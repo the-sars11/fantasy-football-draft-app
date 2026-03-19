@@ -10,11 +10,11 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 - [x] FF-001: Next.js project scaffolding (create-next-app, TypeScript, Tailwind, App Router)
 - [x] FF-002: Install core deps (Supabase, Anthropic SDK, shadcn/ui, googleapis)
 - [x] FF-003: shadcn/ui init + base components (button, card, dialog, table, tabs, input, select, badge)
-- [ ] FF-004: Supabase project setup + environment variables
-- [ ] FF-005: Auth flow (sign-up, sign-in, password reset) — Supabase Auth
-- [ ] FF-006: App shell + navigation (sidebar: Prep, Draft, Settings)
-- [ ] FF-007: DB migration: `users`, `leagues`, `research_runs`, `draft_sessions`, `players_cache`
-- [ ] FF-008: League configuration page (league name, platform, format, size, budget, roster slots, scoring format, keeper settings)
+- [x] FF-004: Supabase project setup + environment variables
+- [x] FF-005: Auth flow (sign-up, sign-in, password reset) — Supabase Auth
+- [x] FF-006: App shell + navigation (sidebar: Prep, Draft, Settings)
+- [x] FF-007: DB migration: `users`, `leagues`, `research_runs`, `draft_sessions`, `players_cache`
+- [x] FF-008: League configuration page (league name, platform, format, size, budget, roster slots, scoring format, keeper settings)
 
 ---
 
