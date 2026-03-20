@@ -15,25 +15,25 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 - [x] FF-006: App shell + navigation (sidebar: Prep, Draft, Settings)
 - [x] FF-007: DB migration: `users`, `leagues`, `research_runs`, `draft_sessions`, `players_cache`
 - [x] FF-008: League configuration page (league name, platform, format, size, budget, roster slots, scoring format, keeper settings)
-- [ ] FF-008b: Mobile-first app shell refactor — bottom tab bar on mobile, sidebar on desktop, responsive layout throughout
+- [x] FF-008b: Mobile-first app shell refactor — bottom tab bar on mobile, sidebar on desktop, responsive layout throughout
 
 ---
 
 ## Phase 1: Data Ingestion (Session 2)
 
 ### Player Data Model
-- [ ] FF-009: Player data model + TypeScript types (name, team, position, bye, ADP, auction values by source, projections, injury status)
+- [x] FF-009: Player data model + TypeScript types (name, team, position, bye, ADP, auction values by source, projections, injury status)
 
 ### Data Source Adapters
-- [ ] FF-010: ESPN unofficial API adapter — rankings, projections, auction values, ADP
-- [ ] FF-011: Yahoo Fantasy API adapter — rankings, projections, auction values, ADP (OAuth flow)
-- [ ] FF-012: Sleeper API adapter — ADP, projections, player metadata, trending players
-- [ ] FF-013: FantasyPros scraper — ECR (Expert Consensus Rankings), tiers, auction values
+- [x] FF-010: ESPN unofficial API adapter — rankings, projections, auction values, ADP
+- [ ] FF-011: Yahoo Fantasy API adapter — rankings, projections, auction values, ADP (OAuth flow) — DEFERRED (requires OAuth app registration)
+- [x] FF-012: Sleeper API adapter — ADP, projections, player metadata, trending players
+- [x] FF-013: FantasyPros scraper — ECR (Expert Consensus Rankings), tiers, auction values
 
 ### Data Pipeline
-- [ ] FF-014: Multi-source normalization engine — merge 3+ sources into consensus rankings + auction values per player
-- [ ] FF-015: Player cache layer (Supabase) — store normalized data, track freshness per source, auto-expire after 24h
-- [ ] FF-016: Data freshness UI indicator — show when each source was last pulled, manual refresh button
+- [x] FF-014: Multi-source normalization engine — merge 3+ sources into consensus rankings + auction values per player
+- [x] FF-015: Player cache layer (Supabase) — store normalized data, track freshness per source, auto-expire after 24h
+- [x] FF-016: Data freshness UI indicator — show when each source was last pulled, manual refresh button
 
 ---
 
