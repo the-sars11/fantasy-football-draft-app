@@ -111,11 +111,70 @@ export interface ResearchRun {
   createdAt: string
 }
 
+// --- Strategy System Types (FF-S01) ---
+
+export type StrategySource = 'ai' | 'user' | 'preset'
+export type RiskTolerance = 'conservative' | 'balanced' | 'aggressive'
+export type PlayerAvoidSeverity = 'soft' | 'hard'
+
+export interface PlayerTarget {
+  playerId: string
+  playerName: string
+  weight: number // 1-10
+  note?: string
+}
+
+export interface PlayerAvoid {
+  playerId: string
+  playerName: string
+  severity: PlayerAvoidSeverity
+  reason?: string
+}
+
+export interface Strategy {
+  id: string
+  leagueId: string
+  name: string
+  description?: string
+  archetype: string
+  source: StrategySource
+  isActive: boolean
+
+  // Position emphasis (1-10, format-agnostic)
+  positionWeights: Record<Position, number>
+
+  // Player targeting
+  playerTargets: PlayerTarget[]
+  playerAvoids: PlayerAvoid[]
+  teamAvoids: string[]
+
+  // Risk
+  riskTolerance: RiskTolerance
+
+  // Auction-only (undefined when snake)
+  budgetAllocation?: Record<string, number> // % of budget per position + bench
+  maxBidPercentage?: number
+
+  // Snake-only (undefined when auction)
+  roundTargets?: Record<Position, number[]>
+  positionRoundPriority?: Record<string, Position[]> // early/mid/late
+
+  // AI-generated fields
+  aiReasoning?: string
+  aiConfidence?: 'high' | 'medium' | 'low'
+  projectedCeiling?: number
+  projectedFloor?: number
+
+  createdAt: string
+  updatedAt: string
+}
+
+// Backward-compatible alias for ResearchRun
 export interface StrategySettings {
-  positionWeights: Record<Position, number> // 1-10 priority per position
-  riskTolerance: 'conservative' | 'balanced' | 'aggressive'
-  budgetAllocation?: Record<Position, number> // auction: % of budget per position
-  roundTargets?: Record<Position, number[]> // snake: target rounds per position
+  positionWeights: Record<Position, number>
+  riskTolerance: RiskTolerance
+  budgetAllocation?: Record<Position, number>
+  roundTargets?: Record<Position, number[]>
 }
 
 export interface DraftPick {

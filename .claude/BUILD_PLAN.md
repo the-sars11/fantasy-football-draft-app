@@ -40,11 +40,11 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 ## Phase 2: Strategy System + Draft Prep (Sessions 3-4)
 
 ### Strategy Data Model
-- [ ] FF-S01: `strategies` DB table + TypeScript types — named strategy profiles with base archetype, position weights, player filters, budget allocation
-- [ ] FF-S02: Strategy filter schema — player targets (+weight), player avoids (-weight/exclude), team avoids, position emphasis overrides, budget allocation shifts (auction) / round targets (snake)
+- [x] FF-S01: `strategies` DB table + TypeScript types — named strategy profiles with base archetype, position weights, player filters, budget allocation
+- [x] FF-S02: Strategy filter schema — player targets (+weight), player avoids (-weight/exclude), team avoids, position emphasis overrides, budget allocation shifts (auction) / round targets (snake)
 
 ### AI-Proposed Strategies
-- [ ] FF-S03: Strategy research engine — Claude analyzes league settings + player data to propose 4-6 named strategies (e.g. WR-Heavy, Zero-RB, Hero-RB, Balanced, Stars & Scrubs, Late-Round QB) with data-backed reasoning
+- [x] FF-S03: Strategy research engine — Claude analyzes league settings + player data to propose 4-6 named strategies (e.g. WR-Heavy, Zero-RB, Hero-RB, Balanced, Stars & Scrubs, Late-Round QB) with data-backed reasoning
 - [ ] FF-S04: Strategy proposal UI — present AI-generated strategies as cards with: name, philosophy, key targets, position allocation, risk profile, projected ceiling/floor, "why this works in your league" reasoning
 - [ ] FF-S05: Strategy comparison view — side-by-side comparison of 2-3 strategies showing position allocation, key player differences, risk/reward tradeoffs
 

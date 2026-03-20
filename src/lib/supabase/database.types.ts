@@ -107,3 +107,91 @@ export interface DraftSession {
   created_at: string
   updated_at: string
 }
+
+// --- Strategy types ---
+
+export type StrategySource = 'ai' | 'user' | 'preset'
+export type RiskTolerance = 'conservative' | 'balanced' | 'aggressive'
+export type AiConfidence = 'high' | 'medium' | 'low'
+export type PlayerAvoidSeverity = 'soft' | 'hard'
+
+export interface StrategyPlayerTarget {
+  player_id: string
+  player_name: string
+  weight: number // 1-10
+  note?: string
+}
+
+export interface StrategyPlayerAvoid {
+  player_id: string
+  player_name: string
+  severity: PlayerAvoidSeverity
+  reason?: string
+}
+
+export interface Strategy {
+  id: string
+  user_id: string
+  league_id: string
+  name: string
+  description: string | null
+  archetype: string
+  source: StrategySource
+  is_active: boolean
+  position_weights: Record<Position, number>
+  player_targets: StrategyPlayerTarget[]
+  player_avoids: StrategyPlayerAvoid[]
+  team_avoids: string[]
+  risk_tolerance: RiskTolerance
+  // Auction-only
+  budget_allocation: Record<string, number> | null
+  max_bid_percentage: number | null
+  // Snake-only
+  round_targets: Record<Position, number[]> | null
+  position_round_priority: Record<string, Position[]> | null
+  // AI fields
+  ai_reasoning: string | null
+  ai_confidence: AiConfidence | null
+  projected_ceiling: number | null
+  projected_floor: number | null
+  created_at: string
+  updated_at: string
+}
+
+export interface StrategyInsert {
+  league_id: string
+  name: string
+  description?: string | null
+  archetype: string
+  source?: StrategySource
+  is_active?: boolean
+  position_weights?: Record<Position, number>
+  player_targets?: StrategyPlayerTarget[]
+  player_avoids?: StrategyPlayerAvoid[]
+  team_avoids?: string[]
+  risk_tolerance?: RiskTolerance
+  budget_allocation?: Record<string, number> | null
+  max_bid_percentage?: number | null
+  round_targets?: Record<Position, number[]> | null
+  position_round_priority?: Record<string, Position[]> | null
+  ai_reasoning?: string | null
+  ai_confidence?: AiConfidence | null
+  projected_ceiling?: number | null
+  projected_floor?: number | null
+}
+
+export interface StrategyUpdate {
+  name?: string
+  description?: string | null
+  archetype?: string
+  is_active?: boolean
+  position_weights?: Record<Position, number>
+  player_targets?: StrategyPlayerTarget[]
+  player_avoids?: StrategyPlayerAvoid[]
+  team_avoids?: string[]
+  risk_tolerance?: RiskTolerance
+  budget_allocation?: Record<string, number> | null
+  max_bid_percentage?: number | null
+  round_targets?: Record<Position, number[]> | null
+  position_round_priority?: Record<string, Position[]> | null
+}
