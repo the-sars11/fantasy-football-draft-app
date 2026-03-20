@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { ClipboardList, BarChart3, History, Settings2 } from 'lucide-react'
+import { ClipboardList, BarChart3, History, Settings2, Sparkles } from 'lucide-react'
 import { DataFreshness } from '@/components/prep/data-freshness'
 
 const btnPrimary = 'inline-flex items-center justify-center rounded-lg bg-primary px-2.5 h-8 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/80'
@@ -28,6 +28,19 @@ export default function PrepPage() {
           </CardHeader>
           <CardContent>
             <Link href="/prep/configure" className={btnPrimary}>Configure</Link>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5" />
+              Draft Strategies
+            </CardTitle>
+            <CardDescription>AI-generated strategies tailored to your league</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Link href="/prep/strategies" className={btnPrimary}>Strategies</Link>
           </CardContent>
         </Card>
 

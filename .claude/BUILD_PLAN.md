@@ -45,7 +45,7 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 
 ### AI-Proposed Strategies
 - [x] FF-S03: Strategy research engine — Claude analyzes league settings + player data to propose 4-6 named strategies (e.g. WR-Heavy, Zero-RB, Hero-RB, Balanced, Stars & Scrubs, Late-Round QB) with data-backed reasoning
-- [ ] FF-S04: Strategy proposal UI — present AI-generated strategies as cards with: name, philosophy, key targets, position allocation, risk profile, projected ceiling/floor, "why this works in your league" reasoning
+- [x] FF-S04: Strategy proposal UI — present AI-generated strategies as cards with: name, philosophy, key targets, position allocation, risk profile, projected ceiling/floor, "why this works in your league" reasoning
 - [ ] FF-S05: Strategy comparison view — side-by-side comparison of 2-3 strategies showing position allocation, key player differences, risk/reward tradeoffs
 
 ### Interactive Strategy Tailoring
