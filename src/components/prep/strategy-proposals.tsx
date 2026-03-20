@@ -1,9 +1,10 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
-import { Sparkles, Loader2 } from 'lucide-react'
+import { useState, useCallback } from 'react'
+import { Sparkles, Loader2, Columns2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { StrategyProposalCard } from './strategy-proposal-card'
+import { StrategyCompare } from './strategy-compare'
 import type { StrategyProposal } from '@/lib/research/strategy/research'
 import type { DraftFormat } from '@/lib/players/types'
 
@@ -29,6 +30,7 @@ export function StrategyProposals({ leagueId, format, onSave }: StrategyProposal
   const [error, setError] = useState<string | null>(null)
   const [selectedIdx, setSelectedIdx] = useState<number | null>(null)
   const [playerCount, setPlayerCount] = useState(0)
+  const [comparing, setComparing] = useState(false)
 
   const generate = useCallback(async () => {
     setLoading(true)
@@ -82,23 +84,35 @@ export function StrategyProposals({ leagueId, format, onSave }: StrategyProposal
               : `Claude will analyze your league settings and player data to propose ${format === 'auction' ? 'auction' : 'snake'} strategies`}
           </p>
         </div>
-        <Button
-          onClick={generate}
-          disabled={loading}
-          size="sm"
-        >
-          {loading ? (
-            <>
-              <Loader2 className="h-4 w-4 mr-1.5 animate-spin" />
-              Analyzing...
-            </>
-          ) : (
-            <>
-              <Sparkles className="h-4 w-4 mr-1.5" />
-              {proposals.length > 0 ? 'Regenerate' : 'Generate Strategies'}
-            </>
+        <div className="flex items-center gap-2">
+          {proposals.length >= 2 && !comparing && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setComparing(true)}
+            >
+              <Columns2 className="h-4 w-4 mr-1.5" />
+              Compare
+            </Button>
           )}
-        </Button>
+          <Button
+            onClick={generate}
+            disabled={loading}
+            size="sm"
+          >
+            {loading ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-1.5 animate-spin" />
+                Analyzing...
+              </>
+            ) : (
+              <>
+                <Sparkles className="h-4 w-4 mr-1.5" />
+                {proposals.length > 0 ? 'Regenerate' : 'Generate Strategies'}
+              </>
+            )}
+          </Button>
+        </div>
       </div>
 
       {/* Loading state */}
@@ -120,8 +134,22 @@ export function StrategyProposals({ leagueId, format, onSave }: StrategyProposal
         </div>
       )}
 
-      {/* Proposals list */}
-      {proposals.length > 0 && (
+      {/* Compare view or Proposals list */}
+      {proposals.length > 0 && comparing && (
+        <StrategyCompare
+          proposals={proposals}
+          format={format}
+          onClose={() => setComparing(false)}
+          onSelect={onSave ? (proposal) => {
+            setComparing(false)
+            const idx = proposals.indexOf(proposal)
+            if (idx !== -1) setSelectedIdx(idx)
+            onSave(proposal)
+          } : undefined}
+        />
+      )}
+
+      {proposals.length > 0 && !comparing && (
         <div className="space-y-3">
           {proposals.map((proposal, idx) => (
             <StrategyProposalCard
@@ -136,7 +164,7 @@ export function StrategyProposals({ leagueId, format, onSave }: StrategyProposal
       )}
 
       {/* Save selected */}
-      {selectedIdx !== null && onSave && (
+      {selectedIdx !== null && onSave && !comparing && (
         <div className="sticky bottom-16 sm:bottom-0 z-10 bg-background/80 backdrop-blur-sm border-t p-3 -mx-4 px-4">
           <Button onClick={handleSave} className="w-full">
             Save &ldquo;{proposals[selectedIdx].name}&rdquo; as active strategy
