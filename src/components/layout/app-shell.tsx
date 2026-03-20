@@ -41,15 +41,14 @@ export function AppShell({
   const displayName = user.user_metadata?.full_name || user.email || 'User'
 
   return (
-    <div className="flex h-screen overflow-hidden bg-background">
-      {/* Sidebar */}
+    <div className="flex h-dvh flex-col md:flex-row overflow-hidden bg-background">
+      {/* Desktop sidebar — hidden on mobile */}
       <aside
         className={cn(
-          'flex flex-col border-r border-border bg-card transition-all duration-200',
+          'hidden md:flex flex-col border-r border-border bg-card transition-all duration-200',
           collapsed ? 'w-14' : 'w-56'
         )}
       >
-        {/* Logo / Brand */}
         <div className="flex h-14 items-center border-b border-border px-3">
           <Trophy className="h-5 w-5 shrink-0 text-primary" />
           {!collapsed && (
@@ -57,7 +56,6 @@ export function AppShell({
           )}
         </div>
 
-        {/* Navigation */}
         <nav className="flex-1 space-y-1 p-2">
           {navItems.map((item) => {
             const isActive = pathname.startsWith(item.href)
@@ -81,7 +79,6 @@ export function AppShell({
           })}
         </nav>
 
-        {/* Footer */}
         <div className="border-t border-border p-2 space-y-1">
           {!collapsed && (
             <div className="px-3 py-2 text-xs text-muted-foreground truncate">
@@ -121,10 +118,46 @@ export function AppShell({
         </div>
       </aside>
 
-      {/* Main content */}
+      {/* Mobile top header — hidden on desktop */}
+      <header className="flex md:hidden items-center justify-between border-b border-border bg-card px-4 h-12 shrink-0">
+        <div className="flex items-center gap-2">
+          <Trophy className="h-4 w-4 text-primary" />
+          <span className="text-sm font-semibold">Draft Advisor</span>
+        </div>
+        <form action={signOut}>
+          <Button variant="ghost" size="sm" className="text-muted-foreground h-8 px-2">
+            <LogOut className="h-4 w-4" />
+          </Button>
+        </form>
+      </header>
+
+      {/* Main content — fills space between header and bottom nav on mobile */}
       <main className="flex-1 overflow-y-auto">
-        <div className="mx-auto max-w-6xl p-6">{children}</div>
+        <div className="mx-auto max-w-6xl p-4 md:p-6 pb-20 md:pb-6">{children}</div>
       </main>
+
+      {/* Mobile bottom tab bar — hidden on desktop */}
+      <nav className="flex md:hidden items-center justify-around border-t border-border bg-card h-16 shrink-0 safe-bottom">
+        {navItems.map((item) => {
+          const isActive = pathname.startsWith(item.href)
+          const Icon = item.icon
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={cn(
+                'flex flex-col items-center justify-center gap-1 flex-1 h-full transition-colors',
+                isActive
+                  ? 'text-primary'
+                  : 'text-muted-foreground active:text-foreground'
+              )}
+            >
+              <Icon className="h-5 w-5" />
+              <span className="text-[10px] font-medium">{item.label}</span>
+            </Link>
+          )
+        })}
+      </nav>
     </div>
   )
 }

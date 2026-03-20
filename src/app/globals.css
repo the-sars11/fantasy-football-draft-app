@@ -128,3 +128,8 @@
     @apply font-sans;
   }
 }
+
+/* Mobile safe area for bottom nav (notch/home indicator) */
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
