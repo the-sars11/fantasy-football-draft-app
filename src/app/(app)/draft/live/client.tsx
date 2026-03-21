@@ -10,8 +10,12 @@
  * - Position scarcity tracker (FF-035)
  * - "Why?" explainability on every player (FF-036)
  *
+ * - My roster panel with strategy grade (FF-037)
+ * - League overview — all managers at a glance (FF-038)
+ * - Manager tendency tracker (FF-039)
+ *
  * Layout: two-column on desktop, stacked on mobile.
- * Left: pick log + manual entry + managers
+ * Left: pick log + manual entry + my roster + managers/tendencies
  * Right: player pool + scarcity
  */
 
@@ -25,15 +29,16 @@ import {
   Radio,
   Wifi,
   WifiOff,
-  Clock,
   Users,
   DollarSign,
-  Hash,
 } from 'lucide-react'
 import { useDraftState } from '@/hooks/use-draft-state'
 import { ManualPickEntry } from '@/components/draft/manual-pick-entry'
 import { PlayerPool } from '@/components/draft/player-pool'
 import { PositionScarcityTracker } from '@/components/draft/position-scarcity'
+import { MyRoster } from '@/components/draft/my-roster'
+import { LeagueOverview } from '@/components/draft/league-overview'
+import { ManagerTendencies } from '@/components/draft/manager-tendencies'
 import { scorePlayersWithStrategy } from '@/lib/research/strategy/scoring'
 import { calculateScarcity, explainPlayer } from '@/lib/draft/explain'
 import type { Player } from '@/lib/players/types'
@@ -330,42 +335,23 @@ export function LiveDraftClient() {
             </CardContent>
           </Card>
 
-          {/* Managers — collapsed on mobile, shown on desktop */}
-          <Card className="hidden lg:block">
-            <CardHeader className="pb-2 pt-3">
-              <CardTitle className="text-sm">Managers</CardTitle>
-            </CardHeader>
-            <CardContent className="pb-3">
-              <div className="space-y-0.5">
-                {managerNames.map(name => {
-                  const mgr = state.managers[name]
-                  if (!mgr) return null
-                  const isCurrent = state.current_manager === name
-                  return (
-                    <div
-                      key={name}
-                      className={`flex items-center justify-between py-1 px-2 rounded text-xs ${
-                        isCurrent ? 'bg-primary/10 border border-primary/20' : ''
-                      }`}
-                    >
-                      <span className={`font-medium ${isCurrent ? 'text-primary' : ''}`}>
-                        {name}
-                        {isCurrent && !isAuction && (
-                          <span className="text-[10px] text-primary/70 ml-1">(OTC)</span>
-                        )}
-                      </span>
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <span>{mgr.picks.length}p</span>
-                        {isAuction && mgr.budget_remaining != null && (
-                          <span className="font-mono">${mgr.budget_remaining}</span>
-                        )}
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            </CardContent>
-          </Card>
+          {/* My roster with strategy grade (FF-037) */}
+          <MyRoster
+            state={state}
+            managerName={myManager}
+            rosterSlots={rosterSlots}
+            strategy={strategy}
+          />
+
+          {/* League overview — all managers (FF-038), desktop only */}
+          <div className="hidden lg:block">
+            <LeagueOverview state={state} myManager={myManager} />
+          </div>
+
+          {/* Manager tendencies (FF-039), desktop only */}
+          <div className="hidden lg:block">
+            <ManagerTendencies state={state} myManager={myManager} />
+          </div>
         </div>
 
         {/* Right column: scarcity + player pool */}
@@ -383,42 +369,11 @@ export function LiveDraftClient() {
         </div>
       </div>
 
-      {/* Managers — shown on mobile below everything else */}
-      <Card className="lg:hidden">
-        <CardHeader className="pb-2 pt-3">
-          <CardTitle className="text-sm">Managers</CardTitle>
-        </CardHeader>
-        <CardContent className="pb-3">
-          <div className="space-y-0.5">
-            {managerNames.map(name => {
-              const mgr = state.managers[name]
-              if (!mgr) return null
-              const isCurrent = state.current_manager === name
-              return (
-                <div
-                  key={name}
-                  className={`flex items-center justify-between py-1 px-2 rounded text-xs ${
-                    isCurrent ? 'bg-primary/10 border border-primary/20' : ''
-                  }`}
-                >
-                  <span className={`font-medium ${isCurrent ? 'text-primary' : ''}`}>
-                    {name}
-                    {isCurrent && !isAuction && (
-                      <span className="text-[10px] text-primary/70 ml-1">(OTC)</span>
-                    )}
-                  </span>
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <span>{mgr.picks.length}p</span>
-                    {isAuction && mgr.budget_remaining != null && (
-                      <span className="font-mono">${mgr.budget_remaining}</span>
-                    )}
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        </CardContent>
-      </Card>
+      {/* League overview + tendencies — shown on mobile below everything else */}
+      <div className="lg:hidden space-y-3">
+        <LeagueOverview state={state} myManager={myManager} />
+        <ManagerTendencies state={state} myManager={myManager} />
+      </div>
     </div>
   )
 }

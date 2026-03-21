@@ -87,9 +87,9 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 - [x] FF-034: Remaining player pool — live-updated list showing available players with strategy-adjusted values/rankings
 - [x] FF-035: Position scarcity tracker — count remaining startable players per position per tier
 - [x] FF-036: "Why?" explainability — expandable reasoning on every recommendation (cites data, scarcity, tendencies, active strategy)
-- [ ] FF-037: Your roster panel — show current picks, position needs, grade vs. strategy plan
-- [ ] FF-038: League overview panel — all managers' rosters at a glance
-- [ ] FF-039: Manager tendency tracker — track each manager's patterns (positions targeted, spending/pick behavior)
+- [x] FF-037: Your roster panel — show current picks, position needs, grade vs. strategy plan
+- [x] FF-038: League overview panel — all managers' rosters at a glance
+- [x] FF-039: Manager tendency tracker — track each manager's patterns (positions targeted, spending/pick behavior)
 
 ### Mid-Draft Strategy Pivot System
 - [ ] FF-P01: Strategy swap UI — one-tap to switch active strategy profile during live draft. All values/targets/recommendations recalculate instantly

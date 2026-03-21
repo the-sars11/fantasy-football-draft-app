@@ -3,13 +3,16 @@
 ## Current Session
 - **Date:** 2026-03-20
 - **Focus:** Phase 3 — Live Draft Mode (FF-033 through FF-036)
-- **Status:** FF-033 through FF-036 complete, live draft page functional
+- **Status:** FF-033 through FF-039 complete, live draft page fully functional
 
 ## Last Completed
 - FF-033: Manual pick entry — search player, select manager, enter price/round, submit
 - FF-034: Remaining player pool — live-updated available players with position filter, search, strategy scores
 - FF-035: Position scarcity tracker — tier-based breakdown per position with color-coded urgency
 - FF-036: "Why?" explainability — expandable reasoning on every player with factors, confidence, summary
+- FF-037: My roster panel — current picks grouped by position, strategy grade (A+ to F), needs summary
+- FF-038: League overview — expandable manager rows with picks, budget, position needs
+- FF-039: Manager tendencies — spending style detection, position focus, likely needs prediction
 
 ## New Files Created
 - `src/hooks/use-draft-state.ts` — Full draft state hook (combines sheet polling + manual picks + persistence)
@@ -19,13 +22,16 @@
 - `src/components/draft/player-pool.tsx` — Available players table with position/search filters
 - `src/components/draft/position-scarcity.tsx` — Visual scarcity cards per position
 - `src/components/draft/why-explainer.tsx` — Structured reasoning display component
+- `src/components/draft/my-roster.tsx` — My roster panel with strategy grade
+- `src/components/draft/league-overview.tsx` — All managers at a glance with expandable picks
+- `src/components/draft/manager-tendencies.tsx` — Manager pattern analysis and prediction
 - `src/app/(app)/draft/live/page.tsx` — Live draft server page
 - `src/app/(app)/draft/live/client.tsx` — Live draft client dashboard (two-column layout)
 
 ## Next Up
-- FF-037: Your roster panel — show current picks, position needs, grade vs. strategy plan
-- FF-038: League overview panel — all managers' rosters at a glance
-- FF-039: Manager tendency tracker — track each manager's patterns
+- FF-P01: Strategy swap UI — one-tap to switch active strategy during live draft
+- FF-P02: Draft flow monitor — track position runs, value anomalies, spending patterns
+- FF-P03: Proactive pivot alerts — detect when draft conditions favor a different strategy
 
 ## Architecture Notes
 - shadcn/ui v4 uses base-ui (not Radix) — no `asChild` prop on Button/TooltipTrigger
