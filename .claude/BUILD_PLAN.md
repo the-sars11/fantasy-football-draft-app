@@ -57,7 +57,7 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 - [x] FF-017: Research pipeline orchestrator (configure → ingest → normalize → analyze through active strategy → output)
 
 ### LLM Analysis Prompts (Strategy-Aware)
-- [ ] FF-019: Positional rankings — Claude analyzes consensus data through lens of active strategy + league settings
+- [x] FF-019: Positional rankings — Claude analyzes consensus data through lens of active strategy + league settings
 - [ ] FF-020: Auction value adjustments (auction) / Round value mapping (snake) — floor/ceiling/target per player, weighted by strategy filters
 - [ ] FF-021: Target list (best value plays given active strategy) + Avoid list (overpriced/risky/filtered out) with reasoning
 - [ ] FF-022: Tier analysis — where value drops off by position, tier breaks, strategy-adjusted
