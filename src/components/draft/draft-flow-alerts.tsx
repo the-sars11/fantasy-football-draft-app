@@ -1,10 +1,10 @@
 'use client'
 
 /**
- * DraftFlowAlerts (FF-P02 + FF-P03)
+ * DraftFlowAlerts (FF-P02 + FF-P03 + FF-P04)
  *
  * Displays draft flow alerts (position runs, value anomalies, pool depletion)
- * and proactive pivot suggestions when conditions favor a different strategy.
+ * and proactive pivot suggestions with impact preview.
  */
 
 import { useState } from 'react'
@@ -14,11 +14,15 @@ import {
   AlertTriangle,
   Info,
   X,
-  TrendingUp,
   Zap,
+  ChevronDown,
+  ChevronRight,
 } from 'lucide-react'
+import { StrategyImpactPreview } from './strategy-impact-preview'
 import type { DraftFlowState, FlowAlert } from '@/lib/draft/flow-monitor'
 import type { Strategy as DbStrategy } from '@/lib/supabase/database.types'
+import type { Player } from '@/lib/players/types'
+import type { DraftFormat } from '@/lib/supabase/database.types'
 
 interface PivotSuggestion {
   strategy: DbStrategy
@@ -31,6 +35,12 @@ interface DraftFlowAlertsProps {
   pivotSuggestion: PivotSuggestion | null
   onAcceptPivot: (strategy: DbStrategy) => void
   onDismissPivot: () => void
+  // For impact preview (FF-P04)
+  currentStrategy?: DbStrategy | null
+  players?: Player[]
+  draftedNames?: Set<string>
+  format?: DraftFormat
+  leagueBudget?: number
 }
 
 const severityIcon = {
@@ -50,8 +60,14 @@ export function DraftFlowAlerts({
   pivotSuggestion,
   onAcceptPivot,
   onDismissPivot,
+  currentStrategy,
+  players,
+  draftedNames,
+  format,
+  leagueBudget,
 }: DraftFlowAlertsProps) {
   const [dismissedAlerts, setDismissedAlerts] = useState<Set<string>>(new Set())
+  const [showPreview, setShowPreview] = useState(false)
 
   const visibleAlerts = flow.alerts.filter(
     a => !dismissedAlerts.has(`${a.type}-${a.message}`)
@@ -60,6 +76,8 @@ export function DraftFlowAlerts({
   const dismissAlert = (alert: FlowAlert) => {
     setDismissedAlerts(prev => new Set([...prev, `${alert.type}-${alert.message}`]))
   }
+
+  const canShowPreview = currentStrategy && pivotSuggestion && players && draftedNames && format
 
   if (visibleAlerts.length === 0 && !pivotSuggestion) return null
 
@@ -86,6 +104,34 @@ export function DraftFlowAlerts({
                   ))}
                 </div>
               )}
+
+              {/* Impact preview toggle (FF-P04) */}
+              {canShowPreview && (
+                <button
+                  onClick={() => setShowPreview(prev => !prev)}
+                  className="flex items-center gap-1 text-[10px] text-primary/70 hover:text-primary mt-1"
+                >
+                  {showPreview
+                    ? <ChevronDown className="h-2.5 w-2.5" />
+                    : <ChevronRight className="h-2.5 w-2.5" />
+                  }
+                  What changes?
+                </button>
+              )}
+
+              {showPreview && canShowPreview && (
+                <div className="mt-1.5 pt-1.5 border-t border-primary/15">
+                  <StrategyImpactPreview
+                    currentStrategy={currentStrategy}
+                    newStrategy={pivotSuggestion.strategy}
+                    players={players}
+                    draftedNames={draftedNames}
+                    format={format}
+                    leagueBudget={leagueBudget}
+                  />
+                </div>
+              )}
+
               <div className="flex items-center gap-2 mt-1.5">
                 <Button
                   size="sm"

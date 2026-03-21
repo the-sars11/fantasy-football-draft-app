@@ -3,7 +3,7 @@
 ## Current Session
 - **Date:** 2026-03-20
 - **Focus:** Phase 3 — Live Draft Mode (FF-033 through FF-036)
-- **Status:** FF-033 through FF-039 + FF-P01/P02/P03 complete, live draft with strategy pivot system
+- **Status:** FF-033 through FF-039 + FF-P01 through FF-P05 complete, full strategy pivot system
 
 ## Last Completed
 - FF-033: Manual pick entry — search player, select manager, enter price/round, submit
@@ -16,6 +16,8 @@
 - FF-P01: Strategy swap — one-tap switching between strategies, instant recalculation
 - FF-P02: Draft flow monitor — position runs, value anomalies, spending patterns, pool quality
 - FF-P03: Proactive pivot alerts — auto-detect when conditions favor a different strategy
+- FF-P04: Strategy impact preview — expandable "What changes?" showing top 3 target shifts, position priority changes, budget allocation changes
+- FF-P05: Pivot history log — tracks all strategy changes with pick number, from/to, reason (user swap / accepted / dismissed recommendation)
 
 ## New Files Created
 - `src/hooks/use-draft-state.ts` — Full draft state hook (combines sheet polling + manual picks + persistence)
@@ -32,13 +34,15 @@
 - `src/components/draft/draft-flow-alerts.tsx` — Flow alerts + pivot suggestion UI
 - `src/lib/draft/flow-monitor.ts` — Position runs, value anomalies, spending, pool quality
 - `src/lib/draft/pivot-detector.ts` — Proactive pivot opportunity detection
+- `src/components/draft/strategy-impact-preview.tsx` — Side-by-side target/priority/budget comparison
+- `src/components/draft/pivot-history.tsx` — Pivot history log with entries
 - `src/app/(app)/draft/live/page.tsx` — Live draft server page
 - `src/app/(app)/draft/live/client.tsx` — Live draft client dashboard (two-column layout)
 
 ## Next Up
-- FF-P04: Strategy impact preview — show what changes before accepting a pivot
-- FF-P05: Pivot history log — track all strategy changes during draft
-- FF-040: Auction state machine enhancements
+- FF-040: Auction state machine — per-manager budget remaining, roster slots filled, picks made
+- FF-041: Per-pick LLM recommendation — "top 3 targets now" with strategy-adjusted auction values
+- FF-042: Max bid calculator — "bid up to $X" based on remaining budget, needs, alternatives
 
 ## Architecture Notes
 - shadcn/ui v4 uses base-ui (not Radix) — no `asChild` prop on Button/TooltipTrigger

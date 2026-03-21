@@ -44,6 +44,8 @@ import { LeagueOverview } from '@/components/draft/league-overview'
 import { ManagerTendencies } from '@/components/draft/manager-tendencies'
 import { StrategySwap } from '@/components/draft/strategy-swap'
 import { DraftFlowAlerts } from '@/components/draft/draft-flow-alerts'
+import { PivotHistory } from '@/components/draft/pivot-history'
+import type { PivotEntry } from '@/components/draft/pivot-history'
 import { scorePlayersWithStrategy } from '@/lib/research/strategy/scoring'
 import { calculateScarcity, explainPlayer } from '@/lib/draft/explain'
 import { analyzeDraftFlow } from '@/lib/draft/flow-monitor'
@@ -78,6 +80,7 @@ export function LiveDraftClient() {
   const [strategy, setStrategy] = useState<DbStrategy | null>(null)
   const [allStrategies, setAllStrategies] = useState<DbStrategy[]>([])
   const [pivotDismissed, setPivotDismissed] = useState(false)
+  const [pivotHistory, setPivotHistory] = useState<PivotEntry[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -194,16 +197,39 @@ export function LiveDraftClient() {
     return detectPivotOpportunity(strategy, allStrategies, state, flow, scoredPlayers, draftedNames)
   }, [strategy, allStrategies, state, flow, scoredPlayers, draftedNames, pivotDismissed])
 
-  // Strategy swap handler (FF-P01)
-  const handleStrategySwap = useCallback((newStrategy: DbStrategy) => {
+  // Strategy swap handler (FF-P01 + FF-P05)
+  const handleStrategySwap = useCallback((newStrategy: DbStrategy, fromRecommendation = false) => {
+    const prevName = strategy?.name ?? 'None'
     setStrategy(newStrategy)
-    // Update allStrategies to reflect new active
     setAllStrategies(prev => prev.map(s => ({
       ...s,
       is_active: s.id === newStrategy.id,
     })))
     setPivotDismissed(false)
-  }, [])
+    // Record in pivot history (FF-P05)
+    setPivotHistory(prev => [...prev, {
+      pickNumber: state?.total_picks ?? 0,
+      fromStrategy: prevName,
+      toStrategy: newStrategy.name,
+      reason: fromRecommendation ? 'accepted_recommendation' : 'user_swap',
+      timestamp: new Date(),
+    }])
+  }, [strategy?.name, state?.total_picks])
+
+  // Dismiss pivot with history tracking (FF-P05)
+  const handleDismissPivot = useCallback(() => {
+    if (pivotSuggestion && strategy) {
+      setPivotHistory(prev => [...prev, {
+        pickNumber: state?.total_picks ?? 0,
+        fromStrategy: strategy.name,
+        toStrategy: strategy.name, // stayed with current
+        reason: 'dismissed_recommendation',
+        recommendedStrategy: pivotSuggestion.strategy.name,
+        timestamp: new Date(),
+      }])
+    }
+    setPivotDismissed(true)
+  }, [pivotSuggestion, strategy, state?.total_picks])
 
   // --- Render ---
 
@@ -396,6 +422,13 @@ export function LiveDraftClient() {
           <div className="hidden lg:block">
             <ManagerTendencies state={state} myManager={myManager} />
           </div>
+
+          {/* Pivot history (FF-P05), desktop only */}
+          {pivotHistory.length > 0 && (
+            <div className="hidden lg:block">
+              <PivotHistory entries={pivotHistory} />
+            </div>
+          )}
         </div>
 
         {/* Right column: alerts + scarcity + player pool */}
@@ -405,8 +438,13 @@ export function LiveDraftClient() {
             <DraftFlowAlerts
               flow={flow}
               pivotSuggestion={pivotSuggestion}
-              onAcceptPivot={handleStrategySwap}
-              onDismissPivot={() => setPivotDismissed(true)}
+              onAcceptPivot={(s) => handleStrategySwap(s, true)}
+              onDismissPivot={handleDismissPivot}
+              currentStrategy={strategy}
+              players={players}
+              draftedNames={draftedNames}
+              format={state.format}
+              leagueBudget={league?.budget ?? undefined}
             />
           )}
 
@@ -423,10 +461,11 @@ export function LiveDraftClient() {
         </div>
       </div>
 
-      {/* League overview + tendencies — shown on mobile below everything else */}
+      {/* League overview + tendencies + pivot history — shown on mobile below everything else */}
       <div className="lg:hidden space-y-3">
         <LeagueOverview state={state} myManager={myManager} />
         <ManagerTendencies state={state} myManager={myManager} />
+        {pivotHistory.length > 0 && <PivotHistory entries={pivotHistory} />}
       </div>
     </div>
   )
