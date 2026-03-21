@@ -3,8 +3,12 @@
 import { useState, useEffect } from 'react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Pencil } from 'lucide-react'
 import { StrategyProposals } from '@/components/prep/strategy-proposals'
+import { StrategyEditor } from '@/components/prep/strategy-editor'
 import type { StrategyProposal } from '@/lib/research/strategy/research'
+import type { Strategy, StrategyUpdate } from '@/lib/supabase/database.types'
 import type { DraftFormat } from '@/lib/players/types'
 
 interface LeagueSummary {
@@ -21,6 +25,9 @@ export function StrategiesPageClient() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  // Editor state
+  const [editingStrategy, setEditingStrategy] = useState<Strategy | null>(null)
+
   useEffect(() => {
     async function fetchLeagues() {
       try {
@@ -28,7 +35,6 @@ export function StrategiesPageClient() {
         if (!res.ok) throw new Error('Failed to fetch leagues')
         const data = await res.json()
         setLeagues(data.leagues || [])
-        // Auto-select first league
         if (data.leagues?.length > 0) {
           setSelectedLeagueId(data.leagues[0].id)
         }
@@ -62,11 +68,33 @@ export function StrategiesPageClient() {
         throw new Error(data.error || 'Failed to save strategy')
       }
 
-      // TODO: navigate to strategy editor or show success
-      alert(`Strategy "${proposal.name}" saved as active!`)
+      const { strategy } = await res.json()
+      // Open the editor with the newly saved strategy
+      setEditingStrategy(strategy as Strategy)
     } catch (e) {
       alert(e instanceof Error ? e.message : 'Failed to save strategy')
     }
+  }
+
+  const handleEditorSave = async (updates: StrategyUpdate) => {
+    if (!editingStrategy) return
+
+    const res = await fetch('/api/strategies', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        strategyId: editingStrategy.id,
+        updates,
+      }),
+    })
+
+    if (!res.ok) {
+      const data = await res.json()
+      throw new Error(data.error || 'Failed to update strategy')
+    }
+
+    const { strategy } = await res.json()
+    setEditingStrategy(strategy as Strategy)
   }
 
   if (loading) {
@@ -91,6 +119,28 @@ export function StrategiesPageClient() {
           </a>{' '}
           to get started.
         </p>
+      </div>
+    )
+  }
+
+  // If editing, show the editor
+  if (editingStrategy && selectedLeague) {
+    return (
+      <div className="space-y-4">
+        {/* League context bar */}
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <span>{selectedLeague.name}</span>
+          <Badge variant="outline" className="text-xs">
+            {selectedLeague.format === 'auction' ? 'Auction' : 'Snake'}
+          </Badge>
+        </div>
+
+        <StrategyEditor
+          strategy={editingStrategy}
+          format={selectedLeague.format}
+          onSave={handleEditorSave}
+          onCancel={() => setEditingStrategy(null)}
+        />
       </div>
     )
   }

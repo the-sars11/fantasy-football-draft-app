@@ -134,3 +134,45 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: message }, { status: 500 })
   }
 }
+
+/**
+ * PUT /api/strategies
+ *
+ * Update an existing strategy.
+ * Body: { strategyId: string, updates: StrategyUpdate }
+ */
+export async function PUT(req: NextRequest) {
+  try {
+    const body = await req.json()
+    const { strategyId, updates } = body as {
+      strategyId?: string
+      updates?: Record<string, unknown>
+    }
+
+    if (!strategyId || !updates) {
+      return NextResponse.json({ error: 'strategyId and updates are required' }, { status: 400 })
+    }
+
+    const supabase = await getClient()
+    if (!supabase) {
+      return NextResponse.json({ error: 'Database not available' }, { status: 503 })
+    }
+
+    const { data, error } = await supabase
+      .from('strategies')
+      .update({ ...updates, updated_at: new Date().toISOString() })
+      .eq('id', strategyId)
+      .select()
+      .single()
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+
+    return NextResponse.json({ strategy: data })
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown error'
+    console.error('[API /strategies PUT]', message)
+    return NextResponse.json({ error: message }, { status: 500 })
+  }
+}

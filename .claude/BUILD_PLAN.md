@@ -49,7 +49,7 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 - [x] FF-S05: Strategy comparison view — side-by-side comparison of 2-3 strategies showing position allocation, key player differences, risk/reward tradeoffs
 
 ### Interactive Strategy Tailoring
-- [ ] FF-S06: Strategy editor UI — modify any base strategy with interactive filters: target specific players (weight slider), avoid players/teams (toggle + severity), adjust position emphasis (sliders), shift budget allocation (auction) / round priority (snake)
+- [x] FF-S06: Strategy editor UI — modify any base strategy with interactive filters: target specific players (weight slider), avoid players/teams (toggle + severity), adjust position emphasis (sliders), shift budget allocation (auction) / round priority (snake)
 - [ ] FF-S07: Real-time value preview — as user adjusts filters, show how auction values / draft rankings shift for key players (top 5 changes highlighted)
 - [ ] FF-S08: Save strategy profiles — save base strategy as-is, or save tailored version as named profile. Multiple profiles per league. Mark one as "active"
 
