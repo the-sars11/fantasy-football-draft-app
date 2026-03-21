@@ -20,6 +20,7 @@ import {
   SlidersHorizontal,
   DollarSign,
   ListOrdered,
+  Copy,
 } from 'lucide-react'
 import { StrategyValuePreview } from './strategy-value-preview'
 import type { Strategy, StrategyUpdate, StrategyPlayerTarget, StrategyPlayerAvoid, Position as DbPosition } from '@/lib/supabase/database.types'
@@ -36,6 +37,7 @@ interface StrategyEditorProps {
   players?: Player[]
   leagueBudget?: number
   onSave: (updates: StrategyUpdate) => Promise<void>
+  onSaveAsNew?: (updates: StrategyUpdate & { name: string }) => Promise<void>
   onCancel: () => void
 }
 
@@ -59,7 +61,7 @@ const NFL_TEAMS = [
 
 type Section = 'weights' | 'targets' | 'avoids' | 'teams' | 'budget' | 'rounds' | 'risk'
 
-export function StrategyEditor({ strategy, format, players = [], leagueBudget, onSave, onCancel }: StrategyEditorProps) {
+export function StrategyEditor({ strategy, format, players = [], leagueBudget, onSave, onSaveAsNew, onCancel }: StrategyEditorProps) {
   // Editable state — initialized from strategy
   const [name, setName] = useState(strategy.name)
   const [description, setDescription] = useState(strategy.description ?? '')
@@ -133,6 +135,37 @@ export function StrategyEditor({ strategy, format, players = [], leagueBudget, o
       }
 
       await onSave(updates)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleSaveAsNew = async () => {
+    if (!onSaveAsNew) return
+    const newName = prompt('Name for the new strategy:', `${name} (copy)`)
+    if (!newName?.trim()) return
+    setSaving(true)
+    try {
+      const updates: StrategyUpdate & { name: string } = {
+        name: newName.trim(),
+        description: description || null,
+        risk_tolerance: riskTolerance,
+        position_weights: positionWeights as Record<DbPosition, number>,
+        player_targets: playerTargets,
+        player_avoids: playerAvoids,
+        team_avoids: teamAvoids,
+      }
+      if (format === 'auction') {
+        updates.budget_allocation = budgetAllocation
+        updates.max_bid_percentage = maxBidPct
+        updates.round_targets = null
+        updates.position_round_priority = null
+      } else {
+        updates.round_targets = roundTargets as Record<DbPosition, number[]>
+        updates.budget_allocation = null
+        updates.max_bid_percentage = null
+      }
+      await onSaveAsNew(updates)
     } finally {
       setSaving(false)
     }
@@ -511,12 +544,18 @@ export function StrategyEditor({ strategy, format, players = [], leagueBudget, o
       {/* Bottom save bar — sticky on mobile */}
       <div className="sticky bottom-16 sm:bottom-0 z-10 bg-background/80 backdrop-blur-sm border-t p-3 -mx-4 px-4">
         <div className="flex gap-2">
-          <Button variant="outline" onClick={onCancel} className="flex-1">
+          <Button variant="outline" onClick={onCancel} className="shrink-0">
             Cancel
           </Button>
+          {onSaveAsNew && (
+            <Button variant="outline" onClick={handleSaveAsNew} disabled={saving || !name.trim()} className="flex-1">
+              <Copy className="h-4 w-4 mr-1" />
+              Save As New
+            </Button>
+          )}
           <Button onClick={handleSave} disabled={saving || !name.trim()} className="flex-1">
             <Save className="h-4 w-4 mr-1" />
-            {saving ? 'Saving...' : 'Save Changes'}
+            {saving ? 'Saving...' : 'Save'}
           </Button>
         </div>
       </div>

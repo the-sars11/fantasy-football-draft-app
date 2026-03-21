@@ -1,12 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Pencil } from 'lucide-react'
 import { StrategyProposals } from '@/components/prep/strategy-proposals'
 import { StrategyEditor } from '@/components/prep/strategy-editor'
+import { StrategyList } from '@/components/prep/strategy-list'
 import type { StrategyProposal } from '@/lib/research/strategy/research'
 import type { Strategy, StrategyUpdate } from '@/lib/supabase/database.types'
 import type { DraftFormat, Player } from '@/lib/players/types'
@@ -27,9 +26,15 @@ export function StrategiesPageClient() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  // Saved strategies
+  const [savedStrategies, setSavedStrategies] = useState<Strategy[]>([])
+  const [strategiesLoading, setStrategiesLoading] = useState(false)
+
   // Editor state
   const [editingStrategy, setEditingStrategy] = useState<Strategy | null>(null)
   const [players, setPlayers] = useState<Player[]>([])
+
+  const selectedLeague = leagues.find((l) => l.id === selectedLeagueId)
 
   // Fetch cached players for value preview (lazy — only when editing)
   useEffect(() => {
@@ -51,6 +56,7 @@ export function StrategiesPageClient() {
     return () => { cancelled = true }
   }, [editingStrategy])
 
+  // Fetch leagues
   useEffect(() => {
     async function fetchLeagues() {
       try {
@@ -70,9 +76,29 @@ export function StrategiesPageClient() {
     fetchLeagues()
   }, [])
 
-  const selectedLeague = leagues.find((l) => l.id === selectedLeagueId)
+  // Fetch saved strategies when league changes
+  const refreshStrategies = useCallback(async () => {
+    if (!selectedLeagueId) return
+    setStrategiesLoading(true)
+    try {
+      const res = await fetch(`/api/strategies?leagueId=${selectedLeagueId}`)
+      if (!res.ok) return
+      const data = await res.json()
+      setSavedStrategies(data.strategies ?? [])
+    } catch {
+      // Non-critical
+    } finally {
+      setStrategiesLoading(false)
+    }
+  }, [selectedLeagueId])
 
-  const handleSave = async (proposal: StrategyProposal) => {
+  useEffect(() => {
+    refreshStrategies()
+  }, [refreshStrategies])
+
+  // --- Handlers ---
+
+  const handleSaveProposal = async (proposal: StrategyProposal) => {
     if (!selectedLeagueId) return
 
     try {
@@ -92,7 +118,7 @@ export function StrategiesPageClient() {
       }
 
       const { strategy } = await res.json()
-      // Open the editor with the newly saved strategy
+      await refreshStrategies()
       setEditingStrategy(strategy as Strategy)
     } catch (e) {
       alert(e instanceof Error ? e.message : 'Failed to save strategy')
@@ -118,7 +144,86 @@ export function StrategiesPageClient() {
 
     const { strategy } = await res.json()
     setEditingStrategy(strategy as Strategy)
+    await refreshStrategies()
   }
+
+  const handleSaveAsNew = async (updates: StrategyUpdate & { name: string }) => {
+    if (!editingStrategy || !selectedLeagueId) return
+
+    // Create a new strategy based on the current editor state
+    const res = await fetch('/api/strategies', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        leagueId: selectedLeagueId,
+        proposal: {
+          name: updates.name,
+          description: updates.description ?? editingStrategy.description,
+          archetype: editingStrategy.archetype,
+          risk_tolerance: updates.risk_tolerance ?? editingStrategy.risk_tolerance,
+          position_weights: updates.position_weights ?? editingStrategy.position_weights,
+          confidence: editingStrategy.ai_confidence,
+          reasoning: editingStrategy.ai_reasoning,
+          projected_ceiling: editingStrategy.projected_ceiling,
+          projected_floor: editingStrategy.projected_floor,
+          budget_allocation: updates.budget_allocation,
+          max_bid_percentage: updates.max_bid_percentage,
+          round_targets: updates.round_targets,
+          position_round_priority: updates.position_round_priority,
+        },
+        setActive: false,
+      }),
+    })
+
+    if (!res.ok) {
+      const data = await res.json()
+      throw new Error(data.error || 'Failed to save new strategy')
+    }
+
+    const { strategy } = await res.json()
+    await refreshStrategies()
+    // Switch to editing the new copy
+    setEditingStrategy(strategy as Strategy)
+  }
+
+  const handleDelete = async (strategyId: string) => {
+    const res = await fetch('/api/strategies', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ strategyId }),
+    })
+
+    if (!res.ok) {
+      const data = await res.json()
+      throw new Error(data.error || 'Failed to delete strategy')
+    }
+
+    await refreshStrategies()
+  }
+
+  const handleSetActive = async (strategyId: string) => {
+    if (!selectedLeagueId) return
+
+    const res = await fetch('/api/strategies', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ strategyId, leagueId: selectedLeagueId }),
+    })
+
+    if (!res.ok) {
+      const data = await res.json()
+      throw new Error(data.error || 'Failed to set active strategy')
+    }
+
+    await refreshStrategies()
+  }
+
+  const handleDuplicate = async (strategy: Strategy) => {
+    // Open the editor with this strategy, then user clicks Save As New
+    setEditingStrategy(strategy)
+  }
+
+  // --- Render ---
 
   if (loading) {
     return <div className="text-sm text-muted-foreground">Loading leagues...</div>
@@ -164,6 +269,7 @@ export function StrategiesPageClient() {
           players={players}
           leagueBudget={selectedLeague.budget ?? undefined}
           onSave={handleEditorSave}
+          onSaveAsNew={handleSaveAsNew}
           onCancel={() => setEditingStrategy(null)}
         />
       </div>
@@ -171,7 +277,7 @@ export function StrategiesPageClient() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {/* League selector */}
       <div className="flex items-center gap-3">
         <Select value={selectedLeagueId ?? ''} onValueChange={setSelectedLeagueId}>
@@ -198,12 +304,31 @@ export function StrategiesPageClient() {
         )}
       </div>
 
-      {/* Strategy proposals */}
+      {/* Saved strategy profiles */}
+      {selectedLeague && (
+        <div className="space-y-2">
+          <h3 className="text-sm font-medium">Saved Strategies</h3>
+          {strategiesLoading ? (
+            <div className="text-xs text-muted-foreground">Loading...</div>
+          ) : (
+            <StrategyList
+              strategies={savedStrategies}
+              format={selectedLeague.format}
+              onEdit={setEditingStrategy}
+              onDelete={handleDelete}
+              onSetActive={handleSetActive}
+              onDuplicate={handleDuplicate}
+            />
+          )}
+        </div>
+      )}
+
+      {/* Strategy proposals (generate new) */}
       {selectedLeague && (
         <StrategyProposals
           leagueId={selectedLeague.id}
           format={selectedLeague.format}
-          onSave={handleSave}
+          onSave={handleSaveProposal}
         />
       )}
     </div>

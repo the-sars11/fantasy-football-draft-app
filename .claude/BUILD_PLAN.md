@@ -51,7 +51,7 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 ### Interactive Strategy Tailoring
 - [x] FF-S06: Strategy editor UI — modify any base strategy with interactive filters: target specific players (weight slider), avoid players/teams (toggle + severity), adjust position emphasis (sliders), shift budget allocation (auction) / round priority (snake)
 - [x] FF-S07: Real-time value preview — as user adjusts filters, show how auction values / draft rankings shift for key players (top 5 changes highlighted)
-- [ ] FF-S08: Save strategy profiles — save base strategy as-is, or save tailored version as named profile. Multiple profiles per league. Mark one as "active"
+- [x] FF-S08: Save strategy profiles — save base strategy as-is, or save tailored version as named profile. Multiple profiles per league. Mark one as "active"
 
 ### Research Pipeline
 - [ ] FF-017: Research pipeline orchestrator (configure → ingest → normalize → analyze through active strategy → output)

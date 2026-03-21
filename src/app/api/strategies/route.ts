@@ -77,6 +77,123 @@ function proposalToInsert(
   return base
 }
 
+/**
+ * GET /api/strategies?leagueId=xxx
+ *
+ * List all saved strategies for a league.
+ */
+export async function GET(req: NextRequest) {
+  try {
+    const leagueId = req.nextUrl.searchParams.get('leagueId')
+    if (!leagueId) {
+      return NextResponse.json({ error: 'leagueId is required' }, { status: 400 })
+    }
+
+    const supabase = await getClient()
+    if (!supabase) {
+      return NextResponse.json({ error: 'Database not available' }, { status: 503 })
+    }
+
+    const { data, error } = await supabase
+      .from('strategies')
+      .select('*')
+      .eq('league_id', leagueId)
+      .order('is_active', { ascending: false })
+      .order('updated_at', { ascending: false })
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+
+    return NextResponse.json({ strategies: data ?? [] })
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown error'
+    return NextResponse.json({ error: message }, { status: 500 })
+  }
+}
+
+/**
+ * DELETE /api/strategies
+ *
+ * Delete a strategy.
+ * Body: { strategyId: string }
+ */
+export async function DELETE(req: NextRequest) {
+  try {
+    const body = await req.json()
+    const { strategyId } = body as { strategyId?: string }
+
+    if (!strategyId) {
+      return NextResponse.json({ error: 'strategyId is required' }, { status: 400 })
+    }
+
+    const supabase = await getClient()
+    if (!supabase) {
+      return NextResponse.json({ error: 'Database not available' }, { status: 503 })
+    }
+
+    const { error } = await supabase
+      .from('strategies')
+      .delete()
+      .eq('id', strategyId)
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown error'
+    return NextResponse.json({ error: message }, { status: 500 })
+  }
+}
+
+/**
+ * PATCH /api/strategies
+ *
+ * Set a strategy as the active one for its league.
+ * Body: { strategyId: string, leagueId: string }
+ */
+export async function PATCH(req: NextRequest) {
+  try {
+    const body = await req.json()
+    const { strategyId, leagueId } = body as { strategyId?: string; leagueId?: string }
+
+    if (!strategyId || !leagueId) {
+      return NextResponse.json({ error: 'strategyId and leagueId are required' }, { status: 400 })
+    }
+
+    const supabase = await getClient()
+    if (!supabase) {
+      return NextResponse.json({ error: 'Database not available' }, { status: 503 })
+    }
+
+    // Deactivate all strategies for this league
+    await supabase
+      .from('strategies')
+      .update({ is_active: false })
+      .eq('league_id', leagueId)
+      .eq('is_active', true)
+
+    // Activate the target strategy
+    const { data, error } = await supabase
+      .from('strategies')
+      .update({ is_active: true, updated_at: new Date().toISOString() })
+      .eq('id', strategyId)
+      .select()
+      .single()
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+
+    return NextResponse.json({ strategy: data })
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown error'
+    return NextResponse.json({ error: message }, { status: 500 })
+  }
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
