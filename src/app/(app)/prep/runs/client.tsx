@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Loader2, Eye, GitCompare, ChevronDown, ChevronUp } from 'lucide-react'
+import { Loader2, Eye, GitCompare, ChevronDown, ChevronUp, RefreshCw, CheckCircle2, AlertCircle } from 'lucide-react'
 import type { DraftFormat } from '@/lib/players/types'
 
 interface LeagueSummary {
@@ -79,6 +79,10 @@ export function RunHistoryClient() {
   const [expandedRunId, setExpandedRunId] = useState<string | null>(null)
   const [expandedRun, setExpandedRun] = useState<RunDetail | null>(null)
   const [detailLoading, setDetailLoading] = useState(false)
+
+  // Refresh (re-run research with fresh data) — FF-028
+  const [refreshing, setRefreshing] = useState(false)
+  const [refreshFeedback, setRefreshFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
 
   // Compare mode
   const [compareIds, setCompareIds] = useState<string[]>([])
@@ -158,6 +162,46 @@ export function RunHistoryClient() {
     }
   }
 
+  // Refresh: re-pull all data sources and re-analyze with current strategy (FF-028)
+  async function handleRefresh() {
+    if (!selectedLeagueId || refreshing) return
+    setRefreshing(true)
+    setRefreshFeedback(null)
+
+    try {
+      const res = await fetch('/api/research', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ leagueId: selectedLeagueId, skipRefresh: false }),
+      })
+      const data = await res.json()
+
+      if (!res.ok) {
+        throw new Error(data.error ?? 'Research failed')
+      }
+
+      // Refresh the runs list
+      const runsRes = await fetch(`/api/research?leagueId=${selectedLeagueId}`)
+      const runsData = await runsRes.json()
+      setRuns(runsData.runs ?? [])
+
+      setRefreshFeedback({
+        type: 'success',
+        message: `Refreshed! ${data.analysis?.totalPlayers ?? 0} players analyzed.`,
+      })
+
+      // Auto-clear feedback after 5 seconds
+      setTimeout(() => setRefreshFeedback(null), 5000)
+    } catch (err) {
+      setRefreshFeedback({
+        type: 'error',
+        message: err instanceof Error ? err.message : 'Refresh failed',
+      })
+    } finally {
+      setRefreshing(false)
+    }
+  }
+
   function formatDate(iso: string) {
     return new Date(iso).toLocaleString('en-US', {
       month: 'short',
@@ -187,8 +231,8 @@ export function RunHistoryClient() {
 
   return (
     <div className="space-y-6">
-      {/* League selector */}
-      <div className="flex items-center gap-3">
+      {/* League selector + Refresh button */}
+      <div className="flex flex-wrap items-center gap-3">
         <span className="text-sm font-medium">League:</span>
         <Select value={selectedLeagueId ?? ''} onValueChange={setSelectedLeagueId}>
           <SelectTrigger className="w-64">
@@ -205,6 +249,37 @@ export function RunHistoryClient() {
             ))}
           </SelectContent>
         </Select>
+
+        {/* Refresh button — FF-028 */}
+        <Button
+          onClick={handleRefresh}
+          disabled={!selectedLeagueId || refreshing}
+          size="sm"
+          variant="outline"
+        >
+          {refreshing ? (
+            <Loader2 className="h-4 w-4 animate-spin mr-1.5" />
+          ) : (
+            <RefreshCw className="h-4 w-4 mr-1.5" />
+          )}
+          {refreshing ? 'Refreshing...' : 'Refresh Data'}
+        </Button>
+
+        {/* Refresh feedback */}
+        {refreshFeedback && (
+          <div
+            className={`flex items-center gap-1.5 text-sm ${
+              refreshFeedback.type === 'success' ? 'text-green-600' : 'text-red-600'
+            }`}
+          >
+            {refreshFeedback.type === 'success' ? (
+              <CheckCircle2 className="h-4 w-4" />
+            ) : (
+              <AlertCircle className="h-4 w-4" />
+            )}
+            {refreshFeedback.message}
+          </div>
+        )}
       </div>
 
       {/* Runs list */}
