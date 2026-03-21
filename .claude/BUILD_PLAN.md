@@ -58,10 +58,10 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 
 ### LLM Analysis Prompts (Strategy-Aware)
 - [x] FF-019: Positional rankings — Claude analyzes consensus data through lens of active strategy + league settings
-- [ ] FF-020: Auction value adjustments (auction) / Round value mapping (snake) — floor/ceiling/target per player, weighted by strategy filters
-- [ ] FF-021: Target list (best value plays given active strategy) + Avoid list (overpriced/risky/filtered out) with reasoning
-- [ ] FF-022: Tier analysis — where value drops off by position, tier breaks, strategy-adjusted
-- [ ] FF-023: Sleeper picks — undervalued based on trend data + expert disagreement + strategy alignment
+- [x] FF-020: Auction value adjustments (auction) / Round value mapping (snake) — floor/ceiling/target per player, weighted by strategy filters
+- [x] FF-021: Target list (best value plays given active strategy) + Avoid list (overpriced/risky/filtered out) with reasoning
+- [x] FF-022: Tier analysis — where value drops off by position, tier breaks, strategy-adjusted
+- [x] FF-023: Sleeper picks — undervalued based on trend data + expert disagreement + strategy alignment
 
 ### Draft Board UI
 - [ ] FF-024: Draft board view — sortable/filterable table (by position, tier, value, target/avoid, auction range or round). Active strategy badge shown. Strategy-adjusted values highlighted

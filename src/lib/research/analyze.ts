@@ -184,3 +184,388 @@ IMPORTANT:
     summary: response.summary,
   }
 }
+
+// --- FF-020: Auction Value Adjustments / Round Value Mapping ---
+
+export interface PlayerValueAdjustment {
+  name: string
+  position: string
+  team: string
+  consensusValue: number
+  adjustedValue: number
+  floor: number
+  ceiling: number
+  target: number
+  reasoning: string
+  confidence: 'high' | 'medium' | 'low'
+}
+
+export interface ValueAdjustmentsResult {
+  adjustments: PlayerValueAdjustment[]
+  format: DraftFormat
+  strategyName: string
+  summary: string
+}
+
+const VALUE_ADJUSTMENTS_SYSTEM = `You are a fantasy football value analyst. You adjust player values based on league settings and draft strategy.
+
+RULES:
+- Only reference players from the provided data. Never invent players or stats.
+- Every adjustment must be justified with specific data points.
+- Floor = worst-case value, ceiling = best-case value, target = what you'd actually pay/draft at.
+- Respond with valid JSON only.
+
+Respond with: { "adjustments": [...], "summary": "..." }`
+
+export async function analyzeValueAdjustments(
+  scoredPlayers: ScoredPlayer[],
+  strategy: Strategy,
+  format: DraftFormat,
+  scoringFormat: ScoringFormat,
+  teamCount: number,
+  budget?: number,
+): Promise<ValueAdjustmentsResult> {
+  const top60 = scoredPlayers.slice(0, 60)
+
+  const valueCol = format === 'auction' ? 'auction value' : 'draft round'
+  const playerLines = top60.map((sp) => {
+    const p = sp.player
+    if (format === 'auction') {
+      const adj = sp.adjustedAuctionValue ?? p.consensusAuctionValue
+      return `${p.name} (${p.position}, ${p.team}) — consensus $${p.consensusAuctionValue}, strategy-adj $${adj}, score ${sp.strategyScore}, proj ${Math.round(p.projections.points)} pts${sp.targetStatus !== 'neutral' ? ` [${sp.targetStatus}]` : ''}`
+    } else {
+      const baseRound = Math.ceil(p.adp / 12)
+      const adj = sp.adjustedRoundValue ?? baseRound
+      return `${p.name} (${p.position}, ${p.team}) — ADP ${Math.round(p.adp)}, round ${baseRound}, strategy-adj round ${adj}, score ${sp.strategyScore}, proj ${Math.round(p.projections.points)} pts${sp.targetStatus !== 'neutral' ? ` [${sp.targetStatus}]` : ''}`
+    }
+  }).join('\n')
+
+  const prompt = `## League
+${formatLeagueContext(format, scoringFormat, teamCount, budget)}
+
+## Active Strategy
+${formatStrategyContext(strategy)}
+
+## Top 60 Scored Players
+${playerLines}
+
+## Task
+For each of these top 60 players, provide ${format === 'auction' ? 'adjusted auction values' : 'adjusted round targets'}:
+
+- name: exact player name
+- position: player position
+- team: NFL team
+- consensusValue: ${format === 'auction' ? 'original consensus $ value' : 'ADP-based round'}
+- adjustedValue: your strategy-adjusted ${valueCol}
+- floor: ${format === 'auction' ? 'minimum you should pay' : 'earliest round worth drafting'}
+- ceiling: ${format === 'auction' ? 'maximum you should bid' : 'latest round still worth taking'}
+- target: ${format === 'auction' ? 'ideal bid amount' : 'ideal round to draft'}
+- reasoning: 1 sentence on why this adjustment (cite strategy, scoring, scarcity)
+- confidence: "high" | "medium" | "low"
+
+Also provide a "summary": 2-3 sentences on overall value landscape and where the biggest edges are.
+
+${format === 'auction' ? `Budget: $${budget ?? 200}. Floor/ceiling/target are dollar amounts. Factor in budget allocation from the strategy.` : 'Floor/ceiling/target are round numbers (1 = first round). Factor in round targets from the strategy.'}`
+
+  const response = await askClaudeJson<{ adjustments: PlayerValueAdjustment[]; summary: string }>({
+    system: VALUE_ADJUSTMENTS_SYSTEM,
+    prompt,
+    maxTokens: 8000,
+  })
+
+  return {
+    adjustments: response.adjustments,
+    format,
+    strategyName: strategy.name,
+    summary: response.summary,
+  }
+}
+
+// --- FF-021: Target List + Avoid List ---
+
+export interface TargetPlayer {
+  name: string
+  position: string
+  team: string
+  value: number
+  reasoning: string
+  urgency: 'must-have' | 'strong-target' | 'nice-to-have'
+}
+
+export interface AvoidPlayer {
+  name: string
+  position: string
+  team: string
+  value: number
+  reasoning: string
+  severity: 'hard-avoid' | 'overpriced' | 'risky'
+}
+
+export interface TargetAvoidResult {
+  targets: TargetPlayer[]
+  avoids: AvoidPlayer[]
+  format: DraftFormat
+  strategyName: string
+  summary: string
+}
+
+const TARGET_AVOID_SYSTEM = `You are a fantasy football analyst identifying best-value targets and overpriced/risky players to avoid.
+
+RULES:
+- Only reference players from the provided data. Never invent players.
+- Targets = best value plays given the active strategy. Avoids = overpriced, risky, or filtered out.
+- Every recommendation cites specific data: values, ADP, projections, strategy alignment.
+- Respond with valid JSON only.
+
+Respond with: { "targets": [...], "avoids": [...], "summary": "..." }`
+
+export async function analyzeTargetsAndAvoids(
+  scoredPlayers: ScoredPlayer[],
+  strategy: Strategy,
+  format: DraftFormat,
+  scoringFormat: ScoringFormat,
+  teamCount: number,
+  budget?: number,
+): Promise<TargetAvoidResult> {
+  // Send top 80 players for analysis
+  const top80 = scoredPlayers.slice(0, 80)
+  const playerLines = top80.map((sp) => {
+    const p = sp.player
+    if (format === 'auction') {
+      return `${p.name} (${p.position}, ${p.team}) — $${p.consensusAuctionValue}, adj $${sp.adjustedAuctionValue ?? p.consensusAuctionValue}, score ${sp.strategyScore}, proj ${Math.round(p.projections.points)} pts${sp.targetStatus !== 'neutral' ? ` [${sp.targetStatus}]` : ''}`
+    } else {
+      return `${p.name} (${p.position}, ${p.team}) — ADP ${Math.round(p.adp)}, adj round ${sp.adjustedRoundValue ?? Math.ceil(p.adp / 12)}, score ${sp.strategyScore}, proj ${Math.round(p.projections.points)} pts${sp.targetStatus !== 'neutral' ? ` [${sp.targetStatus}]` : ''}`
+    }
+  }).join('\n')
+
+  const valueLabel = format === 'auction' ? 'target bid ($)' : 'target round'
+
+  const prompt = `## League
+${formatLeagueContext(format, scoringFormat, teamCount, budget)}
+
+## Active Strategy
+${formatStrategyContext(strategy)}
+
+## Scored Players
+${playerLines}
+
+## Task
+Identify the 15 best TARGET players and 10 AVOID players for this strategy.
+
+TARGETS (best value plays):
+- name, position, team
+- value: ${valueLabel}
+- reasoning: 1-2 sentences citing data (why this player is a value at this price/ADP given the strategy)
+- urgency: "must-have" | "strong-target" | "nice-to-have"
+
+AVOIDS (overpriced, risky, or poor strategy fit):
+- name, position, team
+- value: ${format === 'auction' ? 'consensus $ value (what others will pay)' : 'ADP round'}
+- reasoning: 1-2 sentences citing data (why to avoid — overpriced, injury risk, bad fit, etc.)
+- severity: "hard-avoid" | "overpriced" | "risky"
+
+Include players marked [target] in strategy as targets (if data supports it).
+Include players marked [avoid] in strategy as avoids.
+Also find VALUE plays not in the target list — players whose consensus value underestimates their worth for this strategy.
+
+Provide a "summary": 2-3 sentences on the overall target/avoid landscape.`
+
+  const response = await askClaudeJson<{ targets: TargetPlayer[]; avoids: AvoidPlayer[]; summary: string }>({
+    system: TARGET_AVOID_SYSTEM,
+    prompt,
+    maxTokens: 5000,
+  })
+
+  return {
+    targets: response.targets,
+    avoids: response.avoids,
+    format,
+    strategyName: strategy.name,
+    summary: response.summary,
+  }
+}
+
+// --- FF-022: Tier Analysis ---
+
+export interface TierBreak {
+  position: string
+  tierNumber: number
+  startsAtRank: number
+  endsAtRank: number
+  players: string[]
+  dropoffSeverity: 'cliff' | 'moderate' | 'gradual'
+  insight: string
+}
+
+export interface TierAnalysisResult {
+  tiers: TierBreak[]
+  format: DraftFormat
+  strategyName: string
+  summary: string
+}
+
+const TIER_ANALYSIS_SYSTEM = `You are a fantasy football tier analyst identifying where value drops off by position.
+
+RULES:
+- Only reference players from the provided data.
+- Tiers are based on production dropoff, not arbitrary groupings.
+- Strategy-adjusted: position emphasis affects how much a tier break matters.
+- Respond with valid JSON only.
+
+Respond with: { "tiers": [...], "summary": "..." }`
+
+export async function analyzeTiers(
+  scoredPlayers: ScoredPlayer[],
+  strategy: Strategy,
+  format: DraftFormat,
+  scoringFormat: ScoringFormat,
+  teamCount: number,
+  budget?: number,
+): Promise<TierAnalysisResult> {
+  const positions = ['QB', 'RB', 'WR', 'TE']
+  const positionData = positions.map((pos) => {
+    const data = formatPlayerData(scoredPlayers, format, pos, 30)
+    return `### ${pos}\n${data}`
+  }).join('\n\n')
+
+  const prompt = `## League
+${formatLeagueContext(format, scoringFormat, teamCount, budget)}
+
+## Active Strategy
+${formatStrategyContext(strategy)}
+
+## Scored Player Data
+${positionData}
+
+## Task
+Identify tier breaks for each skill position (QB, RB, WR, TE). A tier break is where player value drops significantly.
+
+For each tier break:
+- position: QB, RB, WR, or TE
+- tierNumber: 1, 2, 3, etc. (1 = elite tier)
+- startsAtRank: position rank where this tier begins
+- endsAtRank: position rank where this tier ends
+- players: array of player names in this tier
+- dropoffSeverity: "cliff" (massive drop), "moderate" (notable drop), "gradual" (gentle decline)
+- insight: 1 sentence on what this tier break means for the strategy (e.g. "After tier 2 WR, value drops sharply — prioritize WR in rounds 2-4")
+
+For each position, identify 3-5 tiers.
+
+Strategy context matters:
+- If position weight is high (7+), tier breaks at that position are MORE important
+- If position weight is low (3-), tier breaks are less actionable
+- ${format === 'auction' ? 'Reference $ values at tier boundaries' : 'Reference ADP/round at tier boundaries'}
+
+Provide a "summary": 2-3 sentences on the most actionable tier breaks for this strategy.`
+
+  const response = await askClaudeJson<{ tiers: TierBreak[]; summary: string }>({
+    system: TIER_ANALYSIS_SYSTEM,
+    prompt,
+    maxTokens: 5000,
+  })
+
+  return {
+    tiers: response.tiers,
+    format,
+    strategyName: strategy.name,
+    summary: response.summary,
+  }
+}
+
+// --- FF-023: Sleeper Picks ---
+
+export interface SleeperPick {
+  name: string
+  position: string
+  team: string
+  consensusValue: number
+  projectedValue: number
+  reasoning: string
+  confidence: 'high' | 'medium' | 'low'
+  catalysts: string[]
+  strategyAlignment: string
+}
+
+export interface SleeperPicksResult {
+  sleepers: SleeperPick[]
+  format: DraftFormat
+  strategyName: string
+  summary: string
+}
+
+const SLEEPER_PICKS_SYSTEM = `You are a fantasy football analyst identifying undervalued sleeper picks.
+
+RULES:
+- Only reference players from the provided data. Never invent players.
+- Sleepers = players whose consensus value significantly underestimates their potential.
+- Look for: expert disagreement (wide ADP ranges), rising trends, strategy alignment, upside indicators.
+- Respond with valid JSON only.
+
+Respond with: { "sleepers": [...], "summary": "..." }`
+
+export async function analyzeSleeperPicks(
+  scoredPlayers: ScoredPlayer[],
+  strategy: Strategy,
+  format: DraftFormat,
+  scoringFormat: ScoringFormat,
+  teamCount: number,
+  budget?: number,
+): Promise<SleeperPicksResult> {
+  // Focus on mid-to-late range players (ranks 30-150) — that's where sleepers live
+  const candidates = scoredPlayers.filter((sp) => {
+    const rank = sp.player.consensusRank
+    return rank >= 30 && rank <= 150
+  })
+
+  const playerLines = candidates.slice(0, 60).map((sp) => {
+    const p = sp.player
+    if (format === 'auction') {
+      return `${p.name} (${p.position}, ${p.team}) — $${p.consensusAuctionValue}, adj $${sp.adjustedAuctionValue ?? p.consensusAuctionValue}, score ${sp.strategyScore}, proj ${Math.round(p.projections.points)} pts, rank ${p.consensusRank}${sp.targetStatus !== 'neutral' ? ` [${sp.targetStatus}]` : ''}${p.injuryStatus ? ` [${p.injuryStatus}]` : ''}`
+    } else {
+      return `${p.name} (${p.position}, ${p.team}) — ADP ${Math.round(p.adp)}, adj round ${sp.adjustedRoundValue ?? Math.ceil(p.adp / 12)}, score ${sp.strategyScore}, proj ${Math.round(p.projections.points)} pts, rank ${p.consensusRank}${sp.targetStatus !== 'neutral' ? ` [${sp.targetStatus}]` : ''}${p.injuryStatus ? ` [${p.injuryStatus}]` : ''}`
+    }
+  }).join('\n')
+
+  const prompt = `## League
+${formatLeagueContext(format, scoringFormat, teamCount, budget)}
+
+## Active Strategy
+${formatStrategyContext(strategy)}
+
+## Mid-to-Late Range Players (ranks 30-150)
+${playerLines}
+
+## Task
+Identify 10 SLEEPER PICKS — undervalued players who could significantly outperform their consensus ranking.
+
+For each sleeper:
+- name: exact player name
+- position, team
+- consensusValue: ${format === 'auction' ? 'current consensus $ value' : 'current ADP round'}
+- projectedValue: ${format === 'auction' ? 'what you think they should be worth ($)' : 'round they should be drafted in'}
+- reasoning: 2-3 sentences on why this player is undervalued (cite projections, strategy score, positional context)
+- confidence: "high" | "medium" | "low"
+- catalysts: array of 2-3 reasons they could break out (e.g. "new offensive coordinator", "reduced target competition", "year 2 leap")
+- strategyAlignment: 1 sentence on how this sleeper fits the active strategy
+
+Look for:
+1. High strategy score relative to consensus rank (the scoring engine sees value others don't)
+2. High projected points relative to draft position
+3. Players at high-emphasis positions (position weight 7+) who are available late
+4. Players on teams NOT in the team-avoids list
+
+Provide a "summary": 2-3 sentences on the best sleeper opportunities for this strategy.`
+
+  const response = await askClaudeJson<{ sleepers: SleeperPick[]; summary: string }>({
+    system: SLEEPER_PICKS_SYSTEM,
+    prompt,
+    maxTokens: 5000,
+  })
+
+  return {
+    sleepers: response.sleepers,
+    format,
+    strategyName: strategy.name,
+    summary: response.summary,
+  }
+}
