@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useMemo } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -21,8 +21,9 @@ import {
   DollarSign,
   ListOrdered,
 } from 'lucide-react'
+import { StrategyValuePreview } from './strategy-value-preview'
 import type { Strategy, StrategyUpdate, StrategyPlayerTarget, StrategyPlayerAvoid, Position as DbPosition } from '@/lib/supabase/database.types'
-import type { DraftFormat } from '@/lib/players/types'
+import type { DraftFormat, Player } from '@/lib/players/types'
 
 /** Extract first value from slider's onValueChange (number | readonly number[]) */
 function sliderVal(v: number | readonly number[]): number {
@@ -32,6 +33,8 @@ function sliderVal(v: number | readonly number[]): number {
 interface StrategyEditorProps {
   strategy: Strategy
   format: DraftFormat
+  players?: Player[]
+  leagueBudget?: number
   onSave: (updates: StrategyUpdate) => Promise<void>
   onCancel: () => void
 }
@@ -56,7 +59,7 @@ const NFL_TEAMS = [
 
 type Section = 'weights' | 'targets' | 'avoids' | 'teams' | 'budget' | 'rounds' | 'risk'
 
-export function StrategyEditor({ strategy, format, onSave, onCancel }: StrategyEditorProps) {
+export function StrategyEditor({ strategy, format, players = [], leagueBudget, onSave, onCancel }: StrategyEditorProps) {
   // Editable state — initialized from strategy
   const [name, setName] = useState(strategy.name)
   const [description, setDescription] = useState(strategy.description ?? '')
@@ -79,6 +82,21 @@ export function StrategyEditor({ strategy, format, onSave, onCancel }: StrategyE
   // New target/avoid input state
   const [newTargetName, setNewTargetName] = useState('')
   const [newAvoidName, setNewAvoidName] = useState('')
+
+  // Build transient strategy from current editor state for live preview
+  const editedStrategy = useMemo<Strategy>(() => ({
+    ...strategy,
+    name,
+    description: description || null,
+    risk_tolerance: riskTolerance,
+    position_weights: positionWeights as Record<DbPosition, number>,
+    player_targets: playerTargets,
+    player_avoids: playerAvoids,
+    team_avoids: teamAvoids,
+    budget_allocation: format === 'auction' ? budgetAllocation : null,
+    max_bid_percentage: format === 'auction' ? maxBidPct : null,
+    round_targets: format === 'snake' ? roundTargets as Record<DbPosition, number[]> : null,
+  }), [strategy, name, description, riskTolerance, positionWeights, playerTargets, playerAvoids, teamAvoids, budgetAllocation, maxBidPct, roundTargets, format])
 
   const toggleSection = (section: Section) => {
     setExpandedSections((prev) => {
@@ -477,6 +495,17 @@ export function StrategyEditor({ strategy, format, onSave, onCancel }: StrategyE
             })}
           </div>
         </SectionToggle>
+      )}
+
+      {/* Real-time value preview (FF-S07) */}
+      {players.length > 0 && (
+        <StrategyValuePreview
+          players={players}
+          originalStrategy={strategy}
+          editedStrategy={editedStrategy}
+          format={format}
+          leagueBudget={leagueBudget}
+        />
       )}
 
       {/* Bottom save bar — sticky on mobile */}

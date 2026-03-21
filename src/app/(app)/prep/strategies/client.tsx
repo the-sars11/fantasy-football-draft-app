@@ -9,13 +9,15 @@ import { StrategyProposals } from '@/components/prep/strategy-proposals'
 import { StrategyEditor } from '@/components/prep/strategy-editor'
 import type { StrategyProposal } from '@/lib/research/strategy/research'
 import type { Strategy, StrategyUpdate } from '@/lib/supabase/database.types'
-import type { DraftFormat } from '@/lib/players/types'
+import type { DraftFormat, Player } from '@/lib/players/types'
+import { cacheToPlayers } from '@/lib/players/convert'
 
 interface LeagueSummary {
   id: string
   name: string
   format: DraftFormat
   team_count: number
+  budget: number | null
   platform: string
 }
 
@@ -27,6 +29,27 @@ export function StrategiesPageClient() {
 
   // Editor state
   const [editingStrategy, setEditingStrategy] = useState<Strategy | null>(null)
+  const [players, setPlayers] = useState<Player[]>([])
+
+  // Fetch cached players for value preview (lazy — only when editing)
+  useEffect(() => {
+    if (!editingStrategy) return
+    let cancelled = false
+    async function fetchPlayers() {
+      try {
+        const res = await fetch('/api/players?limit=300')
+        if (!res.ok) return
+        const data = await res.json()
+        if (!cancelled && data.players) {
+          setPlayers(cacheToPlayers(data.players))
+        }
+      } catch {
+        // Non-critical — preview degrades gracefully
+      }
+    }
+    fetchPlayers()
+    return () => { cancelled = true }
+  }, [editingStrategy])
 
   useEffect(() => {
     async function fetchLeagues() {
@@ -138,6 +161,8 @@ export function StrategiesPageClient() {
         <StrategyEditor
           strategy={editingStrategy}
           format={selectedLeague.format}
+          players={players}
+          leagueBudget={selectedLeague.budget ?? undefined}
           onSave={handleEditorSave}
           onCancel={() => setEditingStrategy(null)}
         />
