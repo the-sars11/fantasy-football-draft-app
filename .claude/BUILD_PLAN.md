@@ -83,10 +83,10 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 - [x] FF-030: Draft setup page — select league, choose active strategy profile, enter manager names, import keeper assignments
 - [x] FF-031: Google Sheets API integration — connect to draft sheet, configure column mapping
 - [x] FF-032: Sheet polling engine — check for new rows every 5-10 seconds, detect new picks, trigger state update
-- [ ] FF-033: Manual pick entry fallback — quick-entry UI (search player → enter pick details → assign to manager)
-- [ ] FF-034: Remaining player pool — live-updated list showing available players with strategy-adjusted values/rankings
-- [ ] FF-035: Position scarcity tracker — count remaining startable players per position per tier
-- [ ] FF-036: "Why?" explainability — expandable reasoning on every recommendation (cites data, scarcity, tendencies, active strategy)
+- [x] FF-033: Manual pick entry fallback — quick-entry UI (search player → enter pick details → assign to manager)
+- [x] FF-034: Remaining player pool — live-updated list showing available players with strategy-adjusted values/rankings
+- [x] FF-035: Position scarcity tracker — count remaining startable players per position per tier
+- [x] FF-036: "Why?" explainability — expandable reasoning on every recommendation (cites data, scarcity, tendencies, active strategy)
 - [ ] FF-037: Your roster panel — show current picks, position needs, grade vs. strategy plan
 - [ ] FF-038: League overview panel — all managers' rosters at a glance
 - [ ] FF-039: Manager tendency tracker — track each manager's patterns (positions targeted, spending/pick behavior)
