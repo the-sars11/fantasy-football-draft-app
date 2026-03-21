@@ -64,8 +64,8 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 - [x] FF-023: Sleeper picks — undervalued based on trend data + expert disagreement + strategy alignment
 
 ### Draft Board UI
-- [ ] FF-024: Draft board view — sortable/filterable table (by position, tier, value, target/avoid, auction range or round). Active strategy badge shown. Strategy-adjusted values highlighted
-- [ ] FF-025: Position breakdown view — top players by position with tier coloring + value indicators + strategy alignment score
+- [x] FF-024: Draft board view — sortable/filterable table (by position, tier, value, target/avoid, auction range or round). Active strategy badge shown. Strategy-adjusted values highlighted
+- [x] FF-025: Position breakdown view — top players by position with tier coloring + value indicators + strategy alignment score
 
 ### Run Management
 - [ ] FF-026: Run save to Supabase (full snapshot: league config, active strategy profile, all analysis results, timestamp)
