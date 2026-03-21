@@ -80,7 +80,7 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 ## Phase 3: Live Draft Mode (Sessions 5-6)
 
 ### Shared Infrastructure (Both Formats)
-- [ ] FF-030: Draft setup page — select league, choose active strategy profile, enter manager names, import keeper assignments
+- [x] FF-030: Draft setup page — select league, choose active strategy profile, enter manager names, import keeper assignments
 - [ ] FF-031: Google Sheets API integration — connect to draft sheet, configure column mapping
 - [ ] FF-032: Sheet polling engine — check for new rows every 5-10 seconds, detect new picks, trigger state update
 - [ ] FF-033: Manual pick entry fallback — quick-entry UI (search player → enter pick details → assign to manager)
