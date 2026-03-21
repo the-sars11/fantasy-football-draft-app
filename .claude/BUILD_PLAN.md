@@ -54,7 +54,7 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 - [x] FF-S08: Save strategy profiles — save base strategy as-is, or save tailored version as named profile. Multiple profiles per league. Mark one as "active"
 
 ### Research Pipeline
-- [ ] FF-017: Research pipeline orchestrator (configure → ingest → normalize → analyze through active strategy → output)
+- [x] FF-017: Research pipeline orchestrator (configure → ingest → normalize → analyze through active strategy → output)
 
 ### LLM Analysis Prompts (Strategy-Aware)
 - [ ] FF-019: Positional rankings — Claude analyzes consensus data through lens of active strategy + league settings
