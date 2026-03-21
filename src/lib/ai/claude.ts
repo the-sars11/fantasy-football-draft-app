@@ -20,10 +20,21 @@ function getClient(): Anthropic {
   return client
 }
 
+/** Available model tiers */
+export type ModelTier = 'fast' | 'default' | 'best'
+
+const MODEL_MAP: Record<ModelTier, string> = {
+  fast: 'claude-haiku-4-5-20251001',      // Fastest, cheapest — good for live draft recommendations
+  default: 'claude-sonnet-4-20250514',     // Balanced — research analysis, strategy proposals
+  best: 'claude-sonnet-4-20250514',        // Best quality — same as default for now
+}
+
 export interface ClaudeJsonRequest {
   system: string
   prompt: string
   maxTokens?: number
+  /** Model tier: 'fast' for live draft, 'default' for analysis (default: 'default') */
+  tier?: ModelTier
 }
 
 /**
@@ -32,9 +43,10 @@ export interface ClaudeJsonRequest {
  */
 export async function askClaudeJson<T>(req: ClaudeJsonRequest): Promise<T> {
   const anthropic = getClient()
+  const model = MODEL_MAP[req.tier ?? 'default']
 
   const response = await anthropic.messages.create({
-    model: 'claude-sonnet-4-20250514',
+    model,
     max_tokens: req.maxTokens ?? 4096,
     system: req.system,
     messages: [

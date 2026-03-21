@@ -10,6 +10,7 @@ import type { StrategyProposal } from '@/lib/research/strategy/research'
 import type { Strategy, StrategyUpdate } from '@/lib/supabase/database.types'
 import type { DraftFormat, Player } from '@/lib/players/types'
 import { cacheToPlayers } from '@/lib/players/convert'
+import { Loader2, AlertCircle, Sparkles } from 'lucide-react'
 
 interface LeagueSummary {
   id: string
@@ -226,26 +227,36 @@ export function StrategiesPageClient() {
   // --- Render ---
 
   if (loading) {
-    return <div className="text-sm text-muted-foreground">Loading leagues...</div>
+    return (
+      <div className="flex items-center gap-2 py-8 text-sm text-muted-foreground">
+        <Loader2 className="h-4 w-4 animate-spin" />
+        Loading leagues...
+      </div>
+    )
   }
 
   if (error) {
     return (
-      <div className="rounded-md bg-red-500/10 border border-red-500/20 p-3 text-sm text-red-600 dark:text-red-400">
-        {error}
+      <div className="rounded-lg bg-destructive/10 border border-destructive/20 p-4 text-sm text-destructive flex items-start gap-3">
+        <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
+        <div>
+          <p className="font-medium">Failed to load data</p>
+          <p className="text-destructive/80 mt-1">{error}</p>
+        </div>
       </div>
     )
   }
 
   if (leagues.length === 0) {
     return (
-      <div className="rounded-md bg-muted/50 border border-border p-6 text-center">
+      <div className="rounded-lg bg-muted/50 border border-border p-8 text-center space-y-2">
+        <Sparkles className="h-8 w-8 text-muted-foreground mx-auto" />
+        <p className="text-sm font-medium">No leagues configured</p>
         <p className="text-sm text-muted-foreground">
-          No leagues configured yet.{' '}
           <a href="/prep/configure" className="text-primary underline underline-offset-4">
             Configure a league
           </a>{' '}
-          to get started.
+          to create strategies.
         </p>
       </div>
     )

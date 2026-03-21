@@ -104,7 +104,8 @@ Exactly 3 targets. Summary should be 1 sentence about overall draft strategy rig
     const result = await askClaudeJson<LLMRecommendation>({
       system,
       prompt,
-      maxTokens: 512,
+      maxTokens: 384,
+      tier: 'fast', // Haiku for live draft speed
     })
 
     return NextResponse.json({ recommendation: result })

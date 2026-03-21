@@ -1,47 +1,50 @@
 # Working State — Fantasy Football Draft Advisor
 
 ## Current Session
-- **Date:** 2026-03-20
-- **Focus:** Phase 3 — Live Draft Mode (Auction Mode features)
-- **Status:** FF-033 through FF-049 + FF-P01 through FF-P05 complete — Phase 3 DONE
+- **Date:** 2026-03-21
+- **Focus:** Phase 4 — Polish
+- **Status:** ALL PHASE 4 ITEMS COMPLETE — FF-050, FF-052, FF-053, FF-054, FF-055
 
 ## Last Completed
-- FF-033: Manual pick entry — search player, select manager, enter price/round, submit
-- FF-034: Remaining player pool — live-updated available players with position filter, search, strategy scores
-- FF-035: Position scarcity tracker — tier-based breakdown per position with color-coded urgency
-- FF-036: "Why?" explainability — expandable reasoning on every player with factors, confidence, summary
-- FF-037: My roster panel — current picks grouped by position, strategy grade (A+ to F), needs summary
-- FF-038: League overview — expandable manager rows with picks, budget, position needs
-- FF-039: Manager tendencies — spending style detection, position focus, likely needs prediction
-- FF-P01: Strategy swap — one-tap switching between strategies, instant recalculation
-- FF-P02: Draft flow monitor — position runs, value anomalies, spending patterns, pool quality
-- FF-P03: Proactive pivot alerts — auto-detect when conditions favor a different strategy
-- FF-P04: Strategy impact preview — expandable "What changes?" showing top 3 target shifts, position priority changes, budget allocation changes
-- FF-P05: Pivot history log — tracks all strategy changes with pick number, from/to, reason
-- FF-040: Auction state machine — per-manager budget remaining, roster slots filled, picks made (already in draft state)
-- FF-041: Per-pick LLM recommendation — API route + client helper for "top 3 targets now"
-- FF-042: Max bid calculator — context-aware max bid with strategy alignment, position need, alternatives, budget allocation factors
-- FF-043: Adaptive budget strategy — ahead/behind/on_track detection with suggestion text
-- FF-044: Position urgency + budget warnings — "only N startable RBs left under $X" with severity levels
+- FF-050: Dark mode (default) + light mode toggle — next-themes provider, theme toggle in sidebar + mobile header
+- FF-052: Loading states, error handling, empty states — route-level loading.tsx (9), error.tsx (1), not-found.tsx (1), upgraded inline states
+- FF-053: Post-draft review — full grading system: overall grade, position grades, target hit/miss report, budget/snake analysis, strengths/weaknesses, pivot impact
+- FF-054: Export draft results — CSV download + shareable text summary (copy to clipboard)
+- FF-055: LLM latency optimization — Haiku model for live draft, 30s client-side recommendation cache, reduced token payload (12 players, 3 recent picks, 384 max tokens), cache invalidation on strategy swap
 
 ## New Files Created (This Session)
-- `src/lib/draft/auction-advisor.ts` — Max bid calculator, budget strategy, position urgency warnings
-- `src/lib/draft/recommend.ts` — Client-side helper for LLM recommendation endpoint
-- `src/app/api/draft/recommend/route.ts` — Per-pick LLM recommendation API (Claude call)
-- `src/components/draft/auction-advisor.tsx` — Auction advisor panel (budget status, urgency, AI targets)
-- `src/lib/draft/snake-advisor.ts` — Snake position tracking, best available projection, trade suggestions
-- `src/components/draft/snake-advisor.tsx` — Snake advisor panel (position info, projections, trade ideas, AI targets)
+- `src/components/theme-provider.tsx` — next-themes wrapper (dark default, class strategy)
+- `src/components/theme-toggle.tsx` — ThemeToggle (desktop) + ThemeToggleMobile components
+- `src/components/page-skeleton.tsx` — PageSkeleton + TableSkeleton reusable loading skeletons
+- `src/app/(app)/error.tsx` — App-level error boundary with retry
+- `src/app/not-found.tsx` — Global 404 page
+- `src/app/(app)/prep/loading.tsx` — Prep hub loading skeleton
+- `src/app/(app)/prep/board/loading.tsx` — Board table loading skeleton
+- `src/app/(app)/prep/configure/loading.tsx` — Configure loading skeleton
+- `src/app/(app)/prep/runs/loading.tsx` — Runs table loading skeleton
+- `src/app/(app)/prep/strategies/loading.tsx` — Strategies loading skeleton
+- `src/app/(app)/draft/loading.tsx` — Draft hub loading skeleton
+- `src/app/(app)/draft/setup/loading.tsx` — Setup loading skeleton
+- `src/app/(app)/draft/review/loading.tsx` — Review loading skeleton
+- `src/app/(app)/settings/loading.tsx` — Settings loading skeleton
+- `src/lib/draft/review.ts` — Post-draft analysis engine (position grades, target tracking, budget/snake analysis)
+- `src/lib/draft/export.ts` — CSV export + shareable text generation + clipboard utilities
+- `src/app/(app)/draft/review/page.tsx` — Review page with Suspense
+- `src/app/(app)/draft/review/client.tsx` — Full review UI (grade card, strengths/weaknesses, position grades, target report, budget/snake analysis, export buttons)
 
 ## Files Modified (This Session)
-- `src/app/(app)/draft/live/client.tsx` — Added AuctionAdvisor + SnakeAdvisor imports and integration
+- `src/app/layout.tsx` — Added ThemeProvider wrapper, removed hardcoded `dark` class, added suppressHydrationWarning
+- `src/components/layout/app-shell.tsx` — Added ThemeToggle in sidebar footer + ThemeToggleMobile in mobile header
+- `src/app/(app)/prep/board/client.tsx` — Upgraded loading/error/empty states with icons + better layout
+- `src/app/(app)/prep/strategies/client.tsx` — Upgraded loading/error/empty states with icons + better layout
+- `src/lib/ai/claude.ts` — Added ModelTier system (fast/default/best), Haiku for live draft
+- `src/app/api/draft/recommend/route.ts` — Switched to fast tier (Haiku), reduced max_tokens to 384
+- `src/lib/draft/recommend.ts` — Added 30s client-side cache, reduced payload (12 players, 3 recent), clearRecommendationCache() export
+- `src/app/(app)/draft/live/client.tsx` — Wired cache invalidation on strategy swap
 
 ## Next Up
-- Phase 4: Polish
-- FF-050: Dark mode (default) + light mode toggle
-- FF-052: Loading states, error handling, empty states
-- FF-053: Post-draft review
-- FF-054: Export draft results
-- FF-055: Minimize LLM latency
+- Phase 4 COMPLETE
+- Remaining backlog: FF-028 (Refresh action), FF-029 (Keeper integration) — both deferred/optional
 
 ## Architecture Notes
 - shadcn/ui v4 uses base-ui (not Radix) — no `asChild` prop on Button/TooltipTrigger

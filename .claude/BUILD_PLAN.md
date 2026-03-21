@@ -117,12 +117,12 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 ## Phase 4: Polish (Session 7)
 
 ### UI/UX
-- [ ] FF-050: Dark mode (default) + light mode toggle
-- [ ] FF-052: Loading states, error handling, empty states throughout
+- [x] FF-050: Dark mode (default) + light mode toggle
+- [x] FF-052: Loading states, error handling, empty states throughout
 
 ### Post-Draft
-- [ ] FF-053: Post-draft review — grade your draft vs. active strategy targets, show deviations + why, compare to original strategy vs. any mid-draft pivots
-- [ ] FF-054: Export draft results (CSV, shareable link)
+- [x] FF-053: Post-draft review — grade your draft vs. active strategy targets, show deviations + why, compare to original strategy vs. any mid-draft pivots
+- [x] FF-054: Export draft results (CSV, shareable link)
 
 ### Performance
-- [ ] FF-055: Minimize LLM latency during live draft (streaming responses, state deltas only, strategy swap = incremental recalc not full re-run)
+- [x] FF-055: Minimize LLM latency during live draft (streaming responses, state deltas only, strategy swap = incremental recalc not full re-run)

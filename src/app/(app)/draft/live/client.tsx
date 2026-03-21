@@ -57,6 +57,7 @@ import type { DraftSession, League, RosterSlots } from '@/lib/supabase/database.
 import type { ScoredPlayer } from '@/lib/research/strategy/scoring'
 import type { Strategy as DbStrategy } from '@/lib/supabase/database.types'
 import type { Explanation } from '@/lib/draft/explain'
+import { clearRecommendationCache } from '@/lib/draft/recommend'
 
 const posColors: Record<string, string> = {
   QB: 'text-red-400',
@@ -203,6 +204,7 @@ export function LiveDraftClient() {
   const handleStrategySwap = useCallback((newStrategy: DbStrategy, fromRecommendation = false) => {
     const prevName = strategy?.name ?? 'None'
     setStrategy(newStrategy)
+    clearRecommendationCache() // FF-055: Force fresh recommendation after strategy swap
     setAllStrategies(prev => prev.map(s => ({
       ...s,
       is_active: s.id === newStrategy.id,

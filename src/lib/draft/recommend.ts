@@ -1,8 +1,13 @@
 /**
- * Real-Time LLM Recommendations (FF-041)
+ * Real-Time LLM Recommendations (FF-041, FF-055)
  *
  * Client-side helper to call the /api/draft/recommend endpoint.
  * Builds the request payload from current draft state + scored players.
+ *
+ * FF-055 optimizations:
+ * - Client-side cache: skips API call if pick count + strategy haven't changed
+ * - Sends only top 12 players (down from 15) to reduce token count
+ * - Server uses Haiku model for speed
  */
 
 import type { DraftState } from './state'
@@ -22,6 +27,21 @@ export interface LLMRecommendation {
   summary: string
 }
 
+// --- Client-side recommendation cache ---
+
+interface CacheEntry {
+  key: string
+  result: LLMRecommendation
+  timestamp: number
+}
+
+let cachedRecommendation: CacheEntry | null = null
+const CACHE_TTL_MS = 30_000 // 30 seconds
+
+function buildCacheKey(pickCount: number, strategyId: string | null, managerName: string): string {
+  return `${pickCount}:${strategyId ?? 'none'}:${managerName}`
+}
+
 export async function fetchRecommendation(
   state: DraftState,
   managerName: string,
@@ -31,6 +51,16 @@ export async function fetchRecommendation(
 ): Promise<LLMRecommendation> {
   const mgr = state.managers[managerName]
   if (!mgr) throw new Error(`Manager "${managerName}" not found`)
+
+  // Check cache — if pick count + strategy haven't changed, return cached result
+  const cacheKey = buildCacheKey(state.picks.length, strategy?.id ?? null, managerName)
+  if (
+    cachedRecommendation &&
+    cachedRecommendation.key === cacheKey &&
+    Date.now() - cachedRecommendation.timestamp < CACHE_TTL_MS
+  ) {
+    return cachedRecommendation.result
+  }
 
   const totalSlots = Object.values(state.roster_slots).reduce((s, v) => s + v, 0)
 
@@ -45,11 +75,11 @@ export async function fetchRecommendation(
     if (need > 0) rosterNeeds[pos] = need
   }
 
-  // Top available by strategy score
+  // Top available by strategy score — reduced to 12 for lower latency
   const available = scoredPlayers
     .filter(sp => !draftedNames.has(sp.player.name.toLowerCase()))
     .sort((a, b) => b.strategyScore - a.strategyScore)
-    .slice(0, 15)
+    .slice(0, 12)
     .map(sp => ({
       name: sp.player.name,
       position: sp.player.position,
@@ -58,8 +88,8 @@ export async function fetchRecommendation(
       adjustedValue: sp.adjustedAuctionValue,
     }))
 
-  // Recent picks
-  const recentPicks = state.picks.slice(-5).reverse().map(p => ({
+  // Recent picks — reduced to 3 for lower latency
+  const recentPicks = state.picks.slice(-3).reverse().map(p => ({
     player: p.player_name,
     position: p.position ?? '?',
     manager: p.manager,
@@ -91,5 +121,15 @@ export async function fetchRecommendation(
   }
 
   const data = await res.json()
-  return data.recommendation
+  const result: LLMRecommendation = data.recommendation
+
+  // Cache the result
+  cachedRecommendation = { key: cacheKey, result, timestamp: Date.now() }
+
+  return result
+}
+
+/** Clear the recommendation cache (e.g., on strategy swap) */
+export function clearRecommendationCache() {
+  cachedRecommendation = null
 }

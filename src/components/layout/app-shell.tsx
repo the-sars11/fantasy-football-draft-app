@@ -15,6 +15,7 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
+import { ThemeToggle, ThemeToggleMobile } from '@/components/theme-toggle'
 import { signOut } from '@/app/(auth)/actions'
 
 interface NavItem {
@@ -86,6 +87,8 @@ export function AppShell({
             </div>
           )}
 
+          <ThemeToggle collapsed={collapsed} />
+
           <button
             onClick={() => setCollapsed(!collapsed)}
             className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm text-muted-foreground hover:bg-accent/50 hover:text-foreground transition-colors"
@@ -124,11 +127,14 @@ export function AppShell({
           <Trophy className="h-4 w-4 text-primary" />
           <span className="text-sm font-semibold">Draft Advisor</span>
         </div>
-        <form action={signOut}>
-          <Button variant="ghost" size="sm" className="text-muted-foreground h-8 px-2">
-            <LogOut className="h-4 w-4" />
-          </Button>
-        </form>
+        <div className="flex items-center gap-1">
+          <ThemeToggleMobile />
+          <form action={signOut}>
+            <Button variant="ghost" size="sm" className="text-muted-foreground h-8 px-2">
+              <LogOut className="h-4 w-4" />
+            </Button>
+          </form>
+        </div>
       </header>
 
       {/* Main content — fills space between header and bottom nav on mobile */}
