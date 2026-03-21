@@ -81,6 +81,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'leagueId is required' }, { status: 400 })
     }
 
+    if (!process.env.ANTHROPIC_API_KEY) {
+      return NextResponse.json(
+        { error: 'AI features not configured — ANTHROPIC_API_KEY is missing' },
+        { status: 503 }
+      )
+    }
+
     const supabase = await getClient()
     if (!supabase) {
       return NextResponse.json({ error: 'Database not available' }, { status: 503 })
