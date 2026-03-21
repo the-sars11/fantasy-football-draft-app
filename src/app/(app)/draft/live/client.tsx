@@ -45,6 +45,7 @@ import { ManagerTendencies } from '@/components/draft/manager-tendencies'
 import { StrategySwap } from '@/components/draft/strategy-swap'
 import { DraftFlowAlerts } from '@/components/draft/draft-flow-alerts'
 import { PivotHistory } from '@/components/draft/pivot-history'
+import { AuctionAdvisor } from '@/components/draft/auction-advisor'
 import type { PivotEntry } from '@/components/draft/pivot-history'
 import { scorePlayersWithStrategy } from '@/lib/research/strategy/scoring'
 import { calculateScarcity, explainPlayer } from '@/lib/draft/explain'
@@ -394,6 +395,17 @@ export function LiveDraftClient() {
               )}
             </CardContent>
           </Card>
+
+          {/* Auction advisor (FF-040 through FF-044) */}
+          {isAuction && (
+            <AuctionAdvisor
+              state={state}
+              managerName={myManager}
+              scoredPlayers={scoredPlayers}
+              draftedNames={draftedNames}
+              strategy={strategy}
+            />
+          )}
 
           {/* Strategy swap (FF-P01) */}
           {allStrategies.length > 1 && (

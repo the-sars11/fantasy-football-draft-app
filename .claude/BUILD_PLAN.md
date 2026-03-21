@@ -99,11 +99,11 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 - [x] FF-P05: Pivot history log — track all strategy changes during draft with timestamp, reason, and what the app recommended vs. what user chose
 
 ### Auction Mode (Joe / ESPN)
-- [ ] FF-040: Auction state machine — per-manager budget remaining, roster slots filled, picks made
-- [ ] FF-041: Per-pick LLM recommendation — "top 3 targets now" with strategy-adjusted auction values
-- [ ] FF-042: Max bid calculator — "bid up to $X" based on remaining budget, needs, alternatives, active strategy
-- [ ] FF-043: Adaptive budget strategy — detect ahead/behind spending plan, suggest pivots with specific strategy profile recommendations
-- [ ] FF-044: Position urgency + budget warnings — "only 3 startable RBs left under $25" contextualized by active strategy
+- [x] FF-040: Auction state machine — per-manager budget remaining, roster slots filled, picks made
+- [x] FF-041: Per-pick LLM recommendation — "top 3 targets now" with strategy-adjusted auction values
+- [x] FF-042: Max bid calculator — "bid up to $X" based on remaining budget, needs, alternatives, active strategy
+- [x] FF-043: Adaptive budget strategy — detect ahead/behind spending plan, suggest pivots with specific strategy profile recommendations
+- [x] FF-044: Position urgency + budget warnings — "only 3 startable RBs left under $25" contextualized by active strategy
 
 ### Snake Mode (Tyler / Yahoo)
 - [ ] FF-045: Snake state machine — track draft order, current round, picks per round, compensatory picks
