@@ -37,13 +37,24 @@ export async function createLeague(
     bench: parseInt(formData.get('roster_bench') as string, 10) || 6,
   }
 
-  // Parse keeper settings if enabled
+  // Parse keeper settings if enabled (FF-029)
   let keeper_settings: KeeperSettings | null = null
   if (keeper_enabled) {
+    // Parse keepers JSON from form
+    let keepers: KeeperSettings['keepers'] = []
+    const keepersJson = formData.get('keepers') as string
+    if (keepersJson) {
+      try {
+        keepers = JSON.parse(keepersJson)
+      } catch {
+        // Invalid JSON, ignore
+      }
+    }
+
     keeper_settings = {
       max_keepers: parseInt(formData.get('max_keepers') as string, 10) || 3,
       cost_type: ((formData.get('keeper_cost_type') as string) || 'round') as KeeperSettings['cost_type'],
-      keepers: [],
+      keepers,
     }
   }
 

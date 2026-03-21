@@ -1,13 +1,20 @@
 'use client'
 
-import { useActionState, useState } from 'react'
+import { useActionState, useState, useCallback } from 'react'
 import { createLeague, type LeagueFormState } from '@/app/(app)/prep/configure/actions'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
-import type { DraftFormat } from '@/lib/supabase/database.types'
+import type { DraftFormat, Position } from '@/lib/supabase/database.types'
+import { Trash2, Plus } from 'lucide-react'
+
+interface KeeperEntry {
+  player_name: string
+  position: Position
+  cost: number
+}
 
 const PRESETS = {
   joe: {
@@ -35,6 +42,24 @@ export function LeagueConfigForm({ userId }: { userId: string }) {
   const [format, setFormat] = useState<DraftFormat>('auction')
   const [keeperEnabled, setKeeperEnabled] = useState(false)
   const [presetApplied, setPresetApplied] = useState<string | null>(null)
+
+  // Keeper management (FF-029)
+  const [keepers, setKeepers] = useState<KeeperEntry[]>([])
+  const [newKeeperName, setNewKeeperName] = useState('')
+  const [newKeeperPosition, setNewKeeperPosition] = useState<Position>('RB')
+  const [newKeeperCost, setNewKeeperCost] = useState('')
+
+  const addKeeper = useCallback(() => {
+    if (!newKeeperName.trim()) return
+    const cost = parseInt(newKeeperCost, 10) || (format === 'auction' ? 1 : 1)
+    setKeepers((prev) => [...prev, { player_name: newKeeperName.trim(), position: newKeeperPosition, cost }])
+    setNewKeeperName('')
+    setNewKeeperCost('')
+  }, [newKeeperName, newKeeperPosition, newKeeperCost, format])
+
+  const removeKeeper = useCallback((index: number) => {
+    setKeepers((prev) => prev.filter((_, i) => i !== index))
+  }, [])
 
   function applyPreset(key: 'joe' | 'tyler') {
     const preset = PRESETS[key]
@@ -248,25 +273,98 @@ export function LeagueConfigForm({ userId }: { userId: string }) {
             </div>
 
             {keeperEnabled && (
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <label htmlFor="max_keepers" className="text-sm font-medium">Max Keepers</label>
-                  <Input id="max_keepers" name="max_keepers" type="number" min={1} max={10} defaultValue={3} />
+              <div className="space-y-4">
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <label htmlFor="max_keepers" className="text-sm font-medium">Max Keepers</label>
+                    <Input id="max_keepers" name="max_keepers" type="number" min={1} max={10} defaultValue={3} />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Keeper Cost Type</label>
+                    <select
+                      name="keeper_cost_type"
+                      defaultValue={format === 'auction' ? 'auction_price' : 'round'}
+                      className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                    >
+                      <option value="round">Round (snake)</option>
+                      <option value="auction_price">Auction Price</option>
+                    </select>
+                  </div>
                 </div>
+
+                {/* Hidden input for keepers JSON (FF-029) */}
+                <input type="hidden" name="keepers" value={JSON.stringify(keepers)} />
+
+                {/* Add keeper form */}
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Keeper Cost Type</label>
-                  <select
-                    name="keeper_cost_type"
-                    defaultValue={format === 'auction' ? 'auction_price' : 'round'}
-                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                  >
-                    <option value="round">Round (snake)</option>
-                    <option value="auction_price">Auction Price</option>
-                  </select>
+                  <label className="text-sm font-medium">Your Keepers</label>
+                  <div className="flex flex-wrap gap-2">
+                    <Input
+                      type="text"
+                      placeholder="Player name"
+                      value={newKeeperName}
+                      onChange={(e) => setNewKeeperName(e.target.value)}
+                      className="w-40"
+                      onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addKeeper())}
+                    />
+                    <select
+                      value={newKeeperPosition}
+                      onChange={(e) => setNewKeeperPosition(e.target.value as Position)}
+                      className="flex h-9 w-20 rounded-md border border-input bg-transparent px-2 py-1 text-sm"
+                    >
+                      <option value="QB">QB</option>
+                      <option value="RB">RB</option>
+                      <option value="WR">WR</option>
+                      <option value="TE">TE</option>
+                      <option value="K">K</option>
+                      <option value="DST">D/ST</option>
+                    </select>
+                    <Input
+                      type="number"
+                      placeholder={format === 'auction' ? 'Price $' : 'Round'}
+                      value={newKeeperCost}
+                      onChange={(e) => setNewKeeperCost(e.target.value)}
+                      className="w-24"
+                      min={1}
+                      onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addKeeper())}
+                    />
+                    <Button type="button" variant="outline" size="sm" onClick={addKeeper} disabled={!newKeeperName.trim()}>
+                      <Plus className="h-4 w-4 mr-1" />
+                      Add
+                    </Button>
+                  </div>
                 </div>
-                <p className="text-xs text-muted-foreground sm:col-span-2">
-                  You'll assign specific keepers and their costs before running research or starting a draft.
-                </p>
+
+                {/* Current keepers list */}
+                {keepers.length > 0 && (
+                  <div className="space-y-1">
+                    {keepers.map((k, idx) => (
+                      <div key={idx} className="flex items-center justify-between rounded bg-muted/50 px-3 py-1.5">
+                        <span className="text-sm">
+                          <Badge variant="outline" className="mr-2 text-xs">{k.position}</Badge>
+                          {k.player_name}
+                          <span className="ml-2 text-muted-foreground">
+                            {format === 'auction' ? `$${k.cost}` : `Rd ${k.cost}`}
+                          </span>
+                        </span>
+                        <Button type="button" variant="ghost" size="sm" onClick={() => removeKeeper(idx)} className="h-6 w-6 p-0">
+                          <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                        </Button>
+                      </div>
+                    ))}
+                    {format === 'auction' && (
+                      <p className="text-xs text-muted-foreground mt-2">
+                        Total keeper cost: ${keepers.reduce((sum, k) => sum + k.cost, 0)}
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {keepers.length === 0 && (
+                  <p className="text-xs text-muted-foreground">
+                    Add your keepers above to exclude them from the draft pool and adjust your budget.
+                  </p>
+                )}
               </div>
             )}
           </CardContent>
