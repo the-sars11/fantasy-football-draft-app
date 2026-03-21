@@ -1,12 +1,12 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Loader2, AlertCircle, ClipboardList } from 'lucide-react'
+import { Loader2, AlertCircle, ClipboardList, RefreshCw, CheckCircle2 } from 'lucide-react'
 import { DraftBoardTable } from '@/components/prep/draft-board-table'
 import { PositionBreakdown } from '@/components/prep/position-breakdown'
 import { scorePlayersWithStrategy, type ScoredPlayer } from '@/lib/research/strategy/scoring'
@@ -44,6 +44,10 @@ export function DraftBoardClient() {
   const [searchQuery, setSearchQuery] = useState('')
   const [sortField, setSortField] = useState<SortField>('score')
   const [sortAsc, setSortAsc] = useState(false)
+
+  // FF-028: Refresh state
+  const [refreshing, setRefreshing] = useState(false)
+  const [refreshFeedback, setRefreshFeedback] = useState<string | null>(null)
 
   const selectedLeague = leagues.find((l) => l.id === selectedLeagueId)
 
@@ -99,6 +103,49 @@ export function DraftBoardClient() {
     fetchData()
     return () => { cancelled = true }
   }, [selectedLeagueId])
+
+  // FF-028: Full refresh — re-pull all sources, re-analyze with strategy, save as new run
+  const handleFullRefresh = useCallback(async () => {
+    if (!selectedLeagueId || refreshing) return
+    setRefreshing(true)
+    setRefreshFeedback(null)
+
+    try {
+      const res = await fetch('/api/research', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ leagueId: selectedLeagueId, skipRefresh: false }),
+      })
+      const data = await res.json()
+
+      if (!res.ok) throw new Error(data.error ?? 'Research failed')
+
+      // Reload board data with fresh players
+      const [playersRes, strategiesRes] = await Promise.all([
+        fetch('/api/players?limit=500'),
+        fetch(`/api/strategies?leagueId=${selectedLeagueId}`),
+      ])
+
+      if (playersRes.ok) {
+        const pData = await playersRes.json()
+        setPlayers(cacheToPlayers(pData.players || []))
+      }
+
+      if (strategiesRes.ok) {
+        const sData = await strategiesRes.json()
+        const active = (sData.strategies ?? []).find((s: Strategy) => s.is_active) ?? null
+        setActiveStrategy(active)
+      }
+
+      const stratName = data.strategy?.name ?? 'Balanced (default)'
+      setRefreshFeedback(`Refreshed ${data.analysis?.totalPlayers ?? 0} players with "${stratName}" strategy. Saved as new run.`)
+      setTimeout(() => setRefreshFeedback(null), 6000)
+    } catch (err) {
+      setRefreshFeedback(`Error: ${err instanceof Error ? err.message : 'Refresh failed'}`)
+    } finally {
+      setRefreshing(false)
+    }
+  }, [selectedLeagueId, refreshing])
 
   // Score players through active strategy
   const scoredPlayers = useMemo<ScoredPlayer[]>(() => {
@@ -260,7 +307,41 @@ export function DraftBoardClient() {
             </a>
           </span>
         )}
+
+        {/* FF-028: Refresh & Re-analyze button */}
+        {selectedLeagueId && (
+          <Button
+            onClick={handleFullRefresh}
+            disabled={refreshing || dataLoading}
+            size="sm"
+            variant="outline"
+            className="ml-auto"
+          >
+            {refreshing ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" />
+            ) : (
+              <RefreshCw className="h-3.5 w-3.5 mr-1.5" />
+            )}
+            {refreshing ? 'Refreshing...' : 'Refresh All'}
+          </Button>
+        )}
       </div>
+
+      {/* FF-028: Refresh feedback */}
+      {refreshFeedback && (
+        <div className={`flex items-center gap-1.5 text-sm rounded-md px-3 py-2 ${
+          refreshFeedback.startsWith('Error')
+            ? 'bg-destructive/10 text-destructive border border-destructive/20'
+            : 'bg-green-500/10 text-green-600 dark:text-green-400 border border-green-500/20'
+        }`}>
+          {refreshFeedback.startsWith('Error') ? (
+            <AlertCircle className="h-4 w-4 shrink-0" />
+          ) : (
+            <CheckCircle2 className="h-4 w-4 shrink-0" />
+          )}
+          {refreshFeedback}
+        </div>
+      )}
 
       {/* Content */}
       {dataLoading ? (

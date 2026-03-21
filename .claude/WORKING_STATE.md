@@ -2,10 +2,14 @@
 
 ## Current Session
 - **Date:** 2026-03-21
-- **Focus:** Backlog — FF-029 Keeper Integration
-- **Status:** FF-029 COMPLETE
+- **Focus:** Backlog — FF-028 + FF-029
+- **Status:** FF-028 AND FF-029 COMPLETE — ALL BACKLOG ITEMS DONE
 
 ## Last Completed
+- FF-028: Refresh action — "Refresh All" on Board page + enhanced Runs page refresh
+  - Board page: "Refresh All" button re-pulls data, re-analyzes with active strategy, saves new run, reloads board
+  - Runs page: enhanced feedback shows strategy name used
+  - Both show success/error feedback with auto-dismiss
 - FF-029: Keeper integration — full keeper support for keeper leagues (Tyler's Yahoo league)
   - Core keeper logic: types, validation, pool filtering, value analysis (`lib/draft/keepers.ts`)
   - Draft setup UI: add/remove keepers per manager with position, cost, and budget impact display
@@ -32,7 +36,7 @@
 - `src/components/draft/snake-advisor.tsx` — FF-048 keeper value display section
 
 ## Next Up
-- FF-028: Refresh action (last backlog item)
+- ALL BUILD PLAN ITEMS COMPLETE (FF-001 through FF-055 + FF-028 + FF-029)
 - Deploy to Vercel
 - End-to-end testing with real data
 

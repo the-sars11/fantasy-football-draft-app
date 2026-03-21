@@ -185,9 +185,10 @@ export function RunHistoryClient() {
       const runsData = await runsRes.json()
       setRuns(runsData.runs ?? [])
 
+      const stratName = data.strategy?.name ?? 'Balanced (default)'
       setRefreshFeedback({
         type: 'success',
-        message: `Refreshed! ${data.analysis?.totalPlayers ?? 0} players analyzed.`,
+        message: `Refreshed! ${data.analysis?.totalPlayers ?? 0} players analyzed with "${stratName}" strategy. Saved as new run.`,
       })
 
       // Auto-clear feedback after 5 seconds
