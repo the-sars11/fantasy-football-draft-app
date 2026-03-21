@@ -68,7 +68,7 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 - [x] FF-025: Position breakdown view — top players by position with tier coloring + value indicators + strategy alignment score
 
 ### Run Management
-- [ ] FF-026: Run save to Supabase (full snapshot: league config, active strategy profile, all analysis results, timestamp)
+- [x] FF-026: Run save to Supabase (full snapshot: league config, active strategy profile, all analysis results, timestamp)
 - [ ] FF-027: Run history page — list saved runs, load any run, compare side-by-side (including strategy differences)
 - [ ] FF-028: "Refresh" action — re-pull all data sources, re-run LLM analysis with same strategy, save as new run
 
