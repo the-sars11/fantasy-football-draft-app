@@ -92,9 +92,9 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 - [x] FF-039: Manager tendency tracker — track each manager's patterns (positions targeted, spending/pick behavior)
 
 ### Mid-Draft Strategy Pivot System
-- [ ] FF-P01: Strategy swap UI — one-tap to switch active strategy profile during live draft. All values/targets/recommendations recalculate instantly
-- [ ] FF-P02: Draft flow monitor — continuous analysis of draft state: track position runs, value anomalies, spending patterns, remaining player pool quality by position
-- [ ] FF-P03: Proactive pivot alerts — app detects when draft conditions favor a different strategy than active one. Alert: "Draft favors pivot to [strategy] — [reasoning]. [3 key opportunities]." Accept (swaps strategy) / Dismiss / Snooze (remind in N picks)
+- [x] FF-P01: Strategy swap UI — one-tap to switch active strategy profile during live draft. All values/targets/recommendations recalculate instantly
+- [x] FF-P02: Draft flow monitor — continuous analysis of draft state: track position runs, value anomalies, spending patterns, remaining player pool quality by position
+- [x] FF-P03: Proactive pivot alerts — app detects when draft conditions favor a different strategy than active one. Alert: "Draft favors pivot to [strategy] — [reasoning]. [3 key opportunities]." Accept (swaps strategy) / Dismiss / Snooze (remind in N picks)
 - [ ] FF-P04: Strategy impact preview — before accepting a pivot, show: "Switching to [strategy] changes your top 3 targets to X, Y, Z and adjusts budget allocation to [new split]"
 - [ ] FF-P05: Pivot history log — track all strategy changes during draft with timestamp, reason, and what the app recommended vs. what user chose
 

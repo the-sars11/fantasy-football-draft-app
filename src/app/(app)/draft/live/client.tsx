@@ -13,10 +13,13 @@
  * - My roster panel with strategy grade (FF-037)
  * - League overview — all managers at a glance (FF-038)
  * - Manager tendency tracker (FF-039)
+ * - Strategy swap (FF-P01)
+ * - Draft flow monitor + alerts (FF-P02)
+ * - Proactive pivot detection (FF-P03)
  *
  * Layout: two-column on desktop, stacked on mobile.
- * Left: pick log + manual entry + my roster + managers/tendencies
- * Right: player pool + scarcity
+ * Left: pick log + manual entry + my roster + strategy + managers/tendencies
+ * Right: alerts + player pool + scarcity
  */
 
 import { useState, useEffect, useMemo, useCallback } from 'react'
@@ -39,8 +42,12 @@ import { PositionScarcityTracker } from '@/components/draft/position-scarcity'
 import { MyRoster } from '@/components/draft/my-roster'
 import { LeagueOverview } from '@/components/draft/league-overview'
 import { ManagerTendencies } from '@/components/draft/manager-tendencies'
+import { StrategySwap } from '@/components/draft/strategy-swap'
+import { DraftFlowAlerts } from '@/components/draft/draft-flow-alerts'
 import { scorePlayersWithStrategy } from '@/lib/research/strategy/scoring'
 import { calculateScarcity, explainPlayer } from '@/lib/draft/explain'
+import { analyzeDraftFlow } from '@/lib/draft/flow-monitor'
+import { detectPivotOpportunity } from '@/lib/draft/pivot-detector'
 import type { Player } from '@/lib/players/types'
 import type { DraftSession, League, RosterSlots } from '@/lib/supabase/database.types'
 import type { ScoredPlayer } from '@/lib/research/strategy/scoring'
@@ -69,6 +76,8 @@ export function LiveDraftClient() {
   const [league, setLeague] = useState<League | null>(null)
   const [players, setPlayers] = useState<Player[]>([])
   const [strategy, setStrategy] = useState<DbStrategy | null>(null)
+  const [allStrategies, setAllStrategies] = useState<DbStrategy[]>([])
+  const [pivotDismissed, setPivotDismissed] = useState(false)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -102,10 +111,12 @@ export function LiveDraftClient() {
 
         const stratData = await stratRes.json()
         if (stratRes.ok && stratData.strategies) {
-          // Find active strategy for this league
-          const active = stratData.strategies.find(
-            (s: DbStrategy) => s.is_active && s.league_id === sessionData.session.league_id
+          const leagueStrats = stratData.strategies.filter(
+            (s: DbStrategy) => s.league_id === sessionData.session.league_id
           )
+          setAllStrategies(leagueStrats)
+          // Find active strategy for this league
+          const active = leagueStrats.find((s: DbStrategy) => s.is_active)
           if (active) setStrategy(active)
         }
       } catch (err) {
@@ -170,6 +181,29 @@ export function LiveDraftClient() {
     const managerName = state.manager_order[0] // "Me" / first manager
     return explainPlayer(scored, state, managerName, available)
   }, [state, players, draftedNames])
+
+  // Draft flow monitor (FF-P02)
+  const flow = useMemo(() => {
+    if (!state) return null
+    return analyzeDraftFlow(state, scoredPlayers, draftedNames, players)
+  }, [state, scoredPlayers, draftedNames, players])
+
+  // Pivot detection (FF-P03)
+  const pivotSuggestion = useMemo(() => {
+    if (!state || !flow || pivotDismissed) return null
+    return detectPivotOpportunity(strategy, allStrategies, state, flow, scoredPlayers, draftedNames)
+  }, [strategy, allStrategies, state, flow, scoredPlayers, draftedNames, pivotDismissed])
+
+  // Strategy swap handler (FF-P01)
+  const handleStrategySwap = useCallback((newStrategy: DbStrategy) => {
+    setStrategy(newStrategy)
+    // Update allStrategies to reflect new active
+    setAllStrategies(prev => prev.map(s => ({
+      ...s,
+      is_active: s.id === newStrategy.id,
+    })))
+    setPivotDismissed(false)
+  }, [])
 
   // --- Render ---
 
@@ -335,6 +369,16 @@ export function LiveDraftClient() {
             </CardContent>
           </Card>
 
+          {/* Strategy swap (FF-P01) */}
+          {allStrategies.length > 1 && (
+            <StrategySwap
+              strategies={allStrategies}
+              activeStrategy={strategy}
+              leagueId={session.league_id}
+              onSwap={handleStrategySwap}
+            />
+          )}
+
           {/* My roster with strategy grade (FF-037) */}
           <MyRoster
             state={state}
@@ -354,8 +398,18 @@ export function LiveDraftClient() {
           </div>
         </div>
 
-        {/* Right column: scarcity + player pool */}
+        {/* Right column: alerts + scarcity + player pool */}
         <div className="space-y-3">
+          {/* Draft flow alerts + pivot suggestions (FF-P02/P03) */}
+          {flow && (
+            <DraftFlowAlerts
+              flow={flow}
+              pivotSuggestion={pivotSuggestion}
+              onAcceptPivot={handleStrategySwap}
+              onDismissPivot={() => setPivotDismissed(true)}
+            />
+          )}
+
           {/* Position scarcity */}
           <PositionScarcityTracker scarcity={scarcity} />
 

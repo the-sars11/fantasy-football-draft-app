@@ -3,7 +3,7 @@
 ## Current Session
 - **Date:** 2026-03-20
 - **Focus:** Phase 3 — Live Draft Mode (FF-033 through FF-036)
-- **Status:** FF-033 through FF-039 complete, live draft page fully functional
+- **Status:** FF-033 through FF-039 + FF-P01/P02/P03 complete, live draft with strategy pivot system
 
 ## Last Completed
 - FF-033: Manual pick entry — search player, select manager, enter price/round, submit
@@ -13,6 +13,9 @@
 - FF-037: My roster panel — current picks grouped by position, strategy grade (A+ to F), needs summary
 - FF-038: League overview — expandable manager rows with picks, budget, position needs
 - FF-039: Manager tendencies — spending style detection, position focus, likely needs prediction
+- FF-P01: Strategy swap — one-tap switching between strategies, instant recalculation
+- FF-P02: Draft flow monitor — position runs, value anomalies, spending patterns, pool quality
+- FF-P03: Proactive pivot alerts — auto-detect when conditions favor a different strategy
 
 ## New Files Created
 - `src/hooks/use-draft-state.ts` — Full draft state hook (combines sheet polling + manual picks + persistence)
@@ -25,13 +28,17 @@
 - `src/components/draft/my-roster.tsx` — My roster panel with strategy grade
 - `src/components/draft/league-overview.tsx` — All managers at a glance with expandable picks
 - `src/components/draft/manager-tendencies.tsx` — Manager pattern analysis and prediction
+- `src/components/draft/strategy-swap.tsx` — One-tap strategy switching during live draft
+- `src/components/draft/draft-flow-alerts.tsx` — Flow alerts + pivot suggestion UI
+- `src/lib/draft/flow-monitor.ts` — Position runs, value anomalies, spending, pool quality
+- `src/lib/draft/pivot-detector.ts` — Proactive pivot opportunity detection
 - `src/app/(app)/draft/live/page.tsx` — Live draft server page
 - `src/app/(app)/draft/live/client.tsx` — Live draft client dashboard (two-column layout)
 
 ## Next Up
-- FF-P01: Strategy swap UI — one-tap to switch active strategy during live draft
-- FF-P02: Draft flow monitor — track position runs, value anomalies, spending patterns
-- FF-P03: Proactive pivot alerts — detect when draft conditions favor a different strategy
+- FF-P04: Strategy impact preview — show what changes before accepting a pivot
+- FF-P05: Pivot history log — track all strategy changes during draft
+- FF-040: Auction state machine enhancements
 
 ## Architecture Notes
 - shadcn/ui v4 uses base-ui (not Radix) — no `asChild` prop on Button/TooltipTrigger
