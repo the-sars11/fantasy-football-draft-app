@@ -106,11 +106,11 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 - [x] FF-044: Position urgency + budget warnings — "only 3 startable RBs left under $25" contextualized by active strategy
 
 ### Snake Mode (Tyler / Yahoo)
-- [ ] FF-045: Snake state machine — track draft order, current round, picks per round, compensatory picks
-- [ ] FF-046: "Best available at your next pick" — project who'll be available X picks away based on other managers' needs + active strategy
-- [ ] FF-047: Pick-by-pick LLM recommendation — at your pick: ranked by position need + value over replacement + strategy alignment
-- [ ] FF-048: Keeper round-cost tracking — show where keepers slot in, flag keeper value vs. ADP
-- [ ] FF-049: Trade-up/down suggestions — "if you trade up 2 spots, you can grab X before manager Y"
+- [x] FF-045: Snake state machine — track draft order, current round, picks per round, compensatory picks
+- [x] FF-046: "Best available at your next pick" — project who'll be available X picks away based on other managers' needs + active strategy
+- [x] FF-047: Pick-by-pick LLM recommendation — at your pick: ranked by position need + value over replacement + strategy alignment
+- [x] FF-048: Keeper round-cost tracking — show where keepers slot in, flag keeper value vs. ADP
+- [x] FF-049: Trade-up/down suggestions — "if you trade up 2 spots, you can grab X before manager Y"
 
 ---
 

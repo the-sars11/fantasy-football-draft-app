@@ -46,6 +46,7 @@ import { StrategySwap } from '@/components/draft/strategy-swap'
 import { DraftFlowAlerts } from '@/components/draft/draft-flow-alerts'
 import { PivotHistory } from '@/components/draft/pivot-history'
 import { AuctionAdvisor } from '@/components/draft/auction-advisor'
+import { SnakeAdvisor } from '@/components/draft/snake-advisor'
 import type { PivotEntry } from '@/components/draft/pivot-history'
 import { scorePlayersWithStrategy } from '@/lib/research/strategy/scoring'
 import { calculateScarcity, explainPlayer } from '@/lib/draft/explain'
@@ -399,6 +400,17 @@ export function LiveDraftClient() {
           {/* Auction advisor (FF-040 through FF-044) */}
           {isAuction && (
             <AuctionAdvisor
+              state={state}
+              managerName={myManager}
+              scoredPlayers={scoredPlayers}
+              draftedNames={draftedNames}
+              strategy={strategy}
+            />
+          )}
+
+          {/* Snake advisor (FF-045 through FF-049) */}
+          {!isAuction && (
+            <SnakeAdvisor
               state={state}
               managerName={myManager}
               scoredPlayers={scoredPlayers}

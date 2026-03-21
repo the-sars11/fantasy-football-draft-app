@@ -3,7 +3,7 @@
 ## Current Session
 - **Date:** 2026-03-20
 - **Focus:** Phase 3 — Live Draft Mode (Auction Mode features)
-- **Status:** FF-033 through FF-044 + FF-P01 through FF-P05 complete
+- **Status:** FF-033 through FF-049 + FF-P01 through FF-P05 complete — Phase 3 DONE
 
 ## Last Completed
 - FF-033: Manual pick entry — search player, select manager, enter price/round, submit
@@ -29,16 +29,19 @@
 - `src/lib/draft/recommend.ts` — Client-side helper for LLM recommendation endpoint
 - `src/app/api/draft/recommend/route.ts` — Per-pick LLM recommendation API (Claude call)
 - `src/components/draft/auction-advisor.tsx` — Auction advisor panel (budget status, urgency, AI targets)
+- `src/lib/draft/snake-advisor.ts` — Snake position tracking, best available projection, trade suggestions
+- `src/components/draft/snake-advisor.tsx` — Snake advisor panel (position info, projections, trade ideas, AI targets)
 
 ## Files Modified (This Session)
-- `src/app/(app)/draft/live/client.tsx` — Added AuctionAdvisor import + integration
+- `src/app/(app)/draft/live/client.tsx` — Added AuctionAdvisor + SnakeAdvisor imports and integration
 
 ## Next Up
-- FF-045: Snake state machine — track draft order, current round, picks per round, compensatory picks
-- FF-046: "Best available at your next pick" — project who'll be available X picks away
-- FF-047: Pick-by-pick LLM recommendation — at your pick: ranked by position need + value over replacement
-- FF-048: Keeper round-cost tracking
-- FF-049: Trade-up/down suggestions
+- Phase 4: Polish
+- FF-050: Dark mode (default) + light mode toggle
+- FF-052: Loading states, error handling, empty states
+- FF-053: Post-draft review
+- FF-054: Export draft results
+- FF-055: Minimize LLM latency
 
 ## Architecture Notes
 - shadcn/ui v4 uses base-ui (not Radix) — no `asChild` prop on Button/TooltipTrigger
