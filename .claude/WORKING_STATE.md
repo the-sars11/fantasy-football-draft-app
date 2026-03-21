@@ -2,49 +2,39 @@
 
 ## Current Session
 - **Date:** 2026-03-21
-- **Focus:** Phase 4 — Polish
-- **Status:** ALL PHASE 4 ITEMS COMPLETE — FF-050, FF-052, FF-053, FF-054, FF-055
+- **Focus:** Backlog — FF-029 Keeper Integration
+- **Status:** FF-029 COMPLETE
 
 ## Last Completed
-- FF-050: Dark mode (default) + light mode toggle — next-themes provider, theme toggle in sidebar + mobile header
-- FF-052: Loading states, error handling, empty states — route-level loading.tsx (9), error.tsx (1), not-found.tsx (1), upgraded inline states
-- FF-053: Post-draft review — full grading system: overall grade, position grades, target hit/miss report, budget/snake analysis, strengths/weaknesses, pivot impact
-- FF-054: Export draft results — CSV download + shareable text summary (copy to clipboard)
-- FF-055: LLM latency optimization — Haiku model for live draft, 30s client-side recommendation cache, reduced token payload (12 players, 3 recent picks, 384 max tokens), cache invalidation on strategy swap
+- FF-029: Keeper integration — full keeper support for keeper leagues (Tyler's Yahoo league)
+  - Core keeper logic: types, validation, pool filtering, value analysis (`lib/draft/keepers.ts`)
+  - Draft setup UI: add/remove keepers per manager with position, cost, and budget impact display
+  - Draft state: `keepers` field on DraftState, `applyKeepersToState()` deducts budgets + fills roster slots
+  - Session API: accepts keepers on creation, stores in Supabase (new `keepers` jsonb column)
+  - Leagues API: returns `keeper_enabled` + `keeper_settings` for setup UI
+  - Player pool: keepers excluded from available players via `getDraftedPlayerNames()`
+  - My Roster: keeper badge ("K") on keeper picks, separate count, grading excludes keepers
+  - Snake Advisor: FF-048 keeper value display with round cost per keeper
+  - DB migration: `20260321000001_add_keepers_to_draft_sessions.sql`
 
 ## New Files Created (This Session)
-- `src/components/theme-provider.tsx` — next-themes wrapper (dark default, class strategy)
-- `src/components/theme-toggle.tsx` — ThemeToggle (desktop) + ThemeToggleMobile components
-- `src/components/page-skeleton.tsx` — PageSkeleton + TableSkeleton reusable loading skeletons
-- `src/app/(app)/error.tsx` — App-level error boundary with retry
-- `src/app/not-found.tsx` — Global 404 page
-- `src/app/(app)/prep/loading.tsx` — Prep hub loading skeleton
-- `src/app/(app)/prep/board/loading.tsx` — Board table loading skeleton
-- `src/app/(app)/prep/configure/loading.tsx` — Configure loading skeleton
-- `src/app/(app)/prep/runs/loading.tsx` — Runs table loading skeleton
-- `src/app/(app)/prep/strategies/loading.tsx` — Strategies loading skeleton
-- `src/app/(app)/draft/loading.tsx` — Draft hub loading skeleton
-- `src/app/(app)/draft/setup/loading.tsx` — Setup loading skeleton
-- `src/app/(app)/draft/review/loading.tsx` — Review loading skeleton
-- `src/app/(app)/settings/loading.tsx` — Settings loading skeleton
-- `src/lib/draft/review.ts` — Post-draft analysis engine (position grades, target tracking, budget/snake analysis)
-- `src/lib/draft/export.ts` — CSV export + shareable text generation + clipboard utilities
-- `src/app/(app)/draft/review/page.tsx` — Review page with Suspense
-- `src/app/(app)/draft/review/client.tsx` — Full review UI (grade card, strengths/weaknesses, position grades, target report, budget/snake analysis, export buttons)
+- `supabase/migrations/20260321000001_add_keepers_to_draft_sessions.sql` — adds keepers jsonb column
 
 ## Files Modified (This Session)
-- `src/app/layout.tsx` — Added ThemeProvider wrapper, removed hardcoded `dark` class, added suppressHydrationWarning
-- `src/components/layout/app-shell.tsx` — Added ThemeToggle in sidebar footer + ThemeToggleMobile in mobile header
-- `src/app/(app)/prep/board/client.tsx` — Upgraded loading/error/empty states with icons + better layout
-- `src/app/(app)/prep/strategies/client.tsx` — Upgraded loading/error/empty states with icons + better layout
-- `src/lib/ai/claude.ts` — Added ModelTier system (fast/default/best), Haiku for live draft
-- `src/app/api/draft/recommend/route.ts` — Switched to fast tier (Haiku), reduced max_tokens to 384
-- `src/lib/draft/recommend.ts` — Added 30s client-side cache, reduced payload (12 players, 3 recent), clearRecommendationCache() export
-- `src/app/(app)/draft/live/client.tsx` — Wired cache invalidation on strategy swap
+- `src/lib/draft/keepers.ts` — Full rewrite from placeholder: types, validation, state integration, value analysis
+- `src/lib/draft/state.ts` — Added `keepers` field to DraftState, `is_keeper` to DraftPick, keepers in getDraftedPlayerNames
+- `src/lib/supabase/database.types.ts` — Added `keepers` array to DraftSession type
+- `src/app/api/draft/sessions/route.ts` — Accept keepers in POST body, store in session
+- `src/app/api/leagues/route.ts` — Return keeper_enabled + keeper_settings in select
+- `src/app/(app)/draft/setup/client.tsx` — Full keeper entry UI: add/remove/edit keepers, validation, budget impact
+- `src/hooks/use-draft-state.ts` — Apply keepers on init + on undo rebuild
+- `src/components/draft/my-roster.tsx` — Keeper badges, separate keeper count, grade excludes keepers
+- `src/components/draft/snake-advisor.tsx` — FF-048 keeper value display section
 
 ## Next Up
-- Phase 4 COMPLETE
-- Remaining backlog: FF-028 (Refresh action), FF-029 (Keeper integration) — both deferred/optional
+- FF-028: Refresh action (last backlog item)
+- Deploy to Vercel
+- End-to-end testing with real data
 
 ## Architecture Notes
 - shadcn/ui v4 uses base-ui (not Radix) — no `asChild` prop on Button/TooltipTrigger
@@ -54,6 +44,10 @@
 - Dark mode is default (class="dark" on html element)
 - Draft state is immutable — `applyPick()` returns new state, enables undo
 - Session picks persist to Supabase via PATCH /api/draft/sessions/[id]
+- Keepers stored in session.keepers jsonb, applied to state at init via `applyKeepersToState()`
+- Keepers have negative pick_numbers to distinguish from real draft picks
+- Keeper picks are excluded from draft grading (only real picks are graded)
+- `getDraftedPlayerNames()` includes both real picks AND keeper player names
 - Explainability engine uses `calculateScarcity()` shared between scarcity tracker and "Why?" reasoning
 - Auction advisor uses analyzeBudgetStrategy() for pace tracking, getPositionUrgencyWarnings() for scarcity alerts
 - LLM recommendations via /api/draft/recommend — sends top 15 available players + context, gets back 3 targets (~500 tokens)

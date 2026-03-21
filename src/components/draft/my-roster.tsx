@@ -167,11 +167,16 @@ export function MyRoster({ state, managerName, rosterSlots, strategy }: MyRoster
   const manager = state.managers[managerName]
   if (!manager) return null
 
+  // Combine keeper picks + draft picks for display
   const myPicks = manager.picks
 
+  // Only grade non-keeper picks (keepers are pre-determined)
+  const draftPicks = myPicks.filter(p => !p.is_keeper)
+  const keeperPicks = myPicks.filter(p => p.is_keeper)
+
   const grade = useMemo(() =>
-    gradeRoster(myPicks, rosterSlots, strategy, state.format),
-    [myPicks, rosterSlots, strategy, state.format],
+    gradeRoster(draftPicks, rosterSlots, strategy, state.format),
+    [draftPicks, rosterSlots, strategy, state.format],
   )
 
   // Group picks by position for roster view
@@ -207,6 +212,11 @@ export function MyRoster({ state, managerName, rosterSlots, strategy }: MyRoster
           <span className="flex items-center gap-2">
             <User className="h-3.5 w-3.5" />
             My Roster ({myPicks.length}/{totalSlots})
+            {keeperPicks.length > 0 && (
+              <Badge variant="outline" className="text-[9px] px-1 py-0 ml-1 border-amber-500/40 text-amber-400 font-normal">
+                {keeperPicks.length} kept
+              </Badge>
+            )}
           </span>
           {myPicks.length > 0 && (
             <span className={`text-lg font-bold ${gradeColor}`}>
@@ -251,7 +261,14 @@ export function MyRoster({ state, managerName, rosterSlots, strategy }: MyRoster
                     key={pick.pick_number}
                     className="flex items-center justify-between py-0.5 px-1.5 text-xs hover:bg-muted/30 rounded"
                   >
-                    <span className="font-medium truncate">{pick.player_name}</span>
+                    <span className="font-medium truncate flex items-center gap-1">
+                      {pick.player_name}
+                      {pick.is_keeper && (
+                        <Badge variant="outline" className="text-[8px] px-1 py-0 border-amber-500/40 text-amber-400">
+                          K
+                        </Badge>
+                      )}
+                    </span>
                     <span className="text-muted-foreground font-mono text-[10px] shrink-0">
                       {state.format === 'auction' && pick.price != null ? `$${pick.price}` : ''}
                       {state.format === 'snake' && pick.round ? `Rd ${pick.round}` : ''}

@@ -73,7 +73,7 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 - [ ] FF-028: "Refresh" action — re-pull all data sources, re-run LLM analysis with same strategy, save as new run
 
 ### Keeper Support
-- [ ] FF-029: Keeper integration — mark kept players + their costs/rounds, remove from pool, adjust remaining values
+- [x] FF-029: Keeper integration — mark kept players + their costs/rounds, remove from pool, adjust remaining values
 
 ---
 

@@ -27,7 +27,7 @@ export async function GET() {
 
     let query = supabase
       .from('leagues')
-      .select('id, name, format, team_count, platform, scoring_format, budget, is_active')
+      .select('id, name, format, team_count, platform, scoring_format, budget, is_active, keeper_enabled, keeper_settings')
       .order('updated_at', { ascending: false })
 
     // In dev mode, filter by dev user

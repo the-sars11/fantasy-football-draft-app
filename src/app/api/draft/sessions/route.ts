@@ -23,6 +23,13 @@ function getUserId(): string {
   throw new Error('Non-dev auth not implemented in this route yet')
 }
 
+interface KeeperInput {
+  player_name: string
+  position: string
+  manager: string
+  cost: number
+}
+
 interface CreateSessionBody {
   league_id: string
   format: DraftFormat
@@ -32,6 +39,7 @@ interface CreateSessionBody {
     budget?: number
     draft_position?: number
   }>
+  keepers?: KeeperInput[]
 }
 
 export async function POST(request: NextRequest) {
@@ -99,6 +107,14 @@ export async function POST(request: NextRequest) {
 
     const status: DraftStatus = 'setup'
 
+    // Validate and normalize keepers
+    const keepers = (body.keepers ?? []).map(k => ({
+      player_name: k.player_name.trim(),
+      position: k.position.toUpperCase(),
+      manager: k.manager.trim(),
+      cost: k.cost,
+    }))
+
     const { data, error } = await supabase
       .from('draft_sessions')
       .insert({
@@ -110,8 +126,9 @@ export async function POST(request: NextRequest) {
         managers,
         picks: [],
         recommendations: [],
+        keepers,
       })
-      .select('id, status, format, managers, sheet_url, created_at')
+      .select('id, status, format, managers, sheet_url, keepers, created_at')
       .single()
 
     if (error) {

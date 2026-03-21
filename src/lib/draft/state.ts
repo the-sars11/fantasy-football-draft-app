@@ -8,6 +8,7 @@
 
 import type { DraftFormat, Position, RosterSlots } from '@/lib/supabase/database.types'
 import type { SheetRow } from '@/lib/sheets'
+import type { KeeperAssignment } from './keepers'
 
 // --- Types ---
 
@@ -18,6 +19,7 @@ export interface DraftPick {
   manager: string
   price?: number   // auction
   round?: number   // snake
+  is_keeper?: boolean // true if this pick was a pre-draft keeper
 }
 
 export interface ManagerState {
@@ -39,6 +41,8 @@ export interface DraftState {
   managers: Record<string, ManagerState>
   manager_order: string[]  // ordered list of manager names
   roster_slots: RosterSlots
+  // Keeper support (FF-029)
+  keepers: KeeperAssignment[]
   // Snake-specific
   current_round?: number
   current_pick_in_round?: number
@@ -79,6 +83,7 @@ export function createInitialState(
     managers: managerMap,
     manager_order: managerOrder,
     roster_slots: rosterSlots,
+    keepers: [],
     current_round: format === 'snake' ? 1 : undefined,
     current_pick_in_round: format === 'snake' ? 1 : undefined,
     current_manager: format === 'snake' ? managerOrder[0] : undefined,
@@ -218,9 +223,15 @@ export function getPositionNeeds(state: DraftState, managerName: string): Record
 
 /**
  * Get list of all drafted player names (for filtering available pool).
+ * Includes keeper players.
  */
 export function getDraftedPlayerNames(state: DraftState): Set<string> {
-  return new Set(state.picks.map(p => p.player_name.toLowerCase()))
+  const names = new Set(state.picks.map(p => p.player_name.toLowerCase()))
+  // Also include keepers (they're on rosters but not in the picks array)
+  for (const k of state.keepers) {
+    names.add(k.player_name.toLowerCase())
+  }
+  return names
 }
 
 /**

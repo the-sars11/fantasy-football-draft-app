@@ -6,9 +6,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Users, FileSpreadsheet, Plus, Trash2, ArrowRight, Loader2 } from 'lucide-react'
-import type { DraftFormat } from '@/lib/supabase/database.types'
+import { Users, FileSpreadsheet, Plus, Trash2, ArrowRight, Loader2, Lock } from 'lucide-react'
+import type { DraftFormat, Position } from '@/lib/supabase/database.types'
+
+const POSITIONS: Position[] = ['QB', 'RB', 'WR', 'TE', 'K', 'DST']
 
 interface LeagueSummary {
   id: string
@@ -18,12 +21,24 @@ interface LeagueSummary {
   platform: string
   scoring_format: string
   budget: number | null
+  keeper_enabled: boolean
+  keeper_settings: {
+    max_keepers: number
+    cost_type: 'round' | 'auction_price'
+  } | null
 }
 
 interface Manager {
   name: string
   budget?: number
   draft_position?: number
+}
+
+interface KeeperEntry {
+  player_name: string
+  position: Position
+  manager: string
+  cost: number
 }
 
 export function DraftSetupClient() {
@@ -41,12 +56,18 @@ export function DraftSetupClient() {
     { name: '' },
   ])
 
+  // Keeper entry (FF-029)
+  const [keepers, setKeepers] = useState<KeeperEntry[]>([])
+
   // Sheet URL
   const [sheetUrl, setSheetUrl] = useState('')
 
   // Submission
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  const isKeeperLeague = selectedLeague?.keeper_enabled ?? false
+  const maxKeepers = selectedLeague?.keeper_settings?.max_keepers ?? 3
 
   // Populate managers from a league object
   const populateManagers = useCallback((league: LeagueSummary) => {
@@ -57,6 +78,7 @@ export function DraftSetupClient() {
       draft_position: league.format === 'snake' ? i + 1 : undefined,
     }))
     setManagers(newManagers)
+    setKeepers([]) // Reset keepers when league changes
   }, [])
 
   // Load leagues on mount
@@ -67,7 +89,6 @@ export function DraftSetupClient() {
         const data = await res.json()
         if (data.leagues) {
           setLeagues(data.leagues)
-          // Auto-select if only one league
           if (data.leagues.length === 1) {
             setSelectedLeagueId(data.leagues[0].id)
             populateManagers(data.leagues[0])
@@ -113,7 +134,42 @@ export function DraftSetupClient() {
 
   const removeManager = (index: number) => {
     if (managers.length <= 2) return
+    const removedName = managers[index].name
     setManagers(prev => prev.filter((_, i) => i !== index))
+    // Remove keepers assigned to removed manager
+    setKeepers(prev => prev.filter(k => k.manager !== removedName))
+  }
+
+  // --- Keeper management (FF-029) ---
+
+  const addKeeper = () => {
+    const defaultManager = managers[0]?.name ?? ''
+    setKeepers(prev => [
+      ...prev,
+      {
+        player_name: '',
+        position: 'RB',
+        manager: defaultManager,
+        cost: selectedLeague?.format === 'auction' ? 10 : 5, // sensible defaults
+      },
+    ])
+  }
+
+  const updateKeeper = (index: number, field: keyof KeeperEntry, value: string | number) => {
+    setKeepers(prev => {
+      const updated = [...prev]
+      updated[index] = { ...updated[index], [field]: value }
+      return updated
+    })
+  }
+
+  const removeKeeper = (index: number) => {
+    setKeepers(prev => prev.filter((_, i) => i !== index))
+  }
+
+  // Count keepers per manager for validation
+  const keepersPerManager = (managerName: string): number => {
+    return keepers.filter(k => k.manager === managerName).length
   }
 
   const handleSubmit = async () => {
@@ -136,6 +192,30 @@ export function DraftSetupClient() {
       return
     }
 
+    // Validate keepers
+    if (keepers.length > 0) {
+      const emptyKeepers = keepers.filter(k => !k.player_name.trim())
+      if (emptyKeepers.length > 0) {
+        setError('All keepers must have a player name')
+        return
+      }
+
+      // Check max keepers per manager
+      for (const m of managers) {
+        if (keepersPerManager(m.name) > maxKeepers) {
+          setError(`${m.name} has more than ${maxKeepers} keeper(s)`)
+          return
+        }
+      }
+
+      // Check duplicate player names
+      const keeperNames = keepers.map(k => k.player_name.trim().toLowerCase())
+      if (new Set(keeperNames).size !== keeperNames.length) {
+        setError('Duplicate keeper player detected')
+        return
+      }
+    }
+
     setSubmitting(true)
     try {
       const res = await fetch('/api/draft/sessions', {
@@ -150,6 +230,14 @@ export function DraftSetupClient() {
             budget: m.budget,
             draft_position: m.draft_position,
           })),
+          keepers: keepers.length > 0
+            ? keepers.map(k => ({
+                player_name: k.player_name.trim(),
+                position: k.position,
+                manager: k.manager,
+                cost: k.cost,
+              }))
+            : undefined,
         }),
       })
 
@@ -159,10 +247,9 @@ export function DraftSetupClient() {
         return
       }
 
-      // Navigate to the live draft page with session ID
       router.push(`/draft/live?session=${data.session.id}`)
     } catch {
-      setError('Network error — could not create session')
+      setError('Network error -- could not create session')
     } finally {
       setSubmitting(false)
     }
@@ -192,6 +279,9 @@ export function DraftSetupClient() {
     )
   }
 
+  const managerNames = managers.map(m => m.name).filter(Boolean)
+  const isAuction = selectedLeague?.format === 'auction'
+
   return (
     <div className="space-y-6 max-w-2xl">
       {/* League Selection */}
@@ -208,7 +298,8 @@ export function DraftSetupClient() {
             <SelectContent>
               {leagues.map(league => (
                 <SelectItem key={league.id} value={league.id}>
-                  {league.name} — {league.format} / {league.scoring_format} / {league.team_count} teams
+                  {league.name} -- {league.format} / {league.scoring_format} / {league.team_count} teams
+                  {league.keeper_enabled && ' (keeper)'}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -226,7 +317,7 @@ export function DraftSetupClient() {
                 Managers ({managers.length})
               </CardTitle>
               <CardDescription>
-                {selectedLeague.format === 'auction'
+                {isAuction
                   ? 'Enter each manager name and starting budget'
                   : 'Enter each manager name and draft position'}
               </CardDescription>
@@ -243,7 +334,7 @@ export function DraftSetupClient() {
                     onChange={e => updateManager(i, 'name', e.target.value)}
                     className="flex-1"
                   />
-                  {selectedLeague.format === 'auction' && (
+                  {isAuction && (
                     <div className="flex items-center gap-1">
                       <Label className="text-xs text-muted-foreground">$</Label>
                       <Input
@@ -254,7 +345,7 @@ export function DraftSetupClient() {
                       />
                     </div>
                   )}
-                  {selectedLeague.format === 'snake' && (
+                  {!isAuction && (
                     <div className="flex items-center gap-1">
                       <Label className="text-xs text-muted-foreground">Pos</Label>
                       <Input
@@ -283,6 +374,128 @@ export function DraftSetupClient() {
               </Button>
             </CardContent>
           </Card>
+
+          {/* Keeper Assignments (FF-029) — only for keeper leagues */}
+          {isKeeperLeague && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <Lock className="h-5 w-5" />
+                  Keepers
+                  <Badge variant="outline" className="text-[10px] font-normal">
+                    max {maxKeepers}/manager
+                  </Badge>
+                </CardTitle>
+                <CardDescription>
+                  {isAuction
+                    ? 'Mark kept players with their auction price. Budget will be reduced accordingly.'
+                    : 'Mark kept players with their keeper round. Those rounds will be pre-filled.'}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {keepers.length === 0 && (
+                  <p className="text-xs text-muted-foreground py-2 text-center">
+                    No keepers added yet. Click below to add keeper assignments.
+                  </p>
+                )}
+
+                {keepers.map((keeper, i) => (
+                  <div key={i} className="rounded-md border border-border p-3 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Input
+                        placeholder="Player name"
+                        value={keeper.player_name}
+                        onChange={e => updateKeeper(i, 'player_name', e.target.value)}
+                        className="flex-1"
+                      />
+                      <Select
+                        value={keeper.position}
+                        onValueChange={v => { if (v) updateKeeper(i, 'position', v) }}
+                      >
+                        <SelectTrigger className="w-20">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {POSITIONS.map(pos => (
+                            <SelectItem key={pos} value={pos}>{pos}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => removeKeeper(i)}
+                        className="shrink-0"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2 flex-1">
+                        <Label className="text-xs text-muted-foreground whitespace-nowrap">
+                          Manager
+                        </Label>
+                        <Select
+                          value={keeper.manager}
+                          onValueChange={v => { if (v) updateKeeper(i, 'manager', v) }}
+                        >
+                          <SelectTrigger className="flex-1">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {managerNames.map(name => (
+                              <SelectItem key={name} value={name}>
+                                {name}
+                                {keepersPerManager(name) >= maxKeepers && ' (full)'}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Label className="text-xs text-muted-foreground">
+                          {isAuction ? '$' : 'Rd'}
+                        </Label>
+                        <Input
+                          type="number"
+                          min={1}
+                          value={keeper.cost}
+                          onChange={e => updateKeeper(i, 'cost', parseInt(e.target.value, 10) || 1)}
+                          className="w-16"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+
+                <Button variant="outline" size="sm" onClick={addKeeper} className="mt-2">
+                  <Plus className="h-4 w-4 mr-1" />
+                  Add Keeper
+                </Button>
+
+                {/* Summary of keeper budget impact */}
+                {isAuction && keepers.length > 0 && (
+                  <div className="rounded-md bg-muted/30 px-3 py-2 text-xs space-y-1 mt-3">
+                    <span className="font-medium">Budget Impact</span>
+                    {managers.filter(m => m.name.trim()).map(m => {
+                      const mKeepers = keepers.filter(k => k.manager === m.name)
+                      if (mKeepers.length === 0) return null
+                      const totalCost = mKeepers.reduce((sum, k) => sum + k.cost, 0)
+                      const remaining = (m.budget ?? 200) - totalCost
+                      return (
+                        <div key={m.name} className="flex justify-between text-muted-foreground">
+                          <span>{m.name}: {mKeepers.length} keeper(s) = ${totalCost}</span>
+                          <span className={remaining < 0 ? 'text-destructive font-semibold' : ''}>
+                            ${remaining} remaining
+                          </span>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
 
           {/* Google Sheets Connection */}
           <Card>

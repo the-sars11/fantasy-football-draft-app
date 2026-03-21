@@ -103,6 +103,12 @@ export interface DraftSession {
     round?: number
     pick_number: number
   }>
+  keepers: Array<{
+    player_name: string
+    position: string
+    manager: string
+    cost: number
+  }>
   recommendations: Array<Record<string, unknown>>
   created_at: string
   updated_at: string

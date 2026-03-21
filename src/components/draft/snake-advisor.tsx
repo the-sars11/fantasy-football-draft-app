@@ -33,6 +33,7 @@ import {
   type TradeSuggestion,
 } from '@/lib/draft/snake-advisor'
 import { fetchRecommendation, type LLMRecommendation } from '@/lib/draft/recommend'
+import { getManagerKeepers } from '@/lib/draft/keepers'
 import type { DraftState } from '@/lib/draft/state'
 import type { ScoredPlayer } from '@/lib/research/strategy/scoring'
 import type { Strategy as DbStrategy } from '@/lib/supabase/database.types'
@@ -141,6 +142,35 @@ export function SnakeAdvisor({
         {!posInfo.isMyPick && posInfo.managersPickingBefore.length > 0 && (
           <div className="text-[10px] text-muted-foreground">
             Before you: {posInfo.managersPickingBefore.join(', ')}
+          </div>
+        )}
+
+        {/* FF-048: Keeper value display */}
+        {state.keepers.length > 0 && (
+          <div className="space-y-1">
+            <span className="text-xs font-medium flex items-center gap-1">
+              <CircleDot className="h-3 w-3 text-amber-400" />
+              Keepers ({state.keepers.length})
+            </span>
+            <div className="space-y-0.5">
+              {getManagerKeepers(state.keepers, managerName).map(k => (
+                <div
+                  key={k.player_name}
+                  className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-amber-500/5 border border-amber-500/20 text-[11px]"
+                >
+                  <Badge variant="outline" className={`text-[9px] px-1 py-0 ${posColors[k.position] ?? ''}`}>
+                    {k.position}
+                  </Badge>
+                  <span className="font-medium truncate flex-1">{k.player_name}</span>
+                  <span className="text-amber-400 font-mono">Rd {k.cost}</span>
+                </div>
+              ))}
+              {getManagerKeepers(state.keepers, managerName).length === 0 && (
+                <p className="text-[10px] text-muted-foreground">
+                  {state.keepers.filter(k => k.manager !== managerName).length} keepers assigned to other managers
+                </p>
+              )}
+            </div>
           </div>
         )}
 
