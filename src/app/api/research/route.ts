@@ -116,7 +116,7 @@ export async function POST(req: NextRequest) {
 
     const activeStrategy = (strategyData as Strategy) ?? null
 
-    // Build pipeline config (FF-029: include keeper settings)
+    // Build pipeline config (FF-029: keepers, FF-068: scoring settings)
     const config: PipelineConfig = {
       leagueId,
       format: league.format,
@@ -125,6 +125,7 @@ export async function POST(req: NextRequest) {
       budget: league.budget ?? undefined,
       skipRefresh,
       keeperSettings: league.keeper_enabled ? league.keeper_settings : null,
+      scoringSettings: league.scoring_settings ?? null,
     }
 
     // Create a pending research_run row before running

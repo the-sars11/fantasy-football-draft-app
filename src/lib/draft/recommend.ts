@@ -12,7 +12,7 @@
 
 import type { DraftState } from './state'
 import type { ScoredPlayer } from '@/lib/research/strategy/scoring'
-import type { Strategy as DbStrategy } from '@/lib/supabase/database.types'
+import type { Strategy as DbStrategy, ScoringSettings } from '@/lib/supabase/database.types'
 
 export interface LLMTarget {
   name: string
@@ -48,6 +48,7 @@ export async function fetchRecommendation(
   scoredPlayers: ScoredPlayer[],
   draftedNames: Set<string>,
   strategy: DbStrategy | null,
+  scoringSettings?: ScoringSettings | null,
 ): Promise<LLMRecommendation> {
   const mgr = state.managers[managerName]
   if (!mgr) throw new Error(`Manager "${managerName}" not found`)
@@ -110,6 +111,7 @@ export async function fetchRecommendation(
       currentRound: state.current_round,
       strategyName: strategy?.name,
       strategyArchetype: strategy?.archetype,
+      scoringSettings: scoringSettings ?? null,
       topAvailable: available,
       recentPicks,
     }),

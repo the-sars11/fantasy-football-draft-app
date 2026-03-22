@@ -15,7 +15,7 @@ import { upsertPlayerCache, readPlayerCache } from './cache'
 import { scorePlayersWithStrategy, type ScoredPlayer } from './strategy/scoring'
 import { cacheToPlayers } from '@/lib/players/convert'
 import type { Player, DraftFormat, ScoringFormat } from '@/lib/players/types'
-import type { Strategy, KeeperSettings } from '@/lib/supabase/database.types'
+import type { Strategy, KeeperSettings, ScoringSettings } from '@/lib/supabase/database.types'
 import type { SupabaseClient } from '@supabase/supabase-js'
 
 // --- Pipeline Configuration ---
@@ -32,6 +32,8 @@ export interface PipelineConfig {
   skipRefresh?: boolean
   /** Keeper settings — players to exclude from pool and costs to deduct (FF-029) */
   keeperSettings?: KeeperSettings | null
+  /** FF-068: Custom scoring settings for bonus-aware LLM analysis */
+  scoringSettings?: ScoringSettings | null
 }
 
 // --- Pipeline Step Results ---

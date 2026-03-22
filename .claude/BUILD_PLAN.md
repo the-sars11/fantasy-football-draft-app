@@ -132,8 +132,8 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 ## Phase 5: Scoring Intelligence + Infrastructure (Sprint 8)
 
 ### Custom Scoring Integration
-- [ ] FF-067: Supabase migration — add `scoring_settings` jsonb column to `leagues` table
-- [ ] FF-068: Scoring-aware LLM analysis — feed custom scoring settings into all analysis prompts (bonus scoring changes player valuations: 40+/50+ yd TD bonuses boost deep-threat WRs & rushing QBs, yardage bonuses boost bellcow RBs, etc.)
+- [x] FF-067: Supabase migration — add `scoring_settings` jsonb column to `leagues` table
+- [x] FF-068: Scoring-aware LLM analysis — feed custom scoring settings into all analysis prompts (bonus scoring changes player valuations: 40+/50+ yd TD bonuses boost deep-threat WRs & rushing QBs, yardage bonuses boost bellcow RBs, etc.)
 - [ ] FF-069: Tyler's league setup — enter his exact scoring settings + keeper rules/costs when provided
 
 ### Deploy + Validate

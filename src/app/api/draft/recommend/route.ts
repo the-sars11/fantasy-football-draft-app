@@ -8,6 +8,8 @@
 
 import { NextResponse } from 'next/server'
 import { askClaudeJson } from '@/lib/ai/claude'
+import { formatScoringBonuses } from '@/lib/research/analyze'
+import type { ScoringSettings } from '@/lib/supabase/database.types'
 
 interface RecommendRequest {
   managerName: string
@@ -20,6 +22,8 @@ interface RecommendRequest {
   currentRound?: number
   strategyName?: string
   strategyArchetype?: string
+  /** FF-068: Custom scoring settings for bonus-aware recommendations */
+  scoringSettings?: ScoringSettings | null
   // Top available players (pre-scored, send only top ~15 to keep tokens low)
   topAvailable: Array<{
     name: string
@@ -63,9 +67,13 @@ export async function POST(request: Request) {
 
     const isAuction = format === 'auction'
 
+    // FF-068: Build scoring bonus context for the LLM
+    const bonusContext = formatScoringBonuses(body.scoringSettings)
+
     const system = `You are a fantasy football draft advisor. Return JSON only.
 Analyze the draft situation and recommend the top 3 players to target right now.
 Consider: roster needs, strategy fit, value relative to consensus, scarcity, and recent draft trends.
+${bonusContext ? `\nIMPORTANT — This league has custom scoring bonuses that affect player valuations:\n${bonusContext}\nFactor these bonuses into your recommendations. Players who benefit from these bonuses should be valued higher.` : ''}
 ${isAuction ? 'For auction: recommend a max bid for each target.' : 'For snake: recommend draft priority order.'}
 Be concise. Each reasoning should be 1-2 sentences max.`
 

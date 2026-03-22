@@ -10,7 +10,7 @@
 
 import { askClaudeJson } from '@/lib/ai/claude'
 import type { Player, DraftFormat, ScoringFormat } from '@/lib/players/types'
-import type { Strategy } from '@/lib/supabase/database.types'
+import type { Strategy, ScoringSettings } from '@/lib/supabase/database.types'
 import type { ScoredPlayer } from './strategy/scoring'
 
 // --- Shared Types ---
@@ -44,6 +44,7 @@ function formatLeagueContext(
   scoringFormat: ScoringFormat,
   teamCount: number,
   budget?: number,
+  scoringSettings?: ScoringSettings | null,
 ): string {
   const scoring = scoringFormat === 'ppr'
     ? 'Full PPR'
@@ -56,7 +57,61 @@ function formatLeagueContext(
     `Teams: ${teamCount}`,
     `Scoring: ${scoring}`,
   ]
+
+  const bonusContext = formatScoringBonuses(scoringSettings)
+  if (bonusContext) {
+    lines.push('', '### Scoring Bonuses (affect player valuations)', bonusContext)
+  }
+
   return lines.join('\n')
+}
+
+/**
+ * FF-068: Generate human-readable scoring context for LLM prompts.
+ * Only includes non-standard settings that change player valuations.
+ * Returns null if no custom/bonus settings exist.
+ * Exported so the live draft recommend route can reuse it.
+ */
+export function formatScoringBonuses(settings?: ScoringSettings | null): string | null {
+  if (!settings) return null
+
+  const impacts: string[] = []
+
+  // PPR value
+  if (settings.rec > 0) {
+    impacts.push(`Reception bonus: ${settings.rec} pts/rec (${settings.rec >= 1 ? 'full' : 'half'} PPR → boosts high-target WRs and pass-catching RBs)`)
+  }
+
+  // Passing bonuses
+  if (settings.pass_td_40 > 0) impacts.push(`40+ yd TD pass bonus: +${settings.pass_td_40} pt (boosts deep-ball QBs like Mahomes, Stroud)`)
+  if (settings.pass_td_50 > 0) impacts.push(`50+ yd TD pass bonus: +${settings.pass_td_50} pts (stacks with 40+ bonus for deep threats)`)
+  if (settings.pass_300 > 0) impacts.push(`300-399 yd passing game bonus: +${settings.pass_300} pts (rewards high-volume QBs)`)
+  if (settings.pass_400 > 0) impacts.push(`400+ yd passing game bonus: +${settings.pass_400} pts (elite QB upside premium)`)
+
+  // Rushing bonuses
+  if (settings.rush_td_40 > 0) impacts.push(`40+ yd TD rush bonus: +${settings.rush_td_40} pt (boosts explosive RBs and rushing QBs)`)
+  if (settings.rush_td_50 > 0) impacts.push(`50+ yd TD rush bonus: +${settings.rush_td_50} pts (big-play RB premium)`)
+  if (settings.rush_100 > 0) impacts.push(`100-199 yd rushing game bonus: +${settings.rush_100} pts (rewards bellcow RBs with heavy workloads)`)
+  if (settings.rush_200 > 0) impacts.push(`200+ yd rushing game bonus: +${settings.rush_200} pts (elite rushing game upside)`)
+
+  // Receiving bonuses
+  if (settings.rec_td_40 > 0) impacts.push(`40+ yd TD rec bonus: +${settings.rec_td_40} pt (boosts deep-threat WRs and speedy TEs)`)
+  if (settings.rec_td_50 > 0) impacts.push(`50+ yd TD rec bonus: +${settings.rec_td_50} pts (premium on speed/YAC ability)`)
+  if (settings.rec_100 > 0) impacts.push(`100-199 yd receiving game bonus: +${settings.rec_100} pts (rewards WR1 target volume)`)
+  if (settings.rec_200 > 0) impacts.push(`200+ yd receiving game bonus: +${settings.rec_200} pts (elite WR ceiling premium)`)
+
+  // Non-standard base scoring
+  if (settings.pass_td !== 4) impacts.push(`Passing TD: ${settings.pass_td} pts (${settings.pass_td > 4 ? 'QB premium — draft QBs earlier' : 'QB discount — wait on QBs'})`)
+  if (settings.pass_int !== -2) impacts.push(`Interception: ${settings.pass_int} pts (${settings.pass_int < -2 ? 'harsh — favor safe QBs' : 'lenient — gunslinger QBs less penalized'})`)
+  if (settings.fumble_lost !== -2) impacts.push(`Fumble lost: ${settings.fumble_lost} pts (${settings.fumble_lost < -2 ? 'harsh — avoid fumble-prone players' : 'lenient'})`)
+
+  // D/ST deviations from standard
+  if (settings.dst_int > 2) impacts.push(`D/ST interception: ${settings.dst_int} pts (premium — favor ballhawk defenses)`)
+  if (settings.dst_fr > 2) impacts.push(`D/ST fumble recovery: ${settings.dst_fr} pts (premium — favor aggressive defenses)`)
+
+  if (impacts.length === 0) return null
+
+  return impacts.map(i => `- ${i}`).join('\n')
 }
 
 function formatStrategyContext(strategy: Strategy): string {
@@ -129,6 +184,7 @@ export async function analyzePositionalRankings(
   scoringFormat: ScoringFormat,
   teamCount: number,
   budget?: number,
+  scoringSettings?: ScoringSettings | null,
 ): Promise<PositionalRankingsResult> {
   const positions = ['QB', 'RB', 'WR', 'TE', 'K', 'DEF']
 
@@ -142,7 +198,7 @@ export async function analyzePositionalRankings(
   const valueLabel = format === 'auction' ? 'strategy-adjusted auction value ($)' : 'target draft round'
 
   const prompt = `## League
-${formatLeagueContext(format, scoringFormat, teamCount, budget)}
+${formatLeagueContext(format, scoringFormat, teamCount, budget, scoringSettings)}
 
 ## Active Strategy
 ${formatStrategyContext(strategy)}
@@ -224,6 +280,7 @@ export async function analyzeValueAdjustments(
   scoringFormat: ScoringFormat,
   teamCount: number,
   budget?: number,
+  scoringSettings?: ScoringSettings | null,
 ): Promise<ValueAdjustmentsResult> {
   const top60 = scoredPlayers.slice(0, 60)
 
@@ -241,7 +298,7 @@ export async function analyzeValueAdjustments(
   }).join('\n')
 
   const prompt = `## League
-${formatLeagueContext(format, scoringFormat, teamCount, budget)}
+${formatLeagueContext(format, scoringFormat, teamCount, budget, scoringSettings)}
 
 ## Active Strategy
 ${formatStrategyContext(strategy)}
@@ -326,6 +383,7 @@ export async function analyzeTargetsAndAvoids(
   scoringFormat: ScoringFormat,
   teamCount: number,
   budget?: number,
+  scoringSettings?: ScoringSettings | null,
 ): Promise<TargetAvoidResult> {
   // Send top 80 players for analysis
   const top80 = scoredPlayers.slice(0, 80)
@@ -341,7 +399,7 @@ export async function analyzeTargetsAndAvoids(
   const valueLabel = format === 'auction' ? 'target bid ($)' : 'target round'
 
   const prompt = `## League
-${formatLeagueContext(format, scoringFormat, teamCount, budget)}
+${formatLeagueContext(format, scoringFormat, teamCount, budget, scoringSettings)}
 
 ## Active Strategy
 ${formatStrategyContext(strategy)}
@@ -421,6 +479,7 @@ export async function analyzeTiers(
   scoringFormat: ScoringFormat,
   teamCount: number,
   budget?: number,
+  scoringSettings?: ScoringSettings | null,
 ): Promise<TierAnalysisResult> {
   const positions = ['QB', 'RB', 'WR', 'TE']
   const positionData = positions.map((pos) => {
@@ -429,7 +488,7 @@ export async function analyzeTiers(
   }).join('\n\n')
 
   const prompt = `## League
-${formatLeagueContext(format, scoringFormat, teamCount, budget)}
+${formatLeagueContext(format, scoringFormat, teamCount, budget, scoringSettings)}
 
 ## Active Strategy
 ${formatStrategyContext(strategy)}
@@ -510,6 +569,7 @@ export async function analyzeSleeperPicks(
   scoringFormat: ScoringFormat,
   teamCount: number,
   budget?: number,
+  scoringSettings?: ScoringSettings | null,
 ): Promise<SleeperPicksResult> {
   // Focus on mid-to-late range players (ranks 30-150) — that's where sleepers live
   const candidates = scoredPlayers.filter((sp) => {
@@ -527,7 +587,7 @@ export async function analyzeSleeperPicks(
   }).join('\n')
 
   const prompt = `## League
-${formatLeagueContext(format, scoringFormat, teamCount, budget)}
+${formatLeagueContext(format, scoringFormat, teamCount, budget, scoringSettings)}
 
 ## Active Strategy
 ${formatStrategyContext(strategy)}
