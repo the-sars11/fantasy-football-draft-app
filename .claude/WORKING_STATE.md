@@ -36,9 +36,10 @@
 - `src/components/draft/snake-advisor.tsx` — FF-048 keeper value display section
 
 ## Next Up
-- ALL BUILD PLAN ITEMS COMPLETE (FF-001 through FF-055 + FF-028 + FF-029)
-- Deploy to Vercel
-- End-to-end testing with real data
+- Phase 5 (Sprint 8): Scoring intelligence — DB migration for scoring_settings, scoring-aware LLM prompts, deploy to Vercel, e2e testing
+- Phase 6 (Sprints 9-11): Gridiron Lens UI redesign — START with Q&A planning session to align on which UI design elements Joe wants before any code
+- Phase 7 (Sprint 12): Pre-season — Yahoo OAuth, 2025 data pull, draft day prep
+- Tyler's league: waiting on his scoring settings + keeper rules/costs
 
 ## Architecture Notes
 - shadcn/ui v4 uses base-ui (not Radix) — no `asChild` prop on Button/TooltipTrigger
