@@ -5,10 +5,10 @@ import { createLeague, type LeagueFormState } from '@/app/(app)/prep/configure/a
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
-import type { DraftFormat, Position } from '@/lib/supabase/database.types'
-import { Trash2, Plus } from 'lucide-react'
+import type { DraftFormat, Position, ScoringSettings } from '@/lib/supabase/database.types'
+import { Trash2, Plus, ChevronDown, ChevronRight } from 'lucide-react'
+import { getScoringPreset, JOES_ESPN_SCORING, SCORING_FIELDS } from '@/lib/scoring-presets'
 
 interface KeeperEntry {
   player_name: string
@@ -18,13 +18,15 @@ interface KeeperEntry {
 
 const PRESETS = {
   joe: {
-    name: "Joe's ESPN League",
+    name: "Joe's ESPN League (Nasties)",
     platform: 'espn',
     format: 'auction' as DraftFormat,
     team_count: 12,
     budget: 200,
-    scoring_format: 'ppr',
+    scoring_format: 'custom',
     keeper_enabled: false,
+    roster: { qb: 1, rb: 1, wr: 1, te: 1, flex: 3, k: 0, dst: 1, bench: 5, ir: 1 },
+    scoring: JOES_ESPN_SCORING,
   },
   tyler: {
     name: "Tyler's Yahoo League",
@@ -32,8 +34,10 @@ const PRESETS = {
     format: 'snake' as DraftFormat,
     team_count: 12,
     budget: null,
-    scoring_format: 'ppr',
+    scoring_format: 'custom',
     keeper_enabled: true,
+    roster: { qb: 1, rb: 2, wr: 2, te: 1, flex: 1, k: 1, dst: 1, bench: 6, ir: 0 },
+    scoring: null, // Tyler needs to provide his
   },
 }
 
@@ -42,8 +46,11 @@ export function LeagueConfigForm({ userId }: { userId: string }) {
   const [format, setFormat] = useState<DraftFormat>('auction')
   const [keeperEnabled, setKeeperEnabled] = useState(false)
   const [presetApplied, setPresetApplied] = useState<string | null>(null)
+  const [scoringFormat, setScoringFormat] = useState('ppr')
+  const [scoringSettings, setScoringSettings] = useState<ScoringSettings>(() => getScoringPreset('ppr'))
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({})
 
-  // Keeper management (FF-029)
+  // Keeper management
   const [keepers, setKeepers] = useState<KeeperEntry[]>([])
   const [newKeeperName, setNewKeeperName] = useState('')
   const [newKeeperPosition, setNewKeeperPosition] = useState<Position>('RB')
@@ -61,17 +68,37 @@ export function LeagueConfigForm({ userId }: { userId: string }) {
     setKeepers((prev) => prev.filter((_, i) => i !== index))
   }, [])
 
+  const toggleSection = useCallback((section: string) => {
+    setExpandedSections((prev) => ({ ...prev, [section]: !prev[section] }))
+  }, [])
+
+  const updateScoring = useCallback((key: string, value: number) => {
+    setScoringSettings((prev) => ({ ...prev, [key]: value }))
+  }, [])
+
+  function handleScoringFormatChange(newFormat: string) {
+    setScoringFormat(newFormat)
+    if (newFormat !== 'custom') {
+      setScoringSettings(getScoringPreset(newFormat))
+    }
+  }
+
   function applyPreset(key: 'joe' | 'tyler') {
     const preset = PRESETS[key]
     setFormat(preset.format)
     setKeeperEnabled(preset.keeper_enabled)
     setPresetApplied(key)
+    setScoringFormat(preset.scoring_format)
+    if (preset.scoring) {
+      setScoringSettings({ ...preset.scoring })
+      setExpandedSections({})
+    }
 
-    // Fill form fields via DOM (controlled inputs are set via state, uncontrolled via ref)
+    // Fill form fields via DOM
     const form = document.getElementById('league-form') as HTMLFormElement
     if (!form) return
     const setField = (name: string, value: string) => {
-      const el = form.elements.namedItem(name) as HTMLInputElement | null
+      const el = form.elements.namedItem(name) as HTMLInputElement | HTMLSelectElement | null
       if (el) {
         el.value = value
         el.dispatchEvent(new Event('input', { bubbles: true }))
@@ -79,7 +106,12 @@ export function LeagueConfigForm({ userId }: { userId: string }) {
     }
     setField('name', preset.name)
     setField('team_count', String(preset.team_count))
+    setField('platform', preset.platform)
     if (preset.budget) setField('budget', String(preset.budget))
+    // Set roster slots
+    for (const [slotKey, slotVal] of Object.entries(preset.roster)) {
+      setField(`roster_${slotKey}`, String(slotVal))
+    }
   }
 
   if (state.success) {
@@ -111,7 +143,7 @@ export function LeagueConfigForm({ userId }: { userId: string }) {
           onClick={() => applyPreset('joe')}
           type="button"
         >
-          Joe's ESPN (Auction)
+          Joe&apos;s ESPN (Auction)
         </Button>
         <Button
           variant={presetApplied === 'tyler' ? 'default' : 'outline'}
@@ -119,7 +151,7 @@ export function LeagueConfigForm({ userId }: { userId: string }) {
           onClick={() => applyPreset('tyler')}
           type="button"
         >
-          Tyler's Yahoo (Snake/Keeper)
+          Tyler&apos;s Yahoo (Snake/Keeper)
         </Button>
       </div>
 
@@ -130,6 +162,13 @@ export function LeagueConfigForm({ userId }: { userId: string }) {
       )}
 
       <form id="league-form" action={formAction} className="space-y-6">
+        {/* Hidden fields for state-managed values */}
+        <input type="hidden" name="format" value={format} />
+        <input type="hidden" name="scoring_format" value={scoringFormat} />
+        <input type="hidden" name="scoring_settings" value={JSON.stringify(scoringSettings)} />
+        <input type="hidden" name="keeper_enabled" value={String(keeperEnabled)} />
+        <input type="hidden" name="keepers" value={JSON.stringify(keepers)} />
+
         {/* Basic Info */}
         <Card>
           <CardHeader>
@@ -143,11 +182,12 @@ export function LeagueConfigForm({ userId }: { userId: string }) {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium">Platform</label>
+                <label htmlFor="platform" className="text-sm font-medium">Platform</label>
                 <select
+                  id="platform"
                   name="platform"
                   defaultValue="espn"
-                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                  className="flex h-9 w-full rounded-md border border-input bg-card px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                 >
                   <option value="espn">ESPN</option>
                   <option value="yahoo">Yahoo</option>
@@ -159,7 +199,6 @@ export function LeagueConfigForm({ userId }: { userId: string }) {
               <div className="space-y-2">
                 <label className="text-sm font-medium">Draft Format</label>
                 <div className="flex gap-2">
-                  <input type="hidden" name="format" value={format} />
                   <Button
                     type="button"
                     variant={format === 'auction' ? 'default' : 'outline'}
@@ -194,13 +233,14 @@ export function LeagueConfigForm({ userId }: { userId: string }) {
               )}
 
               <div className="space-y-2">
-                <label className="text-sm font-medium">Scoring Format</label>
+                <label htmlFor="scoring_format_select" className="text-sm font-medium">Scoring Format</label>
                 <select
-                  name="scoring_format"
-                  defaultValue="ppr"
-                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                  id="scoring_format_select"
+                  value={scoringFormat}
+                  onChange={(e) => handleScoringFormatChange(e.target.value)}
+                  className="flex h-9 w-full rounded-md border border-input bg-card px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                 >
-                  <option value="standard">Standard</option>
+                  <option value="standard">Standard (Non-PPR)</option>
                   <option value="half_ppr">Half PPR</option>
                   <option value="ppr">Full PPR</option>
                   <option value="custom">Custom</option>
@@ -216,7 +256,7 @@ export function LeagueConfigForm({ userId }: { userId: string }) {
             <CardTitle>Roster Slots</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+            <div className="grid grid-cols-3 gap-4 sm:grid-cols-5">
               {[
                 { key: 'qb', label: 'QB', default: 1 },
                 { key: 'rb', label: 'RB', default: 2 },
@@ -226,6 +266,7 @@ export function LeagueConfigForm({ userId }: { userId: string }) {
                 { key: 'k', label: 'K', default: 1 },
                 { key: 'dst', label: 'D/ST', default: 1 },
                 { key: 'bench', label: 'Bench', default: 6 },
+                { key: 'ir', label: 'IR', default: 0 },
               ].map((slot) => (
                 <div key={slot.key} className="space-y-1">
                   <label htmlFor={`roster_${slot.key}`} className="text-xs font-medium text-muted-foreground">
@@ -246,6 +287,86 @@ export function LeagueConfigForm({ userId }: { userId: string }) {
           </CardContent>
         </Card>
 
+        {/* Custom Scoring Editor */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              Scoring Settings
+              {scoringFormat === 'custom' && <Badge variant="secondary">Custom</Badge>}
+              {scoringFormat !== 'custom' && (
+                <Badge variant="outline" className="text-xs">
+                  {scoringFormat === 'standard' ? 'Standard' : scoringFormat === 'half_ppr' ? 'Half PPR' : 'Full PPR'}
+                </Badge>
+              )}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {scoringFormat !== 'custom' && (
+              <p className="text-sm text-muted-foreground">
+                Using preset values. Switch to &quot;Custom&quot; above to edit individual scoring rules.
+              </p>
+            )}
+
+            {Object.entries(SCORING_FIELDS).map(([section, fields]) => {
+              const sectionLabel = section === 'dst' ? 'D/ST' : section.charAt(0).toUpperCase() + section.slice(1)
+              const isExpanded = expandedSections[section] ?? (scoringFormat === 'custom')
+
+              return (
+                <div key={section} className="border border-border rounded-md overflow-hidden">
+                  <button
+                    type="button"
+                    onClick={() => toggleSection(section)}
+                    className="flex w-full items-center justify-between px-3 py-2 text-sm font-medium hover:bg-muted/50 transition-colors"
+                  >
+                    <span className="flex items-center gap-2">
+                      {sectionLabel}
+                      <span className="text-xs text-muted-foreground font-normal">
+                        {fields.map(f => {
+                          const val = scoringSettings[f.key]
+                          if (val === 0) return null
+                          return `${f.label}: ${val}`
+                        }).filter(Boolean).slice(0, 3).join(', ')}
+                        {fields.filter(f => scoringSettings[f.key] !== 0).length > 3 && '...'}
+                      </span>
+                    </span>
+                    {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                  </button>
+
+                  {isExpanded && (
+                    <div className="px-3 pb-3 pt-1 border-t border-border">
+                      <div className="grid grid-cols-2 gap-x-6 gap-y-2 sm:grid-cols-3 lg:grid-cols-4">
+                        {fields.map((field) => (
+                          <div key={field.key} className="flex items-center justify-between gap-2">
+                            <label className="text-xs text-muted-foreground whitespace-nowrap truncate flex-1" title={field.label}>
+                              {field.label}
+                            </label>
+                            <Input
+                              type="number"
+                              step={'step' in field ? field.step : 1}
+                              value={scoringSettings[field.key]}
+                              onChange={(e) => {
+                                updateScoring(field.key, parseFloat(e.target.value) || 0)
+                                if (scoringFormat !== 'custom') setScoringFormat('custom')
+                              }}
+                              className="h-7 w-20 text-right text-xs tabular-nums"
+                              disabled={scoringFormat !== 'custom'}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                      {fields.some(f => 'hint' in f) && (
+                        <p className="text-xs text-muted-foreground mt-2">
+                          {fields.filter(f => 'hint' in f).map(f => ('hint' in f ? f.hint : '')).join(' | ')}
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </CardContent>
+        </Card>
+
         {/* Keeper Settings */}
         <Card>
           <CardHeader>
@@ -256,7 +377,6 @@ export function LeagueConfigForm({ userId }: { userId: string }) {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center gap-3">
-              <input type="hidden" name="keeper_enabled" value={String(keeperEnabled)} />
               <Button
                 type="button"
                 variant={keeperEnabled ? 'default' : 'outline'}
@@ -280,20 +400,18 @@ export function LeagueConfigForm({ userId }: { userId: string }) {
                     <Input id="max_keepers" name="max_keepers" type="number" min={1} max={10} defaultValue={3} />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-sm font-medium">Keeper Cost Type</label>
+                    <label htmlFor="keeper_cost_type" className="text-sm font-medium">Keeper Cost Type</label>
                     <select
+                      id="keeper_cost_type"
                       name="keeper_cost_type"
                       defaultValue={format === 'auction' ? 'auction_price' : 'round'}
-                      className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                      className="flex h-9 w-full rounded-md border border-input bg-card px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                     >
                       <option value="round">Round (snake)</option>
                       <option value="auction_price">Auction Price</option>
                     </select>
                   </div>
                 </div>
-
-                {/* Hidden input for keepers JSON (FF-029) */}
-                <input type="hidden" name="keepers" value={JSON.stringify(keepers)} />
 
                 {/* Add keeper form */}
                 <div className="space-y-2">
@@ -310,7 +428,7 @@ export function LeagueConfigForm({ userId }: { userId: string }) {
                     <select
                       value={newKeeperPosition}
                       onChange={(e) => setNewKeeperPosition(e.target.value as Position)}
-                      className="flex h-9 w-20 rounded-md border border-input bg-transparent px-2 py-1 text-sm"
+                      className="flex h-9 w-20 rounded-md border border-input bg-card px-2 py-1 text-sm"
                     >
                       <option value="QB">QB</option>
                       <option value="RB">RB</option>

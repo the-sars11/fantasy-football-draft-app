@@ -14,6 +14,47 @@ export interface RosterSlots {
   k: number
   dst: number
   bench: number
+  ir: number
+  [key: string]: number
+}
+
+export interface ScoringSettings {
+  // Passing
+  pass_yds: number       // pts per yard (e.g. 0.04 = 1pt/25yds, ESPN "0.2 per 5yds" = 0.04)
+  pass_td: number
+  pass_int: number       // negative
+  pass_2pt: number
+  pass_td_40: number     // 40+ yd TD bonus
+  pass_td_50: number     // 50+ yd TD bonus
+  pass_300: number       // 300-399 yd game bonus
+  pass_400: number       // 400+ yd game bonus
+  // Rushing
+  rush_yds: number       // pts per yard
+  rush_td: number
+  rush_2pt: number
+  rush_td_40: number
+  rush_td_50: number
+  rush_100: number       // 100-199 yd game bonus
+  rush_200: number       // 200+ yd game bonus
+  // Receiving
+  rec_yds: number        // pts per yard
+  rec: number            // pts per reception (PPR value)
+  rec_td: number
+  rec_2pt: number
+  rec_td_40: number
+  rec_td_50: number
+  rec_100: number        // 100-199 yd game bonus
+  rec_200: number        // 200+ yd game bonus
+  // D/ST
+  dst_sack: number
+  dst_int: number
+  dst_fr: number         // fumble recovery
+  dst_td: number         // any return TD
+  dst_safety: number
+  dst_block: number      // blocked kick
+  // Misc
+  fumble_lost: number    // negative
+  // Allow arbitrary additional keys for platform-specific settings
   [key: string]: number
 }
 
@@ -36,6 +77,7 @@ export interface League {
   team_count: number
   budget: number | null
   scoring_format: ScoringFormat
+  scoring_settings: ScoringSettings | null
   roster_slots: RosterSlots
   keeper_enabled: boolean
   keeper_settings: KeeperSettings | null
@@ -51,6 +93,7 @@ export interface LeagueInsert {
   team_count?: number
   budget?: number | null
   scoring_format?: ScoringFormat
+  scoring_settings?: ScoringSettings | null
   roster_slots?: RosterSlots
   keeper_enabled?: boolean
   keeper_settings?: KeeperSettings | null

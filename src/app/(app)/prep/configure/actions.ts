@@ -3,7 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { requireUser } from '@/lib/supabase/server'
 import { DEV_MODE } from '@/lib/supabase/dev-mode'
-import type { LeagueInsert, KeeperSettings } from '@/lib/supabase/database.types'
+import type { LeagueInsert, KeeperSettings, ScoringSettings } from '@/lib/supabase/database.types'
 
 export type LeagueFormState = {
   error?: string
@@ -25,7 +25,18 @@ export async function createLeague(
   const scoring_format = formData.get('scoring_format') as string
   const keeper_enabled = formData.get('keeper_enabled') === 'true'
 
-  // Parse roster slots
+  // Parse scoring settings
+  let scoring_settings: ScoringSettings | null = null
+  const scoringJson = formData.get('scoring_settings') as string
+  if (scoringJson) {
+    try {
+      scoring_settings = JSON.parse(scoringJson)
+    } catch {
+      // Invalid JSON, will use preset based on scoring_format
+    }
+  }
+
+  // Parse roster slots (now includes IR)
   const roster_slots = {
     qb: parseInt(formData.get('roster_qb') as string, 10) || 1,
     rb: parseInt(formData.get('roster_rb') as string, 10) || 2,
@@ -35,12 +46,12 @@ export async function createLeague(
     k: parseInt(formData.get('roster_k') as string, 10) || 1,
     dst: parseInt(formData.get('roster_dst') as string, 10) || 1,
     bench: parseInt(formData.get('roster_bench') as string, 10) || 6,
+    ir: parseInt(formData.get('roster_ir') as string, 10) || 0,
   }
 
-  // Parse keeper settings if enabled (FF-029)
+  // Parse keeper settings if enabled
   let keeper_settings: KeeperSettings | null = null
   if (keeper_enabled) {
-    // Parse keepers JSON from form
     let keepers: KeeperSettings['keepers'] = []
     const keepersJson = formData.get('keepers') as string
     if (keepersJson) {
@@ -83,6 +94,7 @@ export async function createLeague(
     team_count,
     budget,
     scoring_format: scoring_format as LeagueInsert['scoring_format'],
+    scoring_settings,
     roster_slots,
     keeper_enabled,
     keeper_settings,

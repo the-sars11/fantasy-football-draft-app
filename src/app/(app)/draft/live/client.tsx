@@ -69,7 +69,7 @@ const posColors: Record<string, string> = {
 }
 
 const DEFAULT_ROSTER: RosterSlots = {
-  qb: 1, rb: 2, wr: 2, te: 1, flex: 1, k: 1, dst: 1, bench: 6,
+  qb: 1, rb: 2, wr: 2, te: 1, flex: 1, k: 1, dst: 1, bench: 6, ir: 0,
 }
 
 export function LiveDraftClient() {
