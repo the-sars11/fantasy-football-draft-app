@@ -15,8 +15,8 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient as createServerClient } from '@/lib/supabase/server'
-import { DEV_MODE, DEV_USER } from '@/lib/supabase/dev-mode'
+import { createClient as createServerClient, requireUser } from '@/lib/supabase/server'
+import { DEV_MODE } from '@/lib/supabase/dev-mode'
 import { createClient } from '@supabase/supabase-js'
 import { runResearchPipeline, type PipelineConfig } from '@/lib/research/service'
 import type { Strategy } from '@/lib/supabase/database.types'
@@ -28,12 +28,6 @@ async function getClient() {
     if (url && serviceKey) return createClient(url, serviceKey)
   }
   return createServerClient()
-}
-
-function getUserId(): string {
-  if (DEV_MODE) return DEV_USER.id
-  // In prod, this would come from the auth session
-  throw new Error('Auth not implemented for prod yet')
 }
 
 export async function GET(req: NextRequest) {
@@ -48,13 +42,13 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Database not available' }, { status: 503 })
     }
 
-    const userId = getUserId()
+    const user = await requireUser()
 
     const { data, error } = await supabase
       .from('research_runs')
       .select('id, league_id, strategy_settings, status, error_message, created_at, completed_at')
       .eq('league_id', leagueId)
-      .eq('user_id', userId)
+      .eq('user_id', user.id)
       .order('created_at', { ascending: false })
       .limit(20)
 
@@ -93,7 +87,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Database not available' }, { status: 503 })
     }
 
-    const userId = getUserId()
+    const user = await requireUser()
+    const userId = user.id
 
     // Fetch league config
     const { data: league, error: leagueError } = await supabase

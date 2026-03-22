@@ -5,8 +5,8 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient as createServerClient } from '@/lib/supabase/server'
-import { DEV_MODE, DEV_USER } from '@/lib/supabase/dev-mode'
+import { createClient as createServerClient, requireUser } from '@/lib/supabase/server'
+import { DEV_MODE } from '@/lib/supabase/dev-mode'
 import { createClient } from '@supabase/supabase-js'
 
 async function getClient() {
@@ -30,10 +30,8 @@ export async function GET(
       return NextResponse.json({ error: 'Database not available' }, { status: 503 })
     }
 
-    const userId = DEV_MODE ? DEV_USER.id : null
-    if (!userId) {
-      return NextResponse.json({ error: 'Auth not implemented for prod yet' }, { status: 401 })
-    }
+    const user = await requireUser()
+    const userId = user.id
 
     const { data, error } = await supabase
       .from('research_runs')

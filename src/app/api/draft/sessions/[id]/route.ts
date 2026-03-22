@@ -4,8 +4,8 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient as createServerClient } from '@/lib/supabase/server'
-import { DEV_MODE, DEV_USER } from '@/lib/supabase/dev-mode'
+import { createClient as createServerClient, requireUser } from '@/lib/supabase/server'
+import { DEV_MODE } from '@/lib/supabase/dev-mode'
 import { createClient } from '@supabase/supabase-js'
 import type { DraftStatus } from '@/lib/supabase/database.types'
 
@@ -16,11 +16,6 @@ async function getClient() {
     if (url && serviceKey) return createClient(url, serviceKey)
   }
   return createServerClient()
-}
-
-function getUserId(): string {
-  if (DEV_MODE) return DEV_USER.id
-  throw new Error('Non-dev auth not implemented in this route yet')
 }
 
 export async function GET(
@@ -34,7 +29,8 @@ export async function GET(
       return NextResponse.json({ error: 'Database not available' }, { status: 503 })
     }
 
-    const userId = getUserId()
+    const user = await requireUser()
+    const userId = user.id
 
     // Fetch session
     const { data: session, error } = await supabase
@@ -87,7 +83,8 @@ export async function PATCH(
       return NextResponse.json({ error: 'Database not available' }, { status: 503 })
     }
 
-    const userId = getUserId()
+    const user = await requireUser()
+    const userId = user.id
 
     // Verify ownership
     const { data: existing, error: fetchErr } = await supabase
