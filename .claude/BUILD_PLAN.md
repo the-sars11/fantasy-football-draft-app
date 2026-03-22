@@ -137,7 +137,7 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 - [ ] FF-069: Tyler's league setup — enter his exact scoring settings + keeper rules/costs when provided
 
 ### Deploy + Validate
-- [ ] FF-070: Deploy to Vercel (free tier)
+- [x] FF-070: Deploy to Vercel (free tier) — https://fantasyfootballdraftapp-lac.vercel.app
 - [ ] FF-071: End-to-end test with real Nasties league data — full prep cycle, verify output quality
 - [ ] FF-072: Live draft dry run — mock Google Sheet, run through full live draft flow
 
