@@ -42,18 +42,21 @@ export function AppShell({
   const displayName = user.user_metadata?.full_name || user.email || 'User'
 
   return (
-    <div className="flex h-dvh flex-col md:flex-row overflow-hidden bg-background">
+    <div className="flex h-dvh flex-col md:flex-row overflow-hidden ffi-bg-gradient">
       {/* Desktop sidebar — hidden on mobile */}
       <aside
         className={cn(
-          'hidden md:flex flex-col border-r border-border bg-card transition-all duration-200',
+          'hidden md:flex flex-col border-r border-[var(--ffi-border)]/20 ffi-surface-secondary transition-all duration-200',
           collapsed ? 'w-14' : 'w-56'
         )}
       >
-        <div className="flex h-14 items-center border-b border-border px-3">
-          <Trophy className="h-5 w-5 shrink-0 text-primary" />
+        <div className="flex h-14 items-center border-b border-[var(--ffi-border)]/20 px-3">
+          <Trophy className="h-5 w-5 shrink-0 text-[var(--ffi-accent)]" />
           {!collapsed && (
-            <span className="ml-2 text-sm font-semibold truncate">Draft Advisor</span>
+            <span className="ml-2 text-sm font-semibold truncate">
+              <span className="text-white">FF</span>
+              <span className="text-[var(--ffi-primary)]">Intelligence</span>
+            </span>
           )}
         </div>
 
@@ -67,10 +70,10 @@ export function AppShell({
                 href={item.href}
                 title={collapsed ? item.label : undefined}
                 className={cn(
-                  'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
+                  'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200',
                   isActive
-                    ? 'bg-accent text-accent-foreground'
-                    : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'
+                    ? 'bg-[var(--ffi-surface)] text-[var(--ffi-accent)] ffi-glow-accent'
+                    : 'text-[var(--ffi-text-secondary)] hover:bg-[var(--ffi-surface)]/50 hover:text-white'
                 )}
               >
                 <Icon className="h-4 w-4 shrink-0" />
@@ -80,9 +83,9 @@ export function AppShell({
           })}
         </nav>
 
-        <div className="border-t border-border p-2 space-y-1">
+        <div className="border-t border-[var(--ffi-border)]/20 p-2 space-y-1">
           {!collapsed && (
-            <div className="px-3 py-2 text-xs text-muted-foreground truncate">
+            <div className="px-3 py-2 text-xs text-[var(--ffi-text-muted)] truncate">
               {displayName}
             </div>
           )}
@@ -91,7 +94,7 @@ export function AppShell({
 
           <button
             onClick={() => setCollapsed(!collapsed)}
-            className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm text-muted-foreground hover:bg-accent/50 hover:text-foreground transition-colors"
+            className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-[var(--ffi-text-secondary)] hover:bg-[var(--ffi-surface)]/50 hover:text-white transition-all duration-200"
           >
             {collapsed ? (
               <ChevronRight className="h-4 w-4 shrink-0" />
@@ -122,15 +125,18 @@ export function AppShell({
       </aside>
 
       {/* Mobile top header — hidden on desktop */}
-      <header className="flex md:hidden items-center justify-between border-b border-border bg-card px-4 h-12 shrink-0">
+      <header className="flex md:hidden items-center justify-between border-b border-[var(--ffi-border)]/20 ffi-surface-secondary px-4 h-12 shrink-0">
         <div className="flex items-center gap-2">
-          <Trophy className="h-4 w-4 text-primary" />
-          <span className="text-sm font-semibold">Draft Advisor</span>
+          <Trophy className="h-4 w-4 text-[var(--ffi-accent)]" />
+          <span className="text-sm font-semibold">
+            <span className="text-white">FF</span>
+            <span className="text-[var(--ffi-primary)]">Intelligence</span>
+          </span>
         </div>
         <div className="flex items-center gap-1">
           <ThemeToggleMobile />
           <form action={signOut}>
-            <Button variant="ghost" size="sm" className="text-muted-foreground h-8 px-2">
+            <Button variant="ghost" size="sm" className="text-[var(--ffi-text-secondary)] h-8 px-2">
               <LogOut className="h-4 w-4" />
             </Button>
           </form>
@@ -143,7 +149,7 @@ export function AppShell({
       </main>
 
       {/* Mobile bottom tab bar — hidden on desktop */}
-      <nav className="flex md:hidden items-center justify-around border-t border-border bg-card h-16 shrink-0 safe-bottom">
+      <nav className="flex md:hidden items-center justify-around border-t border-[var(--ffi-border)]/20 ffi-surface-secondary h-16 shrink-0 safe-bottom">
         {navItems.map((item) => {
           const isActive = pathname.startsWith(item.href)
           const Icon = item.icon
@@ -152,10 +158,10 @@ export function AppShell({
               key={item.href}
               href={item.href}
               className={cn(
-                'flex flex-col items-center justify-center gap-1 flex-1 h-full transition-colors',
+                'relative flex flex-col items-center justify-center gap-1 flex-1 h-full transition-all duration-200',
                 isActive
-                  ? 'text-primary'
-                  : 'text-muted-foreground active:text-foreground'
+                  ? 'ffi-nav-active'
+                  : 'text-[var(--ffi-text-secondary)] active:text-white'
               )}
             >
               <Icon className="h-5 w-5" />

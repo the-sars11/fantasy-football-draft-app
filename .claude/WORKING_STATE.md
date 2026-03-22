@@ -2,30 +2,65 @@
 
 ## Current Session
 - **Date:** 2026-03-22
-- **Focus:** FF-071 e2e testing
-- **Status:** E2E TESTING COMPLETE — partial pass (see findings below)
+- **Focus:** Phase 6 Sprint 9 — Design System Foundation
+- **Status:** SPRINT 9 COMPLETE — ready for Sprint 10
 
 ## Last Completed
-- FF-071 (partial): End-to-end test on deployed app (https://fantasyfootballdraftapp-lac.vercel.app)
-  - **PASS:** Prep Hub loads, 573 players cached, Sleeper + FantasyPros sources fresh
-  - **PASS:** Configure League page — both Joe's ESPN (Auction) and Tyler's Yahoo (Snake/Keeper) tabs work
-  - **PASS:** Research pipeline runs — POST /api/research returns 200, saves runs to DB
-  - **PASS:** Run History page — shows completed runs with strategy names, timestamps
-  - **PASS:** Strategies page — loads correctly, league selector + Generate button present
-  - **PASS:** All routes return correct HTTP responses (200 for pages, 307 redirect for auth-protected)
-  - **PASS:** Build passes clean, no errors
-  - **EXPECTED:** All players show Rank 999, ADP 999, Value $0 — ranking sources (FantasyPros, ESPN) don't publish 2025 season data until May/June. The pipeline works mechanically but produces defaults.
-  - **FIX:** Broken "Research" link on Prep Hub pointed to nonexistent `/prep/research` — fixed to `/prep/board`
-  - **NOTE:** FF-069 still blocked on Tyler providing scoring settings + keeper rules/costs
+- FF-060: Design system tokens — COMPLETE
+  - Full FFI color palette in globals.css
+  - Surface hierarchy utilities (ffi-surface, ffi-surface-elevated)
+  - Glassmorphism utilities (ffi-glass, ffi-glass-heavy)
+  - Shadow and glow effects (ffi-shadow-card, ffi-glow-accent)
+  - Gradient utilities (ffi-bg-gradient, ffi-gradient-progress)
+- FF-061: Typography overhaul — COMPLETE
+  - Added Oswald font for display headlines
+  - Full type scale (ffi-display-xl through ffi-caption)
+  - All-caps label treatment with letter-spacing
+- FF-062: Component primitives reskin — COMPLETE
+  - FFI button variants (primary lime pill, glass secondary, ghost)
+  - FFI card variants (default, elevated, interactive)
+  - FFI input styles (recessed, glow focus)
+  - FFI badges (position-specific QB/RB/WR/TE/K/DEF, status badges)
+  - FFI progress bars (gradient, scarcity status indicators)
+  - App shell updated with FFI branding and styling
 
 ## Files Modified (This Session)
-- `src/app/(app)/prep/page.tsx` — Fixed broken Research link: `/prep/research` → `/prep/board`
+- `src/app/globals.css` — Complete FFI design system tokens and utilities
+- `src/app/layout.tsx` — Added Oswald font, updated metadata to FFIntelligence
+- `src/components/ui/ffi-primitives.tsx` — NEW: React component primitives
+- `src/components/layout/app-shell.tsx` — Updated with FFI styling and branding
+- `.claude/BUILD_PLAN.md` — Marked Sprint 9 tasks complete
 
 ## Next Up
+- **Phase 6 Sprint 10:** Screen redesigns (FF-063 through FF-066)
+  - FF-063: App shell + nav redesign (full redesign, not just styling)
+  - FF-064: Prep Hub redesign
+  - FF-065: Draft Board redesign (compact player cards)
+  - FF-066: Live Draft room redesign
 - FF-069: Tyler's league setup — waiting on his scoring settings + keeper rules/costs
 - FF-072: Live draft dry run — mock Google Sheet, full live draft flow
-- Phase 6 (Sprints 9-11): Gridiron Lens UI redesign — START with Q&A planning session
-- Phase 7 (Sprint 12): Pre-season — Yahoo OAuth, 2025 data pull, draft day prep
+
+## New FFI Components Available
+```tsx
+// Buttons
+<FFIButton variant="primary|secondary|ghost">
+// Cards
+<FFICard variant="default|elevated|interactive">
+<FFICardHeader>, <FFICardTitle>, <FFICardDescription>
+// Badges
+<FFIBadge position="QB|RB|WR|TE|K|DEF">
+<FFIBadge status="success|warning|danger|info">
+<FFIPositionBadge position="RB" />
+// Progress
+<FFIProgress value={75} status="critical|stable|elite" label="RBs" />
+// Grades
+<FFIGrade grade="B+" size="sm|default|lg" />
+// Composite Cards
+<FFITacticalInsight insight="..." confidence={98} />
+<FFITrashTalkAlert type="overpay" message="..." />
+<FFIAIRecommendation title="..." message="..." />
+<FFIPlayerCard rank={1} name="CMC" ... />
+```
 
 ## Architecture Notes
 - shadcn/ui v4 uses base-ui (not Radix) — no `asChild` prop on Button/TooltipTrigger

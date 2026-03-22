@@ -7,9 +7,9 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: "Geist", "Geist Fallback", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "Geist Mono", "Geist Mono Fallback", ui-monospace, monospace;
-  --font-heading: var(--font-sans);
+  --font-sans: "Inter", "Inter Fallback", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --font-display: "Oswald", "Oswald Fallback", ui-sans-serif, sans-serif;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -46,9 +46,30 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+
+  /* FFIntelligence custom colors */
+  --color-ffi-background: #01040a;
+  --color-ffi-background-secondary: #050a1b;
+  --color-ffi-surface: #0f172a;
+  --color-ffi-surface-elevated: #1e293b;
+  --color-ffi-primary: #5582e6;
+  --color-ffi-accent: #39ff14;
+  --color-ffi-text-primary: #ffffff;
+  --color-ffi-text-secondary: #94a3b8;
+  --color-ffi-text-muted: #64748b;
+  --color-ffi-border: #334155;
+  --color-ffi-success: #39ff14;
+  --color-ffi-warning: #fbbf24;
+  --color-ffi-danger: #ef4444;
+  --color-ffi-info: #5582e6;
 }
 
+/* ========================================
+   FFIntelligence Design System Tokens
+   ======================================== */
+
 :root {
+  /* Light mode fallbacks (not primary use) */
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -72,7 +93,7 @@
   --chart-3: oklch(0.439 0 0);
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
+  --radius: 0.75rem;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: oklch(0.205 0 0);
@@ -81,41 +102,70 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+
+  /* FFI Semantic tokens */
+  --ffi-background: #01040a;
+  --ffi-background-secondary: #050a1b;
+  --ffi-surface: #0f172a;
+  --ffi-surface-elevated: #1e293b;
+  --ffi-primary: #5582e6;
+  --ffi-accent: #39ff14;
+  --ffi-text-primary: #ffffff;
+  --ffi-text-secondary: #94a3b8;
+  --ffi-text-muted: #64748b;
+  --ffi-border: #334155;
+  --ffi-success: #39ff14;
+  --ffi-warning: #fbbf24;
+  --ffi-danger: #ef4444;
+  --ffi-info: #5582e6;
+
+  /* Effects */
+  --ffi-glow-accent: 0 0 20px rgba(57, 255, 20, 0.4);
+  --ffi-glow-primary: 0 0 15px rgba(85, 130, 230, 0.3);
+  --ffi-shadow-card: 0 8px 30px rgba(0, 0, 0, 0.6), 0 0 15px rgba(85, 130, 230, 0.1);
+  --ffi-shadow-elevated: 0 12px 40px rgba(0, 0, 0, 0.7), 0 0 20px rgba(85, 130, 230, 0.15);
 }
 
+/* FFIntelligence Dark Mode (Primary) */
 .dark {
   color-scheme: dark;
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+
+  /* Base shadcn tokens mapped to FFI palette */
+  --background: #01040a;
+  --foreground: #ffffff;
+  --card: rgba(15, 23, 42, 0.6);
+  --card-foreground: #ffffff;
+  --popover: #0f172a;
+  --popover-foreground: #ffffff;
+  --primary: #5582e6;
+  --primary-foreground: #ffffff;
+  --secondary: #1e293b;
+  --secondary-foreground: #ffffff;
+  --muted: #1e293b;
+  --muted-foreground: #94a3b8;
+  --accent: #39ff14;
+  --accent-foreground: #000000;
+  --destructive: #ef4444;
+  --border: rgba(51, 65, 85, 0.25);
+  --input: rgba(51, 65, 85, 0.4);
+  --ring: #5582e6;
+
+  /* Charts using FFI palette */
+  --chart-1: #5582e6;
+  --chart-2: #39ff14;
+  --chart-3: #fbbf24;
+  --chart-4: #ef4444;
+  --chart-5: #94a3b8;
+
+  /* Sidebar */
+  --sidebar: #050a1b;
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: #5582e6;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #39ff14;
+  --sidebar-accent-foreground: #000000;
+  --sidebar-border: rgba(51, 65, 85, 0.25);
+  --sidebar-ring: #5582e6;
 }
 
 @layer base {
@@ -130,7 +180,455 @@
   }
 }
 
-/* Mobile safe area for bottom nav (notch/home indicator) */
+/* ========================================
+   FFI Typography Scale
+   ======================================== */
+
+.ffi-display-xl {
+  font-size: 3rem;
+  line-height: 1.1;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.ffi-display-lg {
+  font-size: 2.25rem;
+  line-height: 1.15;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.ffi-display-md {
+  font-size: 1.5rem;
+  line-height: 1.25;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.ffi-title-lg {
+  font-size: 1.25rem;
+  line-height: 1.3;
+  font-weight: 700;
+}
+
+.ffi-title-md {
+  font-size: 1rem;
+  line-height: 1.4;
+  font-weight: 600;
+}
+
+.ffi-body-lg {
+  font-size: 1rem;
+  line-height: 1.6;
+  font-weight: 400;
+}
+
+.ffi-body-md {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  font-weight: 400;
+}
+
+.ffi-label {
+  font-size: 0.75rem;
+  line-height: 1.4;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.ffi-caption {
+  font-size: 0.625rem;
+  line-height: 1.3;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* Accent font for headlines */
+.font-display {
+  font-family: var(--font-display);
+}
+
+/* ========================================
+   FFI Glassmorphism & Surface Utilities
+   ======================================== */
+
+/* Card with glassmorphism effect */
+.ffi-glass {
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.ffi-glass-heavy {
+  background: rgba(15, 23, 42, 0.8);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+/* Ghost border (subtle, accessibility-friendly) */
+.ffi-ghost-border {
+  border: 1px solid rgba(51, 65, 85, 0.15);
+}
+
+.ffi-ghost-border-hover:hover {
+  border-color: rgba(51, 65, 85, 0.3);
+}
+
+/* Surface hierarchy */
+.ffi-surface {
+  background-color: var(--ffi-surface);
+}
+
+.ffi-surface-elevated {
+  background-color: var(--ffi-surface-elevated);
+}
+
+.ffi-surface-secondary {
+  background-color: var(--ffi-background-secondary);
+}
+
+/* ========================================
+   FFI Shadow & Glow Effects
+   ======================================== */
+
+.ffi-shadow-card {
+  box-shadow: var(--ffi-shadow-card);
+}
+
+.ffi-shadow-elevated {
+  box-shadow: var(--ffi-shadow-elevated);
+}
+
+.ffi-glow-accent {
+  box-shadow: var(--ffi-glow-accent);
+}
+
+.ffi-glow-primary {
+  box-shadow: var(--ffi-glow-primary);
+}
+
+/* Neon glow on hover */
+.ffi-glow-hover:hover {
+  box-shadow: 0 0 25px rgba(57, 255, 20, 0.5);
+}
+
+/* ========================================
+   FFI Gradient Utilities
+   ======================================== */
+
+/* Main app background gradient */
+.ffi-bg-gradient {
+  background:
+    radial-gradient(circle at 20% 30%, #172554 0%, transparent 50%),
+    radial-gradient(circle at 80% 70%, #050a1b 0%, transparent 60%),
+    #01040a;
+}
+
+/* Primary button gradient */
+.ffi-gradient-primary {
+  background: linear-gradient(135deg, #39ff14 0%, #2de210 100%);
+}
+
+/* Progress bar gradient */
+.ffi-gradient-progress {
+  background: linear-gradient(90deg, #5582e6 0%, #39ff14 100%);
+}
+
+/* ========================================
+   FFI Button Variants
+   ======================================== */
+
+/* Lime pill primary button */
+.ffi-btn-primary {
+  @apply inline-flex items-center justify-center gap-2 px-6 py-2.5
+         rounded-full font-semibold text-black
+         transition-all duration-200;
+  background: linear-gradient(135deg, #39ff14 0%, #2de210 100%);
+}
+
+.ffi-btn-primary:hover {
+  box-shadow: 0 0 25px rgba(57, 255, 20, 0.5);
+  transform: translateY(-1px);
+}
+
+.ffi-btn-primary:active {
+  transform: translateY(0);
+}
+
+/* Glass secondary button */
+.ffi-btn-secondary {
+  @apply inline-flex items-center justify-center gap-2 px-6 py-2.5
+         rounded-xl font-semibold text-white
+         transition-all duration-200;
+  background: rgba(15, 23, 42, 0.8);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(51, 65, 85, 0.2);
+}
+
+.ffi-btn-secondary:hover {
+  background: rgba(30, 41, 59, 0.9);
+  border-color: rgba(51, 65, 85, 0.4);
+}
+
+/* Ghost button */
+.ffi-btn-ghost {
+  @apply inline-flex items-center justify-center gap-2 px-4 py-2
+         rounded-lg font-medium text-[var(--ffi-text-secondary)]
+         transition-all duration-200;
+  background: transparent;
+}
+
+.ffi-btn-ghost:hover {
+  background: rgba(51, 65, 85, 0.2);
+  color: var(--ffi-text-primary);
+}
+
+/* ========================================
+   FFI Card Variants
+   ======================================== */
+
+/* Standard card (no hard borders) */
+.ffi-card {
+  @apply rounded-xl p-4;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(12px);
+}
+
+/* Elevated card with shadow */
+.ffi-card-elevated {
+  @apply rounded-xl p-4;
+  background: rgba(30, 41, 59, 0.8);
+  backdrop-filter: blur(16px);
+  box-shadow: var(--ffi-shadow-card);
+}
+
+/* Interactive card */
+.ffi-card-interactive {
+  @apply rounded-xl p-4 cursor-pointer transition-all duration-200;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(12px);
+}
+
+.ffi-card-interactive:hover {
+  transform: translateY(-2px);
+  background: rgba(30, 41, 59, 0.7);
+  box-shadow: var(--ffi-shadow-card);
+}
+
+/* ========================================
+   FFI Input Styles
+   ======================================== */
+
+/* Recessed input field */
+.ffi-input {
+  @apply w-full px-4 py-2.5 rounded-xl text-white
+         transition-all duration-200;
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(51, 65, 85, 0.25);
+}
+
+.ffi-input::placeholder {
+  color: var(--ffi-text-muted);
+}
+
+.ffi-input:focus {
+  outline: none;
+  border-color: var(--ffi-primary);
+  box-shadow: 0 0 0 3px rgba(85, 130, 230, 0.2);
+}
+
+/* ========================================
+   FFI Badge Variants
+   ======================================== */
+
+/* Position badges */
+.ffi-badge {
+  @apply inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold;
+}
+
+.ffi-badge-qb {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+}
+
+.ffi-badge-rb {
+  background: rgba(34, 197, 94, 0.2);
+  color: #22c55e;
+}
+
+.ffi-badge-wr {
+  background: rgba(59, 130, 246, 0.2);
+  color: #3b82f6;
+}
+
+.ffi-badge-te {
+  background: rgba(249, 115, 22, 0.2);
+  color: #f97316;
+}
+
+.ffi-badge-k {
+  background: rgba(168, 85, 247, 0.2);
+  color: #a855f7;
+}
+
+.ffi-badge-def {
+  background: rgba(148, 163, 184, 0.2);
+  color: #94a3b8;
+}
+
+/* Status badges */
+.ffi-badge-success {
+  background: rgba(57, 255, 20, 0.15);
+  color: #39ff14;
+}
+
+.ffi-badge-warning {
+  background: rgba(251, 191, 36, 0.15);
+  color: #fbbf24;
+}
+
+.ffi-badge-danger {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+}
+
+.ffi-badge-info {
+  background: rgba(85, 130, 230, 0.15);
+  color: #5582e6;
+}
+
+/* Tag style badge (small pill) */
+.ffi-tag {
+  @apply inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wide;
+}
+
+/* ========================================
+   FFI Progress Bar
+   ======================================== */
+
+.ffi-progress {
+  @apply w-full h-2 rounded-full overflow-hidden;
+  background: rgba(51, 65, 85, 0.3);
+}
+
+.ffi-progress-bar {
+  @apply h-full rounded-full transition-all duration-500;
+  background: linear-gradient(90deg, #5582e6 0%, #39ff14 100%);
+}
+
+/* Scarcity status indicators */
+.ffi-progress-critical .ffi-progress-bar {
+  background: linear-gradient(90deg, #ef4444 0%, #fbbf24 100%);
+}
+
+.ffi-progress-stable .ffi-progress-bar {
+  background: linear-gradient(90deg, #fbbf24 0%, #5582e6 100%);
+}
+
+.ffi-progress-elite .ffi-progress-bar {
+  background: linear-gradient(90deg, #5582e6 0%, #39ff14 100%);
+}
+
+/* ========================================
+   FFI Navigation
+   ======================================== */
+
+/* Bottom nav active state with glow */
+.ffi-nav-active {
+  color: var(--ffi-accent);
+  text-shadow: 0 0 10px rgba(57, 255, 20, 0.5);
+}
+
+.ffi-nav-active::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--ffi-accent);
+  box-shadow: 0 0 8px rgba(57, 255, 20, 0.6);
+}
+
+/* ========================================
+   FFI Grade Display
+   ======================================== */
+
+.ffi-grade {
+  @apply inline-flex items-center justify-center rounded-2xl font-extrabold;
+  text-shadow: 0 0 30px currentColor;
+}
+
+.ffi-grade-a { color: #39ff14; }
+.ffi-grade-b { color: #5582e6; }
+.ffi-grade-c { color: #fbbf24; }
+.ffi-grade-d { color: #f97316; }
+.ffi-grade-f { color: #ef4444; }
+
+/* ========================================
+   FFI Animations
+   ======================================== */
+
+@keyframes ffi-glow-pulse {
+  0%, 100% { box-shadow: 0 0 20px rgba(57, 255, 20, 0.4); }
+  50% { box-shadow: 0 0 30px rgba(57, 255, 20, 0.6); }
+}
+
+@keyframes ffi-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+
+@keyframes ffi-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.ffi-animate-glow {
+  animation: ffi-glow-pulse 2s ease-in-out infinite;
+}
+
+.ffi-animate-shake {
+  animation: ffi-shake 0.3s ease-in-out;
+}
+
+.ffi-animate-slide-in {
+  animation: ffi-slide-in 0.2s ease-out;
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .ffi-animate-glow,
+  .ffi-animate-shake,
+  .ffi-animate-slide-in {
+    animation: none;
+  }
+
+  .ffi-btn-primary:hover,
+  .ffi-card-interactive:hover {
+    transform: none;
+  }
+}
+
+/* ========================================
+   Mobile Safe Areas
+   ======================================== */
+
 .safe-bottom {
   padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.safe-top {
+  padding-top: env(safe-area-inset-top, 0px);
 }

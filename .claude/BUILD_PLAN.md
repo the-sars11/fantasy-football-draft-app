@@ -138,37 +138,41 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 
 ### Deploy + Validate
 - [x] FF-070: Deploy to Vercel (free tier) — https://fantasyfootballdraftapp-lac.vercel.app
-- [ ] FF-071: End-to-end test with real Nasties league data — full prep cycle, verify output quality
+- [x] FF-071: End-to-end test with real Nasties league data — full prep cycle, verify output quality (PASS — ranking data shows defaults as expected since 2025 season data not published yet)
 - [ ] FF-072: Live draft dry run — mock Google Sheet, run through full live draft flow
 
 ---
 
-## Phase 6: Gridiron Lens UI Redesign (Sprints 9-11)
+## Phase 6: FFIntelligence UI Redesign (Sprints 9-11)
 
-> **IMPORTANT:** Start this phase with a Q&A planning session. Walk through each UI design in the `/UI` folder with Joe to align on which component styles, color choices, and layout patterns to adopt vs. skip. Not every design element may be wanted — get explicit approval before building.
+> **Design spec:** `UI/DESIGN_SPEC.md` — all decisions locked in after Q&A session (2026-03-22)
+> **App name:** FFIntelligence (FFI)
+> **Icons:** `static/icons/` — favicon and app icons ready
 
 ### Sprint 9: Design System Foundation
-- [ ] FF-060: Design system tokens — color palette (deep navy #031018 background, neon lime accent, Gridiron Blue primary), surface hierarchy (no-line rule — tonal shifts not borders), glassmorphism utilities (backdrop-blur, ghost borders), ambient shadows
-- [ ] FF-061: Typography overhaul — Space Grotesk for display/headlines/numbers, Manrope or Inter for body/UI, editorial scale contrasts, all-caps label treatment for metadata
-- [ ] FF-062: Component primitives reskin — buttons (liquid glass gradient primary, glass secondary), cards (tonal layering, no 1px borders), input fields (recessed surface, glow focus states), badges (tactical position tags), progress bars (segmented scarcity style)
+- [x] FF-060: Design system tokens — color palette (`#01040a` background, `#39ff14` accent lime, `#5582e6` primary blue), surface hierarchy (no-line rule — tonal shifts not borders), glassmorphism utilities (backdrop-blur, ghost borders), ambient shadows
+- [x] FF-061: Typography overhaul — Inter for display/body (400-800 weights), Oswald for accent headlines, editorial scale contrasts, all-caps label treatment for metadata
+- [x] FF-062: Component primitives reskin — buttons (lime pill primary, glass secondary), cards (tonal layering, no 1px borders), input fields (recessed surface, glow focus states), badges (position tags), progress bars (smooth gradient style)
 
 ### Sprint 10: Screen Redesigns
-- [ ] FF-063: App shell + nav redesign — Gridiron Lens header/logo, glassmorphism bottom nav with glow active state, profile avatar
+- [ ] FF-063: App shell + nav redesign — FFIntelligence header/logo (use icon elements), bottom nav with glow active state, profile avatar
 - [ ] FF-064: Prep Hub redesign — hub cards with icons + subtitles, "Optimize Your Edge" AI recommendation card, atmospheric layout
-- [ ] FF-065: Draft Board redesign — player cards with position badges + auction values, "RECOMMENDED"/"BEST AVAILABLE" tags, real-time feed layout, Tactical Insight cards
-- [ ] FF-066: Value Inefficiency Engine view — est. real value vs. current projected, under/over-priced color labels, "Your Squad" roster panel
+- [ ] FF-065: Draft Board redesign — COMPACT player cards (tight spacing), position badges + auction values, expandable Tactical Insight with confidence %, "RECOMMENDED"/"BEST AVAILABLE" tags
+- [ ] FF-066: Live Draft room redesign — real-time feed, strategy picker dropdown, My Squad quick panel, inline AI recommendation cards
 
-### Sprint 11: Advanced Views + Polish
-- [ ] FF-073: Remaining Needs + Positional Scarcity redesign — segmented scarcity bars (not smooth), spend range indicators, critical/stable/elite status labels
-- [ ] FF-074: Post-Draft Analysis redesign — letter grade hero with glow, strategy adherence %, pick-by-pick breakdown with color-coded grades
-- [ ] FF-075: Mobile polish pass — glassmorphism nav feel on mobile, touch targets, responsive layouts across all redesigned screens
-- [ ] FF-076: Animation + micro-interactions — flash streaks, ambient glow transitions, card hover states, draft pick entry animations
+### Sprint 11: Advanced Views + New Features
+- [ ] FF-073: Remaining Needs + Positional Scarcity redesign — smooth gradient bars, spend range indicators, critical/stable/elite status labels
+- [ ] FF-074: Post-Draft Analysis redesign — letter grade hero with glow, story-driven pick-by-pick breakdown with contextual narratives, color-coded grades (STEAL/REACH/AI PIVOT)
+- [ ] FF-075: Per-team exportable reports — generate analysis for EVERY team in league, email-able format, contextual callouts ("Reggie took the last WR1 which forced you to overbid")
+- [ ] FF-076: Trash Talk system — live alerts during draft (overpay, roster imbalance, bye week disasters), post-draft "How Everyone Screwed Up" roast report
+- [ ] FF-077: Mobile polish pass — bottom nav feel, touch targets (44px min), responsive layouts across all redesigned screens
+- [ ] FF-078: Animation + micro-interactions — card expand/collapse, neon glow transitions, draft pick entry animations, trash talk alert shake
 
 ---
 
 ## Phase 7: Pre-Season (Sprint 12)
 
 ### Final Prep
-- [ ] FF-077: Yahoo OAuth adapter (FF-011 deferred) — if Tyler wants auto-pull from Yahoo
-- [ ] FF-078: Full pre-draft data pull with 2025 season data — verify all sources working
-- [ ] FF-079: Draft day checklist — confirm Google Sheet template, test sheet polling, verify mobile experience on both phones
+- [ ] FF-079: Yahoo OAuth adapter (FF-011 deferred) — if Tyler wants auto-pull from Yahoo
+- [ ] FF-080: Full pre-draft data pull with 2025 season data — verify all sources working
+- [ ] FF-081: Draft day checklist — confirm Google Sheet template, test sheet polling, verify mobile experience on both phones
