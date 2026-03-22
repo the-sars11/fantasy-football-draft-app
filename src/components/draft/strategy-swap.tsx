@@ -10,9 +10,8 @@
 
 import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Loader2, RefreshCw, Check, Zap } from 'lucide-react'
+import { Loader2, RefreshCw, Check } from 'lucide-react'
 import type { Strategy as DbStrategy } from '@/lib/supabase/database.types'
 
 interface StrategySwapProps {

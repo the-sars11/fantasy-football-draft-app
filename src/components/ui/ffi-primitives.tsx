@@ -183,7 +183,7 @@ export function FFIPositionBadge({
    FFI Input Components
    ======================================== */
 
-interface FFIInputProps extends React.InputHTMLAttributes<HTMLInputElement> {}
+type FFIInputProps = React.InputHTMLAttributes<HTMLInputElement>
 
 export const FFIInput = React.forwardRef<HTMLInputElement, FFIInputProps>(
   ({ className, ...props }, ref) => {

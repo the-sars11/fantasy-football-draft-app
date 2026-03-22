@@ -10,7 +10,6 @@ import {
   Pencil,
   Trash2,
   Star,
-  StarOff,
   Copy,
 } from 'lucide-react'
 import type { Strategy } from '@/lib/supabase/database.types'

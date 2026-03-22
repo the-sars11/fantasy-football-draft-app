@@ -11,7 +11,6 @@
  */
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { History, ArrowRight, Check, X } from 'lucide-react'
 
 export interface PivotEntry {

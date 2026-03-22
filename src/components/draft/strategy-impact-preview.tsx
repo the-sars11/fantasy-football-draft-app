@@ -66,7 +66,7 @@ export function StrategyImpactPreview({
     }
 
     // Budget allocation changes (auction)
-    let budgetChanges: Array<{ pos: string; from: number; to: number }> = []
+    const budgetChanges: Array<{ pos: string; from: number; to: number }> = []
     if (format === 'auction' && currentStrategy.budget_allocation && newStrategy.budget_allocation) {
       const currentAlloc = currentStrategy.budget_allocation as Record<string, number>
       const newAlloc = newStrategy.budget_allocation as Record<string, number>

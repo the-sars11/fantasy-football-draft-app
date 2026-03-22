@@ -165,14 +165,13 @@ function gradeRoster(
 
 export function MyRoster({ state, managerName, rosterSlots, strategy }: MyRosterProps) {
   const manager = state.managers[managerName]
-  if (!manager) return null
 
   // Combine keeper picks + draft picks for display
-  const myPicks = manager.picks
+  const myPicks = useMemo(() => manager?.picks ?? [], [manager?.picks])
 
   // Only grade non-keeper picks (keepers are pre-determined)
-  const draftPicks = myPicks.filter(p => !p.is_keeper)
-  const keeperPicks = myPicks.filter(p => p.is_keeper)
+  const draftPicks = useMemo(() => myPicks.filter(p => !p.is_keeper), [myPicks])
+  const keeperPicks = useMemo(() => myPicks.filter(p => p.is_keeper), [myPicks])
 
   const grade = useMemo(() =>
     gradeRoster(draftPicks, rosterSlots, strategy, state.format),
@@ -189,6 +188,9 @@ export function MyRoster({ state, managerName, rosterSlots, strategy }: MyRoster
     }
     return groups
   }, [myPicks])
+
+  // Early return after hooks
+  if (!manager) return null
 
   // Remaining needs
   const needs: Record<string, number> = {}

@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react'
 import { Badge } from '@/components/ui/badge'
-import { ArrowUp, ArrowDown, TrendingUp, TrendingDown, Minus } from 'lucide-react'
+import { ArrowUp, ArrowDown, TrendingUp, Minus } from 'lucide-react'
 import { scorePlayersWithStrategy } from '@/lib/research/strategy/scoring'
 import type { ScoredPlayer } from '@/lib/research/strategy/scoring'
 import type { Player, DraftFormat } from '@/lib/players/types'

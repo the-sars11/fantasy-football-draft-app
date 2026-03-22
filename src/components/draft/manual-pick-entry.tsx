@@ -63,8 +63,10 @@ export function ManualPickEntry({
   const searchRef = useRef<HTMLInputElement>(null)
   const resultsRef = useRef<HTMLDivElement>(null)
 
-  // Update manager when snake turn changes
+  // Sync manager state when snake draft turn changes (prop → state pattern)
+  // This is a valid use case for useEffect setState: syncing external state
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (currentManager) setManager(currentManager)
   }, [currentManager])
 

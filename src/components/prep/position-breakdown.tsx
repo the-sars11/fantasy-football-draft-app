@@ -3,7 +3,7 @@
 import { useMemo } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Target, Ban, TrendingUp } from 'lucide-react'
+import { Target, Ban } from 'lucide-react'
 import type { ScoredPlayer } from '@/lib/research/strategy/scoring'
 import type { DraftFormat, Position } from '@/lib/players/types'
 

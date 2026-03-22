@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { X, TrendingUp, TrendingDown, Target, ShieldAlert } from 'lucide-react'
@@ -37,10 +37,6 @@ export function StrategyCompare({ proposals, format, onClose, onSelect }: Strate
   }
 
   const compared = selected.map((i) => proposals[i])
-
-  // Find unique targets across all compared strategies
-  const allTargets = new Set(compared.flatMap((p) => p.key_targets))
-  const allAvoids = new Set(compared.flatMap((p) => p.key_avoids))
 
   return (
     <div className="space-y-4">
