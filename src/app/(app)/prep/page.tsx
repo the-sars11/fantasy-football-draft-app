@@ -53,7 +53,7 @@ export default function PrepPage() {
             <CardDescription>Pull data, run AI analysis, generate your draft board</CardDescription>
           </CardHeader>
           <CardContent>
-            <Link href="/prep/research" className={btnSecondary}>Research</Link>
+            <Link href="/prep/board" className={btnSecondary}>Research</Link>
           </CardContent>
         </Card>
 
