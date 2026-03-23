@@ -131,3 +131,22 @@ npm run test:coverage # Coverage report
 6. **Google Sheets primary draft input** — Polls shared sheet for new picks. Manual entry fallback.
 7. **Incremental LLM calls** — Small focused Claude calls per pick during live draft. Fast + cheap.
 8. **Multi-source consensus** — Average 3+ ranking sources for baseline, LLM adjusts for league context.
+
+---
+
+## Git Commit Protocol
+
+1. **Always use descriptive, functional commit messages** — explain WHAT changed, not just which files.
+2. **Format:**
+   ```
+   <type>: <short functional description>
+
+   - Specific changes
+   - What was added/fixed/changed
+
+   Co-Authored-By: Claude <noreply@anthropic.com>
+   ```
+   Types: `feat`, `fix`, `refactor`, `docs`, `chore`
+3. **Commit after each completed task** — one fix = one commit = one deploy.
+4. **Push immediately after commit** — never leave unpushed work.
+5. **Session end:** Commit all changes, push, confirm clean state.
