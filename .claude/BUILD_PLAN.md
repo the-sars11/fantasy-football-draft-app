@@ -231,7 +231,7 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 - [x] FF-103: Port bottom navigation — glass backdrop blur, active state glow, rounded top, safe area padding
 
 #### Verification
-- [ ] FF-104: Visual comparison audit — prototypes side-by-side with running app
+- [x] FF-104: Visual comparison audit — prototypes side-by-side with running app (95%+ match, intentional diffs documented)
 - [x] FF-105: Class audit — grep for generic shadcn classes (53 files still have bg-muted/text-muted-foreground/border-border, 3 files use <Table>)
 
 ---
@@ -252,6 +252,78 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 - [ ] FF-079: Yahoo OAuth adapter (FF-011 deferred) — if Tyler wants auto-pull from Yahoo
 - [ ] FF-080: Full pre-draft data pull with 2025 season data — verify all sources working
 - [ ] FF-081: Draft day checklist — confirm Google Sheet template, test sheet polling, verify mobile experience on both phones
+
+---
+
+## Phase 7.5: Player Intelligence System (Sprint 13)
+
+> **Goal:** Add intelligent player tagging, multi-source sentiment analysis, and user-customizable targeting
+> **Design doc:** `C:\Users\jrasa\.claude\plans\abundant-rolling-oasis.md`
+> **Timeline:** Now through August 2026 drafts
+
+### Foundation (FF-201 to FF-210)
+- [x] FF-201: Create `player_intel` table migration — sentiment data, system tags, source freshness
+- [x] FF-202: Create `user_tags` table migration — user tags, notes, dismissed system tags
+- [x] FF-203: Create `user_rules` table migration — natural language LLM-parsed rules
+- [x] FF-204: Create `source_registry` table migration — source config, freshness, 2026 availability
+- [x] FF-205: TypeScript types for new tables — PlayerIntel, UserTags, UserRule, SourceRegistry
+- [x] FF-206: Source adapter interface — SourceAdapter with 2026 validation methods
+- [x] FF-207: 2026 season validation utilities — validate content is current season
+- [x] FF-208: Freshness tier configuration — TTL per data type, off-season behavior
+- [x] FF-209: Differential fetch algorithm — only refresh stale sources
+- [x] FF-210: Seed source_registry with existing sources (FP, ESPN, Sleeper)
+
+### Tag Detection (FF-211 to FF-218)
+- [ ] FF-211: Tag detection algorithm core — BREAKOUT, SLEEPER, VALUE, BUST, AVOID
+- [ ] FF-212: Sentiment aggregation logic — merge mentions from multiple sources
+- [ ] FF-213: BREAKOUT detection — 3+ sources mention "breakout" or "emerging"
+- [ ] FF-214: SLEEPER detection — 2+ sources identify as undervalued OR ECR std dev > 20
+- [ ] FF-215: BUST detection — 3+ sources express concern
+- [ ] FF-216: VALUE/AVOID detection — ADP vs projection rank gap analysis
+- [ ] FF-217: Intel service orchestration — compute and store intel per player
+- [ ] FF-218: Integration with normalize pipeline — attach intel to ConsensusPlayer
+
+### New Sources (FF-219 to FF-224)
+- [ ] FF-219: Fantasy Footballers adapter — scrape free rankings page
+- [ ] FF-220: FantasyPros Articles adapter — scrape sentiment from public articles
+- [ ] FF-221: Pro Football Reference historical adapter — for projection trends
+- [ ] FF-222: Update normalize.ts for new sources — weighted consensus
+- [ ] FF-223: Source weight configuration UI — adjust weights per source
+- [ ] FF-224: Data quality validation tests — verify 2026 detection works
+
+### User Tags & Rules (FF-225 to FF-234)
+- [ ] FF-225: User tag CRUD API routes
+- [ ] FF-226: User tag React hooks
+- [ ] FF-227: **TARGET tag special handling** — prominent display, +25 score boost
+- [ ] FF-228: LLM rule parser prompt + service — natural language to structured rule
+- [ ] FF-229: User rule CRUD API routes
+- [ ] FF-230: Rule application in scoring engine — stack modifiers
+- [ ] FF-231: User rules management UI
+- [ ] FF-232: Rule validation + error handling
+- [ ] FF-233: Rule application preview — show affected players
+- [ ] FF-234: Tag hierarchy display logic — TARGET overrides compact view
+
+### Player Browser UI (FF-235 to FF-244)
+- [ ] FF-235: Player Browser page scaffold (`/prep/players`)
+- [ ] FF-236: FFIPlayerIntelCard component — compact + expanded views
+- [ ] FF-237: System tag badge styling (per DESIGN_SYSTEM.md)
+- [ ] FF-238: **TARGET badge styling** — lime, prominent, always visible when set
+- [ ] FF-239: User tag inline editor — quick-add TARGET button
+- [ ] FF-240: Sentiment snippet display in expanded view
+- [ ] FF-241: Tag filter panel — system tags, user tags, ADP range
+- [ ] FF-242: ADP range slider filter
+- [ ] FF-243: Confirm/dismiss system tag actions
+- [ ] FF-244: Add to Prep Hub navigation
+
+### Integration & Polish (FF-245 to FF-252)
+- [ ] FF-245: Research pipeline intel integration — load and apply tags
+- [ ] FF-246: Draft board tag display — TARGET prominent
+- [ ] FF-247: Live draft tag-aware recommendations
+- [ ] FF-248: Post-draft tag accuracy analysis
+- [ ] FF-249: Mobile responsiveness
+- [ ] FF-250: Performance optimization — virtualized list
+- [ ] FF-251: End-to-end testing
+- [ ] FF-252: Documentation update
 
 ---
 
@@ -423,7 +495,9 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 | Milestone | Target | Status |
 |-----------|--------|--------|
 | **Personal Use MVP** | Draft Day 2025 | ✅ Complete |
-| **UI Redesign** | March 2026 | 🔄 In Progress |
+| **UI Redesign** | March 2026 | ✅ Complete |
+| **Player Intelligence Foundation** | March 2026 | 🔄 In Progress |
+| **Player Intelligence Full** | June 2026 | Planned |
 | **Live Draft Validation** | August 2026 | Pending |
 | **In-Season Features** | Sept 2026 | Planned |
 | **API Layer** | Oct 2026 | Planned |

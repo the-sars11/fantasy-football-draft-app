@@ -244,3 +244,231 @@ export interface StrategyUpdate {
   round_targets?: Record<Position, number[]> | null
   position_round_priority?: Record<string, Position[]> | null
 }
+
+// --- Player Intelligence System types ---
+
+export type SystemTagType = 'BREAKOUT' | 'SLEEPER' | 'VALUE' | 'BUST' | 'AVOID'
+export type UserTagType = 'target' | 'avoid' | 'watch' | 'sleeper' | 'breakout' | string
+export type SentimentType = 'bullish' | 'neutral' | 'bearish'
+export type SourceType = 'api' | 'scrape' | 'manual'
+export type RuleType = 'avoid' | 'target' | 'filter' | 'boost' | 'custom'
+export type ConditionOperator = 'equals' | 'not_equals' | 'greater_than' | 'less_than' | 'contains' | 'in_list'
+export type FetchStatus = 'success' | 'failed' | 'rate_limited' | 'awaiting_data'
+
+// System tag detected by sentiment analysis
+export interface SystemTag {
+  tag: SystemTagType
+  confidence: number // 0-1
+  sources: string[] // sources that contributed to this tag
+  reasoning: string
+  score_modifier: number
+  adp_gap?: number // for VALUE/AVOID tags
+}
+
+// Sentiment from a single source
+export interface SourceSentiment {
+  source: string
+  sentiment: SentimentType
+  mentions: string[] // relevant quotes/phrases
+  fetched_at: string
+}
+
+// Aggregated sentiment data
+export interface SentimentData {
+  sources: SourceSentiment[]
+  consensus_sentiment: SentimentType
+  sentiment_score: number // 0-100, higher = more bullish
+}
+
+// Source freshness tracking
+export interface SourceFreshness {
+  fetched_at: string
+  is_2026_data: boolean
+  data_type: string // 'rankings', 'projections', 'sentiment', etc.
+}
+
+// Player Intelligence record
+export interface PlayerIntel {
+  id: string
+  player_cache_id: string
+  player_name: string
+  season: number
+  sentiment_data: SentimentData
+  system_tags: SystemTag[]
+  source_freshness: Record<string, SourceFreshness>
+  advanced_metrics: Record<string, number> | null
+  computed_at: string
+  created_at: string
+}
+
+export interface PlayerIntelInsert {
+  player_cache_id: string
+  player_name: string
+  season?: number
+  sentiment_data?: SentimentData
+  system_tags?: SystemTag[]
+  source_freshness?: Record<string, SourceFreshness>
+  advanced_metrics?: Record<string, number> | null
+}
+
+// User tags for a player
+export interface UserTags {
+  id: string
+  user_id: string
+  player_cache_id: string
+  league_id: string | null
+  tags: UserTagType[]
+  note: string | null
+  override_system_tags: boolean
+  dismissed_system_tags: string[]
+  created_at: string
+  updated_at: string
+}
+
+export interface UserTagsInsert {
+  player_cache_id: string
+  league_id?: string | null
+  tags?: UserTagType[]
+  note?: string | null
+  override_system_tags?: boolean
+  dismissed_system_tags?: string[]
+}
+
+export interface UserTagsUpdate {
+  tags?: UserTagType[]
+  note?: string | null
+  override_system_tags?: boolean
+  dismissed_system_tags?: string[]
+}
+
+// Parsed rule condition
+export interface RuleCondition {
+  field: string // position, team, age, years_exp, injury_status, bye_week, adp, auction_value, tag
+  operator: ConditionOperator
+  value: string | number | string[]
+}
+
+// Parsed rule structure
+export interface ParsedRule {
+  action: RuleType
+  conditions: RuleCondition[]
+  score_modifier: number // -50 to +50
+  confidence: number // 0-1
+}
+
+// User rule record
+export interface UserRule {
+  id: string
+  user_id: string
+  league_id: string | null
+  rule_text: string
+  rule_type: RuleType
+  is_active: boolean
+  parsed_rule: ParsedRule
+  llm_interpretation: string | null
+  is_validated: boolean
+  validation_error: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface UserRuleInsert {
+  league_id?: string | null
+  rule_text: string
+  rule_type: RuleType
+  is_active?: boolean
+  parsed_rule: ParsedRule
+  llm_interpretation?: string | null
+  is_validated?: boolean
+  validation_error?: string | null
+}
+
+export interface UserRuleUpdate {
+  rule_text?: string
+  rule_type?: RuleType
+  is_active?: boolean
+  parsed_rule?: ParsedRule
+  llm_interpretation?: string | null
+  is_validated?: boolean
+  validation_error?: string | null
+}
+
+// Source freshness configuration
+export interface FreshnessConfig {
+  rankings_ttl_hours: number
+  projections_ttl_hours: number
+  sentiment_ttl_hours: number
+}
+
+// Source configuration
+export interface SourceConfig {
+  base_url: string
+  requires_auth?: boolean
+  rate_limit_per_hour?: number
+  data_types: string[]
+}
+
+// Scrape configuration
+export interface ScrapeConfig {
+  user_agent_rotation: boolean
+  rate_limit_delay_ms: number
+  retry_count: number
+}
+
+// Source registry record
+export interface SourceRegistry {
+  id: string
+  source_key: string
+  display_name: string
+  source_type: SourceType
+  config: SourceConfig
+  freshness_config: FreshnessConfig
+  consensus_weight: number
+  is_enabled: boolean
+  last_fetch_at: string | null
+  last_fetch_status: FetchStatus | null
+  last_fetch_error: string | null
+  season_data_available: boolean
+  season_data_checked_at: string | null
+  scrape_config: ScrapeConfig | null
+  created_at: string
+  updated_at: string
+}
+
+export interface SourceRegistryInsert {
+  source_key: string
+  display_name: string
+  source_type: SourceType
+  config?: SourceConfig
+  freshness_config?: FreshnessConfig
+  consensus_weight?: number
+  is_enabled?: boolean
+  scrape_config?: ScrapeConfig | null
+}
+
+export interface SourceRegistryUpdate {
+  display_name?: string
+  source_type?: SourceType
+  config?: SourceConfig
+  freshness_config?: FreshnessConfig
+  consensus_weight?: number
+  is_enabled?: boolean
+  last_fetch_at?: string | null
+  last_fetch_status?: FetchStatus | null
+  last_fetch_error?: string | null
+  season_data_available?: boolean
+  season_data_checked_at?: string | null
+  scrape_config?: ScrapeConfig | null
+}
+
+// Score modifiers for tags (constants)
+export const TAG_SCORE_MODIFIERS: Record<SystemTagType, number> = {
+  BREAKOUT: 15,
+  SLEEPER: 10,
+  VALUE: 12,
+  BUST: -20,
+  AVOID: -25,
+}
+
+// Special user tag score modifier
+export const TARGET_SCORE_MODIFIER = 25
