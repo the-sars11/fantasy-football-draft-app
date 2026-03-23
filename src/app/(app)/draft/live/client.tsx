@@ -1,48 +1,39 @@
 'use client'
 
 /**
- * LiveDraftClient
+ * LiveDraftClient (FF-066 Redesign)
  *
- * Main live draft dashboard. Combines:
- * - Draft state (picks via sheet polling or manual entry)
- * - Manual pick entry (FF-033)
- * - Remaining player pool with strategy scores (FF-034)
- * - Position scarcity tracker (FF-035)
- * - "Why?" explainability on every player (FF-036)
- *
- * - My roster panel with strategy grade (FF-037)
- * - League overview — all managers at a glance (FF-038)
- * - Manager tendency tracker (FF-039)
- * - Strategy swap (FF-P01)
- * - Draft flow monitor + alerts (FF-P02)
- * - Proactive pivot detection (FF-P03)
- *
- * Layout: two-column on desktop, stacked on mobile.
- * Left: pick log + manual entry + my roster + strategy + managers/tendencies
- * Right: alerts + player pool + scarcity
+ * Main live draft dashboard with FFI design system.
+ * Features: Real-time feed, strategy picker dropdown, My Squad panel, inline AI recs
  */
 
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useSearchParams } from 'next/navigation'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import {
   Loader2,
   Radio,
   Wifi,
   WifiOff,
-  Users,
-  DollarSign,
+  ChevronDown,
+  Sparkles,
+  Target,
+  AlertTriangle,
 } from 'lucide-react'
+import { cn } from '@/lib/utils'
+import {
+  FFICard,
+  FFIButton,
+  FFIBadge,
+  FFIPositionBadge,
+  FFIProgress,
+  FFISectionHeader,
+} from '@/components/ui/ffi-primitives'
 import { useDraftState } from '@/hooks/use-draft-state'
 import { ManualPickEntry } from '@/components/draft/manual-pick-entry'
 import { PlayerPool } from '@/components/draft/player-pool'
 import { PositionScarcityTracker } from '@/components/draft/position-scarcity'
-import { MyRoster } from '@/components/draft/my-roster'
 import { LeagueOverview } from '@/components/draft/league-overview'
 import { ManagerTendencies } from '@/components/draft/manager-tendencies'
-import { StrategySwap } from '@/components/draft/strategy-swap'
 import { DraftFlowAlerts } from '@/components/draft/draft-flow-alerts'
 import { PivotHistory } from '@/components/draft/pivot-history'
 import { AuctionAdvisor } from '@/components/draft/auction-advisor'
@@ -52,24 +43,233 @@ import { scorePlayersWithStrategy } from '@/lib/research/strategy/scoring'
 import { calculateScarcity, explainPlayer } from '@/lib/draft/explain'
 import { analyzeDraftFlow } from '@/lib/draft/flow-monitor'
 import { detectPivotOpportunity } from '@/lib/draft/pivot-detector'
-import type { Player } from '@/lib/players/types'
+import type { Player, Position } from '@/lib/players/types'
 import type { DraftSession, League, RosterSlots } from '@/lib/supabase/database.types'
 import type { ScoredPlayer } from '@/lib/research/strategy/scoring'
 import type { Strategy as DbStrategy } from '@/lib/supabase/database.types'
 import type { Explanation } from '@/lib/draft/explain'
 import { clearRecommendationCache } from '@/lib/draft/recommend'
 
-const posColors: Record<string, string> = {
-  QB: 'text-red-400',
-  RB: 'text-blue-400',
-  WR: 'text-green-400',
-  TE: 'text-orange-400',
-  K: 'text-purple-400',
-  DEF: 'text-yellow-400',
-}
-
 const DEFAULT_ROSTER: RosterSlots = {
   qb: 1, rb: 2, wr: 2, te: 1, flex: 1, k: 1, dst: 1, bench: 6, ir: 0,
+}
+
+// Strategy Picker Dropdown Component
+function StrategyPicker({
+  strategies,
+  activeStrategy,
+  onSelect,
+}: {
+  strategies: DbStrategy[]
+  activeStrategy: DbStrategy | null
+  onSelect: (strategy: DbStrategy) => void
+}) {
+  const [isOpen, setIsOpen] = useState(false)
+
+  if (strategies.length <= 1) return null
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full ffi-card-interactive flex items-center justify-between gap-2 px-3 py-2"
+      >
+        <div>
+          <div className="ffi-caption text-[var(--ffi-text-muted)]">ACTIVE STRATEGY</div>
+          <div className="ffi-title-md text-white flex items-center gap-2">
+            <Sparkles className="h-4 w-4 text-[var(--ffi-accent)]" />
+            {activeStrategy?.name ?? 'None Selected'}
+          </div>
+        </div>
+        <ChevronDown className={cn(
+          'h-5 w-5 text-[var(--ffi-text-muted)] transition-transform',
+          isOpen && 'rotate-180'
+        )} />
+      </button>
+
+      {isOpen && (
+        <div className="absolute top-full left-0 right-0 z-50 mt-1 ffi-card-elevated max-h-64 overflow-auto">
+          {strategies.map((s) => (
+            <button
+              key={s.id}
+              onClick={() => {
+                onSelect(s)
+                setIsOpen(false)
+              }}
+              className={cn(
+                'w-full text-left px-3 py-2 transition-colors',
+                s.id === activeStrategy?.id
+                  ? 'bg-[var(--ffi-accent)]/10 text-[var(--ffi-accent)]'
+                  : 'hover:bg-[var(--ffi-surface)] text-white'
+              )}
+            >
+              <div className="ffi-body-md font-medium">{s.name}</div>
+              {s.description && (
+                <div className="ffi-body-md text-[var(--ffi-text-muted)] truncate">
+                  {s.description}
+                </div>
+              )}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// Real-time Pick Feed Component
+function PickFeed({
+  picks,
+  format,
+}: {
+  picks: Array<{
+    pick_number: number
+    player_name: string
+    manager: string
+    position?: string
+    price?: number
+  }>
+  format: 'auction' | 'snake'
+}) {
+  const isAuction = format === 'auction'
+  const recentPicks = [...picks].reverse().slice(0, 10)
+
+  return (
+    <FFICard className="overflow-hidden">
+      <div className="flex items-center gap-2 mb-3">
+        <div className="w-2 h-2 rounded-full bg-[var(--ffi-danger)] animate-pulse" />
+        <span className="ffi-label text-[var(--ffi-text-secondary)]">LIVE FEED</span>
+        <span className="ffi-caption text-[var(--ffi-text-muted)] ml-auto">
+          {picks.length} PICKS
+        </span>
+      </div>
+
+      {picks.length === 0 ? (
+        <p className="ffi-body-md text-[var(--ffi-text-muted)] text-center py-4">
+          Waiting for first pick...
+        </p>
+      ) : (
+        <div className="space-y-1 max-h-48 overflow-auto">
+          {recentPicks.map((pick, idx) => (
+            <div
+              key={pick.pick_number}
+              className={cn(
+                'flex items-center gap-2 py-1.5 px-2 rounded-lg transition-all',
+                idx === 0 && 'bg-[var(--ffi-accent)]/10 ffi-animate-slide-in'
+              )}
+            >
+              <span className="ffi-caption text-[var(--ffi-text-muted)] w-6 text-right">
+                {pick.pick_number}
+              </span>
+              {pick.position && (
+                <FFIPositionBadge position={pick.position.toUpperCase() as Position} />
+              )}
+              <span className="ffi-body-md text-white font-medium flex-1 truncate">
+                {pick.player_name}
+              </span>
+              <span className="ffi-body-md text-[var(--ffi-text-secondary)] truncate max-w-20">
+                {pick.manager}
+              </span>
+              {isAuction && pick.price != null && (
+                <span className="ffi-label text-[var(--ffi-accent)] font-mono">
+                  ${pick.price}
+                </span>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </FFICard>
+  )
+}
+
+// My Squad Panel Component
+function MySquadPanel({
+  picks,
+  budget,
+  maxBid,
+  needs,
+  format,
+  rosterSlots,
+}: {
+  picks: Array<{ player_name: string; position?: string; price?: number }>
+  budget: number | null
+  maxBid: number | null
+  needs: Record<string, number>
+  format: 'auction' | 'snake'
+  rosterSlots: RosterSlots
+}) {
+  const isAuction = format === 'auction'
+  const totalSlots = Object.values(rosterSlots).reduce((a, b) => a + b, 0)
+  const filledSlots = picks.length
+
+  return (
+    <FFICard variant="elevated">
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <Target className="h-4 w-4 text-[var(--ffi-accent)]" />
+          <span className="ffi-label text-[var(--ffi-text-secondary)]">YOUR SQUAD</span>
+        </div>
+        <span className="ffi-label text-[var(--ffi-text-muted)]">
+          {filledSlots}/{totalSlots}
+        </span>
+      </div>
+
+      {/* Budget bar for auction */}
+      {isAuction && budget != null && (
+        <div className="mb-3">
+          <div className="flex justify-between items-center mb-1">
+            <span className="ffi-body-md text-[var(--ffi-text-secondary)]">Budget</span>
+            <span className="ffi-title-md text-[var(--ffi-accent)] font-mono">${budget}</span>
+          </div>
+          <FFIProgress value={(budget / (budget + 100)) * 100} status="elite" />
+          {maxBid != null && (
+            <span className="ffi-caption text-[var(--ffi-text-muted)]">
+              Max bid: ${maxBid}
+            </span>
+          )}
+        </div>
+      )}
+
+      {/* Position needs */}
+      <div className="mb-3">
+        <span className="ffi-caption text-[var(--ffi-text-muted)]">NEEDS</span>
+        <div className="flex flex-wrap gap-1 mt-1">
+          {Object.entries(needs).map(([pos, count]) => (
+            <FFIBadge key={pos} status="info" className="text-[10px]">
+              {pos} ×{count}
+            </FFIBadge>
+          ))}
+          {Object.keys(needs).length === 0 && (
+            <span className="ffi-body-md text-[var(--ffi-success)]">Roster complete!</span>
+          )}
+        </div>
+      </div>
+
+      {/* Recent squad picks */}
+      {picks.length > 0 && (
+        <div className="space-y-1 border-t border-[var(--ffi-border)]/20 pt-3">
+          {picks.slice(-5).reverse().map((pick, idx) => (
+            <div key={idx} className="flex items-center gap-2 text-sm">
+              {pick.position && (
+                <span className="ffi-caption text-[var(--ffi-text-muted)] w-8">
+                  {pick.position}
+                </span>
+              )}
+              <span className="ffi-body-md text-white flex-1 truncate">
+                {pick.player_name}
+              </span>
+              {isAuction && pick.price != null && (
+                <span className="ffi-label text-[var(--ffi-text-secondary)] font-mono">
+                  ${pick.price}
+                </span>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </FFICard>
+  )
 }
 
 export function LiveDraftClient() {
@@ -97,7 +297,6 @@ export function LiveDraftClient() {
 
     async function load() {
       try {
-        // Fetch session and league in parallel with players and strategy
         const [sessionRes, playersRes, stratRes] = await Promise.all([
           fetch(`/api/draft/sessions/${sessionId}`),
           fetch('/api/players'),
@@ -121,7 +320,6 @@ export function LiveDraftClient() {
             (s: DbStrategy) => s.league_id === sessionData.session.league_id
           )
           setAllStrategies(leagueStrats)
-          // Find active strategy for this league
           const active = leagueStrats.find((s: DbStrategy) => s.is_active)
           if (active) setStrategy(active)
         }
@@ -147,7 +345,6 @@ export function LiveDraftClient() {
     getBudget,
     getMaxBidFor,
     isPolling,
-    lastPollAt,
     sheetError,
     saving,
   } = useDraftState({
@@ -158,7 +355,6 @@ export function LiveDraftClient() {
   // Score players with active strategy
   const scoredPlayers: ScoredPlayer[] = useMemo(() => {
     if (!strategy || players.length === 0) {
-      // No strategy — return players with neutral scores
       return players.map(p => ({
         player: p,
         strategyScore: 50,
@@ -180,37 +376,36 @@ export function LiveDraftClient() {
     return calculateScarcity(available, state?.manager_order.length ?? 10)
   }, [players, draftedNames, state?.manager_order.length])
 
-  // Explanation generator (memoized callback for player pool)
+  // Explanation generator
   const getExplanation = useCallback((scored: ScoredPlayer): Explanation | null => {
     if (!state) return null
     const available = players.filter(p => !draftedNames.has(p.name.toLowerCase()))
-    const managerName = state.manager_order[0] // "Me" / first manager
+    const managerName = state.manager_order[0]
     return explainPlayer(scored, state, managerName, available)
   }, [state, players, draftedNames])
 
-  // Draft flow monitor (FF-P02)
+  // Draft flow monitor
   const flow = useMemo(() => {
     if (!state) return null
     return analyzeDraftFlow(state, scoredPlayers, draftedNames, players)
   }, [state, scoredPlayers, draftedNames, players])
 
-  // Pivot detection (FF-P03)
+  // Pivot detection
   const pivotSuggestion = useMemo(() => {
     if (!state || !flow || pivotDismissed) return null
     return detectPivotOpportunity(strategy, allStrategies, state, flow, scoredPlayers, draftedNames)
   }, [strategy, allStrategies, state, flow, scoredPlayers, draftedNames, pivotDismissed])
 
-  // Strategy swap handler (FF-P01 + FF-P05)
+  // Strategy swap handler
   const handleStrategySwap = useCallback((newStrategy: DbStrategy, fromRecommendation = false) => {
     const prevName = strategy?.name ?? 'None'
     setStrategy(newStrategy)
-    clearRecommendationCache() // FF-055: Force fresh recommendation after strategy swap
+    clearRecommendationCache()
     setAllStrategies(prev => prev.map(s => ({
       ...s,
       is_active: s.id === newStrategy.id,
     })))
     setPivotDismissed(false)
-    // Record in pivot history (FF-P05)
     setPivotHistory(prev => [...prev, {
       pickNumber: state?.total_picks ?? 0,
       fromStrategy: prevName,
@@ -220,13 +415,13 @@ export function LiveDraftClient() {
     }])
   }, [strategy?.name, state?.total_picks])
 
-  // Dismiss pivot with history tracking (FF-P05)
+  // Dismiss pivot
   const handleDismissPivot = useCallback(() => {
     if (pivotSuggestion && strategy) {
       setPivotHistory(prev => [...prev, {
         pickNumber: state?.total_picks ?? 0,
         fromStrategy: strategy.name,
-        toStrategy: strategy.name, // stayed with current
+        toStrategy: strategy.name,
         reason: 'dismissed_recommendation',
         recommendedStrategy: pivotSuggestion.strategy.name,
         timestamp: new Date(),
@@ -239,9 +434,9 @@ export function LiveDraftClient() {
 
   if (loading) {
     return (
-      <div className="flex items-center gap-2 text-muted-foreground py-8">
-        <Loader2 className="h-4 w-4 animate-spin" />
-        Loading draft session...
+      <div className="flex items-center justify-center gap-3 py-12">
+        <Loader2 className="h-5 w-5 animate-spin text-[var(--ffi-primary)]" />
+        <span className="ffi-body-lg text-[var(--ffi-text-secondary)]">Loading draft session...</span>
       </div>
     )
   }
@@ -249,13 +444,19 @@ export function LiveDraftClient() {
   if (error) {
     return (
       <div className="space-y-4">
-        <h1 className="text-2xl font-bold">Live Draft</h1>
-        <div className="rounded-lg border border-destructive/50 bg-destructive/10 px-4 py-3 text-sm text-destructive">
-          {error}
-        </div>
-        <Button variant="outline" onClick={() => window.history.back()}>
-          Go Back
-        </Button>
+        <FFISectionHeader title="Live Draft" subtitle="Real-time draft assistant" />
+        <FFICard variant="elevated" className="border-l-4 border-l-[var(--ffi-danger)]">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="h-5 w-5 text-[var(--ffi-danger)] shrink-0 mt-0.5" />
+            <div>
+              <p className="ffi-title-md text-[var(--ffi-danger)]">Error Loading Draft</p>
+              <p className="ffi-body-md text-[var(--ffi-text-secondary)]">{error}</p>
+            </div>
+          </div>
+          <FFIButton variant="secondary" onClick={() => window.history.back()} className="mt-4">
+            Go Back
+          </FFIButton>
+        </FFICard>
       </div>
     )
   }
@@ -264,87 +465,58 @@ export function LiveDraftClient() {
 
   const isAuction = state.format === 'auction'
   const managerNames = state.manager_order
-  const myManager = managerNames[0] // first manager = "Me"
+  const myManager = managerNames[0]
   const myBudget = getBudget(myManager)
   const myMaxBid = getMaxBidFor(myManager)
   const myNeeds = getNeeds(myManager)
+  const myPicks = state.picks.filter(p => p.manager === myManager)
 
   return (
-    <div className="space-y-3">
-      {/* Compact header — fits on one mobile line */}
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2 min-w-0">
-          <Radio className="h-4 w-4 text-red-400 shrink-0" />
-          <h1 className="text-base font-bold truncate">Live Draft</h1>
+    <div className="space-y-4">
+      {/* Header */}
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="p-2 rounded-xl bg-[var(--ffi-danger)]/20">
+            <Radio className="h-5 w-5 text-[var(--ffi-danger)]" />
+          </div>
+          <div>
+            <h1 className="ffi-display-md text-white">Live Draft</h1>
+            <p className="ffi-body-md text-[var(--ffi-text-secondary)]">
+              {league?.name} • {isAuction ? 'Auction' : 'Snake'} • {managerNames.length} Teams
+            </p>
+          </div>
         </div>
 
-        <div className="flex items-center gap-2 text-xs shrink-0">
-          {/* Polling status */}
+        <div className="flex items-center gap-2 shrink-0">
           {session.sheet_url && (
-            isPolling
-              ? <Wifi className="h-3 w-3 text-green-400" />
-              : <WifiOff className="h-3 w-3 text-red-400" />
+            <div className={cn(
+              'flex items-center gap-1 px-2 py-1 rounded-full',
+              isPolling
+                ? 'bg-[var(--ffi-success)]/20 text-[var(--ffi-success)]'
+                : 'bg-[var(--ffi-danger)]/20 text-[var(--ffi-danger)]'
+            )}>
+              {isPolling ? <Wifi className="h-3 w-3" /> : <WifiOff className="h-3 w-3" />}
+              <span className="ffi-caption">{isPolling ? 'LIVE' : 'OFFLINE'}</span>
+            </div>
           )}
-          {saving && <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />}
-          <Badge variant="outline" className="text-[10px]">
-            {state.total_picks} pick{state.total_picks !== 1 ? 's' : ''}
-          </Badge>
-          {state.status === 'completed' && (
-            <Badge className="bg-green-500/20 text-green-400 border-green-500/30 text-[10px]">
-              DONE
-            </Badge>
-          )}
+          {saving && <Loader2 className="h-4 w-4 animate-spin text-[var(--ffi-primary)]" />}
+          <FFIBadge status={state.status === 'completed' ? 'success' : 'info'}>
+            {state.status === 'completed' ? 'COMPLETE' : `${state.total_picks} PICKS`}
+          </FFIBadge>
         </div>
-      </div>
-
-      {/* My status bar — compact, always visible */}
-      <div className="flex items-center gap-2 flex-wrap text-xs">
-        <span className="font-semibold">{myManager}</span>
-        {isAuction && myBudget != null && (
-          <>
-            <span className="font-mono">
-              <DollarSign className="inline h-3 w-3" />
-              {myBudget}
-            </span>
-            {myMaxBid != null && (
-              <span className="text-muted-foreground">(max ${myMaxBid})</span>
-            )}
-          </>
-        )}
-        {!isAuction && state.current_round && (
-          <span className="text-muted-foreground">
-            Rd {state.current_round}.{state.current_pick_in_round}
-          </span>
-        )}
-        <span className="text-muted-foreground hidden sm:inline">
-          · {league?.name} · {isAuction ? 'Auction' : 'Snake'} / {managerNames.length}T
-        </span>
-      </div>
-
-      {/* Position needs — compact inline */}
-      <div className="flex flex-wrap gap-1">
-        {Object.entries(myNeeds).map(([pos, needed]) => (
-          <Badge key={pos} variant="outline" className="text-[10px] px-1.5 py-0">
-            {pos} ×{needed}
-          </Badge>
-        ))}
-        {Object.keys(myNeeds).length === 0 && (
-          <span className="text-[10px] text-muted-foreground">All positions filled</span>
-        )}
       </div>
 
       {sheetError && (
-        <div className="rounded-lg border border-orange-500/30 bg-orange-500/10 px-3 py-2 text-xs text-orange-400">
-          Sheet error: {sheetError}
-        </div>
+        <FFICard className="border-l-4 border-l-[var(--ffi-warning)]">
+          <p className="ffi-body-md text-[var(--ffi-warning)]">Sheet sync error: {sheetError}</p>
+        </FFICard>
       )}
 
-      {/* Mobile: Enter Pick + Pool stacked (most important first)
-          Desktop: two-column layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-[340px_1fr] gap-3">
-        {/* Left column on desktop */}
-        <div className="space-y-3">
-          {/* Manual pick entry — always first on mobile */}
+      {/* Main layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-4">
+        {/* Left column */}
+        <div className="space-y-4">
+          {/* Manual pick entry */}
           {state.status !== 'completed' && (
             <ManualPickEntry
               players={players}
@@ -359,48 +531,28 @@ export function LiveDraftClient() {
             />
           )}
 
-          {/* Recent picks log */}
-          <Card>
-            <CardHeader className="pb-2 pt-3">
-              <CardTitle className="text-sm flex items-center gap-2">
-                <Users className="h-3.5 w-3.5" />
-                Pick Log
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pb-3">
-              {state.picks.length === 0 ? (
-                <p className="text-xs text-muted-foreground py-3 text-center">
-                  No picks yet
-                </p>
-              ) : (
-                <div className="max-h-48 overflow-auto space-y-0.5">
-                  {[...state.picks].reverse().map(pick => (
-                    <div
-                      key={pick.pick_number}
-                      className="flex items-center gap-1.5 py-0.5 px-1.5 rounded text-xs hover:bg-muted/30"
-                    >
-                      <span className="font-mono text-muted-foreground w-5 text-right shrink-0 text-[10px]">
-                        {pick.pick_number}
-                      </span>
-                      {pick.position && (
-                        <span className={`font-semibold text-[10px] ${posColors[pick.position.toUpperCase()] ?? 'text-foreground'}`}>
-                          {pick.position}
-                        </span>
-                      )}
-                      <span className="flex-1 font-medium truncate">{pick.player_name}</span>
-                      <span className="text-muted-foreground truncate max-w-16">{pick.manager}</span>
-                      {isAuction && pick.price != null && (
-                        <span className="font-mono text-muted-foreground">${pick.price}</span>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+          {/* Strategy picker dropdown */}
+          <StrategyPicker
+            strategies={allStrategies}
+            activeStrategy={strategy}
+            onSelect={(s) => handleStrategySwap(s, false)}
+          />
 
-          {/* Auction advisor (FF-040 through FF-044) */}
-          {isAuction && (
+          {/* My Squad panel */}
+          <MySquadPanel
+            picks={myPicks}
+            budget={myBudget}
+            maxBid={myMaxBid}
+            needs={myNeeds}
+            format={state.format}
+            rosterSlots={rosterSlots}
+          />
+
+          {/* Real-time pick feed */}
+          <PickFeed picks={state.picks} format={state.format} />
+
+          {/* Auction/Snake advisor with inline AI recs */}
+          {isAuction ? (
             <AuctionAdvisor
               state={state}
               managerName={myManager}
@@ -408,10 +560,7 @@ export function LiveDraftClient() {
               draftedNames={draftedNames}
               strategy={strategy}
             />
-          )}
-
-          {/* Snake advisor (FF-045 through FF-049) */}
-          {!isAuction && (
+          ) : (
             <SnakeAdvisor
               state={state}
               managerName={myManager}
@@ -421,45 +570,17 @@ export function LiveDraftClient() {
             />
           )}
 
-          {/* Strategy swap (FF-P01) */}
-          {allStrategies.length > 1 && (
-            <StrategySwap
-              strategies={allStrategies}
-              activeStrategy={strategy}
-              leagueId={session.league_id}
-              onSwap={handleStrategySwap}
-            />
-          )}
-
-          {/* My roster with strategy grade (FF-037) */}
-          <MyRoster
-            state={state}
-            managerName={myManager}
-            rosterSlots={rosterSlots}
-            strategy={strategy}
-          />
-
-          {/* League overview — all managers (FF-038), desktop only */}
-          <div className="hidden lg:block">
+          {/* Desktop only panels */}
+          <div className="hidden lg:block space-y-4">
             <LeagueOverview state={state} myManager={myManager} />
-          </div>
-
-          {/* Manager tendencies (FF-039), desktop only */}
-          <div className="hidden lg:block">
             <ManagerTendencies state={state} myManager={myManager} />
+            {pivotHistory.length > 0 && <PivotHistory entries={pivotHistory} />}
           </div>
-
-          {/* Pivot history (FF-P05), desktop only */}
-          {pivotHistory.length > 0 && (
-            <div className="hidden lg:block">
-              <PivotHistory entries={pivotHistory} />
-            </div>
-          )}
         </div>
 
-        {/* Right column: alerts + scarcity + player pool */}
-        <div className="space-y-3">
-          {/* Draft flow alerts + pivot suggestions (FF-P02/P03) */}
+        {/* Right column */}
+        <div className="space-y-4">
+          {/* Draft flow alerts + pivot suggestions */}
           {flow && (
             <DraftFlowAlerts
               flow={flow}
@@ -487,8 +608,8 @@ export function LiveDraftClient() {
         </div>
       </div>
 
-      {/* League overview + tendencies + pivot history — shown on mobile below everything else */}
-      <div className="lg:hidden space-y-3">
+      {/* Mobile panels */}
+      <div className="lg:hidden space-y-4">
         <LeagueOverview state={state} myManager={myManager} />
         <ManagerTendencies state={state} myManager={myManager} />
         {pivotHistory.length > 0 && <PivotHistory entries={pivotHistory} />}
