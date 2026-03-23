@@ -431,35 +431,60 @@ export function FFIAIRecommendation({
   return (
     <div
       className={cn(
-        variant === "strategic" ? "ffi-card-elevated" : "ffi-card",
+        "relative overflow-hidden rounded-3xl p-6",
+        "bg-gradient-to-br from-slate-900/90 to-slate-900/60",
+        "border border-slate-700/80",
+        "backdrop-blur-lg",
+        "shadow-[0_8px_30px_rgba(0,0,0,0.6),0_0_15px_rgba(85,130,230,0.1)]",
         className
       )}
       {...props}
     >
-      <div className="flex items-center gap-2 mb-2">
-        <span className="text-[var(--ffi-primary)]">
-          {variant === "strategic" ? "⚙️" : "★"}
-        </span>
-        <span className="ffi-label text-[var(--ffi-text-muted)]">
-          {variant === "strategic" ? "SYSTEM STATUS" : "AI RECOMMENDATION"}
-        </span>
+      {/* Background chart decoration */}
+      <div className="absolute bottom-0 right-0 opacity-10 pointer-events-none">
+        <svg fill="none" height="80" viewBox="0 0 120 80" width="120" xmlns="http://www.w3.org/2000/svg">
+          <path d="M0 80L20 60L40 70L60 30L80 50L100 10L120 40V80H0Z" fill="white" />
+        </svg>
       </div>
-      <h4 className="ffi-title-md text-white mb-2">{title}</h4>
-      <p className="ffi-body-md text-[var(--ffi-text-secondary)] mb-4">{message}</p>
-      {(primaryAction || secondaryAction) && (
-        <div className="flex gap-2">
-          {primaryAction && (
-            <FFIButton variant="primary" size="sm" onClick={primaryAction.onClick}>
-              {primaryAction.label}
-            </FFIButton>
-          )}
-          {secondaryAction && (
-            <FFIButton variant="secondary" size="sm" onClick={secondaryAction.onClick}>
-              {secondaryAction.label}
-            </FFIButton>
-          )}
-        </div>
-      )}
+
+      <div className="relative z-10">
+        {/* Status badge */}
+        <span className="inline-block px-3 py-1 rounded-full bg-slate-800 border border-slate-700 text-[10px] font-bold text-[var(--ffi-accent)] tracking-widest uppercase mb-4 shadow-[0_0_10px_rgba(57,255,20,0.2)]">
+          {variant === "strategic" ? "System Status" : "AI Recommendation"}
+        </span>
+
+        {/* Title */}
+        <h2 className="text-2xl font-black italic uppercase tracking-tight text-white mb-2 leading-none">
+          {title}
+        </h2>
+
+        {/* Message */}
+        <p className="text-sm text-slate-400 mb-6 leading-relaxed">
+          {message}
+        </p>
+
+        {/* Action buttons */}
+        {(primaryAction || secondaryAction) && (
+          <div className="flex gap-3">
+            {primaryAction && (
+              <button
+                onClick={primaryAction.onClick}
+                className="flex-1 bg-[var(--ffi-accent)] text-black font-extrabold py-3 px-4 rounded-xl hover:brightness-110 transition-all shadow-[0_4px_20px_rgba(57,255,20,0.4)] text-sm tracking-tight uppercase"
+              >
+                {primaryAction.label}
+              </button>
+            )}
+            {secondaryAction && (
+              <button
+                onClick={secondaryAction.onClick}
+                className="flex-1 bg-slate-800/80 border border-slate-700 text-white font-bold py-3 px-4 rounded-xl hover:bg-slate-700 transition-colors text-sm"
+              >
+                {secondaryAction.label}
+              </button>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   )
 }

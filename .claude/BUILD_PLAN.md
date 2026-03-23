@@ -207,6 +207,35 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
   - Filter change: smooth reorder animation (layout transition)
   - Sort change: cards smoothly rearrange position
 
+### Sprint 10.7: HTML Prototype → React Port
+> **Source files:** UI/draft_board/code.html, UI/Fantasy_Football - Prep Hub 1/code.html, UI/Post Draft Analysis Screen/code.html
+> **Goal:** Convert HTML prototypes to React components using exact Tailwind classes
+
+#### Foundation
+- [x] FF-095: Create `.claude/DESIGN_SYSTEM.md` — locked reference derived from UI/draft_board/DESIGN.md ("Tactical Hologram" philosophy)
+- [x] FF-096: Update globals.css — add color tokens from HTML prototypes (surface-container-*, secondary #2ff801, primary #8bacff, font families)
+
+#### Draft Board Port (UI/draft_board/code.html → React)
+- [x] FF-097: Create FFIPlayerCard component — port glass-panel player card (numbered rank, badges, auction value, expand chevron)
+- [x] FF-098: Create FFIAIInsight component — port expandable AI insight section (confidence bar, "FULL ANALYTICS" button)
+- [x] FF-099: Port player-pool.tsx — replace Table with FFIPlayerCard list, glass-panel cards, position filter buttons with glow
+- [x] FF-100: Port position filter tabs — active: bg-secondary with neon glow, inactive: bg-surface-container-high
+
+#### Prep Hub Port (UI/Fantasy_Football - Prep Hub 1/code.html → React)
+- [x] FF-101: Port prep hub page — gradient background with light streaks, hub action cards, "Optimize Your Edge" AI card
+
+#### Post-Draft Analysis Port (UI/Post Draft Analysis Screen/code.html → React)
+- [x] FF-102: Port post-draft review page — grade hero (B+), Positional Power Rankings, pick-by-pick timeline with STEAL/REACH/PIVOT badges
+
+#### Navigation Port
+- [x] FF-103: Port bottom navigation — glass backdrop blur, active state glow, rounded top, safe area padding
+
+#### Verification
+- [ ] FF-104: Visual comparison audit — prototypes side-by-side with running app
+- [ ] FF-105: Class audit — grep for generic shadcn classes, should be minimal
+
+---
+
 ### Sprint 11: Advanced Views + New Features
 - [ ] FF-073: Remaining Needs + Positional Scarcity redesign — smooth gradient bars, spend range indicators, critical/stable/elite status labels
 - [ ] FF-074: Post-Draft Analysis redesign — letter grade hero with glow, story-driven pick-by-pick breakdown with contextual narratives, color-coded grades (STEAL/REACH/AI PIVOT)

@@ -24,32 +24,28 @@ interface HubCardProps {
   icon: React.ReactNode
   title: string
   subtitle: string
-  variant?: 'primary' | 'secondary'
 }
 
-function HubCard({ href, icon, title, subtitle, variant = 'secondary' }: HubCardProps) {
+function HubCard({ href, icon, title, subtitle }: HubCardProps) {
   return (
     <Link href={href} className="block group">
       <FFICard variant="interactive" className="h-full">
-        <div className="flex items-start gap-4">
-          <div className={`
-            p-2.5 rounded-xl shrink-0
-            ${variant === 'primary'
-              ? 'bg-[var(--ffi-accent)]/15 text-[var(--ffi-accent)]'
-              : 'bg-[var(--ffi-primary)]/15 text-[var(--ffi-primary)]'
-            }
-          `}>
-            {icon}
+        <div className="flex items-center gap-4">
+          {/* Large icon container like mockup */}
+          <div className="w-12 h-12 rounded-xl bg-slate-800/80 border border-slate-700 flex items-center justify-center shrink-0 group-hover:bg-slate-700 transition-colors">
+            <div className="text-[var(--ffi-accent)]">
+              {icon}
+            </div>
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="ffi-title-lg text-white group-hover:text-[var(--ffi-accent)] transition-colors">
+            <h3 className="font-bold text-slate-100 group-hover:text-[var(--ffi-accent)] transition-colors">
               {title}
             </h3>
-            <p className="ffi-body-md text-[var(--ffi-text-secondary)] mt-0.5">
+            <p className="text-xs text-slate-400">
               {subtitle}
             </p>
           </div>
-          <ChevronRight className="h-5 w-5 text-[var(--ffi-text-muted)] group-hover:text-[var(--ffi-accent)] group-hover:translate-x-1 transition-all shrink-0 mt-1" />
+          <ChevronRight className="h-5 w-5 text-slate-500 group-hover:text-[var(--ffi-accent)] group-hover:translate-x-1 transition-all shrink-0" />
         </div>
       </FFICard>
     </Link>
@@ -92,7 +88,6 @@ export default function PrepPage() {
           icon={<Settings2 className="h-5 w-5" />}
           title="Configure League"
           subtitle="Set up your league settings, roster, and scoring"
-          variant="primary"
         />
 
         <HubCard
@@ -100,7 +95,6 @@ export default function PrepPage() {
           icon={<Sparkles className="h-5 w-5" />}
           title="Draft Strategies"
           subtitle="AI-generated strategies tailored to your league"
-          variant="primary"
         />
 
         <HubCard

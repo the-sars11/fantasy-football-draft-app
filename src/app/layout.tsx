@@ -21,7 +21,7 @@ const oswald = Oswald({
 })
 
 export const metadata: Metadata = {
-  title: 'FFIntelligence',
+  title: 'Fantasy Football Intelligence',
   description: 'AI-powered fantasy football draft intelligence',
 }
 

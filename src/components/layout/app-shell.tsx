@@ -69,11 +69,17 @@ export function AppShell({
 
   return (
     <NavProvider>
-    <div className="flex h-dvh flex-col md:flex-row overflow-hidden ffi-bg-gradient">
+    <div className="flex h-dvh flex-col md:flex-row overflow-hidden ffi-bg-gradient relative">
+      {/* Tactical hologram visual effects */}
+      <div className="light-streak pointer-events-none" />
+      <div className="light-streak-2 pointer-events-none" />
+      <div className="light-streak-3 pointer-events-none" />
+      <div className="flash-effect pointer-events-none" />
+      <div className="flash-effect-2 pointer-events-none" />
       {/* Desktop sidebar — hidden on mobile */}
       <aside
         className={cn(
-          'hidden md:flex flex-col border-r border-[var(--ffi-border)]/20 ffi-surface-secondary transition-all duration-200',
+          'hidden md:flex flex-col border-r border-[var(--ffi-border)]/20 ffi-surface-secondary transition-all duration-200 relative z-10',
           collapsed ? 'w-14' : 'w-56'
         )}
       >
@@ -87,9 +93,8 @@ export function AppShell({
           />
           {!collapsed && (
             <span className="ml-2 text-sm font-semibold truncate">
-              <span className="text-white">FF</span>
-              <span className="text-[var(--ffi-primary)]">I</span>
-              <span className="text-[var(--ffi-text-secondary)] font-normal ml-1">ntelligence</span>
+              <span className="text-white">Fantasy Football</span>
+              <span className="text-[var(--ffi-primary)] ml-1">Intelligence</span>
             </span>
           )}
         </div>
@@ -166,7 +171,7 @@ export function AppShell({
       </aside>
 
       {/* Mobile top header — hidden on desktop */}
-      <header className="flex md:hidden items-center justify-between border-b border-[var(--ffi-border)]/20 ffi-surface-secondary px-4 h-12 shrink-0">
+      <header className="flex md:hidden items-center justify-between border-b border-[var(--ffi-border)]/20 ffi-surface-secondary px-4 h-12 shrink-0 relative z-10">
         <div className="flex items-center gap-2">
           <Image
             src="/icons/FFI - 32x32 - Favicon.png"
@@ -176,7 +181,7 @@ export function AppShell({
           />
           <span className="text-sm font-semibold">
             <span className="text-white">FF</span>
-            <span className="text-[var(--ffi-primary)]">I</span>
+            <span className="text-[var(--ffi-primary)]">Intelligence</span>
           </span>
         </div>
         <div className="flex items-center gap-2">
@@ -186,7 +191,7 @@ export function AppShell({
       </header>
 
       {/* Main content — fills space between header and bottom nav on mobile */}
-      <main className="flex-1 overflow-y-auto relative">
+      <main className="flex-1 overflow-y-auto relative z-10">
         {/* Desktop: just page transition. Mobile: swipe carousel + page transition */}
         <div className="hidden md:block h-full">
           <PageTransition>
@@ -202,8 +207,8 @@ export function AppShell({
         </div>
       </main>
 
-      {/* Mobile bottom tab bar — hidden on desktop */}
-      <nav className="flex md:hidden items-center justify-around border-t border-[var(--ffi-border)]/20 ffi-glass-heavy h-16 shrink-0 safe-bottom">
+      {/* Mobile bottom tab bar — hidden on desktop (FF-103: Tactical Hologram nav) */}
+      <nav className="flex md:hidden items-center justify-around border-t border-white/5 backdrop-blur-2xl bg-[#031018]/90 h-16 shrink-0 safe-bottom rounded-t-xl shadow-[0_-4px_20px_rgba(0,0,0,0.5)]">
         {navItems.map((item) => {
           const isActive = pathname.startsWith(item.href)
           const Icon = item.icon
