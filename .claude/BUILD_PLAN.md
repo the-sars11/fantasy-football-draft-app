@@ -232,13 +232,13 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 
 #### Verification
 - [ ] FF-104: Visual comparison audit — prototypes side-by-side with running app
-- [ ] FF-105: Class audit — grep for generic shadcn classes, should be minimal
+- [x] FF-105: Class audit — grep for generic shadcn classes (53 files still have bg-muted/text-muted-foreground/border-border, 3 files use <Table>)
 
 ---
 
 ### Sprint 11: Advanced Views + New Features
-- [ ] FF-073: Remaining Needs + Positional Scarcity redesign — smooth gradient bars, spend range indicators, critical/stable/elite status labels
-- [ ] FF-074: Post-Draft Analysis redesign — letter grade hero with glow, story-driven pick-by-pick breakdown with contextual narratives, color-coded grades (STEAL/REACH/AI PIVOT)
+- [x] FF-073: Remaining Needs + Positional Scarcity redesign — smooth gradient bars, spend range indicators, critical/stable/elite status labels
+- [x] FF-074: Post-Draft Analysis redesign — letter grade hero with glow, story-driven pick-by-pick breakdown with contextual narratives, color-coded grades (STEAL/REACH/AI PIVOT), segmented progress bars for Positional Power Rankings
 - [ ] FF-075: Per-team exportable reports — generate analysis for EVERY team in league, email-able format, contextual callouts ("Reggie took the last WR1 which forced you to overbid")
 - [ ] FF-076: Trash Talk system — live alerts during draft (overpay, roster imbalance, bye week disasters), post-draft "How Everyone Screwed Up" roast report
 - [ ] FF-077: Mobile polish pass — bottom nav feel, touch targets (44px min), responsive layouts across all redesigned screens
@@ -252,3 +252,181 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 - [ ] FF-079: Yahoo OAuth adapter (FF-011 deferred) — if Tyler wants auto-pull from Yahoo
 - [ ] FF-080: Full pre-draft data pull with 2025 season data — verify all sources working
 - [ ] FF-081: Draft day checklist — confirm Google Sheet template, test sheet polling, verify mobile experience on both phones
+
+---
+
+## Phase 8: In-Season AI Companion (Post-Draft → Week 17)
+
+> **Goal:** Transform FFI from a 1x/year draft tool to a 17+ week season-long companion
+> **Value:** Increases LTV from $20-40 to $50-100/year, dramatically improves retention
+
+### Data Infrastructure
+- [ ] FF-110: Weekly projections ingestion — pull fresh projections from ESPN, Sleeper, FantasyPros every Tuesday
+- [ ] FF-111: Injury/status tracker — monitor player status changes (Q/D/O/IR), update projections accordingly
+- [ ] FF-112: Matchup data — defensive rankings vs. position, weather data, Vegas lines for game script
+- [ ] FF-113: Waiver wire trending — track add/drop velocity from Sleeper + ESPN
+
+### Start/Sit Advisor
+- [ ] FF-114: Roster sync — connect to user's ESPN/Yahoo/Sleeper league, pull current roster weekly
+- [ ] FF-115: Multi-source aggregation — pull start/sit rankings from 5+ expert sources
+- [ ] FF-116: Confidence scoring — weight experts by historical accuracy, surface consensus vs. contrarian takes
+- [ ] FF-117: AI contextualization — "Start X over Y because [matchup + recent performance + expert consensus]"
+- [ ] FF-118: Start/Sit UI — side-by-side comparison, confidence bars, expandable reasoning
+
+### Waiver Wire AI
+- [ ] FF-119: Available player scanner — identify top pickups based on ownership %, trend velocity, upcoming schedule
+- [ ] FF-120: Roster fit analysis — "Player X fills your RB2 hole and has a favorable playoff schedule"
+- [ ] FF-121: FAAB bid recommendations — "Bid $X (Y% of remaining budget) — here's why"
+- [ ] FF-122: Priority ranking — ordered list of pickups with confidence + reasoning
+- [ ] FF-123: Waiver Wire UI — prioritized list, bid suggestions, one-tap add to watchlist
+
+### Trade Analyzer
+- [ ] FF-124: Trade calculator engine — Rest-of-Season (ROS) value per player, adjusted for YOUR league scoring
+- [ ] FF-125: Roster impact analysis — "This trade improves your ROS ceiling by X% and shores up your WR2 slot"
+- [ ] FF-126: Fair trade finder — "To get [player], offer [these combinations]"
+- [ ] FF-127: Trade veto predictor — flag lopsided trades before you embarrass yourself
+- [ ] FF-128: Trade UI — enter trade, see instant analysis, share link with trade partner
+
+### Weekly Matchup Preview
+- [ ] FF-129: Head-to-head projections — your team vs. opponent, position-by-position breakdown
+- [ ] FF-130: Leverage plays — "You're projected to lose by 6 — here's how to swing it"
+- [ ] FF-131: Ceiling/floor analysis — identify high-variance plays for chasing vs. protecting leads
+- [ ] FF-132: Matchup UI — visual comparison, key battles highlighted
+
+### Notifications & Alerts
+- [ ] FF-133: Push notification system — set up for mobile (web push + PWA)
+- [ ] FF-134: Injury alerts — "Your starter [X] is now Questionable — here are backup options"
+- [ ] FF-135: Waiver processing alerts — "Waiver results are in — you got [X], missed [Y]"
+- [ ] FF-136: Weekly prep reminder — "Your Week N lineup is unset — review now"
+
+---
+
+## Phase 9: API Layer for B2B / White-Label (Platform Play)
+
+> **Goal:** Package the AI engine as an API that other fantasy apps can license
+> **Value:** One B2B deal could be worth 10,000+ individual users
+> **Target partners:** Sleeper, Underdog, Fantrax, PrizePicks, sports media (Bleacher Report, The Ringer)
+
+### API Architecture
+- [ ] FF-140: API route structure — `/api/v1/analyze-roster`, `/api/v1/recommend-waiver`, `/api/v1/evaluate-trade`, `/api/v1/start-sit`
+- [ ] FF-141: Request/response schemas — JSON schemas for all endpoints, versioned
+- [ ] FF-142: Rate limiting — per-API-key limits, tiered by plan
+- [ ] FF-143: API key management — generate keys, track usage, revoke access
+- [ ] FF-144: Authentication layer — API keys for B2B, optional OAuth for user-context calls
+
+### Developer Experience
+- [ ] FF-145: API documentation site — OpenAPI spec, interactive playground, code examples (Python, JS, cURL)
+- [ ] FF-146: SDKs — lightweight wrappers for Python and JavaScript
+- [ ] FF-147: Sandbox environment — test API with mock data, no rate limits
+- [ ] FF-148: Webhook support — push notifications for events (injury alerts, waiver results)
+
+### Usage Tracking & Billing
+- [ ] FF-149: Usage metering — track API calls per key, per endpoint, per day
+- [ ] FF-150: Usage dashboard — partners can see their consumption, billing projections
+- [ ] FF-151: Billing integration — Stripe for invoicing, usage-based or flat-rate plans
+
+### B2B Sales Assets
+- [ ] FF-152: Partner pitch deck — slides showing AI capabilities, integration ease, case studies
+- [ ] FF-153: Demo environment — partner can try the API with their own data
+- [ ] FF-154: Integration guide — step-by-step for partners to embed FFI recommendations
+
+---
+
+## Phase 10: Commercialization (Free → Premium)
+
+> **Goal:** Convert users to paid plans without killing the free experience
+> **Pricing hypothesis:** Free (draft basics) → Pro $29/year (full AI) → Team $99/year (in-season)
+
+### Pricing & Tiers
+- [ ] FF-160: Define tier boundaries:
+  - **Free:** League setup, basic draft board, manual pick entry
+  - **Pro ($29/year):** AI strategy generation, live draft recommendations, post-draft analysis
+  - **Team ($99/year):** Everything + in-season features (start/sit, waiver, trades, alerts)
+- [ ] FF-161: Feature gating — implement tier checks throughout app, graceful upgrade prompts
+- [ ] FF-162: Usage limits for free tier — e.g., 1 league, no real-time sync, limited AI calls/day
+
+### Payment Integration
+- [ ] FF-163: Stripe integration — subscription billing, annual plans
+- [ ] FF-164: Checkout flow — in-app upgrade, card entry, confirmation
+- [ ] FF-165: Subscription management — cancel, pause, change plan, billing history
+- [ ] FF-166: Trial experience — 7-day Pro trial for new users
+
+### Landing Page & Marketing Site
+- [ ] FF-167: Marketing landing page — hero section, feature highlights, pricing table, testimonials placeholder
+- [ ] FF-168: SEO foundations — meta tags, sitemap, structured data for "fantasy football AI"
+- [ ] FF-169: Blog / content section — for SEO + thought leadership
+- [ ] FF-170: Email capture — "Get notified when 2026 season starts" + newsletter signup
+
+### Analytics & Instrumentation
+- [ ] FF-171: Event tracking — PostHog or Mixpanel for user behavior
+- [ ] FF-172: Conversion funnel — track free → trial → paid flow
+- [ ] FF-173: Retention metrics — DAU/WAU during season, churn tracking
+- [ ] FF-174: A/B testing framework — for pricing, CTA copy, feature positioning
+
+---
+
+## Phase 11: Marketing & Outreach
+
+> **Goal:** Get users and partners through content, community, and direct outreach
+> **Timeline:** Start content 2-3 months before draft season (June), ramp outreach in July-August
+
+### Content Marketing
+- [ ] FF-180: Blog content calendar — 2 posts/week during pre-draft (June-August):
+  - "AI Draft Strategies for 2026"
+  - "Zero-RB vs. Hero-RB: Data Analysis"
+  - "How FFIntelligence Outperformed FantasyPros in Our League"
+  - Position breakdowns, sleeper picks, etc.
+- [ ] FF-181: YouTube/video content — optional, but high-impact if done
+- [ ] FF-182: Twitter/X presence — daily insights during season, engage fantasy community
+- [ ] FF-183: Reddit strategy — helpful answers in r/fantasyfootball, r/ff_dynasty (no spam)
+
+### Email Marketing
+- [ ] FF-184: Email sequences:
+  - **Welcome sequence:** Onboarding, feature highlights, first draft walkthrough
+  - **Pre-draft sequence:** Strategy tips, data updates, "draft is coming" urgency
+  - **In-season sequence:** Weekly tips, waiver recommendations, engagement hooks
+  - **Upgrade sequence:** Free → trial → paid nudges with value props
+- [ ] FF-185: Email templates — designed, mobile-friendly, on-brand
+- [ ] FF-186: Email platform setup — Resend, Loops, or similar (not Mailchimp)
+- [ ] FF-187: Segmentation — by tier, by league type (auction vs. snake), by engagement level
+
+### B2B Outreach
+- [ ] FF-188: Target list — build list of 20-30 potential partners:
+  - **Tier 1 (dream):** Sleeper, ESPN, Yahoo
+  - **Tier 2 (likely):** Underdog, PrizePicks, Fantrax, Fleaflicker
+  - **Tier 3 (media):** Bleacher Report, The Ringer, Fantasy Footballers podcast
+- [ ] FF-189: Contact research — find product leads, partnership managers on LinkedIn
+- [ ] FF-190: Outreach sequence:
+  - Cold email (personalized, <100 words, clear ask)
+  - Follow-up 1 (3 days): Add value, share insight
+  - Follow-up 2 (7 days): Demo offer
+  - LinkedIn connect + message in parallel
+- [ ] FF-191: Demo script — 15-minute walkthrough of API + partner integration
+- [ ] FF-192: Partnership proposal template — pricing, integration scope, success metrics
+
+### Community & Virality
+- [ ] FF-193: Referral program — "Get 1 month free for each friend who signs up"
+- [ ] FF-194: League commissioner tools — bulk invite, league-wide pricing, admin dashboard
+- [ ] FF-195: Shareable draft results — social cards for Twitter/X showing draft grade
+- [ ] FF-196: Fantasy community partnerships — sponsor podcasts, guest on shows
+
+### Launch Campaign
+- [ ] FF-197: Product Hunt launch — prep listing, screenshots, launch day coordination
+- [ ] FF-198: Press outreach — pitch to fantasy sports blogs, tech blogs covering AI
+- [ ] FF-199: Influencer seeding — send free Pro access to fantasy content creators
+- [ ] FF-200: Launch email blast — to waitlist, existing users, partners
+
+---
+
+## Milestone Summary
+
+| Milestone | Target | Status |
+|-----------|--------|--------|
+| **Personal Use MVP** | Draft Day 2025 | ✅ Complete |
+| **UI Redesign** | March 2026 | 🔄 In Progress |
+| **Live Draft Validation** | August 2026 | Pending |
+| **In-Season Features** | Sept 2026 | Planned |
+| **API Layer** | Oct 2026 | Planned |
+| **Commercialization** | Nov 2026 | Planned |
+| **Marketing Launch** | June 2027 (pre-draft) | Planned |
+| **First B2B Partner** | Q4 2027 | Goal |
