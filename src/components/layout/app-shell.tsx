@@ -17,6 +17,8 @@ import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { ThemeToggle, ThemeToggleMobile } from '@/components/theme-toggle'
 import { signOut } from '@/app/(auth)/actions'
+import { NavProvider } from '@/lib/nav-context'
+import { PageTransition } from '@/components/layout/page-transition'
 
 interface NavItem {
   label: string
@@ -64,6 +66,7 @@ export function AppShell({
   const initials = displayName.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()
 
   return (
+    <NavProvider>
     <div className="flex h-dvh flex-col md:flex-row overflow-hidden ffi-bg-gradient">
       {/* Desktop sidebar — hidden on mobile */}
       <aside
@@ -181,8 +184,10 @@ export function AppShell({
       </header>
 
       {/* Main content — fills space between header and bottom nav on mobile */}
-      <main className="flex-1 overflow-y-auto">
-        <div className="mx-auto max-w-6xl p-4 md:p-6 pb-20 md:pb-6">{children}</div>
+      <main className="flex-1 overflow-y-auto relative">
+        <PageTransition>
+          <div className="mx-auto max-w-6xl p-4 md:p-6 pb-20 md:pb-6">{children}</div>
+        </PageTransition>
       </main>
 
       {/* Mobile bottom tab bar — hidden on desktop */}
@@ -224,5 +229,6 @@ export function AppShell({
         })}
       </nav>
     </div>
+    </NavProvider>
   )
 }
