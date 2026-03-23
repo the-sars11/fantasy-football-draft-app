@@ -1,17 +1,16 @@
 'use client'
 
-import { Badge } from '@/components/ui/badge'
+import { useState } from 'react'
+import { ArrowUp, ArrowDown, Target, Ban, ChevronDown, Sparkles } from 'lucide-react'
+import { cn } from '@/lib/utils'
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
-import { ArrowUp, ArrowDown, ArrowUpDown, Target, Ban, TrendingUp } from 'lucide-react'
+  FFICard,
+  FFIPositionBadge,
+  FFIBadge,
+  FFITacticalInsight,
+} from '@/components/ui/ffi-primitives'
 import type { ScoredPlayer } from '@/lib/research/strategy/scoring'
-import type { DraftFormat } from '@/lib/players/types'
+import type { DraftFormat, Position } from '@/lib/players/types'
 
 type SortField = 'rank' | 'score' | 'value' | 'adp' | 'name'
 
@@ -23,75 +22,197 @@ interface DraftBoardTableProps {
   onSort: (field: SortField) => void
 }
 
-function SortIcon({ field, current, asc }: { field: SortField; current: SortField; asc: boolean }) {
-  if (field !== current) return <ArrowUpDown className="h-3 w-3 ml-1 opacity-30" />
-  return asc
-    ? <ArrowUp className="h-3 w-3 ml-1" />
-    : <ArrowDown className="h-3 w-3 ml-1" />
-}
-
-function SortableHead({
+function SortButton({
   field,
   label,
   current,
   asc,
   onSort,
-  className,
 }: {
   field: SortField
   label: string
   current: SortField
   asc: boolean
   onSort: (f: SortField) => void
-  className?: string
 }) {
+  const isActive = field === current
   return (
-    <TableHead
-      className={`cursor-pointer select-none ${className ?? ''}`}
+    <button
       onClick={() => onSort(field)}
+      className={cn(
+        'ffi-label px-2 py-1 rounded-md transition-all',
+        isActive
+          ? 'bg-[var(--ffi-primary)]/20 text-[var(--ffi-primary)]'
+          : 'text-[var(--ffi-text-muted)] hover:text-white hover:bg-[var(--ffi-surface)]'
+      )}
     >
-      <span className="inline-flex items-center">
-        {label}
-        <SortIcon field={field} current={current} asc={asc} />
-      </span>
-    </TableHead>
+      {label}
+      {isActive && (
+        asc
+          ? <ArrowUp className="inline h-3 w-3 ml-1" />
+          : <ArrowDown className="inline h-3 w-3 ml-1" />
+      )}
+    </button>
   )
 }
 
-const posColors: Record<string, string> = {
-  QB: 'bg-red-500/15 text-red-400 border-red-500/30',
-  RB: 'bg-blue-500/15 text-blue-400 border-blue-500/30',
-  WR: 'bg-green-500/15 text-green-400 border-green-500/30',
-  TE: 'bg-orange-500/15 text-orange-400 border-orange-500/30',
-  K: 'bg-purple-500/15 text-purple-400 border-purple-500/30',
-  DEF: 'bg-yellow-500/15 text-yellow-400 border-yellow-500/30',
-}
-
 function scoreColor(score: number): string {
-  if (score >= 75) return 'text-green-400'
+  if (score >= 75) return 'text-[var(--ffi-success)]'
   if (score >= 60) return 'text-emerald-400'
-  if (score >= 40) return 'text-muted-foreground'
-  if (score >= 25) return 'text-orange-400'
-  return 'text-red-400'
+  if (score >= 40) return 'text-[var(--ffi-text-secondary)]'
+  if (score >= 25) return 'text-[var(--ffi-warning)]'
+  return 'text-[var(--ffi-danger)]'
 }
 
-function StatusBadge({ status }: { status: 'target' | 'avoid' | 'neutral' }) {
-  switch (status) {
-    case 'target':
-      return (
-        <Badge variant="outline" className="gap-1 text-green-400 border-green-500/30 bg-green-500/10 text-[10px] px-1.5 py-0">
-          <Target className="h-2.5 w-2.5" /> TGT
-        </Badge>
-      )
-    case 'avoid':
-      return (
-        <Badge variant="outline" className="gap-1 text-red-400 border-red-500/30 bg-red-500/10 text-[10px] px-1.5 py-0">
-          <Ban className="h-2.5 w-2.5" /> AVD
-        </Badge>
-      )
-    default:
-      return null
+function generateInsight(sp: ScoredPlayer, format: DraftFormat): string {
+  const p = sp.player
+  const boostText = sp.boosts.length > 0 ? sp.boosts.slice(0, 2).join(', ') : ''
+
+  if (sp.targetStatus === 'target') {
+    return `High-value target. ${boostText ? `Boosted by: ${boostText}.` : ''} Strategy alignment score indicates strong fit for your build.`
   }
+  if (sp.targetStatus === 'avoid') {
+    return `Below strategy threshold. Consider alternatives at ${p.position} unless price drops significantly.`
+  }
+
+  const valueContext = format === 'auction'
+    ? `Projected at $${sp.adjustedAuctionValue ?? p.consensusAuctionValue}.`
+    : `ADP suggests round ${Math.ceil(p.adp / 12)} selection.`
+
+  return `${valueContext} ${boostText ? `Strategy factors: ${boostText}.` : 'Neutral fit for current strategy.'}`
+}
+
+interface CompactPlayerCardProps {
+  sp: ScoredPlayer
+  rank: number
+  format: DraftFormat
+  isExpanded: boolean
+  onToggle: () => void
+}
+
+function CompactPlayerCard({ sp, rank, format, isExpanded, onToggle }: CompactPlayerCardProps) {
+  const p = sp.player
+  const isAuction = format === 'auction'
+  const value = isAuction
+    ? sp.adjustedAuctionValue ?? p.consensusAuctionValue
+    : sp.adjustedRoundValue ?? Math.ceil(p.adp / 12)
+  const valueRange = isAuction
+    ? { low: Math.floor(value * 0.85), high: Math.ceil(value * 1.15) }
+    : undefined
+
+  return (
+    <div
+      className={cn(
+        'transition-all duration-200',
+        sp.targetStatus === 'avoid' && 'opacity-60'
+      )}
+    >
+      <FFICard
+        variant={isExpanded ? 'elevated' : 'interactive'}
+        className={cn(
+          'cursor-pointer',
+          sp.targetStatus === 'target' && 'border-l-2 border-l-[var(--ffi-success)]'
+        )}
+        onClick={onToggle}
+      >
+        {/* Main row */}
+        <div className="flex items-center gap-3">
+          {/* Rank */}
+          <span className={cn(
+            'ffi-display-md font-bold w-8 shrink-0 text-center',
+            sp.targetStatus === 'target' ? 'text-[var(--ffi-accent)]' : 'text-[var(--ffi-primary)]'
+          )}>
+            {String(rank).padStart(2, '0')}
+          </span>
+
+          {/* Position badge */}
+          <FFIPositionBadge position={p.position as Position} />
+
+          {/* Player info */}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <span className="ffi-title-md text-white font-semibold truncate">{p.name}</span>
+              {sp.targetStatus === 'target' && (
+                <Target className="h-3.5 w-3.5 text-[var(--ffi-success)] shrink-0" />
+              )}
+              {sp.targetStatus === 'avoid' && (
+                <Ban className="h-3.5 w-3.5 text-[var(--ffi-danger)] shrink-0" />
+              )}
+            </div>
+            <div className="ffi-body-md text-[var(--ffi-text-secondary)]">
+              {p.team} • BYE {p.byeWeek}
+            </div>
+          </div>
+
+          {/* Value + Score */}
+          <div className="text-right shrink-0">
+            <div className="ffi-title-lg text-[var(--ffi-accent)] font-bold">
+              {isAuction ? `$${value}` : `Rd ${value}`}
+            </div>
+            <div className={cn('ffi-label', scoreColor(sp.strategyScore))}>
+              {sp.strategyScore} PTS
+            </div>
+          </div>
+
+          {/* Expand indicator */}
+          <ChevronDown className={cn(
+            'h-4 w-4 text-[var(--ffi-text-muted)] transition-transform shrink-0',
+            isExpanded && 'rotate-180'
+          )} />
+        </div>
+
+        {/* Tags row */}
+        {sp.boosts.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mt-2 pl-11">
+            {sp.boosts.slice(0, 3).map((boost, i) => (
+              <FFIBadge key={i} variant="tag" status="info" className="text-[10px]">
+                {boost}
+              </FFIBadge>
+            ))}
+            {sp.boosts.length > 3 && (
+              <span className="text-[10px] text-[var(--ffi-text-muted)]">
+                +{sp.boosts.length - 3} more
+              </span>
+            )}
+          </div>
+        )}
+
+        {/* Expanded tactical insight */}
+        {isExpanded && (
+          <div className="mt-4 pt-4 border-t border-[var(--ffi-border)]/20">
+            <FFITacticalInsight
+              insight={generateInsight(sp, format)}
+              confidence={Math.min(100, sp.strategyScore + 20)}
+              className="bg-transparent p-0"
+            />
+
+            {/* Additional stats when expanded */}
+            <div className="grid grid-cols-3 gap-4 mt-4 pt-4 border-t border-[var(--ffi-border)]/10">
+              <div>
+                <div className="ffi-caption text-[var(--ffi-text-muted)]">RANK</div>
+                <div className="ffi-title-md text-white">{p.consensusRank}</div>
+              </div>
+              <div>
+                <div className="ffi-caption text-[var(--ffi-text-muted)]">ADP</div>
+                <div className="ffi-title-md text-white">{p.adp > 0 ? p.adp.toFixed(1) : '—'}</div>
+              </div>
+              <div>
+                <div className="ffi-caption text-[var(--ffi-text-muted)]">
+                  {isAuction ? 'RANGE' : 'ECR'}
+                </div>
+                <div className="ffi-title-md text-white">
+                  {isAuction && valueRange
+                    ? `$${valueRange.low}-${valueRange.high}`
+                    : p.consensusRank
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </FFICard>
+    </div>
+  )
 }
 
 export function DraftBoardTable({
@@ -101,156 +222,46 @@ export function DraftBoardTable({
   sortAsc,
   onSort,
 }: DraftBoardTableProps) {
-  const isAuction = format === 'auction'
+  const [expandedId, setExpandedId] = useState<string | null>(null)
+
+  const handleToggle = (id: string) => {
+    setExpandedId(expandedId === id ? null : id)
+  }
 
   return (
-    <div className="rounded-md border border-border">
-      <Table>
-        <TableHeader>
-          <TableRow className="bg-muted/30">
-            <TableHead className="w-8 text-center">#</TableHead>
-            <SortableHead field="name" label="Player" current={sortField} asc={sortAsc} onSort={onSort} className="min-w-[140px]" />
-            <TableHead className="w-12">Pos</TableHead>
-            <TableHead className="w-12">Team</TableHead>
-            <SortableHead field="rank" label="Rank" current={sortField} asc={sortAsc} onSort={onSort} />
-            <SortableHead field="adp" label="ADP" current={sortField} asc={sortAsc} onSort={onSort} />
-            <SortableHead
-              field="value"
-              label={isAuction ? 'Value' : 'Round'}
-              current={sortField}
-              asc={sortAsc}
-              onSort={onSort}
+    <div className="space-y-3">
+      {/* Sort controls */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-1">
+        <span className="ffi-caption text-[var(--ffi-text-muted)] shrink-0">Sort:</span>
+        <SortButton field="score" label="Score" current={sortField} asc={sortAsc} onSort={onSort} />
+        <SortButton field="value" label={format === 'auction' ? 'Value' : 'Round'} current={sortField} asc={sortAsc} onSort={onSort} />
+        <SortButton field="rank" label="Rank" current={sortField} asc={sortAsc} onSort={onSort} />
+        <SortButton field="adp" label="ADP" current={sortField} asc={sortAsc} onSort={onSort} />
+        <SortButton field="name" label="Name" current={sortField} asc={sortAsc} onSort={onSort} />
+      </div>
+
+      {/* Player cards */}
+      {players.length === 0 ? (
+        <FFICard className="text-center py-12">
+          <div className="text-[var(--ffi-text-muted)]">
+            <Sparkles className="h-8 w-8 mx-auto mb-2 opacity-50" />
+            <p>No players match your filters</p>
+          </div>
+        </FFICard>
+      ) : (
+        <div className="space-y-2">
+          {players.map((sp, idx) => (
+            <CompactPlayerCard
+              key={sp.player.id}
+              sp={sp}
+              rank={idx + 1}
+              format={format}
+              isExpanded={expandedId === sp.player.id}
+              onToggle={() => handleToggle(sp.player.id)}
             />
-            <SortableHead field="score" label="Score" current={sortField} asc={sortAsc} onSort={onSort} />
-            <TableHead className="w-12">Status</TableHead>
-            <TableHead className="hidden md:table-cell">Boosts</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {players.length === 0 ? (
-            <TableRow>
-              <TableCell colSpan={10} className="text-center text-muted-foreground py-8">
-                No players match your filters
-              </TableCell>
-            </TableRow>
-          ) : (
-            players.map((sp, idx) => {
-              const p = sp.player
-              const consensusVal = isAuction ? p.consensusAuctionValue : p.adp
-              const adjustedVal = isAuction ? sp.adjustedAuctionValue : sp.adjustedRoundValue
-              const hasAdjustment = adjustedVal != null && adjustedVal !== consensusVal
-
-              return (
-                <TableRow
-                  key={p.id}
-                  className={
-                    sp.targetStatus === 'avoid'
-                      ? 'opacity-50'
-                      : sp.targetStatus === 'target'
-                        ? 'bg-green-500/5'
-                        : ''
-                  }
-                >
-                  {/* Row number */}
-                  <TableCell className="text-center text-xs text-muted-foreground">
-                    {idx + 1}
-                  </TableCell>
-
-                  {/* Name + bye */}
-                  <TableCell className="font-medium">
-                    <div className="flex flex-col">
-                      <span className="text-sm">{p.name}</span>
-                      {p.byeWeek > 0 && (
-                        <span className="text-[10px] text-muted-foreground">Bye {p.byeWeek}</span>
-                      )}
-                    </div>
-                  </TableCell>
-
-                  {/* Position */}
-                  <TableCell>
-                    <Badge variant="outline" className={`text-[10px] px-1.5 py-0 ${posColors[p.position] ?? ''}`}>
-                      {p.position}
-                    </Badge>
-                  </TableCell>
-
-                  {/* Team */}
-                  <TableCell className="text-xs text-muted-foreground">{p.team}</TableCell>
-
-                  {/* Consensus rank */}
-                  <TableCell className="text-xs">{p.consensusRank}</TableCell>
-
-                  {/* ADP */}
-                  <TableCell className="text-xs">{p.adp > 0 ? p.adp.toFixed(1) : '—'}</TableCell>
-
-                  {/* Value / Round */}
-                  <TableCell className="text-xs">
-                    {isAuction ? (
-                      <span className="inline-flex items-center gap-1">
-                        <span className={hasAdjustment ? 'line-through text-muted-foreground' : ''}>
-                          ${consensusVal}
-                        </span>
-                        {hasAdjustment && (
-                          <span className="font-medium text-primary">
-                            ${adjustedVal}
-                          </span>
-                        )}
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1">
-                        {adjustedVal != null ? (
-                          <>
-                            <span className="font-medium">Rd {adjustedVal}</span>
-                            {hasAdjustment && (
-                              <span className="text-muted-foreground text-[10px]">
-                                (ADP {consensusVal.toFixed(1)})
-                              </span>
-                            )}
-                          </>
-                        ) : (
-                          <span>{consensusVal > 0 ? consensusVal.toFixed(1) : '—'}</span>
-                        )}
-                      </span>
-                    )}
-                  </TableCell>
-
-                  {/* Strategy score */}
-                  <TableCell>
-                    <span className={`text-sm font-mono font-semibold ${scoreColor(sp.strategyScore)}`}>
-                      {sp.strategyScore}
-                    </span>
-                  </TableCell>
-
-                  {/* Target status */}
-                  <TableCell>
-                    <StatusBadge status={sp.targetStatus} />
-                  </TableCell>
-
-                  {/* Boosts (desktop only) */}
-                  <TableCell className="hidden md:table-cell">
-                    {sp.boosts.length > 0 ? (
-                      <div className="flex flex-wrap gap-1 max-w-[260px]">
-                        {sp.boosts.slice(0, 3).map((boost, i) => (
-                          <span key={i} className="inline-flex items-center gap-0.5 text-[10px] text-muted-foreground bg-muted/50 rounded px-1.5 py-0.5">
-                            <TrendingUp className="h-2.5 w-2.5" />
-                            {boost}
-                          </span>
-                        ))}
-                        {sp.boosts.length > 3 && (
-                          <span className="text-[10px] text-muted-foreground">
-                            +{sp.boosts.length - 3}
-                          </span>
-                        )}
-                      </div>
-                    ) : (
-                      <span className="text-[10px] text-muted-foreground">—</span>
-                    )}
-                  </TableCell>
-                </TableRow>
-              )
-            })
-          )}
-        </TableBody>
-      </Table>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
