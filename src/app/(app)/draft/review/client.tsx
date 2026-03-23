@@ -482,9 +482,14 @@ export function ReviewClient() {
               </div>
             </FFICard>
 
-            {/* Position Grades */}
+            {/* Positional Power Rankings (FF-074 segmented bars) */}
+            {review.positionGrades.length > 0 && (
+              <PositionalPowerRankings grades={review.positionGrades} />
+            )}
+
+            {/* Position Grades (detailed breakdown) */}
             <FFICard>
-              <FFISectionHeader title="Position Grades" />
+              <FFISectionHeader title="Position Grades" subtitle="Detailed breakdown by position" />
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {review.positionGrades.map(pg => (
                   <PositionGradeCard key={pg.position} grade={pg} />
@@ -741,6 +746,67 @@ function PickCard({
         )}
       </AnimatePresence>
     </motion.div>
+  )
+}
+
+/**
+ * PositionalPowerRankings (FF-074)
+ * Segmented progress bars like the prototype (lines 174-205)
+ */
+function PositionalPowerRankings({ grades }: { grades: DraftReview['positionGrades'] }) {
+  const SEGMENTS = 10
+
+  // Position name mapping for display
+  const positionNames: Record<string, string> = {
+    QB: 'Quarterback',
+    RB: 'Running Back',
+    WR: 'Wide Receiver',
+    TE: 'Tight End',
+    K: 'Kicker',
+    DEF: 'Defense',
+  }
+
+  return (
+    <FFICard>
+      <FFISectionHeader title="Positional Power Rankings" />
+      <div className="space-y-6">
+        {grades.map(grade => {
+          const filledCount = Math.round(grade.score / 10)
+          const isDanger = grade.score < 50
+
+          return (
+            <div key={grade.position} className="space-y-2">
+              <div className="flex justify-between items-end">
+                <span className="ffi-label text-white uppercase tracking-wider">
+                  {positionNames[grade.position] || grade.position}
+                </span>
+                <span
+                  className={cn(
+                    'font-headline text-lg font-bold',
+                    isDanger ? 'text-[var(--ffi-danger)]' : 'text-[var(--ffi-primary)]'
+                  )}
+                >
+                  {grade.score}
+                </span>
+              </div>
+              <div className="segmented-progress">
+                {Array.from({ length: SEGMENTS }).map((_, i) => (
+                  <div
+                    key={i}
+                    className={cn(
+                      'segment',
+                      i < filledCount
+                        ? isDanger ? 'segment-filled danger' : 'segment-filled'
+                        : 'segment-empty'
+                    )}
+                  />
+                ))}
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </FFICard>
   )
 }
 

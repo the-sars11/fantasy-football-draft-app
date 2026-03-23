@@ -693,6 +693,30 @@
   background: linear-gradient(90deg, #5582e6 0%, #39ff14 100%);
 }
 
+/* Segmented Progress Bars (Post-Draft Power Rankings) */
+.segmented-progress {
+  display: flex;
+  gap: 2px;
+}
+
+.segment {
+  height: 8px;
+  flex: 1;
+  border-radius: 1px;
+}
+
+.segment-filled {
+  background: var(--ffi-primary);
+}
+
+.segment-filled.danger {
+  background: var(--ffi-danger);
+}
+
+.segment-empty {
+  background: var(--ffi-surface-bright, #192f3b);
+}
+
 /* ========================================
    FFI Navigation
    ======================================== */
