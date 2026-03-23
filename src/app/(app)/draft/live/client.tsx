@@ -9,6 +9,7 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useSearchParams } from 'next/navigation'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
   Loader2,
   Radio,
@@ -150,33 +151,44 @@ function PickFeed({
         </p>
       ) : (
         <div className="space-y-1 max-h-48 overflow-auto">
-          {recentPicks.map((pick, idx) => (
-            <div
-              key={pick.pick_number}
-              className={cn(
-                'flex items-center gap-2 py-1.5 px-2 rounded-lg transition-all',
-                idx === 0 && 'bg-[var(--ffi-accent)]/10 ffi-animate-slide-in'
-              )}
-            >
-              <span className="ffi-caption text-[var(--ffi-text-muted)] w-6 text-right">
-                {pick.pick_number}
-              </span>
-              {pick.position && (
-                <FFIPositionBadge position={pick.position.toUpperCase() as Position} />
-              )}
-              <span className="ffi-body-md text-white font-medium flex-1 truncate">
-                {pick.player_name}
-              </span>
-              <span className="ffi-body-md text-[var(--ffi-text-secondary)] truncate max-w-20">
-                {pick.manager}
-              </span>
-              {isAuction && pick.price != null && (
-                <span className="ffi-label text-[var(--ffi-accent)] font-mono">
-                  ${pick.price}
+          <AnimatePresence mode="popLayout">
+            {recentPicks.map((pick, idx) => (
+              <motion.div
+                key={pick.pick_number}
+                layout
+                initial={{ opacity: 0, scale: 0.8, y: -20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{
+                  type: 'spring',
+                  stiffness: 500,
+                  damping: 25,
+                }}
+                className={cn(
+                  'flex items-center gap-2 py-1.5 px-2 rounded-lg',
+                  idx === 0 && 'bg-[var(--ffi-accent)]/10'
+                )}
+              >
+                <span className="ffi-caption text-[var(--ffi-text-muted)] w-6 text-right">
+                  {pick.pick_number}
                 </span>
-              )}
-            </div>
-          ))}
+                {pick.position && (
+                  <FFIPositionBadge position={pick.position.toUpperCase() as Position} />
+                )}
+                <span className="ffi-body-md text-white font-medium flex-1 truncate">
+                  {pick.player_name}
+                </span>
+                <span className="ffi-body-md text-[var(--ffi-text-secondary)] truncate max-w-20">
+                  {pick.manager}
+                </span>
+                {isAuction && pick.price != null && (
+                  <span className="ffi-label text-[var(--ffi-accent)] font-mono">
+                    ${pick.price}
+                  </span>
+                )}
+              </motion.div>
+            ))}
+          </AnimatePresence>
         </div>
       )}
     </FFICard>

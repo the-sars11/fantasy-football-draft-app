@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowUp, ArrowDown, Target, Ban, ChevronDown, Sparkles } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import {
@@ -240,27 +241,48 @@ export function DraftBoardTable({
         <SortButton field="name" label="Name" current={sortField} asc={sortAsc} onSort={onSort} />
       </div>
 
-      {/* Player cards */}
+      {/* Player cards with cascade animation */}
       {players.length === 0 ? (
-        <FFICard className="text-center py-12">
-          <div className="text-[var(--ffi-text-muted)]">
-            <Sparkles className="h-8 w-8 mx-auto mb-2 opacity-50" />
-            <p>No players match your filters</p>
-          </div>
-        </FFICard>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <FFICard className="text-center py-12">
+            <div className="text-[var(--ffi-text-muted)]">
+              <Sparkles className="h-8 w-8 mx-auto mb-2 opacity-50" />
+              <p>No players match your filters</p>
+            </div>
+          </FFICard>
+        </motion.div>
       ) : (
-        <div className="space-y-2">
-          {players.map((sp, idx) => (
-            <CompactPlayerCard
-              key={sp.player.id}
-              sp={sp}
-              rank={idx + 1}
-              format={format}
-              isExpanded={expandedId === sp.player.id}
-              onToggle={() => handleToggle(sp.player.id)}
-            />
-          ))}
-        </div>
+        <motion.div className="space-y-2" layout>
+          <AnimatePresence mode="popLayout">
+            {players.map((sp, idx) => (
+              <motion.div
+                key={sp.player.id}
+                layout
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20, scale: 0.95 }}
+                transition={{
+                  type: 'spring',
+                  stiffness: 400,
+                  damping: 30,
+                  delay: Math.min(idx * 0.02, 0.3), // Cap delay for long lists
+                }}
+              >
+                <CompactPlayerCard
+                  sp={sp}
+                  rank={idx + 1}
+                  format={format}
+                  isExpanded={expandedId === sp.player.id}
+                  onToggle={() => handleToggle(sp.player.id)}
+                />
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </motion.div>
       )}
     </div>
   )
