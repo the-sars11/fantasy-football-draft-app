@@ -41,7 +41,7 @@ import { AuctionAdvisor } from '@/components/draft/auction-advisor'
 import { SnakeAdvisor } from '@/components/draft/snake-advisor'
 import type { PivotEntry } from '@/components/draft/pivot-history'
 import { scorePlayersWithStrategy } from '@/lib/research/strategy/scoring'
-import { calculateScarcity, explainPlayer } from '@/lib/draft/explain'
+import { calculateScarcityExtended, explainPlayer } from '@/lib/draft/explain'
 import { analyzeDraftFlow } from '@/lib/draft/flow-monitor'
 import { detectPivotOpportunity } from '@/lib/draft/pivot-detector'
 import type { Player, Position } from '@/lib/players/types'
@@ -385,7 +385,7 @@ export function LiveDraftClient() {
   // Position scarcity
   const scarcity = useMemo(() => {
     const available = players.filter(p => !draftedNames.has(p.name.toLowerCase()))
-    return calculateScarcity(available, state?.manager_order.length ?? 10)
+    return calculateScarcityExtended(available, state?.manager_order.length ?? 10)
   }, [players, draftedNames, state?.manager_order.length])
 
   // Explanation generator

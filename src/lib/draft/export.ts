@@ -132,3 +132,551 @@ export async function copyToClipboard(text: string): Promise<boolean> {
     return false
   }
 }
+
+// --- FF-075: Per-Team Exportable Reports ---
+
+export interface TeamReport {
+  managerName: string
+  picks: DraftPick[]
+  grade: string
+  score: number
+  strengths: string[]
+  weaknesses: string[]
+  contextualCallouts: string[]  // How other teams' picks affected this team
+  positionBreakdown: Array<{
+    position: string
+    players: Array<{ name: string; price?: number; round?: number }>
+    grade: string
+  }>
+  byeWeekDistribution: Record<number, string[]>  // bye week -> player names
+  totalSpent?: number
+  budget?: number
+}
+
+export interface LeagueReport {
+  draftDate: string
+  format: 'auction' | 'snake'
+  teamCount: number
+  teamReports: TeamReport[]
+  leagueHighlights: string[]  // Notable league-wide events
+}
+
+/**
+ * Generate reports for all teams in the league (FF-075)
+ */
+export function generateLeagueReport(
+  picks: DraftPick[],
+  managers: string[],
+  format: 'auction' | 'snake',
+  budget?: number,
+): LeagueReport {
+  // Group picks by manager
+  const picksByManager: Record<string, DraftPick[]> = {}
+  for (const manager of managers) {
+    picksByManager[manager] = picks.filter(p => p.manager === manager)
+  }
+
+  // Track position scarcity during draft for contextual callouts
+  const positionDrafted: Record<string, Array<{ pick: number; manager: string; player: string }>> = {
+    QB: [], RB: [], WR: [], TE: [], K: [], DEF: [],
+  }
+  for (const pick of picks.sort((a, b) => a.pick_number - b.pick_number)) {
+    const pos = pick.position?.toUpperCase() || 'UNKNOWN'
+    if (positionDrafted[pos]) {
+      positionDrafted[pos].push({
+        pick: pick.pick_number,
+        manager: pick.manager,
+        player: pick.player_name,
+      })
+    }
+  }
+
+  // Generate per-team reports
+  const teamReports: TeamReport[] = managers.map(managerName => {
+    const managerPicks = picksByManager[managerName] || []
+    const contextualCallouts = generateContextualCallouts(
+      managerName,
+      managerPicks,
+      positionDrafted,
+      picksByManager,
+      format,
+    )
+
+    // Group by position
+    const byPosition: Record<string, DraftPick[]> = {}
+    for (const p of managerPicks) {
+      const pos = p.position?.toUpperCase() || 'UNKNOWN'
+      if (!byPosition[pos]) byPosition[pos] = []
+      byPosition[pos].push(p)
+    }
+
+    // Calculate position breakdown and grades
+    const positionBreakdown = Object.entries(byPosition)
+      .filter(([pos]) => pos !== 'UNKNOWN')
+      .map(([position, posPicks]) => ({
+        position,
+        players: posPicks.map(p => ({
+          name: p.player_name,
+          price: p.price,
+          round: p.round,
+        })),
+        grade: gradePositionGroup(posPicks, position, format),
+      }))
+
+    // Bye week distribution (placeholder - would need bye week data)
+    const byeWeekDistribution: Record<number, string[]> = {}
+
+    // Calculate totals for auction
+    const totalSpent = format === 'auction'
+      ? managerPicks.reduce((sum, p) => sum + (p.price || 0), 0)
+      : undefined
+
+    // Generate overall grade
+    const { grade, score, strengths, weaknesses } = gradeTeamDraft(
+      managerPicks,
+      positionBreakdown,
+      format,
+      budget,
+      totalSpent,
+    )
+
+    return {
+      managerName,
+      picks: managerPicks,
+      grade,
+      score,
+      strengths,
+      weaknesses,
+      contextualCallouts,
+      positionBreakdown,
+      byeWeekDistribution,
+      totalSpent,
+      budget,
+    }
+  })
+
+  // Sort by grade (best to worst)
+  teamReports.sort((a, b) => b.score - a.score)
+
+  // Generate league-wide highlights
+  const leagueHighlights = generateLeagueHighlights(picks, teamReports, format)
+
+  return {
+    draftDate: new Date().toISOString().split('T')[0],
+    format,
+    teamCount: managers.length,
+    teamReports,
+    leagueHighlights,
+  }
+}
+
+/**
+ * Generate contextual callouts for a team
+ */
+function generateContextualCallouts(
+  managerName: string,
+  managerPicks: DraftPick[],
+  positionDrafted: Record<string, Array<{ pick: number; manager: string; player: string }>>,
+  picksByManager: Record<string, DraftPick[]>,
+  format: 'auction' | 'snake',
+): string[] {
+  const callouts: string[] = []
+  const managerPickNumbers = new Set(managerPicks.map(p => p.pick_number))
+
+  // Find positions where this team was "sniped" (someone drafted just before them)
+  for (const [pos, drafted] of Object.entries(positionDrafted)) {
+    const teamPosCount = managerPicks.filter(p => p.position?.toUpperCase() === pos).length
+
+    // Find instances where another manager picked right before this manager's next pick
+    for (let i = 0; i < drafted.length - 1; i++) {
+      const thisDraft = drafted[i]
+      const nextDraft = drafted[i + 1]
+
+      // If another manager drafted, and this manager drafted the next player at this position
+      if (
+        thisDraft.manager !== managerName &&
+        nextDraft.manager === managerName &&
+        nextDraft.pick - thisDraft.pick <= 3  // Within 3 picks
+      ) {
+        // Check if this was a tier drop (the last elite at position)
+        const posIndex = drafted.findIndex(d => d.manager === managerName && d.pick === nextDraft.pick)
+        if (posIndex <= 3) {  // Top 4 at position
+          callouts.push(
+            `${thisDraft.manager} took ${thisDraft.player} (${pos}${posIndex}) just ${nextDraft.pick - thisDraft.pick} pick${nextDraft.pick - thisDraft.pick > 1 ? 's' : ''} before you grabbed ${nextDraft.player}.`
+          )
+        }
+      }
+    }
+
+    // Detect position runs that hurt this team
+    if (teamPosCount < 2 && pos !== 'QB' && pos !== 'K' && pos !== 'DEF') {
+      // Count how many were taken in a "run" before their pick
+      let runCount = 0
+      let runManagers: string[] = []
+      for (let i = 0; i < drafted.length; i++) {
+        if (drafted[i].manager === managerName) break
+        if (i > 0 && drafted[i].pick - drafted[i - 1].pick <= 3) {
+          runCount++
+          if (!runManagers.includes(drafted[i].manager)) {
+            runManagers.push(drafted[i].manager)
+          }
+        }
+      }
+      if (runCount >= 3) {
+        callouts.push(
+          `A ${pos} run saw ${runCount} players drafted before you got your first, limiting your options.`
+        )
+      }
+    }
+  }
+
+  // Detect if someone hoarded a position
+  for (const [manager, theirPicks] of Object.entries(picksByManager)) {
+    if (manager === managerName) continue
+    const theirRBs = theirPicks.filter(p => p.position?.toUpperCase() === 'RB').length
+    const theirWRs = theirPicks.filter(p => p.position?.toUpperCase() === 'WR').length
+
+    if (theirRBs >= 5) {
+      callouts.push(`${manager} hoarded RBs (${theirRBs} total), limiting the pool for everyone.`)
+    }
+    if (theirWRs >= 6) {
+      callouts.push(`${manager} loaded up on WRs (${theirWRs} total), creating scarcity.`)
+    }
+  }
+
+  // Limit to most relevant callouts
+  return callouts.slice(0, 4)
+}
+
+/**
+ * Grade a position group
+ */
+function gradePositionGroup(
+  picks: DraftPick[],
+  position: string,
+  format: 'auction' | 'snake',
+): string {
+  if (picks.length === 0) return 'F'
+
+  // Simple grading based on count and position
+  const requiredCounts: Record<string, number> = {
+    QB: 1, RB: 3, WR: 3, TE: 1, K: 1, DEF: 1,
+  }
+  const required = requiredCounts[position] || 1
+
+  if (picks.length >= required + 1) return 'A'
+  if (picks.length >= required) return 'B+'
+  if (picks.length >= required - 1) return 'C'
+  return 'D'
+}
+
+/**
+ * Grade a team's overall draft
+ */
+function gradeTeamDraft(
+  picks: DraftPick[],
+  positionBreakdown: TeamReport['positionBreakdown'],
+  format: 'auction' | 'snake',
+  budget?: number,
+  totalSpent?: number,
+): { grade: string; score: number; strengths: string[]; weaknesses: string[] } {
+  let score = 70
+  const strengths: string[] = []
+  const weaknesses: string[] = []
+
+  // Position coverage
+  const hasQB = positionBreakdown.some(p => p.position === 'QB' && p.players.length > 0)
+  const hasRB = positionBreakdown.some(p => p.position === 'RB' && p.players.length >= 2)
+  const hasWR = positionBreakdown.some(p => p.position === 'WR' && p.players.length >= 2)
+  const hasTE = positionBreakdown.some(p => p.position === 'TE' && p.players.length > 0)
+
+  if (hasQB && hasRB && hasWR && hasTE) {
+    score += 10
+    strengths.push('Complete starting lineup')
+  } else {
+    score -= 10
+    weaknesses.push('Missing starters at key positions')
+  }
+
+  // Depth
+  const rbCount = positionBreakdown.find(p => p.position === 'RB')?.players.length || 0
+  const wrCount = positionBreakdown.find(p => p.position === 'WR')?.players.length || 0
+
+  if (rbCount >= 4) {
+    score += 5
+    strengths.push('Strong RB depth')
+  }
+  if (wrCount >= 5) {
+    score += 5
+    strengths.push('Deep WR corps')
+  }
+  if (rbCount < 2) {
+    score -= 10
+    weaknesses.push('Thin at RB')
+  }
+  if (wrCount < 3) {
+    score -= 10
+    weaknesses.push('Weak WR depth')
+  }
+
+  // Budget efficiency (auction)
+  if (format === 'auction' && budget && totalSpent) {
+    const efficiency = totalSpent / budget
+    if (efficiency >= 0.95 && efficiency <= 1.0) {
+      score += 5
+      strengths.push('Efficient budget usage')
+    } else if (efficiency < 0.85) {
+      score -= 5
+      weaknesses.push(`Left $${budget - totalSpent} on the table`)
+    }
+  }
+
+  // Cap score
+  score = Math.max(0, Math.min(100, score))
+
+  // Convert to letter grade
+  const grade = score >= 93 ? 'A+' : score >= 90 ? 'A' : score >= 87 ? 'A-'
+    : score >= 83 ? 'B+' : score >= 80 ? 'B' : score >= 77 ? 'B-'
+    : score >= 73 ? 'C+' : score >= 70 ? 'C' : score >= 67 ? 'C-'
+    : score >= 60 ? 'D+' : score >= 55 ? 'D' : 'F'
+
+  return { grade, score, strengths, weaknesses }
+}
+
+/**
+ * Generate league-wide highlights
+ */
+function generateLeagueHighlights(
+  picks: DraftPick[],
+  teamReports: TeamReport[],
+  format: 'auction' | 'snake',
+): string[] {
+  const highlights: string[] = []
+
+  // Highest spender (auction)
+  if (format === 'auction') {
+    const sorted = picks.filter(p => p.price).sort((a, b) => (b.price || 0) - (a.price || 0))
+    if (sorted[0]) {
+      highlights.push(
+        `Biggest spend: ${sorted[0].manager} paid $${sorted[0].price} for ${sorted[0].player_name}`
+      )
+    }
+    // Biggest steal (lowest price for early pick)
+    const earlyPicks = picks.filter(p => p.pick_number <= 20 && p.price && p.price <= 5)
+    if (earlyPicks.length > 0) {
+      const steal = earlyPicks[0]
+      highlights.push(
+        `Potential steal: ${steal.player_name} went for just $${steal.price}`
+      )
+    }
+  }
+
+  // Best and worst grades
+  if (teamReports.length > 0) {
+    const best = teamReports[0]
+    const worst = teamReports[teamReports.length - 1]
+    highlights.push(`Top-graded team: ${best.managerName} (${best.grade})`)
+    if (teamReports.length > 1) {
+      highlights.push(`Needs work: ${worst.managerName} (${worst.grade})`)
+    }
+  }
+
+  // Most popular position
+  const posCounts: Record<string, number> = {}
+  for (const p of picks.slice(0, Math.min(30, picks.length))) {
+    const pos = p.position?.toUpperCase() || 'UNKNOWN'
+    posCounts[pos] = (posCounts[pos] || 0) + 1
+  }
+  const topPos = Object.entries(posCounts).sort((a, b) => b[1] - a[1])[0]
+  if (topPos) {
+    highlights.push(`Most drafted position (first 30 picks): ${topPos[0]} (${topPos[1]} picks)`)
+  }
+
+  return highlights
+}
+
+/**
+ * Format a team report as plain text for email/sharing
+ */
+export function teamReportToText(report: TeamReport, format: 'auction' | 'snake'): string {
+  const lines: string[] = []
+
+  lines.push('═'.repeat(50))
+  lines.push(`DRAFT REPORT: ${report.managerName.toUpperCase()}`)
+  lines.push('═'.repeat(50))
+  lines.push('')
+  lines.push(`Overall Grade: ${report.grade} (${report.score}/100)`)
+  lines.push('')
+
+  if (report.strengths.length > 0) {
+    lines.push('STRENGTHS:')
+    report.strengths.forEach(s => lines.push(`  ✓ ${s}`))
+    lines.push('')
+  }
+
+  if (report.weaknesses.length > 0) {
+    lines.push('AREAS TO IMPROVE:')
+    report.weaknesses.forEach(w => lines.push(`  ✗ ${w}`))
+    lines.push('')
+  }
+
+  lines.push('ROSTER:')
+  for (const pos of report.positionBreakdown) {
+    const players = pos.players.map(p => {
+      const cost = p.price != null ? ` ($${p.price})` : p.round != null ? ` (Rd ${p.round})` : ''
+      return `${p.name}${cost}`
+    }).join(', ')
+    lines.push(`  ${pos.position} [${pos.grade}]: ${players || 'None'}`)
+  }
+  lines.push('')
+
+  if (format === 'auction' && report.totalSpent != null && report.budget != null) {
+    lines.push(`BUDGET: $${report.totalSpent}/$${report.budget} spent`)
+    lines.push('')
+  }
+
+  if (report.contextualCallouts.length > 0) {
+    lines.push('WHAT HAPPENED:')
+    report.contextualCallouts.forEach(c => lines.push(`  → ${c}`))
+    lines.push('')
+  }
+
+  lines.push('─'.repeat(50))
+  lines.push('Generated by FFIntelligence')
+
+  return lines.join('\n')
+}
+
+/**
+ * Format the full league report as plain text
+ */
+export function leagueReportToText(report: LeagueReport): string {
+  const lines: string[] = []
+
+  lines.push('╔' + '═'.repeat(58) + '╗')
+  lines.push('║' + '  FFINTELLIGENCE LEAGUE DRAFT REPORT  '.padStart(38).padEnd(58) + '║')
+  lines.push('╚' + '═'.repeat(58) + '╝')
+  lines.push('')
+  lines.push(`Date: ${report.draftDate}`)
+  lines.push(`Format: ${report.format === 'auction' ? 'Auction' : 'Snake'}`)
+  lines.push(`Teams: ${report.teamCount}`)
+  lines.push('')
+
+  if (report.leagueHighlights.length > 0) {
+    lines.push('LEAGUE HIGHLIGHTS:')
+    report.leagueHighlights.forEach(h => lines.push(`  ★ ${h}`))
+    lines.push('')
+  }
+
+  lines.push('TEAM RANKINGS:')
+  report.teamReports.forEach((tr, i) => {
+    lines.push(`  ${i + 1}. ${tr.managerName.padEnd(20)} ${tr.grade.padEnd(3)} (${tr.score}/100)`)
+  })
+  lines.push('')
+  lines.push('═'.repeat(60))
+  lines.push('')
+
+  // Individual team reports
+  for (const tr of report.teamReports) {
+    lines.push(teamReportToText(tr, report.format))
+    lines.push('')
+  }
+
+  return lines.join('\n')
+}
+
+/**
+ * Generate HTML email-ready report for a team
+ */
+export function teamReportToHTML(report: TeamReport, format: 'auction' | 'snake'): string {
+  const gradeColor = report.grade.startsWith('A') ? '#39ff14'
+    : report.grade.startsWith('B') ? '#22c55e'
+    : report.grade.startsWith('C') ? '#fbbf24'
+    : report.grade.startsWith('D') ? '#f97316'
+    : '#ef4444'
+
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #01040a; color: #fff; padding: 24px; max-width: 600px; margin: 0 auto; }
+    .header { text-align: center; margin-bottom: 24px; }
+    .grade { font-size: 48px; font-weight: 800; color: ${gradeColor}; text-shadow: 0 0 20px ${gradeColor}40; }
+    .score { color: #94a3b8; font-size: 14px; }
+    .section { background: rgba(15, 23, 42, 0.6); border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+    .section-title { color: #5582e6; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+    .list { margin: 0; padding: 0; list-style: none; }
+    .list li { padding: 4px 0; font-size: 14px; }
+    .strength { color: #39ff14; }
+    .weakness { color: #fbbf24; }
+    .pos-badge { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: 600; margin-right: 8px; }
+    .pos-QB { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+    .pos-RB { background: rgba(34, 197, 94, 0.2); color: #22c55e; }
+    .pos-WR { background: rgba(59, 130, 246, 0.2); color: #3b82f6; }
+    .pos-TE { background: rgba(249, 115, 22, 0.2); color: #f97316; }
+    .callout { background: rgba(85, 130, 230, 0.1); border-left: 3px solid #5582e6; padding: 8px 12px; margin: 8px 0; font-size: 13px; color: #94a3b8; }
+    .footer { text-align: center; color: #64748b; font-size: 12px; margin-top: 24px; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div style="color: #94a3b8; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Draft Report</div>
+    <h1 style="margin: 8px 0; font-size: 24px;">${report.managerName}</h1>
+    <div class="grade">${report.grade}</div>
+    <div class="score">${report.score}/100</div>
+  </div>
+
+  ${report.strengths.length > 0 ? `
+  <div class="section">
+    <div class="section-title">Strengths</div>
+    <ul class="list">
+      ${report.strengths.map(s => `<li class="strength">✓ ${s}</li>`).join('')}
+    </ul>
+  </div>
+  ` : ''}
+
+  ${report.weaknesses.length > 0 ? `
+  <div class="section">
+    <div class="section-title">Areas to Improve</div>
+    <ul class="list">
+      ${report.weaknesses.map(w => `<li class="weakness">✗ ${w}</li>`).join('')}
+    </ul>
+  </div>
+  ` : ''}
+
+  <div class="section">
+    <div class="section-title">Your Roster</div>
+    ${report.positionBreakdown.map(pos => `
+      <div style="margin: 8px 0;">
+        <span class="pos-badge pos-${pos.position}">${pos.position}</span>
+        <span style="color: ${pos.grade.startsWith('A') || pos.grade.startsWith('B') ? '#22c55e' : '#fbbf24'}; font-weight: 600;">${pos.grade}</span>
+        <span style="color: #94a3b8; font-size: 13px; margin-left: 8px;">
+          ${pos.players.map(p => `${p.name}${p.price ? ` ($${p.price})` : p.round ? ` (Rd ${p.round})` : ''}`).join(', ') || 'None'}
+        </span>
+      </div>
+    `).join('')}
+  </div>
+
+  ${format === 'auction' && report.totalSpent != null ? `
+  <div class="section">
+    <div class="section-title">Budget</div>
+    <div style="font-size: 20px; font-weight: 600;">$${report.totalSpent} <span style="color: #64748b; font-size: 14px;">/ $${report.budget}</span></div>
+  </div>
+  ` : ''}
+
+  ${report.contextualCallouts.length > 0 ? `
+  <div class="section">
+    <div class="section-title">What Happened</div>
+    ${report.contextualCallouts.map(c => `<div class="callout">${c}</div>`).join('')}
+  </div>
+  ` : ''}
+
+  <div class="footer">
+    Generated by FFIntelligence
+  </div>
+</body>
+</html>
+  `.trim()
+}

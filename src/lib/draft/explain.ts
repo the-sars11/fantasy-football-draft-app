@@ -34,6 +34,12 @@ export interface PositionScarcity {
   scarcityLevel: 'critical' | 'low' | 'moderate' | 'abundant'
 }
 
+// Extended interface with spend ranges for FF-073 redesign
+export interface PositionScarcityExtended extends PositionScarcity {
+  spendRange?: { low: number; high: number }
+  avgValue?: number
+}
+
 /**
  * Calculate position scarcity across all undrafted players.
  */
@@ -70,6 +76,44 @@ export function calculateScarcity(
       tier3Remaining: tier3.length,
       startableRemaining: startable,
       scarcityLevel,
+    }
+  })
+}
+
+/**
+ * Calculate extended scarcity with spend ranges for auction drafts (FF-073).
+ * Includes value ranges for remaining players at each position.
+ */
+export function calculateScarcityExtended(
+  availablePlayers: Player[],
+  teamCount: number,
+): PositionScarcityExtended[] {
+  const baseScarcity = calculateScarcity(availablePlayers, teamCount)
+
+  return baseScarcity.map(scarcity => {
+    const posPlayers = availablePlayers.filter(p => p.position === scarcity.position)
+
+    // Get auction values for startable players (tier 1-2)
+    const startablePlayers = posPlayers.filter(p => p.consensusTier <= 2)
+    const auctionValues = startablePlayers
+      .map(p => p.consensusAuctionValue)
+      .filter(v => v != null && v > 0)
+      .sort((a, b) => b - a)
+
+    let spendRange: { low: number; high: number } | undefined
+    let avgValue: number | undefined
+
+    if (auctionValues.length > 0) {
+      const high = Math.round(auctionValues[0])
+      const low = Math.round(auctionValues[auctionValues.length - 1])
+      spendRange = { low, high }
+      avgValue = Math.round(auctionValues.reduce((a, b) => a + b, 0) / auctionValues.length)
+    }
+
+    return {
+      ...scarcity,
+      spendRange,
+      avgValue,
     }
   })
 }

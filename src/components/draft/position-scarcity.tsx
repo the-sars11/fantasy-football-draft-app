@@ -1,120 +1,272 @@
 'use client'
 
 /**
- * PositionScarcityTracker (FF-035)
+ * PositionScarcityTracker (FF-035, FF-073 Redesign)
  *
- * Visual display of remaining startable players per position per tier.
- * Color-coded urgency: critical (red), low (orange), moderate (yellow), abundant (green).
+ * Premium position scarcity display with FFI design system:
+ * - Smooth gradient progress bars (not segmented)
+ * - CRITICAL / STABLE / ELITE status labels
+ * - Spend range indicators per position
+ * - Stagger animation on mount
  */
 
-import { Badge } from '@/components/ui/badge'
-import { AlertTriangle } from 'lucide-react'
+import { motion } from 'framer-motion'
+import { AlertTriangle, TrendingDown, Shield, Sparkles } from 'lucide-react'
+import { cn } from '@/lib/utils'
 import type { PositionScarcity } from '@/lib/draft/explain'
+import type { Position } from '@/lib/players/types'
 
-const scarcityStyles: Record<PositionScarcity['scarcityLevel'], { bg: string; text: string; label: string }> = {
-  critical: { bg: 'bg-red-500/15', text: 'text-red-400', label: 'CRITICAL' },
-  low:      { bg: 'bg-orange-500/15', text: 'text-orange-400', label: 'LOW' },
-  moderate: { bg: 'bg-yellow-500/15', text: 'text-yellow-300', label: 'OK' },
-  abundant: { bg: 'bg-green-500/15', text: 'text-green-400', label: 'DEEP' },
+// Map old scarcity levels to new FFI status system
+type ScarcityStatus = 'critical' | 'stable' | 'elite'
+
+interface StatusConfig {
+  label: string
+  icon: typeof AlertTriangle
+  progressClass: string
+  badgeClass: string
+  textClass: string
 }
 
-const posColors: Record<string, string> = {
-  QB: 'border-red-500/40',
-  RB: 'border-blue-500/40',
-  WR: 'border-green-500/40',
-  TE: 'border-orange-500/40',
-  K: 'border-purple-500/40',
-  DEF: 'border-yellow-500/40',
+const statusMap: Record<PositionScarcity['scarcityLevel'], ScarcityStatus> = {
+  critical: 'critical',
+  low: 'critical', // low is still critical in the new design
+  moderate: 'stable',
+  abundant: 'elite',
+}
+
+const statusConfig: Record<ScarcityStatus, StatusConfig> = {
+  critical: {
+    label: 'CRITICAL',
+    icon: AlertTriangle,
+    progressClass: 'ffi-progress-critical',
+    badgeClass: 'bg-[var(--ffi-danger)]/15 text-[var(--ffi-danger)] border-[var(--ffi-danger)]/30',
+    textClass: 'text-[var(--ffi-danger)]',
+  },
+  stable: {
+    label: 'STABLE',
+    icon: Shield,
+    progressClass: 'ffi-progress-stable',
+    badgeClass: 'bg-[var(--ffi-warning)]/15 text-[var(--ffi-warning)] border-[var(--ffi-warning)]/30',
+    textClass: 'text-[var(--ffi-warning)]',
+  },
+  elite: {
+    label: 'ELITE',
+    icon: Sparkles,
+    progressClass: 'ffi-progress-elite',
+    badgeClass: 'bg-[var(--ffi-success)]/15 text-[var(--ffi-success)] border-[var(--ffi-success)]/30',
+    textClass: 'text-[var(--ffi-success)]',
+  },
+}
+
+// Position badge colors (matching FFI design system)
+const positionBadgeClass: Record<Position, string> = {
+  QB: 'ffi-badge-qb',
+  RB: 'ffi-badge-rb',
+  WR: 'ffi-badge-wr',
+  TE: 'ffi-badge-te',
+  K: 'ffi-badge-k',
+  DEF: 'ffi-badge-def',
+}
+
+// Extended scarcity data with spend ranges
+export interface PositionScarcityExtended extends PositionScarcity {
+  spendRange?: { low: number; high: number }
+  avgValue?: number
 }
 
 interface PositionScarcityTrackerProps {
-  scarcity: PositionScarcity[]
+  scarcity: PositionScarcityExtended[]
+  maxStartable?: number // baseline for progress calculation (default: 24)
+  showSpendRanges?: boolean
+  compact?: boolean
 }
 
-export function PositionScarcityTracker({ scarcity }: PositionScarcityTrackerProps) {
-  const alerts = scarcity.filter(s => s.scarcityLevel === 'critical' || s.scarcityLevel === 'low')
+export function PositionScarcityTracker({
+  scarcity,
+  maxStartable = 24,
+  showSpendRanges = true,
+  compact = false,
+}: PositionScarcityTrackerProps) {
+  const criticalCount = scarcity.filter(
+    s => statusMap[s.scarcityLevel] === 'critical'
+  ).length
+
+  // Calculate progress percentage (inverted: lower remaining = higher urgency)
+  const getProgressValue = (s: PositionScarcityExtended) => {
+    const percentage = (s.startableRemaining / maxStartable) * 100
+    return Math.max(5, Math.min(100, percentage)) // clamp 5-100%
+  }
 
   return (
-    <div className="space-y-3">
-      <h3 className="text-sm font-semibold flex items-center gap-1.5">
-        Position Scarcity
-        {alerts.length > 0 && (
-          <Badge variant="outline" className="text-[10px] px-1.5 py-0 text-orange-400 border-orange-500/30 bg-orange-500/10">
-            <AlertTriangle className="h-2.5 w-2.5 mr-0.5" />
-            {alerts.length} alert{alerts.length > 1 ? 's' : ''}
-          </Badge>
+    <div className="space-y-4">
+      {/* Header with alert count */}
+      <div className="flex items-center justify-between">
+        <h3 className="ffi-title-md text-white flex items-center gap-2">
+          <TrendingDown className="h-4 w-4 text-[var(--ffi-primary)]" />
+          Position Scarcity
+        </h3>
+        {criticalCount > 0 && (
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[var(--ffi-danger)]/15 border border-[var(--ffi-danger)]/30"
+          >
+            <AlertTriangle className="h-3 w-3 text-[var(--ffi-danger)]" />
+            <span className="ffi-label text-[var(--ffi-danger)]">
+              {criticalCount} CRITICAL
+            </span>
+          </motion.div>
         )}
-      </h3>
+      </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-        {scarcity.map(s => {
-          const style = scarcityStyles[s.scarcityLevel]
+      {/* Position grid */}
+      <div className={cn(
+        "grid gap-3",
+        compact ? "grid-cols-2 sm:grid-cols-3" : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+      )}>
+        {scarcity.map((s, index) => {
+          const status = statusMap[s.scarcityLevel]
+          const config = statusConfig[status]
+          const StatusIcon = config.icon
+          const progress = getProgressValue(s)
+
           return (
-            <div
+            <motion.div
               key={s.position}
-              className={`rounded-lg border ${posColors[s.position] ?? 'border-border'} ${style.bg} p-2.5`}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{
+                type: 'spring',
+                stiffness: 400,
+                damping: 25,
+                delay: index * 0.05,
+              }}
+              className="ffi-card group"
             >
-              <div className="flex items-center justify-between mb-1.5">
-                <span className="text-sm font-semibold">{s.position}</span>
-                <Badge
-                  variant="outline"
-                  className={`text-[9px] px-1 py-0 ${style.text} border-current/30`}
-                >
-                  {style.label}
-                </Badge>
-              </div>
-
-              {/* Tier breakdown bar */}
-              <div className="flex gap-0.5 h-2 rounded overflow-hidden bg-muted/30 mb-1.5">
-                {s.tier1Remaining > 0 && (
-                  <div
-                    className="bg-green-500/70 rounded-sm"
-                    style={{ flex: s.tier1Remaining }}
-                    title={`Tier 1: ${s.tier1Remaining}`}
-                  />
-                )}
-                {s.tier2Remaining > 0 && (
-                  <div
-                    className="bg-yellow-500/60 rounded-sm"
-                    style={{ flex: s.tier2Remaining }}
-                    title={`Tier 2: ${s.tier2Remaining}`}
-                  />
-                )}
-                {s.tier3Remaining > 0 && (
-                  <div
-                    className="bg-muted-foreground/30 rounded-sm"
-                    style={{ flex: s.tier3Remaining }}
-                    title={`Tier 3+: ${s.tier3Remaining}`}
-                  />
-                )}
-              </div>
-
-              {/* Counts */}
-              <div className="flex justify-between text-[10px] text-muted-foreground">
-                <span>
-                  <span className="text-green-400 font-mono">{s.tier1Remaining}</span> T1
-                  {' · '}
-                  <span className="text-yellow-400 font-mono">{s.tier2Remaining}</span> T2
+              {/* Top row: Position badge + Status */}
+              <div className="flex items-center justify-between mb-3">
+                <span className={cn('ffi-badge', positionBadgeClass[s.position])}>
+                  {s.position}
                 </span>
-                <span className="font-mono">{s.totalRemaining} total</span>
+                <div className={cn(
+                  'flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider border',
+                  config.badgeClass
+                )}>
+                  <StatusIcon className="h-2.5 w-2.5" />
+                  {config.label}
+                </div>
               </div>
-            </div>
+
+              {/* Progress bar */}
+              <div className={cn('ffi-progress mb-2', config.progressClass)}>
+                <motion.div
+                  className="ffi-progress-bar"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${progress}%` }}
+                  transition={{ duration: 0.8, delay: index * 0.05 + 0.2, ease: 'easeOut' }}
+                />
+              </div>
+
+              {/* Stats row */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-[11px]">
+                  <span className="text-[var(--ffi-text-secondary)]">
+                    <span className={cn('font-mono font-bold', config.textClass)}>
+                      {s.startableRemaining}
+                    </span>
+                    {' '}startable
+                  </span>
+                  <span className="text-[var(--ffi-text-muted)]">
+                    ({s.tier1Remaining} T1 · {s.tier2Remaining} T2)
+                  </span>
+                </div>
+              </div>
+
+              {/* Spend range (optional) */}
+              {showSpendRanges && s.spendRange && (
+                <div className="mt-2 pt-2 border-t border-[var(--ffi-border)]/10">
+                  <div className="flex items-center justify-between text-[10px]">
+                    <span className="text-[var(--ffi-text-muted)] uppercase tracking-wider">
+                      Spend Range
+                    </span>
+                    <span className="font-mono text-[var(--ffi-text-secondary)]">
+                      ${s.spendRange.low}–${s.spendRange.high}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {/* Average value indicator (when no spend range) */}
+              {showSpendRanges && !s.spendRange && s.avgValue && (
+                <div className="mt-2 pt-2 border-t border-[var(--ffi-border)]/10">
+                  <div className="flex items-center justify-between text-[10px]">
+                    <span className="text-[var(--ffi-text-muted)] uppercase tracking-wider">
+                      Avg Value
+                    </span>
+                    <span className="font-mono text-[var(--ffi-accent)]">
+                      ${s.avgValue}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </motion.div>
           )
         })}
       </div>
 
       {/* Legend */}
-      <div className="flex gap-3 text-[10px] text-muted-foreground">
-        <span className="flex items-center gap-1">
-          <span className="w-2 h-2 rounded-sm bg-green-500/70" /> Tier 1 (startable)
+      <div className="flex flex-wrap gap-4 text-[10px] text-[var(--ffi-text-muted)]">
+        <span className="flex items-center gap-1.5">
+          <AlertTriangle className="h-3 w-3 text-[var(--ffi-danger)]" />
+          CRITICAL = Act Now
         </span>
-        <span className="flex items-center gap-1">
-          <span className="w-2 h-2 rounded-sm bg-yellow-500/60" /> Tier 2 (depth)
+        <span className="flex items-center gap-1.5">
+          <Shield className="h-3 w-3 text-[var(--ffi-warning)]" />
+          STABLE = Monitor
         </span>
-        <span className="flex items-center gap-1">
-          <span className="w-2 h-2 rounded-sm bg-muted-foreground/30" /> Tier 3+
+        <span className="flex items-center gap-1.5">
+          <Sparkles className="h-3 w-3 text-[var(--ffi-success)]" />
+          ELITE = Deep Pool
         </span>
       </div>
+    </div>
+  )
+}
+
+/**
+ * Mini variant for compact displays (e.g., sidebar summary)
+ */
+interface PositionScarcityMiniProps {
+  scarcity: PositionScarcityExtended[]
+}
+
+export function PositionScarcityMini({ scarcity }: PositionScarcityMiniProps) {
+  return (
+    <div className="flex flex-wrap gap-2">
+      {scarcity.map(s => {
+        const status = statusMap[s.scarcityLevel]
+        const config = statusConfig[status]
+
+        return (
+          <div
+            key={s.position}
+            className={cn(
+              'flex items-center gap-1.5 px-2 py-1 rounded-lg',
+              'bg-[var(--ffi-surface)]/60 border',
+              status === 'critical' && 'border-[var(--ffi-danger)]/30',
+              status === 'stable' && 'border-[var(--ffi-warning)]/30',
+              status === 'elite' && 'border-[var(--ffi-success)]/30'
+            )}
+          >
+            <span className={cn('ffi-badge text-[10px] px-1.5', positionBadgeClass[s.position])}>
+              {s.position}
+            </span>
+            <span className={cn('ffi-label', config.textClass)}>
+              {s.startableRemaining}
+            </span>
+          </div>
+        )
+      })}
     </div>
   )
 }

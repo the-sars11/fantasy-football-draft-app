@@ -19,6 +19,22 @@ export interface PositionGrade {
   notes: string[]
 }
 
+// FF-074: Pick-by-pick story analysis
+export type PickVerdict = 'steal' | 'reach' | 'fair' | 'ai_pivot'
+
+export interface PickAnalysis {
+  pickNumber: number
+  round?: number
+  playerName: string
+  position: string
+  team?: string
+  price?: number
+  adpValue?: number       // +/- value vs ADP
+  verdict: PickVerdict
+  narrative: string       // Story-driven context
+  strategyAlignment: boolean
+}
+
 export interface TargetResult {
   playerName: string
   status: 'hit' | 'missed' | 'avoided_success' | 'avoided_fail'
@@ -36,6 +52,10 @@ export interface DraftReview {
   strengths: string[]
   weaknesses: string[]
   pivotImpact: string | null
+  // FF-074: Pick-by-pick story analysis
+  pickAnalysis: PickAnalysis[]
+  stealCount: number
+  reachCount: number
 }
 
 export interface BudgetAnalysis {
@@ -87,6 +107,9 @@ export function analyzeDraft(
       strengths: [],
       weaknesses: [],
       pivotImpact: null,
+      pickAnalysis: [],
+      stealCount: 0,
+      reachCount: 0,
     }
   }
 
@@ -321,6 +344,85 @@ export function analyzeDraft(
     : overallScore >= 65 ? 'Decent draft but significant strategy drift'
     : 'Draft deviated substantially from strategy'
 
+  // FF-074: Pick-by-pick story analysis
+  const pivotPickNumbers = new Set(pivotHistory?.map(p => p.atPick) || [])
+  const pickAnalysis: PickAnalysis[] = myPicks
+    .sort((a, b) => a.pick_number - b.pick_number)
+    .map(pick => {
+      const pos = pick.position?.toUpperCase() || 'UNKNOWN'
+
+      // Determine verdict (steal/reach/fair/ai_pivot)
+      let verdict: PickVerdict = 'fair'
+      let adpValue: number | undefined
+
+      // Check if this pick was at a pivot point
+      if (pivotPickNumbers.has(pick.pick_number)) {
+        verdict = 'ai_pivot'
+      } else if (format === 'auction' && pick.price != null) {
+        // For auction: estimate value based on price relative to typical position costs
+        const avgPrices: Record<string, number> = { QB: 8, RB: 25, WR: 22, TE: 8, K: 1, DEF: 1 }
+        const avgPrice = avgPrices[pos] || 10
+        adpValue = Math.round((avgPrice - pick.price) * 10) / 10
+        if (pick.price <= avgPrice * 0.7) verdict = 'steal'
+        else if (pick.price >= avgPrice * 1.3) verdict = 'reach'
+      } else if (format === 'snake' && pick.round != null) {
+        // For snake: estimate based on round vs typical position round
+        const targetRounds: Record<string, number> = { QB: 7, RB: 2, WR: 3, TE: 6, K: 14, DEF: 15 }
+        const targetRound = targetRounds[pos] || 8
+        adpValue = targetRound - pick.round
+        if (pick.round <= targetRound - 2) verdict = 'reach'
+        else if (pick.round >= targetRound + 2) verdict = 'steal'
+      }
+
+      // Check strategy alignment
+      const isTarget = strategy?.player_targets.some(
+        t => t.player_name.toLowerCase() === pick.player_name.toLowerCase()
+      )
+      const isAvoid = strategy?.player_avoids.some(
+        a => a.player_name.toLowerCase() === pick.player_name.toLowerCase()
+      )
+      const strategyAlignment = isTarget || (!isAvoid && strategy != null)
+
+      // Generate narrative
+      let narrative = ''
+      if (verdict === 'ai_pivot') {
+        const pivot = pivotHistory?.find(p => p.atPick === pick.pick_number)
+        narrative = pivot
+          ? `Strategy pivoted here: ${pivot.reason}. Shifted approach from ${pivot.from} to ${pivot.to}.`
+          : 'Strategy adjustment made at this pick.'
+      } else if (verdict === 'steal') {
+        narrative = format === 'auction'
+          ? `Excellent value at $${pick.price}. Paid below market rate for ${pos} production.`
+          : `Great late-round find in Round ${pick.round}. Fell further than expected.`
+      } else if (verdict === 'reach') {
+        narrative = format === 'auction'
+          ? `Premium price at $${pick.price}. Overpaid relative to position market.`
+          : `Reached early in Round ${pick.round}. Drafted ahead of typical value.`
+      } else if (isTarget) {
+        narrative = 'Acquired strategy target. This was a planned acquisition.'
+      } else {
+        narrative = format === 'auction'
+          ? `Fair value at $${pick.price}. Solid ${pos} addition.`
+          : `Reasonable selection in Round ${pick.round}. Addressed roster need.`
+      }
+
+      return {
+        pickNumber: pick.pick_number,
+        round: pick.round,
+        playerName: pick.player_name,
+        position: pos,
+        team: undefined, // Not available from DraftPick
+        price: pick.price,
+        adpValue,
+        verdict,
+        narrative,
+        strategyAlignment,
+      }
+    })
+
+  const stealCount = pickAnalysis.filter(p => p.verdict === 'steal').length
+  const reachCount = pickAnalysis.filter(p => p.verdict === 'reach').length
+
   return {
     overallGrade: letterGrade(overallScore),
     overallScore,
@@ -332,5 +434,8 @@ export function analyzeDraft(
     strengths,
     weaknesses,
     pivotImpact,
+    pickAnalysis,
+    stealCount,
+    reachCount,
   }
 }

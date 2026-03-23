@@ -632,3 +632,215 @@
 .safe-top {
   padding-top: env(safe-area-inset-top, 0px);
 }
+
+/* ========================================
+   Mobile Polish (FF-077)
+   44px touch targets + responsive layouts
+   ======================================== */
+
+/* Mobile touch target minimums (44x44px per Apple HIG) */
+@media (max-width: 768px) {
+  /* Primary buttons: full 44px height */
+  .ffi-btn-primary {
+    min-height: 44px;
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+  }
+
+  /* Secondary buttons: 44px height */
+  .ffi-btn-secondary {
+    min-height: 44px;
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+  }
+
+  /* Ghost buttons: maintain 44px tap zone */
+  .ffi-btn-ghost {
+    min-height: 44px;
+    padding-top: 0.625rem;
+    padding-bottom: 0.625rem;
+  }
+
+  /* Inputs: 44px minimum height */
+  .ffi-input,
+  select.ffi-input {
+    min-height: 44px;
+    padding-top: 0.625rem;
+    padding-bottom: 0.625rem;
+    font-size: 16px; /* Prevents iOS zoom on focus */
+  }
+
+  /* Cards: tighter mobile padding */
+  .ffi-card,
+  .ffi-card-elevated,
+  .ffi-card-interactive {
+    padding: 0.875rem;
+  }
+
+  /* Interactive elements: add tap highlight area */
+  .ffi-card-interactive {
+    min-height: 48px;
+    touch-action: manipulation; /* Disable double-tap zoom */
+  }
+
+  /* Badges: slightly larger for easier tapping */
+  .ffi-badge {
+    min-height: 28px;
+    padding: 0.375rem 0.625rem;
+  }
+
+  /* Progress bars: larger touch area when interactive */
+  .ffi-progress {
+    min-height: 12px;
+  }
+
+  /* Typography: slightly larger body text for readability */
+  .ffi-body-md {
+    font-size: 0.9375rem;
+    line-height: 1.55;
+  }
+
+  /* Grade display: scale down for mobile */
+  .ffi-grade {
+    transform: scale(0.9);
+  }
+
+  /* Display text: responsive sizing */
+  .ffi-display-xl {
+    font-size: 2.25rem;
+  }
+
+  .ffi-display-lg {
+    font-size: 1.75rem;
+  }
+
+  .ffi-display-md {
+    font-size: 1.25rem;
+  }
+}
+
+/* Small mobile (iPhone SE, etc.) */
+@media (max-width: 375px) {
+  .ffi-display-xl {
+    font-size: 1.875rem;
+  }
+
+  .ffi-display-lg {
+    font-size: 1.5rem;
+  }
+
+  .ffi-display-md {
+    font-size: 1.125rem;
+  }
+
+  /* Even tighter card padding */
+  .ffi-card,
+  .ffi-card-elevated,
+  .ffi-card-interactive {
+    padding: 0.75rem;
+  }
+}
+
+/* Ensure adequate spacing between tap targets */
+.ffi-touch-spacing > * + * {
+  margin-top: 0.75rem;
+}
+
+@media (max-width: 768px) {
+  .ffi-touch-spacing > * + * {
+    margin-top: 1rem;
+  }
+}
+
+/* Mobile-first grid utilities */
+.ffi-grid-mobile-stack {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .ffi-grid-mobile-stack {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .ffi-grid-mobile-stack {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Bottom navigation safe zone */
+.ffi-bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  padding-bottom: env(safe-area-inset-bottom, 0.5rem);
+}
+
+/* Content area with bottom nav clearance */
+.ffi-main-content {
+  padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+}
+
+@media (min-width: 768px) {
+  .ffi-main-content {
+    padding-bottom: 0;
+  }
+}
+
+/* Disable text selection on interactive elements (prevents accidental selection) */
+.ffi-no-select {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* Smooth scrolling container for mobile */
+.ffi-scroll-container {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  overscroll-behavior: contain;
+}
+
+/* Pull-to-refresh prevention on fixed headers */
+.ffi-fixed-header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  overscroll-behavior: none;
+}
+
+/* Optimized animations for mobile */
+@media (max-width: 768px) {
+  .ffi-card-interactive:hover {
+    transform: none; /* Disable hover transforms on touch */
+  }
+
+  .ffi-btn-primary:hover {
+    transform: none;
+  }
+
+  /* Active states instead of hover */
+  .ffi-card-interactive:active {
+    transform: scale(0.98);
+    transition: transform 0.1s ease-out;
+  }
+
+  .ffi-btn-primary:active {
+    transform: scale(0.97);
+    box-shadow: 0 0 15px rgba(57, 255, 20, 0.4);
+  }
+
+  .ffi-btn-secondary:active {
+    transform: scale(0.98);
+    background: rgba(30, 41, 59, 0.95);
+  }
+
+  .ffi-btn-ghost:active {
+    background: rgba(51, 65, 85, 0.3);
+  }
+}

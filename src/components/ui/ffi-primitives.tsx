@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils"
 
 interface FFIButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "primary" | "secondary" | "ghost"
-  size?: "default" | "sm" | "lg"
+  size?: "default" | "sm" | "lg" | "touch"
 }
 
 export function FFIButton({
@@ -29,6 +29,7 @@ export function FFIButton({
     sm: "px-4 py-1.5 text-sm",
     default: "px-6 py-2.5 text-base",
     lg: "px-8 py-3 text-lg",
+    touch: "px-6 py-3 text-base min-h-[44px]", // Mobile-optimized touch target
   }
 
   return (
@@ -36,6 +37,7 @@ export function FFIButton({
       className={cn(
         variants[variant],
         size !== "default" && sizes[size],
+        "ffi-no-select", // Prevent accidental text selection
         className
       )}
       {...props}
