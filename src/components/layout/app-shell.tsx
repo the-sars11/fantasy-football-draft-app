@@ -19,6 +19,7 @@ import { ThemeToggle, ThemeToggleMobile } from '@/components/theme-toggle'
 import { signOut } from '@/app/(auth)/actions'
 import { NavProvider } from '@/lib/nav-context'
 import { PageTransition } from '@/components/layout/page-transition'
+import { SwipeCarousel } from '@/components/layout/swipe-carousel'
 import { motion, AnimatePresence } from 'framer-motion'
 
 interface NavItem {
@@ -186,9 +187,19 @@ export function AppShell({
 
       {/* Main content — fills space between header and bottom nav on mobile */}
       <main className="flex-1 overflow-y-auto relative">
-        <PageTransition>
-          <div className="mx-auto max-w-6xl p-4 md:p-6 pb-20 md:pb-6">{children}</div>
-        </PageTransition>
+        {/* Desktop: just page transition. Mobile: swipe carousel + page transition */}
+        <div className="hidden md:block h-full">
+          <PageTransition>
+            <div className="mx-auto max-w-6xl p-4 md:p-6 pb-6">{children}</div>
+          </PageTransition>
+        </div>
+        <div className="md:hidden h-full">
+          <SwipeCarousel>
+            <PageTransition>
+              <div className="mx-auto max-w-6xl p-4 pb-24">{children}</div>
+            </PageTransition>
+          </SwipeCarousel>
+        </div>
       </main>
 
       {/* Mobile bottom tab bar — hidden on desktop */}
