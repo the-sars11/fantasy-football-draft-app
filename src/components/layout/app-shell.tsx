@@ -19,6 +19,7 @@ import { ThemeToggle, ThemeToggleMobile } from '@/components/theme-toggle'
 import { signOut } from '@/app/(auth)/actions'
 import { NavProvider } from '@/lib/nav-context'
 import { PageTransition } from '@/components/layout/page-transition'
+import { motion, AnimatePresence } from 'framer-motion'
 
 interface NavItem {
   label: string
@@ -200,30 +201,58 @@ export function AppShell({
               key={item.href}
               href={item.href}
               className={cn(
-                'relative flex flex-col items-center justify-center gap-1 flex-1 h-full transition-all duration-200',
+                'relative flex flex-col items-center justify-center gap-1 flex-1 h-full',
                 isActive
                   ? 'text-[var(--ffi-accent)]'
                   : 'text-[var(--ffi-text-secondary)] active:text-white'
               )}
             >
-              <div className={cn(
-                'relative p-1.5 rounded-lg transition-all duration-200',
-                isActive && 'bg-[var(--ffi-accent)]/10'
-              )}>
-                <Icon className={cn(
-                  'h-5 w-5 transition-all duration-200',
-                  isActive && 'drop-shadow-[0_0_8px_rgba(57,255,20,0.6)]'
-                )} />
+              <div className="relative p-1.5 rounded-lg">
+                {/* Sliding background indicator */}
                 {isActive && (
-                  <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[var(--ffi-accent)] shadow-[0_0_6px_rgba(57,255,20,0.8)]" />
+                  <motion.div
+                    layoutId="nav-indicator"
+                    className="absolute inset-0 bg-[var(--ffi-accent)]/10 rounded-lg"
+                    transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+                  />
                 )}
+                <motion.div
+                  animate={{
+                    scale: isActive ? 1.1 : 1,
+                  }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+                >
+                  <Icon className={cn(
+                    'h-5 w-5 relative z-10',
+                    isActive && 'drop-shadow-[0_0_8px_rgba(57,255,20,0.6)]'
+                  )} />
+                </motion.div>
+                {/* Animated dot indicator */}
+                <AnimatePresence>
+                  {isActive && (
+                    <motion.div
+                      initial={{ scale: 0, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      exit={{ scale: 0, opacity: 0 }}
+                      transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                      className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[var(--ffi-accent)] shadow-[0_0_8px_rgba(57,255,20,0.8)]"
+                    />
+                  )}
+                </AnimatePresence>
               </div>
-              <span className={cn(
-                'text-[10px] font-medium',
-                isActive && 'text-[var(--ffi-accent)]'
-              )}>
+              <motion.span
+                animate={{
+                  opacity: isActive ? 1 : 0.7,
+                  y: isActive ? -1 : 0,
+                }}
+                transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                className={cn(
+                  'text-[10px] font-medium',
+                  isActive && 'text-[var(--ffi-accent)]'
+                )}
+              >
                 {item.label}
-              </span>
+              </motion.span>
             </Link>
           )
         })}
