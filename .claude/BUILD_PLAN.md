@@ -160,49 +160,49 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 - [x] FF-065: Draft Board redesign — COMPACT player cards (tight spacing), position badges + auction values, expandable Tactical Insight with confidence %, "RECOMMENDED"/"BEST AVAILABLE" tags
 - [x] FF-066: Live Draft room redesign — real-time feed, strategy picker dropdown, My Squad quick panel, inline AI recommendation cards
 
-### Sprint 10.5: Premium Navigation & Transitions
+### Sprint 10.5: Premium Navigation & Transitions ✅
 > **Goal:** Buttery-smooth, app-store-quality navigation that feels native and premium
 
 #### Page Transition System
-- [ ] FF-082: Install Framer Motion + configure AnimatePresence wrapper in root layout
-- [ ] FF-083: Page transition orchestrator — detect navigation direction (forward/back), apply directional slide animations
-- [ ] FF-084: Slide transitions by context:
+- [x] FF-082: Install Framer Motion + configure AnimatePresence wrapper in root layout
+- [x] FF-083: Page transition orchestrator — detect navigation direction (forward/back), apply directional slide animations
+- [x] FF-084: Slide transitions by context:
   - Prep Hub → Board/Strategies/Runs: slide LEFT (drilling in)
   - Board/Strategies/Runs → Prep Hub: slide RIGHT (backing out)
   - Draft Setup → Live Draft: slide UP (entering immersive mode)
   - Live Draft → anywhere: slide DOWN (exiting immersive mode)
   - Settings: crossfade (modal-like feel)
-- [ ] FF-085: Shared element transitions — player cards morph between Draft Board and Live Draft, strategy cards persist during navigation
+- [x] FF-085: Shared element transitions — player cards morph between Draft Board and Live Draft, strategy cards persist during navigation
 
 #### Swipe Navigation (Mobile)
-- [ ] FF-086: Horizontal swipe gesture handler — detect left/right swipes on main content area
-- [ ] FF-087: Swipe carousel for main sections:
+- [x] FF-086: Horizontal swipe gesture handler — detect left/right swipes on main content area
+- [x] FF-087: Swipe carousel for main sections:
   - Prep Hub ↔ Draft Hub ↔ Settings (3-screen carousel)
   - Visual indicator dots at bottom showing current position
   - Swipe feels like turning a page, subtle parallax on background
-- [ ] FF-088: Edge swipe to go back (iOS-style) — swipe from left edge triggers back navigation with live preview
-- [ ] FF-089: Swipe resistance at edges — rubber-band effect when at first/last screen
+- [x] FF-088: Edge swipe to go back (iOS-style) — swipe from left edge triggers back navigation with live preview
+- [x] FF-089: Swipe resistance at edges — rubber-band effect when at first/last screen
 
 #### Micro-Transitions
-- [ ] FF-090: Bottom nav transitions:
+- [x] FF-090: Bottom nav transitions:
   - Active icon scales up slightly + glow pulse on tap
   - Inactive icons fade/shrink subtly
   - Dot indicator slides smoothly between tabs
-- [ ] FF-091: Card interactions:
+- [x] FF-091: Card interactions:
   - Cards lift on hover/press (translateY + shadow)
   - Expand/collapse with spring physics (no linear ease)
   - Stagger animation when list loads (cards cascade in)
-- [ ] FF-092: AI recommendation cards:
+- [x] FF-092: AI recommendation cards:
   - Slide in from right with attention-grabbing glow pulse
   - Dismiss swipes left with rotation
   - Accept pulses green and fades up
 
 #### Screen-Specific Polish
-- [ ] FF-093: Live Draft feed animations:
+- [x] FF-093: Live Draft feed animations:
   - New picks slide in from top with subtle bounce
   - Old picks compress/fade simultaneously
   - "Your pick" has special celebration micro-animation
-- [ ] FF-094: Draft Board player reveal:
+- [x] FF-094: Draft Board player reveal:
   - Initial load: cards cascade in with stagger
   - Filter change: smooth reorder animation (layout transition)
   - Sort change: cards smoothly rearrange position
