@@ -1,8 +1,39 @@
 "use client"
 
 import * as React from "react"
-import { motion, AnimatePresence, useMotionValue, useTransform, type PanInfo } from "framer-motion"
+import { createContext, useContext } from "react"
+import { motion, AnimatePresence, useMotionValue, useTransform, type PanInfo, LayoutGroup } from "framer-motion"
 import { cn } from "@/lib/utils"
+
+/* ========================================
+   Shared Element Context — For cross-page morphs
+   ======================================== */
+
+interface SharedElementContextValue {
+  activeId: string | null
+  setActiveId: (id: string | null) => void
+}
+
+const SharedElementContext = createContext<SharedElementContextValue>({
+  activeId: null,
+  setActiveId: () => {},
+})
+
+export function SharedElementProvider({ children }: { children: React.ReactNode }) {
+  const [activeId, setActiveId] = React.useState<string | null>(null)
+
+  return (
+    <SharedElementContext.Provider value={{ activeId, setActiveId }}>
+      <LayoutGroup>
+        {children}
+      </LayoutGroup>
+    </SharedElementContext.Provider>
+  )
+}
+
+export function useSharedElement() {
+  return useContext(SharedElementContext)
+}
 
 /* ========================================
    Motion Card — Lift on press, spring expand
@@ -341,6 +372,112 @@ export function FFIFadeInUp({
       }}
     >
       {children}
+    </motion.div>
+  )
+}
+
+/* ========================================
+   Shared Player Card — Morphs between screens
+   ======================================== */
+
+type PositionType = "QB" | "RB" | "WR" | "TE" | "K" | "DEF"
+
+interface SharedPlayerCardProps {
+  playerId: string
+  rank: number
+  name: string
+  team: string
+  position: PositionType
+  bye: number
+  value: number
+  className?: string
+  onClick?: () => void
+  variant?: "compact" | "expanded"
+  children?: React.ReactNode
+}
+
+export function SharedPlayerCard({
+  playerId,
+  rank,
+  name,
+  team,
+  position,
+  bye,
+  value,
+  className,
+  onClick,
+  variant = "compact",
+  children,
+}: SharedPlayerCardProps) {
+  const positionColors: Record<PositionType, string> = {
+    QB: "text-red-400",
+    RB: "text-green-400",
+    WR: "text-blue-400",
+    TE: "text-orange-400",
+    K: "text-purple-400",
+    DEF: "text-yellow-400",
+  }
+
+  return (
+    <motion.div
+      layoutId={`player-card-${playerId}`}
+      className={cn(
+        "ffi-card-interactive cursor-pointer",
+        variant === "expanded" && "ffi-card-elevated",
+        className
+      )}
+      onClick={onClick}
+      whileHover={{ scale: 1.02, y: -2 }}
+      whileTap={{ scale: 0.98 }}
+      transition={{ type: "spring", stiffness: 400, damping: 25 }}
+    >
+      <div className="flex items-start justify-between">
+        <div className="flex items-start gap-3">
+          <motion.span
+            layoutId={`player-rank-${playerId}`}
+            className="ffi-display-md text-[var(--ffi-accent)] font-bold w-8"
+          >
+            {String(rank).padStart(2, "0")}
+          </motion.span>
+          <div>
+            <motion.h4
+              layoutId={`player-name-${playerId}`}
+              className="ffi-title-lg text-white"
+            >
+              {name}
+            </motion.h4>
+            <motion.p
+              layoutId={`player-meta-${playerId}`}
+              className="ffi-body-md text-[var(--ffi-text-secondary)]"
+            >
+              {team} • <span className={positionColors[position]}>{position}</span> • BYE {bye}
+            </motion.p>
+          </div>
+        </div>
+        <motion.div
+          layoutId={`player-value-${playerId}`}
+          className="text-right"
+        >
+          <span className="ffi-display-md text-[var(--ffi-accent)] font-bold">${value}</span>
+        </motion.div>
+      </div>
+
+      {/* Expanded content with AnimatePresence */}
+      <AnimatePresence>
+        {variant === "expanded" && children && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ type: "spring", stiffness: 400, damping: 30 }}
+            className="overflow-hidden"
+          >
+            <div className="mt-4 pt-4 border-t border-[var(--ffi-border)]/20">
+              {children}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   )
 }
