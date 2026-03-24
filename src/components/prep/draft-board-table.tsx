@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowUp, ArrowDown, Target, Ban, ChevronDown, Sparkles } from 'lucide-react'
+import { ArrowUp, ArrowDown, Target, Ban, ChevronDown, Sparkles, Check, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import {
   FFICard,
@@ -21,6 +21,10 @@ interface DraftBoardTableProps {
   sortField: SortField
   sortAsc: boolean
   onSort: (field: SortField) => void
+  // FF-246: Tag toggle callbacks
+  onToggleTarget?: (playerId: string) => Promise<void>
+  onToggleAvoid?: (playerId: string) => Promise<void>
+  isTagLoading?: boolean
 }
 
 function SortButton({
@@ -89,9 +93,13 @@ interface CompactPlayerCardProps {
   format: DraftFormat
   isExpanded: boolean
   onToggle: () => void
+  // FF-246: Tag callbacks
+  onToggleTarget?: (playerId: string) => Promise<void>
+  onToggleAvoid?: (playerId: string) => Promise<void>
+  isTagLoading?: boolean
 }
 
-function CompactPlayerCard({ sp, rank, format, isExpanded, onToggle }: CompactPlayerCardProps) {
+function CompactPlayerCard({ sp, rank, format, isExpanded, onToggle, onToggleTarget, onToggleAvoid, isTagLoading }: CompactPlayerCardProps) {
   const p = sp.player
   const isAuction = format === 'auction'
   const value = isAuction
@@ -133,10 +141,24 @@ function CompactPlayerCard({ sp, rank, format, isExpanded, onToggle }: CompactPl
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
               <span className="ffi-title-md text-white font-semibold truncate">{p.name}</span>
-              {sp.targetStatus === 'target' && (
+              {/* FF-246: Prominent TARGET badge with glow */}
+              {sp.isUserTarget && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold tracking-wider bg-[#2ff801]/30 text-[#2ff801] shadow-[0_0_8px_rgba(47,248,1,0.4)]">
+                  <Target className="h-3 w-3" />
+                  TARGET
+                </span>
+              )}
+              {sp.isUserAvoid && !sp.isUserTarget && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold tracking-wider bg-[#ff716c]/25 text-[#ff716c]">
+                  <Ban className="h-3 w-3" />
+                  AVOID
+                </span>
+              )}
+              {/* Strategy-based target/avoid icons (when no user tags) */}
+              {!sp.isUserTarget && !sp.isUserAvoid && sp.targetStatus === 'target' && (
                 <Target className="h-3.5 w-3.5 text-[var(--ffi-success)] shrink-0" />
               )}
-              {sp.targetStatus === 'avoid' && (
+              {!sp.isUserTarget && !sp.isUserAvoid && sp.targetStatus === 'avoid' && (
                 <Ban className="h-3.5 w-3.5 text-[var(--ffi-danger)] shrink-0" />
               )}
             </div>
@@ -187,6 +209,63 @@ function CompactPlayerCard({ sp, rank, format, isExpanded, onToggle }: CompactPl
               className="bg-transparent p-0"
             />
 
+            {/* FF-246: Tag toggle controls */}
+            {(onToggleTarget || onToggleAvoid) && (
+              <div className="mt-4 pt-4 border-t border-[var(--ffi-border)]/10">
+                <div className="ffi-caption text-[var(--ffi-text-muted)] mb-2">YOUR TAGS</div>
+                <div className="flex flex-wrap gap-2">
+                  {onToggleTarget && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        onToggleTarget(p.id)
+                      }}
+                      disabled={isTagLoading}
+                      className={cn(
+                        'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all',
+                        sp.isUserTarget
+                          ? 'bg-[#2ff801]/30 text-[#2ff801] shadow-[0_0_12px_rgba(47,248,1,0.3)]'
+                          : 'bg-[var(--ffi-surface)] text-[var(--ffi-text-muted)] hover:bg-[#2ff801]/10 hover:text-[#2ff801]',
+                        isTagLoading && 'opacity-50 cursor-not-allowed'
+                      )}
+                    >
+                      {isTagLoading ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      ) : sp.isUserTarget ? (
+                        <Check className="h-3.5 w-3.5" />
+                      ) : (
+                        <Target className="h-3.5 w-3.5" />
+                      )}
+                      {sp.isUserTarget ? 'TARGET SET' : 'Mark as Target'}
+                    </button>
+                  )}
+                  {onToggleAvoid && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        onToggleAvoid(p.id)
+                      }}
+                      disabled={isTagLoading}
+                      className={cn(
+                        'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all',
+                        sp.isUserAvoid
+                          ? 'bg-[#ff716c]/25 text-[#ff716c]'
+                          : 'bg-[var(--ffi-surface)] text-[var(--ffi-text-muted)] hover:bg-[#ff716c]/10 hover:text-[#ff716c]',
+                        isTagLoading && 'opacity-50 cursor-not-allowed'
+                      )}
+                    >
+                      {isTagLoading ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <Ban className="h-3.5 w-3.5" />
+                      )}
+                      {sp.isUserAvoid ? 'AVOIDING' : 'Mark to Avoid'}
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* Additional stats when expanded */}
             <div className="grid grid-cols-3 gap-4 mt-4 pt-4 border-t border-[var(--ffi-border)]/10">
               <div>
@@ -222,6 +301,9 @@ export function DraftBoardTable({
   sortField,
   sortAsc,
   onSort,
+  onToggleTarget,
+  onToggleAvoid,
+  isTagLoading,
 }: DraftBoardTableProps) {
   const [expandedId, setExpandedId] = useState<string | null>(null)
 
@@ -278,6 +360,9 @@ export function DraftBoardTable({
                   format={format}
                   isExpanded={expandedId === sp.player.id}
                   onToggle={() => handleToggle(sp.player.id)}
+                  onToggleTarget={onToggleTarget}
+                  onToggleAvoid={onToggleAvoid}
+                  isTagLoading={isTagLoading}
                 />
               </motion.div>
             ))}

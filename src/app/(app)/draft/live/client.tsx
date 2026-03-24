@@ -30,6 +30,7 @@ import {
   FFISectionHeader,
 } from '@/components/ui/ffi-primitives'
 import { useDraftState } from '@/hooks/use-draft-state'
+import { useUserTags } from '@/hooks/use-user-tags'
 import { ManualPickEntry } from '@/components/draft/manual-pick-entry'
 import { PlayerPool } from '@/components/draft/player-pool'
 import { PositionScarcityTracker } from '@/components/draft/position-scarcity'
@@ -40,7 +41,7 @@ import { PivotHistory } from '@/components/draft/pivot-history'
 import { AuctionAdvisor } from '@/components/draft/auction-advisor'
 import { SnakeAdvisor } from '@/components/draft/snake-advisor'
 import type { PivotEntry } from '@/components/draft/pivot-history'
-import { scorePlayersWithStrategy } from '@/lib/research/strategy/scoring'
+import { scorePlayersWithStrategy, buildIntelContextMap } from '@/lib/research/strategy/scoring'
 import { calculateScarcityExtended, explainPlayer } from '@/lib/draft/explain'
 import { analyzeDraftFlow } from '@/lib/draft/flow-monitor'
 import { detectPivotOpportunity } from '@/lib/draft/pivot-detector'
@@ -347,6 +348,29 @@ export function LiveDraftClient() {
 
   const rosterSlots = (league?.roster_slots ?? DEFAULT_ROSTER) as RosterSlots
 
+  // FF-247: Load user tags for intel-aware recommendations
+  const playerCacheIds = useMemo(() => players.map(p => p.id), [players])
+  const { userTagsMap, isTarget, isAvoid } = useUserTags({
+    playerCacheIds,
+    leagueId: session?.league_id,
+    includeGlobal: true,
+    enabled: players.length > 0,
+  })
+
+  // Build intel context map from user tags
+  const intelContextMap = useMemo(() => {
+    if (Object.keys(userTagsMap).length === 0) return undefined
+
+    const formattedMap: Record<string, { tags: string[]; dismissedSystemTags?: string[] }> = {}
+    for (const [playerId, data] of Object.entries(userTagsMap)) {
+      formattedMap[playerId] = {
+        tags: data.tags,
+        dismissedSystemTags: data.dismissedSystemTags,
+      }
+    }
+    return buildIntelContextMap(formattedMap)
+  }, [userTagsMap])
+
   // Draft state machine
   const {
     state,
@@ -364,17 +388,18 @@ export function LiveDraftClient() {
     rosterSlots,
   })
 
-  // Score players with active strategy
+  // Score players with active strategy and intel context (FF-247)
   const scoredPlayers: ScoredPlayer[] = useMemo(() => {
     if (!strategy || players.length === 0) {
+      // No strategy — return neutral scores but still apply user tags
       return players.map(p => ({
         player: p,
         strategyScore: 50,
         intelScore: 0,
         combinedScore: 50,
-        targetStatus: 'neutral' as const,
-        isUserTarget: false,
-        isUserAvoid: false,
+        targetStatus: isTarget(p.id) ? 'target' as const : isAvoid(p.id) ? 'avoid' as const : 'neutral' as const,
+        isUserTarget: isTarget(p.id),
+        isUserAvoid: isAvoid(p.id),
         boosts: [],
         intelBoosts: [],
       }))
@@ -384,8 +409,9 @@ export function LiveDraftClient() {
       strategy,
       session?.format ?? 'auction',
       league?.budget ?? undefined,
+      intelContextMap, // FF-247: Pass intel context for tag-aware recommendations
     )
-  }, [players, strategy, session?.format, league?.budget])
+  }, [players, strategy, session?.format, league?.budget, intelContextMap, isTarget, isAvoid])
 
   // Position scarcity
   const scarcity = useMemo(() => {

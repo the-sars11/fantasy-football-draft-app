@@ -42,6 +42,7 @@ import {
 import { FFIFadeInUp } from '@/components/ui/ffi-motion'
 import { TeamReports } from '@/components/draft/team-reports'
 import { RoastReportCard } from '@/components/draft/trash-talk'
+import { useUserTags } from '@/hooks/use-user-tags'
 import { analyzeDraft, type DraftReview, type PickAnalysis, type PickVerdict } from '@/lib/draft/review'
 import { generateRoastReport } from '@/lib/draft/trash-talk'
 import { picksToCSV, reviewToShareText, downloadCSV, copyToClipboard } from '@/lib/draft/export'
@@ -90,6 +91,7 @@ export function ReviewClient() {
   const [session, setSession] = useState<DraftSession | null>(null)
   const [league, setLeague] = useState<League | null>(null)
   const [strategy, setStrategy] = useState<Strategy | null>(null)
+  const [players, setPlayers] = useState<Player[]>([]) // FF-248: For tag accuracy analysis
   const [loading, setLoading] = useState(true)
   const [detailLoading, setDetailLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -97,6 +99,72 @@ export function ReviewClient() {
   const [copied, setCopied] = useState(false)
   const [expandedPick, setExpandedPick] = useState<number | null>(null)
   const [viewMode, setViewMode] = useState<ViewMode>('my-draft')
+
+  // FF-248: Load user tags for tag accuracy analysis
+  const playerCacheIds = useMemo(() => players.map(p => p.id), [players])
+  const { userTagsMap } = useUserTags({
+    playerCacheIds,
+    leagueId: league?.id,
+    includeGlobal: true,
+    enabled: players.length > 0,
+  })
+
+  // FF-248: Calculate tag accuracy analysis
+  const tagAccuracyAnalysis = useMemo(() => {
+    if (!session || !managerName || Object.keys(userTagsMap).length === 0 || players.length === 0) {
+      return null
+    }
+
+    // Get drafted player names for this manager
+    const myPicks = (session.picks || []).filter(p => p.manager === managerName)
+    const draftedNames = new Set(myPicks.map(p => p.player_id?.toLowerCase()))
+
+    // Build a map of player name to cache ID
+    const nameToIdMap: Record<string, string> = {}
+    for (const player of players) {
+      nameToIdMap[player.name.toLowerCase()] = player.id
+    }
+
+    // Analyze TARGET tags
+    const targetPlayers: Array<{ name: string; id: string; drafted: boolean }> = []
+    const avoidPlayers: Array<{ name: string; id: string; drafted: boolean }> = []
+
+    for (const [playerId, tagData] of Object.entries(userTagsMap)) {
+      const player = players.find(p => p.id === playerId)
+      if (!player) continue
+
+      const playerName = player.name
+      const isDrafted = draftedNames.has(playerName.toLowerCase())
+
+      if (tagData.tags.includes('target')) {
+        targetPlayers.push({ name: playerName, id: playerId, drafted: isDrafted })
+      }
+      if (tagData.tags.includes('avoid')) {
+        avoidPlayers.push({ name: playerName, id: playerId, drafted: isDrafted })
+      }
+    }
+
+    const targetsHit = targetPlayers.filter(p => p.drafted)
+    const targetsMissed = targetPlayers.filter(p => !p.drafted)
+    const avoidsSuccessful = avoidPlayers.filter(p => !p.drafted)
+    const avoidsViolated = avoidPlayers.filter(p => p.drafted)
+
+    const totalTargets = targetPlayers.length
+    const totalAvoids = avoidPlayers.length
+    const hitRate = totalTargets > 0 ? Math.round((targetsHit.length / totalTargets) * 100) : 0
+    const avoidRate = totalAvoids > 0 ? Math.round((avoidsSuccessful.length / totalAvoids) * 100) : 0
+
+    return {
+      targetsHit,
+      targetsMissed,
+      avoidsSuccessful,
+      avoidsViolated,
+      totalTargets,
+      totalAvoids,
+      hitRate,
+      avoidRate,
+    }
+  }, [session, managerName, userTagsMap, players])
 
   // Load sessions list
   useEffect(() => {
@@ -129,13 +197,24 @@ export function ReviewClient() {
     async function loadSession() {
       setDetailLoading(true)
       try {
-        const res = await fetch(`/api/draft/sessions/${selectedId}`)
-        if (!res.ok) throw new Error('Failed to load session')
-        const data = await res.json()
+        // Load session, players, and strategy in parallel
+        const [sessionRes, playersRes] = await Promise.all([
+          fetch(`/api/draft/sessions/${selectedId}`),
+          fetch('/api/players?limit=500'),
+        ])
+
+        if (!sessionRes.ok) throw new Error('Failed to load session')
+        const data = await sessionRes.json()
 
         if (cancelled) return
         setSession(data.session)
         setLeague(data.league)
+
+        // FF-248: Load players for tag accuracy analysis
+        if (playersRes.ok) {
+          const playersData = await playersRes.json()
+          setPlayers(playersData.players || [])
+        }
 
         if (data.session?.managers?.length > 0) {
           setManagerName(data.session.managers[0].name)
@@ -496,6 +575,11 @@ export function ReviewClient() {
                 ))}
               </div>
             </FFICard>
+
+            {/* FF-248: Tag Accuracy Analysis */}
+            {tagAccuracyAnalysis && (tagAccuracyAnalysis.totalTargets > 0 || tagAccuracyAnalysis.totalAvoids > 0) && (
+              <TagAccuracyCard analysis={tagAccuracyAnalysis} />
+            )}
 
             {/* Strategy Targets */}
             {review.targetResults.length > 0 && (
@@ -922,5 +1006,155 @@ function MiniStat({ label, value, sub }: { label: string; value: string; sub?: s
       <p className="ffi-title-md text-white font-mono">{value}</p>
       {sub && <p className="text-[10px] text-[var(--ffi-text-muted)] truncate">{sub}</p>}
     </div>
+  )
+}
+
+/**
+ * TagAccuracyCard (FF-248)
+ * Shows how well user's pre-draft TARGET and AVOID tags matched their actual picks
+ */
+function TagAccuracyCard({ analysis }: {
+  analysis: {
+    targetsHit: Array<{ name: string; id: string; drafted: boolean }>
+    targetsMissed: Array<{ name: string; id: string; drafted: boolean }>
+    avoidsSuccessful: Array<{ name: string; id: string; drafted: boolean }>
+    avoidsViolated: Array<{ name: string; id: string; drafted: boolean }>
+    totalTargets: number
+    totalAvoids: number
+    hitRate: number
+    avoidRate: number
+  }
+}) {
+  return (
+    <FFICard>
+      <FFISectionHeader
+        title="Pre-Draft Tag Accuracy"
+        subtitle="How well did you stick to your targets and avoids?"
+        action={<Target className="h-4 w-4 text-[var(--ffi-accent)]" />}
+      />
+
+      {/* Summary stats */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+        <div className="rounded-lg bg-[var(--ffi-surface)]/40 p-2.5">
+          <p className="ffi-label text-[var(--ffi-text-muted)]">TARGETS SET</p>
+          <p className="ffi-title-md text-white font-mono">{analysis.totalTargets}</p>
+        </div>
+        <div className={cn(
+          'rounded-lg p-2.5',
+          analysis.hitRate >= 70 ? 'bg-[var(--ffi-success)]/10' : 'bg-[var(--ffi-surface)]/40'
+        )}>
+          <p className="ffi-label text-[var(--ffi-text-muted)]">HIT RATE</p>
+          <p className={cn(
+            'ffi-title-md font-mono',
+            analysis.hitRate >= 70 ? 'text-[var(--ffi-success)]' : 'text-white'
+          )}>{analysis.hitRate}%</p>
+        </div>
+        <div className="rounded-lg bg-[var(--ffi-surface)]/40 p-2.5">
+          <p className="ffi-label text-[var(--ffi-text-muted)]">AVOIDS SET</p>
+          <p className="ffi-title-md text-white font-mono">{analysis.totalAvoids}</p>
+        </div>
+        <div className={cn(
+          'rounded-lg p-2.5',
+          analysis.avoidRate >= 80 ? 'bg-[var(--ffi-success)]/10' : analysis.avoidsViolated.length > 0 ? 'bg-[var(--ffi-danger)]/10' : 'bg-[var(--ffi-surface)]/40'
+        )}>
+          <p className="ffi-label text-[var(--ffi-text-muted)]">AVOID RATE</p>
+          <p className={cn(
+            'ffi-title-md font-mono',
+            analysis.avoidRate >= 80 ? 'text-[var(--ffi-success)]' : analysis.avoidsViolated.length > 0 ? 'text-[var(--ffi-danger)]' : 'text-white'
+          )}>{analysis.avoidRate}%</p>
+        </div>
+      </div>
+
+      {/* Targets Hit */}
+      {analysis.targetsHit.length > 0 && (
+        <div className="mb-4">
+          <p className="ffi-label text-[var(--ffi-success)] mb-2 flex items-center gap-1.5">
+            <Check className="h-3.5 w-3.5" />
+            TARGETS DRAFTED ({analysis.targetsHit.length})
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {analysis.targetsHit.map(p => (
+              <span
+                key={p.id}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-[var(--ffi-success)]/15 text-[var(--ffi-success)] border border-[var(--ffi-success)]/20"
+              >
+                <Target className="h-3 w-3" />
+                {p.name}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Targets Missed */}
+      {analysis.targetsMissed.length > 0 && (
+        <div className="mb-4">
+          <p className="ffi-label text-[var(--ffi-warning)] mb-2 flex items-center gap-1.5">
+            <X className="h-3.5 w-3.5" />
+            TARGETS MISSED ({analysis.targetsMissed.length})
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {analysis.targetsMissed.map(p => (
+              <span
+                key={p.id}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-[var(--ffi-warning)]/15 text-[var(--ffi-warning)] border border-[var(--ffi-warning)]/20"
+              >
+                <Target className="h-3 w-3" />
+                {p.name}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Avoids Successful */}
+      {analysis.avoidsSuccessful.length > 0 && (
+        <div className="mb-4">
+          <p className="ffi-label text-[var(--ffi-primary)] mb-2 flex items-center gap-1.5">
+            <ShieldCheck className="h-3.5 w-3.5" />
+            SUCCESSFULLY AVOIDED ({analysis.avoidsSuccessful.length})
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {analysis.avoidsSuccessful.map(p => (
+              <span
+                key={p.id}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-[var(--ffi-primary)]/10 text-[var(--ffi-primary)] border border-[var(--ffi-primary)]/20"
+              >
+                <AlertTriangle className="h-3 w-3" />
+                {p.name}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Avoids Violated */}
+      {analysis.avoidsViolated.length > 0 && (
+        <div>
+          <p className="ffi-label text-[var(--ffi-danger)] mb-2 flex items-center gap-1.5">
+            <ShieldAlert className="h-3.5 w-3.5" />
+            AVOIDS VIOLATED ({analysis.avoidsViolated.length})
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {analysis.avoidsViolated.map(p => (
+              <span
+                key={p.id}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-[var(--ffi-danger)]/15 text-[var(--ffi-danger)] border border-[var(--ffi-danger)]/20"
+              >
+                <AlertTriangle className="h-3 w-3" />
+                {p.name}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* No tags set message */}
+      {analysis.totalTargets === 0 && analysis.totalAvoids === 0 && (
+        <p className="ffi-body-md text-[var(--ffi-text-muted)] text-center py-4">
+          No pre-draft TARGET or AVOID tags were set. Set tags before your next draft to track accuracy!
+        </p>
+      )}
+    </FFICard>
   )
 }

@@ -9,9 +9,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Loader2, AlertCircle, ClipboardList, RefreshCw, CheckCircle2 } from 'lucide-react'
 import { DraftBoardTable } from '@/components/prep/draft-board-table'
 import { PositionBreakdown } from '@/components/prep/position-breakdown'
-import { scorePlayersWithStrategy, type ScoredPlayer } from '@/lib/research/strategy/scoring'
+import {
+  scorePlayersWithStrategy,
+  buildIntelContextMap,
+  type ScoredPlayer,
+  type PlayerIntelContext
+} from '@/lib/research/strategy/scoring'
 import { cacheToPlayers } from '@/lib/players/convert'
-import type { Strategy } from '@/lib/supabase/database.types'
+import { useUserTags, useToggleTag } from '@/hooks/use-user-tags'
+import type { Strategy, SystemTag } from '@/lib/supabase/database.types'
 import type { DraftFormat, Player, Position } from '@/lib/players/types'
 
 interface LeagueSummary {
@@ -50,6 +56,23 @@ export function DraftBoardClient() {
   const [refreshFeedback, setRefreshFeedback] = useState<string | null>(null)
 
   const selectedLeague = leagues.find((l) => l.id === selectedLeagueId)
+
+  // --- FF-245: Load user tags for intel integration ---
+  const playerCacheIds = useMemo(() => players.map(p => p.id), [players])
+  const {
+    userTagsMap,
+    isLoading: tagsLoading,
+    refetch: refetchTags,
+    isTarget,
+    isAvoid,
+  } = useUserTags({
+    playerCacheIds,
+    leagueId: selectedLeagueId,
+    includeGlobal: true,
+    enabled: players.length > 0,
+  })
+
+  const { toggle: toggleTag, isLoading: toggleLoading } = useToggleTag(selectedLeagueId)
 
   // Fetch leagues
   useEffect(() => {
@@ -147,19 +170,34 @@ export function DraftBoardClient() {
     }
   }, [selectedLeagueId, refreshing])
 
-  // Score players through active strategy
+  // FF-245: Build intel context map from user tags
+  const intelContextMap = useMemo(() => {
+    if (Object.keys(userTagsMap).length === 0) return undefined
+
+    // Convert userTagsMap to the format expected by buildIntelContextMap
+    const formattedMap: Record<string, { tags: string[]; dismissedSystemTags?: string[] }> = {}
+    for (const [playerId, data] of Object.entries(userTagsMap)) {
+      formattedMap[playerId] = {
+        tags: data.tags,
+        dismissedSystemTags: data.dismissedSystemTags,
+      }
+    }
+    return buildIntelContextMap(formattedMap)
+  }, [userTagsMap])
+
+  // Score players through active strategy with intel context
   const scoredPlayers = useMemo<ScoredPlayer[]>(() => {
     if (players.length === 0) return []
     if (!activeStrategy || !selectedLeague) {
-      // No strategy — return neutral scores
+      // No strategy — return neutral scores but still apply user tags
       return players.map((p) => ({
         player: p,
         strategyScore: 50,
         intelScore: 0,
         combinedScore: 50,
-        targetStatus: 'neutral' as const,
-        isUserTarget: false,
-        isUserAvoid: false,
+        targetStatus: isTarget(p.id) ? 'target' as const : isAvoid(p.id) ? 'avoid' as const : 'neutral' as const,
+        isUserTarget: isTarget(p.id),
+        isUserAvoid: isAvoid(p.id),
         boosts: [],
         intelBoosts: [],
       }))
@@ -169,8 +207,9 @@ export function DraftBoardClient() {
       activeStrategy,
       selectedLeague.format,
       selectedLeague.budget ?? undefined,
+      intelContextMap, // FF-245: Pass intel context for tag-aware scoring
     )
-  }, [players, activeStrategy, selectedLeague])
+  }, [players, activeStrategy, selectedLeague, intelContextMap, isTarget, isAvoid])
 
   // Filter + sort
   const filteredPlayers = useMemo(() => {
@@ -419,6 +458,15 @@ export function DraftBoardClient() {
               sortField={sortField}
               sortAsc={sortAsc}
               onSort={handleSort}
+              onToggleTarget={async (playerId) => {
+                const result = await toggleTag(playerId, 'target')
+                if (result.success) refetchTags()
+              }}
+              onToggleAvoid={async (playerId) => {
+                const result = await toggleTag(playerId, 'avoid')
+                if (result.success) refetchTags()
+              }}
+              isTagLoading={toggleLoading || tagsLoading}
             />
           </TabsContent>
 

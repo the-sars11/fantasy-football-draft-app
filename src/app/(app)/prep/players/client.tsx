@@ -8,7 +8,7 @@
  */
 
 import { useState, useEffect, useMemo, useCallback } from 'react'
-import { Search, SlidersHorizontal, X, Target, Ban, Loader2 } from 'lucide-react'
+import { Search, SlidersHorizontal, X, Target, Loader2 } from 'lucide-react'
 import { FFIInput, FFIButton, FFIEmptyState } from '@/components/ui/ffi-primitives'
 import { FFIPlayerIntelCard } from '@/components/prep/ffi-player-intel-card'
 import { useUserTags, useToggleTag } from '@/hooks/use-user-tags'
@@ -108,6 +108,10 @@ export function PlayerBrowserClient() {
 
   // Expanded card state
   const [expandedPlayerId, setExpandedPlayerId] = useState<string | null>(null)
+
+  // FF-250: Pagination for performance
+  const [displayCount, setDisplayCount] = useState(50)
+  const LOAD_INCREMENT = 50
 
   // User tags
   const playerCacheIds = useMemo(() => players.map(p => p.id), [players])
@@ -210,6 +214,19 @@ export function PlayerBrowserClient() {
     return result
   }, [players, positionFilter, adpRange, searchQuery, tagFilter, isTarget, isAvoid])
 
+  // FF-250: Reset pagination when filters change
+  useEffect(() => {
+    setDisplayCount(50)
+  }, [positionFilter, adpRange, searchQuery, tagFilter])
+
+  // FF-250: Players to display (paginated)
+  const displayedPlayers = useMemo(() => {
+    return filteredPlayers.slice(0, displayCount)
+  }, [filteredPlayers, displayCount])
+
+  const hasMore = displayCount < filteredPlayers.length
+  const loadMore = () => setDisplayCount(prev => prev + LOAD_INCREMENT)
+
   // --- Handlers ---
   const handleToggleTarget = useCallback(async (playerId: string) => {
     const result = await toggleTag(playerId, 'target')
@@ -271,81 +288,91 @@ export function PlayerBrowserClient() {
 
   return (
     <div className="space-y-4">
-      {/* Search and filter bar */}
-      <div className="flex flex-wrap items-center gap-3">
-        {/* Search */}
-        <div className="relative flex-1 min-w-[200px] max-w-[300px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#9eadb8]" />
-          <FFIInput
-            placeholder="Search players..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9 pr-8"
-          />
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9eadb8] hover:text-[#deedf9]"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          )}
+      {/* FF-249: Mobile-responsive search and filter bar */}
+      <div className="space-y-3">
+        {/* Row 1: Search + Filter toggle + Count */}
+        <div className="flex items-center gap-2 sm:gap-3">
+          {/* Search - full width on mobile */}
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#9eadb8]" />
+            <FFIInput
+              placeholder="Search players..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9 pr-8 w-full"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9eadb8] hover:text-[#deedf9]"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </div>
+
+          {/* Filter toggle */}
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className={`
+              p-2 rounded-lg transition-all shrink-0
+              ${showFilters
+                ? 'bg-[#8bacff]/20 text-[#8bacff]'
+                : 'bg-surface-container-high text-[#9eadb8] hover:bg-surface-bright'
+              }
+            `}
+          >
+            <SlidersHorizontal className="h-5 w-5" />
+          </button>
+
+          {/* Player count - visible on larger screens inline */}
+          <span className="hidden sm:block text-xs text-[#9eadb8] shrink-0">
+            {filteredPlayers.length} players
+          </span>
         </div>
 
-        {/* Position pills */}
-        <div className="flex gap-1">
-          {POSITIONS.map((pos) => (
-            <button
-              key={pos}
-              onClick={() => setPositionFilter(pos)}
-              className={`
-                px-4 py-2 rounded-lg font-headline font-bold text-xs tracking-tight transition-all
-                ${positionFilter === pos
-                  ? 'bg-[#2ff801] text-[#0b5800] shadow-[0_0_15px_rgba(47,248,1,0.3)]'
-                  : 'bg-surface-container-high text-[#9eadb8] hover:bg-surface-bright'
-                }
-              `}
-            >
-              {pos}
-            </button>
-          ))}
+        {/* Row 2: Position pills - horizontal scroll on mobile */}
+        <div className="flex items-center gap-2">
+          <div className="flex gap-1 overflow-x-auto no-scrollbar pb-1 -mb-1 flex-1">
+            {POSITIONS.map((pos) => (
+              <button
+                key={pos}
+                onClick={() => setPositionFilter(pos)}
+                className={`
+                  px-3 sm:px-4 py-2 rounded-lg font-headline font-bold text-xs tracking-tight transition-all shrink-0
+                  ${positionFilter === pos
+                    ? 'bg-[#2ff801] text-[#0b5800] shadow-[0_0_15px_rgba(47,248,1,0.3)]'
+                    : 'bg-surface-container-high text-[#9eadb8] hover:bg-surface-bright'
+                  }
+                `}
+              >
+                {pos}
+              </button>
+            ))}
+          </div>
+
+          {/* Player count - mobile only */}
+          <span className="sm:hidden text-xs text-[#9eadb8] shrink-0">
+            {filteredPlayers.length}
+          </span>
         </div>
-
-        {/* Filter toggle */}
-        <button
-          onClick={() => setShowFilters(!showFilters)}
-          className={`
-            p-2 rounded-lg transition-all
-            ${showFilters
-              ? 'bg-[#8bacff]/20 text-[#8bacff]'
-              : 'bg-surface-container-high text-[#9eadb8] hover:bg-surface-bright'
-            }
-          `}
-        >
-          <SlidersHorizontal className="h-5 w-5" />
-        </button>
-
-        {/* Player count */}
-        <span className="text-xs text-[#9eadb8] ml-auto">
-          {filteredPlayers.length} players
-        </span>
       </div>
 
-      {/* Expanded filter panel */}
+      {/* FF-249: Mobile-friendly expanded filter panel */}
       {showFilters && (
-        <div className="glass-panel rounded-xl p-4 space-y-4">
-          {/* Tag filter */}
+        <div className="glass-panel rounded-xl p-3 sm:p-4 space-y-4">
+          {/* Tag filter - scrollable on mobile */}
           <div>
             <label className="block text-[10px] text-[#9eadb8] font-bold uppercase tracking-widest mb-2">
               Filter by Tag
             </label>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1 -mb-1 sm:flex-wrap">
               {TAG_FILTERS.map((filter) => (
                 <button
                   key={filter.value}
                   onClick={() => setTagFilter(filter.value)}
                   className={`
-                    px-3 py-1.5 rounded-full text-xs font-bold transition-all
+                    px-3 py-2 sm:py-1.5 rounded-full text-xs font-bold transition-all shrink-0
                     ${tagFilter === filter.value
                       ? filter.value === 'target'
                         ? 'bg-[#2ff801]/20 text-[#2ff801] shadow-[0_0_8px_rgba(47,248,1,0.3)]'
@@ -362,12 +389,13 @@ export function PlayerBrowserClient() {
             </div>
           </div>
 
-          {/* ADP Range slider */}
+          {/* ADP Range - stacked on mobile */}
           <div>
             <label className="block text-[10px] text-[#9eadb8] font-bold uppercase tracking-widest mb-2">
               ADP Range: {adpRange[0]} - {adpRange[1]}
             </label>
-            <div className="flex items-center gap-3">
+            {/* Desktop: side by side */}
+            <div className="hidden sm:flex items-center gap-3">
               <input
                 type="range"
                 min={1}
@@ -387,6 +415,33 @@ export function PlayerBrowserClient() {
                 className="flex-1 h-2 bg-surface-container-high rounded-full appearance-none cursor-pointer accent-[#8bacff]"
               />
               <span className="text-sm text-[#9eadb8] w-12 text-center">{adpRange[1]}</span>
+            </div>
+            {/* Mobile: stacked with larger touch targets */}
+            <div className="sm:hidden space-y-3">
+              <div className="flex items-center gap-3">
+                <span className="text-xs text-[#9eadb8] w-8">Min</span>
+                <input
+                  type="range"
+                  min={1}
+                  max={300}
+                  value={adpRange[0]}
+                  onChange={(e) => setAdpRange([Math.min(parseInt(e.target.value), adpRange[1] - 10), adpRange[1]])}
+                  className="flex-1 h-3 bg-surface-container-high rounded-full appearance-none cursor-pointer accent-[#8bacff]"
+                />
+                <span className="text-sm text-[#9eadb8] w-10 text-right">{adpRange[0]}</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-xs text-[#9eadb8] w-8">Max</span>
+                <input
+                  type="range"
+                  min={1}
+                  max={300}
+                  value={adpRange[1]}
+                  onChange={(e) => setAdpRange([adpRange[0], Math.max(parseInt(e.target.value), adpRange[0] + 10)])}
+                  className="flex-1 h-3 bg-surface-container-high rounded-full appearance-none cursor-pointer accent-[#8bacff]"
+                />
+                <span className="text-sm text-[#9eadb8] w-10 text-right">{adpRange[1]}</span>
+              </div>
             </div>
           </div>
         </div>
@@ -409,7 +464,7 @@ export function PlayerBrowserClient() {
         </div>
       )}
 
-      {/* Player list */}
+      {/* Player list - FF-250: Paginated for performance */}
       {filteredPlayers.length === 0 ? (
         <FFIEmptyState
           icon="🔍"
@@ -428,7 +483,7 @@ export function PlayerBrowserClient() {
         />
       ) : (
         <div className="space-y-3">
-          {filteredPlayers.map((player, idx) => (
+          {displayedPlayers.map((player, idx) => (
             <FFIPlayerIntelCard
               key={player.id}
               rank={idx + 1}
@@ -444,6 +499,23 @@ export function PlayerBrowserClient() {
               isTagLoading={toggleLoading}
             />
           ))}
+
+          {/* FF-250: Load more button */}
+          {hasMore && (
+            <div className="flex justify-center pt-4 pb-2">
+              <button
+                onClick={loadMore}
+                className="
+                  flex items-center gap-2 text-[#9eadb8] hover:text-[#8bacff]
+                  transition-colors py-3 px-6 rounded-xl bg-surface-container-high
+                  hover:bg-surface-bright
+                  font-headline text-xs font-bold tracking-widest uppercase
+                "
+              >
+                Load More ({filteredPlayers.length - displayCount} remaining)
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>

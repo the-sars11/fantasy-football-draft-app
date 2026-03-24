@@ -342,14 +342,15 @@ Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
 - [x] **GIT CHECKPOINT**: Committed & pushed (8f15302)
 
 ### Integration & Polish (FF-245 to FF-252)
-- [ ] FF-245: Research pipeline intel integration — load and apply tags
-- [ ] FF-246: Draft board tag display — TARGET prominent
-- [ ] FF-247: Live draft tag-aware recommendations
-- [ ] FF-248: Post-draft tag accuracy analysis
-- [ ] FF-249: Mobile responsiveness
-- [ ] FF-250: Performance optimization — virtualized list
-- [ ] FF-251: End-to-end testing
-- [ ] FF-252: Documentation update
+- [x] FF-245: Research pipeline intel integration — load and apply tags
+- [x] FF-246: Draft board tag display — TARGET prominent with tag controls
+- [x] FF-247: Live draft tag-aware recommendations
+- [x] FF-248: Post-draft tag accuracy analysis — hit rate, avoid rate, visual breakdown
+- [x] FF-249: Mobile responsiveness — improved filters, ADP sliders, scrollable pills
+- [x] FF-250: Performance optimization — paginated list with "Load More"
+- [x] FF-251: End-to-end testing — build, type-check, tests all pass
+- [x] FF-252: Documentation update
+- [x] **GIT CHECKPOINT**: Phase 7.5 complete
 
 ---
 
