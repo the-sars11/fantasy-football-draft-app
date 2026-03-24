@@ -145,7 +145,7 @@ export function SourceWeightsConfig({
           {(Object.keys(SOURCE_INFO) as Array<keyof SourceWeights>).map((source) => (
             <TooltipProvider key={source}>
               <Tooltip>
-                <TooltipTrigger asChild>
+                <TooltipTrigger>
                   <div
                     className={cn(
                       'h-2 rounded-full transition-all',
@@ -214,7 +214,7 @@ export function SourceWeightsConfig({
                 <span className="text-sm font-medium">{SOURCE_INFO[source].label}</span>
                 <TooltipProvider>
                   <Tooltip>
-                    <TooltipTrigger asChild>
+                    <TooltipTrigger>
                       <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
                     </TooltipTrigger>
                     <TooltipContent side="right" className="max-w-xs">
@@ -229,7 +229,10 @@ export function SourceWeightsConfig({
             </div>
             <Slider
               value={[weights[source] * 100]}
-              onValueChange={([value]) => handleWeightChange(source, value / 100)}
+              onValueChange={(v) => {
+                const value = typeof v === 'number' ? v : v[0]
+                handleWeightChange(source, value / 100)
+              }}
               min={0}
               max={100}
               step={5}
@@ -275,7 +278,7 @@ export function SourceWeightsConfig({
           {(Object.keys(SOURCE_INFO) as Array<keyof SourceWeights>).map((source) => (
             <TooltipProvider key={source}>
               <Tooltip>
-                <TooltipTrigger asChild>
+                <TooltipTrigger>
                   <div
                     className={cn(
                       'transition-all',

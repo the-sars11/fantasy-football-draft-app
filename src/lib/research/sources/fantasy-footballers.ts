@@ -14,7 +14,8 @@
  * Constraint: Free public data only, no paid subscription
  */
 
-import type { Position, ScoringFormat } from '@/lib/players/types'
+import type { Position } from '@/lib/players/types'
+import type { ScoringFormat } from '@/lib/supabase/database.types'
 import type {
   SourceAdapter,
   SourcePlayerData,
@@ -63,11 +64,12 @@ const FF_POSITION_SLUGS: Record<string, string> = {
   DEF: 'dst',
 }
 
-// Scoring format slugs
+// Scoring format slugs (map DB format to FF website slugs)
 const FF_SCORING_SLUGS: Record<ScoringFormat, string> = {
   ppr: 'ppr',
-  'half-ppr': 'half-ppr',
+  half_ppr: 'half-ppr',
   standard: 'standard',
+  custom: 'ppr', // Fallback custom to PPR
 }
 
 function mapPosition(pos: string): Position | null {
