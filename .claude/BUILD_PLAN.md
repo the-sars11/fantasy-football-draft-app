@@ -372,7 +372,7 @@ Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
 - [x] FF-116: Confidence scoring — weight experts by historical accuracy, surface consensus vs. contrarian takes
 - [x] FF-117: AI contextualization — "Start X over Y because [matchup + recent performance + expert consensus]"
 - [x] FF-118: Start/Sit UI — side-by-side comparison, confidence bars, expandable reasoning
-- [x] **GIT CHECKPOINT**: Committed & pushed
+- [x] **GIT CHECKPOINT**: Committed & pushed (a6991e8)
 
 ### Waiver Wire AI
 - [x] FF-119: Available player scanner — identify top pickups based on ownership %, trend velocity, upcoming schedule
@@ -380,7 +380,7 @@ Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
 - [x] FF-121: FAAB bid recommendations — "Bid $X (Y% of remaining budget) — here's why"
 - [x] FF-122: Priority ranking — ordered list of pickups with confidence + reasoning
 - [x] FF-123: Waiver Wire UI — prioritized list, bid suggestions, one-tap add to watchlist
-- [x] **GIT CHECKPOINT**: Committed & pushed
+- [x] **GIT CHECKPOINT**: Committed & pushed (a6991e8)
 
 ### Trade Analyzer
 - [ ] FF-124: Trade calculator engine — Rest-of-Season (ROS) value per player, adjusted for YOUR league scoring
