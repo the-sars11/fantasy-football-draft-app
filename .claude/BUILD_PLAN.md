@@ -388,7 +388,7 @@ Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
 - [x] FF-126: Fair trade finder — "To get [player], offer [these combinations]"
 - [x] FF-127: Trade veto predictor — flag lopsided trades before you embarrass yourself
 - [x] FF-128: Trade UI — enter trade, see instant analysis, share link with trade partner
-- [x] **GIT CHECKPOINT**: Committed & pushed
+- [x] **GIT CHECKPOINT**: Committed & pushed (43087a4)
 
 ### Weekly Matchup Preview
 - [ ] FF-129: Head-to-head projections — your team vs. opponent, position-by-position breakdown
