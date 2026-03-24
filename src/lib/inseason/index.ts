@@ -118,3 +118,49 @@ export {
   type TradeAnalysis,
   type FairTradeOption,
 } from './trade-analyzer'
+
+// Weekly Matchup Preview (FF-129 to FF-132)
+export {
+  generateMatchupPreview,
+  getPlayerSpread,
+  quickCompare,
+  type TeamProjection,
+  type PositionProjection,
+  type PlayerMatchupProjection,
+  type MatchupPreview,
+  type PositionMatchup,
+  type LeveragePlay,
+} from './weekly-matchup-preview'
+
+// Notifications & Alerts (FF-133 to FF-136)
+export {
+  createNotification,
+  getUnreadNotifications,
+  getNotifications,
+  markNotificationRead,
+  markAllNotificationsRead,
+  dismissNotification,
+  createInjuryAlert,
+  getRecentInjuryAlerts,
+  createWaiverResultNotification,
+  createWaiverSummaryNotification,
+  createLineupReminder,
+  createWaiverDeadlineReminder,
+  createWeeklyPreviewReminder,
+  createGameStartReminder,
+  getNotificationPreferences,
+  updateNotificationPreferences,
+  savePushSubscription,
+  removePushSubscription,
+  getPushSubscriptions,
+  type NotificationType,
+  type NotificationPriority,
+  type NotificationChannel,
+  type ReminderType,
+  type Notification,
+  type NotificationPreferences,
+  type InjuryAlert,
+  type WaiverResult,
+  type WeeklyReminder,
+  type PushSubscription,
+} from './notifications'

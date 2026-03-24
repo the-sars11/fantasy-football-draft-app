@@ -60,7 +60,7 @@ const features = [
     description: 'Head-to-head projections and leverage plays for your matchup.',
     icon: Calendar,
     href: '/season/matchups',
-    available: false,
+    available: true,
     color: '#ff716c',
   },
 ]
