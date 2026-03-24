@@ -200,3 +200,122 @@ export interface DraftRecommendation {
   urgencyWarnings: string[]
   strategyPivot?: string
 }
+
+// --- In-Season Types (Phase 8) ---
+
+export type InjuryStatus = 'healthy' | 'questionable' | 'doubtful' | 'out' | 'ir' | 'pup' | 'suspended'
+export type InjurySeverity = 1 | 2 | 3 | 4 // 1=minor, 2=moderate, 3=significant, 4=severe
+export type WeeklyStatus = 'active' | 'bye' | 'out' | 'doubtful' | 'questionable' | 'probable' | 'ir'
+export type PracticeStatus = 'full' | 'limited' | 'dnp'
+
+export interface WeeklyProjection {
+  playerId: string
+  playerName: string
+  season: number
+  week: number
+  position: Position
+  team: string
+
+  // Per-source projections
+  sourceProjections: Record<string, SourceWeeklyProjection>
+
+  // Consensus values
+  consensusPoints: number
+  consensusFloor?: number
+  consensusCeiling?: number
+
+  // Position rank for the week
+  positionRank?: number
+
+  // Player status
+  status: WeeklyStatus
+
+  // Matchup context
+  opponent?: string
+  isHome?: boolean
+  gameTime?: string
+
+  // Scoring format
+  scoringFormat: ScoringFormat
+}
+
+export interface SourceWeeklyProjection {
+  points: number
+  passingYards?: number
+  passingTDs?: number
+  rushingYards?: number
+  rushingTDs?: number
+  receivingYards?: number
+  receivingTDs?: number
+  receptions?: number
+  touchdowns?: number
+}
+
+export interface InjuryUpdate {
+  id: string
+  playerId: string
+  playerName: string
+  season: number
+  week?: number
+
+  previousStatus?: InjuryStatus
+  newStatus: InjuryStatus
+
+  injuryType?: string // 'hamstring', 'ankle', etc.
+  injuryLocation?: string // 'leg', 'arm', 'head', etc.
+  severity?: InjurySeverity
+
+  expectedReturnWeek?: number
+  expectedReturnDate?: string
+
+  source: string
+  practiceStatus?: PracticeStatus
+  gameDesignation?: string
+  sourceNotes?: string
+
+  reportedAt: string
+}
+
+export interface MatchupData {
+  season: number
+  week: number
+  team: string
+  opponent: string
+  isHome: boolean
+  gameTime?: string
+
+  // Defensive rankings vs position (1 = toughest, 32 = easiest)
+  defRankVsQB?: number
+  defRankVsRB?: number
+  defRankVsWR?: number
+  defRankVsTE?: number
+
+  // Fantasy points allowed per game
+  defFptsAllowedQB?: number
+  defFptsAllowedRB?: number
+  defFptsAllowedWR?: number
+  defFptsAllowedTE?: number
+
+  // Vegas lines for game script
+  spread?: number
+  overUnder?: number
+  impliedTeamTotal?: number
+
+  // Weather
+  weatherTemp?: number
+  weatherWind?: number
+  weatherPrecipChance?: number
+  isDome?: boolean
+}
+
+export interface WaiverTrending {
+  playerId: string
+  playerName: string
+  position: Position
+  team: string
+  addCount: number
+  dropCount: number
+  netAdds: number
+  ownershipPercent?: number
+  trendDirection: 'rising' | 'falling' | 'stable'
+}

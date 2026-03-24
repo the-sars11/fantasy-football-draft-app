@@ -360,10 +360,11 @@ Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
 > **Value:** Increases LTV from $20-40 to $50-100/year, dramatically improves retention
 
 ### Data Infrastructure
-- [ ] FF-110: Weekly projections ingestion — pull fresh projections from ESPN, Sleeper, FantasyPros every Tuesday
-- [ ] FF-111: Injury/status tracker — monitor player status changes (Q/D/O/IR), update projections accordingly
-- [ ] FF-112: Matchup data — defensive rankings vs. position, weather data, Vegas lines for game script
-- [ ] FF-113: Waiver wire trending — track add/drop velocity from Sleeper + ESPN
+- [x] FF-110: Weekly projections ingestion — pull fresh projections from ESPN, Sleeper, FantasyPros every Tuesday
+- [x] FF-111: Injury/status tracker — monitor player status changes (Q/D/O/IR), update projections accordingly
+- [x] FF-112: Matchup data — defensive rankings vs. position, weather data, Vegas lines for game script
+- [x] FF-113: Waiver wire trending — track add/drop velocity from Sleeper + ESPN
+- [x] **GIT CHECKPOINT**: Committed & pushed (pending)
 
 ### Start/Sit Advisor
 - [ ] FF-114: Roster sync — connect to user's ESPN/Yahoo/Sleeper league, pull current roster weekly

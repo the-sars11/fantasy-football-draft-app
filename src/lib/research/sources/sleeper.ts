@@ -119,6 +119,12 @@ export interface NormalizedSleeperProjection {
   receptions?: number
 }
 
+export interface NormalizedSleeperWeeklyProjection extends NormalizedSleeperProjection {
+  week: number
+  season: string
+  opponent?: string
+}
+
 export interface NormalizedSleeperTrending {
   sleeperId: string
   count: number
@@ -249,6 +255,87 @@ export async function fetchSleeperProjections(
   }
 
   return projections
+}
+
+/**
+ * Fetch weekly projections for a specific week.
+ * Returns projected fantasy points + stat breakdowns for that week only.
+ * This is the key endpoint for in-season Start/Sit recommendations.
+ *
+ * Endpoint: GET /projections/nfl/{season}/{week}?season_type=regular
+ */
+export async function fetchSleeperWeeklyProjections(
+  week: number,
+  season?: string
+): Promise<NormalizedSleeperWeeklyProjection[]> {
+  // Get current season if not provided
+  const currentSeason = season || (await fetchSleeperState()).season
+
+  const raw = await fetchJSON<SleeperProjection[]>(
+    `${SLEEPER_BASE}/projections/nfl/${currentSeason}/${week}?season_type=regular`
+  )
+
+  const projections: NormalizedSleeperWeeklyProjection[] = []
+
+  for (const proj of raw) {
+    if (!proj.stats) continue
+    const s = proj.stats
+
+    // Skip if no meaningful projection
+    const hasPPR = s.pts_ppr !== undefined && s.pts_ppr > 0
+    const hasHalf = s.pts_half_ppr !== undefined && s.pts_half_ppr > 0
+    const hasStd = s.pts_std !== undefined && s.pts_std > 0
+    if (!hasPPR && !hasHalf && !hasStd) continue
+
+    projections.push({
+      sleeperId: proj.player_id,
+      week,
+      season: currentSeason,
+      points: {
+        ppr: s.pts_ppr,
+        halfPpr: s.pts_half_ppr,
+        standard: s.pts_std,
+      },
+      passingYards: s.pass_yd,
+      passingTDs: s.pass_td,
+      rushingYards: s.rush_yd,
+      rushingTDs: s.rush_td,
+      receivingYards: s.rec_yd,
+      receivingTDs: s.rec_td,
+      receptions: s.rec,
+    })
+  }
+
+  return projections
+}
+
+/**
+ * Fetch weekly projections for multiple weeks at once.
+ * Useful for building out season projections or looking at upcoming schedule.
+ */
+export async function fetchSleeperWeeklyProjectionsRange(
+  startWeek: number,
+  endWeek: number,
+  season?: string
+): Promise<Map<number, NormalizedSleeperWeeklyProjection[]>> {
+  const currentSeason = season || (await fetchSleeperState()).season
+
+  // Fetch all weeks in parallel
+  const weekNumbers = Array.from(
+    { length: endWeek - startWeek + 1 },
+    (_, i) => startWeek + i
+  )
+
+  const results = await Promise.all(
+    weekNumbers.map((week) => fetchSleeperWeeklyProjections(week, currentSeason))
+  )
+
+  const weeklyMap = new Map<number, NormalizedSleeperWeeklyProjection[]>()
+  weekNumbers.forEach((week, index) => {
+    weeklyMap.set(week, results[index])
+  })
+
+  return weeklyMap
 }
 
 /**
