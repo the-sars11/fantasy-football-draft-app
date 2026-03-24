@@ -261,10 +261,10 @@ Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
 ### Sprint 11: Advanced Views + New Features
 - [x] FF-073: Remaining Needs + Positional Scarcity redesign — smooth gradient bars, spend range indicators, critical/stable/elite status labels
 - [x] FF-074: Post-Draft Analysis redesign — letter grade hero with glow, story-driven pick-by-pick breakdown with contextual narratives, color-coded grades (STEAL/REACH/AI PIVOT), segmented progress bars for Positional Power Rankings
-- [ ] FF-075: Per-team exportable reports — generate analysis for EVERY team in league, email-able format, contextual callouts ("Reggie took the last WR1 which forced you to overbid")
-- [ ] FF-076: Trash Talk system — live alerts during draft (overpay, roster imbalance, bye week disasters), post-draft "How Everyone Screwed Up" roast report
-- [ ] FF-077: Mobile polish pass — bottom nav feel, touch targets (44px min), responsive layouts across all redesigned screens
-- [ ] FF-078: Animation + micro-interactions — card expand/collapse, neon glow transitions, draft pick entry animations, trash talk alert shake
+- [x] FF-075: Per-team exportable reports — generate analysis for EVERY team in league, email-able format, contextual callouts ("Reggie took the last WR1 which forced you to overbid")
+- [x] FF-076: Trash Talk system — live alerts during draft (overpay, roster imbalance, bye week disasters), post-draft "How Everyone Screwed Up" roast report
+- [x] FF-077: Mobile polish pass — bottom nav feel, touch targets (44px min), responsive layouts across all redesigned screens
+- [x] FF-078: Animation + micro-interactions — card expand/collapse, neon glow transitions, draft pick entry animations, trash talk alert shake
 
 ---
 
