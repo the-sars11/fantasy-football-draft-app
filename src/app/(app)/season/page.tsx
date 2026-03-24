@@ -50,8 +50,8 @@ const features = [
     title: 'Trade Analyzer',
     description: 'Evaluate trades with rest-of-season projections and roster impact.',
     icon: ArrowLeftRight,
-    href: '/season/trades',
-    available: false,
+    href: '/season/trade',
+    available: true,
     color: '#ffa500',
   },
   {

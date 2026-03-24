@@ -383,11 +383,12 @@ Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
 - [x] **GIT CHECKPOINT**: Committed & pushed (a6991e8)
 
 ### Trade Analyzer
-- [ ] FF-124: Trade calculator engine — Rest-of-Season (ROS) value per player, adjusted for YOUR league scoring
-- [ ] FF-125: Roster impact analysis — "This trade improves your ROS ceiling by X% and shores up your WR2 slot"
-- [ ] FF-126: Fair trade finder — "To get [player], offer [these combinations]"
-- [ ] FF-127: Trade veto predictor — flag lopsided trades before you embarrass yourself
-- [ ] FF-128: Trade UI — enter trade, see instant analysis, share link with trade partner
+- [x] FF-124: Trade calculator engine — Rest-of-Season (ROS) value per player, adjusted for YOUR league scoring
+- [x] FF-125: Roster impact analysis — "This trade improves your ROS ceiling by X% and shores up your WR2 slot"
+- [x] FF-126: Fair trade finder — "To get [player], offer [these combinations]"
+- [x] FF-127: Trade veto predictor — flag lopsided trades before you embarrass yourself
+- [x] FF-128: Trade UI — enter trade, see instant analysis, share link with trade partner
+- [x] **GIT CHECKPOINT**: Committed & pushed
 
 ### Weekly Matchup Preview
 - [ ] FF-129: Head-to-head projections — your team vs. opponent, position-by-position breakdown

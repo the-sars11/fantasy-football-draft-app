@@ -105,3 +105,16 @@ export {
   type RosterFitAnalysis,
   type WaiverWireAnalysis,
 } from './waiver-wire-advisor'
+
+// Trade Analyzer (FF-124 to FF-127)
+export {
+  analyzeTrade,
+  findFairTrades,
+  getPlayerValues,
+  calculatePlayerValue,
+  type PlayerValue,
+  type TradePackage,
+  type RosterImpact,
+  type TradeAnalysis,
+  type FairTradeOption,
+} from './trade-analyzer'
