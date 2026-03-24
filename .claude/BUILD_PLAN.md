@@ -292,15 +292,15 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 - [ ] FF-224: Data quality validation tests — verify 2026 detection works
 
 ### User Tags & Rules (FF-225 to FF-234)
-- [ ] FF-225: User tag CRUD API routes
-- [ ] FF-226: User tag React hooks
-- [ ] FF-227: **TARGET tag special handling** — prominent display, +25 score boost
-- [ ] FF-228: LLM rule parser prompt + service — natural language to structured rule
-- [ ] FF-229: User rule CRUD API routes
-- [ ] FF-230: Rule application in scoring engine — stack modifiers
+- [x] FF-225: User tag CRUD API routes
+- [x] FF-226: User tag React hooks
+- [x] FF-227: **TARGET tag special handling** — prominent display, +25 score boost
+- [x] FF-228: LLM rule parser prompt + service — natural language to structured rule
+- [x] FF-229: User rule CRUD API routes
+- [x] FF-230: Rule application in scoring engine — stack modifiers
 - [ ] FF-231: User rules management UI
-- [ ] FF-232: Rule validation + error handling
-- [ ] FF-233: Rule application preview — show affected players
+- [x] FF-232: Rule validation + error handling
+- [x] FF-233: Rule application preview — show affected players
 - [ ] FF-234: Tag hierarchy display logic — TARGET overrides compact view
 
 ### Player Browser UI (FF-235 to FF-244)
