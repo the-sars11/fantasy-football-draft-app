@@ -1,26 +1,51 @@
 /**
  * Multi-Source Normalization Engine
  *
- * Merges player data from Sleeper + ESPN + FantasyPros into consensus rankings
+ * Merges player data from multiple sources into consensus rankings
  * and auction values per player. Uses fuzzy name matching to join across sources.
  *
  * Strategy:
  * 1. Sleeper provides the foundational player list (most complete roster)
  * 2. ESPN provides rankings, ADP, auction values, projections
- * 3. FantasyPros provides ECR, tiers, auction values
- * 4. Consensus = weighted average across available sources
- * 5. Intel enrichment adds sentiment-based tags and score modifiers
+ * 3. FantasyPros ECR provides expert consensus rankings, tiers, auction values
+ * 4. Fantasy Footballers provides additional rankings and sentiment tags
+ * 5. Pro Football Reference provides historical stats for trend analysis
+ * 6. Consensus = weighted average across available sources
+ * 7. Intel enrichment adds sentiment-based tags and score modifiers
+ *
+ * Source Weights (configurable):
+ * - FantasyPros ECR: 35% (largest expert consensus)
+ * - ESPN: 30% (mainstream + projections)
+ * - Sleeper: 20% (ADP/trending data)
+ * - Fantasy Footballers: 15% (additional expert rankings)
  */
 
 import type { Position, ScoringFormat } from '@/lib/players/types'
 import type { NormalizedSleeperPlayer, NormalizedSleeperProjection } from './sources/sleeper'
 import type { NormalizedESPNPlayer } from './sources/espn'
 import type { NormalizedFPPlayer, NormalizedFPAuctionValue } from './sources/fantasypros'
+import type { NormalizedFFPlayer } from './sources/fantasy-footballers'
+import type { NormalizedPFRPlayer } from './sources/pro-football-reference'
 import {
   enrichPlayersWithIntel,
-  type IntelEnrichmentResult,
   type DetectedTag,
 } from './intel'
+
+// --- Source Weight Configuration ---
+
+export interface SourceWeights {
+  fantasypros: number
+  espn: number
+  sleeper: number
+  fantasyFootballers: number
+}
+
+export const DEFAULT_SOURCE_WEIGHTS: SourceWeights = {
+  fantasypros: 0.35,
+  espn: 0.30,
+  sleeper: 0.20,
+  fantasyFootballers: 0.15,
+}
 
 export interface SourceFreshness {
   source: string
@@ -53,6 +78,7 @@ export interface ConsensusPlayer {
     sleeper?: number // derived from ADP
     espn?: number
     fantasypros?: number
+    fantasyFootballers?: number
   }
 
   // Per-source ADP
@@ -84,6 +110,13 @@ export interface ConsensusPlayer {
   percentOwned: number | null // from ESPN
   age: number | null
   yearsExp: number | null
+
+  // Historical data (from Pro Football Reference)
+  historical?: {
+    lastSeasonPoints: number | null
+    lastSeasonGames: number | null
+    trend: 'up' | 'down' | 'stable' | null
+  }
 
   // Source tracking
   sources: string[] // which sources contributed data
@@ -187,7 +220,17 @@ export interface NormalizeInput {
     auctionValues: NormalizedFPAuctionValue[]
     fetchedAt: string
   }
+  fantasyFootballers?: {
+    rankings: NormalizedFFPlayer[]
+    fetchedAt: string
+  }
+  proFootballRef?: {
+    historical: NormalizedPFRPlayer[]
+    season: number
+    fetchedAt: string
+  }
   scoringFormat?: ScoringFormat
+  sourceWeights?: Partial<SourceWeights>
 }
 
 export interface NormalizeOutput {
@@ -202,6 +245,7 @@ export interface NormalizeOutput {
  */
 export function normalizePlayerData(input: NormalizeInput): NormalizeOutput {
   const scoringFormat = input.scoringFormat || 'ppr'
+  const weights = { ...DEFAULT_SOURCE_WEIGHTS, ...input.sourceWeights }
   const freshness: SourceFreshness[] = []
 
   // Track source freshness
@@ -238,6 +282,28 @@ export function normalizePlayerData(input: NormalizeInput): NormalizeOutput {
     freshness.push({ source: 'fantasypros', fetchedAt: '', playerCount: 0, status: 'missing' })
   }
 
+  if (input.fantasyFootballers) {
+    freshness.push({
+      source: 'fantasy_footballers',
+      fetchedAt: input.fantasyFootballers.fetchedAt,
+      playerCount: input.fantasyFootballers.rankings.length,
+      status: isStale(input.fantasyFootballers.fetchedAt) ? 'stale' : 'fresh',
+    })
+  } else {
+    freshness.push({ source: 'fantasy_footballers', fetchedAt: '', playerCount: 0, status: 'missing' })
+  }
+
+  if (input.proFootballRef) {
+    freshness.push({
+      source: 'pro_football_reference',
+      fetchedAt: input.proFootballRef.fetchedAt,
+      playerCount: input.proFootballRef.historical.length,
+      status: 'fresh', // Historical data has longer TTL
+    })
+  } else {
+    freshness.push({ source: 'pro_football_reference', fetchedAt: '', playerCount: 0, status: 'missing' })
+  }
+
   // Build lookup indexes for each source
   const espnIndex = input.espn
     ? buildNameIndex(input.espn.players, (p) => p.name, (p) => p.team)
@@ -250,6 +316,14 @@ export function normalizePlayerData(input: NormalizeInput): NormalizeOutput {
   const fpAuctionIndex = input.fantasypros
     ? buildNameIndex(input.fantasypros.auctionValues, (p) => p.name, (p) => p.team)
     : new Map<string, NormalizedFPAuctionValue>()
+
+  const ffIndex = input.fantasyFootballers
+    ? buildNameIndex(input.fantasyFootballers.rankings, (p) => p.name, (p) => p.team)
+    : new Map<string, NormalizedFFPlayer>()
+
+  const pfrIndex = input.proFootballRef
+    ? buildNameIndex(input.proFootballRef.historical, (p) => p.name, (p) => p.team)
+    : new Map<string, NormalizedPFRPlayer>()
 
   // Build Sleeper projection lookup
   const sleeperProjMap = new Map<string, NormalizedSleeperProjection>()
@@ -270,11 +344,15 @@ export function normalizePlayerData(input: NormalizeInput): NormalizeOutput {
     const espnMatch = matchPlayer(sleeperPlayer.name, sleeperPlayer.team, espnIndex)
     const fpMatch = matchPlayer(sleeperPlayer.name, sleeperPlayer.team, fpIndex)
     const fpAuctionMatch = matchPlayer(sleeperPlayer.name, sleeperPlayer.team, fpAuctionIndex)
+    const ffMatch = matchPlayer(sleeperPlayer.name, sleeperPlayer.team, ffIndex)
+    const pfrMatch = matchPlayer(sleeperPlayer.name, sleeperPlayer.team, pfrIndex)
     const sleeperProj = sleeperProjMap.get(sleeperPlayer.sleeperId)
 
     const sources: string[] = ['sleeper']
     if (espnMatch) sources.push('espn')
     if (fpMatch) sources.push('fantasypros')
+    if (ffMatch) sources.push('fantasy_footballers')
+    if (pfrMatch) sources.push('pro_football_reference')
 
     // Get Sleeper ADP based on scoring format
     const sleeperADP =
@@ -285,10 +363,12 @@ export function normalizePlayerData(input: NormalizeInput): NormalizeOutput {
           : sleeperPlayer.adp.standard
 
     // Calculate consensus rank (weighted average of available ranks)
+    // Weights are normalized based on which sources are present
     const consensusRank = weightedAverage([
-      { value: fpMatch?.ecrRank, weight: 0.4 },
-      { value: espnMatch?.rank ?? undefined, weight: 0.35 },
-      { value: sleeperADP, weight: 0.25 }, // Use ADP as proxy for rank
+      { value: fpMatch?.ecrRank, weight: weights.fantasypros },
+      { value: espnMatch?.rank ?? undefined, weight: weights.espn },
+      { value: sleeperADP, weight: weights.sleeper }, // Use ADP as proxy for rank
+      { value: ffMatch?.ffRank, weight: weights.fantasyFootballers },
     ])
 
     // Calculate consensus ADP
@@ -327,6 +407,15 @@ export function normalizePlayerData(input: NormalizeInput): NormalizeOutput {
     // Only include players that have at least a rank or projection
     if (consensusRank === null && projPoints <= 0 && adp === null) continue
 
+    // Build historical data from PFR if available
+    const historical = pfrMatch
+      ? {
+          lastSeasonPoints: pfrMatch.fantasyPointsPPR,
+          lastSeasonGames: pfrMatch.games,
+          trend: null as 'up' | 'down' | 'stable' | null, // Trend requires multi-year data
+        }
+      : undefined
+
     consensusPlayers.push({
       name: sleeperPlayer.name,
       team: sleeperPlayer.team,
@@ -338,12 +427,13 @@ export function normalizePlayerData(input: NormalizeInput): NormalizeOutput {
       fpId: fpMatch?.fpId ?? null,
       consensusRank: consensusRank ?? 999,
       consensusAuctionValue,
-      consensusTier: fpMatch?.tier ?? Math.ceil((consensusRank ?? 999) / 12),
+      consensusTier: fpMatch?.tier ?? ffMatch?.tier ?? Math.ceil((consensusRank ?? 999) / 12),
       adp,
       sourceRanks: {
         sleeper: sleeperADP,
         espn: espnMatch?.rank ?? undefined,
         fantasypros: fpMatch?.ecrRank,
+        fantasyFootballers: ffMatch?.ffRank,
       },
       sourceADP: {
         sleeper: sleeperADP,
@@ -356,8 +446,9 @@ export function normalizePlayerData(input: NormalizeInput): NormalizeOutput {
       projections,
       ecrStdDev: fpMatch?.ecrStdDev ?? null,
       percentOwned: espnMatch?.percentOwned ?? null,
-      age: sleeperPlayer.age,
+      age: sleeperPlayer.age ?? pfrMatch?.age ?? null,
       yearsExp: sleeperPlayer.yearsExp,
+      historical,
       sources,
     })
 
@@ -371,14 +462,33 @@ export function normalizePlayerData(input: NormalizeInput): NormalizeOutput {
 
       const espnMatch = matchPlayer(fpPlayer.name, fpPlayer.team, espnIndex)
       const fpAuctionMatch = matchPlayer(fpPlayer.name, fpPlayer.team, fpAuctionIndex)
+      const ffMatch = matchPlayer(fpPlayer.name, fpPlayer.team, ffIndex)
+      const pfrMatch = matchPlayer(fpPlayer.name, fpPlayer.team, pfrIndex)
 
       const sources: string[] = ['fantasypros']
       if (espnMatch) sources.push('espn')
+      if (ffMatch) sources.push('fantasy_footballers')
+      if (pfrMatch) sources.push('pro_football_reference')
 
       const consensusAuctionValue = weightedAverage([
         { value: fpAuctionMatch?.auctionValue, weight: 0.5 },
         { value: espnMatch?.auctionValue ?? undefined, weight: 0.5 },
       ])
+
+      // Calculate consensus rank including Fantasy Footballers
+      const consensusRank = weightedAverage([
+        { value: fpPlayer.ecrRank, weight: weights.fantasypros },
+        { value: espnMatch?.rank ?? undefined, weight: weights.espn },
+        { value: ffMatch?.ffRank, weight: weights.fantasyFootballers },
+      ])
+
+      const historical = pfrMatch
+        ? {
+            lastSeasonPoints: pfrMatch.fantasyPointsPPR,
+            lastSeasonGames: pfrMatch.games,
+            trend: null as 'up' | 'down' | 'stable' | null,
+          }
+        : undefined
 
       consensusPlayers.push({
         name: fpPlayer.name,
@@ -389,13 +499,14 @@ export function normalizePlayerData(input: NormalizeInput): NormalizeOutput {
         sleeperId: fpPlayer.sleeperId || null,
         espnId: espnMatch?.espnId ?? (fpPlayer.espnId ? parseInt(fpPlayer.espnId) : null),
         fpId: fpPlayer.fpId || null,
-        consensusRank: fpPlayer.ecrRank,
+        consensusRank: consensusRank ?? fpPlayer.ecrRank,
         consensusAuctionValue,
-        consensusTier: fpPlayer.tier,
+        consensusTier: fpPlayer.tier ?? ffMatch?.tier ?? Math.ceil(fpPlayer.ecrRank / 12),
         adp: espnMatch?.adp ?? null,
         sourceRanks: {
           espn: espnMatch?.rank ?? undefined,
           fantasypros: fpPlayer.ecrRank,
+          fantasyFootballers: ffMatch?.ffRank,
         },
         sourceADP: {
           espn: espnMatch?.adp ?? undefined,
@@ -416,8 +527,9 @@ export function normalizePlayerData(input: NormalizeInput): NormalizeOutput {
         },
         ecrStdDev: fpPlayer.ecrStdDev,
         percentOwned: espnMatch?.percentOwned ?? null,
-        age: null,
+        age: pfrMatch?.age ?? null,
         yearsExp: null,
+        historical,
         sources,
       })
 

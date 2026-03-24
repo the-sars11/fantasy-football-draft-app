@@ -34,6 +34,9 @@ const SOURCE_LABELS: Record<string, string> = {
   sleeper: 'Sleeper',
   espn: 'ESPN',
   fantasypros: 'FantasyPros',
+  fantasy_footballers: 'Fantasy Footballers',
+  fantasypros_articles: 'FP Articles',
+  pro_football_reference: 'PFR Historical',
 }
 
 function StatusIcon({ status }: { status: string }) {
