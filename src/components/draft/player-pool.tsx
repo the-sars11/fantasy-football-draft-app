@@ -81,8 +81,8 @@ export function PlayerPool({
 
   return (
     <div className="space-y-4">
-      {/* Header + search */}
-      <div className="flex items-center justify-between gap-4">
+      {/* Header + search - FF-077: Mobile responsive layout */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
         <div className="flex items-center gap-2">
           <div className="h-5 w-1 bg-[#8bacff] shadow-[0_0_8px_#8bacff]" />
           <h3 className="font-headline text-lg font-bold tracking-tight text-[#deedf9]">
@@ -93,8 +93,8 @@ export function PlayerPool({
           </span>
         </div>
 
-        {/* Search input */}
-        <div className="relative w-52">
+        {/* Search input - FF-077: Full width on mobile */}
+        <div className="relative w-full sm:w-52">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#9eadb8]" />
           <input
             type="text"
@@ -102,11 +102,11 @@ export function PlayerPool({
             value={search}
             onChange={e => setSearch(e.target.value)}
             className="
-              w-full pl-10 pr-4 py-2 rounded-lg
+              w-full pl-10 pr-4 py-2.5 sm:py-2 rounded-lg
               bg-black/60 border border-[#3c4a53]/30
               text-[#deedf9] text-sm font-body placeholder:text-[#9eadb8]/50
               focus:outline-none focus:border-[#8bacff]/50 focus:ring-1 focus:ring-[#8bacff]/30
-              transition-colors
+              transition-colors min-h-[44px] sm:min-h-0
             "
           />
         </div>
@@ -126,10 +126,10 @@ export function PlayerPool({
         isAuction={isAuction}
       />
 
-      {/* Player cards list */}
-      <div className="space-y-4 max-h-[520px] overflow-auto no-scrollbar pr-1">
+      {/* Player cards list - FF-077: Adaptive height on mobile */}
+      <div className="space-y-3 sm:space-y-4 max-h-[60vh] sm:max-h-[520px] overflow-auto no-scrollbar pr-1 ffi-scroll-container">
         {available.length === 0 ? (
-          <div className="glass-panel rounded-xl p-8 text-center">
+          <div className="glass-panel rounded-xl p-6 sm:p-8 text-center">
             <p className="text-[#9eadb8] font-body text-sm">
               No players match your filters
             </p>
@@ -151,15 +151,16 @@ export function PlayerPool({
         )}
       </div>
 
-      {/* Load more indicator */}
+      {/* Load more indicator - FF-077: 44px touch target */}
       {available.length > 50 && (
-        <div className="flex justify-center pt-4">
+        <div className="flex justify-center pt-4 pb-2">
           <button className="
             flex items-center gap-2 text-[#9eadb8] hover:text-[#8bacff]
-            transition-colors py-3 px-6 rounded-xl bg-[#05151e]/50
+            active:text-[#8bacff] active:scale-98
+            transition-all py-3 px-6 rounded-xl bg-[#05151e]/50
             font-headline text-xs font-bold tracking-widest uppercase
+            min-h-[44px] touch-manipulation
           ">
-            <span className="material-symbols-outlined text-lg">download</span>
             Load More Tactical Data
           </button>
         </div>

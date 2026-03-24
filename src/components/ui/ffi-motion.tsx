@@ -377,6 +377,122 @@ export function FFIFadeInUp({
 }
 
 /* ========================================
+   FF-078: Glow Pulse — Attention-grabbing animation
+   ======================================== */
+
+interface FFIGlowPulseProps {
+  className?: string
+  color?: "accent" | "primary" | "danger" | "warning"
+  intensity?: "subtle" | "medium" | "strong"
+  children?: React.ReactNode
+}
+
+export function FFIGlowPulse({
+  className,
+  color = "accent",
+  intensity = "medium",
+  children,
+}: FFIGlowPulseProps) {
+  const colors = {
+    accent: "rgba(57, 255, 20, VAR)",
+    primary: "rgba(85, 130, 230, VAR)",
+    danger: "rgba(239, 68, 68, VAR)",
+    warning: "rgba(251, 191, 36, VAR)",
+  }
+
+  const intensities = {
+    subtle: { min: 0.1, max: 0.2, blur: 15 },
+    medium: { min: 0.2, max: 0.4, blur: 20 },
+    strong: { min: 0.3, max: 0.5, blur: 30 },
+  }
+
+  const { min, max, blur } = intensities[intensity]
+  const colorBase = colors[color]
+
+  return (
+    <motion.div
+      className={cn("relative", className)}
+      animate={{
+        boxShadow: [
+          `0 0 ${blur}px ${colorBase.replace("VAR", String(min))}`,
+          `0 0 ${blur + 10}px ${colorBase.replace("VAR", String(max))}`,
+          `0 0 ${blur}px ${colorBase.replace("VAR", String(min))}`,
+        ],
+      }}
+      transition={{
+        duration: 2,
+        repeat: Infinity,
+        ease: "easeInOut",
+      }}
+    >
+      {children}
+    </motion.div>
+  )
+}
+
+/* ========================================
+   FF-078: Scale In — Grade reveal animation
+   ======================================== */
+
+interface FFIScaleInProps {
+  className?: string
+  delay?: number
+  children?: React.ReactNode
+}
+
+export function FFIScaleIn({
+  className,
+  delay = 0,
+  children,
+}: FFIScaleInProps) {
+  return (
+    <motion.div
+      className={cn(className)}
+      initial={{ opacity: 0, scale: 0.5, filter: "blur(4px)" }}
+      animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+      transition={{
+        type: "spring",
+        stiffness: 400,
+        damping: 20,
+        delay,
+      }}
+    >
+      {children}
+    </motion.div>
+  )
+}
+
+/* ========================================
+   FF-078: Trash Talk Entrance — Slide with wobble
+   ======================================== */
+
+interface FFITrashTalkEntranceProps {
+  className?: string
+  children?: React.ReactNode
+}
+
+export function FFITrashTalkEntrance({
+  className,
+  children,
+}: FFITrashTalkEntranceProps) {
+  return (
+    <motion.div
+      className={cn(className)}
+      initial={{ opacity: 0, x: 100, rotate: 2 }}
+      animate={{ opacity: 1, x: 0, rotate: 0 }}
+      exit={{ opacity: 0, x: -100, rotate: -2 }}
+      transition={{
+        type: "spring",
+        stiffness: 400,
+        damping: 25,
+      }}
+    >
+      {children}
+    </motion.div>
+  )
+}
+
+/* ========================================
    Shared Player Card — Morphs between screens
    ======================================== */
 

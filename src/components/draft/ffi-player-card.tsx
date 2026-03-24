@@ -13,6 +13,7 @@
  */
 
 import { useMemo } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronDown, ChevronUp, Target, Zap, TrendingUp, TrendingDown, Star, AlertTriangle } from 'lucide-react'
 import type { Player } from '@/lib/players/types'
 import type { ScoredPlayer } from '@/lib/research/strategy/scoring'
@@ -323,13 +324,23 @@ export function FFIPlayerCard({
           </button>
         </div>
 
-        {/* Expanded AI Insight section */}
-        {isExpanded && explanation && (
-          <FFIAIInsight
-            explanation={explanation}
-            confidence={scoredPlayer.strategyScore}
-          />
-        )}
+        {/* FF-078: Expanded AI Insight section with smooth animation */}
+        <AnimatePresence>
+          {isExpanded && explanation && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ type: "spring", stiffness: 400, damping: 30 }}
+              className="overflow-hidden"
+            >
+              <FFIAIInsight
+                explanation={explanation}
+                confidence={scoredPlayer.strategyScore}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   )
