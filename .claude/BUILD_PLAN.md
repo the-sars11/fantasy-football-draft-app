@@ -364,7 +364,7 @@ Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
 - [x] FF-111: Injury/status tracker — monitor player status changes (Q/D/O/IR), update projections accordingly
 - [x] FF-112: Matchup data — defensive rankings vs. position, weather data, Vegas lines for game script
 - [x] FF-113: Waiver wire trending — track add/drop velocity from Sleeper + ESPN
-- [x] **GIT CHECKPOINT**: Committed & pushed (pending)
+- [x] **GIT CHECKPOINT**: Committed & pushed (8ee080f)
 
 ### Start/Sit Advisor
 - [ ] FF-114: Roster sync — connect to user's ESPN/Yahoo/Sleeper league, pull current roster weekly
