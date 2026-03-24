@@ -4,6 +4,28 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 
 ---
 
+## Git Discipline
+
+**MANDATORY: Commit and push after completing each phase/sprint.**
+
+After completing a phase or sprint section:
+1. `git add` all changed files
+2. `git commit -m "feat(scope): Description of changes"` with Co-Authored-By
+3. `git push origin master`
+4. Verify push succeeded before moving to next phase
+
+Commit message format:
+```
+feat(intel): Add Phase X - Feature Name (FF-XXX to FF-XXX)
+
+- Bullet point summary of changes
+- Another change
+
+Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
+```
+
+---
+
 ## Phase 0: Foundation (Session 1)
 
 ### Project Scaffolding
@@ -272,6 +294,7 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 - [x] FF-208: Freshness tier configuration — TTL per data type, off-season behavior
 - [x] FF-209: Differential fetch algorithm — only refresh stale sources
 - [x] FF-210: Seed source_registry with existing sources (FP, ESPN, Sleeper)
+- [x] **GIT CHECKPOINT**: Committed & pushed (325206b)
 
 ### Tag Detection (FF-211 to FF-218)
 - [x] FF-211: Tag detection algorithm core — BREAKOUT, SLEEPER, VALUE, BUST, AVOID
@@ -282,8 +305,9 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 - [x] FF-216: VALUE/AVOID detection — ADP vs projection rank gap analysis
 - [x] FF-217: Intel service orchestration — compute and store intel per player
 - [x] FF-218: Integration with normalize pipeline — attach intel to ConsensusPlayer
+- [x] **GIT CHECKPOINT**: Committed & pushed (325206b)
 
-### New Sources (FF-219 to FF-224)
+### New Sources (FF-219 to FF-224) — DEFERRED
 - [ ] FF-219: Fantasy Footballers adapter — scrape free rankings page
 - [ ] FF-220: FantasyPros Articles adapter — scrape sentiment from public articles
 - [ ] FF-221: Pro Football Reference historical adapter — for projection trends
@@ -302,6 +326,7 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 - [x] FF-232: Rule validation + error handling
 - [x] FF-233: Rule application preview — show affected players
 - [x] FF-234: Tag hierarchy display logic — TARGET overrides compact view
+- [x] **GIT CHECKPOINT**: Committed & pushed (c88c68f)
 
 ### Player Browser UI (FF-235 to FF-244)
 - [x] FF-235: Player Browser page scaffold (`/prep/players`)
@@ -314,6 +339,7 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 - [x] FF-242: ADP range slider filter
 - [~] FF-243: Confirm/dismiss system tag actions (UI ready, needs API)
 - [x] FF-244: Add to Prep Hub navigation
+- [x] **GIT CHECKPOINT**: Committed & pushed (8f15302)
 
 ### Integration & Polish (FF-245 to FF-252)
 - [ ] FF-245: Research pipeline intel integration — load and apply tags
