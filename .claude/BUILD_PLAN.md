@@ -367,18 +367,20 @@ Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
 - [x] **GIT CHECKPOINT**: Committed & pushed (8ee080f)
 
 ### Start/Sit Advisor
-- [ ] FF-114: Roster sync — connect to user's ESPN/Yahoo/Sleeper league, pull current roster weekly
-- [ ] FF-115: Multi-source aggregation — pull start/sit rankings from 5+ expert sources
-- [ ] FF-116: Confidence scoring — weight experts by historical accuracy, surface consensus vs. contrarian takes
-- [ ] FF-117: AI contextualization — "Start X over Y because [matchup + recent performance + expert consensus]"
-- [ ] FF-118: Start/Sit UI — side-by-side comparison, confidence bars, expandable reasoning
+- [x] FF-114: Roster sync — connect to user's ESPN/Yahoo/Sleeper league, pull current roster weekly
+- [x] FF-115: Multi-source aggregation — pull start/sit rankings from 5+ expert sources
+- [x] FF-116: Confidence scoring — weight experts by historical accuracy, surface consensus vs. contrarian takes
+- [x] FF-117: AI contextualization — "Start X over Y because [matchup + recent performance + expert consensus]"
+- [x] FF-118: Start/Sit UI — side-by-side comparison, confidence bars, expandable reasoning
+- [x] **GIT CHECKPOINT**: Committed & pushed
 
 ### Waiver Wire AI
-- [ ] FF-119: Available player scanner — identify top pickups based on ownership %, trend velocity, upcoming schedule
-- [ ] FF-120: Roster fit analysis — "Player X fills your RB2 hole and has a favorable playoff schedule"
-- [ ] FF-121: FAAB bid recommendations — "Bid $X (Y% of remaining budget) — here's why"
-- [ ] FF-122: Priority ranking — ordered list of pickups with confidence + reasoning
-- [ ] FF-123: Waiver Wire UI — prioritized list, bid suggestions, one-tap add to watchlist
+- [x] FF-119: Available player scanner — identify top pickups based on ownership %, trend velocity, upcoming schedule
+- [x] FF-120: Roster fit analysis — "Player X fills your RB2 hole and has a favorable playoff schedule"
+- [x] FF-121: FAAB bid recommendations — "Bid $X (Y% of remaining budget) — here's why"
+- [x] FF-122: Priority ranking — ordered list of pickups with confidence + reasoning
+- [x] FF-123: Waiver Wire UI — prioritized list, bid suggestions, one-tap add to watchlist
+- [x] **GIT CHECKPOINT**: Committed & pushed
 
 ### Trade Analyzer
 - [ ] FF-124: Trade calculator engine — Rest-of-Season (ROS) value per player, adjusted for YOUR league scoring
