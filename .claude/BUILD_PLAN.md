@@ -304,16 +304,16 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 - [x] FF-234: Tag hierarchy display logic — TARGET overrides compact view
 
 ### Player Browser UI (FF-235 to FF-244)
-- [ ] FF-235: Player Browser page scaffold (`/prep/players`)
-- [ ] FF-236: FFIPlayerIntelCard component — compact + expanded views
-- [ ] FF-237: System tag badge styling (per DESIGN_SYSTEM.md)
-- [ ] FF-238: **TARGET badge styling** — lime, prominent, always visible when set
-- [ ] FF-239: User tag inline editor — quick-add TARGET button
-- [ ] FF-240: Sentiment snippet display in expanded view
-- [ ] FF-241: Tag filter panel — system tags, user tags, ADP range
-- [ ] FF-242: ADP range slider filter
-- [ ] FF-243: Confirm/dismiss system tag actions
-- [ ] FF-244: Add to Prep Hub navigation
+- [x] FF-235: Player Browser page scaffold (`/prep/players`)
+- [x] FF-236: FFIPlayerIntelCard component — compact + expanded views
+- [x] FF-237: System tag badge styling (per DESIGN_SYSTEM.md)
+- [x] FF-238: **TARGET badge styling** — lime, prominent, always visible when set
+- [x] FF-239: User tag inline editor — quick-add TARGET button
+- [x] FF-240: Sentiment snippet display in expanded view
+- [x] FF-241: Tag filter panel — system tags, user tags, ADP range
+- [x] FF-242: ADP range slider filter
+- [~] FF-243: Confirm/dismiss system tag actions (UI ready, needs API)
+- [x] FF-244: Add to Prep Hub navigation
 
 ### Integration & Polish (FF-245 to FF-252)
 - [ ] FF-245: Research pipeline intel integration — load and apply tags
@@ -496,7 +496,7 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 |-----------|--------|--------|
 | **Personal Use MVP** | Draft Day 2025 | ✅ Complete |
 | **UI Redesign** | March 2026 | ✅ Complete |
-| **Player Intelligence Foundation** | March 2026 | 🔄 In Progress |
+| **Player Intelligence Foundation** | March 2026 | 🔄 In Progress (Phase 5 UI complete) |
 | **Player Intelligence Full** | June 2026 | Planned |
 | **Live Draft Validation** | August 2026 | Pending |
 | **In-Season Features** | Sept 2026 | Planned |

@@ -10,6 +10,7 @@ import {
   History,
   Brain,
   ChevronRight,
+  Target,
 } from 'lucide-react'
 import { DataFreshness } from '@/components/prep/data-freshness'
 import {
@@ -102,6 +103,13 @@ export default function PrepPage() {
           icon={<BarChart3 className="h-5 w-5" />}
           title="Draft Board"
           subtitle="Your ranked, tiered, and valued player board"
+        />
+
+        <HubCard
+          href="/prep/players"
+          icon={<Target className="h-5 w-5" />}
+          title="Player Browser"
+          subtitle="Browse players, intel tags, and set your targets"
         />
 
         <HubCard
