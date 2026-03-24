@@ -391,16 +391,19 @@ Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
 - [x] **GIT CHECKPOINT**: Committed & pushed (43087a4)
 
 ### Weekly Matchup Preview
-- [ ] FF-129: Head-to-head projections — your team vs. opponent, position-by-position breakdown
-- [ ] FF-130: Leverage plays — "You're projected to lose by 6 — here's how to swing it"
-- [ ] FF-131: Ceiling/floor analysis — identify high-variance plays for chasing vs. protecting leads
-- [ ] FF-132: Matchup UI — visual comparison, key battles highlighted
+- [x] FF-129: Head-to-head projections — your team vs. opponent, position-by-position breakdown
+- [x] FF-130: Leverage plays — "You're projected to lose by 6 — here's how to swing it"
+- [x] FF-131: Ceiling/floor analysis — identify high-variance plays for chasing vs. protecting leads
+- [x] FF-132: Matchup UI — visual comparison, key battles highlighted
+- [x] **GIT CHECKPOINT**: Committed & pushed
 
 ### Notifications & Alerts
-- [ ] FF-133: Push notification system — set up for mobile (web push + PWA)
-- [ ] FF-134: Injury alerts — "Your starter [X] is now Questionable — here are backup options"
-- [ ] FF-135: Waiver processing alerts — "Waiver results are in — you got [X], missed [Y]"
-- [ ] FF-136: Weekly prep reminder — "Your Week N lineup is unset — review now"
+- [x] FF-133: Push notification system — set up for mobile (web push + PWA)
+- [x] FF-134: Injury alerts — "Your starter [X] is now Questionable — here are backup options"
+- [x] FF-135: Waiver processing alerts — "Waiver results are in — you got [X], missed [Y]"
+- [x] FF-136: Weekly prep reminder — "Your Week N lineup is unset — review now"
+- [x] FF-137: Database migration — notifications, notification_preferences, push_subscriptions tables
+- [x] **GIT CHECKPOINT**: Phase 8 complete
 
 ---
 
