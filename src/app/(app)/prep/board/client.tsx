@@ -155,8 +155,13 @@ export function DraftBoardClient() {
       return players.map((p) => ({
         player: p,
         strategyScore: 50,
+        intelScore: 0,
+        combinedScore: 50,
         targetStatus: 'neutral' as const,
+        isUserTarget: false,
+        isUserAvoid: false,
         boosts: [],
+        intelBoosts: [],
       }))
     }
     return scorePlayersWithStrategy(

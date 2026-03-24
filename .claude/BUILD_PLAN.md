@@ -298,10 +298,10 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 - [x] FF-228: LLM rule parser prompt + service — natural language to structured rule
 - [x] FF-229: User rule CRUD API routes
 - [x] FF-230: Rule application in scoring engine — stack modifiers
-- [ ] FF-231: User rules management UI
+- [x] FF-231: User rules management UI
 - [x] FF-232: Rule validation + error handling
 - [x] FF-233: Rule application preview — show affected players
-- [ ] FF-234: Tag hierarchy display logic — TARGET overrides compact view
+- [x] FF-234: Tag hierarchy display logic — TARGET overrides compact view
 
 ### Player Browser UI (FF-235 to FF-244)
 - [ ] FF-235: Player Browser page scaffold (`/prep/players`)
