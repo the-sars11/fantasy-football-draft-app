@@ -205,6 +205,7 @@ export interface TagDetectionInput {
     source: string
     sentiment: 'bullish' | 'neutral' | 'bearish'
     mentions: string[]
+    fetchedAt?: string
   }>
 }
 

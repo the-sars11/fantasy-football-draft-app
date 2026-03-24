@@ -274,14 +274,14 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 - [x] FF-210: Seed source_registry with existing sources (FP, ESPN, Sleeper)
 
 ### Tag Detection (FF-211 to FF-218)
-- [ ] FF-211: Tag detection algorithm core — BREAKOUT, SLEEPER, VALUE, BUST, AVOID
-- [ ] FF-212: Sentiment aggregation logic — merge mentions from multiple sources
-- [ ] FF-213: BREAKOUT detection — 3+ sources mention "breakout" or "emerging"
-- [ ] FF-214: SLEEPER detection — 2+ sources identify as undervalued OR ECR std dev > 20
-- [ ] FF-215: BUST detection — 3+ sources express concern
-- [ ] FF-216: VALUE/AVOID detection — ADP vs projection rank gap analysis
-- [ ] FF-217: Intel service orchestration — compute and store intel per player
-- [ ] FF-218: Integration with normalize pipeline — attach intel to ConsensusPlayer
+- [x] FF-211: Tag detection algorithm core — BREAKOUT, SLEEPER, VALUE, BUST, AVOID
+- [x] FF-212: Sentiment aggregation logic — merge mentions from multiple sources
+- [x] FF-213: BREAKOUT detection — 3+ sources mention "breakout" or "emerging"
+- [x] FF-214: SLEEPER detection — 2+ sources identify as undervalued OR ECR std dev > 20
+- [x] FF-215: BUST detection — 3+ sources express concern
+- [x] FF-216: VALUE/AVOID detection — ADP vs projection rank gap analysis
+- [x] FF-217: Intel service orchestration — compute and store intel per player
+- [x] FF-218: Integration with normalize pipeline — attach intel to ConsensusPlayer
 
 ### New Sources (FF-219 to FF-224)
 - [ ] FF-219: Fantasy Footballers adapter — scrape free rankings page

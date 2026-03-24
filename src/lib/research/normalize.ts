@@ -9,12 +9,18 @@
  * 2. ESPN provides rankings, ADP, auction values, projections
  * 3. FantasyPros provides ECR, tiers, auction values
  * 4. Consensus = weighted average across available sources
+ * 5. Intel enrichment adds sentiment-based tags and score modifiers
  */
 
 import type { Position, ScoringFormat } from '@/lib/players/types'
 import type { NormalizedSleeperPlayer, NormalizedSleeperProjection } from './sources/sleeper'
 import type { NormalizedESPNPlayer } from './sources/espn'
 import type { NormalizedFPPlayer, NormalizedFPAuctionValue } from './sources/fantasypros'
+import {
+  enrichPlayersWithIntel,
+  type IntelEnrichmentResult,
+  type DetectedTag,
+} from './intel'
 
 export interface SourceFreshness {
   source: string
@@ -81,6 +87,15 @@ export interface ConsensusPlayer {
 
   // Source tracking
   sources: string[] // which sources contributed data
+
+  // Intel enrichment (optional, added by enrichWithIntel)
+  intel?: {
+    tags: DetectedTag[]
+    mostImpactfulTag: DetectedTag | null
+    totalScoreModifier: number
+    sentimentScore: number
+    consensusSentiment: 'bullish' | 'neutral' | 'bearish'
+  }
 }
 
 /**
@@ -429,4 +444,72 @@ function isStale(fetchedAt: string): boolean {
   const now = Date.now()
   const twentyFourHours = 24 * 60 * 60 * 1000
   return now - fetched > twentyFourHours
+}
+
+// --- Intel Enrichment ---
+
+export interface EnrichWithIntelOptions {
+  /**
+   * Sentiment data keyed by player name (lowercase)
+   * If not provided, intel enrichment will run without sentiment input
+   */
+  sentimentByPlayer?: Map<
+    string,
+    Array<{
+      source: string
+      sentiment: 'bullish' | 'neutral' | 'bearish'
+      mentions: string[]
+      fetchedAt: string
+    }>
+  >
+}
+
+/**
+ * Enrich normalized players with intel data (tags, sentiment scores)
+ *
+ * This is a separate step that can be called after normalizePlayerData
+ * to add intelligence-based tags without modifying the core normalization.
+ */
+export function enrichWithIntel(
+  output: NormalizeOutput,
+  options: EnrichWithIntelOptions = {}
+): NormalizeOutput {
+  const { sentimentByPlayer } = options
+
+  const enrichmentResult = enrichPlayersWithIntel(output.players, sentimentByPlayer)
+
+  const enrichedPlayers = output.players.map((player) => {
+    const intel = enrichmentResult.enrichedPlayers.get(player.name.toLowerCase())
+
+    if (!intel) {
+      return player
+    }
+
+    return {
+      ...player,
+      intel: {
+        tags: intel.tags,
+        mostImpactfulTag: intel.mostImpactfulTag,
+        totalScoreModifier: intel.totalScoreModifier,
+        sentimentScore: intel.sentimentScore,
+        consensusSentiment: intel.consensusSentiment,
+      },
+    }
+  })
+
+  return {
+    ...output,
+    players: enrichedPlayers,
+  }
+}
+
+/**
+ * Combined normalize + enrich in one call
+ */
+export function normalizeAndEnrich(
+  input: NormalizeInput,
+  intelOptions?: EnrichWithIntelOptions
+): NormalizeOutput {
+  const normalized = normalizePlayerData(input)
+  return enrichWithIntel(normalized, intelOptions)
 }

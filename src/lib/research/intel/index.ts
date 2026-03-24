@@ -5,7 +5,7 @@
  * - Multi-source data aggregation with 2026 season validation
  * - System-detected tags (BREAKOUT, SLEEPER, VALUE, BUST, AVOID)
  * - User tags with TARGET as highest priority
- * - Natural language rules parsed by LLM
+ * - Sentiment aggregation and keyword detection
  * - Freshness-aware differential fetching
  */
 
@@ -26,3 +26,41 @@ export {
   checkAllSourcesSeasonAvailability,
 } from './freshness'
 export type { SeasonValidation, StaleSourceInfo } from './freshness'
+
+// Sentiment Aggregation
+export {
+  BULLISH_KEYWORDS,
+  BEARISH_KEYWORDS,
+  extractKeywords,
+  countKeywordPatterns,
+  aggregateSentiment,
+  aggregateSentimentFromSources,
+  checkSentimentThreshold,
+} from './sentiment'
+export type { AggregatedSentiment } from './sentiment'
+
+// Tag Detection
+export {
+  TAG_DETECTION_CONFIG,
+  detectBreakout,
+  detectSleeper,
+  detectValue,
+  detectBust,
+  detectAvoid,
+  detectTags,
+  getMostImpactfulTag,
+  calculateTotalModifier,
+} from './tag-detector'
+
+// Service Orchestration
+export {
+  enrichPlayerWithIntel,
+  enrichPlayersWithIntel,
+  applyIntelScoreAdjustment,
+  savePlayerIntel,
+  loadPlayerIntel,
+  loadBulkPlayerIntel,
+  isIntelFresh,
+  getStaleIntelPlayerIds,
+} from './service'
+export type { IntelEnrichmentResult, BulkIntelResult } from './service'
