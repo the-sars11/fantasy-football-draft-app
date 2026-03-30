@@ -1,3 +1,26 @@
+<!-- DASHBOARD_STATUS
+{
+  "currentPhase": "Phase 8 Complete — Pre-Season validation next",
+  "status": "active",
+  "milestones": [
+    { "name": "Data pipeline + strategy engine (Phase 0-2)", "done": true },
+    { "name": "Live draft mode (Phase 3)", "done": true },
+    { "name": "Polish + scoring intelligence (Phase 4-5)", "done": true },
+    { "name": "UI redesign + player intel (Phase 6-7.5)", "done": true },
+    { "name": "In-season AI companion (Phase 8)", "done": true },
+    { "name": "Pre-season 2025 validation (Phase 7)", "done": false },
+    { "name": "API layer + commercialization (Phase 9-10)", "done": false }
+  ],
+  "nextItems": [
+    "Yahoo OAuth adapter (Phase 7 pre-season)",
+    "Full pre-draft data pull with 2025 data",
+    "Live draft dry run (mock Google Sheet)",
+    "API layer for B2B/white-label (Phase 9)",
+    "Commercialization free→pro→team (Phase 10)"
+  ]
+}
+-->
+
 # Fantasy Football Draft Advisor — Build Plan
 
 Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
