@@ -52,3 +52,6 @@ next-env.d.ts
 # Sensitive credentials — never commit
 Keys & Accounts.txt
 Keys*Accounts*
+
+# Visual brainstorming session files
+.superpowers/
