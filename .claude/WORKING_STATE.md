@@ -83,3 +83,81 @@
 - Port 3003 to avoid conflicts
 - Joe = ESPN / Auction / Full redraft
 - Tyler = Yahoo / Snake / Keeper league
+
+---
+
+## Next Up
+
+**P0 sub-tier 0 — UI Evaluation (FF-253)**
+1. Audit all live-draft screens against the 6 criteria in `.claude/BUILD_PLAN.md`
+2. Produce `.claude/UI_EVAL_2026.md` with verdict A, B, or C
+3. Verdict determines whether redesign sprint fires before P0 sub-tiers 1-7
+
+---
+
+## Enterprise Sections
+
+### Last 48 Hours
+- 2026-04-14: Enterprise dev system upgrade — added FEATURES_INDEX.md, CODE_AREAS.md, CHANGELOG.md, REVIEW_LENSES.md, hooks/pre-commit-gate.ps1, skills/code-review/SKILL.md, settings.json, .github/workflows/ci.yml. Merged PROPOSE/PATCH/VERIFY + Review Lenses + Bug Hunt Schedule + Evidence Standard into CLAUDE.md. Rewrote BUILD_PLAN.md to P0-P7 structure.
+
+### What Works (Verified)
+
+| Feature | Last Tested | Status |
+|---------|-------------|--------|
+| Prep mode (full flow) | Phase 7.5 complete | Working |
+| Live draft — auction mode | Sprint 8 complete | Working |
+| Live draft — snake mode | Sprint 8 complete | Working |
+| AI recommendations | Sprint 8 complete | Working |
+| Player Intelligence | Phase 7.5 complete | Working (FF-243 API pending) |
+| In-season companion | Phase 8 complete | Working |
+| Google Sheets polling | Integrated | Working (known 403 edge case) |
+| Manual pick entry | FF-033 | Working |
+| Post-draft review | FF-102 | Working |
+| Vercel deploy | FF-070 | https://fantasyfootballdraftapp-lac.vercel.app |
+
+### What's Broken / Known Issues
+
+#### P0 (Blocking draft day)
+- None confirmed — needs audit (FF-253)
+
+#### Known Non-Blocking
+- FF-243: Confirm/dismiss system tag API pending
+- FF-069: Tyler's league scoring settings not yet entered
+- FF-072: Live draft dry run not yet completed
+- Google Sheets 403 edge case on first connect (non-blocking — manual entry fallback works)
+
+### Blockers
+
+| Blocker | Blocking | Owner | Since |
+|---------|----------|-------|-------|
+| Tyler's scoring settings | FF-069 | Tyler | 2026-03-22 |
+
+### Google Sheets Setup (Exact Format)
+Document exact format when confirmed:
+- **Sheet URL:** [Joe fills in — Nasties 2026 auction sheet]
+- **Column auto-detection:** Player | Manager | Price | Round | Position (see `src/lib/sheets/index.ts:54-91`)
+- **Share permissions:** Anyone with link = Viewer (for CSV export polling)
+- **Polling interval:** 7 seconds (`use-draft-polling.ts` default)
+- **Error handling:** 403/404 → surface error message, fallback to manual entry
+- **Note:** Tyler's Yahoo snake sheet uses same column format but different URL
+
+### Commands Reference
+
+```bash
+npm run dev          # Dev server on localhost:3003
+npm run build        # Production build
+npm run lint         # ESLint (hard gate on commit)
+npm run lint:fix     # Auto-fix lint issues
+npm run format       # Prettier on src/
+npm run type-check   # TypeScript (advisory)
+npm run test:run     # Vitest single run (advisory on commit)
+npm run test         # Vitest watch mode
+npm run test:coverage # Coverage report
+```
+
+### Bug Hunt Status
+
+| Cadence | Mode | Last Run | Next Run |
+|---------|------|----------|----------|
+| Per-sprint | free | Never | Before first P0 code change |
+| Monthly | full | Never | End of first P0 sprint |

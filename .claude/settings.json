@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell.exe -ExecutionPolicy Bypass -File \".claude/hooks/pre-commit-gate.ps1\"",
+            "timeout": 180
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -99,6 +99,8 @@ docs/                          # Planning docs
 5. Mark `[x]` in BUILD_PLAN.md and update `WORKING_STATE.md`
 6. Report what to test
 
+> On major feature work or architectural decisions, read `NORTH_STAR.md` first.
+
 ## Commit Format
 ```
 feat: Brief description (50 chars max)
@@ -150,3 +152,108 @@ npm run test:coverage # Coverage report
 3. **Commit after each completed task** — one fix = one commit = one deploy.
 4. **Push immediately after commit** — never leave unpushed work.
 5. **Session end:** Commit all changes, push, confirm clean state.
+
+---
+
+## Dev Workflow — Enterprise Tier
+
+### Change Classification
+
+Every change must be classified before work begins. The classification determines which Review Lenses apply and what testing is required.
+
+| Class | Examples | Triggered Lenses |
+|-------|----------|-----------------|
+| output | Report content, UI layouts, email templates | Delivery, QA |
+| pipeline | Data processing, API integration, polling | Architecture, QA, Security |
+| shared | Shared components, utilities, hooks | Architecture, QA |
+| schema | DB migrations, API contracts | Architecture, Security, Ops |
+| prompt | LLM prompt changes, AI behavior | QA, Delivery |
+| infra | Deploy config, CI/CD, env setup | Ops, Security |
+| docs | Documentation, README, guides | Delivery |
+| bugfix | Bug fixes, hotfixes | QA |
+
+---
+
+### PROPOSE / PATCH / VERIFY Workflow
+
+Every non-trivial change follows this three-phase discipline.
+
+**PROPOSE (before writing code):**
+1. Classify the change (see Change Classification above)
+2. Identify triggered Review Lenses (see `.claude/REVIEW_LENSES.md`)
+3. Declare scope — which files will be touched, what will NOT change
+4. Run pre-checks for each triggered lens
+5. State a concrete success criterion (e.g., "failing test passes", "feature works on mobile at arm's length")
+
+**PATCH (implementation):**
+1. Execute changes matching declared scope exactly
+2. Do not exceed declared scope without re-proposing
+
+**VERIFY (after implementation):**
+1. Show concretely how the success criterion is satisfied
+2. Run: `npm run test:run` and `npm run lint`
+3. Complete checklist for each triggered Review Lens
+4. Prove completion with command output, not claims
+
+---
+
+### 6 Review Lenses
+
+See `.claude/REVIEW_LENSES.md` for full pre-check and verify checklists.
+
+| Lens | Triggered By |
+|------|-------------|
+| Architecture | pipeline, shared, schema changes |
+| QA | ALL change classes |
+| Security | pipeline, schema, infra |
+| Delivery | output, prompt, docs |
+| Design | output (if UI) |
+| Ops | infra, schema |
+
+---
+
+### Bug Hunt Schedule
+
+| Cadence | Mode | Scope | Last Run | Next Run |
+|---------|------|-------|----------|----------|
+| Per-sprint | `free` ($0, static) | Changed modules | — | — |
+| Monthly | `full` (tests + build) | Full project | — | — |
+
+Run: `/bug-hunt free` or `/bug-hunt full`
+
+---
+
+### Evidence-Based Output Standard
+
+All LLM-generated content and AI recommendations must meet this bar:
+- **No fabricated data** — every stat must have a real source (already enforced in existing rules)
+- **Ranges with stated assumptions**, not point estimates
+- **Cited sources** — inline attribution required on recommendations
+- **Claim Registry** — for audit: track every factual claim that drives a recommendation
+- If data is unavailable, say so explicitly. Never fill gaps with plausible-sounding fiction.
+
+---
+
+### Codebase Navigation Index
+
+Use index files to find code locations instead of reading full files.
+
+| File | Purpose |
+|------|---------|
+| `.claude/FEATURES_INDEX.md` | Feature → code location + searchable tags |
+| `.claude/CODE_AREAS.md` | Function/endpoint/component index with line numbers |
+| `.claude/REVIEW_LENSES.md` | 6 Review Lenses pre-check + verify checklists |
+| `.claude/CHANGELOG.md` | Change audit trail with root cause |
+
+---
+
+### Definition of Done
+
+A task is not done until:
+- [ ] Code committed with descriptive message
+- [ ] `npm run test:run` passes
+- [ ] `npm run lint` passes
+- [ ] BUILD_PLAN.md item marked `[x]`
+- [ ] WORKING_STATE.md updated (current state accurate)
+- [ ] CHANGELOG.md entry added
+- [ ] Triggered Review Lens checklists completed
