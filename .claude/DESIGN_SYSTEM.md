@@ -1,8 +1,16 @@
 # FFIntelligence Design System — "Tactical Hologram"
 
 > **Status: LOCKED** — Do not modify palette, typography, or core classes without Joe's explicit approval.
-> **Version:** 1.1 (updated 2026-03-22)
+> **Version:** 1.2 (updated 2026-04-14)
 > **Source:** `UI/draft_board/DESIGN.md`
+
+## Version History
+
+| Version | Date | Changes |
+|---------|------|---------|
+| 1.0 | 2026-03-22 | Initial Tactical Hologram token lock |
+| 1.1 | 2026-03-22 | Migration checklist + Tailwind usage patterns |
+| 1.2 | 2026-04-14 | P0 redesign patterns: pinned entry bar, draft mode selector, connection status, keeper row markers |
 
 ## Creative North Star
 
@@ -316,3 +324,127 @@ shadow-[0_0_8px_#2ff801]
 <!-- FAB glow -->
 shadow-[0_0_24px_rgba(47,248,1,0.4)]
 ```
+
+---
+
+## v1.2 Patterns — P0 Redesign (FF-257–259, FF-274)
+
+Tokens are unchanged. These are new component patterns approved 2026-04-14.
+
+---
+
+### Pinned Quick-Entry Bar (FF-257)
+
+**Position:** `position: fixed; bottom: 0; inset-x: 0; z-index: 40`  
+**Background:** `ffi-glass-heavy` (same as nav bar — glassmorphism with `backdrop-blur`)  
+**Safe area:** `padding-bottom: env(safe-area-inset-bottom)`  
+**Page offset:** Wrapper uses `pb-32` to clear the bar  
+**Height:** ~72px (always open — no collapse/expand)
+
+**Bar anatomy (left → right):**
+1. **On Block slot** — fills from `player.name` when BID is tapped; shows `[POS badge] [Name] [×]` when occupied; shows `"Tap BID on any player"` hint in `text-on-surface-variant` when empty
+2. **Manager dropdown** — pre-selects `myManager`; renders as FFI pill button
+3. **Price field** — `$` prefix; pre-filled with `consensusAuctionValue`; editable number input
+4. **Record button** — lime green gradient (`bg-secondary`) when all fields valid; muted when On Block slot empty
+5. **Undo button** — ghost button variant; calls `undoLastPick()`
+
+**BID text button (on player cards):**
+```html
+<!-- Top-right of each FFIPlayerCard in the pool -->
+<button class="text-[10px] font-bold font-label tracking-widest px-2 py-1 rounded
+               bg-primary/10 text-primary border border-primary/20
+               hover:bg-primary/20 transition-colors">
+  BID
+</button>
+```
+Tapping BID sets On Block slot. Does NOT navigate or open detail view.  
+Tapping card body still opens detail view (existing behavior unchanged).
+
+**Search results dropdown:** Opens upward (`bottom-full`) — never obscured by the bar.
+
+**Snake mode variant:** Manager dropdown → read-only round display. No price field. Undo present and functional.
+
+---
+
+### Draft Mode Selector — Entry Flow (FF-258)
+
+**Step 1 — Mode Selector screen:**  
+Three `FFICard` interactive variant cards, full width, vertically stacked:
+
+```html
+<!-- Mode card pattern -->
+<button class="w-full flex items-center gap-4 p-5 rounded-2xl
+               bg-surface-container border border-outline-variant/15
+               hover:border-primary/30 data-[selected]:border-secondary/50
+               data-[selected]:bg-secondary/5 transition-all">
+  <span class="text-2xl">📊</span>
+  <div class="text-left">
+    <div class="font-headline font-bold text-on-surface">Google Sheets</div>
+    <div class="font-body text-xs text-on-surface-variant">Auto-import picks from a shared spreadsheet</div>
+  </div>
+  <!-- selected state checkmark -->
+  <span class="ml-auto text-secondary material-symbols-outlined hidden data-[selected]:block">check_circle</span>
+</button>
+```
+
+"Continue →" CTA: `bg-secondary text-on-secondary` when one mode selected; `bg-surface-container text-on-surface-variant cursor-not-allowed` when none selected.
+
+**Step 2 — League Confirm:**  
+Pre-filled league confirmation card (read-only). Mode-specific field below.  
+
+**Step 3 — Keeper Review (Tyler only):**  
+Read-only list. Each row: `[POS badge] [Player name] [Rd X / $Y] [🔒]`  
+Tap row → inline edit. "Start Draft →" CTA in lime green.
+
+---
+
+### Connection Status Pill (FF-259)
+
+Lives in existing live draft header. Same header height (~52px) — no new row.
+
+```html
+<!-- Pill base -->
+<div class="flex items-center gap-[5px] px-[10px] py-[5px] rounded-[20px]
+            font-label text-[11px] font-bold tracking-[0.05em] whitespace-nowrap">
+  <!-- Dot: 8×8px -->
+  <div class="w-2 h-2 rounded-full bg-current flex-shrink-0"></div>
+  <!-- State label -->
+  <span>LIVE</span>
+  <!-- Timestamp (LIVE/STALE/OFFLINE only) -->
+  <span class="text-[9px] opacity-65 font-normal">3s</span>
+</div>
+```
+
+**State tokens:**
+
+| State | BG | Color | Border | Dot animation |
+|-------|----|-------|--------|---------------|
+| LIVE | `rgba(34,197,94,0.15)` | `#22c55e` | `rgba(34,197,94,0.25)` | CSS pulse (opacity 1→0.35→1, 1.5s) |
+| STALE | `rgba(251,191,36,0.15)` | `#fbbf24` | `rgba(251,191,36,0.25)` | Solid |
+| OFFLINE | `rgba(239,68,68,0.15)` | `#ef4444` | `rgba(239,68,68,0.3)` | Solid |
+| MANUAL | `rgba(148,163,184,0.1)` | `#94a3b8` | `rgba(148,163,184,0.15)` | Solid, no timestamp |
+
+**Error bar (OFFLINE only, tap to expand):**  
+40px bar below header, `rgba(239,68,68,0.06)` background, `#f87171` error text, "Retry" ghost button. Auto-dismisses when polling recovers.
+
+---
+
+### Keeper Pick Row Markers (FF-274)
+
+Applies in `LeagueOverview` expanded rows and `PickFeed`.
+
+**Detection:** `pick.is_keeper === true` OR `pick.pick_number < 0`
+
+**Negative pick number display:** `-1 → K1`, `-2 → K2`, `-3 → K3` (never show raw negative)
+
+```html
+<!-- Keeper row — two treatments applied together -->
+<div class="pick-row">
+  <span class="pick-num font-mono text-[9px] text-[#334155]">K1</span>  <!-- darker than draft picks -->
+  <span class="pos-badge ...">TE</span>
+  <span class="pick-name text-[#94a3b8]">Travis Kelce</span>  <!-- muted vs #e2e8f0 for draft picks -->
+  <span class="text-[10px] ml-auto flex-shrink-0">🔒</span>  <!-- right-aligned, replaces round/price display -->
+</div>
+```
+
+**PickFeed:** 🔒 appears inline after position badge. Keeper entries sort to top of feed on draft start (already picked).
