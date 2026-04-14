@@ -64,7 +64,7 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 
 ### Sub-tier 1: Live Draft Integration Reliability
 
-- [ ] FF-257: Promote `manual-pick-entry.tsx` to always-visible pinned quick-entry bar (bottom of live draft screen, collapsible to 1 line, reuses existing player search logic)
+- [x] FF-257: Promote `manual-pick-entry.tsx` to always-visible pinned quick-entry bar (bottom of live draft screen, collapsible to 1 line, reuses existing player search logic) — `bar` variant added; `live/client.tsx` renders fixed bottom bar with `ffi-glass-heavy` + safe-area-inset; defaults collapsed on mobile, expanded on desktop
 - [ ] FF-258: Mode selector at session start: Sheets / Manual / Offline simulation — impossible to start live draft without explicit choice
 - [ ] FF-259: Connection status indicator — colored dot + source label (green=live, yellow=stale >30s, red=disconnected >2m, white=manual mode); one-tap expand bar on red
 - [ ] FF-260: Document exact Sheets setup in `WORKING_STATE.md` — column names, format, share permissions confirmed from actual Nasties 2026 sheet

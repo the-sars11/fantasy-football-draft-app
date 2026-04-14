@@ -4,6 +4,32 @@ All notable changes tracked here with root cause analysis.
 
 ---
 
+## 2026-04-14 (session 3)
+
+### [FEAT] FF-257 — Sticky pinned ManualPickEntry bar
+**Task:** P0 sub-tier 1 first item — promote `ManualPickEntry` to always-visible pinned quick-entry bar at viewport bottom
+**Class:** `output` + `shared` | **Lenses:** Architecture, QA, Delivery, Design
+
+**Root Cause:** UI eval (FF-254) verdict-B FAIL on criterion (a). Live draft scrolling — user spots a player in the pool, scrolls down to find them, then has to scroll all the way back to the top to record the pick. Under auction time pressure this is a real failure mode.
+
+**Changes:**
+- `src/components/draft/manual-pick-entry.tsx`: Add `variant?: 'card' | 'bar'` prop. `bar` = chrome-less horizontal layout for sticky parent. Adds collapse/expand state, defaults collapsed on mobile (search + price + Record visible) and expanded on desktop (also shows Manager + Undo). Backward compatible: `card` is default. Search results dropdown opens UPWARD (`bottom-full`) so it's visible above the bar. 44px touch targets per FF-269 Tactical Hologram standard.
+- `src/app/(app)/draft/live/client.tsx`: Removed `<ManualPickEntry>` from left column. Renders as `position: fixed inset-x-0 bottom-0 z-40` with `ffi-glass-heavy` background + `env(safe-area-inset-bottom)` padding (matches locked HTML prototype `UI/auction_live_draft/code.html:426–462`). Page wrapper now uses `pb-32` to clear bar. Conditional on `state.status !== 'completed'` (no entry needed post-draft).
+
+**Verification:**
+- ✅ `npm run lint` — both changed files clean (23 pre-existing errors in unrelated files unchanged)
+- ✅ `npm run test:run` — 27/27 pass
+- ✅ `npm run type-check` — clean
+- ✅ `npm run build` — `✓ Compiled successfully in 3.5s`
+
+**Reverse rationale (what's NOT changed):**
+- Submit logic (`handleSubmit`, `onSubmit` prop contract) — preserved
+- Player search filtering (`useMemo` for filtered/available) — preserved
+- DESIGN_SYSTEM.md tokens — untouched
+- Database schema, API routes — untouched
+
+---
+
 ## 2026-04-14 (session 2)
 
 ### [DOCS] FF-253/254 — UI evaluation gate complete

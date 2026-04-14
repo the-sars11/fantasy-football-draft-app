@@ -515,7 +515,7 @@ export function LiveDraftClient() {
   const myPicks = state.picks.filter(p => p.manager === myManager)
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 pb-32">
       {/* Header */}
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-3 min-w-0">
@@ -559,21 +559,6 @@ export function LiveDraftClient() {
       <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-4">
         {/* Left column */}
         <div className="space-y-4">
-          {/* Manual pick entry */}
-          {state.status !== 'completed' && (
-            <ManualPickEntry
-              players={players}
-              draftedNames={draftedNames}
-              managerNames={managerNames}
-              format={state.format}
-              currentManager={state.current_manager}
-              currentRound={state.current_round}
-              onSubmit={addManualPick}
-              onUndo={undoLastPick}
-              canUndo={state.picks.length > 0}
-            />
-          )}
-
           {/* Strategy picker dropdown */}
           <StrategyPicker
             strategies={allStrategies}
@@ -657,6 +642,31 @@ export function LiveDraftClient() {
         <ManagerTendencies state={state} myManager={myManager} />
         {pivotHistory.length > 0 && <PivotHistory entries={pivotHistory} />}
       </div>
+
+      {/* FF-257: Pinned quick-entry bar — always visible at viewport bottom */}
+      {state.status !== 'completed' && (
+        <div
+          className="fixed inset-x-0 bottom-0 z-40 ffi-glass-heavy border-t border-[var(--ffi-border)] shadow-2xl"
+          style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+          role="region"
+          aria-label="Quick pick entry"
+        >
+          <div className="mx-auto max-w-7xl px-3 py-2.5">
+            <ManualPickEntry
+              players={players}
+              draftedNames={draftedNames}
+              managerNames={managerNames}
+              format={state.format}
+              currentManager={state.current_manager}
+              currentRound={state.current_round}
+              onSubmit={addManualPick}
+              onUndo={undoLastPick}
+              canUndo={state.picks.length > 0}
+              variant="bar"
+            />
+          </div>
+        </div>
+      )}
     </div>
   )
 }
