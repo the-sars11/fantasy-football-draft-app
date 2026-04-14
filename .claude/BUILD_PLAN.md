@@ -14,9 +14,9 @@
     { "name": "P3+ — Commercialization (CONDITIONAL)", "done": false }
   ],
   "nextItems": [
-    "FF-253: UI evaluation pass (P0 sub-tier 0 GATE)",
-    "FF-254: Produce UI_EVAL_2026.md with verdict A/B/C",
     "FF-257: Pinned quick-entry bar (P0 sub-tier 1)",
+    "FF-258: Mode selector at session start (P0 sub-tier 1)",
+    "FF-259: Connection status indicator (P0 sub-tier 1)",
     "FF-261: ESPN auction calibration audit (P0 sub-tier 2)",
     "FF-279: Auctioneer JSON feed integration (P1)"
   ]
@@ -52,13 +52,13 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 ### Sub-tier 0: UI Evaluation & Possible Redesign [GATE]
 > **Resolve this first before ANY other P0 work. Verdict determines scope of 1-7.**
 
-- [ ] FF-253: Audit all live-draft screens against 6 criteria: (a) pinned quick-entry bar fit without cramping recommendations, (b) first-screen mode selector, (c) connection status placement glanceable at arm's length, (d) confidence/source attribution badges without visual clutter, (e) keeper visual distinction on board, (f) dual-mode layouts (auction vs snake) with zero component bleed
-- [ ] FF-254: Produce `.claude/UI_EVAL_2026.md` — per-screen pass/fail, screenshots, one of three verdicts:
+- [x] FF-253: Audit all live-draft screens against 6 criteria: (a) pinned quick-entry bar fit without cramping recommendations, (b) first-screen mode selector, (c) connection status placement glanceable at arm's length, (d) confidence/source attribution badges without visual clutter, (e) keeper visual distinction on board, (f) dual-mode layouts (auction vs snake) with zero component bleed
+- [x] FF-254: Produce `.claude/UI_EVAL_2026.md` — **VERDICT B: Targeted redesign** — 2 screens + ~4 components; proceed to sub-tiers 1-7 with targeted fixes already scheduled
   - **Verdict A:** Keep current UI — minor tweaks only; proceed directly to sub-tiers 1-7
-  - **Verdict B:** Targeted redesign — redesign 1-3 screens, keep the rest
+  - **Verdict B:** Targeted redesign — redesign 1-3 screens, keep the rest ← **THIS ONE**
   - **Verdict C:** Full redesign sprint — full live-draft + prep surface rebuild before sub-tiers 1-7
-- [ ] FF-255: _(Conditional on B or C)_ Redesign sprint — brainstorm via `superpowers:brainstorming` → mockups → Tyler phone test → lock `DESIGN_SYSTEM.md` v2
-- [ ] FF-256: _(Conditional on B or C)_ Implement redesign — complete before sub-tiers 1-7 begin
+- [ ] FF-255: _(Conditional on B or C — SKIPPED: verdict B scope is contained in FF-257–259, FF-274)_ Redesign sprint — brainstorm via `superpowers:brainstorming` → mockups → Tyler phone test → lock `DESIGN_SYSTEM.md` v2
+- [ ] FF-256: _(Conditional on B or C — SKIPPED: fixes are targeted, no full rebuild needed)_ Implement redesign — complete before sub-tiers 1-7 begin
 
 ---
 

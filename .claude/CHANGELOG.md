@@ -4,6 +4,31 @@ All notable changes tracked here with root cause analysis.
 
 ---
 
+## 2026-04-14 (session 2)
+
+### [DOCS] FF-253/254 — UI evaluation gate complete
+**Task:** Audit all live-draft screens against 6 criteria; produce `UI_EVAL_2026.md`
+**Scope:** Read-only audit + `.claude/UI_EVAL_2026.md` (new file) + BUILD_PLAN.md checkpoint marks
+
+**Root Cause:** P0 sub-tier 0 requires a UI verdict before any code work begins, to scope whether a full redesign or targeted fixes are needed.
+
+**Findings:**
+- 3 hard FAILs: (a) ManualPickEntry not pinned, (b) no mode selector at setup, (e) no keeper visual distinction
+- 3 partial FAILs: (c) connection status binary/tiny/conditional, (d) confidence badges exist but no source attribution, (f) design system inconsistency (setup screen and 3 left-column components still use raw shadcn)
+
+**Verdict: B — Targeted redesign.** Scope is contained:
+- `DraftSetupClient` → add mode selector + FFI styling
+- `ManualPickEntry` → promote to sticky pinned bottom bar
+- `LeagueOverview` + `PickFeed` → keeper visual markers
+- Connection status → 3-state indicator with size fix
+All fixes are already scheduled as FF-257–259, FF-274. FF-255/256 (full redesign sprint) NOT triggered.
+
+**Changes:**
+- `.claude/UI_EVAL_2026.md`: NEW — full per-screen audit with evidence
+- `.claude/BUILD_PLAN.md`: FF-253/254 marked [x]; dashboard nextItems updated; FF-255/256 marked as skipped
+
+---
+
 ## 2026-04-14
 
 ### [CHORE] Enterprise dev system upgrade
