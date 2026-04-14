@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FFIntelligence — UX Flow v1</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Manrope:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      background: #01060c;
+      color: #deedf9;
+      font-family: 'Manrope', sans-serif;
+      font-size: 13px;
+      line-height: 1.5;
+      min-height: 100vh;
+      background-image:
+        radial-gradient(ellipse at 20% 0%, rgba(139, 172, 255, 0.08) 0%, transparent 55%),
+        radial-gradient(ellipse at 85% 100%, rgba(47, 248, 1, 0.05) 0%, transparent 55%);
+    }
+    body { padding: 2rem; }
+    .container { max-width: 1400px; margin: 0 auto; }
+    .header { margin-bottom: 1.5rem; }
+    .header-row { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.4rem; }
+    .pulse-dot {
+      width: 10px; height: 10px; border-radius: 50%; background: #2ff801;
+      box-shadow: 0 0 12px rgba(47, 248, 1, 0.7); animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.55; transform: scale(1.15); } }
+    h1 {
+      font-family: 'Space Grotesk', sans-serif; font-size: 1.75rem; font-weight: 700;
+      letter-spacing: -0.02em; color: #ffffff; text-transform: uppercase;
+    }
+    h1 .accent { color: #2ff801; }
+    .subtitle {
+      font-family: 'Manrope', sans-serif; font-size: 0.8rem; color: #9eadb8;
+      text-transform: uppercase; letter-spacing: 0.14em; margin-left: 22px;
+    }
+    .meta { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: #697782; margin-top: 0.5rem; margin-left: 22px; }
+    .diagram-container {
+      background: linear-gradient(180deg, #031018 0%, #050e17 100%);
+      border-radius: 14px;
+      padding: 1.25rem;
+      box-shadow: 0 0 60px rgba(139, 172, 255, 0.08), inset 0 0 0 1px rgba(255,255,255,0.04);
+      overflow: auto; margin-bottom: 1.5rem;
+    }
+    svg { display: block; width: 100%; height: auto; min-width: 1400px; }
+    .card-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.75rem; margin-bottom: 1rem; }
+    .card {
+      background: rgba(15, 34, 44, 0.55);
+      backdrop-filter: blur(14px);
+      border-radius: 12px;
+      padding: 0.875rem;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.4), inset 0 0 0 1px rgba(139, 172, 255, 0.08);
+    }
+    .card h3 {
+      font-family: 'Space Grotesk', sans-serif; font-size: 0.8rem; font-weight: 700;
+      margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.08em;
+    }
+    .card ul { list-style: none; color: #9eadb8; font-size: 0.72rem; }
+    .card li { margin-bottom: 0.35rem; padding-left: 10px; position: relative; }
+    .card li::before { content: '▸'; position: absolute; left: 0; color: #2ff801; opacity: 0.6; }
+    .footer {
+      text-align: center; margin-top: 1rem; color: #3c4a53; font-size: 0.7rem;
+      font-family: 'JetBrains Mono', monospace; letter-spacing: 0.08em;
+    }
+    @media print {
+      @page { size: 17in 14in; margin: 0.4in; }
+      body { padding: 0; background: #01060c; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .container { max-width: 100%; }
+      .diagram-container { overflow: visible; }
+      svg { min-width: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="header-row">
+        <div class="pulse-dot"></div>
+        <h1>FF<span class="accent">Intelligence</span> — UX Flow</h1>
+      </div>
+      <div class="subtitle">Tactical Hologram · Prep + Live Draft Journey</div>
+      <div class="meta">v1 · 2026-04-14 · Auction (Joe/ESPN) + Snake (Tyler/Yahoo)</div>
+    </div>
+
+    <div class="diagram-container">
+      <svg viewBox="0 0 1400 1220" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <!-- gradients -->
+          <linearGradient id="panelGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#0f222c" stop-opacity="0.85"/>
+            <stop offset="100%" stop-color="#05151e" stop-opacity="0.85"/>
+          </linearGradient>
+          <linearGradient id="peakGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#2ff801" stop-opacity="0.12"/>
+            <stop offset="100%" stop-color="#0a1b25" stop-opacity="0.9"/>
+          </linearGradient>
+          <linearGradient id="joeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#8bacff" stop-opacity="0.15"/>
+            <stop offset="100%" stop-color="#8bacff" stop-opacity="0.03"/>
+          </linearGradient>
+          <linearGradient id="tylerGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#e0d39c" stop-opacity="0.12"/>
+            <stop offset="100%" stop-color="#e0d39c" stop-opacity="0.03"/>
+          </linearGradient>
+          <linearGradient id="streak" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="transparent"/>
+            <stop offset="50%" stop-color="#2ff801" stop-opacity="0.18"/>
+            <stop offset="100%" stop-color="transparent"/>
+          </linearGradient>
+          <!-- glows -->
+          <filter id="limeGlow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="4" result="blur"/>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+          <filter id="blueGlow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="3" result="blur"/>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+          <!-- arrow markers -->
+          <marker id="arrLime" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+            <path d="M0,0 L10,5 L0,10 z" fill="#2ff801"/>
+          </marker>
+          <marker id="arrBlue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+            <path d="M0,0 L10,5 L0,10 z" fill="#8bacff"/>
+          </marker>
+          <marker id="arrDim" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+            <path d="M0,0 L10,5 L0,10 z" fill="#697782"/>
+          </marker>
+        </defs>
+
+        <!-- background grid / flash streak -->
+        <rect x="0" y="0" width="1400" height="1220" fill="#031018"/>
+        <rect x="0" y="620" width="1400" height="50" fill="url(#streak)" opacity="0.4"/>
+
+        <!-- ========== SECTION HEADER: PERSONAS ========== -->
+        <text x="20" y="30" font-family="Space Grotesk" font-size="11" font-weight="700" fill="#697782" letter-spacing="2">[ 01 ]  PERSONAS</text>
+        <line x1="20" y1="40" x2="950" y2="40" stroke="#1a2a36" stroke-width="1"/>
+
+        <!-- Joe persona card -->
+        <g>
+          <rect x="20" y="55" width="460" height="90" rx="10" fill="url(#joeGrad)" stroke="#8bacff" stroke-opacity="0.4" stroke-width="1"/>
+          <circle cx="55" cy="95" r="18" fill="#0a1b25" stroke="#8bacff" stroke-width="1.5"/>
+          <text x="55" y="101" font-family="Space Grotesk" font-size="15" font-weight="700" fill="#8bacff" text-anchor="middle">JR</text>
+          <text x="85" y="82" font-family="Space Grotesk" font-size="14" font-weight="700" fill="#ffffff">JOE — THE AUCTIONEER</text>
+          <text x="85" y="100" font-family="Manrope" font-size="10" fill="#9eadb8">ESPN · Auction · Full Redraft · Competitive</text>
+          <text x="85" y="117" font-family="Manrope" font-size="10" fill="#deedf9">Wants: nomination strategy, bid discipline, scarcity alerts, value hunting</text>
+          <text x="85" y="132" font-family="JetBrains Mono" font-size="9" fill="#2ff801">BUDGET=$200  ROSTER=16  BYES=matter  KEEPERS=none</text>
+        </g>
+
+        <!-- Tyler persona card -->
+        <g>
+          <rect x="490" y="55" width="460" height="90" rx="10" fill="url(#tylerGrad)" stroke="#e0d39c" stroke-opacity="0.4" stroke-width="1"/>
+          <circle cx="525" cy="95" r="18" fill="#0a1b25" stroke="#e0d39c" stroke-width="1.5"/>
+          <text x="525" y="101" font-family="Space Grotesk" font-size="15" font-weight="700" fill="#e0d39c" text-anchor="middle">TY</text>
+          <text x="555" y="82" font-family="Space Grotesk" font-size="14" font-weight="700" fill="#ffffff">TYLER — THE STRATEGIST</text>
+          <text x="555" y="100" font-family="Manrope" font-size="10" fill="#9eadb8">Yahoo · Snake · Keeper League · Long-term</text>
+          <text x="555" y="117" font-family="Manrope" font-size="10" fill="#deedf9">Wants: round value, keeper math, ADP pivots, tier cliffs</text>
+          <text x="555" y="132" font-family="JetBrains Mono" font-size="9" fill="#e0d39c">ROUNDS=16  KEEPERS=3  COST=round-based  TIERS=tracked</text>
+        </g>
+
+        <!-- Meta card: shared LLM + data -->
+        <g>
+          <rect x="970" y="55" width="410" height="90" rx="10" fill="url(#panelGrad)" stroke="#2ff801" stroke-opacity="0.3" stroke-width="1"/>
+          <text x="985" y="78" font-family="Space Grotesk" font-size="11" font-weight="700" fill="#2ff801" letter-spacing="1">MULTI-SOURCE INTEL · ZERO-HALLUCINATION</text>
+          <text x="985" y="96" font-family="Manrope" font-size="10" fill="#deedf9">Claude synthesizes real data only — every rec cites sources</text>
+          <g font-family="JetBrains Mono" font-size="9" fill="#9eadb8">
+            <text x="985" y="114">+ ESPN API          + FantasyPros ECR</text>
+            <text x="985" y="127">+ Yahoo Fantasy     + Player Intel (BREAKOUT/SLEEPER/BUST)</text>
+            <text x="985" y="140">+ Sleeper API       + User tags &amp; natural-language rules</text>
+          </g>
+        </g>
+
+        <!-- ========== SECTION: JOURNEY PHASES ========== -->
+        <text x="20" y="180" font-family="Space Grotesk" font-size="11" font-weight="700" fill="#697782" letter-spacing="2">[ 02 ]  JOURNEY  ·  5 PHASES  ·  PEAK AT DRAFT DAY</text>
+        <line x1="20" y1="190" x2="1380" y2="190" stroke="#1a2a36" stroke-width="1"/>
+
+        <!-- Phase columns background -->
+        <g opacity="0.3">
+          <rect x="20" y="200" width="260" height="620" rx="8" fill="#0a1b25" stroke="#1a2a36"/>
+          <rect x="290" y="200" width="260" height="620" rx="8" fill="#0a1b25" stroke="#1a2a36"/>
+          <rect x="560" y="200" width="260" height="620" rx="8" fill="#0a1b25" stroke="#1a2a36"/>
+          <rect x="830" y="200" width="280" height="620" rx="8" fill="url(#peakGrad)" stroke="#2ff801" stroke-opacity="0.4" stroke-width="1.5"/>
+          <rect x="1120" y="200" width="260" height="620" rx="8" fill="#0a1b25" stroke="#1a2a36"/>
+        </g>
+
+        <!-- Phase titles -->
+        <g font-family="Space Grotesk" font-weight="700" text-anchor="middle">
+          <text x="150" y="225" font-size="11" fill="#697782" letter-spacing="2">PHASE 01</text>
+          <text x="150" y="248" font-size="18" fill="#ffffff">CONNECT</text>
+          <text x="150" y="268" font-family="Manrope" font-size="10" font-weight="400" fill="#9eadb8">League, format, keepers</text>
+
+          <text x="420" y="225" font-size="11" fill="#697782" letter-spacing="2">PHASE 02</text>
+          <text x="420" y="248" font-size="18" fill="#ffffff">PREP HUB</text>
+          <text x="420" y="268" font-family="Manrope" font-size="10" font-weight="400" fill="#9eadb8">Research · Strategy · Board</text>
+
+          <text x="690" y="225" font-size="11" fill="#697782" letter-spacing="2">PHASE 03</text>
+          <text x="690" y="248" font-size="18" fill="#ffffff">SETUP</text>
+          <text x="690" y="268" font-family="Manrope" font-size="10" font-weight="400" fill="#9eadb8">Sheet, managers, keepers</text>
+
+          <text x="970" y="225" font-size="11" fill="#2ff801" letter-spacing="2" filter="url(#limeGlow)">PHASE 04 · LIVE</text>
+          <text x="970" y="248" font-size="20" fill="#ffffff" filter="url(#limeGlow)">DRAFT DAY ★</text>
+          <text x="970" y="268" font-family="Manrope" font-size="10" font-weight="400" fill="#deedf9">Real-time · Adaptive · Immersive</text>
+
+          <text x="1250" y="225" font-size="11" fill="#697782" letter-spacing="2">PHASE 05</text>
+          <text x="1250" y="248" font-size="18" fill="#ffffff">POST-DRAFT</text>
+          <text x="1250" y="268" font-family="Manrope" font-size="10" font-weight="400" fill="#9eadb8">Grade · Roast · Season</text>
+        </g>
+
+        <!-- ========== PHASE 01: CONNECT ========== -->
+        <g font-family="Manrope" font-size="10">
+          <rect x="35" y="285" width="230" height="60" rx="6" fill="#142834" stroke="#8bacff" stroke-opacity="0.3"/>
+          <text x="150" y="304" font-family="Space Grotesk" font-size="11" font-weight="700" fill="#8bacff" text-anchor="middle">SIGN IN</text>
+          <text x="150" y="321" fill="#deedf9" text-anchor="middle">Supabase Auth — email/OAuth</text>
+          <text x="150" y="337" font-family="JetBrains Mono" font-size="9" fill="#697782" text-anchor="middle">DEV_MODE=true bypass for build</text>
+
+          <rect x="35" y="360" width="230" height="72" rx="6" fill="#142834" stroke="#8bacff" stroke-opacity="0.3"/>
+          <text x="150" y="379" font-family="Space Grotesk" font-size="11" font-weight="700" fill="#8bacff" text-anchor="middle">CONFIGURE LEAGUE</text>
+          <text x="46" y="398" fill="#deedf9">• Platform: ESPN / Yahoo</text>
+          <text x="46" y="413" fill="#deedf9">• Format: Auction / Snake</text>
+          <text x="46" y="427" fill="#deedf9">• Size, budget/rounds, scoring, roster</text>
+
+          <rect x="35" y="447" width="230" height="72" rx="6" fill="#142834" stroke="#8bacff" stroke-opacity="0.3"/>
+          <text x="150" y="466" font-family="Space Grotesk" font-size="11" font-weight="700" fill="#8bacff" text-anchor="middle">KEEPERS (OPTIONAL)</text>
+          <text x="46" y="485" fill="#deedf9">• Mark kept players</text>
+          <text x="46" y="500" fill="#deedf9">• Cost / round penalty</text>
+          <text x="46" y="514" fill="#9eadb8" font-size="9">Excluded from pool · neg pick nums</text>
+
+          <rect x="35" y="534" width="230" height="56" rx="6" fill="#142834" stroke="#8bacff" stroke-opacity="0.3"/>
+          <text x="150" y="553" font-family="Space Grotesk" font-size="11" font-weight="700" fill="#8bacff" text-anchor="middle">MANAGER ROSTER</text>
+          <text x="150" y="571" fill="#deedf9" text-anchor="middle">Name each seat · tendencies start</text>
+          <text x="150" y="585" font-size="9" fill="#9eadb8" text-anchor="middle">tracked live during draft</text>
+        </g>
+
+        <!-- Phase 1 entry arrow from personas -->
+        <path d="M 250 150 Q 170 190 150 280" stroke="#8bacff" stroke-width="1.5" stroke-opacity="0.5" fill="none" stroke-dasharray="4,3" marker-end="url(#arrBlue)"/>
+        <path d="M 720 150 Q 450 200 155 280" stroke="#e0d39c" stroke-width="1.5" stroke-opacity="0.4" fill="none" stroke-dasharray="4,3" marker-end="url(#arrBlue)"/>
+
+        <!-- ========== PHASE 02: PREP HUB ========== -->
+        <g font-family="Manrope" font-size="10">
+          <!-- Prep Hub center -->
+          <rect x="305" y="285" width="230" height="52" rx="6" fill="#0f222c" stroke="#2ff801" stroke-opacity="0.35"/>
+          <text x="420" y="304" font-family="Space Grotesk" font-size="12" font-weight="700" fill="#2ff801" text-anchor="middle">◆ PREP HUB</text>
+          <text x="420" y="321" fill="#deedf9" text-anchor="middle">Atmospheric hub · 4 cards</text>
+          <text x="420" y="333" font-size="9" fill="#9eadb8" text-anchor="middle">"Optimize Your Edge" AI rec</text>
+
+          <!-- 4 hub cards -->
+          <rect x="305" y="350" width="108" height="62" rx="6" fill="#142834" stroke="#8bacff" stroke-opacity="0.25"/>
+          <text x="359" y="367" font-family="Space Grotesk" font-size="10" font-weight="700" fill="#8bacff" text-anchor="middle">DRAFT BOARD</text>
+          <text x="359" y="383" font-size="9" fill="#deedf9" text-anchor="middle">Player pool</text>
+          <text x="359" y="396" font-size="9" fill="#9eadb8" text-anchor="middle">Position filters</text>
+          <text x="359" y="407" font-size="9" fill="#2ff801" text-anchor="middle">$ · ADP · tags</text>
+
+          <rect x="427" y="350" width="108" height="62" rx="6" fill="#142834" stroke="#8bacff" stroke-opacity="0.25"/>
+          <text x="481" y="367" font-family="Space Grotesk" font-size="10" font-weight="700" fill="#8bacff" text-anchor="middle">STRATEGIES</text>
+          <text x="481" y="383" font-size="9" fill="#deedf9" text-anchor="middle">Zero-RB · Stars</text>
+          <text x="481" y="396" font-size="9" fill="#deedf9" text-anchor="middle">Robust-RB · Value</text>
+          <text x="481" y="407" font-size="9" fill="#9eadb8" text-anchor="middle">Pick one · mid-pivot</text>
+
+          <rect x="305" y="424" width="108" height="62" rx="6" fill="#142834" stroke="#8bacff" stroke-opacity="0.25"/>
+          <text x="359" y="441" font-family="Space Grotesk" font-size="10" font-weight="700" fill="#8bacff" text-anchor="middle">RESEARCH RUNS</text>
+          <text x="359" y="457" font-size="9" fill="#deedf9" text-anchor="middle">Saved sessions</text>
+          <text x="359" y="470" font-size="9" fill="#deedf9" text-anchor="middle">Compare outputs</text>
+          <text x="359" y="481" font-size="9" fill="#9eadb8" text-anchor="middle">Re-run anytime</text>
+
+          <rect x="427" y="424" width="108" height="62" rx="6" fill="#142834" stroke="#8bacff" stroke-opacity="0.25"/>
+          <text x="481" y="441" font-family="Space Grotesk" font-size="10" font-weight="700" fill="#8bacff" text-anchor="middle">SETTINGS</text>
+          <text x="481" y="457" font-size="9" fill="#deedf9" text-anchor="middle">Custom tags</text>
+          <text x="481" y="470" font-size="9" fill="#deedf9" text-anchor="middle">Natural-lang rules</text>
+          <text x="481" y="481" font-size="9" fill="#9eadb8" text-anchor="middle">"avoid Bears O-line"</text>
+
+          <!-- Player Intel tags block -->
+          <rect x="305" y="500" width="230" height="88" rx="6" fill="#05151e" stroke="#2ff801" stroke-opacity="0.4"/>
+          <text x="420" y="518" font-family="Space Grotesk" font-size="10" font-weight="700" fill="#2ff801" text-anchor="middle" letter-spacing="1">◆ PLAYER INTEL TAGS</text>
+          <g font-family="JetBrains Mono" font-size="8.5" font-weight="700" text-anchor="middle">
+            <rect x="318" y="530" width="60" height="18" rx="9" fill="#2ff801" fill-opacity="0.15" stroke="#2ff801" stroke-opacity="0.4"/>
+            <text x="348" y="543" fill="#2ff801">BREAKOUT</text>
+            <rect x="382" y="530" width="52" height="18" rx="9" fill="#8bacff" fill-opacity="0.15" stroke="#8bacff" stroke-opacity="0.4"/>
+            <text x="408" y="543" fill="#8bacff">SLEEPER</text>
+            <rect x="438" y="530" width="42" height="18" rx="9" fill="#e0d39c" fill-opacity="0.15" stroke="#e0d39c" stroke-opacity="0.4"/>
+            <text x="459" y="543" fill="#e0d39c">VALUE</text>
+            <rect x="484" y="530" width="40" height="18" rx="9" fill="#ff716c" fill-opacity="0.15" stroke="#ff716c" stroke-opacity="0.4"/>
+            <text x="504" y="543" fill="#ff716c">BUST</text>
+            <rect x="365" y="553" width="50" height="18" rx="9" fill="#ff716c" fill-opacity="0.2" stroke="#ff716c" stroke-opacity="0.5"/>
+            <text x="390" y="566" fill="#ff716c">AVOID</text>
+            <rect x="419" y="553" width="86" height="18" rx="9" fill="#9eadb8" fill-opacity="0.1" stroke="#9eadb8" stroke-opacity="0.3"/>
+            <text x="462" y="566" fill="#9eadb8">USER CUSTOM</text>
+          </g>
+          <text x="420" y="582" font-family="Manrope" font-size="9" fill="#9eadb8" text-anchor="middle">Detected from 3+ source mentions · user can dismiss</text>
+        </g>
+
+        <!-- Phase 1 → Phase 2 arrow -->
+        <path d="M 265 440 L 305 440" stroke="#2ff801" stroke-width="2" fill="none" marker-end="url(#arrLime)" opacity="0.7"/>
+
+        <!-- ========== PHASE 03: DRAFT SETUP ========== -->
+        <g font-family="Manrope" font-size="10">
+          <rect x="575" y="285" width="230" height="52" rx="6" fill="#142834" stroke="#8bacff" stroke-opacity="0.3"/>
+          <text x="690" y="304" font-family="Space Grotesk" font-size="11" font-weight="700" fill="#8bacff" text-anchor="middle">CONNECT SHEET</text>
+          <text x="690" y="321" fill="#deedf9" text-anchor="middle">Google Sheets URL</text>
+          <text x="690" y="333" font-size="9" fill="#9eadb8" text-anchor="middle">Primary · manual fallback</text>
+
+          <rect x="575" y="350" width="230" height="62" rx="6" fill="#142834" stroke="#8bacff" stroke-opacity="0.3"/>
+          <text x="690" y="369" font-family="Space Grotesk" font-size="11" font-weight="700" fill="#8bacff" text-anchor="middle">SELECT STRATEGY</text>
+          <text x="586" y="387" fill="#deedf9">• Pick primary going in</text>
+          <text x="586" y="401" fill="#deedf9">• Mid-draft pivots enabled</text>
+
+          <rect x="575" y="425" width="230" height="52" rx="6" fill="#142834" stroke="#8bacff" stroke-opacity="0.3"/>
+          <text x="690" y="444" font-family="Space Grotesk" font-size="11" font-weight="700" fill="#8bacff" text-anchor="middle">VERIFY MANAGERS</text>
+          <text x="690" y="461" fill="#deedf9" text-anchor="middle">Confirm seat order</text>
+          <text x="690" y="473" font-size="9" fill="#9eadb8" text-anchor="middle">Keeper picks applied at init</text>
+
+          <rect x="575" y="490" width="230" height="56" rx="6" fill="#142834" stroke="#8bacff" stroke-opacity="0.3"/>
+          <text x="690" y="508" font-family="Space Grotesk" font-size="11" font-weight="700" fill="#8bacff" text-anchor="middle">DRY RUN (FF-072)</text>
+          <text x="690" y="525" fill="#deedf9" text-anchor="middle">Mock sheet · test polling</text>
+          <text x="690" y="538" font-size="9" fill="#9eadb8" text-anchor="middle">Mobile experience check</text>
+
+          <!-- format divergence -->
+          <rect x="575" y="558" width="230" height="54" rx="6" fill="#05151e" stroke="#e0d39c" stroke-opacity="0.3"/>
+          <text x="690" y="576" font-family="Space Grotesk" font-size="10" font-weight="700" fill="#e0d39c" text-anchor="middle" letter-spacing="1">FORMAT DIVERGENCE</text>
+          <text x="586" y="593" font-family="JetBrains Mono" font-size="9" fill="#8bacff">JOE → $200 budget · bids</text>
+          <text x="586" y="606" font-family="JetBrains Mono" font-size="9" fill="#e0d39c">TYLER → rounds · ADP · keepers</text>
+        </g>
+
+        <path d="M 545 440 L 575 440" stroke="#2ff801" stroke-width="2" fill="none" marker-end="url(#arrLime)" opacity="0.7"/>
+
+        <!-- ========== PHASE 04: DRAFT DAY (peak) ========== -->
+        <g font-family="Manrope" font-size="10">
+          <!-- immersive entry -->
+          <rect x="845" y="285" width="250" height="48" rx="6" fill="#05151e" stroke="#2ff801" stroke-width="1.5" filter="url(#limeGlow)"/>
+          <text x="970" y="303" font-family="Space Grotesk" font-size="11" font-weight="700" fill="#2ff801" text-anchor="middle" letter-spacing="1">SLIDE-UP → IMMERSIVE MODE</text>
+          <text x="970" y="320" fill="#deedf9" text-anchor="middle">Bottom nav hides · focus on draft</text>
+
+          <!-- Live draft state machine -->
+          <rect x="845" y="345" width="250" height="138" rx="6" fill="#0a1b25" stroke="#2ff801" stroke-opacity="0.45"/>
+          <text x="970" y="363" font-family="Space Grotesk" font-size="10" font-weight="700" fill="#2ff801" text-anchor="middle" letter-spacing="1">◆ LIVE DRAFT LOOP</text>
+
+          <g font-family="JetBrains Mono" font-size="9" text-anchor="middle">
+            <rect x="860" y="373" width="62" height="20" rx="10" fill="#0f222c" stroke="#697782"/>
+            <text x="891" y="386" fill="#9eadb8">CONNECTED</text>
+
+            <rect x="928" y="373" width="54" height="20" rx="10" fill="#0f222c" stroke="#8bacff"/>
+            <text x="955" y="386" fill="#8bacff">WAITING</text>
+
+            <rect x="988" y="373" width="94" height="20" rx="10" fill="#2ff801" fill-opacity="0.2" stroke="#2ff801" filter="url(#limeGlow)"/>
+            <text x="1035" y="386" fill="#2ff801" font-weight="700">YOUR PICK ★</text>
+          </g>
+
+          <!-- arrows between states -->
+          <path d="M 922 383 L 928 383" stroke="#697782" stroke-width="1" marker-end="url(#arrDim)"/>
+          <path d="M 982 383 L 988 383" stroke="#8bacff" stroke-width="1" marker-end="url(#arrBlue)"/>
+          <path d="M 1035 395 Q 1090 430 1035 460 Q 980 430 1025 398" stroke="#2ff801" stroke-width="1.2" stroke-dasharray="3,3" fill="none" opacity="0.7" marker-end="url(#arrLime)"/>
+
+          <text x="970" y="410" font-family="Manrope" font-size="9" fill="#deedf9" text-anchor="middle">haptic buzz · glow pulse · 3 AI targets land</text>
+
+          <!-- AI Recommendation card -->
+          <rect x="860" y="420" width="220" height="56" rx="6" fill="#05151e" stroke="#2ff801" stroke-opacity="0.5"/>
+          <text x="970" y="438" font-family="Space Grotesk" font-size="10" font-weight="700" fill="#2ff801" text-anchor="middle">AI RECOMMENDATION</text>
+          <text x="870" y="453" font-family="JetBrains Mono" font-size="8.5" fill="#deedf9">TARGET 1: CMC · $72 · 94%</text>
+          <text x="870" y="465" font-family="JetBrains Mono" font-size="8.5" fill="#9eadb8">"Scarcity: 2 RB1s left · Reggie took last WR1"</text>
+
+          <!-- Feed / My Squad / Trash Talk row -->
+          <rect x="845" y="495" width="118" height="100" rx="6" fill="#142834" stroke="#8bacff" stroke-opacity="0.3"/>
+          <text x="904" y="513" font-family="Space Grotesk" font-size="10" font-weight="700" fill="#8bacff" text-anchor="middle">LIVE FEED</text>
+          <g font-family="JetBrains Mono" font-size="8.5" fill="#deedf9">
+            <text x="854" y="530">12.4  Jefferson</text>
+            <text x="854" y="544">12.5  Lamb</text>
+            <text x="854" y="558">12.6  Henry</text>
+            <text x="854" y="572" fill="#2ff801">12.7  YOU →</text>
+            <text x="854" y="586" fill="#9eadb8">slide-in · bounce</text>
+          </g>
+
+          <rect x="977" y="495" width="118" height="100" rx="6" fill="#142834" stroke="#8bacff" stroke-opacity="0.3"/>
+          <text x="1036" y="513" font-family="Space Grotesk" font-size="10" font-weight="700" fill="#8bacff" text-anchor="middle">MY SQUAD</text>
+          <g font-family="JetBrains Mono" font-size="8.5" fill="#deedf9">
+            <text x="986" y="530">QB  · Allen</text>
+            <text x="986" y="544">RB  · ___</text>
+            <text x="986" y="558">RB  · ___</text>
+            <text x="986" y="572">WR  · Adams</text>
+            <text x="986" y="586" fill="#9eadb8">scarcity bars</text>
+          </g>
+
+          <!-- Trash Talk alert -->
+          <rect x="845" y="605" width="250" height="56" rx="6" fill="#0f222c" stroke="#ff716c" stroke-opacity="0.5"/>
+          <text x="970" y="623" font-family="Space Grotesk" font-size="10" font-weight="700" fill="#ff716c" text-anchor="middle">◆ TRASH TALK ALERTS</text>
+          <text x="970" y="640" font-family="Manrope" font-size="9" fill="#deedf9" text-anchor="middle">Overpay · roster imbalance · bye stack</text>
+          <text x="970" y="653" font-family="Manrope" font-size="9" fill="#9eadb8" text-anchor="middle">shake animation · auto-dismiss 6s</text>
+
+          <!-- Strategy pivot -->
+          <rect x="845" y="675" width="250" height="48" rx="6" fill="#142834" stroke="#e0d39c" stroke-opacity="0.35"/>
+          <text x="970" y="693" font-family="Space Grotesk" font-size="10" font-weight="700" fill="#e0d39c" text-anchor="middle">MID-DRAFT PIVOT</text>
+          <text x="970" y="710" font-family="Manrope" font-size="9" fill="#deedf9" text-anchor="middle">AI suggests Zero-RB → Hero-RB · accept/reject</text>
+
+          <!-- Keeper/format divergence inside draft -->
+          <rect x="845" y="735" width="250" height="70" rx="6" fill="#05151e" stroke="#697782" stroke-opacity="0.4"/>
+          <text x="970" y="753" font-family="Space Grotesk" font-size="10" font-weight="700" fill="#deedf9" text-anchor="middle">FORMAT-SPECIFIC UI</text>
+          <g font-family="JetBrains Mono" font-size="9">
+            <text x="854" y="770" fill="#8bacff">AUCTION: bid input · pace line · $/pos</text>
+            <text x="854" y="783" fill="#e0d39c">SNAKE:   round clock · ADP delta · tier cliff</text>
+            <text x="854" y="796" fill="#9eadb8">both:    undo last pick · explain "Why?"</text>
+          </g>
+        </g>
+
+        <path d="M 815 440 L 845 440" stroke="#2ff801" stroke-width="2.2" fill="none" marker-end="url(#arrLime)" opacity="0.9"/>
+
+        <!-- ========== PHASE 05: POST-DRAFT ========== -->
+        <g font-family="Manrope" font-size="10">
+          <!-- Slide down exit -->
+          <rect x="1135" y="285" width="230" height="42" rx="6" fill="#142834" stroke="#8bacff" stroke-opacity="0.3"/>
+          <text x="1250" y="302" font-family="Space Grotesk" font-size="10" font-weight="700" fill="#8bacff" text-anchor="middle" letter-spacing="1">SLIDE-DOWN → EXIT</text>
+          <text x="1250" y="316" font-size="9" fill="#9eadb8" text-anchor="middle">Bottom nav returns · review mode</text>
+
+          <!-- Grade hero -->
+          <rect x="1135" y="340" width="230" height="90" rx="6" fill="#05151e" stroke="#8bacff" stroke-opacity="0.5"/>
+          <text x="1250" y="358" font-family="Space Grotesk" font-size="10" font-weight="700" fill="#8bacff" text-anchor="middle" letter-spacing="1">GRADE HERO</text>
+          <text x="1250" y="402" font-family="Space Grotesk" font-size="48" font-weight="700" fill="#8bacff" text-anchor="middle" filter="url(#blueGlow)">B+</text>
+          <text x="1250" y="420" font-family="Manrope" font-size="10" fill="#9eadb8" text-anchor="middle">/ Tier 1 · 87th percentile</text>
+
+          <!-- Timeline -->
+          <rect x="1135" y="445" width="230" height="80" rx="6" fill="#142834" stroke="#8bacff" stroke-opacity="0.3"/>
+          <text x="1250" y="462" font-family="Space Grotesk" font-size="10" font-weight="700" fill="#deedf9" text-anchor="middle">PICK-BY-PICK TIMELINE</text>
+          <g font-family="JetBrains Mono" font-size="8.5" font-weight="700" text-anchor="middle">
+            <rect x="1147" y="472" width="50" height="18" rx="9" fill="#2ff801" fill-opacity="0.18" stroke="#2ff801" stroke-opacity="0.5"/>
+            <text x="1172" y="485" fill="#2ff801">STEAL</text>
+            <rect x="1201" y="472" width="50" height="18" rx="9" fill="#ff716c" fill-opacity="0.18" stroke="#ff716c" stroke-opacity="0.5"/>
+            <text x="1226" y="485" fill="#ff716c">REACH</text>
+            <rect x="1255" y="472" width="50" height="18" rx="9" fill="#e0d39c" fill-opacity="0.18" stroke="#e0d39c" stroke-opacity="0.5"/>
+            <text x="1280" y="485" fill="#e0d39c">PIVOT</text>
+            <rect x="1309" y="472" width="44" height="18" rx="9" fill="#8bacff" fill-opacity="0.18" stroke="#8bacff" stroke-opacity="0.5"/>
+            <text x="1331" y="485" fill="#8bacff">HOLD</text>
+          </g>
+          <text x="1250" y="506" font-family="Manrope" font-size="9" fill="#deedf9" text-anchor="middle">Narrative per pick · ADP delta</text>
+          <text x="1250" y="518" font-family="Manrope" font-size="9" fill="#9eadb8" text-anchor="middle">"Reggie took last WR1 → you pivoted"</text>
+
+          <!-- Power rankings -->
+          <rect x="1135" y="540" width="230" height="66" rx="6" fill="#142834" stroke="#8bacff" stroke-opacity="0.3"/>
+          <text x="1250" y="557" font-family="Space Grotesk" font-size="10" font-weight="700" fill="#deedf9" text-anchor="middle">POSITIONAL POWER</text>
+          <text x="1147" y="574" font-family="JetBrains Mono" font-size="9" fill="#9eadb8">QB ▰▰▰▰▰▰▰▱▱▱  78%</text>
+          <text x="1147" y="587" font-family="JetBrains Mono" font-size="9" fill="#9eadb8">RB ▰▰▰▰▰▰▰▰▰▱  91%</text>
+          <text x="1147" y="600" font-family="JetBrains Mono" font-size="9" fill="#9eadb8">WR ▰▰▰▰▰▰▱▱▱▱  62%</text>
+
+          <!-- Per-team reports -->
+          <rect x="1135" y="620" width="230" height="60" rx="6" fill="#142834" stroke="#8bacff" stroke-opacity="0.3"/>
+          <text x="1250" y="638" font-family="Space Grotesk" font-size="10" font-weight="700" fill="#deedf9" text-anchor="middle">PER-TEAM REPORTS</text>
+          <text x="1250" y="655" font-family="Manrope" font-size="9" fill="#deedf9" text-anchor="middle">Every team graded + emailed</text>
+          <text x="1250" y="668" font-family="Manrope" font-size="9" fill="#9eadb8" text-anchor="middle">Contextual callouts</text>
+
+          <!-- Roast -->
+          <rect x="1135" y="695" width="230" height="58" rx="6" fill="#05151e" stroke="#ff716c" stroke-opacity="0.45"/>
+          <text x="1250" y="713" font-family="Space Grotesk" font-size="10" font-weight="700" fill="#ff716c" text-anchor="middle">◆ HOW EVERYONE SCREWED UP</text>
+          <text x="1250" y="730" font-family="Manrope" font-size="9" fill="#deedf9" text-anchor="middle">Post-draft roast report</text>
+          <text x="1250" y="744" font-family="Manrope" font-size="9" fill="#9eadb8" text-anchor="middle">Shareable · league group chat</text>
+
+          <!-- Season -->
+          <rect x="1135" y="765" width="230" height="45" rx="6" fill="#142834" stroke="#9eadb8" stroke-opacity="0.3" stroke-dasharray="4,3"/>
+          <text x="1250" y="783" font-family="Space Grotesk" font-size="10" font-weight="700" fill="#9eadb8" text-anchor="middle" letter-spacing="1">SEASON MODE (FUTURE)</text>
+          <text x="1250" y="799" font-family="Manrope" font-size="9" fill="#697782" text-anchor="middle">Waivers · trades · start/sit</text>
+        </g>
+
+        <path d="M 1095 440 L 1135 440" stroke="#2ff801" stroke-width="2" fill="none" marker-end="url(#arrLime)" opacity="0.8"/>
+
+        <!-- Retention loop: Post-Draft → Prep (next season) -->
+        <path d="M 1135 835 Q 700 900 420 605" stroke="#e0d39c" stroke-width="1.5" stroke-dasharray="6,4" fill="none" opacity="0.65" marker-end="url(#arrBlue)"/>
+        <text x="750" y="880" font-family="Space Grotesk" font-size="10" font-weight="700" fill="#e0d39c" text-anchor="middle" letter-spacing="1.5">↻ NEXT SEASON · RE-RUN RESEARCH · ADJUST KEEPERS</text>
+
+        <!-- ========== MOBILE NAV SHELL ========== -->
+        <text x="20" y="920" font-family="Space Grotesk" font-size="11" font-weight="700" fill="#697782" letter-spacing="2">[ 03 ]  PERSISTENT MOBILE SHELL  ·  3-SCREEN SWIPE CAROUSEL  ·  EDGE-SWIPE BACK</text>
+        <line x1="20" y1="930" x2="1110" y2="930" stroke="#1a2a36" stroke-width="1"/>
+
+        <g>
+          <!-- phone frame -->
+          <rect x="30" y="950" width="420" height="250" rx="14" fill="#050e17" stroke="#1a2a36" stroke-width="1.5"/>
+          <!-- status bar -->
+          <rect x="30" y="950" width="420" height="22" fill="#031018"/>
+          <text x="44" y="966" font-family="JetBrains Mono" font-size="9" fill="#deedf9">9:41</text>
+          <text x="436" y="966" font-family="JetBrains Mono" font-size="9" fill="#deedf9" text-anchor="end">◉ ◉ ◉</text>
+
+          <!-- 3 carousel screens -->
+          <g>
+            <rect x="44" y="984" width="126" height="154" rx="8" fill="#0a1b25" stroke="#8bacff" stroke-opacity="0.2"/>
+            <text x="107" y="1002" font-family="Space Grotesk" font-size="10" font-weight="700" fill="#9eadb8" text-anchor="middle">PREP HUB</text>
+            <rect x="54" y="1012" width="106" height="22" rx="5" fill="#142834"/>
+            <text x="107" y="1026" font-family="Manrope" font-size="8" fill="#8bacff" text-anchor="middle">⚡ Optimize Your Edge</text>
+            <rect x="54" y="1040" width="106" height="22" rx="5" fill="#142834"/>
+            <text x="107" y="1054" font-family="Manrope" font-size="8" fill="#deedf9" text-anchor="middle">◆ Draft Board</text>
+            <rect x="54" y="1068" width="106" height="22" rx="5" fill="#142834"/>
+            <text x="107" y="1082" font-family="Manrope" font-size="8" fill="#deedf9" text-anchor="middle">◆ Strategies</text>
+            <rect x="54" y="1096" width="106" height="22" rx="5" fill="#142834"/>
+            <text x="107" y="1110" font-family="Manrope" font-size="8" fill="#deedf9" text-anchor="middle">◆ Runs</text>
+
+            <rect x="178" y="984" width="126" height="154" rx="8" fill="#05151e" stroke="#2ff801" stroke-opacity="0.5"/>
+            <text x="241" y="1002" font-family="Space Grotesk" font-size="10" font-weight="700" fill="#2ff801" text-anchor="middle" filter="url(#limeGlow)">DRAFT HUB ★</text>
+            <rect x="188" y="1012" width="106" height="28" rx="5" fill="#0a1b25" stroke="#2ff801" stroke-opacity="0.4"/>
+            <text x="241" y="1024" font-family="Manrope" font-size="8" fill="#2ff801" text-anchor="middle">◆ LIVE</text>
+            <text x="241" y="1034" font-family="JetBrains Mono" font-size="8" fill="#deedf9" text-anchor="middle">YOUR PICK · 0:23</text>
+            <rect x="188" y="1046" width="106" height="22" rx="5" fill="#142834"/>
+            <text x="241" y="1060" font-family="Manrope" font-size="8" fill="#deedf9" text-anchor="middle">Setup</text>
+            <rect x="188" y="1074" width="106" height="22" rx="5" fill="#142834"/>
+            <text x="241" y="1088" font-family="Manrope" font-size="8" fill="#deedf9" text-anchor="middle">Review</text>
+
+            <rect x="312" y="984" width="126" height="154" rx="8" fill="#0a1b25" stroke="#8bacff" stroke-opacity="0.2"/>
+            <text x="375" y="1002" font-family="Space Grotesk" font-size="10" font-weight="700" fill="#9eadb8" text-anchor="middle">SETTINGS</text>
+            <rect x="322" y="1012" width="106" height="22" rx="5" fill="#142834"/>
+            <text x="375" y="1026" font-family="Manrope" font-size="8" fill="#deedf9" text-anchor="middle">League config</text>
+            <rect x="322" y="1040" width="106" height="22" rx="5" fill="#142834"/>
+            <text x="375" y="1054" font-family="Manrope" font-size="8" fill="#deedf9" text-anchor="middle">Custom tags</text>
+            <rect x="322" y="1068" width="106" height="22" rx="5" fill="#142834"/>
+            <text x="375" y="1082" font-family="Manrope" font-size="8" fill="#deedf9" text-anchor="middle">Rules</text>
+            <rect x="322" y="1096" width="106" height="22" rx="5" fill="#142834"/>
+            <text x="375" y="1110" font-family="Manrope" font-size="8" fill="#deedf9" text-anchor="middle">Profile</text>
+          </g>
+
+          <!-- carousel dots -->
+          <circle cx="222" cy="1152" r="3" fill="#3c4a53"/>
+          <circle cx="240" cy="1152" r="4" fill="#2ff801" filter="url(#limeGlow)"/>
+          <circle cx="258" cy="1152" r="3" fill="#3c4a53"/>
+          <text x="240" y="1168" font-family="JetBrains Mono" font-size="8" fill="#9eadb8" text-anchor="middle">swipe ← → between screens</text>
+
+          <!-- bottom nav -->
+          <rect x="30" y="1178" width="420" height="22" fill="#031018"/>
+          <g font-family="Space Grotesk" font-size="8" font-weight="700" text-anchor="middle">
+            <text x="90" y="1193" fill="#9eadb8">◆ PREP</text>
+            <rect x="150" y="1183" width="120" height="14" rx="7" fill="#2ff801" fill-opacity="0.15" filter="url(#limeGlow)"/>
+            <text x="210" y="1193" fill="#2ff801">◆ DRAFT</text>
+            <text x="330" y="1193" fill="#9eadb8">◆ SETTINGS</text>
+          </g>
+        </g>
+
+        <!-- Nav + transitions details -->
+        <g>
+          <rect x="470" y="950" width="640" height="250" rx="10" fill="#0a1b25" stroke="#1a2a36"/>
+          <text x="485" y="976" font-family="Space Grotesk" font-size="12" font-weight="700" fill="#deedf9" letter-spacing="1">FRAMER MOTION TRANSITION GRAMMAR</text>
+
+          <!-- transitions list -->
+          <g font-family="JetBrains Mono" font-size="10">
+            <rect x="485" y="992" width="14" height="14" fill="#8bacff" fill-opacity="0.25" stroke="#8bacff"/>
+            <text x="508" y="1003" fill="#deedf9">SLIDE LEFT  →  drilling in (Prep Hub → Board / Strategies / Runs)</text>
+
+            <rect x="485" y="1014" width="14" height="14" fill="#8bacff" fill-opacity="0.25" stroke="#8bacff"/>
+            <text x="508" y="1025" fill="#deedf9">SLIDE RIGHT →  backing out (any detail → Prep Hub)</text>
+
+            <rect x="485" y="1036" width="14" height="14" fill="#2ff801" fill-opacity="0.25" stroke="#2ff801"/>
+            <text x="508" y="1047" fill="#2ff801">SLIDE UP    →  entering Live Draft (immersive mode)</text>
+
+            <rect x="485" y="1058" width="14" height="14" fill="#2ff801" fill-opacity="0.25" stroke="#2ff801"/>
+            <text x="508" y="1069" fill="#deedf9">SLIDE DOWN  →  exiting Live Draft back to shell</text>
+
+            <rect x="485" y="1080" width="14" height="14" fill="#e0d39c" fill-opacity="0.25" stroke="#e0d39c"/>
+            <text x="508" y="1091" fill="#deedf9">CROSSFADE   →  Settings (modal feel)</text>
+
+            <rect x="485" y="1102" width="14" height="14" fill="#9eadb8" fill-opacity="0.15" stroke="#9eadb8"/>
+            <text x="508" y="1113" fill="#deedf9">SHARED ELEM →  player cards morph between Board &amp; Live</text>
+          </g>
+
+          <!-- micro interactions -->
+          <text x="485" y="1144" font-family="Space Grotesk" font-size="11" font-weight="700" fill="#deedf9" letter-spacing="1">MICRO-INTERACTIONS</text>
+          <g font-family="Manrope" font-size="9" fill="#9eadb8">
+            <text x="485" y="1162">• Active tab: scale up + glow pulse · Inactive: fade/shrink</text>
+            <text x="485" y="1175">• Cards lift on press (translateY + tinted ambient shadow)</text>
+            <text x="485" y="1188">• Expand/collapse with spring physics · list stagger cascade</text>
+          </g>
+        </g>
+
+        <!-- ========== RIGHT COLUMN: TACTICAL HOLOGRAM DESIGN SYSTEM ========== -->
+        <g>
+          <rect x="1130" y="870" width="250" height="330" rx="10" fill="url(#panelGrad)" stroke="#2ff801" stroke-opacity="0.3"/>
+          <text x="1255" y="895" font-family="Space Grotesk" font-size="11" font-weight="700" fill="#2ff801" text-anchor="middle" letter-spacing="2">◆ TACTICAL HOLOGRAM</text>
+          <text x="1255" y="910" font-family="Manrope" font-size="9" fill="#9eadb8" text-anchor="middle">Design System (LOCKED)</text>
+
+          <!-- palette -->
+          <g>
+            <text x="1145" y="933" font-family="Space Grotesk" font-size="9" font-weight="700" fill="#deedf9" letter-spacing="1">PALETTE</text>
+            <rect x="1145" y="940" width="22" height="22" rx="3" fill="#031018" stroke="#3c4a53"/>
+            <rect x="1171" y="940" width="22" height="22" rx="3" fill="#8bacff"/>
+            <rect x="1197" y="940" width="22" height="22" rx="3" fill="#2ff801"/>
+            <rect x="1223" y="940" width="22" height="22" rx="3" fill="#e0d39c"/>
+            <rect x="1249" y="940" width="22" height="22" rx="3" fill="#ff716c"/>
+            <text x="1275" y="956" font-family="JetBrains Mono" font-size="8" fill="#9eadb8">void · blue · lime · gold · err</text>
+          </g>
+
+          <!-- typography -->
+          <g>
+            <text x="1145" y="985" font-family="Space Grotesk" font-size="9" font-weight="700" fill="#deedf9" letter-spacing="1">TYPOGRAPHY</text>
+            <text x="1145" y="1000" font-family="Space Grotesk" font-size="10" font-weight="700" fill="#ffffff">Space Grotesk · headlines/numbers</text>
+            <text x="1145" y="1014" font-family="Manrope" font-size="10" fill="#deedf9">Manrope · body/UI</text>
+            <text x="1145" y="1028" font-family="'Oswald', sans-serif" font-size="10" font-weight="700" fill="#e0d39c" letter-spacing="1">OSWALD · ACCENT DISPLAY</text>
+          </g>
+
+          <!-- no-line rule -->
+          <g>
+            <text x="1145" y="1053" font-family="Space Grotesk" font-size="9" font-weight="700" fill="#deedf9" letter-spacing="1">NO-LINE RULE</text>
+            <text x="1145" y="1068" font-family="Manrope" font-size="9" fill="#9eadb8">Tonal shifts · backdrop blur</text>
+            <text x="1145" y="1081" font-family="Manrope" font-size="9" fill="#9eadb8">Ambient glow defines edge</text>
+          </g>
+
+          <!-- LLM discipline -->
+          <g>
+            <text x="1145" y="1106" font-family="Space Grotesk" font-size="9" font-weight="700" fill="#2ff801" letter-spacing="1">LLM DISCIPLINE</text>
+            <text x="1145" y="1120" font-family="Manrope" font-size="9" fill="#deedf9">Claude synthesizes real data</text>
+            <text x="1145" y="1133" font-family="Manrope" font-size="9" fill="#deedf9">Never invents stats</text>
+            <text x="1145" y="1146" font-family="JetBrains Mono" font-size="8" fill="#9eadb8">source: "llm" | "fallback"</text>
+          </g>
+
+          <!-- Stack -->
+          <g>
+            <text x="1145" y="1170" font-family="Space Grotesk" font-size="9" font-weight="700" fill="#deedf9" letter-spacing="1">STACK</text>
+            <text x="1145" y="1185" font-family="JetBrains Mono" font-size="8" fill="#9eadb8">Next.js · Tailwind · Supabase</text>
+            <text x="1145" y="1196" font-family="JetBrains Mono" font-size="8" fill="#9eadb8">Vercel · Claude · Framer Motion</text>
+          </g>
+        </g>
+
+      </svg>
+    </div>
+
+    <div class="card-grid">
+      <div class="card">
+        <h3 style="color:#8bacff">PREP HUB</h3>
+        <ul>
+          <li>Atmospheric hub · "Optimize Your Edge" AI card</li>
+          <li>4 hub cards: Board, Strategies, Runs, Settings</li>
+          <li>Gradient bg with light streaks</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3 style="color:#2ff801">PLAYER INTEL</h3>
+        <ul>
+          <li>BREAKOUT / SLEEPER / VALUE / BUST / AVOID tags</li>
+          <li>3+ source mention detection</li>
+          <li>User custom tags + natural-language rules</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3 style="color:#2ff801">LIVE DRAFT</h3>
+        <ul>
+          <li>Google Sheet polling · manual fallback</li>
+          <li>3 AI targets per pick · confidence %</li>
+          <li>"Your pick" haptic + celebration</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3 style="color:#ff716c">TRASH TALK</h3>
+        <ul>
+          <li>Live overpay / imbalance alerts</li>
+          <li>Shake animation · auto-dismiss</li>
+          <li>Post-draft "How Everyone Screwed Up" roast</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3 style="color:#e0d39c">FORMAT SPLIT</h3>
+        <ul>
+          <li>Joe: auction UI · bids · spend pacing</li>
+          <li>Tyler: snake UI · rounds · ADP · keepers</li>
+          <li>Shared engine · format-specific chrome</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer">FFINTELLIGENCE — UX FLOW V1 · TACTICAL HOLOGRAM · GENERATED 2026-04-14</div>
+  </div>
+</body>
+</html>
