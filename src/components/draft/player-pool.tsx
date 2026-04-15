@@ -31,6 +31,7 @@ interface PlayerPoolProps {
   format: DraftFormat
   getExplanation?: (scored: ScoredPlayer) => Explanation | null
   onBidPlayer?: (player: Player) => void
+  maxBid?: number | null
 }
 
 export function PlayerPool({
@@ -39,6 +40,7 @@ export function PlayerPool({
   format,
   getExplanation,
   onBidPlayer,
+  maxBid,
 }: PlayerPoolProps) {
   const [posFilter, setPosFilter] = useState<Position | 'ALL'>('ALL')
   const [search, setSearch] = useState('')
@@ -149,6 +151,7 @@ export function PlayerPool({
               )}
               getExplanation={getExplanation}
               onBid={onBidPlayer}
+              maxBid={maxBid}
             />
           ))
         )}

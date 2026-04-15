@@ -15,7 +15,6 @@
   ],
   "nextItems": [
     "FF-260: Document Sheets setup in WORKING_STATE.md (P0 sub-tier 1)",
-    "FF-264: Per-player max comfortable bid display (P0 sub-tier 2)",
     "FF-266: Split recommend.ts into auction/snake variants (P0 sub-tier 3)",
     "FF-267: Mode selection as first live-draft screen (P0 sub-tier 3)",
     "FF-273: Keeper discount calculator (P0 keeper sub-tier)"
@@ -76,7 +75,7 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 - [x] FF-261: Audit `src/lib/draft/auction-advisor.ts` for ESPN default $200/15-slot model accuracy — verify `calculateMaxBidAdvice()` math against ESPN defaults — **CONFIRMED CORRECT**: `emptySlots = totalSlots - picks.length - 1` correctly implements ESPN's $1-minimum reserve rule; `getMaxBid()` in state.ts uses identical formula; no hardcoded slot counts; `budget_total ?? 200` fallback is display-only, not safety-critical
 - [x] FF-262: Position budget tracker — spend by position vs. plan, live delta display (e.g., "RB: $67 / $80 planned")
 - [x] FF-263: Budget health panel — $ spent/remaining, slots filled/remaining, implied $/slot for remaining roster
-- [ ] FF-264: Per-player "max comfortable bid" display — consensus ADP value alongside recommended max, visible over/underpay delta
+- [x] FF-264: Per-player "max comfortable bid" display — consensus ADP value alongside recommended max, visible over/underpay delta
 
 ---
 

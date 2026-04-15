@@ -38,6 +38,7 @@ interface FFIPlayerCardProps {
   getExplanation?: (scored: ScoredPlayer) => Explanation | null
   intel?: PlayerIntelDisplay // Optional intel context for tag display
   onBid?: (player: Player) => void
+  maxBid?: number | null
 }
 
 // --- Badge Types & Configuration ---
@@ -144,6 +145,7 @@ export function FFIPlayerCard({
   getExplanation,
   intel,
   onBid,
+  maxBid,
 }: FFIPlayerCardProps) {
   const player = scoredPlayer.player
   const isAuction = format === 'auction'
@@ -222,6 +224,11 @@ export function FFIPlayerCard({
   const valueRangeHigh = isAuction
     ? Math.round(auctionValue * 1.06)
     : roundValue + 1
+
+  // Max bid delta vs consensus (auction only)
+  const maxBidDelta = isAuction && maxBid != null
+    ? maxBid - player.consensusAuctionValue
+    : null
 
   // Is this player highlighted (target or high score)?
   const isHighlighted = scoredPlayer.targetStatus === 'target' || scoredPlayer.strategyScore >= 80
@@ -315,6 +322,27 @@ export function FFIPlayerCard({
                 : `ADP ${player.adp > 0 ? player.adp.toFixed(1) : '—'}`
               }
             </div>
+            {isAuction && maxBid != null && (
+              <div className="mt-1.5 space-y-0.5">
+                <div className="font-headline text-sm font-bold text-[#deedf9]">
+                  MAX ${maxBid}
+                </div>
+                <div className={`font-body text-[9px] font-bold tracking-wider ${
+                  maxBidDelta != null && maxBidDelta > 2
+                    ? 'text-[#2ff801]'
+                    : maxBidDelta != null && maxBidDelta < -2
+                      ? 'text-[#f97316]'
+                      : 'text-[#9eadb8]'
+                }`}>
+                  {maxBidDelta != null && maxBidDelta > 2
+                    ? `+$${maxBidDelta} OVER`
+                    : maxBidDelta != null && maxBidDelta < -2
+                      ? `−$${Math.abs(maxBidDelta)} UNDER`
+                      : 'AT VALUE'
+                  }
+                </div>
+              </div>
+            )}
           </div>
 
           {/* BID nomination button — only rendered when onBid is provided */}

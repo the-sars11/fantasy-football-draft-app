@@ -637,6 +637,7 @@ export function LiveDraftClient() {
             format={state.format}
             getExplanation={getExplanation}
             onBidPlayer={handleBidPlayer}
+            maxBid={myMaxBid}
           />
         </div>
       </div>
