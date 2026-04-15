@@ -11,6 +11,7 @@ import {
   Brain,
   ChevronRight,
   Target,
+  Lock,
 } from 'lucide-react'
 import { DataFreshness } from '@/components/prep/data-freshness'
 import {
@@ -117,6 +118,13 @@ export default function PrepPage() {
           icon={<History className="h-5 w-5" />}
           title="Run History"
           subtitle="Compare saved research runs side by side"
+        />
+
+        <HubCard
+          href="/prep/keepers"
+          icon={<Lock className="h-5 w-5" />}
+          title="Keepers"
+          subtitle="Declare keeper selections before draft day"
         />
       </div>
 
