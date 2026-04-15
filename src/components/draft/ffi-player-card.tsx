@@ -37,6 +37,7 @@ interface FFIPlayerCardProps {
   onToggleExpand?: () => void
   getExplanation?: (scored: ScoredPlayer) => Explanation | null
   intel?: PlayerIntelDisplay // Optional intel context for tag display
+  onBid?: (player: Player) => void
 }
 
 // --- Badge Types & Configuration ---
@@ -142,6 +143,7 @@ export function FFIPlayerCard({
   onToggleExpand,
   getExplanation,
   intel,
+  onBid,
 }: FFIPlayerCardProps) {
   const player = scoredPlayer.player
   const isAuction = format === 'auction'
@@ -314,6 +316,23 @@ export function FFIPlayerCard({
               }
             </div>
           </div>
+
+          {/* BID nomination button — only rendered when onBid is provided */}
+          {onBid && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                onBid(player)
+              }}
+              className="shrink-0 text-[10px] font-bold tracking-widest px-2 py-1 rounded
+                         bg-[#8bacff]/10 text-[#8bacff] border border-[#8bacff]/20
+                         hover:bg-[#8bacff]/20 active:bg-[#8bacff]/30 transition-colors
+                         min-h-[44px] min-w-[44px] flex items-center justify-center"
+              aria-label={`Nominate ${player.name} for bidding`}
+            >
+              BID
+            </button>
+          )}
 
           {/* Expand icon */}
           <button className="text-[#9eadb8]/40 hover:text-[#9eadb8] transition-colors ml-1">

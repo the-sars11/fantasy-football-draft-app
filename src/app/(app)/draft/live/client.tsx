@@ -289,6 +289,9 @@ export function LiveDraftClient() {
   const searchParams = useSearchParams()
   const sessionId = searchParams.get('session')
 
+  // On Block: player nominated via BID button in the player pool
+  const [onBlockPlayer, setOnBlockPlayer] = useState<Player | null>(null)
+
   // Data loading
   const [session, setSession] = useState<DraftSession | null>(null)
   const [league, setLeague] = useState<League | null>(null)
@@ -632,6 +635,9 @@ export function LiveDraftClient() {
             draftedNames={draftedNames}
             format={state.format}
             getExplanation={getExplanation}
+            onBidPlayer={(player) => {
+              setOnBlockPlayer(player)
+            }}
           />
         </div>
       </div>
@@ -663,6 +669,8 @@ export function LiveDraftClient() {
               onUndo={undoLastPick}
               canUndo={state.picks.length > 0}
               variant="bar"
+              onBlockPlayer={onBlockPlayer}
+              onClearBlock={() => setOnBlockPlayer(null)}
             />
           </div>
         </div>

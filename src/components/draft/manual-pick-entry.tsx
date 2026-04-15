@@ -25,7 +25,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
-import { PenLine, Search, Check, Undo2, ChevronUp, ChevronDown } from 'lucide-react'
+import { PenLine, Search, Check, Undo2 } from 'lucide-react'
 import type { Player } from '@/lib/players/types'
 import type { DraftFormat } from '@/lib/supabase/database.types'
 import type { DraftPick } from '@/lib/draft/state'
@@ -51,6 +51,10 @@ interface ManualPickEntryProps {
   canUndo: boolean
   /** Layout variant. 'card' (default) = legacy vertical Card. 'bar' = chrome-less horizontal for sticky bottom bar. */
   variant?: 'card' | 'bar'
+  /** On Block seat: player currently nominated via BID button */
+  onBlockPlayer?: Player | null
+  /** Clear the On Block seat (called on × tap or successful record) */
+  onClearBlock?: () => void
 }
 
 export function ManualPickEntry({
@@ -64,16 +68,9 @@ export function ManualPickEntry({
   onUndo,
   canUndo,
   variant = 'card',
+  onBlockPlayer,
+  onClearBlock,
 }: ManualPickEntryProps) {
-  // Bar mode: track expanded/collapsed for mobile compactness.
-  // Default collapsed on small screens (single-row), expanded on desktop.
-  const [expanded, setExpanded] = useState(false)
-  useEffect(() => {
-    if (variant === 'bar' && typeof window !== 'undefined') {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setExpanded(window.matchMedia('(min-width: 1024px)').matches)
-    }
-  }, [variant])
   const [search, setSearch] = useState('')
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null)
   const [manager, setManager] = useState(currentManager || managerNames[0] || '')
@@ -88,6 +85,20 @@ export function ManualPickEntry({
     // eslint-disable-next-line react-hooks/set-state-in-effect
     if (currentManager) setManager(currentManager)
   }, [currentManager])
+
+  // Bar variant: pre-fill price when a player is put On Block
+  useEffect(() => {
+    if (variant === 'bar' && onBlockPlayer && format === 'auction') {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setPrice(String(onBlockPlayer.consensusAuctionValue || 1))
+    }
+    if (variant === 'bar' && !onBlockPlayer) {
+      setPrice('')
+    }
+  }, [onBlockPlayer, variant, format])
+
+  // Bar variant: is the bar ready to record?
+  const isBarValid = !!(onBlockPlayer && manager && (format === 'snake' || (price && parseInt(price, 10) > 0)))
 
   // Available players (not drafted)
   const available = useMemo(() =>
@@ -155,144 +166,125 @@ export function ManualPickEntry({
   const isValid = selectedPlayer && manager && (format === 'snake' || (price && parseInt(price, 10) > 0))
 
   // ============================================================
-  // BAR variant — chrome-less horizontal layout for sticky bottom bar (FF-257)
+  // BAR variant — always-open horizontal layout for sticky bottom bar (FF-257)
   // Parent owns positioning + glass background.
+  // On Block seat replaces search input — tap BID on any player card to nominate.
   // ============================================================
   if (variant === 'bar') {
     return (
-      <div className="w-full">
-        {/* Always-visible row: search + record + expand toggle */}
-        <div className="flex items-center gap-2">
-          {/* Player search (flex-1 to fill) */}
-          <div className="relative flex-1 min-w-0">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[var(--ffi-text-secondary)] pointer-events-none" />
-            <Input
-              ref={searchRef}
-              placeholder={selectedPlayer ? selectedPlayer.name : 'Search player…'}
-              value={search}
-              onChange={e => {
-                setSearch(e.target.value)
-                setSelectedPlayer(null)
-                setShowResults(true)
-              }}
-              onFocus={() => setShowResults(true)}
-              className="pl-8 h-11 text-base"
-              aria-label="Search player"
-            />
-
-            {/* Search results dropdown — opens UPWARD from a bottom bar */}
-            {showResults && filtered.length > 0 && (
-              <div
-                ref={resultsRef}
-                className="absolute z-50 w-full bottom-full mb-1 rounded-md border border-[var(--ffi-border)] bg-[var(--ffi-surface)] shadow-lg max-h-64 overflow-auto ffi-glass"
+      <div className="w-full flex items-center gap-2 min-h-[56px]">
+        {/* ── On Block slot ── */}
+        <div className={`
+          flex items-center gap-2 px-3 py-2 rounded-xl flex-1 min-w-0 min-h-[44px]
+          bg-[var(--ffi-surface-2,#0a1b25)] border transition-colors
+          ${onBlockPlayer
+            ? 'border-[#8bacff]/30'
+            : 'border-[var(--ffi-border,#3c4a53)]/30'}
+        `}>
+          {onBlockPlayer ? (
+            <>
+              {/* Position badge */}
+              <span className={`
+                text-[9px] font-bold px-1.5 py-0.5 rounded shrink-0
+                ${posColors[onBlockPlayer.position] ?? 'bg-[#8bacff]/10 text-[#8bacff]'}
+              `}>
+                {onBlockPlayer.position}
+              </span>
+              {/* Player name */}
+              <span className="ffi-body-md font-semibold text-white flex-1 truncate">
+                {onBlockPlayer.name}
+              </span>
+              {/* Clear button */}
+              <button
+                onClick={() => {
+                  onClearBlock?.()
+                  setPrice('')
+                }}
+                className="text-[var(--ffi-text-muted)] hover:text-white transition-colors shrink-0 text-lg leading-none"
+                aria-label="Clear nomination"
               >
-                {filtered.map(player => (
-                  <button
-                    key={player.id}
-                    onClick={() => selectPlayer(player)}
-                    className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-[var(--ffi-primary)]/10 transition-colors text-sm"
-                  >
-                    <Badge variant="outline" className={`text-[10px] px-1 py-0 ${posColors[player.position] ?? ''}`}>
-                      {player.position}
-                    </Badge>
-                    <span className="flex-1 font-medium truncate">{player.name}</span>
-                    <span className="text-xs text-[var(--ffi-text-secondary)]">{player.team}</span>
-                    {format === 'auction' && (
-                      <span className="text-xs font-mono text-[var(--ffi-text-secondary)]">${player.consensusAuctionValue}</span>
-                    )}
-                    {format === 'snake' && player.adp > 0 && (
-                      <span className="text-xs font-mono text-[var(--ffi-text-secondary)]">ADP {player.adp.toFixed(1)}</span>
-                    )}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Price (auction, always visible — small inline) */}
-          {format === 'auction' && (
-            <div className="relative w-16 shrink-0">
-              <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-[var(--ffi-text-secondary)] pointer-events-none">$</span>
-              <Input
-                type="number"
-                min={1}
-                value={price}
-                onChange={e => setPrice(e.target.value)}
-                className="pl-5 h-11 text-base text-center"
-                aria-label="Price"
-              />
-            </div>
+                ×
+              </button>
+            </>
+          ) : (
+            <span className="ffi-body-md text-[var(--ffi-text-muted)] italic text-sm">
+              Tap BID on any player
+            </span>
           )}
+        </div>
 
-          {/* Submit (44px touch target) */}
-          <Button
-            onClick={handleSubmit}
-            disabled={!isValid}
-            className="h-11 px-4 shrink-0 min-w-[88px]"
-            size="default"
-          >
-            Record
-          </Button>
+        {/* ── Manager dropdown (auction) or Round display (snake) ── */}
+        {format === 'auction' ? (
+          <div className="w-28 shrink-0">
+            <Select value={manager} onValueChange={v => { if (v) setManager(v) }}>
+              <SelectTrigger className="h-11 text-sm">
+                <SelectValue placeholder="Manager" />
+              </SelectTrigger>
+              <SelectContent>
+                {managerNames.map(name => (
+                  <SelectItem key={name} value={name}>{name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        ) : (
+          <div className="ffi-caption px-2 py-1 rounded bg-[var(--ffi-surface-2)] text-[var(--ffi-text-secondary)] shrink-0 text-sm">
+            Rd {currentRound ?? '—'}
+          </div>
+        )}
 
-          {/* Expand/collapse toggle */}
+        {/* ── Price field (auction only) ── */}
+        {format === 'auction' && (
+          <div className="relative w-16 shrink-0">
+            <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-[var(--ffi-text-secondary)] pointer-events-none">$</span>
+            <Input
+              type="number"
+              min={1}
+              value={price}
+              onChange={e => setPrice(e.target.value)}
+              placeholder="0"
+              className="pl-6 h-11 text-base text-center"
+              aria-label="Price"
+            />
+          </div>
+        )}
+
+        {/* ── Record button ── */}
+        <Button
+          onClick={() => {
+            if (!onBlockPlayer || !manager) return
+            const pick: Omit<DraftPick, 'pick_number'> = {
+              player_name: onBlockPlayer.name,
+              position: onBlockPlayer.position,
+              manager,
+              price: format === 'auction' ? parseInt(price, 10) || 1 : undefined,
+              round: format === 'snake' ? currentRound : undefined,
+            }
+            onSubmit(pick)
+            onClearBlock?.()
+            setPrice('')
+          }}
+          disabled={!isBarValid}
+          className={`h-11 px-4 shrink-0 min-w-[80px] font-bold ${
+            isBarValid
+              ? 'bg-[#2ff801] text-[#031018] hover:bg-[#2ff801]/90'
+              : 'bg-[var(--ffi-surface-2)] text-[var(--ffi-text-muted)] cursor-not-allowed'
+          }`}
+        >
+          Record
+        </Button>
+
+        {/* ── Undo ── */}
+        {canUndo && (
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setExpanded(e => !e)}
-            className="h-11 w-11 p-0 shrink-0"
-            aria-label={expanded ? 'Collapse' : 'Expand'}
-            aria-expanded={expanded}
+            onClick={onUndo}
+            className="h-11 w-11 p-0 shrink-0 text-[var(--ffi-text-secondary)] hover:text-white"
+            aria-label="Undo last pick"
           >
-            {expanded ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}
+            <Undo2 className="h-4 w-4" />
           </Button>
-        </div>
-
-        {/* Expanded row: manager + undo + selected player confirmation */}
-        {expanded && (
-          <div className="mt-2 flex items-center gap-2">
-            {/* Manager */}
-            <div className="flex-1 min-w-0">
-              <Select value={manager} onValueChange={v => { if (v) setManager(v) }}>
-                <SelectTrigger className="h-9 text-sm">
-                  <SelectValue placeholder="Manager" />
-                </SelectTrigger>
-                <SelectContent>
-                  {managerNames.map(name => (
-                    <SelectItem key={name} value={name}>{name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Round indicator (snake only — read-only) */}
-            {format === 'snake' && currentRound && (
-              <div className="ffi-caption px-2 py-1 rounded bg-[var(--ffi-surface-2)] text-[var(--ffi-text-secondary)] shrink-0">
-                Rd {currentRound}
-              </div>
-            )}
-
-            {/* Selected player confirmation */}
-            {selectedPlayer && (
-              <div className="flex items-center gap-1 text-xs text-[var(--ffi-text-secondary)] truncate">
-                <Check className="h-3 w-3 text-[var(--ffi-success)] shrink-0" />
-                <span className="truncate">{selectedPlayer.team}</span>
-              </div>
-            )}
-
-            {/* Undo */}
-            {canUndo && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onUndo}
-                className="h-9 px-2 text-xs gap-1 shrink-0"
-                aria-label="Undo last pick"
-              >
-                <Undo2 className="h-3 w-3" />
-                Undo
-              </Button>
-            )}
-          </div>
         )}
       </div>
     )

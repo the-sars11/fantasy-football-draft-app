@@ -16,7 +16,7 @@
 
 import { useState, useMemo } from 'react'
 import { Search } from 'lucide-react'
-import type { Position } from '@/lib/players/types'
+import type { Player, Position } from '@/lib/players/types'
 import type { ScoredPlayer } from '@/lib/research/strategy/scoring'
 import type { DraftFormat } from '@/lib/supabase/database.types'
 import type { Explanation } from '@/lib/draft/explain'
@@ -30,6 +30,7 @@ interface PlayerPoolProps {
   draftedNames: Set<string>
   format: DraftFormat
   getExplanation?: (scored: ScoredPlayer) => Explanation | null
+  onBidPlayer?: (player: Player) => void
 }
 
 export function PlayerPool({
@@ -37,6 +38,7 @@ export function PlayerPool({
   draftedNames,
   format,
   getExplanation,
+  onBidPlayer,
 }: PlayerPoolProps) {
   const [posFilter, setPosFilter] = useState<Position | 'ALL'>('ALL')
   const [search, setSearch] = useState('')
@@ -146,6 +148,7 @@ export function PlayerPool({
                 expandedId === sp.player.id ? null : sp.player.id
               )}
               getExplanation={getExplanation}
+              onBid={onBidPlayer}
             />
           ))
         )}
