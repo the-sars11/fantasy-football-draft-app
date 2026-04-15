@@ -456,7 +456,7 @@ export function DraftSetupClient() {
               </p>
               <FFIButton
                 variant="secondary"
-                onClick={() => { window.location.href = '/prep/keepers' }}
+                onClick={() => router.push('/prep/keepers')}
                 className="mt-3"
               >
                 Go to Keepers
