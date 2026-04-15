@@ -14,10 +14,10 @@
     { "name": "P3+ — Commercialization (CONDITIONAL)", "done": false }
   ],
   "nextItems": [
-    "FF-257: Pinned quick-entry bar (P0 sub-tier 1)",
-    "FF-258: Mode selector at session start (P0 sub-tier 1)",
-    "FF-259: Connection status indicator (P0 sub-tier 1)",
+    "FF-260: Document Sheets setup in WORKING_STATE.md (P0 sub-tier 1)",
     "FF-261: ESPN auction calibration audit (P0 sub-tier 2)",
+    "FF-262: Position budget tracker (P0 sub-tier 2)",
+    "FF-273: Keeper discount calculator (P0 keeper sub-tier)",
     "FF-279: Auctioneer JSON feed integration (P1)"
   ]
 }
@@ -64,9 +64,9 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 
 ### Sub-tier 1: Live Draft Integration Reliability
 
-- [x] FF-257: Promote `manual-pick-entry.tsx` to always-visible pinned quick-entry bar (bottom of live draft screen, collapsible to 1 line, reuses existing player search logic) — `bar` variant added; `live/client.tsx` renders fixed bottom bar with `ffi-glass-heavy` + safe-area-inset; defaults collapsed on mobile, expanded on desktop
-- [ ] FF-258: Mode selector at session start: Sheets / Manual / Offline simulation — impossible to start live draft without explicit choice
-- [ ] FF-259: Connection status indicator — colored dot + source label (green=live, yellow=stale >30s, red=disconnected >2m, white=manual mode); one-tap expand bar on red
+- [x] FF-257: Promote `manual-pick-entry.tsx` to always-visible pinned quick-entry bar — **revised 2026-04-14**: always-open On Block slot (no collapse/expand); BID button on player cards nominates a player without navigating away; price auto-fills from consensusAuctionValue; bar wired via onBlockPlayer state in LiveDraftClient
+- [x] FF-258: Mode selector at session start: Sheets / Manual / Offline simulation — 3-step setup flow: mode → league confirm + managers → keeper review (keeper leagues only); manager section preserved; no re-entry of league settings on draft day
+- [x] FF-259: Connection status indicator — 4-state ConnectionStatusPill (LIVE/STALE/OFFLINE/MANUAL), always visible; pulsing green dot + elapsed timer when LIVE; OFFLINE tap expands error bar; replaces binary Wifi icon
 - [ ] FF-260: Document exact Sheets setup in `WORKING_STATE.md` — column names, format, share permissions confirmed from actual Nasties 2026 sheet
 
 ---
@@ -108,7 +108,7 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 
 - [ ] FF-069: Tyler's league setup — enter his exact scoring settings + keeper rules/costs when provided `[!]` _(Blocked: waiting on Tyler's settings)_
 - [ ] FF-273: Keeper discount calculator — keeper cost vs. current ADP value = keeper equity, sorted descending
-- [ ] FF-274: Visual distinction between kept and drafted players on the league board
+- [x] FF-274: Visual distinction between kept and drafted players — keeper picks (is_keeper=true OR pick_number<0) show 🔒 icon, muted name (#94a3b8), K1/K2/K3 pick numbers in PickFeed + LeagueOverview; helpers extracted to lib/draft/keepers.ts
 - [ ] FF-275: Yahoo keeper assignment import → auto-exclude from draft pool
 
 ---

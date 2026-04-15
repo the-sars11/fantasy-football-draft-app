@@ -4,6 +4,57 @@ All notable changes tracked here with root cause analysis.
 
 ---
 
+## 2026-04-14 (session 4) — P0 Redesign Sprint (FF-257 revision, FF-258, FF-259, FF-274)
+
+**Task:** Implement all 4 P0 redesign decisions (Verdict B from FF-254 UI eval) + /prep/keepers page
+**Class:** `output` + `shared` | **Lenses:** Architecture, QA, Delivery, Design
+**Plan:** `docs/superpowers/plans/2026-04-14-p0-redesign.md` | **Spec:** `docs/superpowers/specs/2026-04-14-p0-redesign-design.md`
+
+**Root Cause:** UI eval returned 3 hard FAILs (criteria a/b/e) and 3 partials (c/d/f). This sprint fixes a/b/c/e before P0 sub-tier 1–7 implementation begins.
+
+**Changes:**
+
+**FF-257 revision — Always-open On Block bar + BID button:**
+- `manual-pick-entry.tsx`: bar variant rewritten — no collapse/expand; On Block slot replaces search input; price pre-fills from `consensusAuctionValue`; isBarValid gated on onBlockPlayer + manager + price; Undo always visible (disabled when no picks); auction manager defaults to `myManager`
+- `ffi-player-card.tsx`: optional `onBid` prop + BID pill button (stopPropagation); 44px touch target
+- `player-pool.tsx`: `onBidPlayer` prop threaded to each card; `useCallback` for stable identity
+- `live/client.tsx`: `onBlockPlayer` state; `handleBidPlayer` wrapped in `useCallback`
+
+**FF-259 — 4-state ConnectionStatusPill:**
+- Created `connection-status-pill.tsx`: LIVE (green, pulsing dot) / STALE (amber) / OFFLINE (red, tap to expand error bar) / MANUAL (gray); 1s tick for elapsed timestamp; error bar auto-hides when state leaves OFFLINE
+- `live/client.tsx`: replaced binary Wifi icon pill; always visible regardless of `session.sheet_url`; removed duplicate sheetError banner card
+
+**FF-274 — Keeper visual markers:**
+- `lib/draft/keepers.ts`: extracted `isKeeperPick()` + `displayPickNum()` as shared exports
+- `live/client.tsx` (PickFeed): K1/K2/K3 numbers, 🔒 after position badge, muted name, no price; composite `manager-picknum` key prevents React key collisions
+- `league-overview.tsx`: same keeper markers in expanded pick rows; 🔒 right-aligned replacing price/round
+
+**/prep/keepers — New keeper declaration page:**
+- Created `src/app/(app)/prep/keepers/` (page.tsx + client.tsx + loading.tsx)
+- `KeeperDeclarationClient`: CRUD for keepers; auto-saves to `localStorage` (key: `ffi_keepers_{leagueId}`); `initialized` ref prevents spurious "Saved" flash on load; only shows keeper-enabled leagues
+- `prep/page.tsx`: hub link added via `HubCard` component
+
+**FF-258 — Multi-step draft setup flow:**
+- `draft/setup/client.tsx`: 3-step flow — mode selector → league confirm + managers → keeper review
+- Step 1: mode cards gate all else; Continue disabled until selection
+- Step 2: read-only league confirmation card; Sheets URL shown for sheets mode only; keeper entry block removed
+- Step 3: reads declared keepers from localStorage; K1/K2/K3 display with 🔒 and muted names; `handleSubmit(keepersOverride)` avoids React batching issue
+
+**Verification:**
+- ✅ `npm run lint` — no new errors in changed files
+- ✅ `npm run type-check` — clean
+- ✅ `npm run test:run` — 27/27 pass
+- ✅ `npm run build` — 52 pages compiled
+
+**Reverse rationale (unchanged):**
+- All existing API contracts — untouched
+- DB schema — no new tables or columns
+- `applyKeepersToState()` logic — untouched
+- DESIGN_SYSTEM.md Tactical Hologram tokens — untouched
+- 27 research pipeline tests — all passing
+
+---
+
 ## 2026-04-14 (session 3)
 
 ### [FEAT] FF-257 — Sticky pinned ManualPickEntry bar
