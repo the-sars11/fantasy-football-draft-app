@@ -11,6 +11,7 @@ import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { ChevronDown, ChevronRight, LayoutGrid } from 'lucide-react'
+import { cn } from '@/lib/utils'
 import type { DraftState } from '@/lib/draft/state'
 
 const posColors: Record<string, string> = {
@@ -21,6 +22,12 @@ const posColors: Record<string, string> = {
   K: 'text-purple-400',
   DEF: 'text-yellow-400',
 }
+
+const isKeeperPick = (pick: { pick_number: number; is_keeper?: boolean }) =>
+  pick.is_keeper === true || pick.pick_number < 0
+
+const displayPickNum = (n: number) =>
+  n < 0 ? `K${Math.abs(n)}` : String(n)
 
 interface LeagueOverviewProps {
   state: DraftState
@@ -103,28 +110,45 @@ export function LeagueOverview({ state, myManager }: LeagueOverviewProps) {
                     {mgr.picks.length === 0 ? (
                       <p className="text-[10px] text-muted-foreground py-1">No picks</p>
                     ) : (
-                      mgr.picks.map(pick => (
-                        <div
-                          key={pick.pick_number}
-                          className="flex items-center gap-1.5 text-[11px] py-0.5"
-                        >
-                          <span className="font-mono text-muted-foreground w-4 text-right text-[9px]">
-                            {pick.pick_number}
-                          </span>
-                          {pick.position && (
-                            <span className={`font-semibold text-[9px] ${posColors[pick.position.toUpperCase()] ?? ''}`}>
-                              {pick.position}
+                      mgr.picks.map(pick => {
+                        const keeper = isKeeperPick(pick)
+                        return (
+                          <div
+                            key={pick.pick_number}
+                            className="flex items-center gap-1.5 text-[11px] py-0.5"
+                          >
+                            <span className={cn(
+                              'font-mono w-4 text-right text-[9px]',
+                              keeper ? 'text-[#334155]' : 'text-muted-foreground'
+                            )}>
+                              {displayPickNum(pick.pick_number)}
                             </span>
-                          )}
-                          <span className="flex-1 truncate">{pick.player_name}</span>
-                          {isAuction && pick.price != null && (
-                            <span className="font-mono text-muted-foreground text-[10px]">${pick.price}</span>
-                          )}
-                          {!isAuction && pick.round && (
-                            <span className="text-muted-foreground text-[10px]">Rd {pick.round}</span>
-                          )}
-                        </div>
-                      ))
+                            {pick.position && (
+                              <span className={`font-semibold text-[9px] ${posColors[pick.position.toUpperCase()] ?? ''}`}>
+                                {pick.position}
+                              </span>
+                            )}
+                            <span className={cn(
+                              'flex-1 truncate',
+                              keeper ? 'text-[#94a3b8]' : ''
+                            )}>
+                              {pick.player_name}
+                            </span>
+                            {keeper ? (
+                              <span className="text-[10px] ml-auto shrink-0" aria-label="Keeper">🔒</span>
+                            ) : (
+                              <>
+                                {isAuction && pick.price != null && (
+                                  <span className="font-mono text-muted-foreground text-[10px]">${pick.price}</span>
+                                )}
+                                {!isAuction && pick.round && (
+                                  <span className="text-muted-foreground text-[10px]">Rd {pick.round}</span>
+                                )}
+                              </>
+                            )}
+                          </div>
+                        )
+                      })
                     )}
 
                     {/* Position needs summary */}

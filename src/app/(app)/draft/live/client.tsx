@@ -129,11 +129,18 @@ function PickFeed({
     manager: string
     position?: string
     price?: number
+    is_keeper?: boolean
   }>
   format: 'auction' | 'snake'
 }) {
   const isAuction = format === 'auction'
   const recentPicks = [...picks].reverse().slice(0, 10)
+
+  const isKeeper = (pick: { pick_number: number; is_keeper?: boolean }) =>
+    pick.is_keeper === true || pick.pick_number < 0
+
+  const displayPickNum = (n: number) =>
+    n < 0 ? `K${Math.abs(n)}` : String(n)
 
   return (
     <FFICard className="overflow-hidden">
@@ -170,18 +177,19 @@ function PickFeed({
                 )}
               >
                 <span className="ffi-caption text-[var(--ffi-text-muted)] w-6 text-right">
-                  {pick.pick_number}
+                  {displayPickNum(pick.pick_number)}
                 </span>
                 {pick.position && (
                   <FFIPositionBadge position={pick.position.toUpperCase() as Position} />
                 )}
-                <span className="ffi-body-md text-white font-medium flex-1 truncate">
+                {isKeeper(pick) && <span className="text-[10px] shrink-0" aria-label="Keeper">🔒</span>}
+                <span className={cn('ffi-body-md font-medium flex-1 truncate', isKeeper(pick) ? 'text-[#94a3b8]' : 'text-white')}>
                   {pick.player_name}
                 </span>
                 <span className="ffi-body-md text-[var(--ffi-text-secondary)] truncate max-w-20">
                   {pick.manager}
                 </span>
-                {isAuction && pick.price != null && (
+                {!isKeeper(pick) && isAuction && pick.price != null && (
                   <span className="ffi-label text-[var(--ffi-accent)] font-mono">
                     ${pick.price}
                   </span>
