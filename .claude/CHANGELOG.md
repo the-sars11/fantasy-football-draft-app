@@ -4,6 +4,23 @@ All notable changes tracked here with root cause analysis.
 
 ---
 
+## 2026-04-14 (session 6, cont.) — FF-267: Format Gate as First Live Draft Screen
+
+**Task:** FF-267 (new feature / UX)
+**Class:** `output` | **Lenses:** QA, Delivery
+
+**Root Cause:** The draft format (auction vs snake) was inherited silently from the league config with no explicit confirmation step. A user with a misconfigured league or who just forgot which format was set could enter the wrong mode without any friction.
+
+**Changes:**
+- `src/app/(app)/draft/setup/client.tsx`: Inserted new Step 1 (Format Gate) as the literal first screen of live draft setup. Shows a large, visually distinct confirmation card — green + "AUCTION DRAFT" or blue + "SNAKE DRAFT" — with league name, team count, and budget/format details. Requires explicit "Confirm — Start [Auction/Snake] Draft →" click to proceed. Includes "Wrong format? Update your league config" escape link. If multiple leagues exist, the league dropdown is on this screen. Renumbered old steps 1→2 (input method), 2→3 (session details), 3→4 (keepers); all internal step transitions updated. League dropdown removed from Step 3 (now handled in Step 1).
+
+**Verification:**
+- ✅ `npm run type-check` — clean
+- ✅ `npm run test:run` — 27/27 passed
+- ✅ `npm run build` — clean
+
+---
+
 ## 2026-04-14 (session 6, cont.) — FF-266: Split recommend.ts into auction/snake variants
 
 **Task:** FF-266 (refactor + feature)

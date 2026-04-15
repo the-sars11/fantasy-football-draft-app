@@ -64,7 +64,7 @@ export function DraftSetupClient() {
   const [error, setError] = useState<string | null>(null)
 
   // Step flow state
-  const [step, setStep] = useState<1 | 2 | 3>(1)
+  const [step, setStep] = useState<1 | 2 | 3 | 4>(1)
   const [draftMode, setDraftMode] = useState<DraftMode | null>(null)
   const [declaredKeepers, setDeclaredKeepers] = useState<KeeperEntry[]>([])
 
@@ -221,14 +221,111 @@ export function DraftSetupClient() {
     )
   }
 
-  // === STEP 1: Mode Selector ===
+  // === STEP 1: Format Gate ===
   if (step === 1) {
     return (
       <div className="space-y-6 max-w-lg">
         <FFISectionHeader
-          title="Start Draft"
-          subtitle="Choose how picks will be tracked during the draft"
+          title="Live Draft"
+          subtitle="Confirm your draft format before continuing"
         />
+
+        {/* League selector — only needed when multiple leagues exist */}
+        {leagues.length > 1 && (
+          <div>
+            <Label className="ffi-caption text-[var(--ffi-text-secondary)] mb-1 block">League</Label>
+            <Select value={selectedLeagueId} onValueChange={handleLeagueChange}>
+              <SelectTrigger><SelectValue placeholder="Choose a league..." /></SelectTrigger>
+              <SelectContent>
+                {leagues.map(league => (
+                  <SelectItem key={league.id} value={league.id}>
+                    {league.name} — {league.format}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+
+        {/* Format confirmation card — the whole point of this screen */}
+        {selectedLeague ? (
+          <div className={`relative rounded-2xl border-2 p-8 text-center space-y-2 overflow-hidden ${
+            isAuction
+              ? 'border-[#2ff801]/40 bg-[#2ff801]/5'
+              : 'border-[#8bacff]/40 bg-[#8bacff]/5'
+          }`}>
+            <div className={`absolute inset-0 blur-3xl -z-10 opacity-10 ${
+              isAuction ? 'bg-[#2ff801]' : 'bg-[#8bacff]'
+            }`} />
+            <div className={`font-headline text-6xl font-black tracking-tighter uppercase leading-none ${
+              isAuction ? 'text-[#2ff801]' : 'text-[#8bacff]'
+            }`}>
+              {isAuction ? 'AUCTION' : 'SNAKE'}
+            </div>
+            <div className="font-headline text-2xl font-bold text-white tracking-wide">
+              DRAFT
+            </div>
+            <div className="pt-2 space-y-1">
+              <div className="font-body text-sm font-semibold text-[var(--ffi-text-primary)]">
+                {selectedLeague.name}
+              </div>
+              <div className="font-body text-xs text-[var(--ffi-text-secondary)]">
+                {selectedLeague.team_count} teams
+                {isAuction && selectedLeague.budget != null && ` · $${selectedLeague.budget} budget`}
+                {!isAuction && ' · Snake order'}
+                {selectedLeague.keeper_enabled && ' · Keeper league'}
+              </div>
+            </div>
+          </div>
+        ) : (
+          <FFICard className="py-8 text-center">
+            <p className="ffi-body-md text-[var(--ffi-text-secondary)]">Select a league to continue.</p>
+          </FFICard>
+        )}
+
+        {selectedLeague && (
+          <p className="text-center ffi-caption text-[var(--ffi-text-secondary)]">
+            Wrong format?{' '}
+            <button
+              onClick={() => router.push('/prep/configure')}
+              className="text-[#8bacff] hover:underline transition-colors"
+            >
+              Update your league config
+            </button>
+          </p>
+        )}
+
+        <FFIButton
+          variant="primary"
+          onClick={() => setStep(2)}
+          disabled={!selectedLeague}
+          className="w-full"
+        >
+          {selectedLeague
+            ? `Confirm — Start ${isAuction ? 'Auction' : 'Snake'} Draft →`
+            : 'Select a league to continue'
+          }
+        </FFIButton>
+      </div>
+    )
+  }
+
+  // === STEP 2: Input Method ===
+  if (step === 2) {
+    return (
+      <div className="space-y-6 max-w-lg">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setStep(1)}
+            className="ffi-caption text-[var(--ffi-text-secondary)] hover:text-white transition-colors"
+          >
+            ← Back
+          </button>
+          <FFISectionHeader
+            title="Start Draft"
+            subtitle="Choose how picks will be tracked during the draft"
+          />
+        </div>
 
         <div className="space-y-3">
           {[
@@ -259,7 +356,7 @@ export function DraftSetupClient() {
 
         <FFIButton
           variant="primary"
-          onClick={() => setStep(2)}
+          onClick={() => setStep(3)}
           disabled={!draftMode}
           className="w-full"
         >
@@ -269,19 +366,19 @@ export function DraftSetupClient() {
     )
   }
 
-  // === STEP 2: League Confirm + Session Details ===
-  if (step === 2) {
+  // === STEP 3: Session Details ===
+  if (step === 3) {
     return (
       <div className="space-y-6 max-w-2xl">
         <div className="flex items-center gap-3">
           <button
-            onClick={() => setStep(1)}
+            onClick={() => setStep(2)}
             className="ffi-caption text-[var(--ffi-text-secondary)] hover:text-white transition-colors"
           >
             ← Back
           </button>
           <FFISectionHeader
-            title="League & Session Details"
+            title="Session Details"
             subtitle={`Mode: ${draftMode === 'sheets' ? '📊 Google Sheets' : draftMode === 'manual' ? '✏️ Manual Entry' : '🎮 Offline Sim'}`}
           />
         </div>
@@ -302,22 +399,7 @@ export function DraftSetupClient() {
           </FFICard>
         )}
 
-        {/* League select (if multiple leagues) */}
-        {leagues.length > 1 && (
-          <div>
-            <Label className="ffi-caption text-[var(--ffi-text-secondary)] mb-1 block">League</Label>
-            <Select value={selectedLeagueId} onValueChange={handleLeagueChange}>
-              <SelectTrigger><SelectValue placeholder="Choose a league..." /></SelectTrigger>
-              <SelectContent>
-                {leagues.map(league => (
-                  <SelectItem key={league.id} value={league.id}>
-                    {league.name} — {league.format}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        )}
+        {/* League already confirmed in Step 1 — no dropdown here */}
 
         {/* Mode-specific field */}
         {draftMode === 'sheets' && (
@@ -417,7 +499,7 @@ export function DraftSetupClient() {
                 const raw = localStorage.getItem(`ffi_keepers_${selectedLeagueId}`)
                 setDeclaredKeepers(raw ? JSON.parse(raw) : [])
               } catch { setDeclaredKeepers([]) }
-              setStep(3)
+              setStep(4)
             } else {
               handleSubmit()
             }
@@ -431,13 +513,13 @@ export function DraftSetupClient() {
     )
   }
 
-  // === STEP 3: Keeper Review (keeper leagues only) ===
-  if (step === 3) {
+  // === STEP 4: Keeper Review (keeper leagues only) ===
+  if (step === 4) {
     return (
       <div className="space-y-6 max-w-lg">
         <div className="flex items-center gap-3">
           <button
-            onClick={() => setStep(2)}
+            onClick={() => setStep(3)}
             className="ffi-caption text-[var(--ffi-text-secondary)] hover:text-white"
           >
             ← Back
