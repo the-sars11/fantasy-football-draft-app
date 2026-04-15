@@ -29,6 +29,7 @@ import {
 import {
   analyzeBudgetStrategy,
   getPositionUrgencyWarnings,
+  getPositionBudgetBreakdown,
   type BudgetAnalysis,
   type PositionUrgencyWarning,
 } from '@/lib/draft/auction-advisor'
@@ -76,6 +77,9 @@ export function AuctionAdvisor({
 
   // FF-043: Budget strategy analysis
   const budget: BudgetAnalysis | null = analyzeBudgetStrategy(state, managerName)
+
+  // FF-262: Position budget breakdown
+  const posBreakdown = getPositionBudgetBreakdown(state, managerName, strategy)
 
   // FF-044: Position urgency warnings
   const warnings: PositionUrgencyWarning[] = getPositionUrgencyWarnings(
@@ -142,6 +146,54 @@ export function AuctionAdvisor({
             </div>
 
             <p className="text-[11px] text-muted-foreground">{budget.suggestion}</p>
+          </div>
+        )}
+
+        {/* FF-262: Position budget tracker */}
+        {posBreakdown.length > 0 && (
+          <div className="space-y-1.5">
+            <span className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+              By Position
+            </span>
+            <div className="space-y-1">
+              {posBreakdown.map(row => (
+                <div key={row.position} className="flex items-center gap-1.5">
+                  <span className="text-[10px] font-mono font-semibold w-7 shrink-0">
+                    {row.position}
+                  </span>
+                  <div className="flex-1 h-1 bg-muted rounded-full overflow-hidden">
+                    <div
+                      className={`h-full rounded-full transition-all ${
+                        row.planned === 0
+                          ? 'bg-primary/50'
+                          : row.delta >= 0
+                          ? 'bg-green-500/70'
+                          : 'bg-orange-500/70'
+                      }`}
+                      style={{
+                        width: row.planned > 0
+                          ? `${Math.min(100, Math.round((row.spent / row.planned) * 100))}%`
+                          : row.spent > 0 ? '100%' : '0%',
+                      }}
+                    />
+                  </div>
+                  <span className="text-[10px] font-mono tabular-nums text-muted-foreground w-16 text-right shrink-0">
+                    {row.planned > 0 ? `$${row.spent}/$${row.planned}` : `$${row.spent}`}
+                  </span>
+                  {row.planned > 0 && (
+                    <span className={`text-[10px] font-mono tabular-nums w-10 text-right shrink-0 ${
+                      row.delta > 0 ? 'text-green-400' :
+                      row.delta < 0 ? 'text-orange-400' :
+                      'text-muted-foreground'
+                    }`}>
+                      {row.delta > 0 ? `+$${row.delta}` :
+                       row.delta < 0 ? `-$${Math.abs(row.delta)}` :
+                       '—'}
+                    </span>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
         )}
 

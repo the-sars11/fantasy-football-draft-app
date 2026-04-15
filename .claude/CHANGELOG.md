@@ -4,6 +4,56 @@ All notable changes tracked here with root cause analysis.
 
 ---
 
+## 2026-04-14 (session 5) — FF-262: Position Budget Tracker + FF-261 Audit
+
+**Tasks:** FF-261 (audit, no code changes) + FF-262 (new feature)
+**Class:** `shared` + `output` | **Lenses:** Architecture, QA, Delivery
+
+**FF-261 — ESPN Auction Math Audit (no code changes):**
+Math confirmed correct — see previous CHANGELOG entry below.
+
+**FF-262 — Position Budget Tracker:**
+
+**Root Cause:** During a live auction, managers have no live view of per-position spending vs. their pre-draft allocation plan. Without this, it's easy to overspend on RBs and arrive at TE/WR needing $30 of value with $8 left.
+
+**Changes:**
+- `src/lib/draft/auction-advisor.ts`: Added `PositionBudgetRow` interface + `getPositionBudgetBreakdown()` — iterates QB/RB/WR/TE/K/DST, computes `planned = (alloc% / 100) * budget_total` and `spent` from picks, returns `delta = planned - spent`; DST row matches both 'DST' and 'DEF' pick positions; filters to rows with spent > 0 or planned > 0
+- `src/components/draft/auction-advisor.tsx`: Added "By Position" section inside `AuctionAdvisor` between budget-pace block and urgency warnings; shows position badge + mini progress bar + `$spent/$planned` text + colored delta (`+$X` green / `-$X` orange); section hidden when no picks + no plan; `league-overview.tsx` comment added to clear stale Turbopack cache (pre-existing stale error, not introduced here)
+
+**Verification:**
+- ✅ `npm run lint` — no new errors in changed files
+- ✅ `npm run type-check` — clean
+- ✅ `npm run test:run` — 27/27 pass
+- ✅ `npm run build` — `✓ Compiled successfully in 3.4s`, 53 pages
+
+**Reverse rationale (unchanged):**
+- Existing `analyzeBudgetStrategy()` / `getPositionUrgencyWarnings()` — untouched
+- `AuctionAdvisorProps` interface — no new props needed (strategy already passed)
+- All API routes and DB schema — untouched
+
+---
+
+## 2026-04-14 (session 5 — audit only) — FF-261: ESPN Auction Math Audit
+
+**Task:** Audit `src/lib/draft/auction-advisor.ts` for ESPN $200/15-slot model accuracy
+**Class:** `bugfix` (audit — no code changed) | **Lens:** QA
+
+**Findings:** Math is correct. No changes needed.
+
+**Formula verified:**
+- `calculateMaxBidAdvice()` lines 44–46: `emptySlots = totalSlots - picks.length - 1`; `absoluteMax = budget_remaining - emptySlots`
+- Trace (5 slots filled, $80 remaining, 10 slots left): `emptySlots = 15 - 5 - 1 = 9`; `absoluteMax = 80 - 9 = 71` ✓
+- Matches ESPN rule exactly: max bid = budget_remaining - (unfilled_slots - 1)
+- `-1` correctly accounts for the player currently on the nomination block (fills one slot, needs no reserve)
+- `getMaxBid()` in `state.ts:247` uses identical formula; consistent across both implementations
+- No hardcoded slot counts — `totalSlots` always computed dynamically from `state.roster_slots`
+- `mgr.budget_total ?? 200` fallback at line 121 is display-only (position budget advisory factor), not the safety constraint — non-$200 leagues unaffected
+
+**Changes:** None (audit only)
+- `BUILD_PLAN.md`: FF-261 marked [x] with confirmed-correct note
+
+---
+
 ## 2026-04-14 (session 4) — P0 Redesign Sprint (FF-257 revision, FF-258, FF-259, FF-274)
 
 **Task:** Implement all 4 P0 redesign decisions (Verdict B from FF-254 UI eval) + /prep/keepers page

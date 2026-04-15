@@ -265,3 +265,48 @@ export function getPositionUrgencyWarnings(
     return sev[a.severity] - sev[b.severity]
   })
 }
+
+// --- FF-262: Position Budget Breakdown ---
+
+export interface PositionBudgetRow {
+  position: string  // uppercase: 'QB', 'RB', 'WR', 'TE', 'K', 'DST'
+  planned: number   // $ planned from strategy allocation (0 if no plan)
+  spent: number     // $ actually spent on this position
+  delta: number     // planned - spent: positive = money left, negative = over budget
+}
+
+const TRACKED_POSITIONS = ['QB', 'RB', 'WR', 'TE', 'K', 'DST'] as const
+
+/**
+ * Per-position spend vs. planned budget from the active strategy's budget_allocation.
+ * Formula: planned = (alloc[pos] / 100) * budget_total
+ * Returns only rows where spent > 0 or planned > 0 — empty if no relevant data.
+ */
+export function getPositionBudgetBreakdown(
+  state: DraftState,
+  managerName: string,
+  strategy: DbStrategy | null,
+): PositionBudgetRow[] {
+  if (state.format !== 'auction') return []
+  const mgr = state.managers[managerName]
+  if (!mgr || mgr.budget_total == null) return []
+
+  const alloc = (strategy?.budget_allocation ?? {}) as Record<string, number>
+  const budget = mgr.budget_total
+
+  const rows = TRACKED_POSITIONS.map(pos => {
+    const pct = alloc[pos.toLowerCase()] ?? 0
+    const planned = pct > 0 ? Math.round((pct / 100) * budget) : 0
+    // DST row matches picks with position 'DST' or 'DEF' (ESPN uses 'DEF')
+    const spent = mgr.picks
+      .filter(p => {
+        const pPos = p.position?.toUpperCase()
+        return pos === 'DST' ? (pPos === 'DST' || pPos === 'DEF') : pPos === pos
+      })
+      .reduce((sum, p) => sum + (p.price ?? 0), 0)
+
+    return { position: pos, planned, spent, delta: planned - spent }
+  })
+
+  return rows.filter(r => r.spent > 0 || r.planned > 0)
+}

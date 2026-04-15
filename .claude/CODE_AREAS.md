@@ -96,12 +96,14 @@ Detailed **function & endpoint index** with line numbers.
 | `calculateMaxBidAdvice()` | 28-146 | Context-aware max bid (strategy score, need, alternatives, budget) |
 | `analyzeBudgetStrategy()` | 161-202 | Ahead/behind pace analysis with suggestion |
 | `getPositionUrgencyWarnings()` | 215-267 | Scarcity alerts by position + budget threshold |
+| `getPositionBudgetBreakdown()` | ~270-310 | Per-position spend vs. planned budget (FF-262) |
 
 **Key interfaces:**
 - `MaxBidResult` — lines 16-20
 - `MaxBidFactor` — lines 22-26
 - `BudgetAnalysis` — lines 150-159
 - `PositionUrgencyWarning` — lines 206-213
+- `PositionBudgetRow` — ~270 (position, planned, spent, delta)
 
 ### Explainability Engine (`src/lib/draft/explain.ts`)
 

@@ -15,6 +15,7 @@ import { cn } from '@/lib/utils'
 import type { DraftState } from '@/lib/draft/state'
 import { isKeeperPick, displayPickNum } from '@/lib/draft/keepers'
 
+// FF-274: keeper helpers imported from shared lib
 const posColors: Record<string, string> = {
   QB: 'text-red-400',
   RB: 'text-blue-400',
