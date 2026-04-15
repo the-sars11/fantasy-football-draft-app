@@ -4,6 +4,23 @@ All notable changes tracked here with root cause analysis.
 
 ---
 
+## 2026-04-14 (session 7) — FF-275: Yahoo Keeper Assignment Import
+
+**Task:** FF-275 (new feature)
+**Class:** `output` | **Lenses:** QA, Delivery
+
+**Root Cause:** Tyler's keeper league (Yahoo snake) requires entering keepers manually one-by-one. Yahoo's keeper confirmation page can be copy-pasted but there was no import path, making setup tedious for 3+ keepers.
+
+**Changes:**
+- `src/app/(app)/prep/keepers/client.tsx`: Added "Import from Yahoo" collapsible section (collapsed by default) above the manual keeper list, visible only for snake leagues. Section contains a textarea for paste input, a "Parse & Import" button, and inline feedback (e.g. "3 keepers imported, 1 line skipped"). Added pure `parseYahooKeeperText()` function handling two Yahoo copy-paste formats: colon-style (`Round 3: Justin Jefferson (WR) - Tyler`) and tabular (`Justin Jefferson  WR  Round 3  Tyler`). Position normalization: DEF/D/ST → DST. Invalid lines are skipped with a count shown. Parsed entries are appended (not replaced), deduplicated by player_name case-insensitively. Added `normalizePosition()` helper.
+
+**Verification:**
+- ✅ `npm run type-check` — clean
+- ✅ `npm run test:run` — 27/27 passed
+- ✅ `npm run build` — clean
+
+---
+
 ## 2026-04-14 (session 6, cont.) — FF-267: Format Gate as First Live Draft Screen
 
 **Task:** FF-267 (new feature / UX)

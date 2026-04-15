@@ -14,8 +14,8 @@
     { "name": "P3+ — Commercialization (CONDITIONAL)", "done": false }
   ],
   "nextItems": [
-    "FF-260: Document Sheets setup in WORKING_STATE.md (P0 sub-tier 1)",
-    "FF-273: Keeper discount calculator (P0 keeper sub-tier)"
+    "FF-273: Keeper discount calculator (P0 keeper sub-tier)",
+    "FF-276: Dry run simulation — stress-test draft strategy against historical ADP"
   ]
 }
 -->
@@ -106,7 +106,7 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 - [ ] FF-069: Tyler's league setup — enter his exact scoring settings + keeper rules/costs when provided `[!]` _(Blocked: waiting on Tyler's settings)_
 - [ ] FF-273: Keeper discount calculator — keeper cost vs. current ADP value = keeper equity, sorted descending
 - [x] FF-274: Visual distinction between kept and drafted players — keeper picks (is_keeper=true OR pick_number<0) show 🔒 icon, muted name (#94a3b8), K1/K2/K3 pick numbers in PickFeed + LeagueOverview; helpers extracted to lib/draft/keepers.ts
-- [ ] FF-275: Yahoo keeper assignment import → auto-exclude from draft pool
+- [x] FF-275: Yahoo keeper assignment import → auto-exclude from draft pool
 
 ---
 

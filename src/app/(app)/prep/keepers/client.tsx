@@ -9,7 +9,7 @@
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { Plus, Trash2, Loader2, Lock } from 'lucide-react'
+import { Plus, Trash2, Loader2, Lock, ChevronDown, ChevronRight } from 'lucide-react'
 import {
   FFICard,
   FFIButton,
@@ -61,6 +61,63 @@ function saveKeepers(leagueId: string, keepers: KeeperEntry[]): void {
   }
 }
 
+function normalizePosition(raw: string): Position | null {
+  const upper = raw.toUpperCase().replace(/\s/g, '')
+  if (upper === 'DEF' || upper === 'D/ST' || upper === 'DST') return 'DST'
+  if ((POSITIONS as readonly string[]).includes(upper)) return upper as Position
+  return null
+}
+
+/**
+ * Parse raw text copied from Yahoo's keeper confirmation page.
+ *
+ * Handles two formats:
+ *   Format 1 (colon style): "Round 3: Justin Jefferson (WR) - Tyler"
+ *   Format 2 (tabular):     "Justin Jefferson  WR  Round 3  Tyler"
+ *
+ * Returns parsed entries and a count of lines that couldn't be parsed.
+ */
+function parseYahooKeeperText(
+  raw: string,
+  managerFallback: string
+): { entries: Omit<KeeperEntry, 'id'>[]; skipped: number } {
+  const lines = raw.split('\n').map(l => l.trim()).filter(Boolean)
+  const entries: Omit<KeeperEntry, 'id'>[] = []
+  let skipped = 0
+
+  for (const line of lines) {
+    // Format 1: "Round N: Player Name (POS) - Manager"
+    const fmt1 = line.match(/^Round\s+(\d+)\s*:\s*(.+?)\s*\(([^)]+)\)\s*(?:-\s*(.+))?$/i)
+    if (fmt1) {
+      const round = parseInt(fmt1[1], 10)
+      const playerName = fmt1[2].trim()
+      const pos = normalizePosition(fmt1[3])
+      const manager = fmt1[4]?.trim() || managerFallback
+      if (pos && round > 0 && playerName) {
+        entries.push({ player_name: playerName, position: pos, manager, cost: round })
+        continue
+      }
+    }
+
+    // Format 2: "Player Name  POS  Round N  Manager" (2+ spaces as delimiter)
+    const fmt2 = line.match(/^(.+?)\s{2,}([A-Za-z/]+)\s{2,}Round\s+(\d+)(?:\s{2,}(.*))?$/i)
+    if (fmt2) {
+      const playerName = fmt2[1].trim()
+      const pos = normalizePosition(fmt2[2])
+      const round = parseInt(fmt2[3], 10)
+      const manager = fmt2[4]?.trim() || managerFallback
+      if (pos && round > 0 && playerName) {
+        entries.push({ player_name: playerName, position: pos, manager, cost: round })
+        continue
+      }
+    }
+
+    skipped++
+  }
+
+  return { entries, skipped }
+}
+
 export function KeeperDeclarationClient() {
   const [leagues, setLeagues] = useState<LeagueSummary[]>([])
   const [selectedLeagueId, setSelectedLeagueId] = useState<string>('')
@@ -68,6 +125,11 @@ export function KeeperDeclarationClient() {
   const [loadingLeagues, setLoadingLeagues] = useState(true)
   const [saved, setSaved] = useState(false)
   const initialized = useRef(false)
+
+  // Yahoo import state
+  const [importOpen, setImportOpen] = useState(false)
+  const [importRaw, setImportRaw] = useState('')
+  const [importFeedback, setImportFeedback] = useState<{ imported: number; skipped: number } | null>(null)
 
   const selectedLeague = leagues.find(l => l.id === selectedLeagueId)
   const isAuction = selectedLeague?.format === 'auction'
@@ -136,6 +198,23 @@ export function KeeperDeclarationClient() {
     setKeepers(prev => prev.filter(k => k.id !== id))
   }, [])
 
+  const handleImport = useCallback(() => {
+    const managerFallback = keepers.find(k => k.manager)?.manager ?? ''
+    const { entries, skipped } = parseYahooKeeperText(importRaw, managerFallback)
+    const existingNames = new Set(keepers.map(k => k.player_name.toLowerCase()))
+    const seen = new Set<string>()
+    const newEntries: KeeperEntry[] = []
+    for (const e of entries) {
+      const key = e.player_name.toLowerCase()
+      if (!existingNames.has(key) && !seen.has(key)) {
+        seen.add(key)
+        newEntries.push({ ...e, id: crypto.randomUUID() })
+      }
+    }
+    setKeepers(prev => [...prev, ...newEntries])
+    setImportFeedback({ imported: newEntries.length, skipped })
+  }, [importRaw, keepers])
+
   if (loadingLeagues) {
     return (
       <div className="flex items-center gap-2 py-8 text-[var(--ffi-text-secondary)]">
@@ -191,6 +270,61 @@ export function KeeperDeclarationClient() {
             <span className="ffi-badge ffi-badge-info opacity-70">max {maxKeepers}/manager</span>
             {saved && <span className="ffi-caption text-[var(--ffi-success)]">&#10003; Saved</span>}
           </div>
+
+          {/* Import from Yahoo — snake leagues only */}
+          {!isAuction && (
+            <FFICard>
+              <button
+                type="button"
+                className="flex items-center gap-2 w-full text-left"
+                onClick={() => setImportOpen(o => !o)}
+              >
+                {importOpen
+                  ? <ChevronDown className="h-4 w-4 text-[var(--ffi-text-secondary)]" />
+                  : <ChevronRight className="h-4 w-4 text-[var(--ffi-text-secondary)]" />
+                }
+                <span className="ffi-title-md text-white">Import from Yahoo</span>
+                <span className="ffi-caption text-[var(--ffi-text-secondary)] ml-auto">
+                  Paste keeper text to auto-fill
+                </span>
+              </button>
+
+              {importOpen && (
+                <div className="mt-4 space-y-3">
+                  <textarea
+                    className="w-full h-32 px-3 py-2 text-sm rounded-lg border border-[var(--ffi-border)] bg-[var(--ffi-surface)] text-white placeholder:text-[var(--ffi-text-secondary)] resize-y focus:outline-none focus:ring-1 focus:ring-[var(--ffi-border)]"
+                    placeholder={"Round 3: Justin Jefferson (WR) - Tyler\nRound 7: Davante Adams (WR) - Tyler\nRound 11: Mark Andrews (TE) - Tyler"}
+                    value={importRaw}
+                    onChange={e => { setImportRaw(e.target.value); setImportFeedback(null) }}
+                  />
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <FFIButton
+                      onClick={handleImport}
+                      disabled={!importRaw.trim()}
+                    >
+                      Parse &amp; Import
+                    </FFIButton>
+                    {importFeedback !== null && (
+                      <span className="ffi-caption">
+                        {importFeedback.imported > 0 ? (
+                          <span className="text-[var(--ffi-success)]">
+                            {importFeedback.imported} keeper{importFeedback.imported !== 1 ? 's' : ''} imported
+                          </span>
+                        ) : (
+                          <span className="text-[var(--ffi-text-secondary)]">Nothing new to import</span>
+                        )}
+                        {importFeedback.skipped > 0 && (
+                          <span className="text-amber-400 ml-2">
+                            , {importFeedback.skipped} line{importFeedback.skipped !== 1 ? 's' : ''} skipped
+                          </span>
+                        )}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
+            </FFICard>
+          )}
 
           {/* Keeper list */}
           <FFICard>
