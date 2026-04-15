@@ -86,6 +86,21 @@ export function AuctionAdvisor({
     state, managerName, scoredPlayers, draftedNames,
   )
 
+  // FF-263: Budget Health Panel derived values
+  const totalSlots = Object.values(state.roster_slots).reduce((s: number, v: number) => s + v, 0)
+  const filledSlots = state.managers[managerName]?.picks.length ?? 0
+  const remainingSlots = Math.max(0, totalSlots - filledSlots)
+  const healthSpent = budget ? budget.budgetTotal - budget.budgetRemaining : 0
+  const healthSafeRemaining = budget
+    ? Math.max(1, budget.budgetRemaining - Math.max(0, remainingSlots - 1))
+    : 0
+  const healthImpliedPerSlot = budget && remainingSlots > 0
+    ? Math.round(healthSafeRemaining / remainingSlots)
+    : 0
+  const healthDelta = budget ? healthImpliedPerSlot - budget.avgPricePerPick : 0
+  const healthBurnStatus: 'flush' | 'tight' | 'balanced' =
+    healthDelta >= 6 ? 'flush' : healthDelta <= -6 ? 'tight' : 'balanced'
+
   // FF-041: Fetch LLM recommendation
   const handleGetTargets = useCallback(async () => {
     setLoadingRec(true)
@@ -113,6 +128,45 @@ export function AuctionAdvisor({
         </CardTitle>
       </CardHeader>
       <CardContent className="pb-3 space-y-3">
+        {/* FF-263: Budget Health Panel — at-a-glance numbers */}
+        {budget && (
+          <div className="rounded-md bg-muted/40 border border-border/50 px-3 py-2 space-y-1.5">
+            {/* Row 1: $ spent · $ left + slot count */}
+            <div className="flex items-center justify-between text-xs">
+              <span className="tabular-nums">
+                <span className="text-muted-foreground">Spent </span>
+                <span className="font-semibold">${healthSpent}</span>
+                <span className="text-muted-foreground"> · </span>
+                <span className="font-semibold text-primary">${budget.budgetRemaining} left</span>
+              </span>
+              <span className="font-mono text-[10px] text-muted-foreground tabular-nums">
+                {filledSlots} / {totalSlots} slots
+              </span>
+            </div>
+            {/* Row 2: Implied $/slot + burn rate indicator */}
+            {remainingSlots > 0 && (
+              <div className="flex items-center justify-between text-[10px]">
+                <span className="text-muted-foreground tabular-nums font-mono">
+                  ~${healthImpliedPerSlot}/slot remaining
+                </span>
+                {budget.avgPricePerPick > 0 && (
+                  <span className={`font-medium tabular-nums ${
+                    healthBurnStatus === 'flush' ? 'text-green-400' :
+                    healthBurnStatus === 'tight' ? 'text-orange-400' :
+                    'text-muted-foreground'
+                  }`}>
+                    {healthBurnStatus === 'flush'
+                      ? `+$${healthDelta} vs avg`
+                      : healthBurnStatus === 'tight'
+                      ? `−$${Math.abs(healthDelta)} vs avg`
+                      : '≈ avg'}
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
         {/* FF-043: Budget status */}
         {budget && (
           <div className="space-y-1.5">

@@ -15,10 +15,10 @@
   ],
   "nextItems": [
     "FF-260: Document Sheets setup in WORKING_STATE.md (P0 sub-tier 1)",
-    "FF-263: Budget health panel (P0 sub-tier 2)",
     "FF-264: Per-player max comfortable bid display (P0 sub-tier 2)",
-    "FF-273: Keeper discount calculator (P0 keeper sub-tier)",
-    "FF-279: Auctioneer JSON feed integration (P1)"
+    "FF-266: Split recommend.ts into auction/snake variants (P0 sub-tier 3)",
+    "FF-267: Mode selection as first live-draft screen (P0 sub-tier 3)",
+    "FF-273: Keeper discount calculator (P0 keeper sub-tier)"
   ]
 }
 -->
@@ -75,14 +75,14 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 
 - [x] FF-261: Audit `src/lib/draft/auction-advisor.ts` for ESPN default $200/15-slot model accuracy — verify `calculateMaxBidAdvice()` math against ESPN defaults — **CONFIRMED CORRECT**: `emptySlots = totalSlots - picks.length - 1` correctly implements ESPN's $1-minimum reserve rule; `getMaxBid()` in state.ts uses identical formula; no hardcoded slot counts; `budget_total ?? 200` fallback is display-only, not safety-critical
 - [x] FF-262: Position budget tracker — spend by position vs. plan, live delta display (e.g., "RB: $67 / $80 planned")
-- [ ] FF-263: Budget health panel — $ spent/remaining, slots filled/remaining, implied $/slot for remaining roster
+- [x] FF-263: Budget health panel — $ spent/remaining, slots filled/remaining, implied $/slot for remaining roster
 - [ ] FF-264: Per-player "max comfortable bid" display — consensus ADP value alongside recommended max, visible over/underpay delta
 
 ---
 
 ### Sub-tier 3: Auction vs. Snake Full Separation
 
-- [ ] FF-265: Audit `src/components/draft/*` for snake/auction concept bleed — snake concepts (round, pick order) must not appear in auction UI and vice versa
+- [x] FF-265: Audit `src/components/draft/*` for snake/auction concept bleed — snake concepts (round, pick order) must not appear in auction UI and vice versa — **one real bleed found + fixed**: `PositionScarcityTracker` showed dollar spend ranges in snake mode (showSpendRanges defaults true; calculateScarcityExtended always populates spendRange/avgValue from player auction values); fixed by passing `showSpendRanges={state.format === 'auction'}` in client.tsx; all other 11 files audited clean
 - [ ] FF-266: Split `src/lib/draft/recommend.ts` into `recommend-auction.ts` / `recommend-snake.ts` — separate Claude prompts for each format
 - [ ] FF-267: Mode selection is the literal first screen of live draft — impossible to enter wrong mode without explicit confirmation
 

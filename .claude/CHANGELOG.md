@@ -4,6 +4,36 @@ All notable changes tracked here with root cause analysis.
 
 ---
 
+## 2026-04-14 (session 6) — FF-263: Budget Health Panel + FF-265: Auction/Snake Bleed Audit
+
+**Tasks:** FF-263 (new feature) + FF-265 (audit + fix)
+**Class:** `output` + `shared` | **Lenses:** QA, Delivery, Architecture
+
+**FF-263 — Budget Health Panel:**
+
+**Root Cause:** Managers drafting in auction had no single at-a-glance view of how their budget was tracking — the existing FF-043 pacing block shows percentages and projections but not raw dollar numbers or slot counts, making it hard to mentally compute "what can I actually bid right now?"
+
+**Changes:**
+- `src/components/draft/auction-advisor.tsx`: Added FF-263 derived values (`totalSlots`, `filledSlots`, `remainingSlots`, `healthSpent`, `healthSafeRemaining`, `healthImpliedPerSlot`, `healthDelta`, `healthBurnStatus`) in component body. Added compact "Budget Health Panel" section above the FF-043 block: row 1 = `Spent $X · $Y left` + `N/M slots` (font-mono, tabular-nums); row 2 = `~$Z/slot remaining` + burn rate indicator (`+$X vs avg` green, `−$X vs avg` orange, `≈ avg` muted). Implied $/slot uses getMaxBid reserve logic ($1 per remaining empty slot). Row 2 hidden when no slots remain.
+
+**FF-265 — Auction vs. Snake Bleed Audit:**
+
+**Root Cause:** 12 draft components needed auditing to ensure no cross-mode concept bleed (round/pick-order in auction UI, prices/budgets in snake UI).
+
+**Findings:** 11 files clean. One real bleed:
+- `position-scarcity.tsx` has `showSpendRanges = true` default. `calculateScarcityExtended()` in `explain.ts` always populates `spendRange`/`avgValue` from player auction values, regardless of draft format. The call site in `client.tsx` passed no `showSpendRanges` prop → dollar spend ranges appeared in snake mode.
+
+**Changes:**
+- `src/app/(app)/draft/live/client.tsx`: Added `showSpendRanges={state.format === 'auction'}` to `PositionScarcityTracker` call.
+
+**Verification:**
+- ✅ `npm run lint` — no new errors in changed files (23 pre-existing errors unchanged)
+- ✅ `npm run type-check` — clean
+- ✅ `npm run test:run` — 27/27 pass
+- ✅ `npm run build` — `✓ Compiled successfully in 3.7s`, 53 pages
+
+---
+
 ## 2026-04-14 (session 5) — FF-262: Position Budget Tracker + FF-261 Audit
 
 **Tasks:** FF-261 (audit, no code changes) + FF-262 (new feature)

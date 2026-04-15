@@ -624,8 +624,11 @@ export function LiveDraftClient() {
             />
           )}
 
-          {/* Position scarcity */}
-          <PositionScarcityTracker scarcity={scarcity} />
+          {/* Position scarcity — showSpendRanges is auction-only (FF-265) */}
+          <PositionScarcityTracker
+            scarcity={scarcity}
+            showSpendRanges={state.format === 'auction'}
+          />
 
           {/* Available players */}
           <PlayerPool
