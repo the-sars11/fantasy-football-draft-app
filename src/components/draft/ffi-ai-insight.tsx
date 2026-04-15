@@ -15,14 +15,33 @@ interface FFIAIInsightProps {
 }
 
 export function FFIAIInsight({ explanation, confidence }: FFIAIInsightProps) {
-  // Build insight text from explanation factors
+  // Build insight text from explanation factors, skip the Thin Data sentinel factor
   const insightText = explanation.factors
+    .filter(f => f.label !== 'Thin Data')
     .slice(0, 3)
     .map(f => f.detail)
     .join(' ')
 
+  const isThinData = !!explanation.dataWarning
+  const isLowConfidence = explanation.confidence === 'low'
+  const barColor = isThinData
+    ? '#f59e0b'   // amber for thin data
+    : isLowConfidence
+    ? '#ff716c'   // red for conflicting signals
+    : '#2ff801'   // green default
+
   return (
     <div className="bg-black/80 p-5 space-y-4 border-t border-[#3c4a53]/10">
+      {/* FF-270: Thin data warning banner */}
+      {isThinData && (
+        <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-[#f59e0b]/10 border border-[#f59e0b]/30">
+          <span className="text-[#f59e0b] text-[10px]">⚠</span>
+          <span className="text-[9px] font-bold text-[#f59e0b] uppercase tracking-wider">
+            Low confidence — {explanation.dataWarning}
+          </span>
+        </div>
+      )}
+
       {/* Insight header and content */}
       <div className="flex items-start gap-3">
         <span className="material-symbols-outlined text-[#2ff801] text-sm mt-1" style={{ fontVariationSettings: "'FILL' 1" }}>
@@ -46,14 +65,18 @@ export function FFIAIInsight({ explanation, confidence }: FFIAIInsightProps) {
             <span className="text-[9px] font-headline uppercase tracking-widest text-[#9eadb8]">
               Confidence
             </span>
-            <span className="text-[9px] font-headline font-bold text-[#2ff801]">
+            <span className="text-[9px] font-headline font-bold" style={{ color: barColor }}>
               {confidence}%
             </span>
           </div>
           <div className="h-1 bg-[#142834] rounded-full overflow-hidden">
             <div
-              className="h-full bg-[#2ff801] shadow-[0_0_8px_#2ff801] transition-all duration-300"
-              style={{ width: `${Math.min(100, Math.max(0, confidence))}%` }}
+              className="h-full transition-all duration-300"
+              style={{
+                width: `${Math.min(100, Math.max(0, confidence))}%`,
+                backgroundColor: barColor,
+                boxShadow: `0 0 8px ${barColor}`,
+              }}
             />
           </div>
         </div>
@@ -64,14 +87,14 @@ export function FFIAIInsight({ explanation, confidence }: FFIAIInsightProps) {
         </button>
       </div>
 
-      {/* Factor breakdown (if available) */}
-      {explanation.factors.length > 0 && (
+      {/* Factor breakdown (if available) — skip Thin Data sentinel */}
+      {explanation.factors.filter(f => f.label !== 'Thin Data').length > 0 && (
         <div className="pt-3 border-t border-[#3c4a53]/10 space-y-2">
           <h5 className="text-[9px] font-headline uppercase tracking-widest text-[#9eadb8]">
             Key Factors
           </h5>
           <div className="flex flex-wrap gap-2">
-            {explanation.factors.map((factor, i) => (
+            {explanation.factors.filter(f => f.label !== 'Thin Data').map((factor, i) => (
               <span
                 key={i}
                 className={`px-2 py-1 rounded text-[9px] font-bold tracking-wider ${

@@ -20,6 +20,7 @@ export interface Explanation {
   summary: string           // 1-sentence recommendation
   factors: ExplainFactor[]  // ordered by weight desc
   confidence: 'high' | 'medium' | 'low'
+  dataWarning?: string      // FF-270: set when coverage is sparse
 }
 
 // --- Position scarcity types (also used by FF-035) ---
@@ -116,6 +117,31 @@ export function calculateScarcityExtended(
       avgValue,
     }
   })
+}
+
+/**
+ * FF-270: Assess data coverage for a player.
+ * Returns a warning string when coverage is too thin to trust the recommendation,
+ * or null when data is sufficient.
+ */
+function assessDataCoverage(player: Player): string | null {
+  const sourceCount = player.sourceData?.length ?? 0
+  const hasADP = player.adp > 0
+  const hasRank = player.consensusRank > 0
+
+  if (sourceCount === 0) {
+    return 'No source data — ranking unavailable'
+  }
+  if (sourceCount < 2 && !hasADP && !hasRank) {
+    return 'Single source, no ADP — estimate only'
+  }
+  if (sourceCount < 2) {
+    return `Only ${sourceCount} source — consensus unavailable`
+  }
+  if (!hasADP && !hasRank) {
+    return 'No ADP or rank data — thin coverage'
+  }
+  return null
 }
 
 /**
@@ -277,13 +303,30 @@ export function explainPlayer(
   // Sort by weight desc
   factors.sort((a, b) => b.weight - a.weight)
 
+  // FF-270: Thin data check — overrides confidence regardless of factors
+  const dataWarning = assessDataCoverage(player)
+  if (dataWarning) {
+    factors.push({
+      label: 'Thin Data',
+      detail: `Low confidence — ${dataWarning}`,
+      impact: 'neutral',
+      weight: 0,
+    })
+  }
+
   // Confidence based on factor count and consistency
   const positives = factors.filter(f => f.impact === 'positive').length
   const negatives = factors.filter(f => f.impact === 'negative').length
   let confidence: Explanation['confidence'] = 'medium'
-  if (positives >= 3 && negatives === 0) confidence = 'high'
-  else if (negatives >= 2 && positives <= 1) confidence = 'high'
-  else if (positives > 0 && negatives > 0) confidence = 'low'
+  if (dataWarning) {
+    confidence = 'low'
+  } else if (positives >= 3 && negatives === 0) {
+    confidence = 'high'
+  } else if (negatives >= 2 && positives <= 1) {
+    confidence = 'high'
+  } else if (positives > 0 && negatives > 0) {
+    confidence = 'low'
+  }
 
   // Summary sentence
   const topFactor = factors[0]
@@ -298,5 +341,5 @@ export function explainPlayer(
     summary = `${player.name} is a weak fit. ${topFactor?.detail || 'Consider other options.'}`
   }
 
-  return { summary, factors, confidence }
+  return { summary, factors, confidence, dataWarning: dataWarning ?? undefined }
 }
