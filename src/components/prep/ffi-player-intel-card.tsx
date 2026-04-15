@@ -111,6 +111,9 @@ interface FFIPlayerIntelCardProps {
   onToggleAvoid?: () => void
   isTagLoading?: boolean
   sentimentSnippets?: string[]
+  dismissedSystemTags?: string[]
+  onDismissSystemTag?: (tag: SystemTagType) => void
+  onUndismissSystemTag?: (tag: SystemTagType) => void
 }
 
 // --- Component ---
@@ -128,6 +131,9 @@ export function FFIPlayerIntelCard({
   onToggleAvoid,
   isTagLoading = false,
   sentimentSnippets = [],
+  dismissedSystemTags = [],
+  onDismissSystemTag,
+  onUndismissSystemTag,
 }: FFIPlayerIntelCardProps) {
   // Format rank with leading zero
   const rankDisplay = rank.toString().padStart(2, '0')
@@ -144,9 +150,10 @@ export function FFIPlayerIntelCard({
       return { type: 'user', tag: 'avoid', config: USER_TAG_CONFIG.avoid }
     }
 
-    // Then highest priority system tag (BREAKOUT > VALUE > SLEEPER > BUST > AVOID)
+    // Then highest priority system tag (BREAKOUT > VALUE > SLEEPER > BUST > AVOID), skip dismissed
     const priority: SystemTagType[] = ['BREAKOUT', 'VALUE', 'SLEEPER', 'BUST', 'AVOID']
     for (const tagType of priority) {
+      if (dismissedSystemTags.includes(tagType)) continue
       const found = systemTags.find(t => t.tag === tagType)
       if (found) {
         return { type: 'system', tag: found, config: SYSTEM_TAG_CONFIG[tagType] }
@@ -295,25 +302,50 @@ export function FFIPlayerIntelCard({
                   {systemTags.map((tag, idx) => {
                     const config = SYSTEM_TAG_CONFIG[tag.tag]
                     const Icon = config.icon
+                    const isDismissed = dismissedSystemTags.includes(tag.tag)
                     return (
-                      <div key={`${tag.tag}-${idx}`} className="flex items-start gap-2">
+                      <div key={`${tag.tag}-${idx}`} className={`flex items-start gap-2 ${isDismissed ? 'opacity-40' : ''}`}>
                         <span
                           className={`
                             inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold tracking-wider shrink-0
-                            ${config.bgClass} ${config.textClass}
+                            ${isDismissed ? 'bg-[#8bacff]/10 text-[#697782]' : `${config.bgClass} ${config.textClass}`}
                           `}
                         >
                           <Icon className="h-3 w-3" />
                           {config.label}
                         </span>
-                        <span className="text-[10px] text-[#9eadb8] leading-relaxed">
-                          {tag.reasoning}
-                          {tag.adp_gap && (
-                            <span className="text-[#8bacff] ml-1">
-                              ({tag.adp_gap > 0 ? '+' : ''}{tag.adp_gap} spots)
-                            </span>
+                        <span className="text-[10px] text-[#9eadb8] leading-relaxed flex-1">
+                          {isDismissed ? (
+                            <span className="text-[#697782] italic">Dismissed</span>
+                          ) : (
+                            <>
+                              {tag.reasoning}
+                              {tag.adp_gap && (
+                                <span className="text-[#8bacff] ml-1">
+                                  ({tag.adp_gap > 0 ? '+' : ''}{tag.adp_gap} spots)
+                                </span>
+                              )}
+                            </>
                           )}
                         </span>
+                        {isDismissed ? (
+                          <button
+                            onClick={(e) => { e.stopPropagation(); onUndismissSystemTag?.(tag.tag) }}
+                            disabled={isTagLoading}
+                            className="text-[9px] text-[#8bacff] hover:text-[#deedf9] transition-colors shrink-0 disabled:opacity-50"
+                          >
+                            restore
+                          </button>
+                        ) : (
+                          <button
+                            onClick={(e) => { e.stopPropagation(); onDismissSystemTag?.(tag.tag) }}
+                            disabled={isTagLoading}
+                            className="text-[#697782] hover:text-[#ff716c] transition-colors shrink-0 disabled:opacity-50 opacity-0 group-hover:opacity-100"
+                            title="Dismiss tag"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        )}
                       </div>
                     )
                   })}

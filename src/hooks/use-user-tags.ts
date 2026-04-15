@@ -431,6 +431,65 @@ export function useToggleTag(leagueId?: string | null): UseToggleTagResult {
 }
 
 /**
+ * Hook for dismissing / restoring system tags (FF-243)
+ */
+export function useSystemTagActions(leagueId?: string | null): {
+  dismissSystemTag: (playerCacheId: string, tag: string) => Promise<{ success: boolean; error?: string }>
+  undismissSystemTag: (playerCacheId: string, tag: string) => Promise<{ success: boolean; error?: string }>
+  isLoading: boolean
+  error: string | null
+} {
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const dismissSystemTag = useCallback(async (
+    playerCacheId: string, tag: string
+  ): Promise<{ success: boolean; error?: string }> => {
+    setIsLoading(true)
+    setError(null)
+    try {
+      const res = await fetch('/api/user-tags', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ playerCacheId, leagueId: leagueId ?? null, action: 'dismissSystemTag', tag }),
+      })
+      if (!res.ok) { const d = await res.json(); throw new Error(d.error) }
+      return { success: true }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Unknown error'
+      setError(message)
+      return { success: false, error: message }
+    } finally {
+      setIsLoading(false)
+    }
+  }, [leagueId])
+
+  const undismissSystemTag = useCallback(async (
+    playerCacheId: string, tag: string
+  ): Promise<{ success: boolean; error?: string }> => {
+    setIsLoading(true)
+    setError(null)
+    try {
+      const res = await fetch('/api/user-tags', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ playerCacheId, leagueId: leagueId ?? null, action: 'undismissSystemTag', tag }),
+      })
+      if (!res.ok) { const d = await res.json(); throw new Error(d.error) }
+      return { success: true }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Unknown error'
+      setError(message)
+      return { success: false, error: message }
+    } finally {
+      setIsLoading(false)
+    }
+  }, [leagueId])
+
+  return { dismissSystemTag, undismissSystemTag, isLoading, error }
+}
+
+/**
  * Convenience hook for a single player's tags with real-time updates
  */
 export function usePlayerTags(

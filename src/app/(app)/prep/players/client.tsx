@@ -11,7 +11,7 @@ import { useState, useEffect, useMemo, useCallback } from 'react'
 import { Search, SlidersHorizontal, X, Target, Loader2 } from 'lucide-react'
 import { FFIInput, FFIButton, FFIEmptyState } from '@/components/ui/ffi-primitives'
 import { FFIPlayerIntelCard } from '@/components/prep/ffi-player-intel-card'
-import { useUserTags, useToggleTag } from '@/hooks/use-user-tags'
+import { useUserTags, useToggleTag, useSystemTagActions } from '@/hooks/use-user-tags'
 import { cacheToPlayers } from '@/lib/players/convert'
 import type { Player, Position } from '@/lib/players/types'
 import type { SystemTag } from '@/lib/supabase/database.types'
@@ -128,6 +128,7 @@ export function PlayerBrowserClient() {
   })
 
   const { toggle: toggleTag, isLoading: toggleLoading } = useToggleTag()
+  const { dismissSystemTag, undismissSystemTag } = useSystemTagActions()
 
   // --- Fetch players ---
   useEffect(() => {
@@ -245,6 +246,16 @@ export function PlayerBrowserClient() {
   const handleToggleExpand = useCallback((playerId: string) => {
     setExpandedPlayerId(prev => prev === playerId ? null : playerId)
   }, [])
+
+  const handleDismissSystemTag = useCallback(async (playerId: string, tag: string) => {
+    const result = await dismissSystemTag(playerId, tag)
+    if (result.success) refetchTags()
+  }, [dismissSystemTag, refetchTags])
+
+  const handleUndismissSystemTag = useCallback(async (playerId: string, tag: string) => {
+    const result = await undismissSystemTag(playerId, tag)
+    if (result.success) refetchTags()
+  }, [undismissSystemTag, refetchTags])
 
   // --- Render ---
   if (loading) {
@@ -497,6 +508,9 @@ export function PlayerBrowserClient() {
               onToggleTarget={() => handleToggleTarget(player.id)}
               onToggleAvoid={() => handleToggleAvoid(player.id)}
               isTagLoading={toggleLoading}
+              dismissedSystemTags={userTagsMap[player.id]?.dismissedSystemTags ?? []}
+              onDismissSystemTag={(tag) => handleDismissSystemTag(player.id, tag)}
+              onUndismissSystemTag={(tag) => handleUndismissSystemTag(player.id, tag)}
             />
           ))}
 

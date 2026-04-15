@@ -392,10 +392,76 @@ export async function DELETE(req: NextRequest) {
 export async function PATCH(req: NextRequest) {
   try {
     const body = await req.json()
-    const { playerCacheId, leagueId = null, toggleTag } = body as {
+    const { playerCacheId, leagueId = null, toggleTag, action, tag: systemTag } = body as {
       playerCacheId?: string
       leagueId?: string | null
       toggleTag?: string
+      action?: 'dismissSystemTag' | 'undismissSystemTag'
+      tag?: string
+    }
+
+    // --- System tag dismiss / undismiss ---
+    if (action === 'dismissSystemTag' || action === 'undismissSystemTag') {
+      if (!playerCacheId || !systemTag) {
+        return NextResponse.json(
+          { error: 'playerCacheId and tag are required' },
+          { status: 400 }
+        )
+      }
+
+      const supabase = await getClient()
+      if (!supabase) {
+        return NextResponse.json({ error: 'Database not available' }, { status: 503 })
+      }
+
+      // Look up existing record
+      let lookupQuery = supabase
+        .from('user_tags')
+        .select('*')
+        .eq('player_cache_id', playerCacheId)
+      if (leagueId === null) {
+        lookupQuery = lookupQuery.is('league_id', null)
+      } else {
+        lookupQuery = lookupQuery.eq('league_id', leagueId)
+      }
+      const { data: existing, error: lookupError } = await lookupQuery.maybeSingle()
+      if (lookupError) {
+        return NextResponse.json({ error: lookupError.message }, { status: 500 })
+      }
+
+      const normalizedTag = systemTag.toUpperCase()
+      const currentDismissed = new Set<string>(
+        (existing?.dismissed_system_tags as string[] | null) ?? []
+      )
+      if (action === 'dismissSystemTag') {
+        currentDismissed.add(normalizedTag)
+      } else {
+        currentDismissed.delete(normalizedTag)
+      }
+      const newDismissed = [...currentDismissed]
+
+      if (existing) {
+        const { data, error } = await supabase
+          .from('user_tags')
+          .update({ dismissed_system_tags: newDismissed, updated_at: new Date().toISOString() })
+          .eq('id', existing.id)
+          .select('*, players_cache(name, team, position)')
+          .single()
+        if (error) {
+          return NextResponse.json({ error: error.message }, { status: 500 })
+        }
+        return NextResponse.json({ userTag: data, action, tag: normalizedTag })
+      } else {
+        const { data, error } = await supabase
+          .from('user_tags')
+          .insert({ player_cache_id: playerCacheId, league_id: leagueId, tags: [], dismissed_system_tags: newDismissed })
+          .select('*, players_cache(name, team, position)')
+          .single()
+        if (error) {
+          return NextResponse.json({ error: error.message }, { status: 500 })
+        }
+        return NextResponse.json({ userTag: data, action, tag: normalizedTag, created: true })
+      }
     }
 
     if (!playerCacheId || !toggleTag) {
