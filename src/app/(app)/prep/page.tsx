@@ -12,6 +12,7 @@ import {
   ChevronRight,
   Target,
   Lock,
+  Play,
 } from 'lucide-react'
 import { DataFreshness } from '@/components/prep/data-freshness'
 import {
@@ -125,6 +126,13 @@ export default function PrepPage() {
           icon={<Lock className="h-5 w-5" />}
           title="Keepers"
           subtitle="Declare keeper selections before draft day"
+        />
+
+        <HubCard
+          href="/prep/simulate"
+          icon={<Play className="h-5 w-5" />}
+          title="Dry Run"
+          subtitle="Simulate a full draft against historical ADP"
         />
       </div>
 
