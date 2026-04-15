@@ -275,17 +275,16 @@ export function ManualPickEntry({
         </Button>
 
         {/* ── Undo ── */}
-        {canUndo && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onUndo}
-            className="h-11 w-11 p-0 shrink-0 text-[var(--ffi-text-secondary)] hover:text-white"
-            aria-label="Undo last pick"
-          >
-            <Undo2 className="h-4 w-4" />
-          </Button>
-        )}
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onUndo}
+          disabled={!canUndo}
+          className="h-11 w-11 p-0 shrink-0 text-[var(--ffi-text-secondary)] hover:text-white disabled:opacity-30 disabled:cursor-not-allowed"
+          aria-label="Undo last pick"
+        >
+          <Undo2 className="h-4 w-4" />
+        </Button>
       </div>
     )
   }

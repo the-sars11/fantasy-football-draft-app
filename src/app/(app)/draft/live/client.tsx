@@ -663,7 +663,7 @@ export function LiveDraftClient() {
               draftedNames={draftedNames}
               managerNames={managerNames}
               format={state.format}
-              currentManager={state.current_manager}
+              currentManager={isAuction ? myManager : state.current_manager}
               currentRound={state.current_round}
               onSubmit={addManualPick}
               onUndo={undoLastPick}
