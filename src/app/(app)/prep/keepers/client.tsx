@@ -8,7 +8,7 @@
  * Draft Setup Step 3 reads from this same storage.
  */
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { Plus, Trash2, Loader2, Lock } from 'lucide-react'
 import {
   FFICard,
@@ -67,6 +67,7 @@ export function KeeperDeclarationClient() {
   const [keepers, setKeepers] = useState<KeeperEntry[]>([])
   const [loadingLeagues, setLoadingLeagues] = useState(true)
   const [saved, setSaved] = useState(false)
+  const initialized = useRef(false)
 
   const selectedLeague = leagues.find(l => l.id === selectedLeagueId)
   const isAuction = selectedLeague?.format === 'auction'
@@ -97,19 +98,21 @@ export function KeeperDeclarationClient() {
   // Load keepers when league changes
   useEffect(() => {
     if (selectedLeagueId) {
+      initialized.current = false
       setKeepers(loadKeepers(selectedLeagueId))
       setSaved(false)
+      const t = setTimeout(() => { initialized.current = true }, 0)
+      return () => clearTimeout(t)
     }
   }, [selectedLeagueId])
 
   // Auto-save when keepers change
   useEffect(() => {
-    if (selectedLeagueId && keepers.length >= 0) {
-      saveKeepers(selectedLeagueId, keepers)
-      setSaved(true)
-      const t = setTimeout(() => setSaved(false), 2000)
-      return () => clearTimeout(t)
-    }
+    if (!selectedLeagueId || !initialized.current) return
+    saveKeepers(selectedLeagueId, keepers)
+    setSaved(true)
+    const t = setTimeout(() => setSaved(false), 2000)
+    return () => clearTimeout(t)
   }, [keepers, selectedLeagueId])
 
   const addKeeper = useCallback(() => {
