@@ -372,7 +372,7 @@ export function ReviewClient() {
             <button
               onClick={() => setViewMode('my-draft')}
               className={cn(
-                'flex-1 py-2.5 px-4 rounded-lg text-sm font-semibold transition-all',
+                'flex-1 min-h-[44px] py-2.5 px-4 rounded-lg text-sm font-semibold transition-all',
                 viewMode === 'my-draft'
                   ? 'bg-[var(--ffi-primary)] text-white'
                   : 'bg-[var(--ffi-surface)]/50 text-[var(--ffi-text-secondary)] hover:bg-[var(--ffi-surface)]'
@@ -383,7 +383,7 @@ export function ReviewClient() {
             <button
               onClick={() => setViewMode('all-teams')}
               className={cn(
-                'flex-1 py-2.5 px-4 rounded-lg text-sm font-semibold transition-all',
+                'flex-1 min-h-[44px] py-2.5 px-4 rounded-lg text-sm font-semibold transition-all',
                 viewMode === 'all-teams'
                   ? 'bg-[var(--ffi-primary)] text-white'
                   : 'bg-[var(--ffi-surface)]/50 text-[var(--ffi-text-secondary)] hover:bg-[var(--ffi-surface)]'
@@ -394,7 +394,7 @@ export function ReviewClient() {
             <button
               onClick={() => setViewMode('trash-talk')}
               className={cn(
-                'flex-1 py-2.5 px-4 rounded-lg text-sm font-semibold transition-all',
+                'flex-1 min-h-[44px] py-2.5 px-4 rounded-lg text-sm font-semibold transition-all',
                 viewMode === 'trash-talk'
                   ? 'bg-[var(--ffi-danger)] text-white'
                   : 'bg-[var(--ffi-surface)]/50 text-[var(--ffi-text-secondary)] hover:bg-[var(--ffi-surface)]'

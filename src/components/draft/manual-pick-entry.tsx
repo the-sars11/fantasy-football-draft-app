@@ -200,7 +200,7 @@ export function ManualPickEntry({
                   onClearBlock?.()
                   setPrice('')
                 }}
-                className="text-[var(--ffi-text-muted)] hover:text-white transition-colors shrink-0 text-lg leading-none"
+                className="w-11 h-11 flex items-center justify-center text-[var(--ffi-text-muted)] hover:text-white transition-colors shrink-0 text-lg"
                 aria-label="Clear nomination"
               >
                 ×

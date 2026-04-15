@@ -4,6 +4,25 @@ All notable changes tracked here with root cause analysis.
 
 ---
 
+## 2026-04-14 (session 7, cont.) — FF-268: Mobile-First Primary Action Audit
+
+**Task:** FF-268 (output/UX)
+**Class:** `output` | **Lenses:** QA, Delivery, Design
+
+**Root Cause:** Setup wizard CTAs were at the bottom of free-scrolling containers, so on Step 3 with 10+ managers the "Start Draft" button was buried below the fold. Back buttons were text-only links with no touch target sizing. The ManualPickEntry clear (×) button had no height/width, making it a ~20px tap target.
+
+**Changes:**
+- `src/app/(app)/draft/setup/client.tsx`: All 4 steps now return a Fragment with scrollable content (`pb-24`) + fixed bottom CTA bar (`fixed inset-x-0 bottom-0 z-30 ffi-glass-heavy`), matching the live draft bar pattern. Error display for steps 3/4 moved into the fixed bar so it's always visible. Back buttons in steps 2/3/4 now have `min-h-[44px] flex items-center px-1`.
+- `src/components/draft/manual-pick-entry.tsx`: Clear nomination button in bar variant changed from `text-lg leading-none` to `w-11 h-11 flex items-center justify-center` — 44px tap target.
+- `src/app/(app)/draft/review/client.tsx`: View mode tab buttons (`My Draft / All Teams / Trash Talk`) bumped from `py-2.5` (~36px) to `min-h-[44px]`.
+
+**Verification:**
+- ✅ `npm run type-check` — clean
+- ✅ `npm run test:run` — 27/27 passed
+- ✅ `npm run build` — clean
+
+---
+
 ## 2026-04-14 (session 7) — FF-275: Yahoo Keeper Assignment Import
 
 **Task:** FF-275 (new feature)

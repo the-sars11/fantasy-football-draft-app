@@ -224,7 +224,8 @@ export function DraftSetupClient() {
   // === STEP 1: Format Gate ===
   if (step === 1) {
     return (
-      <div className="space-y-6 max-w-lg">
+      <>
+      <div className="space-y-6 max-w-lg pb-24">
         <FFISectionHeader
           title="Live Draft"
           subtitle="Confirm your draft format before continuing"
@@ -295,29 +296,38 @@ export function DraftSetupClient() {
           </p>
         )}
 
-        <FFIButton
-          variant="primary"
-          onClick={() => setStep(2)}
-          disabled={!selectedLeague}
-          className="w-full"
-        >
-          {selectedLeague
-            ? `Confirm — Start ${isAuction ? 'Auction' : 'Snake'} Draft →`
-            : 'Select a league to continue'
-          }
-        </FFIButton>
       </div>
+      <div
+        className="fixed inset-x-0 bottom-0 z-30 ffi-glass-heavy border-t border-[var(--ffi-border)] px-4 py-3"
+        style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+      >
+        <div className="mx-auto max-w-lg">
+          <FFIButton
+            variant="primary"
+            onClick={() => setStep(2)}
+            disabled={!selectedLeague}
+            className="w-full"
+          >
+            {selectedLeague
+              ? `Confirm — Start ${isAuction ? 'Auction' : 'Snake'} Draft →`
+              : 'Select a league to continue'
+            }
+          </FFIButton>
+        </div>
+      </div>
+      </>
     )
   }
 
   // === STEP 2: Input Method ===
   if (step === 2) {
     return (
-      <div className="space-y-6 max-w-lg">
+      <>
+      <div className="space-y-6 max-w-lg pb-24">
         <div className="flex items-center gap-3">
           <button
             onClick={() => setStep(1)}
-            className="ffi-caption text-[var(--ffi-text-secondary)] hover:text-white transition-colors"
+            className="ffi-caption text-[var(--ffi-text-secondary)] hover:text-white transition-colors min-h-[44px] flex items-center px-1"
           >
             ← Back
           </button>
@@ -354,26 +364,35 @@ export function DraftSetupClient() {
           ))}
         </div>
 
-        <FFIButton
-          variant="primary"
-          onClick={() => setStep(3)}
-          disabled={!draftMode}
-          className="w-full"
-        >
-          Continue →
-        </FFIButton>
       </div>
+      <div
+        className="fixed inset-x-0 bottom-0 z-30 ffi-glass-heavy border-t border-[var(--ffi-border)] px-4 py-3"
+        style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+      >
+        <div className="mx-auto max-w-lg">
+          <FFIButton
+            variant="primary"
+            onClick={() => setStep(3)}
+            disabled={!draftMode}
+            className="w-full"
+          >
+            Continue →
+          </FFIButton>
+        </div>
+      </div>
+      </>
     )
   }
 
   // === STEP 3: Session Details ===
   if (step === 3) {
     return (
-      <div className="space-y-6 max-w-2xl">
+      <>
+      <div className="space-y-6 max-w-2xl pb-24">
         <div className="flex items-center gap-3">
           <button
             onClick={() => setStep(2)}
-            className="ffi-caption text-[var(--ffi-text-secondary)] hover:text-white transition-colors"
+            className="ffi-caption text-[var(--ffi-text-secondary)] hover:text-white transition-colors min-h-[44px] flex items-center px-1"
           >
             ← Back
           </button>
@@ -477,50 +496,58 @@ export function DraftSetupClient() {
           </FFICard>
         )}
 
-        {error && (
-          <div className="rounded-lg border border-[var(--ffi-danger)]/50 bg-[var(--ffi-danger)]/10 px-4 py-3 ffi-body-md text-[var(--ffi-danger)]">
-            {error}
-          </div>
-        )}
-
-        <FFIButton
-          variant="primary"
-          onClick={() => {
-            // Validate managers
-            const emptyNames = managers.filter(m => !m.name.trim())
-            if (emptyNames.length > 0) { setError('All managers must have a name'); return }
-            const uniqueNames = new Set(managers.map(m => m.name.trim().toLowerCase()))
-            if (uniqueNames.size !== managers.length) { setError('Manager names must be unique'); return }
-            setError(null)
-
-            // Keeper leagues → Step 3; else submit
-            if (isKeeperLeague) {
-              try {
-                const raw = localStorage.getItem(`ffi_keepers_${selectedLeagueId}`)
-                setDeclaredKeepers(raw ? JSON.parse(raw) : [])
-              } catch { setDeclaredKeepers([]) }
-              setStep(4)
-            } else {
-              handleSubmit()
-            }
-          }}
-          disabled={submitting || !selectedLeagueId}
-          className="w-full"
-        >
-          {isKeeperLeague ? 'Review Keepers →' : (submitting ? 'Starting...' : 'Start Draft →')}
-        </FFIButton>
       </div>
+      <div
+        className="fixed inset-x-0 bottom-0 z-30 ffi-glass-heavy border-t border-[var(--ffi-border)] px-4 py-3"
+        style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+      >
+        <div className="mx-auto max-w-2xl space-y-2">
+          {error && (
+            <div className="rounded-lg border border-[var(--ffi-danger)]/50 bg-[var(--ffi-danger)]/10 px-4 py-3 ffi-body-md text-[var(--ffi-danger)]">
+              {error}
+            </div>
+          )}
+          <FFIButton
+            variant="primary"
+            onClick={() => {
+              // Validate managers
+              const emptyNames = managers.filter(m => !m.name.trim())
+              if (emptyNames.length > 0) { setError('All managers must have a name'); return }
+              const uniqueNames = new Set(managers.map(m => m.name.trim().toLowerCase()))
+              if (uniqueNames.size !== managers.length) { setError('Manager names must be unique'); return }
+              setError(null)
+
+              // Keeper leagues → Step 4; else submit
+              if (isKeeperLeague) {
+                try {
+                  const raw = localStorage.getItem(`ffi_keepers_${selectedLeagueId}`)
+                  setDeclaredKeepers(raw ? JSON.parse(raw) : [])
+                } catch { setDeclaredKeepers([]) }
+                setStep(4)
+              } else {
+                handleSubmit()
+              }
+            }}
+            disabled={submitting || !selectedLeagueId}
+            className="w-full"
+          >
+            {isKeeperLeague ? 'Review Keepers →' : (submitting ? 'Starting...' : 'Start Draft →')}
+          </FFIButton>
+        </div>
+      </div>
+      </>
     )
   }
 
   // === STEP 4: Keeper Review (keeper leagues only) ===
   if (step === 4) {
     return (
-      <div className="space-y-6 max-w-lg">
+      <>
+      <div className="space-y-6 max-w-lg pb-24">
         <div className="flex items-center gap-3">
           <button
             onClick={() => setStep(3)}
-            className="ffi-caption text-[var(--ffi-text-secondary)] hover:text-white"
+            className="ffi-caption text-[var(--ffi-text-secondary)] hover:text-white min-h-[44px] flex items-center px-1"
           >
             ← Back
           </button>
@@ -573,28 +600,35 @@ export function DraftSetupClient() {
           )}
         </FFICard>
 
-        {error && (
-          <div className="rounded-lg border border-[var(--ffi-danger)]/50 bg-[var(--ffi-danger)]/10 px-4 py-3 ffi-body-md text-[var(--ffi-danger)]">
-            {error}
-          </div>
-        )}
-
-        <FFIButton
-          variant="primary"
-          onClick={() => {
-            handleSubmit(declaredKeepers.map(k => ({
-              player_name: k.player_name,
-              position: k.position,
-              manager: k.manager,
-              cost: k.cost,
-            })))
-          }}
-          disabled={submitting}
-          className="w-full"
-        >
-          {submitting ? 'Starting...' : 'Start Draft →'}
-        </FFIButton>
       </div>
+      <div
+        className="fixed inset-x-0 bottom-0 z-30 ffi-glass-heavy border-t border-[var(--ffi-border)] px-4 py-3"
+        style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+      >
+        <div className="mx-auto max-w-lg space-y-2">
+          {error && (
+            <div className="rounded-lg border border-[var(--ffi-danger)]/50 bg-[var(--ffi-danger)]/10 px-4 py-3 ffi-body-md text-[var(--ffi-danger)]">
+              {error}
+            </div>
+          )}
+          <FFIButton
+            variant="primary"
+            onClick={() => {
+              handleSubmit(declaredKeepers.map(k => ({
+                player_name: k.player_name,
+                position: k.position,
+                manager: k.manager,
+                cost: k.cost,
+              })))
+            }}
+            disabled={submitting}
+            className="w-full"
+          >
+            {submitting ? 'Starting...' : 'Start Draft →'}
+          </FFIButton>
+        </div>
+      </div>
+      </>
     )
   }
 

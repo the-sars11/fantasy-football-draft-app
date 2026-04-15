@@ -64,8 +64,6 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 - [x] FF-257: Promote `manual-pick-entry.tsx` to always-visible pinned quick-entry bar — **revised 2026-04-14**: always-open On Block slot (no collapse/expand); BID button on player cards nominates a player without navigating away; price auto-fills from consensusAuctionValue; bar wired via onBlockPlayer state in LiveDraftClient
 - [x] FF-258: Mode selector at session start: Sheets / Manual / Offline simulation — 3-step setup flow: mode → league confirm + managers → keeper review (keeper leagues only); manager section preserved; no re-entry of league settings on draft day
 - [x] FF-259: Connection status indicator — 4-state ConnectionStatusPill (LIVE/STALE/OFFLINE/MANUAL), always visible; pulsing green dot + elapsed timer when LIVE; OFFLINE tap expands error bar; replaces binary Wifi icon
-- [ ] FF-260: Document exact Sheets setup in `WORKING_STATE.md` — column names, format, share permissions confirmed from actual Nasties 2026 sheet
-
 ---
 
 ### Sub-tier 2: ESPN Auction Calibration
@@ -87,7 +85,7 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 
 ### Sub-tier 4: Mobile-First Audit
 
-- [ ] FF-268: Every live draft screen: primary action reachable with one thumb, no scrolling required for any core action
+- [x] FF-268: Every live draft screen: primary action reachable with one thumb, no scrolling required for any core action
 - [ ] FF-269: Arm's-length + bad-lighting physical test — fix anything requiring precision tapping or small touch targets (<44px)
 
 ---
@@ -133,6 +131,7 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 > **Was Phase 7. Run this before Aug 2026 drafts to confirm everything is live-ready.**
 
 - [ ] FF-011: Yahoo Fantasy API adapter — OAuth flow for Tyler's auto-pull from Yahoo _(DEFERRED — requires OAuth app registration)_ `DEEP`
+- [ ] FF-260: Document exact Sheets setup in `WORKING_STATE.md` — column names, format, share permissions confirmed from actual Nasties 2026 sheet _(Blocked: need real draft sheet ~Aug 2026)_
 - [ ] FF-072: Live draft dry run — mock Google Sheet, run through full auction + snake live draft flow end-to-end `ACTION`
 - [ ] FF-079: Yahoo OAuth adapter (FF-011 follow-up) — if Tyler wants auto-pull `DEEP`
 - [ ] FF-080: Full pre-draft data pull with 2026 season data — verify all sources working `ACTION`
