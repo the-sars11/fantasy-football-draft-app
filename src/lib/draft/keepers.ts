@@ -217,3 +217,15 @@ export function getManagerKeepers(
     k => k.manager.toLowerCase() === managerName.toLowerCase()
   )
 }
+
+// --- Display Helpers ---
+
+/** Returns true if the pick is a keeper (is_keeper flag OR negative pick_number) */
+export function isKeeperPick(pick: { pick_number: number; is_keeper?: boolean }): boolean {
+  return pick.is_keeper === true || pick.pick_number < 0
+}
+
+/** Returns display string for pick number: negative values become K1, K2, K3 */
+export function displayPickNum(n: number): string {
+  return n < 0 ? `K${Math.abs(n)}` : String(n)
+}

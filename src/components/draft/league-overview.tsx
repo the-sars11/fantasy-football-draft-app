@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge'
 import { ChevronDown, ChevronRight, LayoutGrid } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { DraftState } from '@/lib/draft/state'
+import { isKeeperPick, displayPickNum } from '@/lib/draft/keepers'
 
 const posColors: Record<string, string> = {
   QB: 'text-red-400',
@@ -22,12 +23,6 @@ const posColors: Record<string, string> = {
   K: 'text-purple-400',
   DEF: 'text-yellow-400',
 }
-
-const isKeeperPick = (pick: { pick_number: number; is_keeper?: boolean }) =>
-  pick.is_keeper === true || pick.pick_number < 0
-
-const displayPickNum = (n: number) =>
-  n < 0 ? `K${Math.abs(n)}` : String(n)
 
 interface LeagueOverviewProps {
   state: DraftState
@@ -114,12 +109,12 @@ export function LeagueOverview({ state, myManager }: LeagueOverviewProps) {
                         const keeper = isKeeperPick(pick)
                         return (
                           <div
-                            key={pick.pick_number}
+                            key={`${name}-${pick.pick_number}`}
                             className="flex items-center gap-1.5 text-[11px] py-0.5"
                           >
                             <span className={cn(
                               'font-mono w-4 text-right text-[9px]',
-                              keeper ? 'text-[#334155]' : 'text-muted-foreground'
+                              keeper ? 'text-[#475569]' : 'text-muted-foreground'
                             )}>
                               {displayPickNum(pick.pick_number)}
                             </span>

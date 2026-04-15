@@ -50,6 +50,7 @@ import type { ScoredPlayer } from '@/lib/research/strategy/scoring'
 import type { Strategy as DbStrategy } from '@/lib/supabase/database.types'
 import type { Explanation } from '@/lib/draft/explain'
 import { clearRecommendationCache } from '@/lib/draft/recommend'
+import { isKeeperPick, displayPickNum } from '@/lib/draft/keepers'
 
 const DEFAULT_ROSTER: RosterSlots = {
   qb: 1, rb: 2, wr: 2, te: 1, flex: 1, k: 1, dst: 1, bench: 6, ir: 0,
@@ -136,12 +137,6 @@ function PickFeed({
   const isAuction = format === 'auction'
   const recentPicks = [...picks].reverse().slice(0, 10)
 
-  const isKeeper = (pick: { pick_number: number; is_keeper?: boolean }) =>
-    pick.is_keeper === true || pick.pick_number < 0
-
-  const displayPickNum = (n: number) =>
-    n < 0 ? `K${Math.abs(n)}` : String(n)
-
   return (
     <FFICard className="overflow-hidden">
       <div className="flex items-center gap-2 mb-3">
@@ -161,7 +156,7 @@ function PickFeed({
           <AnimatePresence mode="popLayout">
             {recentPicks.map((pick, idx) => (
               <motion.div
-                key={pick.pick_number}
+                key={`${pick.manager}-${pick.pick_number}`}
                 layout
                 initial={{ opacity: 0, scale: 0.8, y: -20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -182,14 +177,14 @@ function PickFeed({
                 {pick.position && (
                   <FFIPositionBadge position={pick.position.toUpperCase() as Position} />
                 )}
-                {isKeeper(pick) && <span className="text-[10px] shrink-0" aria-label="Keeper">🔒</span>}
-                <span className={cn('ffi-body-md font-medium flex-1 truncate', isKeeper(pick) ? 'text-[#94a3b8]' : 'text-white')}>
+                {isKeeperPick(pick) && <span className="text-[10px] shrink-0" aria-label="Keeper">🔒</span>}
+                <span className={cn('ffi-body-md font-medium flex-1 truncate', isKeeperPick(pick) ? 'text-[#94a3b8]' : 'text-white')}>
                   {pick.player_name}
                 </span>
                 <span className="ffi-body-md text-[var(--ffi-text-secondary)] truncate max-w-20">
                   {pick.manager}
                 </span>
-                {!isKeeper(pick) && isAuction && pick.price != null && (
+                {!isKeeperPick(pick) && isAuction && pick.price != null && (
                   <span className="ffi-label text-[var(--ffi-accent)] font-mono">
                     ${pick.price}
                   </span>
