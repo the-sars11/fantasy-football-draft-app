@@ -1,0 +1,156 @@
+'use client'
+
+/**
+ * ConnectionStatusPill (FF-259)
+ *
+ * 4-state connection indicator for the live draft header.
+ * States: LIVE (<30s) · STALE (30s–2m) · OFFLINE (>2m) · MANUAL (no sheet)
+ *
+ * Spec: docs/superpowers/specs/2026-04-14-p0-redesign-design.md — Decision 3
+ */
+
+import { useState, useEffect } from 'react'
+import { cn } from '@/lib/utils'
+
+type ConnState = 'LIVE' | 'STALE' | 'OFFLINE' | 'MANUAL'
+
+interface ConnectionStatusPillProps {
+  /** ISO timestamp of last successful sheet poll. Null if never polled. */
+  lastPollAt: Date | null
+  /** Whether a sheet URL is configured */
+  sheetConnected: boolean
+  /** Current error message (used in OFFLINE error bar) */
+  error: string | null
+  /** Callback for retry button in error bar */
+  onRetry?: () => void
+}
+
+const STATE_CONFIG: Record<ConnState, {
+  bg: string
+  color: string
+  border: string
+  label: string
+  pulse: boolean
+}> = {
+  LIVE:    { bg: 'rgba(34,197,94,0.15)',   color: '#22c55e', border: 'rgba(34,197,94,0.25)',    label: 'LIVE',    pulse: true  },
+  STALE:   { bg: 'rgba(251,191,36,0.15)',  color: '#fbbf24', border: 'rgba(251,191,36,0.25)',   label: 'STALE',   pulse: false },
+  OFFLINE: { bg: 'rgba(239,68,68,0.15)',   color: '#ef4444', border: 'rgba(239,68,68,0.3)',     label: 'OFFLINE', pulse: false },
+  MANUAL:  { bg: 'rgba(148,163,184,0.1)',  color: '#94a3b8', border: 'rgba(148,163,184,0.15)',  label: 'MANUAL',  pulse: false },
+}
+
+function getElapsedLabel(lastPollAt: Date | null, now: number): string {
+  if (!lastPollAt) return ''
+  const secs = Math.floor((now - lastPollAt.getTime()) / 1000)
+  if (secs < 60) return `${secs}s`
+  const mins = Math.floor(secs / 60)
+  const rem = secs % 60
+  return rem > 0 ? `${mins}m ${rem}s` : `${mins}m`
+}
+
+function getConnState(lastPollAt: Date | null, sheetConnected: boolean, now: number): ConnState {
+  if (!sheetConnected) return 'MANUAL'
+  if (!lastPollAt) return 'OFFLINE'
+  const secs = Math.floor((now - lastPollAt.getTime()) / 1000)
+  if (secs <= 30) return 'LIVE'
+  if (secs <= 120) return 'STALE'
+  return 'OFFLINE'
+}
+
+export function ConnectionStatusPill({
+  lastPollAt,
+  sheetConnected,
+  error,
+  onRetry,
+}: ConnectionStatusPillProps) {
+  const [now, setNow] = useState(() => Date.now())
+  const [errorBarOpen, setErrorBarOpen] = useState(false)
+
+  // Tick every second to update elapsed time
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 1000)
+    return () => clearInterval(id)
+  }, [])
+
+  const connState = getConnState(lastPollAt, sheetConnected, now)
+  const cfg = STATE_CONFIG[connState]
+  const showTimestamp = connState !== 'MANUAL'
+  const elapsed = showTimestamp ? getElapsedLabel(lastPollAt, now) : ''
+
+  return (
+    <div className="flex flex-col items-end">
+      {/* Pill */}
+      <button
+        onClick={() => {
+          if (connState === 'OFFLINE') setErrorBarOpen(v => !v)
+        }}
+        style={{
+          background: cfg.bg,
+          color: cfg.color,
+          border: `1px solid ${cfg.border}`,
+        }}
+        className="flex items-center gap-[5px] px-[10px] py-[5px] rounded-[20px] cursor-default"
+        aria-label={`Connection status: ${cfg.label}${elapsed ? ` — ${elapsed} ago` : ''}`}
+      >
+        {/* Dot */}
+        <span
+          style={{ background: cfg.color }}
+          className={cn(
+            'w-2 h-2 rounded-full flex-shrink-0',
+            cfg.pulse && 'animate-pulse'
+          )}
+        />
+        {/* Label */}
+        <span
+          style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.05em', lineHeight: 1 }}
+        >
+          {cfg.label}
+        </span>
+        {/* Elapsed timestamp */}
+        {showTimestamp && elapsed && (
+          <span
+            style={{ fontSize: 9, opacity: 0.65, fontWeight: 400, lineHeight: 1 }}
+          >
+            {elapsed}
+          </span>
+        )}
+      </button>
+
+      {/* Error bar — OFFLINE only, expands below pill */}
+      {connState === 'OFFLINE' && errorBarOpen && (
+        <div
+          className="mt-1 flex items-center justify-between gap-2 px-3 py-2 rounded-lg w-64"
+          style={{ background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.15)' }}
+        >
+          <p style={{ fontSize: 10, color: '#f87171', lineHeight: 1.4, flex: 1 }}>
+            {error ?? 'Sheet unreachable — check share permissions or your connection. Picks entered manually will still save.'}
+          </p>
+          <div className="flex items-center gap-1 shrink-0">
+            {onRetry && (
+              <button
+                onClick={onRetry}
+                style={{
+                  fontSize: 10,
+                  fontWeight: 700,
+                  color: '#fff',
+                  padding: '4px 10px',
+                  borderRadius: 6,
+                  background: 'rgba(239,68,68,0.2)',
+                  border: '1px solid rgba(239,68,68,0.3)',
+                }}
+              >
+                Retry
+              </button>
+            )}
+            <button
+              onClick={() => setErrorBarOpen(false)}
+              style={{ fontSize: 14, color: '#f87171', lineHeight: 1 }}
+              aria-label="Dismiss error"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}

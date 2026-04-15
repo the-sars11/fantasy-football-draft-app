@@ -13,8 +13,6 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   Loader2,
   Radio,
-  Wifi,
-  WifiOff,
   ChevronDown,
   Sparkles,
   Target,
@@ -31,6 +29,7 @@ import {
 } from '@/components/ui/ffi-primitives'
 import { useDraftState } from '@/hooks/use-draft-state'
 import { useUserTags } from '@/hooks/use-user-tags'
+import { ConnectionStatusPill } from '@/components/draft/connection-status-pill'
 import { ManualPickEntry } from '@/components/draft/manual-pick-entry'
 import { PlayerPool } from '@/components/draft/player-pool'
 import { PositionScarcityTracker } from '@/components/draft/position-scarcity'
@@ -383,7 +382,7 @@ export function LiveDraftClient() {
     getNeeds,
     getBudget,
     getMaxBidFor,
-    isPolling,
+    lastPollAt,
     sheetError,
     saving,
   } = useDraftState({
@@ -539,17 +538,12 @@ export function LiveDraftClient() {
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
-          {session.sheet_url && (
-            <div className={cn(
-              'flex items-center gap-1 px-2 py-1 rounded-full',
-              isPolling
-                ? 'bg-[var(--ffi-success)]/20 text-[var(--ffi-success)]'
-                : 'bg-[var(--ffi-danger)]/20 text-[var(--ffi-danger)]'
-            )}>
-              {isPolling ? <Wifi className="h-3 w-3" /> : <WifiOff className="h-3 w-3" />}
-              <span className="ffi-caption">{isPolling ? 'LIVE' : 'OFFLINE'}</span>
-            </div>
-          )}
+          <ConnectionStatusPill
+            lastPollAt={lastPollAt}
+            sheetConnected={!!session.sheet_url}
+            error={sheetError}
+            onRetry={undefined}
+          />
           {saving && <Loader2 className="h-4 w-4 animate-spin text-[var(--ffi-primary)]" />}
           <FFIBadge status={state.status === 'completed' ? 'success' : 'info'}>
             {state.status === 'completed' ? 'COMPLETE' : `${state.total_picks} PICKS`}
