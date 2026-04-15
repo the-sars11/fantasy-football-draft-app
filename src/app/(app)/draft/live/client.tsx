@@ -551,11 +551,7 @@ export function LiveDraftClient() {
         </div>
       </div>
 
-      {sheetError && (
-        <FFICard className="border-l-4 border-l-[var(--ffi-warning)]">
-          <p className="ffi-body-md text-[var(--ffi-warning)]">Sheet sync error: {sheetError}</p>
-        </FFICard>
-      )}
+      {/* Sheet sync errors now surfaced via ConnectionStatusPill (FF-259) */}
 
       {/* Main layout */}
       <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-4">
