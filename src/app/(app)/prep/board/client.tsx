@@ -1,12 +1,12 @@
 'use client'
 
-import { useState, useEffect, useMemo, useCallback } from 'react'
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Loader2, AlertCircle, ClipboardList, RefreshCw, CheckCircle2 } from 'lucide-react'
+import { Loader2, AlertCircle, ClipboardList, RefreshCw, CheckCircle2, TrendingUp, TrendingDown } from 'lucide-react'
 import { DraftBoardTable } from '@/components/prep/draft-board-table'
 import { PositionBreakdown } from '@/components/prep/position-breakdown'
 import {
@@ -43,6 +43,9 @@ export function DraftBoardClient() {
   const [players, setPlayers] = useState<Player[]>([])
   const [activeStrategy, setActiveStrategy] = useState<Strategy | null>(null)
   const [dataLoading, setDataLoading] = useState(false)
+  // FF-278: raw per-source ADP divergence map (playerId → max-min divergence)
+  const [adpDivergenceMap, setAdpDivergenceMap] = useState<Map<string, number>>(new Map())
+  const hasComputedMovers = useRef(false)
 
   // Filters
   const [positionFilter, setPositionFilter] = useState<Position | 'ALL'>('ALL')
@@ -110,6 +113,20 @@ export function DraftBoardClient() {
         if (!cancelled && playersRes.ok) {
           const pData = await playersRes.json()
           setPlayers(cacheToPlayers(pData.players || []))
+          // FF-278: compute cross-source ADP divergence from raw data
+          if (!hasComputedMovers.current) {
+            const divMap = new Map<string, number>()
+            for (const raw of pData.players || []) {
+              const vals = Object.values(raw.adp ?? {}).filter(
+                (v): v is number => typeof v === 'number' && v > 0,
+              )
+              if (vals.length >= 2) {
+                divMap.set(raw.id as string, Math.max(...vals) - Math.min(...vals))
+              }
+            }
+            setAdpDivergenceMap(divMap)
+            hasComputedMovers.current = true
+          }
         }
 
         if (!cancelled && strategiesRes.ok) {
@@ -152,6 +169,17 @@ export function DraftBoardClient() {
       if (playersRes.ok) {
         const pData = await playersRes.json()
         setPlayers(cacheToPlayers(pData.players || []))
+        // FF-278: recompute divergence after refresh
+        const divMap = new Map<string, number>()
+        for (const raw of pData.players || []) {
+          const vals = Object.values(raw.adp ?? {}).filter(
+            (v): v is number => typeof v === 'number' && v > 0,
+          )
+          if (vals.length >= 2) {
+            divMap.set(raw.id as string, Math.max(...vals) - Math.min(...vals))
+          }
+        }
+        setAdpDivergenceMap(divMap)
       }
 
       if (strategiesRes.ok) {
@@ -210,6 +238,15 @@ export function DraftBoardClient() {
       intelContextMap, // FF-245: Pass intel context for tag-aware scoring
     )
   }, [players, activeStrategy, selectedLeague, intelContextMap, isTarget, isAvoid])
+
+  // FF-278: top movers — players with highest cross-source ADP divergence
+  const topMovers = useMemo(() => {
+    if (adpDivergenceMap.size === 0) return []
+    return players
+      .filter((p) => (adpDivergenceMap.get(p.id) ?? 0) > 10)
+      .sort((a, b) => (adpDivergenceMap.get(b.id) ?? 0) - (adpDivergenceMap.get(a.id) ?? 0))
+      .slice(0, 6)
+  }, [players, adpDivergenceMap])
 
   // Filter + sort
   const filteredPlayers = useMemo(() => {
@@ -401,6 +438,37 @@ export function DraftBoardClient() {
           </p>
         </div>
       ) : (
+        <>
+        {/* FF-278: ADP Movers — players with high cross-source divergence */}
+        {topMovers.length > 0 && (
+          <div className="rounded-lg border border-border/50 bg-muted/30 p-3 space-y-2">
+            <div className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
+              <TrendingUp className="h-3.5 w-3.5" />
+              ADP Movers
+              <span className="ml-auto text-[10px] font-normal">Cross-source divergence ↕ &gt;10 spots</span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {topMovers.map((p) => {
+                const div = adpDivergenceMap.get(p.id) ?? 0
+                return (
+                  <div
+                    key={p.id}
+                    className="flex items-center gap-1.5 rounded-md bg-background/70 border border-border/40 px-2 py-1 text-xs"
+                    title={`ADP diverges ${div.toFixed(0)} spots across sources`}
+                  >
+                    <span className="text-muted-foreground font-medium w-7">{p.position}</span>
+                    <span className="font-medium truncate max-w-[100px]">{p.name}</span>
+                    <span className="text-[var(--ffi-warning)] font-mono font-bold text-[10px] flex items-center gap-0.5">
+                      <TrendingDown className="h-3 w-3" />
+                      ↕{div.toFixed(0)}
+                    </span>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
         <Tabs defaultValue="board">
           <TabsList>
             <TabsTrigger value="board">All Players</TabsTrigger>
@@ -477,6 +545,7 @@ export function DraftBoardClient() {
             />
           </TabsContent>
         </Tabs>
+        </>
       )}
     </div>
   )

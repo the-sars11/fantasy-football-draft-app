@@ -39,6 +39,8 @@ interface FFIPlayerCardProps {
   intel?: PlayerIntelDisplay // Optional intel context for tag display
   onBid?: (player: Player) => void
   maxBid?: number | null
+  /** FF-278: cross-source ADP divergence (max − min across sources). Show indicator when > 10. */
+  adpDivergence?: number
 }
 
 // --- Badge Types & Configuration ---
@@ -146,6 +148,7 @@ export function FFIPlayerCard({
   intel,
   onBid,
   maxBid,
+  adpDivergence,
 }: FFIPlayerCardProps) {
   const player = scoredPlayer.player
   const isAuction = format === 'auction'
@@ -316,11 +319,20 @@ export function FFIPlayerCard({
             <div className={`font-headline text-2xl font-bold ${isHighlighted ? 'text-[#2ff801]' : 'text-[#deedf9]'}`}>
               {isAuction ? `$${auctionValue}` : `Rd ${roundValue}`}
             </div>
-            <div className="font-body text-[10px] text-[#9eadb8]">
+            <div className="font-body text-[10px] text-[#9eadb8] flex items-center justify-end gap-1.5">
               {isAuction
                 ? `$${valueRangeLow}-$${valueRangeHigh} RANGE`
                 : `ADP ${player.adp > 0 ? player.adp.toFixed(1) : '—'}`
               }
+              {/* FF-278: ADP divergence indicator */}
+              {adpDivergence != null && adpDivergence > 10 && (
+                <span
+                  className="text-[#f97316] font-bold tracking-tight"
+                  title={`ADP diverges ${adpDivergence.toFixed(0)} spots across sources`}
+                >
+                  ↕{adpDivergence.toFixed(0)}
+                </span>
+              )}
             </div>
             {isAuction && maxBid != null && (
               <div className="mt-1.5 space-y-0.5">
