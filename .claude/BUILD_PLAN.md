@@ -95,7 +95,7 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 - [x] FF-243: Confirm/dismiss system tag actions — PATCH /api/user-tags handles dismissSystemTag/undismissSystemTag; useSystemTagActions hook; dismissed tags render grayed-out with restore link in FFIPlayerIntelCard; wired in PlayerBrowserClient
 - [x] FF-270: Confidence indicators on recommendations — assessDataCoverage() in explain.ts detects <2 sources or missing ADP+rank; Thin Data factor added; confidence forced 'low'; amber warning banner + colored confidence bar in FFIAIInsight
 - [x] FF-271: Data source attribution — sources[] on Explanation type; collected from player.sourceData + AI Analysis; rendered as muted pill row in FFIAIInsight
-- [ ] FF-272: Strategy drift alert — when target players are gone and AI is about to pivot, make it explicit before acting
+- [x] FF-272: Strategy drift alert — detectStrategyDrift() in flow-monitor; orange "Strategy drift" banner in DraftFlowAlerts with struck-through target names when all targets are gone; dismissible
 
 ---
 

@@ -4,6 +4,25 @@ All notable changes tracked here with root cause analysis.
 
 ---
 
+## 2026-04-14 (session 7, cont.) — FF-272: Strategy Drift Alert
+
+**Task:** FF-272 (shared)
+**Class:** `shared` | **Lenses:** Architecture, QA
+
+**Root Cause:** When all of a strategy's player targets get drafted by other managers, the AI silently shifts to best-available mode with no notification. The user has no idea the plan has changed — they think the AI is still targeting specific players when it isn't.
+
+**Changes:**
+- `src/lib/draft/flow-monitor.ts`: Added `StrategyDrift` type and `detectStrategyDrift(strategyTargets, draftedNames, myPickedNames)`. Classifies each strategy target as gone (drafted by others) or remaining (still on board). Targets the user themselves drafted are excluded. `active = true` when `goneTargets.length > 0 && remainingTargets.length === 0`. Also imports `StrategyPlayerTarget` from database types.
+- `src/app/(app)/draft/live/client.tsx`: `myPickedNames` useMemo (user's own picks by `state.manager_order[0]`); `driftAlert` useMemo (fires after pick 3, null when dismissed); `handleDismissDrift` callback (`driftDismissed` state); `driftAlert` + `onDismissDrift` passed to `DraftFlowAlerts`.
+- `src/components/draft/draft-flow-alerts.tsx`: Renders orange "Strategy drift" banner with struck-through target name badges and "Got it" dismiss button between the pivot suggestion and flow alerts. Early return guard updated to include `driftAlert`.
+
+**Verification:**
+- ✅ `npm run type-check` — clean
+- ✅ `npm run test:run` — 27/27 passed
+- ✅ `npm run build` — clean
+
+---
+
 ## 2026-04-14 (session 7, cont.) — FF-271: Data Source Attribution
 
 **Task:** FF-271 (shared)
