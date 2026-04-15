@@ -8,8 +8,8 @@
  * Draft Setup Step 3 reads from this same storage.
  */
 
-import { useState, useEffect, useCallback, useRef } from 'react'
-import { Plus, Trash2, Loader2, Lock, ChevronDown, ChevronRight } from 'lucide-react'
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
+import { Plus, Trash2, Loader2, Lock, ChevronDown, ChevronRight, TrendingUp } from 'lucide-react'
 import {
   FFICard,
   FFIButton,
@@ -19,6 +19,9 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { analyzeKeeperValues } from '@/lib/draft/keepers'
+import type { KeeperAssignment, KeeperValue } from '@/lib/draft/keepers'
+import type { Player } from '@/lib/players/types'
 
 const POSITIONS = ['QB', 'RB', 'WR', 'TE', 'K', 'DST'] as const
 type Position = typeof POSITIONS[number]
@@ -131,6 +134,10 @@ export function KeeperDeclarationClient() {
   const [importRaw, setImportRaw] = useState('')
   const [importFeedback, setImportFeedback] = useState<{ imported: number; skipped: number } | null>(null)
 
+  // Player data for equity calculation
+  const [players, setPlayers] = useState<Player[]>([])
+  const [playersLoading, setPlayersLoading] = useState(false)
+
   const selectedLeague = leagues.find(l => l.id === selectedLeagueId)
   const isAuction = selectedLeague?.format === 'auction'
   const maxKeepers = selectedLeague?.keeper_settings?.max_keepers ?? 3
@@ -176,6 +183,31 @@ export function KeeperDeclarationClient() {
     const t = setTimeout(() => setSaved(false), 2000)
     return () => clearTimeout(t)
   }, [keepers, selectedLeagueId])
+
+  // Lazy-load player data when keepers exist (needed for equity calc)
+  useEffect(() => {
+    if (!selectedLeagueId || keepers.length === 0 || players.length > 0) return
+    setPlayersLoading(true)
+    fetch('/api/players')
+      .then(r => r.json())
+      .then(data => { if (data.players) setPlayers(data.players) })
+      .catch(() => {})
+      .finally(() => setPlayersLoading(false))
+  }, [selectedLeagueId, keepers.length, players.length])
+
+  // Keeper equity: cost vs. market value, sorted best deal first
+  const keeperEquity = useMemo((): (KeeperValue & { hasData: boolean })[] => {
+    const named = keepers.filter(k => k.player_name.trim())
+    if (named.length === 0 || players.length === 0) return []
+    const knownNames = new Set(players.map(p => p.name.toLowerCase()))
+    return analyzeKeeperValues(
+      named as unknown as KeeperAssignment[],
+      players,
+      isAuction ? 'auction' : 'snake',
+    )
+      .map(kv => ({ ...kv, hasData: knownNames.has(kv.player_name.toLowerCase()) }))
+      .sort((a, b) => b.surplus - a.surplus)
+  }, [keepers, players, isAuction])
 
   const addKeeper = useCallback(() => {
     setKeepers(prev => [
@@ -413,6 +445,74 @@ export function KeeperDeclarationClient() {
               Add Keeper
             </FFIButton>
           </FFICard>
+
+          {/* Keeper Equity Panel */}
+          {keepers.filter(k => k.player_name.trim()).length > 0 && (
+            <FFICard>
+              <div className="flex items-center gap-2 mb-4">
+                <TrendingUp className="h-4 w-4 text-[var(--ffi-accent)]" />
+                <span className="ffi-title-md text-white">Keeper Equity</span>
+                <span className="ffi-caption text-[var(--ffi-text-secondary)] ml-auto">
+                  {isAuction ? 'cost vs. auction value' : 'round cost vs. ADP round'}
+                </span>
+              </div>
+
+              {playersLoading ? (
+                <div className="flex items-center gap-2 py-3 text-[var(--ffi-text-secondary)]">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span className="ffi-body-md">Loading market data...</span>
+                </div>
+              ) : keeperEquity.length === 0 ? (
+                <p className="ffi-body-md text-[var(--ffi-text-secondary)] py-2">
+                  Run a research pass to load market data.
+                </p>
+              ) : (
+                <div className="space-y-2">
+                  {keeperEquity.map((kv) => {
+                    const surplusAbs = Math.abs(kv.surplus)
+                    const surplusColor =
+                      !kv.hasData ? 'text-[var(--ffi-text-muted)]'
+                      : kv.surplus > 0 ? 'text-[var(--ffi-success)]'
+                      : kv.surplus < 0 ? 'text-[var(--ffi-danger)]'
+                      : 'text-[var(--ffi-text-secondary)]'
+                    const surplusLabel =
+                      !kv.hasData ? '—'
+                      : kv.surplus > 0 ? `+${surplusAbs}${isAuction ? ' $' : ' rd'}`
+                      : kv.surplus < 0 ? `-${surplusAbs}${isAuction ? ' $' : ' rd'}`
+                      : `±0`
+
+                    return (
+                      <div
+                        key={kv.player_name}
+                        className="flex items-center gap-2 px-3 py-2 rounded-lg border border-[var(--ffi-border)]/20 bg-[var(--ffi-surface)]"
+                      >
+                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded shrink-0 bg-[#8bacff]/10 text-[#8bacff]">
+                          {kv.position}
+                        </span>
+                        <span className="ffi-body-md text-white flex-1 truncate min-w-0">
+                          {kv.player_name}
+                        </span>
+                        <span className="ffi-caption text-[var(--ffi-text-secondary)] shrink-0">
+                          {isAuction ? `$${kv.cost}` : `Rd ${kv.cost}`}
+                        </span>
+                        <span className="ffi-caption text-[var(--ffi-text-muted)] shrink-0">
+                          {kv.hasData
+                            ? isAuction ? `mkt $${kv.marketValue}` : `ADP Rd ${kv.marketValue}`
+                            : 'no data'}
+                        </span>
+                        <span className={`ffi-caption font-mono font-bold w-12 text-right shrink-0 ${surplusColor}`}>
+                          {surplusLabel}
+                        </span>
+                      </div>
+                    )
+                  })}
+                  <p className="ffi-caption text-[var(--ffi-text-muted)] pt-1">
+                    {isAuction ? 'Positive = paying less than market value' : 'Positive = keeping in a later round than ADP'}
+                  </p>
+                </div>
+              )}
+            </FFICard>
+          )}
         </>
       )}
     </div>

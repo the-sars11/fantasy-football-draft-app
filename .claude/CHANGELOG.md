@@ -4,6 +4,23 @@ All notable changes tracked here with root cause analysis.
 
 ---
 
+## 2026-04-14 (session 7, cont.) — FF-273: Keeper Equity Panel
+
+**Task:** FF-273 (new feature)
+**Class:** `output` | **Lenses:** QA, Delivery
+
+**Root Cause:** Keeper leagues need a way to evaluate whether each keeper is a good deal vs. current market. No equity visibility means Tyler is flying blind when deciding which players to keep and at what round cost.
+
+**Changes:**
+- `src/app/(app)/prep/keepers/client.tsx`: Added "Keeper Equity" card below the declared keepers list. Lazy-loads `/api/players` only when keepers exist. Uses existing `analyzeKeeperValues()` from `lib/draft/keepers.ts` to compute `surplus = round cost − ADP round` (snake) or `market − cost` (auction). Rows sorted descending by surplus (best deals first). Each row shows position, player name, round cost, ADP round, and a color-coded surplus badge (green = bargain, red = overpay, muted = no market data). Legend line explains the sign convention. Auction vs. snake display adapts to league format.
+
+**Verification:**
+- ✅ `npm run type-check` — clean
+- ✅ `npm run test:run` — 27/27 passed
+- ✅ `npm run build` — clean
+
+---
+
 ## 2026-04-14 (session 7, cont.) — FF-268: Mobile-First Primary Action Audit
 
 **Task:** FF-268 (output/UX)

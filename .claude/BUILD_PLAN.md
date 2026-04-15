@@ -102,7 +102,7 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 ### Sub-tier 6: Tyler's Keeper League (Yahoo snake)
 
 - [ ] FF-069: Tyler's league setup — enter his exact scoring settings + keeper rules/costs when provided `[!]` _(Blocked: waiting on Tyler's settings)_
-- [ ] FF-273: Keeper discount calculator — keeper cost vs. current ADP value = keeper equity, sorted descending
+- [x] FF-273: Keeper discount calculator — keeper cost vs. current ADP value = keeper equity, sorted descending
 - [x] FF-274: Visual distinction between kept and drafted players — keeper picks (is_keeper=true OR pick_number<0) show 🔒 icon, muted name (#94a3b8), K1/K2/K3 pick numbers in PickFeed + LeagueOverview; helpers extracted to lib/draft/keepers.ts
 - [x] FF-275: Yahoo keeper assignment import → auto-exclude from draft pool
 
