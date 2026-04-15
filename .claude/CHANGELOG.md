@@ -1,5 +1,67 @@
 # Changelog — FFIntelligence
 
+---
+
+## 2026-04-14 (session 8) — FF-276 / FF-277 / FF-278: Pre-Draft Tools
+
+### FF-278: Consensus Shift Alerts
+
+**Task:** FF-278 (shared)
+**Class:** `shared` | **Lenses:** Architecture, QA
+
+**Root Cause:** No visual signal existed to flag players whose ADP was being called differently across sources (ESPN vs. Sleeper vs. FantasyPros). A player with a wide ADP range across sources is either a breakout candidate or a volatile pick — either way worth flagging before draft day.
+
+**Approach:** Cross-source divergence proxy (max ADP − min ADP across sourceData). Real historical ADP movement data is not stored, so this is honest about what the data supports.
+
+**Changes:**
+- `src/app/(app)/prep/board/client.tsx`: Stores raw `adp: Record<string, number>` from API response before `cacheToPlayers` conversion (conversion loses per-source data). Computes `adpDivergenceMap` (playerId → divergence). Renders "ADP Movers" chip strip above tabs when any player has divergence > 10 (top 6 shown, sorted descending by divergence).
+- `src/components/draft/ffi-player-card.tsx`: Added `adpDivergence?: number` prop. Shows orange `↕N` indicator next to ADP in the value column when divergence > 10.
+- `src/components/draft/player-pool.tsx`: Added `getAdpDivergence()` helper that inspects the raw `Record<string, number>` adp field on live draft players (typed as `number` but runtime is object from raw API). Passes computed divergence to each `FFIPlayerCard`.
+
+**Verification:**
+- ✅ `npm run type-check` — clean
+- ✅ `npm run test:run` — 27/27 passed
+- ✅ `npm run build` — clean
+
+---
+
+### FF-277: Injury Watch Panel
+
+**Task:** FF-277 (output)
+**Class:** `output` | **Lenses:** Delivery, QA
+
+**Root Cause:** During a live draft, injury news can break at any moment. There was no panel surfacing which undrafted players had active injury flags — forcing the user to mentally track status from memory or context-switch to a separate source.
+
+**Changes:**
+- `src/components/draft/injury-watch.tsx` (NEW): `InjuryWatch` component accepts `players[]` and `draftedNames`. Filters undrafted players with flagged status. Handles both `Player.injuryStatus` (camelCase, set by cacheToPlayer) and raw `injury_status` (snake_case, present on live draft's raw API data). Color-coded status badges: OUT/IR/PUP = red, DOUBTFUL = orange, QUESTIONABLE = amber, SUSPENDED = red/dim. Truncated to top 8. Auto-hides when no flagged players.
+- `src/app/(app)/draft/live/client.tsx`: Added `InjuryWatch` import and rendered in right column between `PositionScarcityTracker` and `PlayerPool`.
+
+**Verification:**
+- ✅ `npm run type-check` — clean
+- ✅ `npm run test:run` — 27/27 passed
+- ✅ `npm run build` — clean
+
+---
+
+### FF-276: Dry Run Simulation
+
+**Task:** FF-276 (output)
+**Class:** `output` | **Lenses:** Delivery, QA
+
+**Root Cause:** No way to stress-test a draft strategy before draft day. Entering the live draft without knowing how the strategy performs against field competition leaves unanswered questions: "Would I end up with good RBs? Could I get shut out at a position?"
+
+**Changes:**
+- `src/app/(app)/prep/simulate/page.tsx` (NEW): Server component wrapper at `/prep/simulate`.
+- `src/app/(app)/prep/simulate/client.tsx` (NEW): Full simulation client. Fetches `/api/players` and `/api/strategies`. Runs client-side simulation: for snake, user picks by `scorePlayersWithStrategy` combinedScore, others pick by ADP. For auction, round-robin with budget constraints, same pick logic. Outputs: simulated roster (player / position / round or price), per-position grades (A/B/C/F based on tier-1 starter coverage), overall verdict (Strong = 5+ top-50 players, Average = 3-4, Weak < 3), and shutout position alerts.
+- `src/app/(app)/prep/page.tsx`: Added "Dry Run" HubCard linking to `/prep/simulate`.
+
+**Verification:**
+- ✅ `npm run type-check` — clean
+- ✅ `npm run test:run` — 27/27 passed
+- ✅ `npm run build` — clean (54 pages, `/prep/simulate` included)
+
+---
+
 All notable changes tracked here with root cause analysis.
 
 ---

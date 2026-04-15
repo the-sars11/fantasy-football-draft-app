@@ -14,8 +14,9 @@
     { "name": "P3+ — Commercialization (CONDITIONAL)", "done": false }
   ],
   "nextItems": [
-    "FF-273: Keeper discount calculator (P0 keeper sub-tier)",
-    "FF-276: Dry run simulation — stress-test draft strategy against historical ADP"
+    "FF-279: FFI reads Auctioneer JSON export at auction setup (P1 Auctioneer integration)",
+    "FF-280: Subscribe to Auctioneer BroadcastChannel for instant pick sync",
+    "FF-269: Arm's-length physical test — fix anything requiring precision tapping"
   ]
 }
 -->
@@ -110,9 +111,9 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 
 ### Sub-tier 7: Pre-Draft Tools
 
-- [ ] FF-276: Dry run simulation — run full draft strategy against historical ADP to stress-test
-- [ ] FF-277: Draft day news panel — surface injury/status changes within 24 hours of draft; flag any board player with status change since last refresh
-- [ ] FF-278: Consensus shift alerts — highlight players whose ADP moved >5 spots since last refresh
+- [x] FF-276: Dry run simulation — run full draft strategy against historical ADP to stress-test
+- [x] FF-277: Draft day news panel — surface injury/status changes within 24 hours of draft; flag any board player with status change since last refresh
+- [x] FF-278: Consensus shift alerts — highlight players whose ADP moved >5 spots since last refresh
 
 ---
 
