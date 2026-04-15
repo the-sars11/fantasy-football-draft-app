@@ -4,6 +4,24 @@ All notable changes tracked here with root cause analysis.
 
 ---
 
+## 2026-04-14 (session 7, cont.) — FF-271: Data Source Attribution
+
+**Task:** FF-271 (shared)
+**Class:** `shared` | **Lenses:** QA
+
+**Root Cause:** Recommendations showed reasoning but gave no indication of which data sources contributed. Users had no way to judge whether a recommendation was backed by 1 source or 4.
+
+**Changes:**
+- `src/lib/draft/explain.ts`: Added `sources: string[]` to `Explanation` type. In `explainPlayer()`, collects unique display names from `player.sourceData` (espn→ESPN, yahoo→Yahoo, sleeper→Sleeper, fantasypros→FantasyPros) plus `AI Analysis` when `player.analysis` exists.
+- `src/components/draft/ffi-ai-insight.tsx`: Renders a muted pill row above the Key Factors block showing "Sources: ESPN · FantasyPros · AI Analysis" (or whatever applies). Empty if no sources.
+
+**Verification:**
+- ✅ `npm run type-check` — clean
+- ✅ `npm run test:run` — 27/27 passed
+- ✅ `npm run build` — clean
+
+---
+
 ## 2026-04-14 (session 7, cont.) — FF-270: Confidence Indicators — Thin Data Flag
 
 **Task:** FF-270 (shared)
