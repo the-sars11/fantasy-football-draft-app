@@ -52,6 +52,7 @@ import type { Strategy as DbStrategy } from '@/lib/supabase/database.types'
 import type { Explanation } from '@/lib/draft/explain'
 import { clearRecommendationCache } from '@/lib/draft/recommend'
 import { isKeeperPick, displayPickNum } from '@/lib/draft/keepers'
+import { InjuryWatch } from '@/components/draft/injury-watch'
 
 const DEFAULT_ROSTER: RosterSlots = {
   qb: 1, rb: 2, wr: 2, te: 1, flex: 1, k: 1, dst: 1, bench: 6, ir: 0,
@@ -658,6 +659,12 @@ export function LiveDraftClient() {
           <PositionScarcityTracker
             scarcity={scarcity}
             showSpendRanges={state.format === 'auction'}
+          />
+
+          {/* FF-277: Injury Watch — flagged undrafted players */}
+          <InjuryWatch
+            players={players}
+            draftedNames={draftedNames}
           />
 
           {/* Available players */}
