@@ -87,6 +87,21 @@ export function FFIAIInsight({ explanation, confidence }: FFIAIInsightProps) {
         </button>
       </div>
 
+      {/* FF-271: Source attribution */}
+      {explanation.sources.length > 0 && (
+        <div className="flex items-center gap-1.5 flex-wrap">
+          <span className="text-[9px] text-[#697782] uppercase tracking-widest shrink-0">Sources:</span>
+          {explanation.sources.map((src) => (
+            <span
+              key={src}
+              className="px-1.5 py-0.5 rounded text-[9px] font-bold tracking-wider bg-[#142834] text-[#697782]"
+            >
+              {src}
+            </span>
+          ))}
+        </div>
+      )}
+
       {/* Factor breakdown (if available) — skip Thin Data sentinel */}
       {explanation.factors.filter(f => f.label !== 'Thin Data').length > 0 && (
         <div className="pt-3 border-t border-[#3c4a53]/10 space-y-2">

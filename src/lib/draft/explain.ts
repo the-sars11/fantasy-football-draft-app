@@ -21,6 +21,7 @@ export interface Explanation {
   factors: ExplainFactor[]  // ordered by weight desc
   confidence: 'high' | 'medium' | 'low'
   dataWarning?: string      // FF-270: set when coverage is sparse
+  sources: string[]         // FF-271: data sources behind this recommendation
 }
 
 // --- Position scarcity types (also used by FF-035) ---
@@ -341,5 +342,19 @@ export function explainPlayer(
     summary = `${player.name} is a weak fit. ${topFactor?.detail || 'Consider other options.'}`
   }
 
-  return { summary, factors, confidence, dataWarning: dataWarning ?? undefined }
+  // FF-271: Collect data sources behind this recommendation
+  const SOURCE_DISPLAY: Record<string, string> = {
+    espn: 'ESPN',
+    yahoo: 'Yahoo',
+    sleeper: 'Sleeper',
+    fantasypros: 'FantasyPros',
+  }
+  const sources: string[] = [
+    ...new Set(
+      (player.sourceData ?? []).map(s => SOURCE_DISPLAY[s.source] ?? s.source)
+    ),
+  ]
+  if (player.analysis) sources.push('AI Analysis')
+
+  return { summary, factors, confidence, dataWarning: dataWarning ?? undefined, sources }
 }
