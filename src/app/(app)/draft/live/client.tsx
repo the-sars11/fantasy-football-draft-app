@@ -42,7 +42,8 @@ import { SnakeAdvisor } from '@/components/draft/snake-advisor'
 import type { PivotEntry } from '@/components/draft/pivot-history'
 import { scorePlayersWithStrategy, buildIntelContextMap } from '@/lib/research/strategy/scoring'
 import { calculateScarcityExtended, explainPlayer } from '@/lib/draft/explain'
-import { analyzeDraftFlow } from '@/lib/draft/flow-monitor'
+import { analyzeDraftFlow, detectStrategyDrift } from '@/lib/draft/flow-monitor'
+import type { StrategyDrift } from '@/lib/draft/flow-monitor'
 import { detectPivotOpportunity } from '@/lib/draft/pivot-detector'
 import type { Player, Position } from '@/lib/players/types'
 import type { DraftSession, League, RosterSlots } from '@/lib/supabase/database.types'
@@ -302,6 +303,7 @@ export function LiveDraftClient() {
   const [allStrategies, setAllStrategies] = useState<DbStrategy[]>([])
   const [pivotDismissed, setPivotDismissed] = useState(false)
   const [pivotHistory, setPivotHistory] = useState<PivotEntry[]>([])
+  const [driftDismissed, setDriftDismissed] = useState(false)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -443,6 +445,32 @@ export function LiveDraftClient() {
     if (!state || !flow || pivotDismissed) return null
     return detectPivotOpportunity(strategy, allStrategies, state, flow, scoredPlayers, draftedNames)
   }, [strategy, allStrategies, state, flow, scoredPlayers, draftedNames, pivotDismissed])
+
+  // FF-272: Strategy drift detection
+  const myPickedNames = useMemo(() => {
+    if (!state) return new Set<string>()
+    const myMgr = state.manager_order[0]
+    return new Set(
+      state.picks
+        .filter(p => p.manager === myMgr)
+        .map(p => p.player_name.toLowerCase())
+    )
+  }, [state])
+
+  const driftAlert = useMemo((): StrategyDrift | null => {
+    if (!strategy || !state || driftDismissed || state.total_picks < 3) return null
+    if (!strategy.player_targets?.length) return null
+    const result = detectStrategyDrift(
+      strategy.player_targets,
+      draftedNames,
+      myPickedNames,
+    )
+    return result.active ? result : null
+  }, [strategy, state, draftedNames, myPickedNames, driftDismissed])
+
+  const handleDismissDrift = useCallback(() => {
+    setDriftDismissed(true)
+  }, [])
 
   // Strategy swap handler
   const handleStrategySwap = useCallback((newStrategy: DbStrategy, fromRecommendation = false) => {
@@ -621,6 +649,8 @@ export function LiveDraftClient() {
               draftedNames={draftedNames}
               format={state.format}
               leagueBudget={league?.budget ?? undefined}
+              driftAlert={driftAlert}
+              onDismissDrift={handleDismissDrift}
             />
           )}
 

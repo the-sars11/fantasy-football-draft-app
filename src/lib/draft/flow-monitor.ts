@@ -11,6 +11,7 @@
 import type { DraftState, DraftPick } from '@/lib/draft/state'
 import type { Player } from '@/lib/players/types'
 import type { ScoredPlayer } from '@/lib/research/strategy/scoring'
+import type { StrategyPlayerTarget } from '@/lib/supabase/database.types'
 
 export interface PositionRun {
   position: string
@@ -275,4 +276,49 @@ function generateAlerts(
   }
 
   return alerts
+}
+
+// --- FF-272: Strategy Drift Detection ---
+
+export interface StrategyDrift {
+  active: boolean
+  goneTargets: string[]       // target names drafted by other managers
+  remainingTargets: string[]  // target names still on the board
+}
+
+/**
+ * FF-272: Detect strategy drift — all planned targets have been taken by others.
+ * Fires once the last remaining target leaves the board so the AI's pivot
+ * can be surfaced explicitly rather than happening silently.
+ *
+ * @param strategyTargets  player_targets from the active strategy
+ * @param draftedNames     all drafted player names (lowercase)
+ * @param myPickedNames    names the user themselves drafted (lowercase) — these don't count as "gone"
+ */
+export function detectStrategyDrift(
+  strategyTargets: StrategyPlayerTarget[],
+  draftedNames: Set<string>,
+  myPickedNames: Set<string>,
+): StrategyDrift {
+  if (strategyTargets.length === 0) {
+    return { active: false, goneTargets: [], remainingTargets: [] }
+  }
+
+  const goneTargets: string[] = []
+  const remainingTargets: string[] = []
+
+  for (const target of strategyTargets) {
+    const nameLower = target.player_name.toLowerCase()
+    if (myPickedNames.has(nameLower)) continue  // user got this one — success, not drift
+    if (draftedNames.has(nameLower)) {
+      goneTargets.push(target.player_name)
+    } else {
+      remainingTargets.push(target.player_name)
+    }
+  }
+
+  // Drift is active when at least one target was taken by others AND none remain
+  const active = goneTargets.length > 0 && remainingTargets.length === 0
+
+  return { active, goneTargets, remainingTargets }
 }

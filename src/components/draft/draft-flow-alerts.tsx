@@ -19,7 +19,7 @@ import {
   ChevronRight,
 } from 'lucide-react'
 import { StrategyImpactPreview } from './strategy-impact-preview'
-import type { DraftFlowState, FlowAlert } from '@/lib/draft/flow-monitor'
+import type { DraftFlowState, FlowAlert, StrategyDrift } from '@/lib/draft/flow-monitor'
 import type { Strategy as DbStrategy } from '@/lib/supabase/database.types'
 import type { Player } from '@/lib/players/types'
 import type { DraftFormat } from '@/lib/supabase/database.types'
@@ -41,6 +41,9 @@ interface DraftFlowAlertsProps {
   draftedNames?: Set<string>
   format?: DraftFormat
   leagueBudget?: number
+  // FF-272: Strategy drift
+  driftAlert?: StrategyDrift | null
+  onDismissDrift?: () => void
 }
 
 const severityIcon = {
@@ -65,6 +68,8 @@ export function DraftFlowAlerts({
   draftedNames,
   format,
   leagueBudget,
+  driftAlert,
+  onDismissDrift,
 }: DraftFlowAlertsProps) {
   const [dismissedAlerts, setDismissedAlerts] = useState<Set<string>>(new Set())
   const [showPreview, setShowPreview] = useState(false)
@@ -79,7 +84,7 @@ export function DraftFlowAlerts({
 
   const canShowPreview = currentStrategy && pivotSuggestion && players && draftedNames && format
 
-  if (visibleAlerts.length === 0 && !pivotSuggestion) return null
+  if (visibleAlerts.length === 0 && !pivotSuggestion && !driftAlert) return null
 
   return (
     <div className="space-y-1.5">
@@ -149,6 +154,42 @@ export function DraftFlowAlerts({
                   Dismiss
                 </Button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* FF-272: Strategy drift alert */}
+      {driftAlert?.active && (
+        <div className="rounded-lg border border-orange-500/30 bg-orange-500/5 px-3 py-2">
+          <div className="flex items-start gap-2">
+            <AlertTriangle className="h-3.5 w-3.5 text-orange-400 mt-0.5 shrink-0" />
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-medium text-orange-300">Strategy drift</p>
+              <p className="text-[10px] text-muted-foreground mt-0.5">
+                All your targets are off the board. Recommendations are now best-available.
+              </p>
+              {driftAlert.goneTargets.length > 0 && (
+                <div className="flex flex-wrap gap-1 mt-1.5">
+                  {driftAlert.goneTargets.map((name, i) => (
+                    <Badge
+                      key={i}
+                      variant="outline"
+                      className="text-[9px] px-1 py-0 line-through text-muted-foreground/60 border-muted/40"
+                    >
+                      {name}
+                    </Badge>
+                  ))}
+                </div>
+              )}
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-6 text-[10px] px-2 mt-1.5"
+                onClick={onDismissDrift}
+              >
+                Got it
+              </Button>
             </div>
           </div>
         </div>
