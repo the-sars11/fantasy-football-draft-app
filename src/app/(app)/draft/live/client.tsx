@@ -461,6 +461,11 @@ export function LiveDraftClient() {
     }])
   }, [strategy?.name, state?.total_picks])
 
+  // Stable callback for PlayerPool BID button (FF-257)
+  const handleBidPlayer = useCallback((player: Player) => {
+    setOnBlockPlayer(player)
+  }, [])
+
   // Dismiss pivot
   const handleDismissPivot = useCallback(() => {
     if (pivotSuggestion && strategy) {
@@ -635,9 +640,7 @@ export function LiveDraftClient() {
             draftedNames={draftedNames}
             format={state.format}
             getExplanation={getExplanation}
-            onBidPlayer={(player) => {
-              setOnBlockPlayer(player)
-            }}
+            onBidPlayer={handleBidPlayer}
           />
         </div>
       </div>

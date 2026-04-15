@@ -92,7 +92,7 @@ export function ManualPickEntry({
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setPrice(String(onBlockPlayer.consensusAuctionValue || 1))
     }
-    if (variant === 'bar' && !onBlockPlayer) {
+    if (variant === 'bar' && !onBlockPlayer && format === 'auction') {
       setPrice('')
     }
   }, [onBlockPlayer, variant, format])
