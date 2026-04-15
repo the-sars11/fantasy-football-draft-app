@@ -33,7 +33,7 @@ import {
   type BudgetAnalysis,
   type PositionUrgencyWarning,
 } from '@/lib/draft/auction-advisor'
-import { fetchRecommendation, type LLMRecommendation } from '@/lib/draft/recommend'
+import { fetchAuctionRecommendation, type LLMAuctionRecommendation } from '@/lib/draft/recommend-auction'
 import type { DraftState } from '@/lib/draft/state'
 import type { ScoredPlayer } from '@/lib/research/strategy/scoring'
 import type { Strategy as DbStrategy } from '@/lib/supabase/database.types'
@@ -71,7 +71,7 @@ export function AuctionAdvisor({
   draftedNames,
   strategy,
 }: AuctionAdvisorProps) {
-  const [recommendation, setRecommendation] = useState<LLMRecommendation | null>(null)
+  const [recommendation, setRecommendation] = useState<LLMAuctionRecommendation | null>(null)
   const [loadingRec, setLoadingRec] = useState(false)
   const [recError, setRecError] = useState<string | null>(null)
 
@@ -106,7 +106,7 @@ export function AuctionAdvisor({
     setLoadingRec(true)
     setRecError(null)
     try {
-      const rec = await fetchRecommendation(
+      const rec = await fetchAuctionRecommendation(
         state, managerName, scoredPlayers, draftedNames, strategy,
       )
       setRecommendation(rec)

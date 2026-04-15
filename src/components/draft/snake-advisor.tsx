@@ -32,7 +32,7 @@ import {
   type ProjectedAvailability,
   type TradeSuggestion,
 } from '@/lib/draft/snake-advisor'
-import { fetchRecommendation, type LLMRecommendation } from '@/lib/draft/recommend'
+import { fetchSnakeRecommendation, type LLMSnakeRecommendation } from '@/lib/draft/recommend-snake'
 import { getManagerKeepers } from '@/lib/draft/keepers'
 import type { DraftState } from '@/lib/draft/state'
 import type { ScoredPlayer } from '@/lib/research/strategy/scoring'
@@ -69,7 +69,7 @@ export function SnakeAdvisor({
   draftedNames,
   strategy,
 }: SnakeAdvisorProps) {
-  const [recommendation, setRecommendation] = useState<LLMRecommendation | null>(null)
+  const [recommendation, setRecommendation] = useState<LLMSnakeRecommendation | null>(null)
   const [loadingRec, setLoadingRec] = useState(false)
   const [recError, setRecError] = useState<string | null>(null)
   const [showProjections, setShowProjections] = useState(false)
@@ -92,7 +92,7 @@ export function SnakeAdvisor({
     setLoadingRec(true)
     setRecError(null)
     try {
-      const rec = await fetchRecommendation(
+      const rec = await fetchSnakeRecommendation(
         state, managerName, scoredPlayers, draftedNames, strategy,
       )
       setRecommendation(rec)
@@ -297,7 +297,12 @@ export function SnakeAdvisor({
                         {t.confidence}
                       </Badge>
                     </div>
-                    <p className="text-[10px] text-muted-foreground mt-0.5">{t.reasoning}</p>
+                    <div className="flex items-center justify-between mt-0.5">
+                      <p className="text-[10px] text-muted-foreground">{t.reasoning}</p>
+                      <span className="text-[10px] font-mono font-semibold text-primary shrink-0 ml-1">
+                        Rd {t.pickRound}
+                      </span>
+                    </div>
                   </div>
                 </div>
               ))}

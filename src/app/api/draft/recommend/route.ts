@@ -1,9 +1,9 @@
 /**
  * FF-041: Per-Pick LLM Recommendation API
+ * FF-266: Split into auction-specific and snake-specific prompt builders
  *
  * POST /api/draft/recommend
- * Returns top 3 targets with strategy-adjusted auction values and reasoning.
- * ~500 tokens in, ~300 tokens out. Fast and cheap per call.
+ * Dispatches to buildAuctionPrompt or buildSnakePrompt based on `format`.
  */
 
 import { NextResponse } from 'next/server'
@@ -11,37 +11,63 @@ import { askClaudeJson } from '@/lib/ai/claude'
 import { formatScoringBonuses } from '@/lib/research/analyze'
 import type { ScoringSettings } from '@/lib/supabase/database.types'
 
-interface RecommendRequest {
-  managerName: string
-  format: 'auction' | 'snake'
-  budgetRemaining?: number
-  budgetTotal?: number
-  rosterNeeds: Record<string, number> // e.g. { QB: 1, RB: 2 }
-  picksMade: number
-  totalSlots: number
-  currentRound?: number
-  strategyName?: string
-  strategyArchetype?: string
-  /** FF-068: Custom scoring settings for bonus-aware recommendations */
-  scoringSettings?: ScoringSettings | null
-  // Top available players (pre-scored, send only top ~15 to keep tokens low)
-  topAvailable: Array<{
-    name: string
-    position: string
-    consensusValue: number
-    strategyScore: number
-    adjustedValue?: number
-  }>
-  // Recent picks for context
-  recentPicks: Array<{
-    player: string
-    position: string
-    manager: string
-    price?: number
-  }>
+// --- Shared types ---
+
+interface RecentPick {
+  player: string
+  position: string
+  manager: string
+  price?: number
+  round?: number
 }
 
-interface LLMRecommendation {
+interface AuctionAvailablePlayer {
+  name: string
+  position: string
+  consensusValue: number
+  adjustedValue?: number
+  strategyScore: number
+}
+
+interface SnakeAvailablePlayer {
+  name: string
+  position: string
+  adp: number
+  consensusRank: number
+  adjustedRound?: number
+  strategyScore: number
+}
+
+interface BaseRecommendRequest {
+  managerName: string
+  format: 'auction' | 'snake'
+  rosterNeeds: Record<string, number>
+  picksMade: number
+  totalSlots: number
+  strategyName?: string
+  strategyArchetype?: string
+  scoringSettings?: ScoringSettings | null
+  recentPicks: RecentPick[]
+}
+
+interface AuctionRecommendRequest extends BaseRecommendRequest {
+  format: 'auction'
+  budgetRemaining: number
+  budgetTotal: number
+  topAvailable: AuctionAvailablePlayer[]
+}
+
+interface SnakeRecommendRequest extends BaseRecommendRequest {
+  format: 'snake'
+  currentRound?: number
+  topAvailable: SnakeAvailablePlayer[]
+}
+
+type RecommendRequest = AuctionRecommendRequest | SnakeRecommendRequest
+
+// --- Auction prompt ---
+
+interface LLMAuctionRecommendation {
   targets: Array<{
     name: string
     position: string
@@ -52,69 +78,139 @@ interface LLMRecommendation {
   summary: string
 }
 
-export async function POST(request: Request) {
-  try {
-    const body: RecommendRequest = await request.json()
-
-    const { format, managerName, topAvailable, recentPicks, rosterNeeds } = body
-
-    if (!topAvailable || topAvailable.length === 0) {
-      return NextResponse.json(
-        { error: 'No available players provided' },
-        { status: 400 },
-      )
-    }
-
-    const isAuction = format === 'auction'
-
-    // FF-068: Build scoring bonus context for the LLM
-    const bonusContext = formatScoringBonuses(body.scoringSettings)
-
-    const system = `You are a fantasy football draft advisor. Return JSON only.
-Analyze the draft situation and recommend the top 3 players to target right now.
-Consider: roster needs, strategy fit, value relative to consensus, scarcity, and recent draft trends.
-${bonusContext ? `\nIMPORTANT — This league has custom scoring bonuses that affect player valuations:\n${bonusContext}\nFactor these bonuses into your recommendations. Players who benefit from these bonuses should be valued higher.` : ''}
-${isAuction ? 'For auction: recommend a max bid for each target.' : 'For snake: recommend draft priority order.'}
+function buildAuctionPrompts(body: AuctionRecommendRequest, bonusContext: string): { system: string; prompt: string } {
+  const system = `You are a fantasy football auction draft advisor. Return JSON only.
+Analyze the auction draft situation and recommend the top 3 players to target right now.
+Consider: roster needs, strategy fit, auction value relative to consensus, positional scarcity, budget management, and recent bidding trends.
+${bonusContext ? `\nIMPORTANT — Custom scoring bonuses affect valuations:\n${bonusContext}\nFactor these bonuses into recommendations and max bids.` : ''}
+For each target, recommend a realistic max bid that accounts for the manager's remaining budget and empty roster slots.
 Be concise. Each reasoning should be 1-2 sentences max.`
 
-    const needsStr = Object.entries(rosterNeeds)
-      .filter(([, n]) => n > 0)
-      .map(([pos, n]) => `${pos}×${n}`)
-      .join(', ')
+  const needsStr = Object.entries(body.rosterNeeds)
+    .filter(([, n]) => n > 0)
+    .map(([pos, n]) => `${pos}×${n}`)
+    .join(', ')
 
-    const availableStr = topAvailable
-      .slice(0, 15)
-      .map(p => `${p.name} (${p.position}) $${p.consensusValue} score:${p.strategyScore}`)
-      .join('\n')
+  const availableStr = body.topAvailable
+    .map(p => {
+      const adj = p.adjustedValue != null ? ` adj:$${p.adjustedValue}` : ''
+      return `${p.name} (${p.position}) consensus:$${p.consensusValue}${adj} score:${p.strategyScore}`
+    })
+    .join('\n')
 
-    const recentStr = recentPicks.length > 0
-      ? recentPicks.slice(0, 5).map(p =>
-          `${p.player} (${p.position}) → ${p.manager}${p.price != null ? ` $${p.price}` : ''}`
-        ).join('\n')
-      : 'None yet'
+  const recentStr = body.recentPicks.length > 0
+    ? body.recentPicks.map(p => `${p.player} (${p.position}) → ${p.manager}$${p.price ?? '?'}`).join('\n')
+    : 'None yet'
 
-    const prompt = `Draft situation for "${managerName}":
-- Format: ${format}
+  const prompt = `Auction draft situation for "${body.managerName}":
 - Strategy: ${body.strategyName ?? 'None'} (${body.strategyArchetype ?? 'balanced'})
-- Picks made: ${body.picksMade}/${body.totalSlots}
-${isAuction ? `- Budget: $${body.budgetRemaining}/$${body.budgetTotal}` : `- Round: ${body.currentRound ?? '?'}`}
+- Budget: $${body.budgetRemaining} remaining / $${body.budgetTotal} total
+- Picks: ${body.picksMade}/${body.totalSlots} slots filled
 - Needs: ${needsStr || 'None'}
 
-Recent picks:
+Recent nominations won:
 ${recentStr}
 
 Top available players (sorted by strategy fit):
 ${availableStr}
 
 Return JSON: { "targets": [{ "name": string, "position": string, "maxBid": number, "reasoning": string, "confidence": "high"|"medium"|"low" }], "summary": string }
-Exactly 3 targets. Summary should be 1 sentence about overall draft strategy right now.`
+Exactly 3 targets. maxBid must be within the manager's budget. Summary: 1 sentence on auction strategy right now.`
 
-    const result = await askClaudeJson<LLMRecommendation>({
-      system,
-      prompt,
-      maxTokens: 384,
-      tier: 'fast', // Haiku for live draft speed
+  return { system, prompt }
+}
+
+// --- Snake prompt ---
+
+interface LLMSnakeRecommendation {
+  targets: Array<{
+    name: string
+    position: string
+    pickRound: number
+    reasoning: string
+    confidence: 'high' | 'medium' | 'low'
+  }>
+  summary: string
+}
+
+function buildSnakePrompts(body: SnakeRecommendRequest, bonusContext: string): { system: string; prompt: string } {
+  const system = `You are a fantasy football snake draft advisor. Return JSON only.
+Analyze the snake draft situation and recommend the top 3 players to target in the next few rounds.
+Consider: roster needs, strategy fit, ADP vs consensus rank, positional scarcity, upcoming pick position, and best available value.
+${bonusContext ? `\nIMPORTANT — Custom scoring bonuses affect valuations:\n${bonusContext}\nFactor these bonuses into recommendations.` : ''}
+For each target, recommend the latest round to draft them (pickRound) before they likely get taken.
+Be concise. Each reasoning should be 1-2 sentences max.`
+
+  const needsStr = Object.entries(body.rosterNeeds)
+    .filter(([, n]) => n > 0)
+    .map(([pos, n]) => `${pos}×${n}`)
+    .join(', ')
+
+  const availableStr = body.topAvailable
+    .map(p => {
+      const adj = p.adjustedRound != null ? ` targetRd:${p.adjustedRound}` : ''
+      return `${p.name} (${p.position}) adp:${p.adp.toFixed(1)} rank:${p.consensusRank}${adj} score:${p.strategyScore}`
     })
+    .join('\n')
+
+  const recentStr = body.recentPicks.length > 0
+    ? body.recentPicks.map(p => `Rd${p.round ?? '?'}: ${p.player} (${p.position}) → ${p.manager}`).join('\n')
+    : 'None yet'
+
+  const prompt = `Snake draft situation for "${body.managerName}":
+- Strategy: ${body.strategyName ?? 'None'} (${body.strategyArchetype ?? 'balanced'})
+- Current round: ${body.currentRound ?? '?'}
+- Picks: ${body.picksMade}/${body.totalSlots} slots filled
+- Needs: ${needsStr || 'None'}
+
+Recent picks (last 3):
+${recentStr}
+
+Top available players (sorted by strategy fit):
+${availableStr}
+
+Return JSON: { "targets": [{ "name": string, "position": string, "pickRound": number, "reasoning": string, "confidence": "high"|"medium"|"low" }], "summary": string }
+Exactly 3 targets. pickRound is the latest round to safely draft each player. Summary: 1 sentence on draft strategy right now.`
+
+  return { system, prompt }
+}
+
+// --- Route handler ---
+
+export async function POST(request: Request) {
+  try {
+    const body: RecommendRequest = await request.json()
+
+    if (!body.topAvailable || body.topAvailable.length === 0) {
+      return NextResponse.json(
+        { error: 'No available players provided' },
+        { status: 400 },
+      )
+    }
+
+    const bonusContext = formatScoringBonuses(body.scoringSettings ?? null) ?? ''
+
+    let system: string
+    let prompt: string
+    let result: LLMAuctionRecommendation | LLMSnakeRecommendation
+
+    if (body.format === 'auction') {
+      ;({ system, prompt } = buildAuctionPrompts(body as AuctionRecommendRequest, bonusContext))
+      result = await askClaudeJson<LLMAuctionRecommendation>({
+        system,
+        prompt,
+        maxTokens: 384,
+        tier: 'fast',
+      })
+    } else {
+      ;({ system, prompt } = buildSnakePrompts(body as SnakeRecommendRequest, bonusContext))
+      result = await askClaudeJson<LLMSnakeRecommendation>({
+        system,
+        prompt,
+        maxTokens: 384,
+        tier: 'fast',
+      })
+    }
 
     return NextResponse.json({ recommendation: result })
   } catch (err) {
