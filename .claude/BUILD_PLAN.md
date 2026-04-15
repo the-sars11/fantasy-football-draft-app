@@ -93,7 +93,7 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 ### Sub-tier 5: AI Transparency
 
 - [x] FF-243: Confirm/dismiss system tag actions — PATCH /api/user-tags handles dismissSystemTag/undismissSystemTag; useSystemTagActions hook; dismissed tags render grayed-out with restore link in FFIPlayerIntelCard; wired in PlayerBrowserClient
-- [ ] FF-270: Confidence indicators on recommendations — flag "Low confidence — thin data" when coverage is sparse (extend `src/lib/draft/explain.ts:explainPlayer()`)
+- [x] FF-270: Confidence indicators on recommendations — assessDataCoverage() in explain.ts detects <2 sources or missing ADP+rank; Thin Data factor added; confidence forced 'low'; amber warning banner + colored confidence bar in FFIAIInsight
 - [ ] FF-271: Data source attribution — show which sources the AI is drawing from per recommendation
 - [ ] FF-272: Strategy drift alert — when target players are gone and AI is about to pivot, make it explicit before acting
 

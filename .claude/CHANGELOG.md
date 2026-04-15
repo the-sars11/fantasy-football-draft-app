@@ -4,6 +4,24 @@ All notable changes tracked here with root cause analysis.
 
 ---
 
+## 2026-04-14 (session 7, cont.) — FF-270: Confidence Indicators — Thin Data Flag
+
+**Task:** FF-270 (shared)
+**Class:** `shared` | **Lenses:** QA
+
+**Root Cause:** `explainPlayer()` calculated confidence purely from factor consistency (positive vs. negative counts). A player with 1 data source and no ADP could still receive "medium" or "high" confidence, misleading the user on draft day.
+
+**Changes:**
+- `src/lib/draft/explain.ts`: Added `dataWarning?: string` to `Explanation` type. Added `assessDataCoverage(player)` helper — returns a warning string when `sourceData.length < 2` or when both `adp` and `consensusRank` are 0. In `explainPlayer()`, if triggered: appends a `Thin Data` sentinel factor (weight 0, neutral) and forces `confidence = 'low'`. Returns `dataWarning` on the `Explanation` object.
+- `src/components/draft/ffi-ai-insight.tsx`: When `dataWarning` is set, renders an amber "Low confidence — [reason]" banner above the insight text. Confidence bar color shifts: amber for thin data, red for conflicting signals, green otherwise. `Thin Data` sentinel filtered out of Key Factors chips and insight text construction.
+
+**Verification:**
+- ✅ `npm run type-check` — clean
+- ✅ `npm run test:run` — 27/27 passed
+- ✅ `npm run build` — clean
+
+---
+
 ## 2026-04-14 (session 7, cont.) — FF-243: Confirm/Dismiss System Tag Actions
 
 **Task:** FF-243 (shared + pipeline)
