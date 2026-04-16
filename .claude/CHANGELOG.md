@@ -2,6 +2,33 @@
 
 ---
 
+## 2026-04-16 — FF-309 + Keeper/Sleeper Augmentation
+
+**Task:** FF-309 + Tyler's Sleeper keeper league augmentation (pipeline)
+**Class:** `pipeline` | **Lenses:** Architecture, QA
+
+**Root Cause:** Snake/both-format triggers were missing (market_mismatch, late_roster_qb_panic). Keeper league QB-detection was broken — `state.keepers` not included in `allPicks`, so `lone_wolf_qb` and `late_roster_qb_panic` would false-fire for any team with a keeper QB. No keeper value trash talk existed. Tyler's league moved from Yahoo to Sleeper.
+
+**Approach:** `market_mismatch` iterates `allPicks` at same position within 15 ADP spots and compares price spread (auction) or round difference (snake). `late_roster_qb_panic` mirrors `lone_wolf_qb` but snake-only at lower threshold (7 vs 9 picks). Keeper fix: live client now prepends `keepersToPicks(state.keepers)` to `allPicksWithKeepers` before passing to trigger engine — no signature change needed, `is_keeper: true` flag already guards out keeper picks from triggering on themselves. New `analyzeKeeperPicksForTrashTalk()` fires once at draft start via a second effect with a processed ref guard.
+
+**Changes:**
+- `src/lib/draft/trash-talk.ts`:
+  - `TrashTalkType` union: added `market_mismatch | late_roster_qb_panic | keeper_steal | bad_keeper`
+  - Import `KeeperAssignment` from `./keepers`
+  - `detectMarketMismatch()`: position-matched ADP-comparable picks, ≥35% price spread (auction) or ≥3 round diff (snake); skips keeper picks via `comp.is_keeper` guard
+  - `detectLateRosterQbPanic()`: snake-only, 7+ picks, no QB — fires before `lone_wolf_qb` kicks in at 9
+  - `export analyzeKeeperPicksForTrashTalk()`: batch keeper value analysis, returns `keeper_steal` (surplus ≥3 rounds or ≥$10) / `bad_keeper` (surplus ≤-2 rounds or ≤-$10) alerts
+  - `analyzePickForTrashTalk`: `market_mismatch` wired after `steal`; `late_roster_qb_panic` wired after `lone_wolf_qb` (snake-only gate)
+- `src/components/draft/trash-talk.tsx`: extended `trashTalkConfig` with 4 new type entries
+- `src/app/(app)/draft/live/client.tsx`:
+  - Import `keepersToPicks`, `analyzeKeeperPicksForTrashTalk`
+  - `keeperAlertsProcessedRef`: one-time guard for keeper analysis
+  - Per-pick effect: builds `allPicksWithKeepers` from keepers + regular picks before passing to trigger engine
+  - New one-time effect: calls `analyzeKeeperPicksForTrashTalk` on draft load, populates alert feed
+- `src/components/prep/league-config-form.tsx`: Tyler's preset → `"Tyler's Sleeper League"`, `platform: 'sleeper'`; button label updated
+
+---
+
 ## 2026-04-16 — FF-308: Auction Trigger Engine Upgrade
 
 **Task:** FF-308 (pipeline)

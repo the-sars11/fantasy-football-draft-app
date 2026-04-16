@@ -107,6 +107,34 @@ const trashTalkConfig: Record<TrashTalkType, {
     borderClass: 'border-l-[var(--ffi-warning)]',
     textClass: 'text-[var(--ffi-warning)]',
   },
+  market_mismatch: {
+    icon: Target,
+    emoji: '📊',
+    bgClass: 'bg-blue-500/10',
+    borderClass: 'border-l-blue-500',
+    textClass: 'text-blue-400',
+  },
+  late_roster_qb_panic: {
+    icon: AlertTriangle,
+    emoji: '😱',
+    bgClass: 'bg-[var(--ffi-danger)]/10',
+    borderClass: 'border-l-[var(--ffi-danger)]',
+    textClass: 'text-[var(--ffi-danger)]',
+  },
+  keeper_steal: {
+    icon: Target,
+    emoji: '🔒',
+    bgClass: 'bg-[var(--ffi-success)]/10',
+    borderClass: 'border-l-[var(--ffi-success)]',
+    textClass: 'text-[var(--ffi-success)]',
+  },
+  bad_keeper: {
+    icon: Flame,
+    emoji: '🔥',
+    bgClass: 'bg-[var(--ffi-warning)]/10',
+    borderClass: 'border-l-[var(--ffi-warning)]',
+    textClass: 'text-[var(--ffi-warning)]',
+  },
 }
 
 // --- Live Trash Talk Alert ---

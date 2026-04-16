@@ -51,10 +51,10 @@ import type { ScoredPlayer } from '@/lib/research/strategy/scoring'
 import type { Strategy as DbStrategy } from '@/lib/supabase/database.types'
 import type { Explanation } from '@/lib/draft/explain'
 import { clearRecommendationCache } from '@/lib/draft/recommend'
-import { isKeeperPick, displayPickNum } from '@/lib/draft/keepers'
+import { isKeeperPick, displayPickNum, keepersToPicks } from '@/lib/draft/keepers'
 import { InjuryWatch } from '@/components/draft/injury-watch'
 import { TrashTalkFeed, SavedTrashTalk } from '@/components/draft/trash-talk'
-import { analyzePickForTrashTalk } from '@/lib/draft/trash-talk'
+import { analyzePickForTrashTalk, analyzeKeeperPicksForTrashTalk } from '@/lib/draft/trash-talk'
 import type { TrashTalkAlert } from '@/lib/draft/trash-talk'
 
 const DEFAULT_ROSTER: RosterSlots = {
@@ -319,6 +319,8 @@ export function LiveDraftClient() {
   const [savedAlerts, setSavedAlerts] = useState<TrashTalkAlert[]>([])
   // null = not yet initialized (skip existing picks on load); number = picks processed so far
   const processedPickCountRef = useRef<number | null>(null)
+  // false = keeper alerts not yet fired; true = already fired once
+  const keeperAlertsProcessedRef = useRef(false)
 
   // Load session + league + players + active strategy
   useEffect(() => {
@@ -502,10 +504,16 @@ export function LiveDraftClient() {
     const myManagerName = state.manager_order[0]
     const newAlerts: TrashTalkAlert[] = []
 
+    // Include keeper picks in allPicks so QB-detection triggers work for keeper leagues
+    const allPicksWithKeepers = [
+      ...keepersToPicks(state.keepers, state.format),
+      ...state.picks,
+    ]
+
     for (const newPick of newPicks) {
       const alert = analyzePickForTrashTalk(
         newPick,
-        state.picks,
+        allPicksWithKeepers,
         players,
         state.format,
         myManagerName,
@@ -516,6 +524,25 @@ export function LiveDraftClient() {
 
     if (newAlerts.length > 0) {
       setTrashTalkAlerts(prev => [...prev, ...newAlerts])
+    }
+  }, [state, players, trashTalkMode])
+
+  // One-time keeper value analysis at draft start (keeper leagues only)
+  useEffect(() => {
+    if (!state || players.length === 0) return
+    if (trashTalkMode === 'off') return
+    if (keeperAlertsProcessedRef.current) return
+    if (state.keepers.length === 0) return
+
+    keeperAlertsProcessedRef.current = true
+    const keeperAlerts = analyzeKeeperPicksForTrashTalk(
+      state.keepers,
+      players,
+      state.format,
+      state.manager_order.length,
+    )
+    if (keeperAlerts.length > 0) {
+      setTrashTalkAlerts(prev => [...prev, ...keeperAlerts])
     }
   }, [state, players, trashTalkMode])
 

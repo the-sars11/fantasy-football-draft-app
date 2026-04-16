@@ -151,7 +151,7 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
   - Port `lone_wolf_qb`: team has 9+ picks AND no QB AND current pick is not QB; works auction AND snake (no budget dependency)
   - Priority order: budget_buster > overpay > steal > market_mismatch > last_big_spender > budget_dominance > lone_wolf_qb > cheapskate_special > first_defense_buy > reach > imbalance | `pipeline`
 
-- [ ] FF-309: Add snake + both-format triggers to `src/lib/draft/trash-talk.ts`:
+- [x] FF-309: Add snake + both-format triggers to `src/lib/draft/trash-talk.ts`:
   - `market_mismatch` (both formats): find sold/drafted picks at same position from other teams within 15 ESPN rank or ADP spots; **auction**: price % spread ≥35% fires trigger; **snake**: round difference ≥3 for similarly-ranked player fires trigger; context string for snake: `"${player} (ADP ${adp}) drafted Round ${round}; comparable ${comp} (ADP ${compAdp}) went to ${compTeam} Round ${compRound} — ${N} rounds cheaper/earlier for similar-tier ${pos}"`; fires in both directions (steal and reach)
   - `late_roster_qb_panic` (snake-only, gated on `format === 'snake'`): team has 7+ picks (lower threshold than auction's 9 — snake picks faster), no QB drafted, current pick is non-QB; context: `"Team has ${N} players and still no QB; just drafted another ${pos} in Round ${round}"` | `pipeline`
 

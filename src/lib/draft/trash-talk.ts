@@ -6,6 +6,7 @@
  */
 
 import type { DraftPick } from './state'
+import type { KeeperAssignment } from './keepers'
 import type { Player, Position } from '@/lib/players/types'
 
 export type TrashTalkType =
@@ -20,6 +21,10 @@ export type TrashTalkType =
   | 'budget_dominance'
   | 'first_defense_buy'
   | 'lone_wolf_qb'
+  | 'market_mismatch'
+  | 'late_roster_qb_panic'
+  | 'keeper_steal'
+  | 'bad_keeper'
 
 export interface TrashTalkAlert {
   id: string
@@ -132,6 +137,10 @@ export function analyzePickForTrashTalk(
   const stealAlert = detectSteal(pick, player, format, teamCount, DEFAULT_AUCTION_BUDGET)
   if (stealAlert) return stealAlert
 
+  // market_mismatch (both formats): comparable player at same position, wildly different price/round
+  const mmAlert = detectMarketMismatch(pick, allPicks, player, players, format)
+  if (mmAlert) return mmAlert
+
   // last_big_spender (auction, league-state)
   if (format === 'auction') {
     const lbsAlert = detectLastBigSpender(pick, allPicks, teamCount, DEFAULT_AUCTION_BUDGET)
@@ -147,6 +156,12 @@ export function analyzePickForTrashTalk(
   // lone_wolf_qb (both formats)
   const lwqbAlert = detectLoneWolfQb(pick, managerPicks)
   if (lwqbAlert) return lwqbAlert
+
+  // late_roster_qb_panic (snake-only — lower threshold than lone_wolf_qb, covers picks 7-8)
+  if (format === 'snake') {
+    const lqpAlert = detectLateRosterQbPanic(pick, managerPicks)
+    if (lqpAlert) return lqpAlert
+  }
 
   // cheapskate_special (auction)
   if (format === 'auction') {
@@ -601,6 +616,189 @@ function detectLoneWolfQb(
     severity: pickCount >= 12 ? 'medium' : 'mild',
     timestamp: Date.now(),
   }
+}
+
+/**
+ * Detect market mismatch: comparable player at same position drafted at wildly different price/round (both formats)
+ */
+function detectMarketMismatch(
+  pick: DraftPick,
+  allPicks: DraftPick[],
+  player: Player | undefined,
+  players: Player[],
+  format: 'auction' | 'snake',
+): TrashTalkAlert | null {
+  if (!player || player.adp <= 0) return null
+  const pos = pick.position?.toUpperCase()
+  if (!pos) return null
+  const pickAdp = player.adp
+
+  for (const comp of allPicks) {
+    if (comp.manager === pick.manager) continue
+    if (comp.pick_number === pick.pick_number) continue
+    if (comp.position?.toUpperCase() !== pos) continue
+    if (comp.is_keeper) continue
+
+    const compPlayer = players.find(p => p.name.toLowerCase() === comp.player_name.toLowerCase())
+    if (!compPlayer || compPlayer.adp <= 0) continue
+    if (Math.abs(compPlayer.adp - pickAdp) > 15) continue
+
+    if (format === 'auction' && pick.price != null && comp.price != null) {
+      const avgPrice = (pick.price + comp.price) / 2
+      if (avgPrice === 0) continue
+      const spread = Math.abs(pick.price - comp.price) / avgPrice
+      if (spread >= 0.35) {
+        const isSteal = pick.price < comp.price
+        return {
+          id: `market_mismatch-${pick.pick_number}`,
+          type: 'market_mismatch',
+          managerName: pick.manager,
+          message: isSteal
+            ? `${pick.manager} got ${pick.player_name} at a steal vs comparable picks`
+            : `${pick.manager} paid a premium vs comparable picks at the same tier`,
+          detail: `${pick.player_name} (ADP ${Math.round(pickAdp)}) at $${pick.price} — ${comp.manager} got comparable ${comp.player_name} (ADP ${Math.round(compPlayer.adp)}) for $${comp.price}`,
+          pickNumber: pick.pick_number,
+          severity: spread >= 0.5 ? 'medium' : 'mild',
+          timestamp: Date.now(),
+          playerName: pick.player_name,
+        }
+      }
+    }
+
+    if (format === 'snake' && pick.round != null && comp.round != null) {
+      const roundDiff = pick.round - comp.round
+      const n = Math.abs(roundDiff)
+      if (n >= 3) {
+        const isLater = roundDiff > 0 // current pick went later = better value
+        return {
+          id: `market_mismatch-${pick.pick_number}`,
+          type: 'market_mismatch',
+          managerName: pick.manager,
+          message: isLater
+            ? `${pick.manager} snagged ${pick.player_name} way later than a comparable pick`
+            : `${pick.manager} reached early vs a comparable pick`,
+          detail: `${pick.player_name} (ADP ${Math.round(pickAdp)}) drafted Round ${pick.round}; comparable ${comp.player_name} (ADP ${Math.round(compPlayer.adp)}) went to ${comp.manager} Round ${comp.round} — ${n} rounds ${isLater ? 'cheaper/later' : 'earlier'} for similar-tier ${pos}`,
+          pickNumber: pick.pick_number,
+          severity: n >= 5 ? 'medium' : 'mild',
+          timestamp: Date.now(),
+          playerName: pick.player_name,
+        }
+      }
+    }
+  }
+
+  return null
+}
+
+/**
+ * Detect late roster QB panic: snake-only, team has 7+ picks with no QB and current pick is not QB
+ */
+function detectLateRosterQbPanic(
+  pick: DraftPick,
+  managerPicks: DraftPick[],
+): TrashTalkAlert | null {
+  const pickCount = managerPicks.length
+  if (pickCount < 7) return null
+  if (pick.position?.toUpperCase() === 'QB') return null
+
+  const hasQb = managerPicks.some(p => p.position?.toUpperCase() === 'QB')
+  if (hasQb) return null
+
+  const currentRound = pick.round ?? pickCount
+  return {
+    id: `late_roster_qb_panic-${pick.pick_number}`,
+    type: 'late_roster_qb_panic',
+    managerName: pick.manager,
+    message: `${pick.manager} still no QB — Round ${currentRound} problem incoming`,
+    detail: `Team has ${pickCount} players and still no QB; just drafted another ${pick.position ?? '?'} in Round ${currentRound}`,
+    pickNumber: pick.pick_number,
+    severity: pickCount >= 10 ? 'savage' : pickCount >= 8 ? 'medium' : 'mild',
+    timestamp: Date.now(),
+  }
+}
+
+/**
+ * Analyze all keepers for trash talk value alerts.
+ * Call once at draft start. Returns keeper_steal / bad_keeper alerts for notable keepers.
+ */
+export function analyzeKeeperPicksForTrashTalk(
+  keepers: KeeperAssignment[],
+  players: Player[],
+  format: 'auction' | 'snake',
+  teamCount: number,
+): TrashTalkAlert[] {
+  const alerts: TrashTalkAlert[] = []
+
+  for (let i = 0; i < keepers.length; i++) {
+    const keeper = keepers[i]
+    const player = players.find(p => p.name.toLowerCase() === keeper.player_name.toLowerCase())
+    if (!player) continue
+
+    if (format === 'snake') {
+      const adpRound = Math.max(1, Math.ceil(player.adp / teamCount))
+      const keeperRound = keeper.cost
+      const surplus = keeperRound - adpRound // positive = steal (paying later round for earlier talent)
+
+      if (surplus >= 3) {
+        alerts.push({
+          id: `keeper_steal-${i}`,
+          type: 'keeper_steal',
+          managerName: keeper.manager,
+          message: `${keeper.manager} kept ${keeper.player_name} at a STEAL`,
+          detail: `Kept at Round ${keeperRound} — ADP is Round ${adpRound}. That's ${surplus} rounds of free value.`,
+          pickNumber: -(i + 1),
+          severity: surplus >= 5 ? 'savage' : 'medium',
+          timestamp: Date.now(),
+          playerName: keeper.player_name,
+        })
+      } else if (surplus <= -2) {
+        const overpayRounds = Math.abs(surplus)
+        alerts.push({
+          id: `bad_keeper-${i}`,
+          type: 'bad_keeper',
+          managerName: keeper.manager,
+          message: `${keeper.manager} is locked into a questionable keeper`,
+          detail: `Keeping ${keeper.player_name} at Round ${keeperRound}, but ADP is Round ${adpRound}. Overpaying by ${overpayRounds} rounds.`,
+          pickNumber: -(i + 1),
+          severity: overpayRounds >= 4 ? 'medium' : 'mild',
+          timestamp: Date.now(),
+          playerName: keeper.player_name,
+        })
+      }
+    } else {
+      const expectedValue = impliedAuctionValue(player, DEFAULT_AUCTION_BUDGET, teamCount)
+      const surplus = expectedValue - keeper.cost // positive = deal (market > cost)
+
+      if (surplus >= 10) {
+        alerts.push({
+          id: `keeper_steal-${i}`,
+          type: 'keeper_steal',
+          managerName: keeper.manager,
+          message: `${keeper.manager} is keeping ${keeper.player_name} at a massive discount`,
+          detail: `Keeper cost $${keeper.cost}, market value ~$${expectedValue}. That's $${surplus} of free money going into the draft.`,
+          pickNumber: -(i + 1),
+          severity: surplus >= 20 ? 'savage' : 'medium',
+          timestamp: Date.now(),
+          playerName: keeper.player_name,
+        })
+      } else if (surplus <= -10) {
+        const overpay = Math.abs(surplus)
+        alerts.push({
+          id: `bad_keeper-${i}`,
+          type: 'bad_keeper',
+          managerName: keeper.manager,
+          message: `${keeper.manager} is keeping ${keeper.player_name} well above market`,
+          detail: `Keeper cost $${keeper.cost}, market value ~$${expectedValue}. Overpaying by $${overpay} before the draft even starts.`,
+          pickNumber: -(i + 1),
+          severity: overpay >= 20 ? 'medium' : 'mild',
+          timestamp: Date.now(),
+          playerName: keeper.player_name,
+        })
+      }
+    }
+  }
+
+  return alerts
 }
 
 /**

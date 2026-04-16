@@ -29,8 +29,8 @@ const PRESETS = {
     scoring: JOES_ESPN_SCORING,
   },
   tyler: {
-    name: "Tyler's Yahoo League",
-    platform: 'yahoo',
+    name: "Tyler's Sleeper League",
+    platform: 'sleeper',
     format: 'snake' as DraftFormat,
     team_count: 12,
     budget: null,
@@ -151,7 +151,7 @@ export function LeagueConfigForm({ userId }: { userId: string }) {
           onClick={() => applyPreset('tyler')}
           type="button"
         >
-          Tyler&apos;s Yahoo (Snake/Keeper)
+          Tyler&apos;s Sleeper (Snake/Keeper)
         </Button>
       </div>
 
