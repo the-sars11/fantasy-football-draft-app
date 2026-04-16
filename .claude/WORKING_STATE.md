@@ -3,9 +3,10 @@
 ## Current Session
 - **Date:** 2026-04-16
 - **Focus:** P0 sub-tier 8 — Trash Talk Live Wiring
-- **Status:** FF-306 COMPLETE — trash talk mode toggle added to setup. Next: FF-307 (API route).
+- **Status:** FF-307 COMPLETE — trash talk API route created. Next: FF-308 (trigger engine upgrade).
 
 ## Last Completed (most recent first)
+- **FF-307** (2026-04-16): Created `src/app/api/trash-talk/route.ts`. Claude Haiku (temperature 1.0, no streaming). Family-Safe: PG-13 system prompt, max_tokens 60. Adult-Only: Jeselnik/Ross/Hinchcliffe style, max_tokens 80. Em-dash hard-strip enforced post-response. Fail-silent on all errors — always returns `{ line: null }` rather than breaking the draft. Exports `TrashTalkRequest` and `TrashTalkResponse` types for FF-310 client wrapper.
 - **FF-306** (2026-04-16): Added 3-way trash talk mode selector (Off/Family-Safe/Adult-Only) to setup Step 3. `TrashTalkMode` type defined in both files. Mode passed as `&ttm=` URL param to live client. Live client reads param from searchParams (default: `family-safe`), gates the trash talk `useEffect` with early return when `'off'`.
 - **FF-305** (2026-04-16): Wired `analyzePickForTrashTalk()` into `live/client.tsx`. Added `trashTalkAlerts` + `savedAlerts` state, `processedPickCountRef` to skip historical picks on load, `useEffect` watching `state` + `players` to detect incremental picks from both manual entry and sheet polling. Renders `<TrashTalkFeed>` and `<SavedTrashTalk>` below `<PickFeed>` in left column. Dismiss removes from feed; save moves to saved list. Rule-based only — no LLM calls.
 - **FF-257** (2026-04-14): Sticky pinned `ManualPickEntry` bar at viewport bottom. Added `bar` variant to `manual-pick-entry.tsx`, removed component from left column in `live/client.tsx`, rendered as `fixed inset-x-0 bottom-0 z-40 ffi-glass-heavy` with `env(safe-area-inset-bottom)` padding. Search dropdown opens upward. Defaults collapsed on mobile (search + price + Record), expanded on desktop. Card variant preserved for backward compat. Build/lint/test/type-check all clean.

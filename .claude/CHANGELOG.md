@@ -2,6 +2,29 @@
 
 ---
 
+## 2026-04-16 — FF-307: Trash Talk API Route (Claude Haiku Generation)
+
+**Task:** FF-307 (pipeline)
+**Class:** `pipeline` | **Lenses:** Architecture, QA, Security
+
+**Root Cause:** No server-side generation endpoint existed — trash talk messages were rule-based hardcoded strings with no AI variation.
+
+**Approach:** Ported from AA reference (`fantasy_auction_auctioneer/src/app/api/trash-talk/route.ts`), using the project's existing `@anthropic-ai/sdk` pattern. Fail-silent throughout — trash talk is non-critical and must never surface errors to the draft UI.
+
+**Changes:**
+- `src/app/api/trash-talk/route.ts` (NEW):
+  - `TrashTalkRequest` and `TrashTalkResponse` types exported (consumed by FF-310 client wrapper)
+  - Family-Safe system prompt: PG-13, ≤80 chars, punches at situation not person
+  - Adult-Only system prompt: Jeselnik/Ross/Hinchcliffe style, profanity required, ≤120 chars
+  - `buildUserMessage()`: assembles trigger context, player/price/pick data, optional history block
+  - Claude Haiku (`claude-haiku-4-5-20251001`), temperature 1.0, no streaming
+  - Family-Safe max_tokens 60, Adult-Only max_tokens 80
+  - Em-dash hard-strip: `raw.replace(/\u2014/g, '-').replace(/--/g, '-)` enforced post-response regardless of prompt compliance
+  - Missing `ANTHROPIC_API_KEY` → `{ line: null }` (silent, not 500)
+  - Any Claude SDK error → `{ line: null }` (silent)
+
+---
+
 ## 2026-04-16 — FF-306: Trash Talk Mode Toggle at Session Setup
 
 **Task:** FF-306 (output)
