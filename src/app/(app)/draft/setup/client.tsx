@@ -14,6 +14,10 @@ import {
   FFIBadge,
 } from '@/components/ui/ffi-primitives'
 import type { KeeperEntry } from '@/app/(app)/prep/keepers/client'
+import {
+  setGlobalFileHandle,
+  type AuctioneerConnectionType,
+} from '@/hooks/use-auctioneer-feed'
 
 interface LeagueSummary {
   id: string
@@ -69,6 +73,11 @@ export function DraftSetupClient() {
   const [draftMode, setDraftMode] = useState<DraftMode | null>(null)
   const [declaredKeepers, setDeclaredKeepers] = useState<KeeperEntry[]>([])
   const [trashTalkMode, setTrashTalkMode] = useState<TrashTalkMode>('family-safe')
+
+  // Auctioneer integration (auction format only — FF-279)
+  const [auctioneerConnectionType, setAuctioneerConnectionType] = useState<AuctioneerConnectionType>(null)
+  const [auctioneerFileName, setAuctioneerFileName] = useState<string | null>(null)
+  const [aifError, setAifError] = useState<string | null>(null)
 
   const isKeeperLeague = selectedLeague?.keeper_enabled ?? false
   const isAuction = selectedLeague?.format === 'auction'
@@ -193,7 +202,8 @@ export function DraftSetupClient() {
         return
       }
 
-      router.push(`/draft/live?session=${data.session.id}&ttm=${trashTalkMode}`)
+      const aifParam = auctioneerConnectionType ? `&aif=${auctioneerConnectionType}` : ''
+      router.push(`/draft/live?session=${data.session.id}&ttm=${trashTalkMode}${aifParam}`)
     } catch {
       setError('Network error -- could not create session')
     } finally {
@@ -469,6 +479,96 @@ export function DraftSetupClient() {
               Share the sheet with &quot;Anyone with the link&quot; (view access).
             </p>
           </div>
+        )}
+
+        {/* Auctioneer Sync (auction format only — FF-279) */}
+        {isAuction && (
+          <FFICard>
+            <div className="ffi-title-md text-white font-semibold mb-1">Auctioneer Sync</div>
+            <div className="ffi-body-md text-[var(--ffi-text-secondary)] mb-3 text-sm">
+              Import picks from the Auctioneer app in real time. Optional — skip if not using it.
+            </div>
+            <div className="space-y-2">
+              {/* Same-device localStorage path */}
+              <button
+                type="button"
+                onClick={() =>
+                  setAuctioneerConnectionType(prev =>
+                    prev === 'localstorage' ? null : 'localstorage',
+                  )
+                }
+                className={`w-full flex items-center gap-3 p-3 rounded-xl border transition-all text-left
+                  ${auctioneerConnectionType === 'localstorage'
+                    ? 'border-[#2ff801]/50 bg-[#2ff801]/5'
+                    : 'border-[var(--ffi-border)]/20 bg-[var(--ffi-surface)] hover:border-[#8bacff]/30'
+                  }`}
+              >
+                <span className="text-xl shrink-0">🔗</span>
+                <div className="flex-1 min-w-0">
+                  <div className="ffi-body-md text-white font-semibold">Same Device</div>
+                  <div className="ffi-caption text-[var(--ffi-text-secondary)]">
+                    Auctioneer running in the same browser — picks sync automatically
+                  </div>
+                </div>
+                {auctioneerConnectionType === 'localstorage' && (
+                  <span className="text-[#2ff801] shrink-0">✓</span>
+                )}
+              </button>
+
+              {/* File System Access API path */}
+              <button
+                type="button"
+                onClick={async () => {
+                  setAifError(null)
+                  const w = window as Window & {
+                    showOpenFilePicker?: (opts?: object) => Promise<FileSystemFileHandle[]>
+                  }
+                  if (!w.showOpenFilePicker) {
+                    setAifError('File picker not supported in this browser. Use the Same Device option instead.')
+                    return
+                  }
+                  try {
+                    const [handle] = await w.showOpenFilePicker({
+                      types: [{ description: 'JSON', accept: { 'application/json': ['.json'] } }],
+                      multiple: false,
+                    })
+                    setGlobalFileHandle(handle)
+                    setAuctioneerFileName(handle.name)
+                    setAuctioneerConnectionType('file')
+                  } catch {
+                    // User cancelled the picker — no error
+                  }
+                }}
+                className={`w-full flex items-center gap-3 p-3 rounded-xl border transition-all text-left
+                  ${auctioneerConnectionType === 'file'
+                    ? 'border-[#2ff801]/50 bg-[#2ff801]/5'
+                    : 'border-[var(--ffi-border)]/20 bg-[var(--ffi-surface)] hover:border-[#8bacff]/30'
+                  }`}
+              >
+                <span className="text-xl shrink-0">📂</span>
+                <div className="flex-1 min-w-0">
+                  <div className="ffi-body-md text-white font-semibold">Export File</div>
+                  <div className="ffi-caption text-[var(--ffi-text-secondary)] truncate">
+                    {auctioneerConnectionType === 'file' && auctioneerFileName
+                      ? `Connected: ${auctioneerFileName}`
+                      : "Pick Auctioneer's exported JSON file — re-polled every 3s"}
+                  </div>
+                </div>
+                {auctioneerConnectionType === 'file' && (
+                  <span className="text-[#2ff801] shrink-0">✓</span>
+                )}
+              </button>
+            </div>
+
+            {aifError && (
+              <p className="ffi-caption text-[var(--ffi-danger)] mt-2">{aifError}</p>
+            )}
+            {auctioneerConnectionType === null && (
+              <p className="ffi-caption text-[var(--ffi-text-muted)] mt-2">
+                Not using Auctioneer? Leave this unset — no impact on the draft.
+              </p>
+            )}
+          </FFICard>
         )}
 
         {/* Managers section */}

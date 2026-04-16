@@ -58,6 +58,11 @@ import { analyzePickForTrashTalk, analyzeKeeperPicksForTrashTalk, generateTrashT
 import type { TrashTalkAlert } from '@/lib/draft/trash-talk'
 import { loadHistory, buildTeamOwnerMap, buildHistoryBlock } from '@/lib/draft/trash-talk-history'
 import type { TeamOwnerMap } from '@/lib/draft/trash-talk-history'
+import {
+  useAuctioneerfeed,
+  type AuctioneerConnectionType,
+  type AuctioneerPick,
+} from '@/hooks/use-auctioneer-feed'
 
 const DEFAULT_ROSTER: RosterSlots = {
   qb: 1, rb: 2, wr: 2, te: 1, flex: 1, k: 1, dst: 1, bench: 6, ir: 0,
@@ -300,6 +305,8 @@ export function LiveDraftClient() {
   const searchParams = useSearchParams()
   const sessionId = searchParams.get('session')
   const trashTalkMode = (searchParams.get('ttm') ?? 'family-safe') as TrashTalkMode
+  // FF-279: Auctioneer connection type from setup (?aif=localstorage|file)
+  const aifParam = searchParams.get('aif') as AuctioneerConnectionType
 
   // On Block: player nominated via BID button in the player pool
   const [onBlockPlayer, setOnBlockPlayer] = useState<Player | null>(null)
@@ -325,6 +332,9 @@ export function LiveDraftClient() {
   const keeperAlertsProcessedRef = useRef(false)
   // Built once at draft start; maps manager name → OwnerHistory for history injection
   const teamOwnerMapRef = useRef<TeamOwnerMap | null>(null)
+
+  // FF-279: ref declared early; assigned after useDraftState gives us draftedNames + addManualPick
+  const handleAuctioneerPicksRef = useRef<((picks: AuctioneerPick[]) => void) | null>(null)
 
   // Load session + league + players + active strategy
   useEffect(() => {
@@ -412,6 +422,40 @@ export function LiveDraftClient() {
   } = useDraftState({
     session,
     rosterSlots,
+  })
+
+  // FF-279: Update Auctioneer handler ref every render so it always sees the
+  // latest draftedNames + addManualPick without rethrashing hook deps.
+  handleAuctioneerPicksRef.current = (picks: AuctioneerPick[]) => {
+    for (const pick of picks) {
+      // draftedNames keys are lowercase player names (see getDraftedPlayerNames)
+      if (!draftedNames.has(pick.player_name.toLowerCase())) {
+        addManualPick({
+          player_name: pick.player_name,
+          manager: pick.manager,
+          price: pick.price,
+          position: pick.position,
+        })
+      }
+    }
+  }
+
+  // FF-279: Auctioneer feed hook — gated auction-only, zero effect for snake.
+  // onAuctioneerpicks is stable (empty deps) — routes through ref so it always
+  // sees latest draftedNames+addManualPick without restarting the poll interval.
+  const aifEnabled = !!aifParam && session?.format === 'auction'
+  const onAuctioneerpicks = useCallback(
+    (picks: AuctioneerPick[]) => handleAuctioneerPicksRef.current?.(picks),
+    [], // stable — routes through ref
+  )
+  const {
+    connected: aifConnected,
+    importedCount: aifImportedCount,
+    error: aifError,
+  } = useAuctioneerfeed({
+    enabled: aifEnabled,
+    connectionType: aifEnabled ? aifParam : null,
+    onNewPicks: aifEnabled ? onAuctioneerpicks : undefined,
   })
 
   // Score players with active strategy and intel context (FF-247)
@@ -702,6 +746,15 @@ export function LiveDraftClient() {
             error={sheetError}
             onRetry={undefined}
           />
+          {/* FF-279: Auctioneer sync indicator — auction-only */}
+          {aifEnabled && (
+            <FFIBadge
+              status={aifError ? 'danger' : aifConnected ? 'success' : 'info'}
+              title={aifError ?? (aifConnected ? `${aifImportedCount} picks imported from Auctioneer` : 'Waiting for Auctioneer data...')}
+            >
+              AA {aifConnected ? `✓${aifImportedCount > 0 ? ` ${aifImportedCount}` : ''}` : '…'}
+            </FFIBadge>
+          )}
           {saving && <Loader2 className="h-4 w-4 animate-spin text-[var(--ffi-primary)]" />}
           <FFIBadge status={state.status === 'completed' ? 'success' : 'info'}>
             {state.status === 'completed' ? 'COMPLETE' : `${state.total_picks} PICKS`}

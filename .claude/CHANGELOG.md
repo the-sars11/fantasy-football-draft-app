@@ -2,6 +2,29 @@
 
 ---
 
+## 2026-04-16 — FF-279: Auctioneer JSON Import with Hot-Reload
+
+**Task:** FF-279 — FFI reads Auctioneer's JSON export at auction setup  
+**Class:** `pipeline` | **Lenses:** Architecture, QA, Security
+
+**Root Cause:** P1 milestone — Joe's ESPN auction draft uses the Auctioneer app to run the live auction; FFI had no way to receive picks from it. Each pick was re-entered manually, doubling work and creating sync lag.
+
+**Approach:** `useAuctioneerfeed` hook with two polling paths at 3-second intervals. (1) localStorage: reads `auctioneer-ffi-feed-v1` (Auctioneer's append-only pick feed) + `auctioneer-draft-v1` (for teamId→name resolution) directly from `window.localStorage` — works when both apps run in the same browser tab on the same device. (2) File System Access API: polls a `FileSystemFileHandle` selected at setup time; supports all three Auctioneer JSON shapes (storage envelope, StoredDraft, raw Pick[]). Dedup across polls via `seenPickIdsRef` (Auctioneer pick IDs). At live-client boundary, picks are filtered against `draftedNames` before `addManualPick` to prevent double-recording on cold-start. `onNewPicks` is stabilized via `useCallback([])` + a handler ref so the 3-second interval never restarts mid-draft. File handle survives client-side navigation via module-level `_globalFileHandle` / `setGlobalFileHandle()`. Gated: hook is a no-op unless `enabled===true` (caller gates on `session.format === 'auction'`); Tyler's snake/Sleeper flow is completely unaffected.
+
+**Changes:**
+- `src/hooks/use-auctioneer-feed.ts` (new): `useAuctioneerfeed(enabled, connectionType, onNewPicks)` hook; `AuctioneerConnectionType`, `AuctioneerPick` types; `setGlobalFileHandle()` / `getGlobalFileHandle()` module-level API; `parseFileContent()` for multi-shape file support; `buildTeamNameMap()` + `normalizeAAPick()` helpers
+- `src/app/(app)/draft/setup/client.tsx`: imports `setGlobalFileHandle`, `AuctioneerConnectionType`; `auctioneerConnectionType` + `auctioneerFileName` + `aifError` state; Auctioneer Sync card in Step 3 (only rendered when `isAuction`): "Same Device" toggle (localStorage) + "Export File" button (File System Access API with type filter); `?aif=` param appended to live page navigation URL
+- `src/app/(app)/draft/live/client.tsx`: imports `useAuctioneerfeed`, `AuctioneerConnectionType`, `AuctioneerPick`; reads `?aif=` from searchParams; `handleAuctioneerPicksRef` declared early, updated post-`useDraftState`; `onAuctioneerpicks` via `useCallback([])` (stable); `useAuctioneerfeed` call with `aifEnabled` gate; `AA ✓N` / `AA …` badge in header when `aifEnabled`
+
+**Architecture notes:**
+- `onNewPicks` must be stable at call site — empty-dep `useCallback` + handler ref pattern avoids interval restarts
+- `setError` never called synchronously in `useEffect` (react-compiler rule) — error state flows from failed poll attempts only
+- Module-level `_globalFileHandle` is cleared by the user navigating back to setup and picking a new file; no explicit cleanup needed for one-session use
+
+**Verification:** `npm run type-check` — clean. `npm run lint` — zero new errors in changed files. All pre-existing errors unchanged.
+
+---
+
 ## 2026-04-16 — FF-311: Owner History System
 
 **Task:** FF-311 — Owner history system for trash talk context injection  
