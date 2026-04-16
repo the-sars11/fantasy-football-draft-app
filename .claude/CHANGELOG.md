@@ -2,6 +2,28 @@
 
 ---
 
+## 2026-04-16 — FF-306: Trash Talk Mode Toggle at Session Setup
+
+**Task:** FF-306 (output)
+**Class:** `output` | **Lenses:** Delivery, QA
+
+**Root Cause:** No way to configure trash talk intensity at session start — all users got the same rule-based alerts with no opt-out.
+
+**Approach:** Session-scoped mode stored as `&ttm=` URL param (no DB migration needed — mode is fixed at session start, not persisted across sessions). Default: `family-safe`.
+
+**Changes:**
+- `src/app/(app)/draft/setup/client.tsx`:
+  - Added `TrashTalkMode = 'off' | 'family-safe' | 'adult-only'` type
+  - Added `trashTalkMode` state (default: `'family-safe'`)
+  - Added 3-button selector card in Step 3 (Off 🔇 / Family-Safe 😄 / Adult-Only 🔥) using existing card-button pattern
+  - Appended `&ttm=${trashTalkMode}` to `router.push` on session start
+- `src/app/(app)/draft/live/client.tsx`:
+  - Added `TrashTalkMode` type alias
+  - Reads `ttm` from `useSearchParams()` (default: `'family-safe'`)
+  - Trash talk `useEffect` returns early when mode is `'off'`; `trashTalkMode` added to dep array
+
+---
+
 ## 2026-04-16 — FF-305: Wire Live Trash Talk Alerts into Live Draft Client
 
 **Task:** FF-305 (shared)

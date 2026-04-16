@@ -37,6 +37,7 @@ interface Manager {
 }
 
 type DraftMode = 'sheets' | 'manual' | 'sim'
+type TrashTalkMode = 'off' | 'family-safe' | 'adult-only'
 
 export function DraftSetupClient() {
   const router = useRouter()
@@ -67,6 +68,7 @@ export function DraftSetupClient() {
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1)
   const [draftMode, setDraftMode] = useState<DraftMode | null>(null)
   const [declaredKeepers, setDeclaredKeepers] = useState<KeeperEntry[]>([])
+  const [trashTalkMode, setTrashTalkMode] = useState<TrashTalkMode>('family-safe')
 
   const isKeeperLeague = selectedLeague?.keeper_enabled ?? false
   const isAuction = selectedLeague?.format === 'auction'
@@ -191,7 +193,7 @@ export function DraftSetupClient() {
         return
       }
 
-      router.push(`/draft/live?session=${data.session.id}`)
+      router.push(`/draft/live?session=${data.session.id}&ttm=${trashTalkMode}`)
     } catch {
       setError('Network error -- could not create session')
     } finally {
@@ -417,6 +419,38 @@ export function DraftSetupClient() {
             </div>
           </FFICard>
         )}
+
+        {/* Trash Talk Mode */}
+        <FFICard>
+          <div className="ffi-title-md text-white font-semibold mb-1">Trash Talk</div>
+          <div className="ffi-body-md text-[var(--ffi-text-secondary)] mb-3 text-sm">
+            Auto-detect draft mistakes and generate callouts during the draft.
+          </div>
+          <div className="grid grid-cols-3 gap-2">
+            {([
+              { mode: 'off' as TrashTalkMode, emoji: '🔇', label: 'Off', desc: 'Silent' },
+              { mode: 'family-safe' as TrashTalkMode, emoji: '😄', label: 'Family-Safe', desc: 'PG-13' },
+              { mode: 'adult-only' as TrashTalkMode, emoji: '🔥', label: 'Adult-Only', desc: 'No filter' },
+            ] as const).map(({ mode, emoji, label, desc }) => (
+              <button
+                key={mode}
+                type="button"
+                onClick={() => setTrashTalkMode(mode)}
+                className={`flex flex-col items-center gap-1 p-3 rounded-xl border transition-all text-center
+                  ${trashTalkMode === mode
+                    ? 'border-[#2ff801]/50 bg-[#2ff801]/5'
+                    : 'border-[var(--ffi-border)]/20 bg-[var(--ffi-surface)] hover:border-[#8bacff]/30'
+                  }`}
+              >
+                <span className="text-xl">{emoji}</span>
+                <span className={`ffi-caption font-semibold ${trashTalkMode === mode ? 'text-[#2ff801]' : 'text-white'}`}>
+                  {label}
+                </span>
+                <span className="ffi-caption text-[var(--ffi-text-muted)] text-[10px]">{desc}</span>
+              </button>
+            ))}
+          </div>
+        </FFICard>
 
         {/* League already confirmed in Step 1 — no dropdown here */}
 

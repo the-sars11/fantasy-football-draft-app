@@ -292,9 +292,12 @@ function MySquadPanel({
   )
 }
 
+type TrashTalkMode = 'off' | 'family-safe' | 'adult-only'
+
 export function LiveDraftClient() {
   const searchParams = useSearchParams()
   const sessionId = searchParams.get('session')
+  const trashTalkMode = (searchParams.get('ttm') ?? 'family-safe') as TrashTalkMode
 
   // On Block: player nominated via BID button in the player pool
   const [onBlockPlayer, setOnBlockPlayer] = useState<Player | null>(null)
@@ -488,6 +491,9 @@ export function LiveDraftClient() {
       return
     }
 
+    // Mode is off — skip all analysis
+    if (trashTalkMode === 'off') return
+
     if (state.picks.length <= processedPickCountRef.current) return
 
     const newPicks = state.picks.slice(processedPickCountRef.current)
@@ -511,7 +517,7 @@ export function LiveDraftClient() {
     if (newAlerts.length > 0) {
       setTrashTalkAlerts(prev => [...prev, ...newAlerts])
     }
-  }, [state, players])
+  }, [state, players, trashTalkMode])
 
   const handleDismissTrashTalk = useCallback((id: string) => {
     setTrashTalkAlerts(prev => prev.filter(a => a.id !== id))
