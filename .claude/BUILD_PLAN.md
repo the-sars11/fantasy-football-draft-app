@@ -14,9 +14,9 @@
     { "name": "P3+ — Commercialization (CONDITIONAL)", "done": false }
   ],
   "nextItems": [
-    "FF-282: Generalize use-draft-polling.ts → use-draft-feed.ts (multi-source merge)",
     "FF-283: Dynamic max-bid recompute on every pick from any source",
-    "FF-269: Arm's-length physical test — fix anything requiring precision tapping"
+    "FF-269: Arm's-length physical test — fix anything requiring precision tapping",
+    "FF-011: Yahoo Fantasy API adapter (OAuth, deferred)"
   ]
 }
 -->
@@ -129,7 +129,7 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 - [x] FF-279: FFI reads Auctioneer's JSON export at auction setup — hot-reload on file change via File System Access API or localStorage namespace
 - [x] FF-280: Subscribe to Auctioneer's `ffi-auction-feed` BroadcastChannel — instant pick sync when both run on same device (gated: auction mode only)
 - [x] FF-281: `src/lib/draft/auction-feed-merge.ts` (NEW) — dedup pick events across sources by `pickId`, emit normalized pick events
-- [ ] FF-282: Generalize `src/hooks/use-draft-polling.ts` → `use-draft-feed.ts` — multi-source priority merge (BroadcastChannel > JSON > Sheets); snake/Sleeper mode uses manual entry only, zero behavior change
+- [x] FF-282: Generalize `src/hooks/use-draft-polling.ts` → `use-draft-feed.ts` — multi-source priority merge (BroadcastChannel > JSON > Sheets); snake/Sleeper mode uses manual entry only, zero behavior change
 - [ ] FF-283: Dynamic max-bid recompute — every pick from any source triggers `calculateMaxBidAdvice()` recompute for remaining players
 
 ---

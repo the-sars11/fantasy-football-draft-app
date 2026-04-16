@@ -2,6 +2,28 @@
 
 ---
 
+## 2026-04-16 — FF-282: use-draft-feed.ts Unified Multi-Source Pick Feed
+
+**Task:** FF-282 — Generalize `use-draft-polling.ts` → `use-draft-feed.ts`  
+**Class:** `pipeline` | **Lenses:** Architecture, QA
+
+**Root Cause:** `live/client.tsx` called `useAuctioneerfeed` directly with `AuctioneerPick[]` — a raw internal type from the Auctioneer integration layer. Downstream code (FF-283 max-bid recompute, future Sheets unification) needs a stable `NormalizedPickEvent[]` interface that abstracts the source. Also eliminated explicit `enabled`/`connectionType` gating boilerplate from the call site.
+
+**Approach:** New `src/hooks/use-draft-feed.ts` wraps `useAuctioneerfeed` and converts its `AuctioneerPick[]` output to `NormalizedPickEvent[]` using `createPickMerger()` (FF-281) + `playerNameToPickId()`. Gating is internal: hook is a no-op when `format !== 'auction'` or `connectionType` is null — callers pass `session.format` and `aifParam` unconditionally. `connectionTypeToSource()` maps the connection type to `FeedSource` tag. The `mergerRef` (one `createPickMerger()` per mount) deduplicates pickIds across BroadcastChannel and localStorage poll paths; it's primed to also dedup against Sheets picks once that source is routed through here. Re-exports `NormalizedPickEvent` and `AuctioneerConnectionType` so `live/client.tsx` has a single import point. `use-draft-state.ts` and `use-draft-polling.ts` are untouched — Tyler's Sheets + manual entry path has zero behavior change.
+
+**Changes:**
+- `src/hooks/use-draft-feed.ts` (new): `useDraftFeed(format, connectionType, onNewPicks)` → `UseDraftFeedResult`; `toNormalizedEvent()`; `connectionTypeToSource()`; re-exports `NormalizedPickEvent`, `AuctioneerConnectionType`
+- `src/app/(app)/draft/live/client.tsx`: import swapped (`useAuctioneerfeed`/`AuctioneerPick` → `useDraftFeed`/`NormalizedPickEvent`); `handleAuctioneerPicksRef` type updated; handler body `pick.player_name` → `pick.playerName`; `onAuctioneerpicks` callback type updated; hook call simplified to `useDraftFeed({format, connectionType, onNewPicks})`
+
+**Architecture notes:**
+- `use-draft-polling.ts` is NOT deleted — `use-draft-state.ts` still uses it for Sheets polling; the "generalize" step is additive (new hook) not a replacement yet
+- Source priority (BroadcastChannel > localStorage > file) is enforced inside `useAuctioneerfeed`; `useDraftFeed` adds the normalization and cross-source dedup layer on top
+- `mergerRef` persists for the hook's lifetime; `reset()` is available for future session-restart use cases
+
+**Verification:** `npm run type-check` — clean. `npm run lint` — zero new errors in changed files.
+
+---
+
 ## 2026-04-16 — FF-281: auction-feed-merge.ts Cross-Source Pick Dedup Utility
 
 **Task:** FF-281 — `src/lib/draft/auction-feed-merge.ts` (NEW) — dedup pick events across sources by `pickId`  

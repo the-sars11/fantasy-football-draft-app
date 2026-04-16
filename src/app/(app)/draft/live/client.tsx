@@ -59,10 +59,10 @@ import type { TrashTalkAlert } from '@/lib/draft/trash-talk'
 import { loadHistory, buildTeamOwnerMap, buildHistoryBlock } from '@/lib/draft/trash-talk-history'
 import type { TeamOwnerMap } from '@/lib/draft/trash-talk-history'
 import {
-  useAuctioneerfeed,
+  useDraftFeed,
   type AuctioneerConnectionType,
-  type AuctioneerPick,
-} from '@/hooks/use-auctioneer-feed'
+  type NormalizedPickEvent,
+} from '@/hooks/use-draft-feed'
 
 const DEFAULT_ROSTER: RosterSlots = {
   qb: 1, rb: 2, wr: 2, te: 1, flex: 1, k: 1, dst: 1, bench: 6, ir: 0,
@@ -333,8 +333,8 @@ export function LiveDraftClient() {
   // Built once at draft start; maps manager name → OwnerHistory for history injection
   const teamOwnerMapRef = useRef<TeamOwnerMap | null>(null)
 
-  // FF-279: ref declared early; assigned after useDraftState gives us draftedNames + addManualPick
-  const handleAuctioneerPicksRef = useRef<((picks: AuctioneerPick[]) => void) | null>(null)
+  // FF-279/FF-282: ref declared early; assigned after useDraftState gives us draftedNames + addManualPick
+  const handleAuctioneerPicksRef = useRef<((picks: NormalizedPickEvent[]) => void) | null>(null)
 
   // Load session + league + players + active strategy
   useEffect(() => {
@@ -426,12 +426,12 @@ export function LiveDraftClient() {
 
   // FF-279: Update Auctioneer handler ref every render so it always sees the
   // latest draftedNames + addManualPick without rethrashing hook deps.
-  handleAuctioneerPicksRef.current = (picks: AuctioneerPick[]) => {
+  handleAuctioneerPicksRef.current = (picks: NormalizedPickEvent[]) => {
     for (const pick of picks) {
       // draftedNames keys are lowercase player names (see getDraftedPlayerNames)
-      if (!draftedNames.has(pick.player_name.toLowerCase())) {
+      if (!draftedNames.has(pick.playerName.toLowerCase())) {
         addManualPick({
-          player_name: pick.player_name,
+          player_name: pick.playerName,
           manager: pick.manager,
           price: pick.price,
           position: pick.position,
@@ -440,22 +440,22 @@ export function LiveDraftClient() {
     }
   }
 
-  // FF-279: Auctioneer feed hook — gated auction-only, zero effect for snake.
+  // FF-282: Unified draft feed — gating is internal (format + connectionType).
   // onAuctioneerpicks is stable (empty deps) — routes through ref so it always
-  // sees latest draftedNames+addManualPick without restarting the poll interval.
+  // sees latest draftedNames+addManualPick without restarting the feed interval.
   const aifEnabled = !!aifParam && session?.format === 'auction'
   const onAuctioneerpicks = useCallback(
-    (picks: AuctioneerPick[]) => handleAuctioneerPicksRef.current?.(picks),
+    (picks: NormalizedPickEvent[]) => handleAuctioneerPicksRef.current?.(picks),
     [], // stable — routes through ref
   )
   const {
     connected: aifConnected,
     importedCount: aifImportedCount,
     error: aifError,
-  } = useAuctioneerfeed({
-    enabled: aifEnabled,
-    connectionType: aifEnabled ? aifParam : null,
-    onNewPicks: aifEnabled ? onAuctioneerpicks : undefined,
+  } = useDraftFeed({
+    format: session?.format ?? null,
+    connectionType: aifParam,
+    onNewPicks: onAuctioneerpicks,
   })
 
   // Score players with active strategy and intel context (FF-247)
