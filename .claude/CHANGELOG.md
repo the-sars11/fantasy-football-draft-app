@@ -2,6 +2,26 @@
 
 ---
 
+## 2026-04-16 — FF-310: Claude Haiku Trash Talk Generation
+
+**Task:** FF-310 — Replace hardcoded message arrays with Claude Haiku generation  
+**Class:** `pipeline` | **Lenses:** Architecture, QA
+
+**Root Cause:** `analyzePickForTrashTalk()` returned alerts with hardcoded message strings from static arrays. FF-307 created the `/api/trash-talk` Claude Haiku endpoint but nothing called it from the live client.
+
+**Approach:** Added `generateTrashTalk(alert, mode, historyBlock?)` to `src/lib/draft/trash-talk.ts` as a thin async wrapper that maps `TrashTalkAlert` fields to `TrashTalkRequest` and calls `/api/trash-talk`. In `live/client.tsx`, both trash talk `useEffect` hooks (per-pick and keeper one-time) now fire-and-forget this function after adding alerts to state. Alerts appear immediately with the hardcoded fallback message; when Haiku responds with a non-null line, the alert's `message` is updated in-place via a targeted `prev.map()`. Null response from API = hardcoded message kept, alert not dropped. All errors handled silently inside `generateTrashTalk()`. Draft UI never blocks.
+
+**Changes:**
+- `src/lib/draft/trash-talk.ts`: Added `export async function generateTrashTalk()` — maps `TrashTalkAlert` → `TrashTalkRequest` body, fetches `/api/trash-talk`, returns `line` or null; catch-all fail-silent
+- `src/app/(app)/draft/live/client.tsx`:
+  - Import updated to include `generateTrashTalk`
+  - Per-pick `useEffect`: after `setTrashTalkAlerts([...prev, ...newAlerts])`, loops over `newAlerts` firing `void generateTrashTalk(alert, mode).then(line => { if (line) setTrashTalkAlerts(...map update) })`
+  - Keeper `useEffect`: same fire-and-forget pattern applied to `keeperAlerts`
+
+**Verification:** `npm run type-check` — clean. `npm run lint` — no new errors introduced (pre-existing errors in unrelated files).
+
+---
+
 ## 2026-04-16 — FF-309 + Keeper/Sleeper Augmentation
 
 **Task:** FF-309 + Tyler's Sleeper keeper league augmentation (pipeline)

@@ -841,6 +841,45 @@ export function detectByeWeekDisaster(
   return null
 }
 
+/**
+ * Send a trigger result to the server-side Claude API route and return the
+ * generated line, or null if the call fails or returns nothing.
+ *
+ * Fire-and-forget wrapper. Fail-silent on all errors — trash talk is non-critical.
+ */
+export async function generateTrashTalk(
+  alert: TrashTalkAlert,
+  mode: 'family-safe' | 'adult-only',
+  historyBlock?: string,
+): Promise<string | null> {
+  try {
+    const body = {
+      trigger: alert.type,
+      playerName: alert.playerName ?? '',
+      position: '',
+      espnPprRank: 0,
+      teamName: alert.managerName,
+      price: 0,
+      impliedValue: 0,
+      pickNumber: alert.pickNumber,
+      totalPicks: 0,
+      contextString: alert.detail,
+      mode,
+      historyBlock,
+    }
+    const response = await fetch('/api/trash-talk', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    })
+    if (!response.ok) return null
+    const data = (await response.json()) as { line: string | null }
+    return data.line ?? null
+  } catch {
+    return null
+  }
+}
+
 // --- Post-Draft Roast Report ---
 
 export interface RoastReportEntry {

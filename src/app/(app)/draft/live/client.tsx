@@ -54,7 +54,7 @@ import { clearRecommendationCache } from '@/lib/draft/recommend'
 import { isKeeperPick, displayPickNum, keepersToPicks } from '@/lib/draft/keepers'
 import { InjuryWatch } from '@/components/draft/injury-watch'
 import { TrashTalkFeed, SavedTrashTalk } from '@/components/draft/trash-talk'
-import { analyzePickForTrashTalk, analyzeKeeperPicksForTrashTalk } from '@/lib/draft/trash-talk'
+import { analyzePickForTrashTalk, analyzeKeeperPicksForTrashTalk, generateTrashTalk } from '@/lib/draft/trash-talk'
 import type { TrashTalkAlert } from '@/lib/draft/trash-talk'
 
 const DEFAULT_ROSTER: RosterSlots = {
@@ -524,6 +524,14 @@ export function LiveDraftClient() {
 
     if (newAlerts.length > 0) {
       setTrashTalkAlerts(prev => [...prev, ...newAlerts])
+      // Fire-and-forget: enrich each alert's message with AI-generated line
+      for (const alert of newAlerts) {
+        void generateTrashTalk(alert, trashTalkMode as 'family-safe' | 'adult-only').then(line => {
+          if (line) {
+            setTrashTalkAlerts(prev => prev.map(a => a.id === alert.id ? { ...a, message: line } : a))
+          }
+        })
+      }
     }
   }, [state, players, trashTalkMode])
 
@@ -543,6 +551,14 @@ export function LiveDraftClient() {
     )
     if (keeperAlerts.length > 0) {
       setTrashTalkAlerts(prev => [...prev, ...keeperAlerts])
+      // Fire-and-forget: enrich keeper alerts with AI-generated lines
+      for (const alert of keeperAlerts) {
+        void generateTrashTalk(alert, trashTalkMode as 'family-safe' | 'adult-only').then(line => {
+          if (line) {
+            setTrashTalkAlerts(prev => prev.map(a => a.id === alert.id ? { ...a, message: line } : a))
+          }
+        })
+      }
     }
   }, [state, players, trashTalkMode])
 
