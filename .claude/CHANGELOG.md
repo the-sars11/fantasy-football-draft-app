@@ -2,6 +2,27 @@
 
 ---
 
+## 2026-04-16 — FF-280: Auctioneer BroadcastChannel Subscriber
+
+**Task:** FF-280 — Subscribe to Auctioneer's `ffi-auction-feed` BroadcastChannel for instant pick sync  
+**Class:** `pipeline` | **Lenses:** Architecture, QA, Security
+
+**Root Cause:** FF-279 added 3-second localStorage polling, but picks were delayed up to 3s from when Auctioneer committed them. With both apps open in the same browser, a BroadcastChannel can deliver picks in sub-100ms with no polling overhead.
+
+**Approach:** New `useEffect` in `useAuctioneerfeed` (between `processBatch` definition and the existing localStorage poll). Gates on `enabled && connectionType === 'localstorage'` — channel is meaningless for the file path and would silently receive nothing. SSR-safe (`typeof window === 'undefined'` guard). Opens `BroadcastChannel('ffi-auction-feed')`, sets `onmessage` handler: reads teamNameMap from `auctioneer-draft-v1` localStorage for teamId→name resolution, routes the single `_AAPick` through `processBatch` (same dedup ref as the poll). Sets `connected=true` + clears error on each message. Cleanup closes the channel. The 3-second poll below it continues running as catch-up for any messages missed during a brief disconnect. `seenPickIdsRef` ensures each pick ID is emitted to `onNewPicks` exactly once regardless of which path delivers it first. No changes to Auctioneer repo — `ffiBroadcastRef.postMessage(pick)` was already wired in `draft/page.tsx` as part of AA-INT1.
+
+**Changes:**
+- `src/hooks/use-auctioneer-feed.ts`: new BroadcastChannel subscriber `useEffect` before the localStorage poll effect; comment on the existing localStorage poll updated to "catch-up fallback"
+
+**Architecture notes:**
+- Channel subscriber scoped to `'localstorage'` only — file path users are on a different device where a same-origin BroadcastChannel would never receive messages
+- Both paths call `processBatch` → `seenPickIdsRef` dedup → `onNewPicks` exactly once per pick ID
+- Channel open/close is tied to effect lifecycle; no global channel instance needed
+
+**Verification:** `npm run lint` — zero new errors in changed file. `npm run type-check` — clean. Auctioneer `npx tsc --noEmit` — clean.
+
+---
+
 ## 2026-04-16 — FF-279: Auctioneer JSON Import with Hot-Reload
 
 **Task:** FF-279 — FFI reads Auctioneer's JSON export at auction setup  

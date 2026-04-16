@@ -222,7 +222,41 @@ export function useAuctioneerfeed({
   )
 
   // ------------------------------------------------------------------
-  // localStorage path
+  // BroadcastChannel path (localstorage only — instant delivery)
+  // Supplements the 3-second poll below; seenPickIdsRef dedupes both.
+  // ------------------------------------------------------------------
+  useEffect(() => {
+    if (!enabled || connectionType !== 'localstorage') return
+    if (typeof window === 'undefined') return
+
+    const channel = new BroadcastChannel('ffi-auction-feed')
+
+    channel.onmessage = (event: MessageEvent) => {
+      try {
+        const pick = event.data as _AAPick
+        if (!pick?.id) return
+
+        // Resolve team names from localStorage state if available
+        let teamNameMap = new Map<string, string>()
+        const stateRaw = window.localStorage.getItem(AA_STATE_KEY)
+        if (stateRaw) {
+          const env: _AAStorageEnvelope = JSON.parse(stateRaw) as _AAStorageEnvelope
+          teamNameMap = buildTeamNameMap(env.draft?.state?.config?.teams ?? [])
+        }
+
+        setConnected(true)
+        setError(null)
+        processBatch([pick], teamNameMap)
+      } catch {
+        // Malformed message payload — ignore silently
+      }
+    }
+
+    return () => channel.close()
+  }, [enabled, connectionType, processBatch])
+
+  // ------------------------------------------------------------------
+  // localStorage path (3-second poll — catch-up fallback)
   // ------------------------------------------------------------------
   useEffect(() => {
     if (!enabled || connectionType !== 'localstorage') return
