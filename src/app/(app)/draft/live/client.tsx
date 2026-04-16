@@ -56,6 +56,8 @@ import { InjuryWatch } from '@/components/draft/injury-watch'
 import { TrashTalkFeed, SavedTrashTalk } from '@/components/draft/trash-talk'
 import { analyzePickForTrashTalk, analyzeKeeperPicksForTrashTalk, generateTrashTalk } from '@/lib/draft/trash-talk'
 import type { TrashTalkAlert } from '@/lib/draft/trash-talk'
+import { loadHistory, buildTeamOwnerMap, buildHistoryBlock } from '@/lib/draft/trash-talk-history'
+import type { TeamOwnerMap } from '@/lib/draft/trash-talk-history'
 
 const DEFAULT_ROSTER: RosterSlots = {
   qb: 1, rb: 2, wr: 2, te: 1, flex: 1, k: 1, dst: 1, bench: 6, ir: 0,
@@ -321,6 +323,8 @@ export function LiveDraftClient() {
   const processedPickCountRef = useRef<number | null>(null)
   // false = keeper alerts not yet fired; true = already fired once
   const keeperAlertsProcessedRef = useRef(false)
+  // Built once at draft start; maps manager name → OwnerHistory for history injection
+  const teamOwnerMapRef = useRef<TeamOwnerMap | null>(null)
 
   // Load session + league + players + active strategy
   useEffect(() => {
@@ -483,6 +487,13 @@ export function LiveDraftClient() {
     return result.active ? result : null
   }, [strategy, state, draftedNames, myPickedNames, driftDismissed])
 
+  // Build owner map once when manager_order is first populated
+  useEffect(() => {
+    if (teamOwnerMapRef.current !== null) return
+    if (!state?.manager_order.length) return
+    teamOwnerMapRef.current = buildTeamOwnerMap(state.manager_order, loadHistory())
+  }, [state])
+
   // Analyze each new pick for trash talk opportunities
   useEffect(() => {
     if (!state || players.length === 0) return
@@ -526,7 +537,9 @@ export function LiveDraftClient() {
       setTrashTalkAlerts(prev => [...prev, ...newAlerts])
       // Fire-and-forget: enrich each alert's message with AI-generated line
       for (const alert of newAlerts) {
-        void generateTrashTalk(alert, trashTalkMode as 'family-safe' | 'adult-only').then(line => {
+        const owner = teamOwnerMapRef.current?.[alert.managerName] ?? null
+        const historyBlock = buildHistoryBlock(alert.type, owner) || undefined
+        void generateTrashTalk(alert, trashTalkMode as 'family-safe' | 'adult-only', historyBlock).then(line => {
           if (line) {
             setTrashTalkAlerts(prev => prev.map(a => a.id === alert.id ? { ...a, message: line } : a))
           }
@@ -553,7 +566,9 @@ export function LiveDraftClient() {
       setTrashTalkAlerts(prev => [...prev, ...keeperAlerts])
       // Fire-and-forget: enrich keeper alerts with AI-generated lines
       for (const alert of keeperAlerts) {
-        void generateTrashTalk(alert, trashTalkMode as 'family-safe' | 'adult-only').then(line => {
+        const owner = teamOwnerMapRef.current?.[alert.managerName] ?? null
+        const historyBlock = buildHistoryBlock(alert.type, owner) || undefined
+        void generateTrashTalk(alert, trashTalkMode as 'family-safe' | 'adult-only', historyBlock).then(line => {
           if (line) {
             setTrashTalkAlerts(prev => prev.map(a => a.id === alert.id ? { ...a, message: line } : a))
           }

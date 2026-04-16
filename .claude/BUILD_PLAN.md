@@ -161,7 +161,7 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
   - If API returns non-null line: use as `alert.message` in `LiveTrashTalkAlert`; if null: use existing hardcoded fallback string (do not drop alert entirely — degraded mode is better than silent failure)
   - Cost: ~$0.01/draft at 30% trigger rate | `pipeline`
 
-- [ ] FF-311: Owner history system — port from `fantasy_auction_auctioneer/src/lib/trash-talk-history.ts` → `src/lib/draft/trash-talk-history.ts`; copy `fantasy_auction_auctioneer/src/data/history.json` → `src/data/history.json` (same 10 Nasties owner profiles, same league, same roast_ammo);
+- [x] FF-311: Owner history system — port from `fantasy_auction_auctioneer/src/lib/trash-talk-history.ts` → `src/lib/draft/trash-talk-history.ts`; copy `fantasy_auction_auctioneer/src/data/history.json` → `src/data/history.json` (same 10 Nasties owner profiles, same league, same roast_ammo);
   - `loadHistory()`: load bundled JSON once
   - `matchOwnerToHistory(teamName, history)`: case-insensitive alias fuzzy match (team name contains alias OR alias contains team name token)
   - `buildTeamOwnerMap(teams, history)`: called once at session start, stored in session state

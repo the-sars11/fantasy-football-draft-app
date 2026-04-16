@@ -2,6 +2,28 @@
 
 ---
 
+## 2026-04-16 — FF-311: Owner History System
+
+**Task:** FF-311 — Owner history system for trash talk context injection  
+**Class:** `pipeline` | **Lenses:** Architecture, QA
+
+**Root Cause:** `generateTrashTalk()` was calling `/api/trash-talk` with an empty `historyBlock`. The Nasties league has 10 years of roast ammo (Le'Veon Bell $73, CMC $82, Bowers $3, etc.) that Claude could use to sharpen lines — but nothing was surfacing it.
+
+**Approach:** Ported `trash-talk-history.ts` from the auctioneer with two key adaptations: (1) `buildTeamOwnerMap` takes `string[]` manager names instead of `Array<{ id, name }>` — in FFI managers are plain strings in `state.manager_order`; (2) `buildHistoryBlock` uses `TrashTalkType` and extends the trigger map for FFI-specific types (`keeper_steal` → steal moments, `bad_keeper` → overpay/bust moments). History loaded from bundled JSON at runtime (no network call). `teamOwnerMapRef` built once when `state.manager_order` first populates; per-alert owner lookup + historyBlock construction happens inline in the fire-and-forget loop.
+
+**Changes:**
+- `src/data/history.json` (new): 10 Nasties owner profiles — aliases, championships, worst seasons, signature moments, roast ammo; copied from auctioneer
+- `src/lib/draft/trash-talk-history.ts` (new): `loadHistory()`, `matchOwnerToHistory()`, `buildTeamOwnerMap(managers: string[], history)`, `buildHistoryBlock(trigger: TrashTalkType, owner)`, all types exported
+- `src/app/(app)/draft/live/client.tsx`:
+  - Imports `loadHistory`, `buildTeamOwnerMap`, `buildHistoryBlock`, `TeamOwnerMap`
+  - `teamOwnerMapRef`: built once from `state.manager_order` via one-time `useEffect`
+  - Per-pick effect: owner lookup + `buildHistoryBlock()` → `historyBlock` passed to `generateTrashTalk()`
+  - Keeper effect: same pattern
+
+**Verification:** `npm run type-check` — clean. `npm run lint` — no new errors.
+
+---
+
 ## 2026-04-16 — FF-310: Claude Haiku Trash Talk Generation
 
 **Task:** FF-310 — Replace hardcoded message arrays with Claude Haiku generation  

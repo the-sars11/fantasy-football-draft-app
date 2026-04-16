@@ -1,0 +1,259 @@
+{
+  "league": "The Nasties",
+  "founded": 2011,
+  "seasons": [2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025],
+  "owners": {
+    "rasar": {
+      "id": "rasar",
+      "aliases": ["Rasar", "Joe", "Joe Rasar"],
+      "championships": [],
+      "worst_seasons": [
+        {
+          "year": 2018,
+          "note": "Paid $73 for Le'Veon Bell who got 0.0 FPTS; finished last"
+        }
+      ],
+      "signature_moments": [
+        {
+          "year": 2018,
+          "type": "bust",
+          "player": "Le'Veon Bell",
+          "price": 73,
+          "outcome": "0.0 FPTS, finished last",
+          "note": "Bell held out all season. $73 for zero points. Still the defining Rasar moment."
+        },
+        {
+          "year": 2020,
+          "type": "steal",
+          "player": "Justin Jefferson",
+          "price": 1,
+          "note": "Bench pick at $1 turned into one of the best steals in league history"
+        },
+        {
+          "year": 2021,
+          "type": "steal",
+          "player": "Ja'Marr Chase",
+          "price": 2,
+          "note": "Chase for $2 as a rookie. Rasar has a nose for WR steals and a blind spot for RB1 overpays."
+        }
+      ],
+      "patterns": [
+        "Tends to overpay at RB1 in panic moments",
+        "Historically great at spotting late WR value",
+        "No championships despite several competitive seasons"
+      ],
+      "roast_ammo": "Rasar paid $73 for Le'Veon Bell in 2018 and got 0.0 fantasy points when Bell held out. He finished last. He also somehow drafted Justin Jefferson for $1 and Ja'Marr Chase for $2 in back-to-back years. The man is capable of brilliance and total catastrophe with equal confidence."
+    },
+    "bruce": {
+      "id": "bruce",
+      "aliases": ["Bruce", "GOLDEN LIKE A SHOWER", "Golden Shower"],
+      "championships": [],
+      "worst_seasons": [
+        {
+          "year": 2013,
+          "record": "1-12",
+          "note": "Worst record in league history at the time"
+        },
+        {
+          "year": 2024,
+          "note": "Paid $82 for CMC (highest single-player price in league history) and finished last"
+        }
+      ],
+      "signature_moments": [
+        {
+          "year": 2024,
+          "type": "overpay",
+          "player": "Christian McCaffrey",
+          "price": 82,
+          "outcome": "finished last",
+          "note": "League-record single-player spend. CMC missed significant time. Bruce finished last."
+        },
+        {
+          "year": 2013,
+          "type": "record",
+          "note": "1-12 record, worst in league history at the time"
+        }
+      ],
+      "patterns": [
+        "Goes all-in on a single elite RB at auction",
+        "Team name has been a golden shower joke for years",
+        "Record single-player spend in 2024 resulted in last place"
+      ],
+      "roast_ammo": "Bruce paid $82 for Christian McCaffrey in 2024, a league-record single-player price, and finished last. He also went 1-12 in 2013, still one of the worst records in league history. Bruce commits fully to his studs strategy every year, and the results are historically inconsistent."
+    },
+    "garrett": {
+      "id": "garrett",
+      "aliases": ["Garrett"],
+      "championships": [],
+      "worst_seasons": [
+        {
+          "year": 2020,
+          "note": "Only season below 100 PF/G in 17 years. Made 92 moves. -33.0 DIFF. Worst managed season in league history despite big spend."
+        }
+      ],
+      "signature_moments": [
+        {
+          "year": 2020,
+          "type": "bust",
+          "player": "Saquon Barkley",
+          "price": 77,
+          "outcome": "99.6 PF/G avg, -33.0 DIFF, 92 total moves",
+          "note": "Worst managed season ever. Paid $77 for Saquon, made 92 moves all year, still tanked."
+        }
+      ],
+      "patterns": [
+        "High activity manager, lots of adds drops and trades",
+        "Capable of big swings but 2020 showed overactivity can backfire catastrophically",
+        "Usually competitive despite chaotic approach"
+      ],
+      "roast_ammo": "Garrett paid $77 for Saquon Barkley in 2020, made 92 roster moves, and finished with a -33.0 point differential. That is the most active and least effective season in 17 years of this league. Ninety-two moves. Negative 33 points. Do not let him manage your 401k."
+    },
+    "kevin": {
+      "id": "kevin",
+      "aliases": ["Kevin"],
+      "championships": [2024],
+      "worst_seasons": [],
+      "signature_moments": [
+        {
+          "year": 2024,
+          "type": "champ_move",
+          "player": "full roster",
+          "outcome": "Championship, +24.4 DIFF, only 8 moves all season",
+          "note": "Won his first championship in approximately a decade of trying. Made 8 total moves. The patience finally paid off."
+        }
+      ],
+      "patterns": [
+        "Decade of 10th-12th place finishes before 2024",
+        "2024 championship with minimal roster moves (8 total)",
+        "Quiet low-activity manager who finally found the formula"
+      ],
+      "roast_ammo": "Kevin finished 10th-12th place for most of a decade before winning the 2024 championship with only 8 roster moves and a +24.4 point differential. Either he figured it out or everyone else got worse. The jury is still out on which."
+    },
+    "cross": {
+      "id": "cross",
+      "aliases": ["Cross"],
+      "championships": [],
+      "worst_seasons": [],
+      "signature_moments": [
+        {
+          "year": 2024,
+          "type": "steal",
+          "player": "Brock Bowers",
+          "price": 3,
+          "note": "Bowers went for $3 in the same draft where Travis Kelce went for $43. The spread on comparable-tier TEs was $40."
+        }
+      ],
+      "patterns": [
+        "Value hunter willing to wait for underpriced talent",
+        "2024 Bowers steal is the most extreme market mismatch in recent memory"
+      ],
+      "roast_ammo": "Cross got Brock Bowers for $3 in 2024, the same draft where Travis Kelce went for $43. That is a $40 spread on similar-tier tight ends. Cross either knows something the room does not, or he got lucky enough that it does not matter."
+    },
+    "moonshine": {
+      "id": "moonshine",
+      "aliases": ["Moonshine", "Moonshine Express"],
+      "championships": [],
+      "worst_seasons": [],
+      "signature_moments": [
+        {
+          "year": 2024,
+          "type": "overpay",
+          "player": "Sam LaPorta",
+          "price": 40,
+          "note": "Paid $40 for LaPorta while Kelce went for $43. LaPorta was not a top-5 TE by any ranking."
+        }
+      ],
+      "patterns": [
+        "Known to overpay at tight end",
+        "2024 LaPorta purchase remains a league talking point"
+      ],
+      "roast_ammo": "Moonshine paid $40 for Sam LaPorta in 2024, a year where Travis Kelce went for $43. LaPorta is not worth $3 less than Travis Kelce. Moonshine overpaid at TE by approximately $25 and did it with confidence."
+    },
+    "reggie": {
+      "id": "reggie",
+      "aliases": ["Reggie", "Rey", "Rey Reggie"],
+      "championships": [],
+      "worst_seasons": [],
+      "signature_moments": [
+        {
+          "year": 2011,
+          "type": "champ_move",
+          "note": "+35.6 point differential, best in league history"
+        },
+        {
+          "year": 2014,
+          "type": "record",
+          "note": "Trade-raped Aaron Hendrickson in a transaction the league still references"
+        }
+      ],
+      "patterns": [
+        "Best single-season point differential in league history (+35.6 in 2011)",
+        "Typically slow to act in the first hour of auction",
+        "Reputation for aggressive lopsided trades"
+      ],
+      "roast_ammo": "Reggie had the best season in Nasties history in 2011 with a +35.6 point differential, but is also famous for systematically dismantling Aaron Hendrickson in a trade the league still calls a robbery. Reggie tends to freeze in the first hour of the auction and then wake up mid-draft."
+    },
+    "moe": {
+      "id": "moe",
+      "aliases": ["Moe"],
+      "championships": [],
+      "worst_seasons": [],
+      "signature_moments": [
+        {
+          "year": 2025,
+          "type": "record",
+          "note": "Most cumulative points scored in league history: 27,473.4 PF all-time"
+        }
+      ],
+      "patterns": [
+        "Most cumulative points in league history (27473.4 PF all-time)",
+        "Consistently competitive scorer across all seasons",
+        "Fewer dramatic highs and lows than most owners"
+      ],
+      "roast_ammo": "Moe has scored more fantasy points than anyone in Nasties history, 27,473.4 all-time. He is remarkably consistent and rarely makes headlines in either direction. In a league full of dramatic characters, Moe is quietly the best scorer the draft never talks about."
+    },
+    "robbie": {
+      "id": "robbie",
+      "aliases": ["Robbie", "Team Johnson"],
+      "championships": [],
+      "worst_seasons": [
+        {
+          "year": 2023,
+          "record": "2-12",
+          "note": "Worst record in 14-game season era. 17 years of Team Johnson as a team name."
+        }
+      ],
+      "signature_moments": [
+        {
+          "year": 2023,
+          "type": "record",
+          "note": "2-12 record, worst finish in the 14-game season era"
+        }
+      ],
+      "patterns": [
+        "Has used Team Johnson as his team name for 17 consecutive years",
+        "2023 produced the worst record in the modern era (2-12)",
+        "Draft performance has been consistently below the median"
+      ],
+      "roast_ammo": "Robbie has called his team Team Johnson for 17 consecutive years. His team went 2-12 in 2023, the worst record in the 14-game season era. These two facts coexist peacefully."
+    },
+    "hendrickson": {
+      "id": "hendrickson",
+      "aliases": ["Hendrickson", "Aaron", "Aaron Hendrickson"],
+      "championships": [],
+      "worst_seasons": [],
+      "signature_moments": [
+        {
+          "year": 2014,
+          "type": "record",
+          "note": "Was on the receiving end of a trade widely considered the most lopsided in league history, courtesy of Reggie"
+        }
+      ],
+      "patterns": [
+        "Infamous for being trade-raped by Reggie in 2014",
+        "10-year member of the league"
+      ],
+      "roast_ammo": "Hendrickson is best known in league lore for losing what is widely considered the worst trade in Nasties history to Reggie. He has been in this league for a decade and that trade is still the first thing anyone mentions."
+    }
+  }
+}
