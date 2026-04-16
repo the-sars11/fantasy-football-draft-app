@@ -2,10 +2,11 @@
 
 ## Current Session
 - **Date:** 2026-04-16
-- **Focus:** P0 sub-tier 8 — Trash Talk Live Wiring
-- **Status:** FF-307 COMPLETE — trash talk API route created. Next: FF-308 (trigger engine upgrade).
+- **Focus:** P0 sub-tier 2 — Trash Talk AI Upgrade
+- **Status:** FF-308 COMPLETE — trigger engine upgraded. Next: FF-309 (snake + both-format triggers).
 
 ## Last Completed (most recent first)
+- **FF-308** (2026-04-16): Upgraded auction trigger engine in `src/lib/draft/trash-talk.ts`. Added `impliedAuctionValue()` quadratic decay formula (replaces `AVG_POSITION_VALUES` fallback in overpay + steal). Added 6 triggers: `budget_buster` (>60% spent, <35% roster filled), `last_big_spender` (pick 30+, exactly 1 team >2x avg remaining AND >$30), `cheapskate_special` (price ≤$3, avg <$7/pick), `budget_dominance` (pick 40+, top team >1.5x avg remaining AND >$30), `first_defense_buy` (fires BEFORE K/DEF guard), `lone_wolf_qb` (9+ picks, no QB). Priority order updated. `TrashTalkType` union + component config map extended. `detectOverpay` and `detectSteal` updated to use `impliedAuctionValue`.
 - **FF-307** (2026-04-16): Created `src/app/api/trash-talk/route.ts`. Claude Haiku (temperature 1.0, no streaming). Family-Safe: PG-13 system prompt, max_tokens 60. Adult-Only: Jeselnik/Ross/Hinchcliffe style, max_tokens 80. Em-dash hard-strip enforced post-response. Fail-silent on all errors — always returns `{ line: null }` rather than breaking the draft. Exports `TrashTalkRequest` and `TrashTalkResponse` types for FF-310 client wrapper.
 - **FF-306** (2026-04-16): Added 3-way trash talk mode selector (Off/Family-Safe/Adult-Only) to setup Step 3. `TrashTalkMode` type defined in both files. Mode passed as `&ttm=` URL param to live client. Live client reads param from searchParams (default: `family-safe`), gates the trash talk `useEffect` with early return when `'off'`.
 - **FF-305** (2026-04-16): Wired `analyzePickForTrashTalk()` into `live/client.tsx`. Added `trashTalkAlerts` + `savedAlerts` state, `processedPickCountRef` to skip historical picks on load, `useEffect` watching `state` + `players` to detect incremental picks from both manual entry and sheet polling. Renders `<TrashTalkFeed>` and `<SavedTrashTalk>` below `<PickFeed>` in left column. Dismiss removes from feed; save moves to saved list. Rule-based only — no LLM calls.

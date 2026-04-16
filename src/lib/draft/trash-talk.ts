@@ -8,7 +8,18 @@
 import type { DraftPick } from './state'
 import type { Player, Position } from '@/lib/players/types'
 
-export type TrashTalkType = 'overpay' | 'imbalance' | 'bye_disaster' | 'reach' | 'steal'
+export type TrashTalkType =
+  | 'overpay'
+  | 'imbalance'
+  | 'bye_disaster'
+  | 'reach'
+  | 'steal'
+  | 'budget_buster'
+  | 'last_big_spender'
+  | 'cheapskate_special'
+  | 'budget_dominance'
+  | 'first_defense_buy'
+  | 'lone_wolf_qb'
 
 export interface TrashTalkAlert {
   id: string
@@ -51,6 +62,23 @@ const MIN_ROSTER_COUNTS: Record<string, number> = {
   TE: 1,
 }
 
+// Default league constants (used when config is not passed through to trigger engine)
+const DEFAULT_AUCTION_BUDGET = 200
+const DEFAULT_ROSTER_SPOTS = 15
+
+/**
+ * Compute implied auction value using quadratic decay from ADP.
+ * Returns consensusAuctionValue if available, otherwise derives from rank + budget.
+ */
+function impliedAuctionValue(player: Player | undefined, budget: number, teamCount: number): number {
+  if (player && player.consensusAuctionValue > 0) return player.consensusAuctionValue
+  if (!player || player.adp <= 0) return 1
+  const maxValue = budget * 0.35
+  const maxRank = teamCount * 10
+  const decay = Math.max(0, 1 - (player.adp - 1) / maxRank)
+  return Math.max(1, Math.round(maxValue * decay * decay))
+}
+
 /**
  * Analyze a pick and generate trash talk if warranted
  */
@@ -63,46 +91,78 @@ export function analyzePickForTrashTalk(
   teamCount: number,
 ): TrashTalkAlert | null {
   const pos = pick.position?.toUpperCase() as Position
-  if (!pos || pos === 'K' || pos === 'DEF') return null // Skip kickers and defense
+
+  // first_defense_buy: must fire BEFORE the K/DEF guard
+  const defAlert = detectFirstDefenseBuy(pick, allPicks, pos)
+  if (defAlert) return defAlert
+
+  if (!pos || pos === 'K' || pos === 'DEF') return null
 
   const player = players.find(
     p => p.name.toLowerCase() === pick.player_name.toLowerCase()
   )
+  const managerPicks = allPicks.filter(p => p.manager === pick.manager)
 
-  // Don't trash talk yourself
+  // budget_buster: auction-only, fires even on your own picks
+  if (format === 'auction') {
+    const bbAlert = detectBudgetBuster(pick, managerPicks, DEFAULT_AUCTION_BUDGET, DEFAULT_ROSTER_SPOTS)
+    if (bbAlert) return bbAlert
+  }
+
+  // Don't trash talk yourself (but DO alert if you got a steal)
   if (pick.manager === myManagerName) {
-    // But DO alert if you got a steal
-    const stealAlert = detectSteal(pick, player, format, teamCount)
+    const stealAlert = detectSteal(pick, player, format, teamCount, DEFAULT_AUCTION_BUDGET)
     if (stealAlert) {
       return {
         ...stealAlert,
         managerName: pick.manager,
-        severity: 'mild', // Don't be too excited about your own steals
+        severity: 'mild',
       }
     }
     return null
   }
 
-  // Check for overpay (auction)
+  // overpay (auction, opponents only)
   if (format === 'auction' && pick.price != null) {
-    const overpayAlert = detectOverpay(pick, player, pos)
+    const overpayAlert = detectOverpay(pick, player, pos, DEFAULT_AUCTION_BUDGET, teamCount)
     if (overpayAlert) return overpayAlert
   }
 
-  // Check for reach (snake)
+  // steal (opponents)
+  const stealAlert = detectSteal(pick, player, format, teamCount, DEFAULT_AUCTION_BUDGET)
+  if (stealAlert) return stealAlert
+
+  // last_big_spender (auction, league-state)
+  if (format === 'auction') {
+    const lbsAlert = detectLastBigSpender(pick, allPicks, teamCount, DEFAULT_AUCTION_BUDGET)
+    if (lbsAlert) return lbsAlert
+  }
+
+  // budget_dominance (auction, league-state)
+  if (format === 'auction') {
+    const bdAlert = detectBudgetDominance(pick, allPicks, teamCount, DEFAULT_AUCTION_BUDGET)
+    if (bdAlert) return bdAlert
+  }
+
+  // lone_wolf_qb (both formats)
+  const lwqbAlert = detectLoneWolfQb(pick, managerPicks)
+  if (lwqbAlert) return lwqbAlert
+
+  // cheapskate_special (auction)
+  if (format === 'auction') {
+    const csAlert = detectCheapskateSpecial(pick, managerPicks)
+    if (csAlert) return csAlert
+  }
+
+  // reach (snake)
   if (format === 'snake' && pick.round != null) {
     const reachAlert = detectReach(pick, player, pos, pick.round)
     if (reachAlert) return reachAlert
   }
 
-  // Check for roster imbalance
-  const managerPicks = allPicks.filter(p => p.manager === pick.manager)
+  // imbalance (both formats)
   const imbalanceAlert = detectRosterImbalance(pick, managerPicks, pos, teamCount)
   if (imbalanceAlert) return imbalanceAlert
-
-  // Check for steal (opponent got great value - still worth noting)
-  const stealAlert = detectSteal(pick, player, format, teamCount)
-  if (stealAlert) return stealAlert
 
   return null
 }
@@ -114,9 +174,12 @@ function detectOverpay(
   pick: DraftPick,
   player: Player | undefined,
   pos: Position,
+  budget: number,
+  teamCount: number,
 ): TrashTalkAlert | null {
+  if (!player) return null
   const price = pick.price!
-  const expectedValue = player?.consensusAuctionValue ?? AVG_POSITION_VALUES[pos]
+  const expectedValue = impliedAuctionValue(player, budget, teamCount)
   const overpayAmount = price - expectedValue
   const overpayPercent = expectedValue > 0 ? (overpayAmount / expectedValue) * 100 : 0
 
@@ -271,11 +334,12 @@ function detectSteal(
   player: Player | undefined,
   format: 'auction' | 'snake',
   teamCount: number,
+  budget: number,
 ): TrashTalkAlert | null {
   if (!player) return null
 
   if (format === 'auction' && pick.price != null) {
-    const expectedValue = player.consensusAuctionValue
+    const expectedValue = impliedAuctionValue(player, budget, teamCount)
     const discount = expectedValue - pick.price
     const discountPercent = expectedValue > 0 ? (discount / expectedValue) * 100 : 0
 
@@ -314,6 +378,229 @@ function detectSteal(
   }
 
   return null
+}
+
+/**
+ * Detect budget buster: team spent >60% of budget with <35% of roster slots filled (auction-only)
+ */
+function detectBudgetBuster(
+  pick: DraftPick,
+  managerPicks: DraftPick[],
+  budget: number,
+  totalRosterSpots: number,
+): TrashTalkAlert | null {
+  const spent = managerPicks.reduce((s, p) => s + (p.price ?? 0), 0)
+  const pickCount = managerPicks.length
+  const spentPct = spent / budget
+  const filledPct = pickCount / totalRosterSpots
+
+  if (spentPct > 0.60 && filledPct < 0.35) {
+    const remaining = budget - spent
+    const spotsLeft = totalRosterSpots - pickCount
+    const severity: TrashTalkAlert['severity'] = spentPct > 0.75 ? 'savage' : 'medium'
+    const messages =
+      severity === 'savage'
+        ? [
+            `${pick.manager} just torched their budget`,
+            `${pick.manager} has money problems and it's only pick ${pick.pick_number}`,
+          ]
+        : [
+            `${pick.manager} is spending like there's no tomorrow`,
+            `${pick.manager} blew through 60% of their budget already`,
+          ]
+
+    return {
+      id: `budget_buster-${pick.pick_number}`,
+      type: 'budget_buster',
+      managerName: pick.manager,
+      message: messages[Math.floor(Math.random() * messages.length)],
+      detail: `Team has spent $${spent} of $${budget} with ${pickCount} of ${totalRosterSpots} spots filled ($${remaining} left for ${spotsLeft} spots)`,
+      pickNumber: pick.pick_number,
+      severity,
+      timestamp: Date.now(),
+    }
+  }
+
+  return null
+}
+
+/**
+ * Detect last big spender: pick 30+, exactly 1 team has remaining budget >2x league avg AND >$30 (auction-only)
+ */
+function detectLastBigSpender(
+  pick: DraftPick,
+  allPicks: DraftPick[],
+  teamCount: number,
+  budget: number,
+): TrashTalkAlert | null {
+  if (pick.pick_number < 30) return null
+
+  const spentByManager: Record<string, number> = {}
+  for (const p of allPicks) {
+    spentByManager[p.manager] = (spentByManager[p.manager] ?? 0) + (p.price ?? 0)
+  }
+
+  const managersSeen = Object.keys(spentByManager)
+  const allRemaining = managersSeen.map(name => ({
+    name,
+    remaining: budget - (spentByManager[name] ?? 0),
+  }))
+
+  // Teams not yet seen: assume full budget remaining
+  const unseenCount = Math.max(0, teamCount - managersSeen.length)
+  const totalRemaining =
+    allRemaining.reduce((s, m) => s + m.remaining, 0) + unseenCount * budget
+  const leagueAvg = totalRemaining / teamCount
+
+  const richTeams = allRemaining.filter(m => m.remaining > 2 * leagueAvg && m.remaining > 30)
+  if (richTeams.length !== 1) return null
+
+  const richTeam = richTeams[0]
+  return {
+    id: `last_big_spender-${pick.pick_number}`,
+    type: 'last_big_spender',
+    managerName: richTeam.name,
+    message: `${richTeam.name} is sitting on a war chest while everyone else scrapes`,
+    detail: `${richTeam.name} has $${richTeam.remaining} left; rest of league averages $${Math.round(leagueAvg)}`,
+    pickNumber: pick.pick_number,
+    severity: 'medium',
+    timestamp: Date.now(),
+  }
+}
+
+/**
+ * Detect cheapskate special: price ≤$3, team has 4+ picks, avg spend <$7/pick (auction-only)
+ */
+function detectCheapskateSpecial(
+  pick: DraftPick,
+  managerPicks: DraftPick[],
+): TrashTalkAlert | null {
+  const price = pick.price ?? 0
+  const pickCount = managerPicks.length
+  if (price > 3 || pickCount < 4) return null
+
+  const totalSpent = managerPicks.reduce((s, p) => s + (p.price ?? 0), 0)
+  const avgSpend = totalSpent / pickCount
+
+  if (avgSpend < 7) {
+    return {
+      id: `cheapskate_special-${pick.pick_number}`,
+      type: 'cheapskate_special',
+      managerName: pick.manager,
+      message: `${pick.manager} found the dollar menu section of the draft`,
+      detail: `Team averaging $${avgSpend.toFixed(2)} per player across ${pickCount} picks; just paid $${price}`,
+      pickNumber: pick.pick_number,
+      severity: 'mild',
+      timestamp: Date.now(),
+      playerName: pick.player_name,
+    }
+  }
+
+  return null
+}
+
+/**
+ * Detect budget dominance: pick 40+, top team's remaining >1.5x league avg AND >$30 (auction-only)
+ */
+function detectBudgetDominance(
+  pick: DraftPick,
+  allPicks: DraftPick[],
+  teamCount: number,
+  budget: number,
+): TrashTalkAlert | null {
+  if (pick.pick_number < 40) return null
+
+  const spentByManager: Record<string, number> = {}
+  for (const p of allPicks) {
+    spentByManager[p.manager] = (spentByManager[p.manager] ?? 0) + (p.price ?? 0)
+  }
+
+  const managersSeen = Object.keys(spentByManager)
+  const allRemaining = managersSeen.map(name => ({
+    name,
+    remaining: budget - (spentByManager[name] ?? 0),
+  }))
+
+  const unseenCount = Math.max(0, teamCount - managersSeen.length)
+  const totalRemaining =
+    allRemaining.reduce((s, m) => s + m.remaining, 0) + unseenCount * budget
+  const leagueAvg = totalRemaining / teamCount
+
+  const top = allRemaining.reduce<{ name: string; remaining: number } | null>(
+    (best, m) => (best === null || m.remaining > best.remaining ? m : best),
+    null,
+  )
+  if (!top) return null
+
+  if (top.remaining > 1.5 * leagueAvg && top.remaining > 30) {
+    return {
+      id: `budget_dominance-${pick.pick_number}`,
+      type: 'budget_dominance',
+      managerName: top.name,
+      message: `${top.name} is running a budget masterclass out here`,
+      detail: `${top.name} has $${top.remaining} left; league average is $${Math.round(leagueAvg)}`,
+      pickNumber: pick.pick_number,
+      severity: 'medium',
+      timestamp: Date.now(),
+    }
+  }
+
+  return null
+}
+
+/**
+ * Detect first defense buy: first DEF pick in the entire draft (both formats).
+ * Must be called BEFORE the K/DEF guard in analyzePickForTrashTalk.
+ */
+function detectFirstDefenseBuy(
+  pick: DraftPick,
+  allPicks: DraftPick[],
+  pos: Position | undefined,
+): TrashTalkAlert | null {
+  if (pos !== 'DEF') return null
+
+  const priorDefPicks = allPicks.filter(
+    p => p.pick_number < pick.pick_number && p.position?.toUpperCase() === 'DEF',
+  )
+  if (priorDefPicks.length > 0) return null
+
+  return {
+    id: `first_defense_buy-${pick.pick_number}`,
+    type: 'first_defense_buy',
+    managerName: pick.manager,
+    message: `${pick.manager} is the first to grab a defense — bold early move`,
+    detail: `First DEF bought at pick #${pick.pick_number}; all other teams still have zero defenses`,
+    pickNumber: pick.pick_number,
+    severity: 'mild',
+    timestamp: Date.now(),
+    playerName: pick.player_name,
+  }
+}
+
+/**
+ * Detect lone wolf QB: team has 9+ picks, no QB drafted, current pick is not QB (both formats)
+ */
+function detectLoneWolfQb(
+  pick: DraftPick,
+  managerPicks: DraftPick[],
+): TrashTalkAlert | null {
+  const pickCount = managerPicks.length
+  if (pickCount < 9) return null
+  if (pick.position?.toUpperCase() === 'QB') return null
+
+  const hasQb = managerPicks.some(p => p.position?.toUpperCase() === 'QB')
+  if (hasQb) return null
+
+  return {
+    id: `lone_wolf_qb-${pick.pick_number}`,
+    type: 'lone_wolf_qb',
+    managerName: pick.manager,
+    message: `${pick.manager} still has no QB after ${pickCount} picks`,
+    detail: `${pickCount} players drafted and still no QB — either a genius or a disaster waiting to happen`,
+    pickNumber: pick.pick_number,
+    severity: pickCount >= 12 ? 'medium' : 'mild',
+    timestamp: Date.now(),
+  }
 }
 
 /**

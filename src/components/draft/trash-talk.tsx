@@ -65,6 +65,48 @@ const trashTalkConfig: Record<TrashTalkType, {
     borderClass: 'border-l-[var(--ffi-success)]',
     textClass: 'text-[var(--ffi-success)]',
   },
+  budget_buster: {
+    icon: Flame,
+    emoji: '💸',
+    bgClass: 'bg-[var(--ffi-danger)]/10',
+    borderClass: 'border-l-[var(--ffi-danger)]',
+    textClass: 'text-[var(--ffi-danger)]',
+  },
+  last_big_spender: {
+    icon: Target,
+    emoji: '💰',
+    bgClass: 'bg-[var(--ffi-warning)]/10',
+    borderClass: 'border-l-[var(--ffi-warning)]',
+    textClass: 'text-[var(--ffi-warning)]',
+  },
+  cheapskate_special: {
+    icon: Meh,
+    emoji: '🪙',
+    bgClass: 'bg-orange-500/10',
+    borderClass: 'border-l-orange-500',
+    textClass: 'text-orange-400',
+  },
+  budget_dominance: {
+    icon: Target,
+    emoji: '👑',
+    bgClass: 'bg-[var(--ffi-success)]/10',
+    borderClass: 'border-l-[var(--ffi-success)]',
+    textClass: 'text-[var(--ffi-success)]',
+  },
+  first_defense_buy: {
+    icon: AlertTriangle,
+    emoji: '🛡️',
+    bgClass: 'bg-blue-500/10',
+    borderClass: 'border-l-blue-500',
+    textClass: 'text-blue-400',
+  },
+  lone_wolf_qb: {
+    icon: AlertTriangle,
+    emoji: '🐺',
+    bgClass: 'bg-[var(--ffi-warning)]/10',
+    borderClass: 'border-l-[var(--ffi-warning)]',
+    textClass: 'text-[var(--ffi-warning)]',
+  },
 }
 
 // --- Live Trash Talk Alert ---

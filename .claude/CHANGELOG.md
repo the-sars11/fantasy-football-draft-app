@@ -2,6 +2,28 @@
 
 ---
 
+## 2026-04-16 — FF-308: Auction Trigger Engine Upgrade
+
+**Task:** FF-308 (pipeline)
+**Class:** `pipeline` | **Lenses:** Architecture, QA
+
+**Root Cause:** Trigger engine only had 4 rules (overpay, reach, imbalance, steal) using flat position-average fallbacks. No auction-specific budget/spending triggers.
+
+**Approach:** Ported 6 triggers from AA reference spec. Added `impliedAuctionValue()` quadratic decay as the shared value baseline. Budget signals derived from `allPicks` + `DEFAULT_AUCTION_BUDGET` ($200) since budget config isn't passed through to the trigger layer. `first_defense_buy` required special pre-guard placement before the K/DEF skip. League-state triggers (`last_big_spender`, `budget_dominance`) fire regardless of who the current picker is.
+
+**Changes:**
+- `src/lib/draft/trash-talk.ts`:
+  - `TrashTalkType` union: added `budget_buster | last_big_spender | cheapskate_special | budget_dominance | first_defense_buy | lone_wolf_qb`
+  - `DEFAULT_AUCTION_BUDGET = 200`, `DEFAULT_ROSTER_SPOTS = 15`
+  - `impliedAuctionValue(player, budget, teamCount)`: quadratic decay from ADP; uses `consensusAuctionValue` if set
+  - `detectOverpay`: updated signature (budget, teamCount), uses `impliedAuctionValue`, guards `!player` to avoid false positives
+  - `detectSteal`: updated signature (budget), uses `impliedAuctionValue`
+  - Added: `detectBudgetBuster`, `detectLastBigSpender`, `detectCheapskateSpecial`, `detectBudgetDominance`, `detectFirstDefenseBuy`, `detectLoneWolfQb`
+  - `analyzePickForTrashTalk`: `first_defense_buy` fires before K/DEF guard; `budget_buster` fires before self-pick gate; new priority order: `budget_buster > overpay > steal > last_big_spender > budget_dominance > lone_wolf_qb > cheapskate_special > first_defense_buy > reach > imbalance`
+- `src/components/draft/trash-talk.tsx`: extended `trashTalkConfig` map with 6 new type entries
+
+---
+
 ## 2026-04-16 — FF-307: Trash Talk API Route (Claude Haiku Generation)
 
 **Task:** FF-307 (pipeline)
