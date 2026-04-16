@@ -124,12 +124,12 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 ---
 
 ## P1 — Auctioneer Integration
-> **Scope:** Joe's ESPN auction ONLY. Tyler's Yahoo snake draft uses Sheets polling exclusively — no Auctioneer involvement. All code paths gated by `format === 'auction'`.
+> **Scope:** Joe's ESPN auction ONLY. Tyler drafts via the Sleeper app (snake, keeper) — no Auctioneer involvement for Tyler's league. All code paths gated by `format === 'auction'`.
 
 - [ ] FF-279: FFI reads Auctioneer's JSON export at auction setup — hot-reload on file change via File System Access API or localStorage namespace
 - [ ] FF-280: Subscribe to Auctioneer's `ffi-auction-feed` BroadcastChannel — instant pick sync when both run on same device (gated: auction mode only)
 - [ ] FF-281: `src/lib/draft/auction-feed-merge.ts` (NEW) — dedup pick events across sources by `pickId`, emit normalized pick events
-- [ ] FF-282: Generalize `src/hooks/use-draft-polling.ts` → `use-draft-feed.ts` — multi-source priority merge (BroadcastChannel > JSON > Sheets); snake mode uses only existing Sheets source, zero behavior change
+- [ ] FF-282: Generalize `src/hooks/use-draft-polling.ts` → `use-draft-feed.ts` — multi-source priority merge (BroadcastChannel > JSON > Sheets); snake/Sleeper mode uses manual entry only, zero behavior change
 - [ ] FF-283: Dynamic max-bid recompute — every pick from any source triggers `calculateMaxBidAdvice()` recompute for remaining players
 
 ---
