@@ -2,6 +2,27 @@
 
 ---
 
+## 2026-04-16 — FF-281: auction-feed-merge.ts Cross-Source Pick Dedup Utility
+
+**Task:** FF-281 — `src/lib/draft/auction-feed-merge.ts` (NEW) — dedup pick events across sources by `pickId`  
+**Class:** `pipeline` | **Lenses:** Architecture, QA
+
+**Root Cause:** Picks now arrive from up to four paths (BroadcastChannel, localStorage poll, file poll, Sheets poll). Each path may deliver the same pick. A shared, testable dedup layer prevents double-add regardless of which path fires first. Sets up FF-282's multi-source `use-draft-feed.ts`.
+
+**Approach:** Pure utility module — no React, no `'use client'`, SSR-safe. `createPickMerger()` factory owns a private `Set<string>` of seen pickIds and returns a `PickMerger` interface with three members: `merge(picks)` filters incoming batches to unseen IDs only (mutates internal set), `reset()` clears the set for session restart, and `seenCount` getter for observability. `playerNameToPickId(name)` synthesizes a `sheets:<name>` ID for Sheets picks that carry no Auctioneer pick ID — the `sheets:` prefix ensures these never collide with Auctioneer's `pick-N` IDs. `NormalizedPickEvent` is the canonical cross-source pick type: `pickId`, `playerName`, `manager`, `price`, `position?`, `source: FeedSource`. FF-282 will instantiate one merger per session in a `useRef` and route all source batches through it.
+
+**Changes:**
+- `src/lib/draft/auction-feed-merge.ts` (new): `FeedSource`, `NormalizedPickEvent`, `PickMerger`, `createPickMerger()`, `playerNameToPickId()`
+
+**Architecture notes:**
+- `createPickMerger()` stores its Set privately — callers cannot accidentally mutate it
+- `playerNameToPickId` prefix (`sheets:`) guarantees no collision with Auctioneer IDs (`pick-1`, `pick-2`)
+- The module has zero dependencies — safe to import from hooks, server components, or tests
+
+**Verification:** `npm run lint` — zero errors in new file. `npm run type-check` — clean.
+
+---
+
 ## 2026-04-16 — FF-280: Auctioneer BroadcastChannel Subscriber
 
 **Task:** FF-280 — Subscribe to Auctioneer's `ffi-auction-feed` BroadcastChannel for instant pick sync  
