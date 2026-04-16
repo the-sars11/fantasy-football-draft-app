@@ -2,6 +2,28 @@
 
 ---
 
+## 2026-04-16 — FF-283: Dynamic Max-Bid Recompute on Every Pick
+
+**Task:** FF-283 — Every pick from any source triggers `calculateMaxBidAdvice()` recompute for remaining players  
+**Class:** `shared` | **Lenses:** Architecture, QA
+
+**Root Cause:** `calculateMaxBidAdvice()` was defined in `auction-advisor.ts` but **never called anywhere** in the live UI. Player cards in the pool showed a single global `getMaxBid()` value (flat absolute max) — the same number for every player regardless of strategy score, position need, or scarcity. Per-player strategy-aware advice was completely unwired.
+
+**Approach:** Added a `maxBidAdviceMap: Map<string, number>` useMemo in `live/client.tsx` keyed by lowercase player name. It depends on `[state, scoredPlayers, draftedNames, strategy]` — every pick from any source (Auctioneer BroadcastChannel/localStorage → `addManualPick` → `setState`, Sheets → `handleNewSheetPicks` → `setState`, manual → `addManualPick` → `setState`) invalidates the memo and recomputes `calculateMaxBidAdvice()` for all remaining undrafted players. The result map is passed to `PlayerPool` as new `maxBidMap` prop; each `FFIPlayerCard` gets its own per-player value (fallback to global `maxBid` if map absent). `MySquadPanel` continues to use the simple `getMaxBid()` result for its "Max bid" line — correct behavior since it's a squad-level overview, not a per-player decision.
+
+**Changes:**
+- `src/app/(app)/draft/live/client.tsx`: import `calculateMaxBidAdvice`; add `maxBidAdviceMap` useMemo (deps: state + scoredPlayers + draftedNames + strategy); pass `maxBidMap={isAuction ? maxBidAdviceMap : undefined}` to `<PlayerPool>`
+- `src/components/draft/player-pool.tsx`: add `maxBidMap?: Map<string, number>` prop; card render uses `maxBidMap.get(sp.player.name.toLowerCase()) ?? null` per card (fallback to `maxBid`)
+
+**Architecture notes:**
+- Pure computation — no async, no network calls; computing for ~100–300 players is sub-millisecond (simple math + one `.filter()` per player over `scoredPlayers`)
+- `MySquadPanel` keeps `maxBid={myMaxBid}` (simple global max) — squad-level overview doesn't need per-player strategy advice
+- `maxBidMap` is `undefined` in snake mode — `FFIPlayerCard` hides the MAX display when `maxBid` is null/undefined
+
+**Verification:** `npm run type-check` — clean. `npm run lint` — zero new errors in changed files.
+
+---
+
 ## 2026-04-16 — FF-282: use-draft-feed.ts Unified Multi-Source Pick Feed
 
 **Task:** FF-282 — Generalize `use-draft-polling.ts` → `use-draft-feed.ts`  

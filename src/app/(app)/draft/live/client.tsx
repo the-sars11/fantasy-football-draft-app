@@ -51,6 +51,7 @@ import type { ScoredPlayer } from '@/lib/research/strategy/scoring'
 import type { Strategy as DbStrategy } from '@/lib/supabase/database.types'
 import type { Explanation } from '@/lib/draft/explain'
 import { clearRecommendationCache } from '@/lib/draft/recommend'
+import { calculateMaxBidAdvice } from '@/lib/draft/auction-advisor'
 import { isKeeperPick, displayPickNum, keepersToPicks } from '@/lib/draft/keepers'
 import { InjuryWatch } from '@/components/draft/injury-watch'
 import { TrashTalkFeed, SavedTrashTalk } from '@/components/draft/trash-talk'
@@ -531,6 +532,32 @@ export function LiveDraftClient() {
     return result.active ? result : null
   }, [strategy, state, draftedNames, myPickedNames, driftDismissed])
 
+  // FF-283: Per-player max-bid advice — recomputes on every pick from any source.
+  // deps: state (changes on every pick), scoredPlayers, draftedNames, strategy.
+  // All three pick paths (Auctioneer BroadcastChannel/localStorage, Sheets, manual)
+  // flow through setState → invalidates this memo → recomputes for remaining players.
+  const maxBidAdviceMap = useMemo((): Map<string, number> => {
+    if (!state || state.format !== 'auction') return new Map()
+    const managerName = state.manager_order[0]
+    const map = new Map<string, number>()
+    for (const sp of scoredPlayers) {
+      if (draftedNames.has(sp.player.name.toLowerCase())) continue
+      const result = calculateMaxBidAdvice(
+        state,
+        managerName,
+        sp.player.name,
+        sp.player.position,
+        sp.player.consensusAuctionValue ?? 1,
+        sp.strategyScore,
+        scoredPlayers,
+        draftedNames,
+        strategy,
+      )
+      map.set(sp.player.name.toLowerCase(), result.maxBid)
+    }
+    return map
+  }, [state, scoredPlayers, draftedNames, strategy])
+
   // Build owner map once when manager_order is first populated
   useEffect(() => {
     if (teamOwnerMapRef.current !== null) return
@@ -869,6 +896,7 @@ export function LiveDraftClient() {
             getExplanation={getExplanation}
             onBidPlayer={handleBidPlayer}
             maxBid={myMaxBid}
+            maxBidMap={isAuction ? maxBidAdviceMap : undefined}
           />
         </div>
       </div>

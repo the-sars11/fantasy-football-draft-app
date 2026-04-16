@@ -130,7 +130,7 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 - [x] FF-280: Subscribe to Auctioneer's `ffi-auction-feed` BroadcastChannel — instant pick sync when both run on same device (gated: auction mode only)
 - [x] FF-281: `src/lib/draft/auction-feed-merge.ts` (NEW) — dedup pick events across sources by `pickId`, emit normalized pick events
 - [x] FF-282: Generalize `src/hooks/use-draft-polling.ts` → `use-draft-feed.ts` — multi-source priority merge (BroadcastChannel > JSON > Sheets); snake/Sleeper mode uses manual entry only, zero behavior change
-- [ ] FF-283: Dynamic max-bid recompute — every pick from any source triggers `calculateMaxBidAdvice()` recompute for remaining players
+- [x] FF-283: Dynamic max-bid recompute — every pick from any source triggers `calculateMaxBidAdvice()` recompute for remaining players
 
 ---
 

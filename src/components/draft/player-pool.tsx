@@ -45,6 +45,9 @@ interface PlayerPoolProps {
   getExplanation?: (scored: ScoredPlayer) => Explanation | null
   onBidPlayer?: (player: Player) => void
   maxBid?: number | null
+  /** FF-283: per-player strategy-aware max bids (player name lowercase → maxBid).
+   *  When provided, overrides the global `maxBid` for each card. */
+  maxBidMap?: Map<string, number>
 }
 
 export function PlayerPool({
@@ -54,6 +57,7 @@ export function PlayerPool({
   getExplanation,
   onBidPlayer,
   maxBid,
+  maxBidMap,
 }: PlayerPoolProps) {
   const [posFilter, setPosFilter] = useState<Position | 'ALL'>('ALL')
   const [search, setSearch] = useState('')
@@ -164,7 +168,7 @@ export function PlayerPool({
               )}
               getExplanation={getExplanation}
               onBid={onBidPlayer}
-              maxBid={maxBid}
+              maxBid={maxBidMap ? (maxBidMap.get(sp.player.name.toLowerCase()) ?? null) : maxBid}
               adpDivergence={getAdpDivergence(sp.player)}
             />
           ))
