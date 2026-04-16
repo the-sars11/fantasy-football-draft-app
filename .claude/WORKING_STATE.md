@@ -1,11 +1,12 @@
 # Working State — Fantasy Football Draft Advisor
 
 ## Current Session
-- **Date:** 2026-04-14 (session 3)
-- **Focus:** P0 sub-tier 1 — Live Draft Integration Reliability
-- **Status:** FF-257 COMPLETE — sticky pinned ManualPickEntry bar shipped. Next up: FF-258 (mode selector at session start).
+- **Date:** 2026-04-16
+- **Focus:** P0 sub-tier 8 — Trash Talk Live Wiring
+- **Status:** FF-305 COMPLETE — live trash talk alerts wired into live draft client.
 
 ## Last Completed (most recent first)
+- **FF-305** (2026-04-16): Wired `analyzePickForTrashTalk()` into `live/client.tsx`. Added `trashTalkAlerts` + `savedAlerts` state, `processedPickCountRef` to skip historical picks on load, `useEffect` watching `state` + `players` to detect incremental picks from both manual entry and sheet polling. Renders `<TrashTalkFeed>` and `<SavedTrashTalk>` below `<PickFeed>` in left column. Dismiss removes from feed; save moves to saved list. Rule-based only — no LLM calls.
 - **FF-257** (2026-04-14): Sticky pinned `ManualPickEntry` bar at viewport bottom. Added `bar` variant to `manual-pick-entry.tsx`, removed component from left column in `live/client.tsx`, rendered as `fixed inset-x-0 bottom-0 z-40 ffi-glass-heavy` with `env(safe-area-inset-bottom)` padding. Search dropdown opens upward. Defaults collapsed on mobile (search + price + Record), expanded on desktop. Card variant preserved for backward compat. Build/lint/test/type-check all clean.
 - **FF-253/254** (2026-04-14): UI evaluation gate — verdict B (targeted redesign). 4 fixes scheduled: FF-257, FF-258, FF-259, FF-274. FF-255/256 (full redesign sprint) skipped.
 - **Enterprise dev system upgrade** (2026-04-14): `.claude/` upgraded to Enterprise tier — REVIEW_LENSES, FEATURES_INDEX, CODE_AREAS, CHANGELOG, hooks, code-review skill.

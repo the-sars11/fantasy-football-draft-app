@@ -2,6 +2,28 @@
 
 ---
 
+## 2026-04-16 — FF-305: Wire Live Trash Talk Alerts into Live Draft Client
+
+**Task:** FF-305 (shared)
+**Class:** `shared` | **Lenses:** Architecture, QA
+
+**Root Cause:** `analyzePickForTrashTalk()` and the `LiveTrashTalkAlert`/`TrashTalkFeed` components existed but were never called from any live draft page. Alerts never fired during a draft session.
+
+**Approach:** Detect new picks via a `useEffect` watching `state` (which gets a new reference on every pick confirmation, whether from manual entry or sheet polling). A `processedPickCountRef` skips historical picks loaded on session start, then tracks the last analyzed index so only incremental picks get evaluated.
+
+**Changes:**
+- `src/app/(app)/draft/live/client.tsx`:
+  - Added `useRef` to imports
+  - Added imports: `TrashTalkFeed`, `SavedTrashTalk`, `analyzePickForTrashTalk`, `TrashTalkAlert`
+  - Added `trashTalkAlerts` and `savedAlerts` useState arrays
+  - Added `processedPickCountRef` (null until first state load)
+  - Added `useEffect(deps: [state, players])` — on first load sets ref to skip existing picks; on subsequent state changes, slices new picks, calls `analyzePickForTrashTalk()` for each, pushes non-null results
+  - Added `handleDismissTrashTalk`, `handleSaveTrashTalk`, `handleRemoveSavedAlert` callbacks
+  - Renders `<TrashTalkFeed>` below `<PickFeed>` in left column
+  - Renders `<SavedTrashTalk>` conditionally when saved alerts exist
+
+---
+
 ## 2026-04-14 (session 8) — FF-276 / FF-277 / FF-278: Pre-Draft Tools
 
 ### FF-278: Consensus Shift Alerts

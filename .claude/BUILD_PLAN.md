@@ -117,6 +117,12 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 
 ---
 
+### Sub-tier 8: Trash Talk Live Wiring
+
+- [x] FF-305: Wire `analyzePickForTrashTalk()` into the live draft client — `LiveTrashTalkAlert` and `TrashTalkFeed` exist in `src/components/draft/trash-talk.tsx` and `analyzePickForTrashTalk()` exists in `src/lib/draft/trash-talk.ts`, but none are called from any live draft page (only post-draft `RoastReportCard` is wired); add a `trashTalkAlerts` useState array in `src/app/(app)/draft/live/client.tsx`, call `analyzePickForTrashTalk()` after every confirmed pick (Sheets poll, manual entry, BroadcastChannel), push non-null results to state, render `<TrashTalkFeed>` with dismiss/save handlers in the live draft UI; rule-based only — LLM generation comes in FF-310
+
+---
+
 ## P1 — Auctioneer Integration
 > **Scope:** Joe's ESPN auction ONLY. Tyler's Yahoo snake draft uses Sheets polling exclusively — no Auctioneer involvement. All code paths gated by `format === 'auction'`.
 
@@ -125,6 +131,42 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 - [ ] FF-281: `src/lib/draft/auction-feed-merge.ts` (NEW) — dedup pick events across sources by `pickId`, emit normalized pick events
 - [ ] FF-282: Generalize `src/hooks/use-draft-polling.ts` → `use-draft-feed.ts` — multi-source priority merge (BroadcastChannel > JSON > Sheets); snake mode uses only existing Sheets source, zero behavior change
 - [ ] FF-283: Dynamic max-bid recompute — every pick from any source triggers `calculateMaxBidAdvice()` recompute for remaining players
+
+---
+
+### Sub-tier 2: Trash Talk AI Upgrade
+> **Prerequisite:** FF-305 (live wiring) complete before starting this sub-tier. **Scope:** Auction-only triggers gated on `format === 'auction'`; snake/both-format triggers always apply. Reference implementation: `fantasy_auction_auctioneer/src/lib/trash-talk.ts` and `.claude/AA-TT-SPEC.md`.
+
+- [ ] FF-306: Add trash talk mode toggle to draft session setup — 3-way selector: **Off / Family-Safe / Adult-Only**; store as `trashTalkMode: 'off' | 'family-safe' | 'adult-only'` in draft session config; Off skips all trigger evaluation (early return before `analyzePickForTrashTalk`); Family-Safe = PG-13 ≤80 chars; Adult-Only = explicit ≤120 chars; mirror the AA `src/app/setup/page.tsx` pattern; add to `src/app/(app)/draft/setup/` session start screen | `output`
+
+- [ ] FF-307: Create `src/app/api/trash-talk/route.ts` — server-side Claude Haiku generation; port directly from `fantasy_auction_auctioneer/src/app/api/trash-talk/route.ts`; two system prompts (Family-Safe PG-13 / Adult-Only Jeselnik/Ross/Hinchcliffe style); model `claude-haiku-4-5-20251001` temperature 1.0 no streaming; Family-Safe max_tokens 60, Adult-Only max_tokens 80; em-dash hard-strip `raw.replace(/\u2014/g, '-')` enforced in handler regardless of prompt compliance; request body: `{ trigger, playerName, position, espnPprRank, teamName, price, impliedValue, pickNumber, totalPicks, contextString, mode, historyBlock? }`; fail-silent on Claude errors — return `{ line: null }` — trash talk is non-critical | `pipeline`
+
+- [ ] FF-308: Upgrade auction trigger engine — 6 new AA-spec triggers + implied value formula; all auction-only triggers gated on `format === 'auction'`; in `src/lib/draft/trash-talk.ts`:
+  - Port `impliedAuctionValue(player, config)` quadratic decay formula from AA spec — `maxValue = budget * 0.35`, `maxRank = teamCount * 10`, `decay = max(0, 1 - (rank - 1) / maxRank)`, returns `max(1, round(maxValue * decay^2))`; use `player.consensusAuctionValue` if set, else decay; replaces `AVG_POSITION_VALUES` fallback for overpay + steal detection
+  - Port `budget_buster`: team spent >60% of budget with <35% of roster slots filled; context: `"Team has spent $X of $Y with N of M spots filled ($Z left for K spots)"`
+  - Port `last_big_spender`: pick 30+, exactly 1 team has remaining budget >2x league avg AND >$30; context: `"${team} has $X left; rest of league averages $Y"`
+  - Port `cheapskate_special`: price ≤$3 AND team has 4+ picks AND team avg spend/pick <$7; context: `"Team averaging $X.XX per player across N picks; just paid $Z"`
+  - Port `budget_dominance`: pick 40+, winning team's remaining budget >1.5x league avg AND >$30; context: `"${team} has $X left; league average is $Y"`
+  - Port `first_defense_buy`: first DEF pick in draft; **special-case**: add DEF check BEFORE the existing `if (!pos || pos === 'K' || pos === 'DEF') return null` guard — if position is DEF and no prior DEF pick exists, fire this trigger only then return; context: `"First DEF bought at pick #N; all other teams still have zero defenses"`
+  - Port `lone_wolf_qb`: team has 9+ picks AND no QB AND current pick is not QB; works auction AND snake (no budget dependency)
+  - Priority order: budget_buster > overpay > steal > market_mismatch > last_big_spender > budget_dominance > lone_wolf_qb > cheapskate_special > first_defense_buy > reach > imbalance | `pipeline`
+
+- [ ] FF-309: Add snake + both-format triggers to `src/lib/draft/trash-talk.ts`:
+  - `market_mismatch` (both formats): find sold/drafted picks at same position from other teams within 15 ESPN rank or ADP spots; **auction**: price % spread ≥35% fires trigger; **snake**: round difference ≥3 for similarly-ranked player fires trigger; context string for snake: `"${player} (ADP ${adp}) drafted Round ${round}; comparable ${comp} (ADP ${compAdp}) went to ${compTeam} Round ${compRound} — ${N} rounds cheaper/earlier for similar-tier ${pos}"`; fires in both directions (steal and reach)
+  - `late_roster_qb_panic` (snake-only, gated on `format === 'snake'`): team has 7+ picks (lower threshold than auction's 9 — snake picks faster), no QB drafted, current pick is non-QB; context: `"Team has ${N} players and still no QB; just drafted another ${pos} in Round ${round}"` | `pipeline`
+
+- [ ] FF-310: Replace hardcoded message arrays with Claude Haiku generation; in live draft client (FF-305 wires this in), after `analyzePickForTrashTalk()` returns a trigger result:
+  - Check `trashTalkMode` — if `'off'`, skip; if on, call `generateTrashTalk(result, mode, historyBlock?)` → `fetch('/api/trash-talk')`
+  - Port `generateTrashTalk()` thin wrapper from `fantasy_auction_auctioneer/src/lib/trash-talk.ts` → `src/lib/draft/trash-talk.ts`; async fire-and-forget, fail-silent (return null on any error)
+  - If API returns non-null line: use as `alert.message` in `LiveTrashTalkAlert`; if null: use existing hardcoded fallback string (do not drop alert entirely — degraded mode is better than silent failure)
+  - Cost: ~$0.01/draft at 30% trigger rate | `pipeline`
+
+- [ ] FF-311: Owner history system — port from `fantasy_auction_auctioneer/src/lib/trash-talk-history.ts` → `src/lib/draft/trash-talk-history.ts`; copy `fantasy_auction_auctioneer/src/data/history.json` → `src/data/history.json` (same 10 Nasties owner profiles, same league, same roast_ammo);
+  - `loadHistory()`: load bundled JSON once
+  - `matchOwnerToHistory(teamName, history)`: case-insensitive alias fuzzy match (team name contains alias OR alias contains team name token)
+  - `buildTeamOwnerMap(teams, history)`: called once at session start, stored in session state
+  - `buildHistoryBlock(trigger, owner)`: trigger-specific injection — overpay → `['overpay','bust']` moments; steal → `['steal']` moments; budget_dominance/last_big_spender → `['champ_move']` moments; all others → general `roast_ammo` only; at most 2 moments appended; returns empty string if no owner matched (trigger still fires, no history)
+  - Wire `historyBlock` into `generateTrashTalk()` call in FF-310 | `pipeline`
 
 ---
 

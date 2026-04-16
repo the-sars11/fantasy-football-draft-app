@@ -7,7 +7,7 @@
  * Features: Real-time feed, strategy picker dropdown, My Squad panel, inline AI recs
  */
 
-import { useState, useEffect, useMemo, useCallback } from 'react'
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
@@ -53,6 +53,9 @@ import type { Explanation } from '@/lib/draft/explain'
 import { clearRecommendationCache } from '@/lib/draft/recommend'
 import { isKeeperPick, displayPickNum } from '@/lib/draft/keepers'
 import { InjuryWatch } from '@/components/draft/injury-watch'
+import { TrashTalkFeed, SavedTrashTalk } from '@/components/draft/trash-talk'
+import { analyzePickForTrashTalk } from '@/lib/draft/trash-talk'
+import type { TrashTalkAlert } from '@/lib/draft/trash-talk'
 
 const DEFAULT_ROSTER: RosterSlots = {
   qb: 1, rb: 2, wr: 2, te: 1, flex: 1, k: 1, dst: 1, bench: 6, ir: 0,
@@ -308,6 +311,12 @@ export function LiveDraftClient() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  // Trash talk alerts
+  const [trashTalkAlerts, setTrashTalkAlerts] = useState<TrashTalkAlert[]>([])
+  const [savedAlerts, setSavedAlerts] = useState<TrashTalkAlert[]>([])
+  // null = not yet initialized (skip existing picks on load); number = picks processed so far
+  const processedPickCountRef = useRef<number | null>(null)
+
   // Load session + league + players + active strategy
   useEffect(() => {
     if (!sessionId) {
@@ -469,6 +478,59 @@ export function LiveDraftClient() {
     return result.active ? result : null
   }, [strategy, state, draftedNames, myPickedNames, driftDismissed])
 
+  // Analyze each new pick for trash talk opportunities
+  useEffect(() => {
+    if (!state || players.length === 0) return
+
+    // First load: mark existing picks as already seen, don't generate alerts for them
+    if (processedPickCountRef.current === null) {
+      processedPickCountRef.current = state.picks.length
+      return
+    }
+
+    if (state.picks.length <= processedPickCountRef.current) return
+
+    const newPicks = state.picks.slice(processedPickCountRef.current)
+    processedPickCountRef.current = state.picks.length
+
+    const myManagerName = state.manager_order[0]
+    const newAlerts: TrashTalkAlert[] = []
+
+    for (const newPick of newPicks) {
+      const alert = analyzePickForTrashTalk(
+        newPick,
+        state.picks,
+        players,
+        state.format,
+        myManagerName,
+        state.manager_order.length,
+      )
+      if (alert) newAlerts.push(alert)
+    }
+
+    if (newAlerts.length > 0) {
+      setTrashTalkAlerts(prev => [...prev, ...newAlerts])
+    }
+  }, [state, players])
+
+  const handleDismissTrashTalk = useCallback((id: string) => {
+    setTrashTalkAlerts(prev => prev.filter(a => a.id !== id))
+  }, [])
+
+  const handleSaveTrashTalk = useCallback((id: string) => {
+    setTrashTalkAlerts(prev => {
+      const alert = prev.find(a => a.id === id)
+      if (alert) {
+        setSavedAlerts(s => [...s, { ...alert, savedForLater: true }])
+      }
+      return prev.filter(a => a.id !== id)
+    })
+  }, [])
+
+  const handleRemoveSavedAlert = useCallback((id: string) => {
+    setSavedAlerts(prev => prev.filter(a => a.id !== id))
+  }, [])
+
   const handleDismissDrift = useCallback(() => {
     setDriftDismissed(true)
   }, [])
@@ -608,6 +670,21 @@ export function LiveDraftClient() {
 
           {/* Real-time pick feed */}
           <PickFeed picks={state.picks} format={state.format} />
+
+          {/* Trash talk feed */}
+          <TrashTalkFeed
+            alerts={trashTalkAlerts}
+            onDismiss={handleDismissTrashTalk}
+            onSave={handleSaveTrashTalk}
+          />
+
+          {/* Saved trash talk (only when items exist) */}
+          {savedAlerts.length > 0 && (
+            <SavedTrashTalk
+              alerts={savedAlerts}
+              onRemove={handleRemoveSavedAlert}
+            />
+          )}
 
           {/* Auction/Snake advisor with inline AI recs */}
           {isAuction ? (
