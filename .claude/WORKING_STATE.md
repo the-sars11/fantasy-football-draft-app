@@ -3,7 +3,7 @@
 ## Current Session
 - **Date:** 2026-04-17
 - **Focus:** P0 + P2 — Tyler's league setup
-- **Status:** FF-069 COMPLETE — Tyler's T&A Keeper League scoring entered. `TYLERS_SLEEPER_SCORING` exported from scoring-presets.ts; Tyler preset updated in league-config-form.tsx. Roster corrected to 2 FLEX / no K / 2 IR. Draft order + keeper selections entered at draft setup time (not in league config). Next P0 item: FF-269 arm's-length physical test.
+- **Status:** FF-312 COMPLETE — Sleeper live draft integration. `use-sleeper-draft-feed.ts` polls Sleeper API every 5s, maps picks to managers via snake-order math, normalizes to `NormalizedPickEvent`. Setup: Sleeper mode option (snake-only) + draft URL/ID input. Live client: `sdi` param, SL badge, same pick handler pattern as Auctioneer. Next P0 item: FF-269 arm's-length physical test.
 
 ## Last Completed (most recent first)
 - **FF-283** (2026-04-16): Added `maxBidAdviceMap: Map<string, number>` useMemo in `live/client.tsx` — calls `calculateMaxBidAdvice()` for every undrafted player, keyed by lowercase name. Deps: `[state, scoredPlayers, draftedNames, strategy]` — all three pick sources (Auctioneer BroadcastChannel/localStorage, Sheets, manual) flow through `setState` and invalidate the memo. Added `maxBidMap?: Map<string, number>` prop to `PlayerPool`; each `FFIPlayerCard` now gets per-player strategy-aware max bid (not a global flat value). `MySquadPanel` keeps the simple `getMaxBid()` result. Import added: `calculateMaxBidAdvice` from `auction-advisor`. Type-check clean, lint zero new errors.
@@ -57,8 +57,7 @@
   - FF-064: Prep Hub redesign
   - FF-065: Draft Board redesign (compact player cards)
   - FF-066: Live Draft room redesign
-- FF-069: Tyler's league setup — waiting on his scoring settings + keeper rules/costs
-- FF-072: Live draft dry run — mock Google Sheet, full live draft flow
+- FF-072: Live draft dry run — mock Google Sheet + Sleeper draft, full live draft flow
 
 ## New FFI Components Available
 ```tsx
@@ -142,7 +141,7 @@
 
 #### Known Non-Blocking
 - FF-243: Confirm/dismiss system tag API pending
-- FF-312: Sleeper live draft integration not yet started
+- FF-269: Arm's-length physical test — needs Joe on phone
 - FF-072: Live draft dry run not yet completed
 - Google Sheets 403 edge case on first connect (non-blocking — manual entry fallback works)
 
@@ -150,7 +149,7 @@
 
 | Blocker | Blocking | Owner | Since |
 |---------|----------|-------|-------|
-| Tyler's scoring settings | FF-069 | Tyler | 2026-03-22 |
+| — | — | — | — |
 
 ### Google Sheets Setup (Exact Format)
 Document exact format when confirmed:

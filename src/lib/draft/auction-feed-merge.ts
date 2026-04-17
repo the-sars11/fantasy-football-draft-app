@@ -22,7 +22,7 @@
 // ---------------------------------------------------------------------------
 
 /** Transport path that delivered the pick event. */
-export type FeedSource = 'broadcast' | 'localstorage' | 'file' | 'sheets'
+export type FeedSource = 'broadcast' | 'localstorage' | 'file' | 'sheets' | 'sleeper'
 
 /**
  * Normalized pick event emitted by the merged feed.

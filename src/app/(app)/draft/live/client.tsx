@@ -64,6 +64,7 @@ import {
   type AuctioneerConnectionType,
   type NormalizedPickEvent,
 } from '@/hooks/use-draft-feed'
+import { useSleeperDraftFeed } from '@/hooks/use-sleeper-draft-feed'
 
 const DEFAULT_ROSTER: RosterSlots = {
   qb: 1, rb: 2, wr: 2, te: 1, flex: 1, k: 1, dst: 1, bench: 6, ir: 0,
@@ -308,6 +309,8 @@ export function LiveDraftClient() {
   const trashTalkMode = (searchParams.get('ttm') ?? 'family-safe') as TrashTalkMode
   // FF-279: Auctioneer connection type from setup (?aif=localstorage|file)
   const aifParam = searchParams.get('aif') as AuctioneerConnectionType
+  // FF-312: Sleeper draft ID from setup (?sdi=...)
+  const sdiParam = searchParams.get('sdi')
 
   // On Block: player nominated via BID button in the player pool
   const [onBlockPlayer, setOnBlockPlayer] = useState<Player | null>(null)
@@ -457,6 +460,36 @@ export function LiveDraftClient() {
     format: session?.format ?? null,
     connectionType: aifParam,
     onNewPicks: onAuctioneerpicks,
+  })
+
+  // FF-312: Sleeper live draft feed (snake mode only)
+  const handleSleeperPicksRef = useRef<((picks: NormalizedPickEvent[]) => void) | null>(null)
+  handleSleeperPicksRef.current = (picks: NormalizedPickEvent[]) => {
+    for (const pick of picks) {
+      if (!draftedNames.has(pick.playerName.toLowerCase())) {
+        addManualPick({
+          player_name: pick.playerName,
+          manager: pick.manager,
+          price: pick.price,
+          position: pick.position,
+        })
+      }
+    }
+  }
+  const sleeperEnabled = !!sdiParam && session?.format === 'snake'
+  const onSleeperPicks = useCallback(
+    (picks: NormalizedPickEvent[]) => handleSleeperPicksRef.current?.(picks),
+    [], // stable — routes through ref
+  )
+  const {
+    connected: sleeperConnected,
+    importedCount: sleeperImportedCount,
+    error: sleeperError,
+  } = useSleeperDraftFeed({
+    draftId: sdiParam,
+    enabled: sleeperEnabled,
+    managerOrder: state?.manager_order ?? [],
+    onNewPicks: onSleeperPicks,
   })
 
   // Score players with active strategy and intel context (FF-247)
@@ -780,6 +813,15 @@ export function LiveDraftClient() {
               title={aifError ?? (aifConnected ? `${aifImportedCount} picks imported from Auctioneer` : 'Waiting for Auctioneer data...')}
             >
               AA {aifConnected ? `✓${aifImportedCount > 0 ? ` ${aifImportedCount}` : ''}` : '…'}
+            </FFIBadge>
+          )}
+          {/* FF-312: Sleeper sync indicator — snake-only */}
+          {sleeperEnabled && (
+            <FFIBadge
+              status={sleeperError ? 'danger' : sleeperConnected ? 'success' : 'info'}
+              title={sleeperError ?? (sleeperConnected ? `${sleeperImportedCount} picks from Sleeper` : 'Connecting to Sleeper...')}
+            >
+              SL {sleeperConnected ? `✓${sleeperImportedCount > 0 ? ` ${sleeperImportedCount}` : ''}` : '…'}
             </FFIBadge>
           )}
           {saving && <Loader2 className="h-4 w-4 animate-spin text-[var(--ffi-primary)]" />}

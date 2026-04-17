@@ -18,6 +18,7 @@ import {
   setGlobalFileHandle,
   type AuctioneerConnectionType,
 } from '@/hooks/use-auctioneer-feed'
+import { extractSleeperDraftId } from '@/hooks/use-sleeper-draft-feed'
 
 interface LeagueSummary {
   id: string
@@ -40,7 +41,7 @@ interface Manager {
   draft_position?: number
 }
 
-type DraftMode = 'sheets' | 'manual' | 'sim'
+type DraftMode = 'sheets' | 'manual' | 'sim' | 'sleeper'
 type TrashTalkMode = 'off' | 'family-safe' | 'adult-only'
 
 export function DraftSetupClient() {
@@ -63,6 +64,9 @@ export function DraftSetupClient() {
 
   // Sheet URL
   const [sheetUrl, setSheetUrl] = useState('')
+
+  // Sleeper draft ID (snake mode — FF-312)
+  const [sleeperDraftInput, setSleeperDraftInput] = useState('')
 
   // Submission
   const [submitting, setSubmitting] = useState(false)
@@ -203,7 +207,9 @@ export function DraftSetupClient() {
       }
 
       const aifParam = auctioneerConnectionType ? `&aif=${auctioneerConnectionType}` : ''
-      router.push(`/draft/live?session=${data.session.id}&ttm=${trashTalkMode}${aifParam}`)
+      const sleeperDraftId = draftMode === 'sleeper' ? extractSleeperDraftId(sleeperDraftInput) : null
+      const sdiParam = sleeperDraftId ? `&sdi=${sleeperDraftId}` : ''
+      router.push(`/draft/live?session=${data.session.id}&ttm=${trashTalkMode}${aifParam}${sdiParam}`)
     } catch {
       setError('Network error -- could not create session')
     } finally {
@@ -350,11 +356,13 @@ export function DraftSetupClient() {
         </div>
 
         <div className="space-y-3">
-          {[
-            { mode: 'sheets' as DraftMode, icon: '📊', label: 'Google Sheets', desc: 'Auto-import picks from a shared spreadsheet' },
-            { mode: 'manual' as DraftMode, icon: '✏️', label: 'Manual Entry',  desc: 'Enter each pick by hand as it happens' },
-            { mode: 'sim'    as DraftMode, icon: '🎮', label: 'Offline Sim',   desc: 'Practice run — no real draft' },
-          ].map(({ mode, icon, label, desc }) => (
+          {([
+            { mode: 'sheets'  as DraftMode, icon: '📊', label: 'Google Sheets', desc: 'Auto-import picks from a shared spreadsheet', forceShow: true },
+            { mode: 'sleeper' as DraftMode, icon: '🏈', label: 'Sleeper',        desc: 'Auto-import picks from your Sleeper draft room', forceShow: false },
+            { mode: 'manual'  as DraftMode, icon: '✏️', label: 'Manual Entry',  desc: 'Enter each pick by hand as it happens',           forceShow: true },
+            { mode: 'sim'     as DraftMode, icon: '🎮', label: 'Offline Sim',   desc: 'Practice run — no real draft',                    forceShow: true },
+          ] as const).filter(({ mode, forceShow }) => forceShow || (mode === 'sleeper' && !isAuction))
+          .map(({ mode, icon, label, desc }) => (
             <button
               key={mode}
               onClick={() => setDraftMode(mode)}
@@ -410,7 +418,7 @@ export function DraftSetupClient() {
           </button>
           <FFISectionHeader
             title="Session Details"
-            subtitle={`Mode: ${draftMode === 'sheets' ? '📊 Google Sheets' : draftMode === 'manual' ? '✏️ Manual Entry' : '🎮 Offline Sim'}`}
+            subtitle={`Mode: ${draftMode === 'sheets' ? '📊 Google Sheets' : draftMode === 'sleeper' ? '🏈 Sleeper' : draftMode === 'manual' ? '✏️ Manual Entry' : '🎮 Offline Sim'}`}
           />
         </div>
 
@@ -477,6 +485,22 @@ export function DraftSetupClient() {
             />
             <p className="ffi-caption text-[var(--ffi-text-secondary)] mt-1">
               Share the sheet with &quot;Anyone with the link&quot; (view access).
+            </p>
+          </div>
+        )}
+
+        {draftMode === 'sleeper' && (
+          <div>
+            <Label className="ffi-caption text-[var(--ffi-text-secondary)] mb-1 block">
+              Sleeper Draft URL or Draft ID
+            </Label>
+            <Input
+              placeholder="https://sleeper.com/draft/nfl/... or draft ID"
+              value={sleeperDraftInput}
+              onChange={e => setSleeperDraftInput(e.target.value)}
+            />
+            <p className="ffi-caption text-[var(--ffi-text-secondary)] mt-1">
+              Paste the URL from your Sleeper draft room. No account needed — picks sync automatically every 5 seconds.
             </p>
           </div>
         )}
