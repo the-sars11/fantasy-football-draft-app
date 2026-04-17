@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import type { DraftFormat, Position, ScoringSettings } from '@/lib/supabase/database.types'
 import { Trash2, Plus, ChevronDown, ChevronRight } from 'lucide-react'
-import { getScoringPreset, JOES_ESPN_SCORING, SCORING_FIELDS } from '@/lib/scoring-presets'
+import { getScoringPreset, JOES_ESPN_SCORING, TYLERS_SLEEPER_SCORING, SCORING_FIELDS } from '@/lib/scoring-presets'
 
 interface KeeperEntry {
   player_name: string
@@ -29,15 +29,15 @@ const PRESETS = {
     scoring: JOES_ESPN_SCORING,
   },
   tyler: {
-    name: "Tyler's Sleeper League",
+    name: "Tyler's Sleeper League (T&A Keeper)",
     platform: 'sleeper',
     format: 'snake' as DraftFormat,
     team_count: 12,
     budget: null,
     scoring_format: 'custom',
     keeper_enabled: true,
-    roster: { qb: 1, rb: 2, wr: 2, te: 1, flex: 1, k: 1, dst: 1, bench: 6, ir: 0 },
-    scoring: null, // Tyler needs to provide his
+    roster: { qb: 1, rb: 2, wr: 2, te: 1, flex: 2, k: 0, dst: 1, bench: 6, ir: 2 },
+    scoring: TYLERS_SLEEPER_SCORING,
   },
 }
 

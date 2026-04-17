@@ -1,9 +1,9 @@
 # Working State — Fantasy Football Draft Advisor
 
 ## Current Session
-- **Date:** 2026-04-16
-- **Focus:** P1 — Auctioneer Integration
-- **Status:** FF-283 COMPLETE — Dynamic max-bid recompute wired. `calculateMaxBidAdvice()` now called reactively for all remaining players on every pick. P1 Auctioneer Integration sub-tier 1 complete (FF-279 through FF-283). Next P0 item: FF-269 arm's-length physical test.
+- **Date:** 2026-04-17
+- **Focus:** P0 + P2 — Tyler's league setup
+- **Status:** FF-069 COMPLETE — Tyler's T&A Keeper League scoring entered. `TYLERS_SLEEPER_SCORING` exported from scoring-presets.ts; Tyler preset updated in league-config-form.tsx. Roster corrected to 2 FLEX / no K / 2 IR. Draft order + keeper selections entered at draft setup time (not in league config). Next P0 item: FF-269 arm's-length physical test.
 
 ## Last Completed (most recent first)
 - **FF-283** (2026-04-16): Added `maxBidAdviceMap: Map<string, number>` useMemo in `live/client.tsx` — calls `calculateMaxBidAdvice()` for every undrafted player, keyed by lowercase name. Deps: `[state, scoredPlayers, draftedNames, strategy]` — all three pick sources (Auctioneer BroadcastChannel/localStorage, Sheets, manual) flow through `setState` and invalidate the memo. Added `maxBidMap?: Map<string, number>` prop to `PlayerPool`; each `FFIPlayerCard` now gets per-player strategy-aware max bid (not a global flat value). `MySquadPanel` keeps the simple `getMaxBid()` result. Import added: `calculateMaxBidAdvice` from `auction-advisor`. Type-check clean, lint zero new errors.
