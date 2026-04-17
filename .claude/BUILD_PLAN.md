@@ -173,12 +173,11 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 ## P2 — Pre-Season Validation
 > **Was Phase 7. Run this before Aug 2026 drafts to confirm everything is live-ready.**
 
-- [ ] FF-011: Yahoo Fantasy API adapter — OAuth flow for Tyler's auto-pull from Yahoo _(DEFERRED — requires OAuth app registration)_ `DEEP`
+- [ ] FF-312: Sleeper live draft integration — add `sleeper` as a 4th draft mode in setup; `src/hooks/use-sleeper-draft-feed.ts` polls `GET /draft/{draft_id}/picks` every 5s (no auth); normalize to `NormalizedPickEvent`; wire into `use-draft-feed.ts` priority chain (snake mode only); setup UI: paste Sleeper draft URL or draft ID; extract draft ID from URL via regex; draft state polling via `GET /draft/{draft_id}` to detect draft complete `pipeline`
 - [ ] FF-260: Document exact Sheets setup in `WORKING_STATE.md` — column names, format, share permissions confirmed from actual Nasties 2026 sheet _(Blocked: need real draft sheet ~Aug 2026)_
-- [ ] FF-072: Live draft dry run — mock Google Sheet, run through full auction + snake live draft flow end-to-end `ACTION`
-- [ ] FF-079: Yahoo OAuth adapter (FF-011 follow-up) — if Tyler wants auto-pull `DEEP`
+- [ ] FF-072: Live draft dry run — mock Google Sheet + mock Sleeper draft, run through full auction + snake live draft flow end-to-end `ACTION`
 - [ ] FF-080: Full pre-draft data pull with 2026 season data — verify all sources working `ACTION`
-- [ ] FF-081: Draft day checklist — confirm Google Sheet template, test sheet polling, verify mobile on both phones `ACTION`
+- [ ] FF-081: Draft day checklist — confirm Google Sheet template (Joe/auction), confirm Sleeper draft ID (Tyler/snake), verify mobile on both phones `ACTION`
 
 ---
 

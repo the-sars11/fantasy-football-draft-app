@@ -102,7 +102,7 @@
 - gh CLI not installed — GitHub repo needs web UI or gh install
 - Port 3003 to avoid conflicts
 - Joe = ESPN / Auction / Full redraft
-- Tyler = Yahoo / Snake / Keeper league
+- Tyler = Sleeper / Snake / Keeper league (T&A Keeper League)
 
 ---
 
@@ -142,7 +142,7 @@
 
 #### Known Non-Blocking
 - FF-243: Confirm/dismiss system tag API pending
-- FF-069: Tyler's league scoring settings not yet entered
+- FF-312: Sleeper live draft integration not yet started
 - FF-072: Live draft dry run not yet completed
 - Google Sheets 403 edge case on first connect (non-blocking — manual entry fallback works)
 
@@ -159,7 +159,7 @@ Document exact format when confirmed:
 - **Share permissions:** Anyone with link = Viewer (for CSV export polling)
 - **Polling interval:** 7 seconds (`use-draft-polling.ts` default)
 - **Error handling:** 403/404 → surface error message, fallback to manual entry
-- **Note:** Tyler's Yahoo snake sheet uses same column format but different URL
+- **Note:** Tyler uses Sleeper app (snake/keeper) — FF-312 adds Sleeper live draft polling as a 4th draft mode
 
 ### Commands Reference
 
