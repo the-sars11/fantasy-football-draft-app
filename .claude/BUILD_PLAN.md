@@ -173,6 +173,18 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 ## P2 — Pre-Season Validation
 > **Was Phase 7. Run this before Aug 2026 drafts to confirm everything is live-ready.**
 
+### Design System Formalization
+
+> Reference: `AI_Code_Library/templates/UI_DESIGN_SPEC_TEMPLATE.md`
+> **Context:** Phase 6 FFIntelligence UI Redesign created DESIGN_SYSTEM.md with Tactical Hologram tokens. This sprint formalizes that into the standard 17-section `.claude/UI_DESIGN_SPEC.md` for reference in all future work.
+> **Aesthetic note:** Mobile-first, live-draft-optimized, sports-energy UI. Distinct from Auctioneer despite shared design DNA.
+
+- [ ] FF-DS-001: Copy `AI_Code_Library/templates/UI_DESIGN_SPEC_TEMPLATE.md` → `.claude/UI_DESIGN_SPEC.md`
+- [ ] FF-DS-002: Fill Sections 1-5 (Vision, Layout, Colors, Typography) — from existing DESIGN_SYSTEM.md
+- [ ] FF-DS-003: Fill Section 6 (Components) — live draft components, player cards, recommendation UI, confidence badges
+- [ ] FF-DS-004: Fill Sections 7-11 (Interactions, Motion, Effects, Responsive, A11y) — Framer Motion specs, arm's-length audit findings, 44px targets
+- [ ] FF-DS-005: Fill Sections 12-17 (Dark Mode, Performance, Decisions, Tools, Maintenance)
+
 - [x] FF-312: Sleeper live draft integration — `use-sleeper-draft-feed.ts` polls `/draft/{draft_id}/picks` every 5s; snake-order math maps pick_no → manager name; `extractSleeperDraftId()` handles full URLs or raw IDs; 4th mode option in setup (snake-only); `sdi` URL param to live client; SL badge in header; draft-complete polling via `/draft/{draft_id}`
 - [ ] FF-260: Document exact Sheets setup in `WORKING_STATE.md` — column names, format, share permissions confirmed from actual Nasties 2026 sheet _(Blocked: need real draft sheet ~Aug 2026)_
 - [ ] FF-072: Live draft dry run — mock Google Sheet + mock Sleeper draft, run through full auction + snake live draft flow end-to-end `ACTION`

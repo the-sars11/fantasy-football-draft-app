@@ -79,6 +79,23 @@ Review the diff against EVERY category below. Skip categories that don't apply.
 - [ ] No unnecessary design patterns or wrapper classes
 - [ ] Minimal diff footprint (no unrelated changes)
 
+### F. Silent Failure Risks
+
+Code that fails without signaling failure is the hardest bug to find — nothing crashes, nothing logs, nothing alerts. Check every one of these:
+
+- [ ] No empty catch/except blocks (exceptions swallowed without logging or re-raising)
+- [ ] All async operations awaited — missing `await` means failure is invisible to the caller
+- [ ] Fire-and-forget tasks have `.catch()` / `add_done_callback()` error handlers attached
+- [ ] Return values are checked when they carry success/failure info (not silently discarded)
+- [ ] `subprocess` / shell calls use `check=True` or explicitly handle non-zero exit codes
+- [ ] Retry loops raise or signal failure after exhaustion (not silently return `None`/empty)
+- [ ] API/HTTP responses checked for error payloads, not just status codes (200 with `{"error": ...}`)
+- [ ] Webhook/callback handlers return error status codes on processing failure (not always 200)
+- [ ] Required env vars fail loudly at startup (not silently default to `""` or `None`)
+- [ ] DB writes confirmed via commit/flush — no fire-and-forget DB mutations
+- [ ] Background jobs / scheduled tasks have error reporting (not just silent exit)
+- [ ] Queue/message failures are dead-lettered or logged, not silently dropped
+
 ## Step 3: Output Format
 
 For each issue found:
