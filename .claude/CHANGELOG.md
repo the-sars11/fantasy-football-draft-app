@@ -2,6 +2,26 @@
 
 ---
 
+## 2026-06-02 — FF-269: Touch Target Audit + Fix (P0 Sub-tier 4)
+
+**Task:** FF-269 — Arm's-length physical test — fix touch targets < 44px  
+**Class:** `output` (UI only) | **Lenses:** Design, QA
+
+**Audit findings (4 files, 7 elements):**
+- `ffi-position-filters.tsx` — filter pills `py-2` ≈ 30px; sort tabs `py-1` ≈ 24px
+- `ffi-player-card.tsx` — expand/collapse chevron: no sizing, wraps 20px icon
+- `connection-status-pill.tsx` — error bar Retry `padding: 4px 10px` ≈ 22px; dismiss × no sizing
+- `manual-pick-entry.tsx` CARD variant — submit `h-9` (36px); undo `h-7` (28px)
+
+**Fix:** Added `min-h-[44px]` (+ `flex items-center justify-center` where needed) to all offending elements. Bar variant, BID button, and trash talk buttons already compliant — untouched.
+
+**Not changed:** logic, state, props, tests.  
+**Physical verification (FFT-008):** still requires Joe on phone — scheduled in P2 Testing Sprint.
+
+**Verification:** lint zero new errors in changed files, type-check clean, 27/27 tests pass.
+
+---
+
 ## 2026-04-16 — FF-283: Dynamic Max-Bid Recompute on Every Pick
 
 **Task:** FF-283 — Every pick from any source triggers `calculateMaxBidAdvice()` recompute for remaining players  

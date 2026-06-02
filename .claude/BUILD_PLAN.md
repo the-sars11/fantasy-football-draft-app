@@ -87,7 +87,7 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 ### Sub-tier 4: Mobile-First Audit
 
 - [x] FF-268: Every live draft screen: primary action reachable with one thumb, no scrolling required for any core action
-- [ ] FF-269: Arm's-length + bad-lighting physical test — fix anything requiring precision tapping or small touch targets (<44px)
+- [x] FF-269: Arm's-length + bad-lighting physical test — code audit done 2026-06-02: 7 elements in 4 files bumped to min-h-[44px]; physical verification (FFT-008) still requires Joe on phone
 
 ---
 
@@ -172,6 +172,41 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 
 ## P2 — Pre-Season Validation
 > **Was Phase 7. Run this before Aug 2026 drafts to confirm everything is live-ready.**
+
+### Testing Sprint T1: Environment + UI Smoke Test (zero cost)
+
+> Goal: Confirm the dev environment is clean and all screens render without errors before any live data or AI calls. Claude can run automated Chrome tests (via Claude-in-Chrome MCP tools) on the running dev server before Joe does manual testing.
+
+| ID | Description | Status |
+|----|-------------|--------|
+| FFT-001 | Verify dev environment — `npm run dev` on port 3003, no build errors. Confirm all env vars present (ANTHROPIC_API_KEY, NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY). Hit `/api/players/status` → confirm 200. DEV_MODE bypass works. | [ ] |
+| FFT-002 | Automated Chrome UI test (prep mode) — Claude starts dev server, uses Chrome MCP tools to navigate prep configure → strategies → board. Screenshot each screen. Check console for errors. No API calls fired. | [ ] |
+| FFT-003 | Automated Chrome UI test (live draft mode) — Claude navigates draft setup → live draft room (auction + snake). Verify: connection status pill visible, manual pick bar present, player pool renders, no console errors. Screenshot all screens. | [ ] |
+
+---
+
+### Testing Sprint T2: Player Data Seed (zero cost)
+
+> Goal: Populate `players_cache` with real 2026 player data using free APIs only. No Claude API calls. Enables UI testing with real player names and positions.
+
+| ID | Description | Status |
+|----|-------------|--------|
+| FFT-004 | Seed 2026 players via Sleeper API — write `scripts/seed-players-sleeper.ts`. Call `GET https://api.sleeper.app/v1/players/nfl` (free, no key). Filter: `active: true`, skip K position (Nasties rule). Normalize to `players_cache` schema. Run once, verify 300+ players in Supabase. Zero Claude API calls. | [ ] |
+| FFT-005 | Verify prep configure flow with seeded data — open `/prep/configure`, set up Joe's ESPN auction league (12 teams, $200 budget, PPR). Confirm player pool loads from cache. Do NOT run research pipeline (costs money — separate approval required). | [ ] |
+
+---
+
+### Testing Sprint T3: Live Draft Dry Run (requires cost approval)
+
+> **STOP before FFT-006/007: AI calls cost ~$0.01–0.03 per pick. Joe must type explicit approval before starting this sprint.**
+
+| ID | Description | Status |
+|----|-------------|--------|
+| FFT-006 / FF-072 | Auction live draft dry run — create a mock Google Sheet (public, anyone-with-link viewer) with 10 pre-filled picks. Connect FFI auction mode. Verify: Sheets polling detects picks, AI recommendations generate, budget math updates, trash talk fires on overpay/steal. | [ ] |
+| FFT-007 | Tyler's Sleeper dry run — create a test Sleeper draft (public, snake format). Connect FFI Sleeper mode. Simulate 5 picks. Verify: Sleeper polling detects picks, keeper visual distinction shows, AI recommendations fire. | [ ] |
+| FFT-008 / FF-269 | Arm's-length physical test — Joe on phone at normal distance. Verify: all tap targets reachable one-handed, text readable, no precision tapping required. Note any issues in BUG_LOG. | [ ] |
+
+---
 
 ### Design System Formalization
 

@@ -1,11 +1,12 @@
 # Working State — Fantasy Football Draft Advisor
 
 ## Current Session
-- **Date:** 2026-04-17
-- **Focus:** P0 + P2 — Tyler's league setup
-- **Status:** FF-312 COMPLETE — Sleeper live draft integration. `use-sleeper-draft-feed.ts` polls Sleeper API every 5s, maps picks to managers via snake-order math, normalizes to `NormalizedPickEvent`. Setup: Sleeper mode option (snake-only) + draft URL/ID input. Live client: `sdi` param, SL badge, same pick handler pattern as Auctioneer. Next P0 item: FF-269 arm's-length physical test.
+- **Date:** 2026-06-02
+- **Focus:** P0 Sub-tier 4 — Touch target audit
+- **Status:** FF-269 code audit COMPLETE — 7 elements in 4 files bumped to min-h-[44px]. Physical test (FFT-008) still requires Joe on phone. Next actionable P0 items: FF-DS-001 (Design System Formalization) or FFT-001 (environment smoke test in P2).
 
 ## Last Completed (most recent first)
+- **FF-269** (2026-06-02): Touch target audit — 7 elements in 4 files bumped to min-h-[44px]: position filter pills + sort tabs (ffi-position-filters.tsx), expand chevron (ffi-player-card.tsx), error bar Retry + dismiss × (connection-status-pill.tsx), card submit + undo (manual-pick-entry.tsx). Physical test FFT-008 still needs Joe on phone.
 - **FF-283** (2026-04-16): Added `maxBidAdviceMap: Map<string, number>` useMemo in `live/client.tsx` — calls `calculateMaxBidAdvice()` for every undrafted player, keyed by lowercase name. Deps: `[state, scoredPlayers, draftedNames, strategy]` — all three pick sources (Auctioneer BroadcastChannel/localStorage, Sheets, manual) flow through `setState` and invalidate the memo. Added `maxBidMap?: Map<string, number>` prop to `PlayerPool`; each `FFIPlayerCard` now gets per-player strategy-aware max bid (not a global flat value). `MySquadPanel` keeps the simple `getMaxBid()` result. Import added: `calculateMaxBidAdvice` from `auction-advisor`. Type-check clean, lint zero new errors.
 - **FF-282** (2026-04-16): Created `src/hooks/use-draft-feed.ts` — wraps `useAuctioneerfeed`, converts `AuctioneerPick[]` → `NormalizedPickEvent[]` via `createPickMerger()` + `playerNameToPickId()`. Re-exports `NormalizedPickEvent` + `AuctioneerConnectionType`. Gated: `format === 'auction'` (internal). Updated `live/client.tsx`: import swapped to `useDraftFeed` + `NormalizedPickEvent`; handler ref type updated; `pick.player_name` → `pick.playerName` in handler body; `useAuctioneerfeed(...)` → `useDraftFeed({format, connectionType, onNewPicks})`; gating now internal to hook. Sheets polling in `use-draft-state.ts` untouched — Tyler's path zero behavior change. Type-check clean, lint zero new errors.
 - **FF-281** (2026-04-16): Created `src/lib/draft/auction-feed-merge.ts` — pure utility, no React deps. `NormalizedPickEvent` (pickId, playerName, manager, price, position?, source). `createPickMerger()` factory returns stateful `PickMerger` with `merge()`, `reset()`, `seenCount`. `playerNameToPickId()` synthesizes `sheets:<name>` IDs for sources without native pick IDs. Ready for FF-282's `use-draft-feed.ts` to consume.
