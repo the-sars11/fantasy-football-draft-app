@@ -41,6 +41,7 @@ export function FFIPositionFilters({
             className={`
               px-6 py-2 rounded-lg font-headline font-bold text-xs tracking-tighter
               transition-all active:scale-95 whitespace-nowrap
+              min-h-[44px] flex items-center justify-center
               ${activeFilter === pos
                 ? 'bg-[#2ff801] text-[#0b5800] shadow-[0_0_15px_rgba(47,248,1,0.3)]'
                 : 'bg-[#0f222c] text-[#9eadb8] hover:bg-[#192f3b]'
@@ -85,6 +86,7 @@ export function FFISortTabs({
           onClick={() => onSortChange(option.value)}
           className={`
             px-3 py-1 rounded-md font-headline tracking-wider uppercase transition-colors
+            min-h-[44px] flex items-center justify-center
             ${sortBy === option.value
               ? 'bg-[#0f222c] text-[#deedf9] border border-[#3c4a53]/30'
               : 'text-[#9eadb8] hover:text-[#deedf9]'

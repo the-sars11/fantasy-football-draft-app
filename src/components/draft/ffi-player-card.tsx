@@ -375,7 +375,7 @@ export function FFIPlayerCard({
           )}
 
           {/* Expand icon */}
-          <button className="text-[#9eadb8]/40 hover:text-[#9eadb8] transition-colors ml-1">
+          <button className="text-[#9eadb8]/40 hover:text-[#9eadb8] transition-colors ml-1 min-h-[44px] min-w-[44px] flex items-center justify-center">
             {isExpanded
               ? <ChevronUp className="w-5 h-5" />
               : <ChevronDown className="w-5 h-5" />

@@ -301,7 +301,7 @@ export function ManualPickEntry({
             Enter Pick
           </span>
           {canUndo && (
-            <Button variant="ghost" size="sm" onClick={onUndo} className="h-7 text-xs gap-1">
+            <Button variant="ghost" size="sm" onClick={onUndo} className="h-11 text-xs gap-1">
               <Undo2 className="h-3 w-3" />
               Undo
             </Button>
@@ -417,8 +417,7 @@ export function ManualPickEntry({
         <Button
           onClick={handleSubmit}
           disabled={!isValid}
-          className="w-full h-9"
-          size="sm"
+          className="w-full h-11"
         >
           Record Pick
         </Button>

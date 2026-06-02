@@ -132,10 +132,12 @@ export function ConnectionStatusPill({
                   fontSize: 10,
                   fontWeight: 700,
                   color: '#fff',
-                  padding: '4px 10px',
+                  padding: '8px 14px',
                   borderRadius: 6,
                   background: 'rgba(239,68,68,0.2)',
                   border: '1px solid rgba(239,68,68,0.3)',
+                  minHeight: 44,
+                  minWidth: 44,
                 }}
               >
                 Retry
@@ -143,7 +145,7 @@ export function ConnectionStatusPill({
             )}
             <button
               onClick={() => setErrorBarOpen(false)}
-              style={{ fontSize: 14, color: '#f87171', lineHeight: 1 }}
+              style={{ fontSize: 18, color: '#f87171', lineHeight: 1, minHeight: 44, minWidth: 44, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
               aria-label="Dismiss error"
             >
               ×
