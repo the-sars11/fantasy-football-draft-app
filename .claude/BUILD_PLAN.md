@@ -179,9 +179,9 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 
 | ID | Description | Status |
 |----|-------------|--------|
-| FFT-001 | Verify dev environment — `npm run dev` on port 3003, no build errors. Confirm all env vars present (ANTHROPIC_API_KEY, NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY). Hit `/api/players/status` → confirm 200. DEV_MODE bypass works. | [ ] |
-| FFT-002 | Automated Chrome UI test (prep mode) — Claude starts dev server, uses Chrome MCP tools to navigate prep configure → strategies → board. Screenshot each screen. Check console for errors. No API calls fired. | [ ] |
-| FFT-003 | Automated Chrome UI test (live draft mode) — Claude navigates draft setup → live draft room (auction + snake). Verify: connection status pill visible, manual pick bar present, player pool renders, no console errors. Screenshot all screens. | [ ] |
+| FFT-001 | Verify dev environment — `npm run dev` on port 3003, no build errors. Confirm all env vars present (ANTHROPIC_API_KEY, NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY). Hit `/api/players/status` → confirm 200. DEV_MODE bypass works. | [x] PARTIAL: dev server ✅, build clean ✅, /api/players/status 200 ✅, ANTHROPIC_API_KEY missing (Joe adds when ready) |
+| FFT-002 | Automated Chrome UI test (prep mode) — Claude starts dev server, uses Chrome MCP tools to navigate prep configure → strategies → board. Screenshot each screen. Check console for errors. No API calls fired. | [x] PASS: all prep screens render. Console: ThemeToggle hydration mismatch (non-blocking). |
+| FFT-003 | Automated Chrome UI test (live draft mode) — Claude navigates draft setup → live draft room (auction + snake). Verify: connection status pill visible, manual pick bar present, player pool renders, no console errors. Screenshot all screens. | [x] PARTIAL PASS: pill ✅, bar ✅, pool (300) ✅. Console: `user_tags` table missing in Supabase — apply `supabase/migrations/20260321000001` + `20260323000002` in Supabase Dashboard SQL Editor (Joe action). |
 
 ---
 

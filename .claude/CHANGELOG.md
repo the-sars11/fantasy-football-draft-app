@@ -2,6 +2,40 @@
 
 ---
 
+## 2026-06-02 — FFT-002 + FFT-003: Chrome UI Smoke Tests + Bug Fixes
+
+**Tasks:** FFT-002 (prep mode UI), FFT-003 (live draft UI) + 3 bug fixes found during testing  
+**Class:** `bugfix` | **Lenses:** QA, Design
+
+**FFT-002 — Prep screens (PASS):**
+- Prep Hub: renders, 573 players cached, correct CTA
+- Configure: Joe's ESPN Auction (12 teams, $200, PPR) ✅; Tyler's Sleeper tab ✅
+- Draft Strategies: empty state "No leagues configured" — correct behavior
+- Draft Board: empty state — correct behavior
+- Console: ThemeToggle hydration mismatch on every page (non-blocking — SSR/client light/dark mismatch)
+
+**FFT-003 — Live draft UI (PARTIAL PASS — 3/4 criteria met):**
+- ✅ Connection status pill: "● MANUAL 0 PICKS" visible in header
+- ✅ Manual pick bar: "Tap BID on any player" pinned at bottom (auction + snake)
+- ✅ Player pool: 300 players render in both auction and snake modes
+- ⚠️ Console: `[useUserTags] Error: Could not find the table 'public.user_tags'` (×4) — Supabase migration not applied; player intel tags non-functional but does not crash the UI
+- Snake: "Rd 1 · Pick 1 · YOUR PICK" snake advisor, ADP sort tabs, correct keeper-league roster slots ✅
+
+**Bugs fixed:**
+1. `createLeague` DEV_MODE: was returning fake `leagueId: 'dev-league-001'` without saving to Supabase — fixed to use service role key (same pattern as sessions route)
+2. `ffi-player-card.tsx` — `$undefined` / `$NaN-$NaN RANGE` on players with no `consensusAuctionValue`: added `?? 0` fallback; display now shows `$0`/`$0-$0 RANGE`
+3. `ffi-player-card.tsx` — `Rd NaN` on players with no ADP (`player.adp === 0` or `NaN`): added `player.adp > 0` guard; display now shows `Rd 0`
+4. `manual-pick-entry.tsx` — `$undefined` in search dropdown for players without auction value: added `?? 0` fallback
+
+**Supabase migrations needed (Joe action required):**
+- `20260321000001_add_keepers_to_draft_sessions.sql` — adds `keepers` jsonb column (blocks session API `POST /api/draft/sessions`)
+- `20260323000002_user_tags_table.sql` — creates `user_tags` table (suppresses console errors in live draft)
+- Apply via Supabase Dashboard → SQL Editor (scripts are in `supabase/migrations/`)
+
+**Not changed:** game logic, state machine, API behavior, tests.
+
+---
+
 ## 2026-06-02 — FF-269: Touch Target Audit + Fix (P0 Sub-tier 4)
 
 **Task:** FF-269 — Arm's-length physical test — fix touch targets < 44px  

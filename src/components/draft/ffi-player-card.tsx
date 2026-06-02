@@ -217,8 +217,8 @@ export function FFIPlayerCard({
   const rankDisplay = rank.toString().padStart(2, '0')
 
   // Calculate value display
-  const auctionValue = scoredPlayer.adjustedAuctionValue ?? player.consensusAuctionValue
-  const roundValue = scoredPlayer.adjustedRoundValue ?? Math.round(player.adp)
+  const auctionValue = scoredPlayer.adjustedAuctionValue ?? player.consensusAuctionValue ?? 0
+  const roundValue = scoredPlayer.adjustedRoundValue ?? (player.adp > 0 ? Math.round(player.adp) : 0)
 
   // Calculate value range (±5% for auction, ±1 for rounds)
   const valueRangeLow = isAuction
@@ -230,7 +230,7 @@ export function FFIPlayerCard({
 
   // Max bid delta vs consensus (auction only)
   const maxBidDelta = isAuction && maxBid != null
-    ? maxBid - player.consensusAuctionValue
+    ? maxBid - (player.consensusAuctionValue ?? 0)
     : null
 
   // Is this player highlighted (target or high score)?

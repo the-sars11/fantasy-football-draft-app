@@ -1,9 +1,16 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
-import { requireUser } from '@/lib/supabase/server'
+import { createClient, requireUser } from '@/lib/supabase/server'
 import { DEV_MODE } from '@/lib/supabase/dev-mode'
+import { createClient as createServiceClient } from '@supabase/supabase-js'
 import type { LeagueInsert, KeeperSettings, ScoringSettings } from '@/lib/supabase/database.types'
+
+async function getAdminClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (url && serviceKey) return createServiceClient(url, serviceKey)
+  return null
+}
 
 export type LeagueFormState = {
   error?: string
@@ -77,12 +84,10 @@ export async function createLeague(
     return { error: 'Auction format requires a budget' }
   }
 
-  // In dev mode, just return success (no Supabase connection)
-  if (DEV_MODE) {
-    return { success: true, leagueId: 'dev-league-001' }
-  }
+  const supabase = DEV_MODE
+    ? await getAdminClient()
+    : await createClient()
 
-  const supabase = await createClient()
   if (!supabase) {
     return { error: 'Database connection failed' }
   }

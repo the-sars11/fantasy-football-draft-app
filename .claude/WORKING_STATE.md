@@ -2,11 +2,13 @@
 
 ## Current Session
 - **Date:** 2026-06-02
-- **Focus:** Design System Formalization (FF-DS-001–005) + FFT-001 env smoke test
-- **Status:** FF-DS-001–005 COMPLETE (all 17 sections of UI_DESIGN_SPEC.md written). FFT-001 BLOCKED — 2 env issues found, Joe action required (see blockers below).
+- **Focus:** P2 Testing Sprint T1 — FFT-002 + FFT-003 Chrome UI smoke tests
+- **Status:** FFT-002 PASS, FFT-003 PARTIAL PASS (3/4 criteria met). 3 bugs fixed. 2 Supabase migrations still need to be applied manually (Joe action). Next: FFT-004 (seed 2026 players via Sleeper API).
 
 ## Last Completed (most recent first)
-- **FF-DS-001–005** (2026-06-02): UI Design Spec formalized — `.claude/UI_DESIGN_SPEC.md` created, all 17 sections filled from DESIGN_SYSTEM.md. Covers vision, layout, colors, typography, all components (player cards, status pills, keeper markers, confidence badges), interactions, motion (Framer Motion specs), glassmorphism, responsive, a11y, dark mode, performance, design decisions log, tools, and maintenance rules.
+- **FFT-002 + FFT-003** (2026-06-02): Chrome UI smoke tests — all prep screens pass; live draft auction + snake both render with connection pill, manual bar, 300-player pool. 3 bugs fixed (see below). ThemeToggle hydration mismatch and `user_tags` missing are known outstanding issues. Two Supabase migrations need Joe to apply via Dashboard SQL Editor.
+- **Bug fixes** (2026-06-02): `createLeague` DEV_MODE now saves to Supabase via service role key; `ffi-player-card.tsx` `$undefined`/`$NaN-$NaN`/`Rd NaN` fixed with null-guards; `manual-pick-entry.tsx` `$undefined` in search dropdown fixed.
+- **FF-DS-001–005** (2026-06-02): UI Design Spec formalized — `.claude/UI_DESIGN_SPEC.md` created, all 17 sections filled from DESIGN_SYSTEM.md.
 - **FFT-001** (2026-06-02): PARTIAL PASS — dev server starts, build clean (3.8s), root → 200, /api/players/status → 200 (573 players in cache, last seeded 2026-03-22 — stale). One remaining blocker: ANTHROPIC_API_KEY missing from .env.local (AI calls will fail until added).
 - **FF-269** (2026-06-02): Touch target audit — 7 elements in 4 files bumped to min-h-[44px]: position filter pills + sort tabs (ffi-position-filters.tsx), expand chevron (ffi-player-card.tsx), error bar Retry + dismiss × (connection-status-pill.tsx), card submit + undo (manual-pick-entry.tsx). Physical test FFT-008 still needs Joe on phone.
 - **FF-283** (2026-04-16): Added `maxBidAdviceMap: Map<string, number>` useMemo in `live/client.tsx` — calls `calculateMaxBidAdvice()` for every undrafted player, keyed by lowercase name. Deps: `[state, scoredPlayers, draftedNames, strategy]` — all three pick sources (Auctioneer BroadcastChannel/localStorage, Sheets, manual) flow through `setState` and invalidate the memo. Added `maxBidMap?: Map<string, number>` prop to `PlayerPool`; each `FFIPlayerCard` now gets per-player strategy-aware max bid (not a global flat value). `MySquadPanel` keeps the simple `getMaxBid()` result. Import added: `calculateMaxBidAdvice` from `auction-advisor`. Type-check clean, lint zero new errors.
@@ -153,6 +155,7 @@
 | Blocker | Blocking | Owner | Since |
 |---------|----------|-------|-------|
 | `ANTHROPIC_API_KEY` missing from `.env.local` | All AI calls (research pipeline, recommendations, trash talk) | Joe — add key to `.env.local` | 2026-06-02 |
+| Supabase migrations not applied: `20260321000001_add_keepers_to_draft_sessions.sql` + `20260323000002_user_tags_table.sql` | `keepers` column blocks `/api/draft/sessions` POST; `user_tags` missing causes console errors on live draft | Joe — open Supabase Dashboard → SQL Editor, run each file in `supabase/migrations/` in order | 2026-06-02 |
 
 ### Google Sheets Setup (Exact Format)
 Document exact format when confirmed:

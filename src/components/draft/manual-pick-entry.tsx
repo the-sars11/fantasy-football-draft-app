@@ -346,7 +346,7 @@ export function ManualPickEntry({
                   <span className="flex-1 font-medium">{player.name}</span>
                   <span className="text-xs text-muted-foreground">{player.team}</span>
                   {format === 'auction' && (
-                    <span className="text-xs font-mono text-muted-foreground">${player.consensusAuctionValue}</span>
+                    <span className="text-xs font-mono text-muted-foreground">${player.consensusAuctionValue ?? 0}</span>
                   )}
                   {format === 'snake' && player.adp > 0 && (
                     <span className="text-xs font-mono text-muted-foreground">ADP {player.adp.toFixed(1)}</span>
