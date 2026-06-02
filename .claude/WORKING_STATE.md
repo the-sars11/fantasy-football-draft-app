@@ -2,10 +2,12 @@
 
 ## Current Session
 - **Date:** 2026-06-02
-- **Focus:** P0 Sub-tier 4 — Touch target audit
-- **Status:** FF-269 code audit COMPLETE — 7 elements in 4 files bumped to min-h-[44px]. Physical test (FFT-008) still requires Joe on phone. Next actionable P0 items: FF-DS-001 (Design System Formalization) or FFT-001 (environment smoke test in P2).
+- **Focus:** Design System Formalization (FF-DS-001–005) + FFT-001 env smoke test
+- **Status:** FF-DS-001–005 COMPLETE (all 17 sections of UI_DESIGN_SPEC.md written). FFT-001 BLOCKED — 2 env issues found, Joe action required (see blockers below).
 
 ## Last Completed (most recent first)
+- **FF-DS-001–005** (2026-06-02): UI Design Spec formalized — `.claude/UI_DESIGN_SPEC.md` created, all 17 sections filled from DESIGN_SYSTEM.md. Covers vision, layout, colors, typography, all components (player cards, status pills, keeper markers, confidence badges), interactions, motion (Framer Motion specs), glassmorphism, responsive, a11y, dark mode, performance, design decisions log, tools, and maintenance rules.
+- **FFT-001** (2026-06-02): PARTIAL PASS — dev server starts, build clean (3.8s), root → 200, /api/players/status → 200 (573 players in cache, last seeded 2026-03-22 — stale). One remaining blocker: ANTHROPIC_API_KEY missing from .env.local (AI calls will fail until added).
 - **FF-269** (2026-06-02): Touch target audit — 7 elements in 4 files bumped to min-h-[44px]: position filter pills + sort tabs (ffi-position-filters.tsx), expand chevron (ffi-player-card.tsx), error bar Retry + dismiss × (connection-status-pill.tsx), card submit + undo (manual-pick-entry.tsx). Physical test FFT-008 still needs Joe on phone.
 - **FF-283** (2026-04-16): Added `maxBidAdviceMap: Map<string, number>` useMemo in `live/client.tsx` — calls `calculateMaxBidAdvice()` for every undrafted player, keyed by lowercase name. Deps: `[state, scoredPlayers, draftedNames, strategy]` — all three pick sources (Auctioneer BroadcastChannel/localStorage, Sheets, manual) flow through `setState` and invalidate the memo. Added `maxBidMap?: Map<string, number>` prop to `PlayerPool`; each `FFIPlayerCard` now gets per-player strategy-aware max bid (not a global flat value). `MySquadPanel` keeps the simple `getMaxBid()` result. Import added: `calculateMaxBidAdvice` from `auction-advisor`. Type-check clean, lint zero new errors.
 - **FF-282** (2026-04-16): Created `src/hooks/use-draft-feed.ts` — wraps `useAuctioneerfeed`, converts `AuctioneerPick[]` → `NormalizedPickEvent[]` via `createPickMerger()` + `playerNameToPickId()`. Re-exports `NormalizedPickEvent` + `AuctioneerConnectionType`. Gated: `format === 'auction'` (internal). Updated `live/client.tsx`: import swapped to `useDraftFeed` + `NormalizedPickEvent`; handler ref type updated; `pick.player_name` → `pick.playerName` in handler body; `useAuctioneerfeed(...)` → `useDraftFeed({format, connectionType, onNewPicks})`; gating now internal to hook. Sheets polling in `use-draft-state.ts` untouched — Tyler's path zero behavior change. Type-check clean, lint zero new errors.
@@ -150,7 +152,7 @@
 
 | Blocker | Blocking | Owner | Since |
 |---------|----------|-------|-------|
-| — | — | — | — |
+| `ANTHROPIC_API_KEY` missing from `.env.local` | All AI calls (research pipeline, recommendations, trash talk) | Joe — add key to `.env.local` | 2026-06-02 |
 
 ### Google Sheets Setup (Exact Format)
 Document exact format when confirmed:
