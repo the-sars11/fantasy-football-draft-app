@@ -162,10 +162,10 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 - [ ] UX-4.1: Hub cards glass-interactive + gold-on-hover; menu/layout cleanup
 - [ ] UX-4.2: Glow-focus form inputs (NCAA `.form-input` pattern) for league config + strategy editor
 
-### UX-5: Post-Draft Review + Celebration
+### UX-5: Post-Draft Review + Celebration — ✅ grade reveal DONE 2026-06-03 (Sunday Night Gridiron)
 > Goal: a shareable, broadcast-grade finish.
-- [ ] UX-5.1: Grade hero in metallic gold; timeline pick cards in v2.0
-- [ ] UX-5.2: Confetti on reveal; card-as-hero shareable
+- [x] UX-5.1: Grade hero in metallic gold — GradeHero gold `gradeGlow.A` + `.ffi-grade-a` + score color; rotating conic gold ring (`.ffi-grade-ring-sheen` via `@property`); Oswald verdict word ("ELITE DRAFT"). Timeline pick cards already v2.0.
+- [x] UX-5.2: Confetti on reveal — `FFICelebration` (new gold tone) + new `FFIConfettiBurst` in GradeHero; champion sound + haptic; reduced-motion = static. (Dedicated shareable card-image still BACKLOG; CSV + share-link already exist.)
 
 ### UX-6: Cross-cutting polish + QA gate
 > Goal: AAA everywhere, verified.
@@ -173,6 +173,12 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 - [ ] UX-6.2: WCAG ≥4.5:1 contrast pass; reduced-motion audit
 - [ ] UX-6.3: Background-layer performance (GPU promote); arm's-length mobile re-test (ties FF-269/FFT-008)
 - [ ] UX-6.4: Before/after screenshot set
+
+### UX-7: Sim Draft / Demo Mode (dev-only) [showcase + QA fixture]
+> Goal: watch the full broadcast experience (and demo it to people) without running a real draft, and give the bug-hunt/QA sessions a way to drive the live UI. Reuses the REAL components — no standalone HTML, no API key (the advisor shows its rule-based fallback). Pairs with the Phase 2/3 moments shipped in Sunday Night Gridiron (lower-third, score-bug, ticker, gold grade reveal).
+- [ ] UX-7.1: Dev-only Sim engine — `useDraftSimulator` hook (or a `?sim=1` flag on `/draft/live`, gated behind DEV_MODE) that auto-plays a scripted sequence of realistic picks from the loaded player pool into the existing draft state on a timer. Reuse the manual-pick / `applyPick` path; respect format (auction prices vs snake rounds). Speed control (slow/medium/fast) + pause/reset.
+- [ ] UX-7.2: Drive every signature moment — verify the sim fires the lower-third wipe (`pick-lower-third.tsx`), the live score-bug cyan flashes (`live-scorebug.tsx`), the position-run ticker (script a 3+ run), and the on-the-clock takeover; auto-advance to completion so it lands on the gold grade reveal + confetti (`review/client.tsx`). Force the AI advisor OFF / `source:'fallback'` in sim so zero paid calls happen.
+- [ ] UX-7.3: One-tap demo entry — a dev launcher (e.g. `/draft/live?sim=1` bookmark, or a long-press on the Draft hub) so Joe can pull it up on a phone on repeat to show people; document how to launch it in `WORKING_STATE.md`.
 
 ---
 
