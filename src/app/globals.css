@@ -975,6 +975,21 @@
   }
 }
 
+/* UX-2.1: On-the-clock body class — applied from live draft client while draft is active */
+body.draft-active .stadium-atmos {
+  background:
+    radial-gradient(70% 55% at 50% -8%, rgba(253, 239, 182, 0.20) 0%, transparent 64%),
+    radial-gradient(45% 40% at 88% 92%, rgba(85, 130, 230, 0.10) 0%, transparent 60%),
+    radial-gradient(50% 45% at 8% 85%, rgba(16, 70, 50, 0.24) 0%, transparent 62%),
+    linear-gradient(180deg, #02060d 0%, #050b16 45%, #01040a 100%);
+  animation: atmos-clock-pulse 3.2s ease-in-out infinite;
+}
+
+/* UX-2.3: Pick flash — box-shadow gold glow only (no scale; Framer Motion handles transform) */
+.ffi-pick-flash {
+  animation: ffi-gold-flash 0.7s ease-out 0.1s both;
+}
+
 /* Stadium Primetime v2.0 motion (UX-1.7) — pick/moment reveal, gold flash, stagger */
 @keyframes ffi-reveal {
   0% { opacity: 0; transform: scale(0.85); }
@@ -1054,6 +1069,8 @@
   .ffi-animate-reveal,
   .ffi-animate-stagger,
   .stadium-atmos.atmos-clock,
+  body.draft-active .stadium-atmos,
+  .ffi-pick-flash,
   .animate-shake {
     animation: none;
   }

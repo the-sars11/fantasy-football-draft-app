@@ -61,9 +61,9 @@ const trashTalkConfig: Record<TrashTalkType, {
   steal: {
     icon: Target,
     emoji: '🎯',
-    bgClass: 'bg-[var(--ffi-success)]/10',
-    borderClass: 'border-l-[var(--ffi-success)]',
-    textClass: 'text-[var(--ffi-success)]',
+    bgClass: 'bg-[var(--value-green)]/8',
+    borderClass: 'border-l-[var(--value-green)]',
+    textClass: 'text-[var(--value-green)]',
   },
   budget_buster: {
     icon: Flame,
@@ -89,9 +89,9 @@ const trashTalkConfig: Record<TrashTalkType, {
   budget_dominance: {
     icon: Target,
     emoji: '👑',
-    bgClass: 'bg-[var(--ffi-success)]/10',
-    borderClass: 'border-l-[var(--ffi-success)]',
-    textClass: 'text-[var(--ffi-success)]',
+    bgClass: 'bg-[var(--value-green)]/8',
+    borderClass: 'border-l-[var(--value-green)]',
+    textClass: 'text-[var(--value-green)]',
   },
   first_defense_buy: {
     icon: AlertTriangle,
@@ -124,9 +124,9 @@ const trashTalkConfig: Record<TrashTalkType, {
   keeper_steal: {
     icon: Target,
     emoji: '🔒',
-    bgClass: 'bg-[var(--ffi-success)]/10',
-    borderClass: 'border-l-[var(--ffi-success)]',
-    textClass: 'text-[var(--ffi-success)]',
+    bgClass: 'bg-[var(--value-green)]/8',
+    borderClass: 'border-l-[var(--value-green)]',
+    textClass: 'text-[var(--value-green)]',
   },
   bad_keeper: {
     icon: Flame,
@@ -350,7 +350,7 @@ function AwardBadge({ emoji, title, winner, color }: AwardBadgeProps) {
   const colorClasses = {
     danger: 'border-[var(--ffi-danger)]/30 bg-[var(--ffi-danger)]/10',
     warning: 'border-[var(--ffi-warning)]/30 bg-[var(--ffi-warning)]/10',
-    success: 'border-[var(--ffi-success)]/30 bg-[var(--ffi-success)]/10',
+    success: 'border-[var(--value-green)]/25 bg-[var(--value-green)]/8',
     purple: 'border-purple-500/30 bg-purple-500/10',
   }
 
@@ -446,7 +446,7 @@ export function SavedTrashTalk({ alerts, onRemove }: SavedTrashTalkProps) {
       <FFISectionHeader
         title="Saved Trash Talk"
         subtitle={`${alerts.length} moment${alerts.length !== 1 ? 's' : ''} worth remembering`}
-        action={<Bookmark className="h-4 w-4 text-[var(--ffi-accent)]" />}
+        action={<Bookmark className="h-4 w-4 text-[var(--ffi-gold)]" />}
       />
       <div className="space-y-2">
         {alerts.map(alert => {

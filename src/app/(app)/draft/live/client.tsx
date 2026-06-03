@@ -137,6 +137,7 @@ function StrategyPicker({
 function PickFeed({
   picks,
   format,
+  myManager,
 }: {
   picks: Array<{
     pick_number: number
@@ -147,6 +148,7 @@ function PickFeed({
     is_keeper?: boolean
   }>
   format: 'auction' | 'snake'
+  myManager?: string
 }) {
   const isAuction = format === 'auction'
   const recentPicks = [...picks].reverse().slice(0, 10)
@@ -154,7 +156,7 @@ function PickFeed({
   return (
     <FFICard className="overflow-hidden">
       <div className="flex items-center gap-2 mb-3">
-        <div className="w-2 h-2 rounded-full bg-[var(--ffi-danger)] animate-pulse" />
+        <div className="w-2 h-2 rounded-full bg-[var(--value-green)] animate-pulse" />
         <span className="ffi-label text-[var(--ffi-text-secondary)]">LIVE FEED</span>
         <span className="ffi-caption text-[var(--ffi-text-muted)] ml-auto">
           {picks.length} PICKS
@@ -168,43 +170,56 @@ function PickFeed({
       ) : (
         <div className="space-y-1 max-h-48 overflow-auto">
           <AnimatePresence mode="popLayout">
-            {recentPicks.map((pick, idx) => (
-              <motion.div
-                key={`${pick.manager}-${pick.pick_number}`}
-                layout
-                initial={{ opacity: 0, scale: 0.8, y: -20 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                transition={{
-                  type: 'spring',
-                  stiffness: 500,
-                  damping: 25,
-                }}
-                className={cn(
-                  'flex items-center gap-2 py-1.5 px-2 rounded-lg',
-                  idx === 0 && 'bg-[var(--ffi-accent)]/10'
-                )}
-              >
-                <span className="ffi-caption text-[var(--ffi-text-muted)] w-6 text-right">
-                  {displayPickNum(pick.pick_number)}
-                </span>
-                {pick.position && (
-                  <FFIPositionBadge position={pick.position.toUpperCase() as Position} />
-                )}
-                {isKeeperPick(pick) && <span className="text-[10px] shrink-0" aria-label="Keeper">🔒</span>}
-                <span className={cn('ffi-body-md font-medium flex-1 truncate', isKeeperPick(pick) ? 'text-[#94a3b8]' : 'text-white')}>
-                  {pick.player_name}
-                </span>
-                <span className="ffi-body-md text-[var(--ffi-text-secondary)] truncate max-w-20">
-                  {pick.manager}
-                </span>
-                {!isKeeperPick(pick) && isAuction && pick.price != null && (
-                  <span className="ffi-label text-[var(--ffi-accent)] font-mono">
-                    ${pick.price}
+            {recentPicks.map((pick, idx) => {
+              const isMyPick = !!(myManager && pick.manager === myManager)
+              return (
+                <motion.div
+                  key={`${pick.manager}-${pick.pick_number}`}
+                  layout
+                  initial={{ opacity: 0, scale: 0.8, y: -20 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  transition={{
+                    type: 'spring',
+                    stiffness: 500,
+                    damping: 25,
+                  }}
+                  className={cn(
+                    'flex items-center gap-2 py-1.5 px-2 rounded-lg transition-colors',
+                    idx === 0 && 'ffi-pick-flash',
+                    isMyPick
+                      ? 'border-l-2 border-[var(--ffi-gold)] bg-[var(--ffi-gold)]/5'
+                      : idx === 0 ? 'bg-[var(--ffi-primary)]/10' : null,
+                  )}
+                >
+                  <span className="ffi-caption text-[var(--ffi-text-muted)] w-6 text-right">
+                    {displayPickNum(pick.pick_number)}
                   </span>
-                )}
-              </motion.div>
-            ))}
+                  {pick.position && (
+                    <FFIPositionBadge position={pick.position.toUpperCase() as Position} />
+                  )}
+                  {isKeeperPick(pick) && <span className="text-[10px] shrink-0" aria-label="Keeper">🔒</span>}
+                  <span className={cn(
+                    'ffi-body-md font-medium flex-1 truncate',
+                    isKeeperPick(pick) ? 'text-[#94a3b8]' :
+                    isMyPick ? 'text-[var(--ffi-gold-bright)]' : 'text-white',
+                  )}>
+                    {pick.player_name}
+                  </span>
+                  <span className="ffi-body-md text-[var(--ffi-text-secondary)] truncate max-w-20">
+                    {pick.manager}
+                  </span>
+                  {!isKeeperPick(pick) && isAuction && pick.price != null && (
+                    <span className={cn(
+                      'ffi-label font-mono',
+                      isMyPick ? 'text-[var(--ffi-gold)]' : 'text-[var(--ffi-text-secondary)]',
+                    )}>
+                      ${pick.price}
+                    </span>
+                  )}
+                </motion.div>
+              )
+            })}
           </AnimatePresence>
         </div>
       )}
@@ -249,7 +264,7 @@ function MySquadPanel({
         <div className="mb-3">
           <div className="flex justify-between items-center mb-1">
             <span className="ffi-body-md text-[var(--ffi-text-secondary)]">Budget</span>
-            <span className="ffi-title-md text-[var(--ffi-accent)] font-mono">${budget}</span>
+            <span className="ffi-title-md text-[var(--ffi-primary)] font-mono">${budget}</span>
           </div>
           <FFIProgress value={(budget / (budget + 100)) * 100} status="elite" />
           {maxBid != null && (
@@ -703,6 +718,16 @@ export function LiveDraftClient() {
     setDriftDismissed(true)
   }, [])
 
+  // UX-2.1: Body class drives atmos-clock gold spotlight while draft is active.
+  const draftIsActive = !!(state && state.status !== 'completed')
+  useEffect(() => {
+    if (draftIsActive) {
+      document.body.classList.add('draft-active')
+      return () => document.body.classList.remove('draft-active')
+    }
+    document.body.classList.remove('draft-active')
+  }, [draftIsActive])
+
   // Strategy swap handler
   const handleStrategySwap = useCallback((newStrategy: DbStrategy, fromRecommendation = false) => {
     const prevName = strategy?.name ?? 'None'
@@ -785,16 +810,28 @@ export function LiveDraftClient() {
 
   return (
     <div className="space-y-4 pb-32">
-      {/* Header */}
+      {/* Header — UX-2.1 gold spotlight + mode badge */}
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="p-2 rounded-xl bg-[var(--ffi-danger)]/20">
-            <Radio className="h-5 w-5 text-[var(--ffi-danger)]" />
+          <div className="p-2 rounded-xl bg-[var(--ffi-gold)]/15">
+            <Radio className="h-5 w-5 text-[var(--ffi-gold)]" />
           </div>
           <div>
-            <h1 className="ffi-display-md text-white">Live Draft</h1>
+            <div className="flex items-center gap-2 flex-wrap">
+              <h1 className="ffi-display-md text-white">Live Draft</h1>
+              <span
+                className="text-[10px] font-bold px-2.5 py-0.5 rounded-full font-headline tracking-widest"
+                style={{
+                  background: 'rgba(224,194,122,0.12)',
+                  color: 'var(--ffi-gold-bright)',
+                  border: '1px solid rgba(224,194,122,0.22)',
+                }}
+              >
+                {isAuction ? 'AUCTION' : 'SNAKE'}
+              </span>
+            </div>
             <p className="ffi-body-md text-[var(--ffi-text-secondary)]">
-              {league?.name} • {isAuction ? 'Auction' : 'Snake'} • {managerNames.length} Teams
+              {league?.name} • {managerNames.length} Teams
             </p>
           </div>
         </div>
@@ -855,7 +892,7 @@ export function LiveDraftClient() {
           />
 
           {/* Real-time pick feed */}
-          <PickFeed picks={state.picks} format={state.format} />
+          <PickFeed picks={state.picks} format={state.format} myManager={myManager} />
 
           {/* Trash talk feed */}
           <TrashTalkFeed

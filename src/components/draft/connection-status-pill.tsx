@@ -32,10 +32,10 @@ const STATE_CONFIG: Record<ConnState, {
   label: string
   pulse: boolean
 }> = {
-  LIVE:    { bg: 'rgba(34,197,94,0.15)',   color: '#22c55e', border: 'rgba(34,197,94,0.25)',    label: 'LIVE',    pulse: true  },
-  STALE:   { bg: 'rgba(251,191,36,0.15)',  color: '#fbbf24', border: 'rgba(251,191,36,0.25)',   label: 'STALE',   pulse: false },
-  OFFLINE: { bg: 'rgba(239,68,68,0.15)',   color: '#ef4444', border: 'rgba(239,68,68,0.3)',     label: 'OFFLINE', pulse: false },
-  MANUAL:  { bg: 'rgba(148,163,184,0.1)',  color: '#94a3b8', border: 'rgba(148,163,184,0.15)',  label: 'MANUAL',  pulse: false },
+  LIVE:    { bg: 'rgba(47,248,1,0.10)',    color: '#2ff801', border: 'rgba(47,248,1,0.22)',     label: 'LIVE',    pulse: true  },
+  STALE:   { bg: 'rgba(251,191,36,0.12)',  color: '#fbbf24', border: 'rgba(251,191,36,0.22)',   label: 'STALE',   pulse: false },
+  OFFLINE: { bg: 'rgba(239,68,68,0.12)',   color: '#ef4444', border: 'rgba(239,68,68,0.25)',    label: 'OFFLINE', pulse: false },
+  MANUAL:  { bg: 'rgba(148,163,184,0.08)', color: '#94a3b8', border: 'rgba(148,163,184,0.12)',  label: 'MANUAL',  pulse: false },
 }
 
 function getElapsedLabel(lastPollAt: Date | null, now: number): string {
@@ -87,6 +87,8 @@ export function ConnectionStatusPill({
           background: cfg.bg,
           color: cfg.color,
           border: `1px solid ${cfg.border}`,
+          backdropFilter: 'blur(8px)',
+          WebkitBackdropFilter: 'blur(8px)',
         }}
         className="flex items-center gap-[5px] px-[10px] py-[5px] rounded-[20px] cursor-default"
         aria-label={`Connection status: ${cfg.label}${elapsed ? ` — ${elapsed} ago` : ''}`}
@@ -118,8 +120,8 @@ export function ConnectionStatusPill({
       {/* Error bar — OFFLINE only, expands below pill */}
       {connState === 'OFFLINE' && errorBarOpen && (
         <div
-          className="mt-1 flex items-center justify-between gap-2 px-3 py-2 rounded-lg w-64"
-          style={{ background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.15)' }}
+          className="mt-1 flex items-center justify-between gap-2 px-3 py-2 rounded-xl w-64 ffi-glass"
+          style={{ borderColor: 'rgba(239,68,68,0.22)' }}
         >
           <p style={{ fontSize: 10, color: '#f87171', lineHeight: 1.4, flex: 1 }}>
             {error ?? 'Sheet unreachable — check share permissions or your connection. Picks entered manually will still save.'}

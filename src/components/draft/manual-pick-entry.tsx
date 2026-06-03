@@ -249,8 +249,8 @@ export function ManualPickEntry({
           </div>
         )}
 
-        {/* ── Record button ── */}
-        <Button
+        {/* ── Record button — gold hero on valid, muted when not (UX-2.2) ── */}
+        <button
           onClick={() => {
             if (!onBlockPlayer || !manager) return
             const pick: Omit<DraftPick, 'pick_number'> = {
@@ -265,14 +265,19 @@ export function ManualPickEntry({
             setPrice('')
           }}
           disabled={!isBarValid}
-          className={`h-11 px-4 shrink-0 min-w-[80px] font-bold ${
+          className={`h-11 px-4 shrink-0 min-w-[84px] rounded-full font-bold inline-flex items-center justify-center transition-all duration-200 ${
             isBarValid
-              ? 'bg-[#2ff801] text-[#031018] hover:bg-[#2ff801]/90'
-              : 'bg-[var(--ffi-surface-2)] text-[var(--ffi-text-muted)] cursor-not-allowed'
+              ? 'active:scale-95'
+              : 'bg-[var(--ffi-surface-elevated)] text-[var(--ffi-text-muted)] cursor-not-allowed opacity-50'
           }`}
+          style={isBarValid ? {
+            background: 'linear-gradient(135deg, #fdefb6 0%, #e0c27a 50%, #d3c791 100%)',
+            boxShadow: '0 4px 15px rgba(224,194,122,0.30)',
+            color: '#383008',
+          } : undefined}
         >
           Record
-        </Button>
+        </button>
 
         {/* ── Undo ── */}
         <Button
