@@ -8,7 +8,8 @@ import { cn } from "@/lib/utils"
    ======================================== */
 
 interface FFIButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: "primary" | "secondary" | "ghost"
+  // primary = structure/action (blue), hero = commit moment (gold), value = steal/positive (green)
+  variant?: "primary" | "hero" | "value" | "secondary" | "ghost"
   size?: "default" | "sm" | "lg" | "touch"
 }
 
@@ -21,6 +22,8 @@ export function FFIButton({
 }: FFIButtonProps) {
   const variants = {
     primary: "ffi-btn-primary",
+    hero: "ffi-btn-hero",
+    value: "ffi-btn-value",
     secondary: "ffi-btn-secondary",
     ghost: "ffi-btn-ghost",
   }

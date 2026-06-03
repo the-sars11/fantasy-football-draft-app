@@ -2,10 +2,11 @@
 
 ## Current Session
 - **Date:** 2026-06-02
-- **Focus:** P2 Testing Sprint T2 — FFT-004 + FFT-005 complete
-- **Status:** T2 DONE. Both items PASS. Next: T3 (FFT-006/007/008 — requires cost approval before starting).
+- **Focus:** UX — AAA Visual Upgrade (Stadium Primetime). UX-1 global foundation sprint.
+- **Status:** UX-1 DONE (tokens, fonts, atmospheric background, glass, buttons, motion, gold nav). Next: UX-2 (Live Draft Room). P2 T3 (FFT-006/007/008) still pending cost approval.
 
 ## Last Completed (most recent first)
+- **UX-1.1–1.7** (2026-06-02): Stadium Primetime foundation. Superseded DESIGN_SYSTEM.md → v2.0; created UI_UPGRADE_PLAN.md + UI_DESIGN_SPEC v2.0 addendum; added UX track to BUILD_PLAN. `layout.tsx` loads Space Grotesk/Manrope/JetBrains via next/font (Inter dropped; fonts verified live on :3003 — fixes the long-standing silent system-font fallback). `globals.css`: gold ramp + value-green tokens, `.stadium-atmos`/`.atmos-grain`/`.atmos-clock` background, 3-tier light-catch glass (all gray card borders removed), `.ffi-btn-primary`(blue)/`.ffi-btn-hero`(gold)/`.ffi-btn-value`(green), `.ffi-animate-reveal`(+gold flash)/`.ffi-animate-stagger`. `app-shell.tsx`: atmosphere layers replace light-streak/flash divs; active nav lime→gold. `ffi-primitives.tsx`: FFIButton hero/value variants. type-check clean, 27/27 tests, changed files lint clean. Full `next build` deferred (port 3003 held by parallel dev server).
 - **FFT-005** (2026-06-02): Prep configure + player pool Chrome test — `/prep/configure` renders ESPN/Auction/12-team/$200/Full PPR; Draft Board loads 500 players from Sleeper-seeded cache; 3 console issues all pre-existing (ThemeToggle hydration × 2 + user_tags fetch). PASS.
 - **FFT-004** (2026-06-02): Seeded 2026 NFL players via Sleeper API. Created `scripts/seed-players-sleeper.ts` — fetches 12,194 players, filters to 3,064 active QB/RB/WR/TE/DEF (no kickers), deduplicates 16 name collisions → 3,048 unique rows upserted. Supabase total: 3,093. PASS.
 - **FFT-002 + FFT-003** (2026-06-02): Chrome UI smoke tests — all prep screens pass; live draft auction + snake both render with connection pill, manual bar, 300-player pool. 3 bugs fixed (see below). ThemeToggle hydration mismatch and `user_tags` missing are known outstanding issues. Two Supabase migrations need Joe to apply via Dashboard SQL Editor.

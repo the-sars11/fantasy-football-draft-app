@@ -69,13 +69,10 @@ export function AppShell({
 
   return (
     <NavProvider>
-    <div className="flex h-dvh flex-col md:flex-row overflow-hidden ffi-bg-gradient relative">
-      {/* Tactical hologram visual effects */}
-      <div className="light-streak pointer-events-none" />
-      <div className="light-streak-2 pointer-events-none" />
-      <div className="light-streak-3 pointer-events-none" />
-      <div className="flash-effect pointer-events-none" />
-      <div className="flash-effect-2 pointer-events-none" />
+    <div className="flex h-dvh flex-col md:flex-row overflow-hidden bg-[var(--ffi-background)] relative">
+      {/* Stadium Primetime atmospheric background (UX-1.4) */}
+      <div className="stadium-atmos" aria-hidden="true" />
+      <div className="atmos-grain" aria-hidden="true" />
       {/* Desktop sidebar — hidden on mobile */}
       <aside
         className={cn(
@@ -111,7 +108,7 @@ export function AppShell({
                 className={cn(
                   'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200',
                   isActive
-                    ? 'bg-[var(--ffi-surface)] text-[var(--ffi-accent)] ffi-glow-accent'
+                    ? 'bg-[var(--ffi-gold)]/10 text-[var(--ffi-gold-bright)]'
                     : 'text-[var(--ffi-text-secondary)] hover:bg-[var(--ffi-surface)]/50 hover:text-white'
                 )}
               >
@@ -219,7 +216,7 @@ export function AppShell({
               className={cn(
                 'relative flex flex-col items-center justify-center gap-1 flex-1 h-full',
                 isActive
-                  ? 'text-[var(--ffi-accent)]'
+                  ? 'text-[var(--ffi-gold-bright)]'
                   : 'text-[var(--ffi-text-secondary)] active:text-white'
               )}
             >
@@ -228,7 +225,7 @@ export function AppShell({
                 {isActive && (
                   <motion.div
                     layoutId="nav-indicator"
-                    className="absolute inset-0 bg-[var(--ffi-accent)]/10 rounded-lg"
+                    className="absolute inset-0 bg-[var(--ffi-gold)]/12 rounded-lg"
                     transition={{ type: 'spring', stiffness: 500, damping: 35 }}
                   />
                 )}
@@ -240,7 +237,7 @@ export function AppShell({
                 >
                   <Icon className={cn(
                     'h-5 w-5 relative z-10',
-                    isActive && 'drop-shadow-[0_0_8px_rgba(57,255,20,0.6)]'
+                    isActive && 'drop-shadow-[0_0_8px_rgba(253,239,182,0.6)]'
                   )} />
                 </motion.div>
                 {/* Animated dot indicator */}
@@ -251,7 +248,7 @@ export function AppShell({
                       animate={{ scale: 1, opacity: 1 }}
                       exit={{ scale: 0, opacity: 0 }}
                       transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                      className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[var(--ffi-accent)] shadow-[0_0_8px_rgba(57,255,20,0.8)]"
+                      className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[var(--ffi-gold-bright)] shadow-[0_0_8px_rgba(253,239,182,0.85)]"
                     />
                   )}
                 </AnimatePresence>
@@ -264,7 +261,7 @@ export function AppShell({
                 transition={{ type: 'spring', stiffness: 400, damping: 25 }}
                 className={cn(
                   'text-[10px] font-medium',
-                  isActive && 'text-[var(--ffi-accent)]'
+                  isActive && 'text-[var(--ffi-gold-bright)]'
                 )}
               >
                 {item.label}

@@ -2,6 +2,23 @@
 
 ---
 
+## 2026-06-02 — UX-1: Stadium Primetime Foundation (AAA Visual Upgrade)
+
+**Task:** UX-1.1–1.7  |  **Class:** `output` (UI) | **Lenses:** Design, QA
+**Authorization:** Supersedes locked DESIGN_SYSTEM.md v1.2 → v2.0 (Joe approved 2026-06-02).
+
+- **Design system v2.0** "Stadium Primetime" — rewrote `DESIGN_SYSTEM.md`, created `UI_UPGRADE_PLAN.md`, added a v2.0 addendum to `UI_DESIGN_SPEC.md`, added the UX sprint track to `BUILD_PLAN.md`.
+- **Fonts (UX-1.3):** `layout.tsx` loads Space Grotesk + Manrope + JetBrains Mono via `next/font` (distinct vars `--font-space-grotesk/-manrope/-jetbrains/-oswald`); Inter removed; `.font-headline/-body/-label/-display` + `@theme` rewired to resolve to the loaded families. Root cause fixed: v1.x referenced "Space Grotesk"/"Manrope" in CSS but never loaded them, so every `font-headline/body` silently fell back to system. Verified live on :3003.
+- **Tokens (UX-1.2):** Stadium Gold ramp (`--ffi-gold*`, `--color-gold*`), `--value-green`, gold glow effects; blue + surface token names kept stable.
+- **Background (UX-1.4):** `.stadium-atmos` (overhead gold spotlight + cool ambient + turf hint + night-navy) + `.atmos-grain` (SVG fractalNoise top overlay) + `.atmos-clock` on-the-clock tint; `app-shell.tsx` swapped the 5 light-streak/flash divs for the two atmosphere layers.
+- **Glass (UX-1.5):** `.ffi-glass/-heavy/.glass-panel` refined (navy tint + saturate + light-catch hairline); added `.glass-interactive` + `.ffi-scrim`; removed gray `rgba(51,65,85,0.5/0.8)` borders from all three `.ffi-card*` tiers; interactive hover edge lime → gold.
+- **Buttons (UX-1.6):** `.ffi-btn-primary` lime → blue; added `.ffi-btn-hero` (gold) + `.ffi-btn-value` (green); `FFIButton` variants `primary|hero|value|secondary|ghost`; mobile 44px targets, `:active` glows, reduced-motion all updated.
+- **Motion (UX-1.7):** `@keyframes ffi-reveal` + `ffi-gold-flash` + `ffi-stagger-fade`; `.ffi-animate-reveal/-stagger`; reduced-motion list extended.
+- **Nav:** active sidebar + bottom-tab accent shifted lime → gold (spotlight follows the active item).
+- **Verify:** `type-check` clean · `test:run` 27/27 pass · changed files lint clean · `globals.css` brace-balanced (204/204) · fonts confirmed served on :3003. Full `next build` deferred until port 3003 is free (a parallel dev server held `.next`).
+
+---
+
 ## 2026-06-02 — FFT-005: Prep Configure + Player Pool Chrome Test
 
 **Task:** FFT-005  

@@ -1,23 +1,37 @@
 import type { Metadata, Viewport } from 'next'
-import { Inter, JetBrains_Mono, Oswald } from 'next/font/google'
+import { Space_Grotesk, Manrope, JetBrains_Mono, Oswald } from 'next/font/google'
 import { ThemeProvider } from '@/components/theme-provider'
 import './globals.css'
 
-const inter = Inter({
-  variable: '--font-sans',
+// Stadium Primetime v2.0 type system (UX-1.3):
+// Space Grotesk = headlines/labels/numbers, Manrope = body, JetBrains Mono = stats, Oswald = condensed display.
+// Distinct variable names so the .font-* custom classes resolve to the loaded families at runtime.
+const spaceGrotesk = Space_Grotesk({
+  variable: '--font-space-grotesk',
   subsets: ['latin'],
-  weight: ['400', '600', '700', '800'],
+  weight: ['400', '500', '600', '700'],
+  display: 'swap',
+})
+
+const manrope = Manrope({
+  variable: '--font-manrope',
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '800'],
+  display: 'swap',
 })
 
 const jetbrainsMono = JetBrains_Mono({
-  variable: '--font-mono',
+  variable: '--font-jetbrains',
   subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  display: 'swap',
 })
 
 const oswald = Oswald({
-  variable: '--font-display',
+  variable: '--font-oswald',
   subsets: ['latin'],
-  weight: ['700'],
+  weight: ['500', '600', '700'],
+  display: 'swap',
 })
 
 export const metadata: Metadata = {
@@ -37,7 +51,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={`dark ${inter.variable} ${jetbrainsMono.variable} ${oswald.variable} h-full antialiased`} suppressHydrationWarning>
+    <html lang="en" className={`dark ${spaceGrotesk.variable} ${manrope.variable} ${jetbrainsMono.variable} ${oswald.variable} h-full antialiased`} suppressHydrationWarning>
       <body className="min-h-full flex flex-col">
         <ThemeProvider>{children}</ThemeProvider>
       </body>

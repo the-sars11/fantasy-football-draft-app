@@ -7,9 +7,9 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: "Inter", "Inter Fallback", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, monospace;
-  --font-display: "Oswald", "Oswald Fallback", ui-sans-serif, sans-serif;
+  --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
+  --font-display: var(--font-oswald), "Oswald Fallback", ui-sans-serif, sans-serif;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -63,6 +63,13 @@
   --color-ffi-danger: #ef4444;
   --color-ffi-info: #5582e6;
 
+  /* Stadium Primetime v2.0 — Stadium Gold (the "moment": your pick, draft complete, grade hero) */
+  --color-gold: #e0c27a;
+  --color-gold-bright: #fdefb6;
+  --color-gold-deep: #d3c791;
+  --color-gold-ink: #383008;
+  --color-value-green: #2ff801;
+
   /* Tactical Hologram Palette (from UI/draft_board/code.html) */
   --color-surface-dim: #031018;
   --color-surface-bright: #192f3b;
@@ -89,9 +96,9 @@
   --color-on-error-container: #ffa8a3;
 
   /* Font families */
-  --font-headline: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
-  --font-body: "Manrope", ui-sans-serif, system-ui, sans-serif;
-  --font-label: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-headline: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+  --font-label: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
 }
 
 /* ========================================
@@ -154,6 +161,16 @@
   --ffi-glow-primary: 0 0 15px rgba(85, 130, 230, 0.3);
   --ffi-shadow-card: 0 8px 30px rgba(0, 0, 0, 0.6), 0 0 15px rgba(85, 130, 230, 0.1);
   --ffi-shadow-elevated: 0 12px 40px rgba(0, 0, 0, 0.7), 0 0 20px rgba(85, 130, 230, 0.15);
+
+  /* Stadium Primetime v2.0 — Stadium Gold + atmosphere (shared across light/dark) */
+  --ffi-gold: #e0c27a;
+  --ffi-gold-bright: #fdefb6;
+  --ffi-gold-deep: #d3c791;
+  --ffi-gold-ink: #383008;
+  --ffi-gold-glow: rgba(253, 239, 182, 0.30);
+  --value-green: #2ff801;
+  --ffi-glow-gold: 0 0 20px rgba(253, 239, 182, 0.30);
+  --ffi-glow-gold-strong: 0 0 36px rgba(253, 239, 182, 0.45);
 }
 
 /* FFIntelligence Dark Mode (Primary) */
@@ -277,31 +294,56 @@
 
 /* Accent font for headlines */
 .font-display {
-  font-family: var(--font-display);
+  font-family: var(--font-oswald), "Oswald", ui-sans-serif, sans-serif;
 }
 
 /* ========================================
    FFI Glassmorphism & Surface Utilities
    ======================================== */
 
+/* Stadium Primetime v2.0 glass system (UX-1.5) — navy-tinted, light-catch hairline (the spec's
+   allowed ghost border ≤10%), surgical blur. Three tiers: panel / heavy / interactive. */
+
 /* Card with glassmorphism effect */
 .ffi-glass {
-  background: rgba(15, 23, 42, 0.6);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: rgba(10, 27, 37, 0.58);
+  backdrop-filter: blur(12px) saturate(1.1);
+  -webkit-backdrop-filter: blur(12px) saturate(1.1);
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
+/* Heavy glass — nav bars, pinned bar, modals (border left to the element so nav edges stay single) */
 .ffi-glass-heavy {
-  background: rgba(15, 23, 42, 0.8);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: rgba(5, 21, 30, 0.72);
+  backdrop-filter: blur(18px) saturate(1.1);
+  -webkit-backdrop-filter: blur(18px) saturate(1.1);
 }
 
 /* Glass panel (from UI/draft_board/code.html) */
 .glass-panel {
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px) saturate(1.1);
+  -webkit-backdrop-filter: blur(16px) saturate(1.1);
   background: rgba(10, 27, 37, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* Interactive glass — hover lift + gold light-catch edge */
+.glass-interactive {
+  background: rgba(10, 27, 37, 0.58);
+  backdrop-filter: blur(12px) saturate(1.1);
+  -webkit-backdrop-filter: blur(12px) saturate(1.1);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.glass-interactive:hover {
+  transform: translateY(-2px);
+  border-color: rgba(253, 239, 182, 0.35);
+  box-shadow: 0 10px 34px rgba(0, 0, 0, 0.5), 0 0 22px rgba(253, 239, 182, 0.12);
+}
+
+/* Scrim — keeps text legible over the atmospheric background inside glass surfaces */
+.ffi-scrim {
+  background: linear-gradient(180deg, rgba(1, 4, 10, 0) 0%, rgba(1, 4, 10, 0.35) 100%);
 }
 
 /* Flash streak effect */
@@ -390,6 +432,51 @@
   z-index: 1;
 }
 
+/* ========================================
+   Stadium Primetime v2.0 — Atmospheric Background System (UX-1.4)
+   Layer 1: stadium-atmos (overhead gold spotlight + cool ambient + turf hint)
+   Layer 2: atmos-grain (film grain, top layer, NOT behind blur)
+   Both are fixed, full-bleed, behind content (content sits at z-10).
+   ======================================== */
+
+.stadium-atmos {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(60% 45% at 50% -5%, rgba(253, 239, 182, 0.10) 0%, transparent 60%),
+    radial-gradient(45% 40% at 88% 92%, rgba(85, 130, 230, 0.10) 0%, transparent 60%),
+    radial-gradient(50% 45% at 8% 85%, rgba(16, 70, 50, 0.26) 0%, transparent 62%),
+    linear-gradient(180deg, #02060d 0%, #031018 45%, #01040a 100%);
+  transform: translateZ(0);
+}
+
+.atmos-grain {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.04;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Per-screen tint — On the Clock: intensify the overhead gold spotlight + slow pulse (apply on the shell during live draft) */
+.stadium-atmos.atmos-clock {
+  background:
+    radial-gradient(70% 55% at 50% -8%, rgba(253, 239, 182, 0.20) 0%, transparent 64%),
+    radial-gradient(45% 40% at 88% 92%, rgba(85, 130, 230, 0.10) 0%, transparent 60%),
+    radial-gradient(50% 45% at 8% 85%, rgba(16, 70, 50, 0.24) 0%, transparent 62%),
+    linear-gradient(180deg, #02060d 0%, #050b16 45%, #01040a 100%);
+  animation: atmos-clock-pulse 3.2s ease-in-out infinite;
+}
+
+@keyframes atmos-clock-pulse {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.1); }
+}
+
 /* Neon glow shadow */
 .neon-glow {
   box-shadow: 0 0 20px rgba(57, 255, 20, 0.4);
@@ -411,13 +498,13 @@
 
 /* Font families from prototypes */
 .font-headline {
-  font-family: var(--font-headline);
+  font-family: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
 }
 .font-body {
-  font-family: var(--font-body);
+  font-family: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
 }
 .font-label {
-  font-family: var(--font-label);
+  font-family: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
 }
 
 /* Ghost border (subtle, accessibility-friendly) */
@@ -493,20 +580,55 @@
    FFI Button Variants
    ======================================== */
 
-/* Lime pill primary button */
+/* Blue pill primary button — structure / default action */
 .ffi-btn-primary {
   @apply inline-flex items-center justify-center gap-2 px-6 py-2.5
-         rounded-full font-semibold text-black
+         rounded-full font-semibold text-white
          transition-all duration-200;
-  background: linear-gradient(135deg, #39ff14 0%, #2de210 100%);
+  background: linear-gradient(135deg, #5582e6 0%, #3f63c4 100%);
 }
 
 .ffi-btn-primary:hover {
-  box-shadow: 0 0 25px rgba(57, 255, 20, 0.5);
+  box-shadow: 0 0 24px rgba(85, 130, 230, 0.45);
   transform: translateY(-1px);
 }
 
 .ffi-btn-primary:active {
+  transform: translateY(0);
+}
+
+/* Gold hero button — the "moment": Record Pick, Start Draft, Confirm */
+.ffi-btn-hero {
+  @apply inline-flex items-center justify-center gap-2 px-6 py-2.5
+         rounded-full font-bold transition-all duration-200;
+  color: var(--ffi-gold-ink);
+  background: linear-gradient(135deg, #fdefb6 0%, #e0c27a 50%, #d3c791 100%);
+  box-shadow: 0 4px 15px rgba(224, 194, 122, 0.30);
+}
+
+.ffi-btn-hero:hover {
+  box-shadow: 0 6px 26px rgba(224, 194, 122, 0.45);
+  transform: translateY(-2px);
+}
+
+.ffi-btn-hero:active {
+  transform: translateY(0);
+}
+
+/* Green value button — value / steal / positive confirmation */
+.ffi-btn-value {
+  @apply inline-flex items-center justify-center gap-2 px-6 py-2.5
+         rounded-full font-bold text-black
+         transition-all duration-200;
+  background: linear-gradient(135deg, #39ff14 0%, #2de210 100%);
+}
+
+.ffi-btn-value:hover {
+  box-shadow: 0 0 24px rgba(57, 255, 20, 0.5);
+  transform: translateY(-1px);
+}
+
+.ffi-btn-value:active {
   transform: translateY(0);
 }
 
@@ -542,41 +664,41 @@
    FFI Card Variants
    ======================================== */
 
-/* Standard card - glass with visible border */
+/* Standard card — glass with light-catch hairline (no more gray 1px lines) */
 .ffi-card {
   @apply rounded-2xl p-4;
-  background: rgba(15, 23, 42, 0.6);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(51, 65, 85, 0.5);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4), 0 0 15px rgba(85, 130, 230, 0.08);
+  background: rgba(10, 27, 37, 0.58);
+  backdrop-filter: blur(12px) saturate(1.1);
+  -webkit-backdrop-filter: blur(12px) saturate(1.1);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.36), 0 0 15px rgba(85, 130, 230, 0.06);
 }
 
 /* Elevated card with stronger shadow */
 .ffi-card-elevated {
   @apply rounded-2xl p-5;
-  background: linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(15, 23, 42, 0.6) 100%);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(51, 65, 85, 0.8);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6), 0 0 15px rgba(85, 130, 230, 0.1);
+  background: linear-gradient(135deg, rgba(15, 34, 44, 0.92) 0%, rgba(10, 27, 37, 0.7) 100%);
+  backdrop-filter: blur(16px) saturate(1.1);
+  -webkit-backdrop-filter: blur(16px) saturate(1.1);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5), 0 0 20px rgba(85, 130, 230, 0.08);
 }
 
-/* Interactive card - bold hover state */
+/* Interactive card — gold light-catch edge on hover */
 .ffi-card-interactive {
   @apply rounded-2xl p-4 cursor-pointer transition-all duration-200;
-  background: rgba(15, 23, 42, 0.6);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(51, 65, 85, 0.5);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4), 0 0 15px rgba(85, 130, 230, 0.08);
+  background: rgba(10, 27, 37, 0.58);
+  backdrop-filter: blur(12px) saturate(1.1);
+  -webkit-backdrop-filter: blur(12px) saturate(1.1);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.36), 0 0 15px rgba(85, 130, 230, 0.06);
 }
 
 .ffi-card-interactive:hover {
   transform: translateY(-2px);
-  background: rgba(30, 41, 59, 0.7);
-  border-color: rgba(57, 255, 20, 0.5);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6), 0 0 20px rgba(57, 255, 20, 0.15);
+  background: rgba(15, 34, 44, 0.66);
+  border-color: rgba(253, 239, 182, 0.30);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5), 0 0 22px rgba(253, 239, 182, 0.12);
 }
 
 /* ========================================
@@ -853,6 +975,33 @@
   }
 }
 
+/* Stadium Primetime v2.0 motion (UX-1.7) — pick/moment reveal, gold flash, stagger */
+@keyframes ffi-reveal {
+  0% { opacity: 0; transform: scale(0.85); }
+  60% { opacity: 1; transform: scale(1.05); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes ffi-gold-flash {
+  0% { box-shadow: 0 0 0 rgba(253, 239, 182, 0); }
+  40% { box-shadow: 0 0 50px rgba(253, 239, 182, 0.55), 0 0 100px rgba(253, 239, 182, 0.22); }
+  100% { box-shadow: 0 0 16px rgba(253, 239, 182, 0.14); }
+}
+
+@keyframes ffi-stagger-fade {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.ffi-animate-reveal {
+  animation: ffi-reveal 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both,
+             ffi-gold-flash 0.6s ease-out both;
+}
+
+.ffi-animate-stagger {
+  animation: ffi-stagger-fade 0.4s ease-out both;
+}
+
 .ffi-animate-glow {
   animation: ffi-glow-pulse 2s ease-in-out infinite;
 }
@@ -902,11 +1051,16 @@
   .ffi-animate-grade,
   .ffi-animate-attention,
   .ffi-animate-trash-talk,
+  .ffi-animate-reveal,
+  .ffi-animate-stagger,
+  .stadium-atmos.atmos-clock,
   .animate-shake {
     animation: none;
   }
 
   .ffi-btn-primary:hover,
+  .ffi-btn-hero:hover,
+  .ffi-btn-value:hover,
   .ffi-card-interactive:hover {
     transform: none;
   }
@@ -931,8 +1085,10 @@
 
 /* Mobile touch target minimums (44x44px per Apple HIG) */
 @media (max-width: 768px) {
-  /* Primary buttons: full 44px height */
-  .ffi-btn-primary {
+  /* Primary / hero / value buttons: full 44px height */
+  .ffi-btn-primary,
+  .ffi-btn-hero,
+  .ffi-btn-value {
     min-height: 44px;
     padding-top: 0.75rem;
     padding-bottom: 0.75rem;
@@ -1111,7 +1267,9 @@
     transform: none; /* Disable hover transforms on touch */
   }
 
-  .ffi-btn-primary:hover {
+  .ffi-btn-primary:hover,
+  .ffi-btn-hero:hover,
+  .ffi-btn-value:hover {
     transform: none;
   }
 
@@ -1122,6 +1280,16 @@
   }
 
   .ffi-btn-primary:active {
+    transform: scale(0.97);
+    box-shadow: 0 0 15px rgba(85, 130, 230, 0.4);
+  }
+
+  .ffi-btn-hero:active {
+    transform: scale(0.97);
+    box-shadow: 0 0 15px rgba(224, 194, 122, 0.45);
+  }
+
+  .ffi-btn-value:active {
     transform: scale(0.97);
     box-shadow: 0 0 15px rgba(57, 255, 20, 0.4);
   }

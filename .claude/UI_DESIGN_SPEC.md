@@ -6,6 +6,19 @@
 
 ---
 
+> ## ⚡ v2.0 "Stadium Primetime" (2026-06-02) — supersedes the Tactical Hologram direction below
+> The aesthetic evolved to **Stadium Primetime** (NFL-primetime broadcast feel). Canonical tokens/classes now live in **`DESIGN_SYSTEM.md` v2.0**; sprint track in **`UI_UPGRADE_PLAN.md`**. These override Sections 1–5 and 9–10 below:
+> - **Backgrounds:** layered atmospheric system (`stadium-atmos` + `atmos-grain` + `atmos-clock` tint), not a flat void.
+> - **Color meaning:** Blue = structure/action · **Gold (`--ffi-gold*`) = the moment** (your pick, draft complete, grade hero, on-the-clock, active nav) · **Green = value/steal/success only** (no longer a generic CTA).
+> - **Type:** Space Grotesk / Manrope / JetBrains Mono now actually load via `next/font` (Inter removed).
+> - **Glass:** light-catch hairline (white ≤10%) replaces gray 1px borders on all cards.
+> - **Buttons:** `.ffi-btn-primary` (blue), `.ffi-btn-hero` (gold), `.ffi-btn-value` (green).
+> - **Motion:** `.ffi-animate-reveal` (scale + gold flash), `.ffi-animate-stagger`.
+>
+> Sections 6–8 and 11–17 remain current. Where this spec and DESIGN_SYSTEM.md v2.0 differ, v2.0 wins.
+
+---
+
 ## 1. Design Vision & Aesthetic Direction
 
 ### Visual Aesthetic

@@ -9,14 +9,15 @@
     { "name": "UI redesign + player intel (Phase 6-7.5)", "done": true },
     { "name": "In-season AI companion (Phase 8)", "done": true },
     { "name": "P0 — Personal season hardening (Aug 2026 drafts)", "done": false },
+    { "name": "UX — AAA Visual Upgrade (Stadium Primetime)", "done": false },
     { "name": "P1 — Auctioneer integration", "done": false },
     { "name": "P2 — Pre-season validation", "done": false },
     { "name": "P3+ — Commercialization (CONDITIONAL)", "done": false }
   ],
   "nextItems": [
-    "FF-283: Dynamic max-bid recompute on every pick from any source",
-    "FF-269: Arm's-length physical test — fix anything requiring precision tapping",
-    "FF-011: Yahoo Fantasy API adapter (OAuth, deferred)"
+    "UX-1.1: Stadium Primetime v2.0 design system + globals tokens",
+    "UX-1.4: Atmospheric background system (app-shell)",
+    "FF-269: Arm's-length physical test — fix anything requiring precision tapping"
   ]
 }
 -->
@@ -120,6 +121,55 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 ### Sub-tier 8: Trash Talk Live Wiring
 
 - [x] FF-305: Wire `analyzePickForTrashTalk()` into the live draft client — `LiveTrashTalkAlert` and `TrashTalkFeed` exist in `src/components/draft/trash-talk.tsx` and `analyzePickForTrashTalk()` exists in `src/lib/draft/trash-talk.ts`, but none are called from any live draft page (only post-draft `RoastReportCard` is wired); add a `trashTalkAlerts` useState array in `src/app/(app)/draft/live/client.tsx`, call `analyzePickForTrashTalk()` after every confirmed pick (Sheets poll, manual entry, BroadcastChannel), push non-null results to state, render `<TrashTalkFeed>` with dismiss/save handlers in the live draft UI; rule-based only — LLM generation comes in FF-310
+
+---
+
+## UX — AAA Visual Upgrade ("Stadium Primetime")
+> **Goal:** Take the app from ~7.5/10 to AAA. Full plan: `.claude/UI_UPGRADE_PLAN.md`.
+> **Direction:** Keep Gridiron Blue structure; add NCAA arena depth (CSS atmospheric backgrounds + spotlight glows + grain); metallic GOLD = the moment (your pick, draft complete, grade hero); electric GREEN demoted to value/steal/success only.
+> **Authorization:** Supersedes locked `DESIGN_SYSTEM.md` v1.2 → v2.0 (Joe approved 2026-06-02).
+> **Rule:** Visual-only track. No engine/data/logic changes — flag + re-propose separately if a screen needs a logic fix.
+
+### UX-1: Stadium Primetime Foundation (global) [do first] — ✅ DONE 2026-06-02
+> Goal: entire app looks dramatically better the moment this ships, before any per-screen work.
+- [x] UX-1.1: `DESIGN_SYSTEM.md` v2.0 + archived v1.2; saved `.claude/UI_UPGRADE_PLAN.md`; added `UI_DESIGN_SPEC.md` v2.0 addendum
+- [x] UX-1.2: `globals.css` color tokens — gold ramp, `--value-green`, gold glow effects; blue + surface token names kept stable
+- [x] UX-1.3: Loaded Space Grotesk / Manrope / JetBrains Mono via `next/font`; rewired `.font-*` + `@theme`; dropped Inter (verified live on :3003)
+- [x] UX-1.4: Atmospheric background system in `app-shell.tsx` (`stadium-atmos` + `atmos-grain` + `atmos-clock` tint)
+- [x] UX-1.5: Glass system → 3 tiers + light-catch hairline; removed gray borders from all `.ffi-card*`; `.glass-interactive` + `.ffi-scrim`
+- [x] UX-1.6: Button system — `.ffi-btn-primary` (blue), `.ffi-btn-hero` (gold), `.ffi-btn-value` (green); `FFIButton` variants
+- [x] UX-1.7: Motion — `.ffi-animate-reveal` (scale + gold flash), `.ffi-animate-stagger`; reduced-motion guards
+- [x] UX-1.x: Active nav accent lime → gold (sidebar + bottom tabs)
+
+### UX-2: Live Draft Room (hero screen) [recommend second]
+> Goal: the screen used during a real draft is unmistakably AAA.
+- [ ] UX-2.1: On-the-clock spotlight state (gold pulse) + AUCTION/SNAKE mode badge
+- [ ] UX-2.2: Pinned quick-entry bar restyle (gold Record button, glass-heavy)
+- [ ] UX-2.3: Your-pick gold rail + gold name; card-reveal + gold flash on confirmed picks
+- [ ] UX-2.4: Connection pill + trash-talk feed restyled to v2.0
+
+### UX-3: Draft Board / Player Pool (data-dense)
+> Goal: research-backed scannability for the big player list.
+- [ ] UX-3.1: Redesign rank (bold Space Grotesk, gold top-tier / blue rest; kill italic-30%)
+- [ ] UX-3.2: Tabular JetBrains Mono numbers right-aligned; two-color hierarchy; spacing not borders
+- [ ] UX-3.3: Position badges remapped to palette; sticky filter header; row-density modes; skeleton loaders
+
+### UX-4: Prep Hub + Configure / Strategies
+> Goal: calm, premium entry surfaces and forms.
+- [ ] UX-4.1: Hub cards glass-interactive + gold-on-hover; menu/layout cleanup
+- [ ] UX-4.2: Glow-focus form inputs (NCAA `.form-input` pattern) for league config + strategy editor
+
+### UX-5: Post-Draft Review + Celebration
+> Goal: a shareable, broadcast-grade finish.
+- [ ] UX-5.1: Grade hero in metallic gold; timeline pick cards in v2.0
+- [ ] UX-5.2: Confetti on reveal; card-as-hero shareable
+
+### UX-6: Cross-cutting polish + QA gate
+> Goal: AAA everywhere, verified.
+- [ ] UX-6.1: Empty states + skeletons across remaining screens
+- [ ] UX-6.2: WCAG ≥4.5:1 contrast pass; reduced-motion audit
+- [ ] UX-6.3: Background-layer performance (GPU promote); arm's-length mobile re-test (ties FF-269/FFT-008)
+- [ ] UX-6.4: Before/after screenshot set
 
 ---
 
