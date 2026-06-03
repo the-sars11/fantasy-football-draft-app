@@ -2,6 +2,21 @@
 
 ---
 
+## 2026-06-02 — FFT-004: Sleeper Player Seed
+
+**Task:** FFT-004  
+**Class:** `pipeline` | **Lenses:** Architecture, QA, Security
+
+- Created `scripts/seed-players-sleeper.ts` — one-shot seed script for `players_cache`
+- Fetches `GET https://api.sleeper.app/v1/players/nfl` (free, no key)
+- Filters 12,194 Sleeper players → 3,064 active QB/RB/WR/TE/DEF (K excluded per Nasties rule)
+- Deduplicates 16 name collisions before upsert (same `name` conflict key as table constraint)
+- Upserts 3,048 unique rows via service role key in batches of 100
+- Supabase `players_cache` total: 3,093 (includes prior seed rows)
+- **Result:** FFT-004 PASS
+
+---
+
 ## 2026-06-02 — FFT-002 + FFT-003: Chrome UI Smoke Tests + Bug Fixes
 
 **Tasks:** FFT-002 (prep mode UI), FFT-003 (live draft UI) + 3 bug fixes found during testing  

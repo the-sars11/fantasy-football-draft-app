@@ -2,10 +2,11 @@
 
 ## Current Session
 - **Date:** 2026-06-02
-- **Focus:** P2 Testing Sprint T1 — FFT-002 + FFT-003 Chrome UI smoke tests
-- **Status:** FFT-002 PASS, FFT-003 PARTIAL PASS (3/4 criteria met). 3 bugs fixed. 2 Supabase migrations still need to be applied manually (Joe action). Next: FFT-004 (seed 2026 players via Sleeper API).
+- **Focus:** P2 Testing Sprint T2 — FFT-004 player seed
+- **Status:** FFT-004 PASS. 3,048 active players seeded from Sleeper API (3,093 total in players_cache). Next: FFT-005 (verify prep configure with seeded data).
 
 ## Last Completed (most recent first)
+- **FFT-004** (2026-06-02): Seeded 2026 NFL players via Sleeper API. Created `scripts/seed-players-sleeper.ts` — fetches 12,194 players, filters to 3,064 active QB/RB/WR/TE/DEF (no kickers), deduplicates 16 name collisions → 3,048 unique rows upserted. Supabase total: 3,093. PASS.
 - **FFT-002 + FFT-003** (2026-06-02): Chrome UI smoke tests — all prep screens pass; live draft auction + snake both render with connection pill, manual bar, 300-player pool. 3 bugs fixed (see below). ThemeToggle hydration mismatch and `user_tags` missing are known outstanding issues. Two Supabase migrations need Joe to apply via Dashboard SQL Editor.
 - **Bug fixes** (2026-06-02): `createLeague` DEV_MODE now saves to Supabase via service role key; `ffi-player-card.tsx` `$undefined`/`$NaN-$NaN`/`Rd NaN` fixed with null-guards; `manual-pick-entry.tsx` `$undefined` in search dropdown fixed.
 - **FF-DS-001–005** (2026-06-02): UI Design Spec formalized — `.claude/UI_DESIGN_SPEC.md` created, all 17 sections filled from DESIGN_SYSTEM.md.
