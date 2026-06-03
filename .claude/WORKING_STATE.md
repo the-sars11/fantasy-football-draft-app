@@ -1,11 +1,12 @@
 # Working State — Fantasy Football Draft Advisor
 
 ## Current Session
-- **Date:** 2026-06-02
-- **Focus:** UX — AAA Visual Upgrade (Stadium Primetime). UX-1 global foundation sprint.
-- **Status:** UX-1 DONE (tokens, fonts, atmospheric background, glass, buttons, motion, gold nav). Next: UX-2 (Live Draft Room). P2 T3 (FFT-006/007/008) still pending cost approval.
+- **Date:** 2026-06-03
+- **Focus:** UX — AAA Visual Upgrade (Stadium Primetime). UX-2 Live Draft Room sprint.
+- **Status:** UX-2 DONE (on-the-clock spotlight, gold header, mode badge, gold Record button, your-pick gold rail, v2.0 connection pill, trash-talk value-green fix). Next: UX-3 (Draft Board / Player Pool). P2 T3 (FFT-006/007/008) still pending cost approval.
 
 ## Last Completed (most recent first)
+- **UX-2.1–2.4** (2026-06-03): Live Draft Room v2.0. Gold Radio icon + AUCTION/SNAKE mode badge in header. `body.draft-active` class triggers `atmos-clock` gold spotlight pulse via CSS. `.ffi-pick-flash` CSS utility for gold-glow on newest pick (box-shadow only, no conflict with Framer Motion). PickFeed: your picks = gold left rail + gold-bright player name + gold price. Record button in pinned bar: lime → metallic gold gradient (`.ffi-btn-hero` values). ConnectionStatusPill: value-green LIVE state + glass blur on pill + `ffi-glass` error bar. TrashTalk steal/budget_dominance/keeper_steal: `--ffi-success → --value-green`. Bookmark icon gold. MySquadPanel budget: blue primary. type-check clean, 27/27, lint 0 errors.
 - **UX-1.1–1.7** (2026-06-02): Stadium Primetime foundation. Superseded DESIGN_SYSTEM.md → v2.0; created UI_UPGRADE_PLAN.md + UI_DESIGN_SPEC v2.0 addendum; added UX track to BUILD_PLAN. `layout.tsx` loads Space Grotesk/Manrope/JetBrains via next/font (Inter dropped; fonts verified live on :3003 — fixes the long-standing silent system-font fallback). `globals.css`: gold ramp + value-green tokens, `.stadium-atmos`/`.atmos-grain`/`.atmos-clock` background, 3-tier light-catch glass (all gray card borders removed), `.ffi-btn-primary`(blue)/`.ffi-btn-hero`(gold)/`.ffi-btn-value`(green), `.ffi-animate-reveal`(+gold flash)/`.ffi-animate-stagger`. `app-shell.tsx`: atmosphere layers replace light-streak/flash divs; active nav lime→gold. `ffi-primitives.tsx`: FFIButton hero/value variants. type-check clean, 27/27 tests, changed files lint clean. Full `next build` deferred (port 3003 held by parallel dev server).
 - **FFT-005** (2026-06-02): Prep configure + player pool Chrome test — `/prep/configure` renders ESPN/Auction/12-team/$200/Full PPR; Draft Board loads 500 players from Sleeper-seeded cache; 3 console issues all pre-existing (ThemeToggle hydration × 2 + user_tags fetch). PASS.
 - **FFT-004** (2026-06-02): Seeded 2026 NFL players via Sleeper API. Created `scripts/seed-players-sleeper.ts` — fetches 12,194 players, filters to 3,064 active QB/RB/WR/TE/DEF (no kickers), deduplicates 16 name collisions → 3,048 unique rows upserted. Supabase total: 3,093. PASS.

@@ -2,6 +2,20 @@
 
 ---
 
+## 2026-06-03 — UX-2: Stadium Primetime — Live Draft Room (AAA Visual Upgrade)
+
+**Task:** UX-2.1–2.4  |  **Class:** `output` (UI) | **Lenses:** Design, QA
+**Commit:** `08a7d37`
+
+- **UX-2.1 On-the-clock spotlight:** Radio icon in live draft header: `danger-red → gold`. Added AUCTION/SNAKE pill badge in gold beside "Live Draft" title. `body.draft-active` CSS class set via `useEffect` while draft is active → intensifies `stadium-atmos` overhead gold spotlight + enables `atmos-clock-pulse` 3.2s breath animation on the background.
+- **UX-2.2 Pinned bar Record button:** Changed from lime (`bg-[#2ff801]`) to metallic gold gradient (`ffi-btn-hero` values via inline style for specificity) — now reads as a commit/moment action, not a generic CTA. Disabled state unchanged (muted glass).
+- **UX-2.3 Your-pick gold rail:** `PickFeed` now accepts `myManager` prop; your picks: gold left border + `bg-gold/5` tint + `text-gold-bright` player name + gold price. Latest pick (idx 0) gets `.ffi-pick-flash` (box-shadow gold glow keyframe, no scale conflict with Framer Motion). Other newest pick: blue tint. Live feed pulse dot: `danger-red → value-green` (it's a success/live signal).
+- **UX-2.4 v2.0 restyling:** `ConnectionStatusPill` LIVE state: `#22c55e → #2ff801` (value-green token); all states get `backdropFilter: blur(8px)` glass; error bar: `ffi-glass` class + danger border tint. `TrashTalkFeed` steal/budget_dominance/keeper_steal alert colors: `--ffi-success → --value-green`. SavedTrashTalk bookmark icon: lime accent → gold. AwardBadge success: `--ffi-success → --value-green`. MySquadPanel budget: lime accent → blue primary (budget is structural data, not a moment).
+- **CSS additions:** `.ffi-pick-flash` (box-shadow gold flash only, no scale); `body.draft-active .stadium-atmos` override; both added to reduced-motion guard.
+- **Verify:** type-check clean · 27/27 tests pass · 0 lint errors in changed files · CSS rules confirmed live in browser · gold/value-green tokens confirmed in computed styles.
+
+---
+
 ## 2026-06-02 — UX-1: Stadium Primetime Foundation (AAA Visual Upgrade)
 
 **Task:** UX-1.1–1.7  |  **Class:** `output` (UI) | **Lenses:** Design, QA

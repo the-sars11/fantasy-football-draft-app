@@ -33,11 +33,11 @@ The app is functionally hardened (P0/P1 ~complete) but the visual layer read ~7.
 - [x] UX-1.7 Motion: `.ffi-animate-reveal` (scale + gold flash), `.ffi-animate-stagger`; reduced-motion guards
 - Also: active nav accent shifted lime → gold (the spotlight follows where you are).
 
-### UX-2 — Live Draft Room (hero screen) [recommend next]
-- [ ] UX-2.1 On-the-clock `atmos-clock` spotlight + AUCTION/SNAKE mode badge
-- [ ] UX-2.2 Pinned quick-entry bar → gold Record button, glass-heavy
-- [ ] UX-2.3 Your-pick gold rail + gold name; `.ffi-animate-reveal` on confirmed picks
-- [ ] UX-2.4 Connection pill + trash-talk feed restyled to v2.0
+### UX-2 — Live Draft Room (hero screen) — ✅ DONE 2026-06-03
+- [x] UX-2.1 On-the-clock `atmos-clock` spotlight + AUCTION/SNAKE mode badge
+- [x] UX-2.2 Pinned quick-entry bar → gold Record button, glass-heavy
+- [x] UX-2.3 Your-pick gold rail + gold name; `.ffi-pick-flash` gold glow on newest pick
+- [x] UX-2.4 Connection pill + trash-talk feed restyled to v2.0
 
 ### UX-3 — Draft Board / Player Pool (data-dense)
 - [ ] UX-3.1 Rank → bold Space Grotesk (gold top-tier / blue rest); kill italic-30%
