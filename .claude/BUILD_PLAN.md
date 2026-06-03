@@ -126,6 +126,7 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 
 ## UX — AAA Visual Upgrade ("Stadium Primetime")
 > **Goal:** Take the app from ~7.5/10 to AAA. Full plan: `.claude/UI_UPGRADE_PLAN.md`.
+> **Per-session prompt:** `.claude/UX_SESSION_PROMPT.md` — paste into a fresh session to do the next sprint; loop until every UX item is `[x]`. (Opus for UX-2/UX-5, Sonnet for UX-3/UX-4/UX-6.)
 > **Direction:** Keep Gridiron Blue structure; add NCAA arena depth (CSS atmospheric backgrounds + spotlight glows + grain); metallic GOLD = the moment (your pick, draft complete, grade hero); electric GREEN demoted to value/steal/success only.
 > **Authorization:** Supersedes locked `DESIGN_SYSTEM.md` v1.2 → v2.0 (Joe approved 2026-06-02).
 > **Rule:** Visual-only track. No engine/data/logic changes — flag + re-propose separately if a screen needs a logic fix.
