@@ -2,10 +2,11 @@
 
 ## Current Session
 - **Date:** 2026-06-02
-- **Focus:** P2 Testing Sprint T2 — FFT-004 player seed
-- **Status:** FFT-004 PASS. 3,048 active players seeded from Sleeper API (3,093 total in players_cache). Next: FFT-005 (verify prep configure with seeded data).
+- **Focus:** P2 Testing Sprint T2 — FFT-004 + FFT-005 complete
+- **Status:** T2 DONE. Both items PASS. Next: T3 (FFT-006/007/008 — requires cost approval before starting).
 
 ## Last Completed (most recent first)
+- **FFT-005** (2026-06-02): Prep configure + player pool Chrome test — `/prep/configure` renders ESPN/Auction/12-team/$200/Full PPR; Draft Board loads 500 players from Sleeper-seeded cache; 3 console issues all pre-existing (ThemeToggle hydration × 2 + user_tags fetch). PASS.
 - **FFT-004** (2026-06-02): Seeded 2026 NFL players via Sleeper API. Created `scripts/seed-players-sleeper.ts` — fetches 12,194 players, filters to 3,064 active QB/RB/WR/TE/DEF (no kickers), deduplicates 16 name collisions → 3,048 unique rows upserted. Supabase total: 3,093. PASS.
 - **FFT-002 + FFT-003** (2026-06-02): Chrome UI smoke tests — all prep screens pass; live draft auction + snake both render with connection pill, manual bar, 300-player pool. 3 bugs fixed (see below). ThemeToggle hydration mismatch and `user_tags` missing are known outstanding issues. Two Supabase migrations need Joe to apply via Dashboard SQL Editor.
 - **Bug fixes** (2026-06-02): `createLeague` DEV_MODE now saves to Supabase via service role key; `ffi-player-card.tsx` `$undefined`/`$NaN-$NaN`/`Rd NaN` fixed with null-guards; `manual-pick-entry.tsx` `$undefined` in search dropdown fixed.

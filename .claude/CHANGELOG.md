@@ -2,6 +2,19 @@
 
 ---
 
+## 2026-06-02 — FFT-005: Prep Configure + Player Pool Chrome Test
+
+**Task:** FFT-005  
+**Class:** `output` | **Lenses:** QA, Delivery
+
+- Navigated to `/prep/configure` via Chrome MCP: ESPN/Auction/12-team/$200/Full PPR all pre-filled correctly
+- Draft Board at `/prep/board`: 500 players load from Sleeper-seeded cache (real NFL names confirmed)
+- 3 console issues reviewed — all pre-existing: ThemeToggle script-tag warning, ThemeToggle hydration mismatch, `[useUserTags] fetch failed` (awaiting Supabase migration `20260323000002`)
+- No new errors introduced by the seed
+- **Result:** FFT-005 PASS — Testing Sprint T2 complete
+
+---
+
 ## 2026-06-02 — FFT-004: Sleeper Player Seed
 
 **Task:** FFT-004  

@@ -192,7 +192,7 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 | ID | Description | Status |
 |----|-------------|--------|
 | FFT-004 | Seed 2026 players via Sleeper API — write `scripts/seed-players-sleeper.ts`. Call `GET https://api.sleeper.app/v1/players/nfl` (free, no key). Filter: `active: true`, skip K position (Nasties rule). Normalize to `players_cache` schema. Run once, verify 300+ players in Supabase. Zero Claude API calls. | [x] PASS: 3,048 players upserted (3,093 total in cache). 16 name-dupes removed before upsert. |
-| FFT-005 | Verify prep configure flow with seeded data — open `/prep/configure`, set up Joe's ESPN auction league (12 teams, $200 budget, PPR). Confirm player pool loads from cache. Do NOT run research pipeline (costs money — separate approval required). | [ ] |
+| FFT-005 | Verify prep configure flow with seeded data — open `/prep/configure`, set up Joe's ESPN auction league (12 teams, $200 budget, PPR). Confirm player pool loads from cache. Do NOT run research pipeline (costs money — separate approval required). | [x] PASS: configure renders ESPN/Auction/12-team/$200/Full PPR correctly; Draft Board loads 500 players from Sleeper cache; 3 issues all pre-existing (ThemeToggle hydration × 2 + user_tags fetch — awaiting Joe's Supabase migration). |
 
 ---
 
