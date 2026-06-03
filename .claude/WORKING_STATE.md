@@ -157,7 +157,6 @@
 | Blocker | Blocking | Owner | Since |
 |---------|----------|-------|-------|
 | `ANTHROPIC_API_KEY` missing from `.env.local` | All AI calls (research pipeline, recommendations, trash talk) | Joe — add key to `.env.local` | 2026-06-02 |
-| Supabase migrations not applied: `20260321000001_add_keepers_to_draft_sessions.sql` + `20260323000002_user_tags_table.sql` | `keepers` column blocks `/api/draft/sessions` POST; `user_tags` missing causes console errors on live draft | Joe — open Supabase Dashboard → SQL Editor, run each file in `supabase/migrations/` in order | 2026-06-02 |
 
 ### Google Sheets Setup (Exact Format)
 Document exact format when confirmed:
