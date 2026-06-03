@@ -25,6 +25,7 @@ interface DraftBoardTableProps {
   onToggleTarget?: (playerId: string) => Promise<void>
   onToggleAvoid?: (playerId: string) => Promise<void>
   isTagLoading?: boolean
+  compact?: boolean
 }
 
 function SortButton({
@@ -97,9 +98,10 @@ interface CompactPlayerCardProps {
   onToggleTarget?: (playerId: string) => Promise<void>
   onToggleAvoid?: (playerId: string) => Promise<void>
   isTagLoading?: boolean
+  compact?: boolean
 }
 
-function CompactPlayerCard({ sp, rank, format, isExpanded, onToggle, onToggleTarget, onToggleAvoid, isTagLoading }: CompactPlayerCardProps) {
+function CompactPlayerCard({ sp, rank, format, isExpanded, onToggle, onToggleTarget, onToggleAvoid, isTagLoading, compact }: CompactPlayerCardProps) {
   const p = sp.player
   const isAuction = format === 'auction'
   const value = isAuction
@@ -120,16 +122,18 @@ function CompactPlayerCard({ sp, rank, format, isExpanded, onToggle, onToggleTar
         variant={isExpanded ? 'elevated' : 'interactive'}
         className={cn(
           'cursor-pointer',
+          compact && '!p-2 !rounded-xl',
           sp.targetStatus === 'target' && 'border-l-2 border-l-[var(--ffi-success)]'
         )}
         onClick={onToggle}
       >
         {/* Main row */}
-        <div className="flex items-center gap-3">
-          {/* Rank */}
+        <div className={cn('flex items-center', compact ? 'gap-2' : 'gap-3')}>
+          {/* Rank — gold top-24 (elite tier), blue rest; no lime */}
           <span className={cn(
-            'ffi-display-md font-bold w-8 shrink-0 text-center',
-            sp.targetStatus === 'target' ? 'text-[var(--ffi-accent)]' : 'text-[var(--ffi-primary)]'
+            'font-headline font-bold shrink-0 text-center',
+            compact ? 'text-xl w-7' : 'text-2xl w-8',
+            rank <= 24 ? 'text-[var(--ffi-gold)]' : 'text-[var(--ffi-primary)]'
           )}>
             {String(rank).padStart(2, '0')}
           </span>
@@ -169,11 +173,11 @@ function CompactPlayerCard({ sp, rank, format, isExpanded, onToggle, onToggleTar
 
           {/* Value + Score */}
           <div className="text-right shrink-0">
-            <div className="ffi-title-lg text-[var(--ffi-accent)] font-bold">
+            <div className={cn('font-mono tabular-nums font-bold text-[var(--ffi-gold)]', compact ? 'text-base' : 'text-lg')}>
               {isAuction ? `$${value}` : `Rd ${value}`}
             </div>
-            <div className={cn('ffi-label', scoreColor(sp.strategyScore))}>
-              {sp.strategyScore} PTS
+            <div className={cn('font-mono text-[10px] font-bold tabular-nums', scoreColor(sp.strategyScore))}>
+              {sp.strategyScore}pts
             </div>
           </div>
 
@@ -202,7 +206,7 @@ function CompactPlayerCard({ sp, rank, format, isExpanded, onToggle, onToggleTar
 
         {/* Expanded tactical insight */}
         {isExpanded && (
-          <div className="mt-4 pt-4 border-t border-[var(--ffi-border)]/20">
+          <div className="mt-5">
             <FFITacticalInsight
               insight={generateInsight(sp, format)}
               confidence={Math.min(100, sp.strategyScore + 20)}
@@ -211,7 +215,7 @@ function CompactPlayerCard({ sp, rank, format, isExpanded, onToggle, onToggleTar
 
             {/* FF-246: Tag toggle controls */}
             {(onToggleTarget || onToggleAvoid) && (
-              <div className="mt-4 pt-4 border-t border-[var(--ffi-border)]/10">
+              <div className="mt-5">
                 <div className="ffi-caption text-[var(--ffi-text-muted)] mb-2">YOUR TAGS</div>
                 <div className="flex flex-wrap gap-2">
                   {onToggleTarget && (
@@ -266,21 +270,21 @@ function CompactPlayerCard({ sp, rank, format, isExpanded, onToggle, onToggleTar
               </div>
             )}
 
-            {/* Additional stats when expanded */}
-            <div className="grid grid-cols-3 gap-4 mt-4 pt-4 border-t border-[var(--ffi-border)]/10">
+            {/* Additional stats when expanded — tabular mono numbers, spacing not borders */}
+            <div className="grid grid-cols-3 gap-4 mt-5">
               <div>
                 <div className="ffi-caption text-[var(--ffi-text-muted)]">RANK</div>
-                <div className="ffi-title-md text-white">{p.consensusRank}</div>
+                <div className="font-mono font-bold tabular-nums text-[var(--color-on-surface)]">{p.consensusRank}</div>
               </div>
               <div>
                 <div className="ffi-caption text-[var(--ffi-text-muted)]">ADP</div>
-                <div className="ffi-title-md text-white">{p.adp > 0 ? p.adp.toFixed(1) : '—'}</div>
+                <div className="font-mono font-bold tabular-nums text-[var(--color-on-surface)]">{p.adp > 0 ? p.adp.toFixed(1) : '—'}</div>
               </div>
               <div>
                 <div className="ffi-caption text-[var(--ffi-text-muted)]">
                   {isAuction ? 'RANGE' : 'ECR'}
                 </div>
-                <div className="ffi-title-md text-white">
+                <div className="font-mono font-bold tabular-nums text-[var(--color-on-surface)]">
                   {isAuction && valueRange
                     ? `$${valueRange.low}-${valueRange.high}`
                     : p.consensusRank
@@ -304,6 +308,7 @@ export function DraftBoardTable({
   onToggleTarget,
   onToggleAvoid,
   isTagLoading,
+  compact,
 }: DraftBoardTableProps) {
   const [expandedId, setExpandedId] = useState<string | null>(null)
 
@@ -338,7 +343,7 @@ export function DraftBoardTable({
           </FFICard>
         </motion.div>
       ) : (
-        <motion.div className="space-y-2" layout>
+        <motion.div className={compact ? 'space-y-1' : 'space-y-2'} layout>
           <AnimatePresence mode="popLayout">
             {players.map((sp, idx) => (
               <motion.div
@@ -351,7 +356,7 @@ export function DraftBoardTable({
                   type: 'spring',
                   stiffness: 400,
                   damping: 30,
-                  delay: Math.min(idx * 0.02, 0.3), // Cap delay for long lists
+                  delay: Math.min(idx * 0.02, 0.3),
                 }}
               >
                 <CompactPlayerCard
@@ -363,6 +368,7 @@ export function DraftBoardTable({
                   onToggleTarget={onToggleTarget}
                   onToggleAvoid={onToggleAvoid}
                   isTagLoading={isTagLoading}
+                  compact={compact}
                 />
               </motion.div>
             ))}

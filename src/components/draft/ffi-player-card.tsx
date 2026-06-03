@@ -41,6 +41,8 @@ interface FFIPlayerCardProps {
   maxBid?: number | null
   /** FF-278: cross-source ADP divergence (max − min across sources). Show indicator when > 10. */
   adpDivergence?: number
+  /** UX-3: compact density mode — tighter padding for data-dense views */
+  compact?: boolean
 }
 
 // --- Badge Types & Configuration ---
@@ -149,6 +151,7 @@ export function FFIPlayerCard({
   onBid,
   maxBid,
   adpDivergence,
+  compact = false,
 }: FFIPlayerCardProps) {
   const player = scoredPlayer.player
   const isAuction = format === 'auction'
@@ -252,7 +255,7 @@ export function FFIPlayerCard({
       `}>
         {/* Main card content */}
         <div
-          className="p-5 flex items-center gap-4 relative"
+          className={`flex items-center relative ${compact ? 'p-3 gap-2' : 'p-5 gap-4'}`}
           onClick={onToggleExpand}
         >
           {/* Flash streak for highlighted */}
@@ -260,17 +263,18 @@ export function FFIPlayerCard({
             <div className="flash-streak absolute top-0 left-0 w-full h-full pointer-events-none" />
           )}
 
-          {/* Rank number */}
+          {/* Rank number — gold top-24 (elite), blue rest; no italic ghost */}
           <div className={`
-            font-headline text-3xl font-extrabold tracking-tighter italic
-            ${isHighlighted ? 'text-[#8bacff]/30' : 'text-[#8bacff]/20'}
+            font-headline font-extrabold tracking-tight shrink-0
+            ${compact ? 'text-xl w-7' : 'text-3xl w-10'}
+            ${rank <= 24 ? 'text-[var(--ffi-gold)]' : 'text-[#8bacff]'}
           `}>
             {rankDisplay}
           </div>
 
           {/* Player info */}
           <div className="flex-1 min-w-0">
-            <h3 className="font-headline text-lg font-bold text-[#deedf9] leading-tight truncate">
+            <h3 className={`font-headline font-bold text-[#deedf9] leading-tight truncate ${compact ? 'text-base' : 'text-lg'}`}>
               {player.name.toUpperCase()}
             </h3>
             <p className="font-body text-[10px] text-[#9eadb8] tracking-widest uppercase mt-0.5">
@@ -316,10 +320,10 @@ export function FFIPlayerCard({
 
           {/* Value display */}
           <div className="text-right flex-shrink-0">
-            <div className={`font-headline text-2xl font-bold ${isHighlighted ? 'text-[#2ff801]' : 'text-[#deedf9]'}`}>
+            <div className={`font-mono tabular-nums font-bold ${compact ? 'text-lg' : 'text-2xl'} ${isHighlighted ? 'text-[var(--value-green)]' : 'text-[#deedf9]'}`}>
               {isAuction ? `$${auctionValue}` : `Rd ${roundValue}`}
             </div>
-            <div className="font-body text-[10px] text-[#9eadb8] flex items-center justify-end gap-1.5">
+            <div className="font-mono text-[10px] tabular-nums text-[#9eadb8] flex items-center justify-end gap-1.5">
               {isAuction
                 ? `$${valueRangeLow}-$${valueRangeHigh} RANGE`
                 : `ADP ${player.adp > 0 ? player.adp.toFixed(1) : '—'}`

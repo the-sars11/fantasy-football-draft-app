@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Loader2, AlertCircle, ClipboardList, RefreshCw, CheckCircle2, TrendingUp, TrendingDown } from 'lucide-react'
+import { Loader2, AlertCircle, ClipboardList, RefreshCw, CheckCircle2, TrendingUp, TrendingDown, AlignJustify, LayoutList } from 'lucide-react'
 import { DraftBoardTable } from '@/components/prep/draft-board-table'
 import { PositionBreakdown } from '@/components/prep/position-breakdown'
 import {
@@ -33,6 +33,16 @@ const POSITIONS: (Position | 'ALL')[] = ['ALL', 'QB', 'RB', 'WR', 'TE', 'K', 'DE
 
 type SortField = 'rank' | 'score' | 'value' | 'adp' | 'name'
 
+function PlayerListSkeleton() {
+  return (
+    <div className="space-y-2 mt-3">
+      {Array.from({ length: 8 }).map((_, i) => (
+        <div key={i} className="ffi-skeleton" style={{ height: '68px' }} />
+      ))}
+    </div>
+  )
+}
+
 export function DraftBoardClient() {
   const [leagues, setLeagues] = useState<LeagueSummary[]>([])
   const [selectedLeagueId, setSelectedLeagueId] = useState<string | null>(null)
@@ -57,6 +67,8 @@ export function DraftBoardClient() {
   // FF-028: Refresh state
   const [refreshing, setRefreshing] = useState(false)
   const [refreshFeedback, setRefreshFeedback] = useState<string | null>(null)
+  // UX-3: compact density mode
+  const [compact, setCompact] = useState(false)
 
   const selectedLeague = leagues.find((l) => l.id === selectedLeagueId)
 
@@ -426,7 +438,7 @@ export function DraftBoardClient() {
 
       {/* Content */}
       {dataLoading ? (
-        <div className="text-sm text-muted-foreground py-8 text-center">Loading player data...</div>
+        <PlayerListSkeleton />
       ) : players.length === 0 ? (
         <div className="rounded-md bg-muted/50 border border-border p-6 text-center">
           <p className="text-sm text-muted-foreground">
@@ -475,49 +487,72 @@ export function DraftBoardClient() {
             <TabsTrigger value="position">By Position</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="board" className="space-y-3 mt-3">
-            {/* Filters bar */}
-            <div className="flex flex-wrap items-center gap-2">
-              {/* Position pills */}
-              <div className="flex gap-1">
-                {POSITIONS.map((pos) => (
-                  <Button
-                    key={pos}
-                    variant={positionFilter === pos ? 'default' : 'outline'}
-                    size="sm"
-                    className="h-7 px-2.5 text-xs"
-                    onClick={() => setPositionFilter(pos)}
+          <TabsContent value="board" className="space-y-0 mt-2">
+            {/* Sticky filter bar with glass backdrop */}
+            <div className="ffi-filter-sticky mb-3">
+              <div className="flex flex-wrap items-center gap-2">
+                {/* Position pills — blue active state */}
+                <div className="flex gap-1 flex-wrap">
+                  {POSITIONS.map((pos) => (
+                    <button
+                      key={pos}
+                      onClick={() => setPositionFilter(pos)}
+                      className={`
+                        px-3 py-1 rounded-lg font-headline font-bold text-xs tracking-tight
+                        transition-all min-h-[32px] flex items-center justify-center
+                        ${positionFilter === pos
+                          ? 'bg-[#5582e6] text-white shadow-[0_0_10px_rgba(85,130,230,0.35)]'
+                          : 'bg-[#0f222c] text-[#9eadb8] hover:bg-[#192f3b]'
+                        }
+                      `}
+                    >
+                      {pos}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Target filter */}
+                <Select value={targetFilter} onValueChange={(v) => setTargetFilter(v as typeof targetFilter)}>
+                  <SelectTrigger className="w-[110px] h-8 text-xs">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Players</SelectItem>
+                    <SelectItem value="target">Targets</SelectItem>
+                    <SelectItem value="avoid">Avoids</SelectItem>
+                    <SelectItem value="neutral">Neutral</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                {/* Search */}
+                <Input
+                  placeholder="Search name or team..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="h-8 w-[160px] text-xs"
+                />
+
+                {/* Count + density toggle */}
+                <div className="flex items-center gap-2 ml-auto">
+                  <span className="font-mono text-xs tabular-nums text-[#9eadb8]">
+                    {filteredPlayers.length} players
+                  </span>
+                  <button
+                    onClick={() => setCompact(c => !c)}
+                    className={`
+                      p-1.5 rounded-lg transition-all min-h-[32px] min-w-[32px] flex items-center justify-center
+                      ${compact
+                        ? 'bg-[#5582e6]/20 text-[#8bacff]'
+                        : 'bg-[#0f222c] text-[#9eadb8] hover:bg-[#192f3b]'
+                      }
+                    `}
+                    title={compact ? 'Comfortable view' : 'Compact view'}
+                    aria-label="Toggle row density"
                   >
-                    {pos}
-                  </Button>
-                ))}
+                    {compact ? <AlignJustify className="h-3.5 w-3.5" /> : <LayoutList className="h-3.5 w-3.5" />}
+                  </button>
+                </div>
               </div>
-
-              {/* Target filter */}
-              <Select value={targetFilter} onValueChange={(v) => setTargetFilter(v as typeof targetFilter)}>
-                <SelectTrigger className="w-[120px] h-7 text-xs">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Players</SelectItem>
-                  <SelectItem value="target">Targets</SelectItem>
-                  <SelectItem value="avoid">Avoids</SelectItem>
-                  <SelectItem value="neutral">Neutral</SelectItem>
-                </SelectContent>
-              </Select>
-
-              {/* Search */}
-              <Input
-                placeholder="Search name or team..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="h-7 w-[180px] text-xs"
-              />
-
-              {/* Count */}
-              <span className="text-xs text-muted-foreground ml-auto">
-                {filteredPlayers.length} players
-              </span>
             </div>
 
             <DraftBoardTable
@@ -535,6 +570,7 @@ export function DraftBoardClient() {
                 if (result.success) refetchTags()
               }}
               isTagLoading={toggleLoading || tagsLoading}
+              compact={compact}
             />
           </TabsContent>
 

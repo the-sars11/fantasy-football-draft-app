@@ -26,7 +26,7 @@ export function FFIPositionFilters({
     <section className="mb-6 relative overflow-hidden">
       {/* Section header */}
       <div className="flex items-center gap-2 mb-4">
-        <div className="h-4 w-1 bg-[#2ff801] shadow-[0_0_8px_#2ff801]" />
+        <div className="h-4 w-1 bg-[#8bacff] shadow-[0_0_8px_rgba(139,172,255,0.6)]" />
         <h2 className="font-headline font-bold text-sm tracking-widest uppercase text-[#9eadb8]">
           Tactical Filters
         </h2>
@@ -43,7 +43,7 @@ export function FFIPositionFilters({
               transition-all active:scale-95 whitespace-nowrap
               min-h-[44px] flex items-center justify-center
               ${activeFilter === pos
-                ? 'bg-[#2ff801] text-[#0b5800] shadow-[0_0_15px_rgba(47,248,1,0.3)]'
+                ? 'bg-[#5582e6] text-white shadow-[0_0_12px_rgba(85,130,230,0.4)]'
                 : 'bg-[#0f222c] text-[#9eadb8] hover:bg-[#192f3b]'
               }
             `}
