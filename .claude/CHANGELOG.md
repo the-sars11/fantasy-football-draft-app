@@ -2,6 +2,17 @@
 
 ---
 
+## 2026-06-03 — UX-6.1: Empty states + skeletons across remaining screens
+
+**Task:** UX-6.1 | **Class:** `output` (visual only) | **Lenses:** Delivery, QA
+- `src/components/page-skeleton.tsx`: removed dependency on shadcn `Skeleton` component; replaced with inline `FfiSkeleton` helper using `.ffi-skeleton` (v2.0 shimmer from UX-3). Card wrappers upgraded from `border-border bg-card` to `bg-[#0a1b25] border-white/[0.04]`; table header from `bg-muted/30` to `bg-[#0a1b25]/80`; row dividers from `border-border` to `border-white/[0.04]`. All `loading.tsx` files that import PageSkeleton/TableSkeleton inherit the fix at once.
+- `src/app/(app)/prep/runs/client.tsx`: replaced 3x inline `Loader2` spinners (initial leagues load, runs-list load, row detail-expand load) with `.ffi-skeleton` shimmer rows; replaced 2x generic `<Card><CardContent>` empty states with glass divs (`bg-[#0a1b25] border-white/[0.04]`) + v2.0 text tokens.
+- `src/app/(app)/prep/strategies/client.tsx`: replaced `Loader2` loading state with shimmer skeleton cards; upgraded "No leagues configured" empty state from `bg-muted/50 border-border` to glass + v2.0 text tokens (`#deedf9` / `#9eadb8` / `#8bacff` link); removed now-unused `Loader2` import.
+- `src/app/(app)/prep/runs/page.tsx` + `prep/strategies/page.tsx`: plain `<h1 className="text-2xl font-bold">` → `<h2 className="ffi-display-md text-white">` + `<p className="ffi-body-md text-[var(--ffi-text-secondary)]">`, matching `configure/page.tsx` v2.0 pattern.
+- **Verify:** /prep/runs empty state renders "No research runs yet"; /prep/strategies header and empty states render correctly. type-check clean, 29/29 tests, 0 net-new lint errors, build passes.
+
+---
+
 ## 2026-06-03 — UX-4: Prep Hub gold hover + Configure form glow (UX-4.1 + UX-4.2)
 
 **Task:** UX-4.1 (hub cards gold-on-hover) + UX-4.2 (glow-focus form inputs) | **Class:** `output` (visual only) | **Lenses:** Design, QA

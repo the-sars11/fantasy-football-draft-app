@@ -169,7 +169,7 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 
 ### UX-6: Cross-cutting polish + QA gate
 > Goal: AAA everywhere, verified.
-- [ ] UX-6.1: Empty states + skeletons across remaining screens
+- [x] UX-6.1: Empty states + skeletons across remaining screens — `page-skeleton.tsx` upgraded to `.ffi-skeleton` shimmer + v2.0 surface tokens; runs + strategies clients: `Loader2` spinners replaced with shimmer rows; empty states upgraded to glass; page headers match configure v2.0 pattern
 - [ ] UX-6.2: WCAG ≥4.5:1 contrast pass; reduced-motion audit
 - [ ] UX-6.3: Background-layer performance (GPU promote); arm's-length mobile re-test (ties FF-269/FFT-008)
 - [ ] UX-6.4: Before/after screenshot set

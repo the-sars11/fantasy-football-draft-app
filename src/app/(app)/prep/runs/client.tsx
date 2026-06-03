@@ -214,19 +214,26 @@ export function RunHistoryClient() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      <div className="space-y-3">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <div key={i} className="rounded-xl border border-white/[0.04] bg-[#0a1b25] p-4 flex gap-4">
+            <div className="ffi-skeleton h-10 w-20 shrink-0" />
+            <div className="flex-1 space-y-2">
+              <div className="ffi-skeleton h-4 w-48" />
+              <div className="ffi-skeleton h-4 w-32" />
+            </div>
+          </div>
+        ))}
       </div>
     )
   }
 
   if (leagues.length === 0) {
     return (
-      <Card>
-        <CardContent className="py-8 text-center text-muted-foreground">
-          No leagues configured. Set up a league first to run research.
-        </CardContent>
-      </Card>
+      <div className="rounded-xl border border-white/[0.04] bg-[#0a1b25] p-8 text-center space-y-1">
+        <p className="text-sm font-medium text-[#9eadb8]">No leagues configured</p>
+        <p className="text-xs text-[#697782]">Set up a league first to run research.</p>
+      </div>
     )
   }
 
@@ -285,15 +292,21 @@ export function RunHistoryClient() {
 
       {/* Runs list */}
       {runsLoading ? (
-        <div className="flex items-center justify-center py-8">
-          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+        <div className="rounded-xl border border-white/[0.04] overflow-hidden">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="border-b border-white/[0.04] last:border-0 px-4 py-3 flex gap-6">
+              <div className="ffi-skeleton h-4 w-24" />
+              <div className="ffi-skeleton h-4 flex-1" />
+              <div className="ffi-skeleton h-4 w-16" />
+              <div className="ffi-skeleton h-4 w-12" />
+            </div>
+          ))}
         </div>
       ) : runs.length === 0 ? (
-        <Card>
-          <CardContent className="py-8 text-center text-muted-foreground">
-            No research runs saved yet. Run research from the Prep page to create one.
-          </CardContent>
-        </Card>
+        <div className="rounded-xl border border-white/[0.04] bg-[#0a1b25] p-8 text-center space-y-1">
+          <p className="text-sm font-medium text-[#9eadb8]">No research runs yet</p>
+          <p className="text-xs text-[#697782]">Run research from the Prep page to create one.</p>
+        </div>
       ) : (
         <>
           {/* Compare button */}
@@ -355,8 +368,10 @@ export function RunHistoryClient() {
                     <TableRow key={`${run.id}-detail`}>
                       <TableCell colSpan={6} className="p-0">
                         {detailLoading ? (
-                          <div className="flex items-center justify-center py-6">
-                            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                          <div className="p-4 space-y-2">
+                            <div className="ffi-skeleton h-4 w-full" />
+                            <div className="ffi-skeleton h-4 w-3/4" />
+                            <div className="ffi-skeleton h-4 w-1/2" />
                           </div>
                         ) : expandedRun?.results ? (
                           <RunDetailView run={expandedRun} />

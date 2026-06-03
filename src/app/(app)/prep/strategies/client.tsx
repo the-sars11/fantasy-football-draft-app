@@ -10,7 +10,7 @@ import type { StrategyProposal } from '@/lib/research/strategy/research'
 import type { Strategy, StrategyUpdate } from '@/lib/supabase/database.types'
 import type { DraftFormat, Player } from '@/lib/players/types'
 import { cacheToPlayers } from '@/lib/players/convert'
-import { Loader2, AlertCircle, Sparkles } from 'lucide-react'
+import { AlertCircle, Sparkles } from 'lucide-react'
 
 interface LeagueSummary {
   id: string
@@ -228,9 +228,14 @@ export function StrategiesPageClient() {
 
   if (loading) {
     return (
-      <div className="flex items-center gap-2 py-8 text-sm text-muted-foreground">
-        <Loader2 className="h-4 w-4 animate-spin" />
-        Loading leagues...
+      <div className="space-y-3">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <div key={i} className="rounded-xl border border-white/[0.04] bg-[#0a1b25] p-4 space-y-2">
+            <div className="ffi-skeleton h-5 w-40" />
+            <div className="ffi-skeleton h-4 w-64" />
+            <div className="ffi-skeleton h-8 w-24" />
+          </div>
+        ))}
       </div>
     )
   }
@@ -249,11 +254,11 @@ export function StrategiesPageClient() {
 
   if (leagues.length === 0) {
     return (
-      <div className="rounded-lg bg-muted/50 border border-border p-8 text-center space-y-2">
-        <Sparkles className="h-8 w-8 text-muted-foreground mx-auto" />
-        <p className="text-sm font-medium">No leagues configured</p>
-        <p className="text-sm text-muted-foreground">
-          <a href="/prep/configure" className="text-primary underline underline-offset-4">
+      <div className="rounded-xl border border-white/[0.04] bg-[#0a1b25] p-8 text-center space-y-2">
+        <Sparkles className="h-8 w-8 text-[#9eadb8] mx-auto" />
+        <p className="text-sm font-medium text-[#deedf9]">No leagues configured</p>
+        <p className="text-sm text-[#9eadb8]">
+          <a href="/prep/configure" className="text-[#8bacff] underline underline-offset-4">
             Configure a league
           </a>{' '}
           to create strategies.
