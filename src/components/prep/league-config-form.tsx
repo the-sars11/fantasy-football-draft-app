@@ -178,7 +178,7 @@ export function LeagueConfigForm({ userId }: { userId: string }) {
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <label htmlFor="name" className="text-sm font-medium">League Name</label>
-                <Input id="name" name="name" placeholder="My Fantasy League" required />
+                <Input id="name" name="name" placeholder="My Fantasy League" required className="ffi-form-input" />
               </div>
 
               <div className="space-y-2">
@@ -187,7 +187,7 @@ export function LeagueConfigForm({ userId }: { userId: string }) {
                   id="platform"
                   name="platform"
                   defaultValue="espn"
-                  className="flex h-9 w-full rounded-md border border-input bg-card px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                  className="ffi-form-input flex h-9 w-full rounded-md border border-input bg-card px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none"
                 >
                   <option value="espn">ESPN</option>
                   <option value="yahoo">Yahoo</option>
@@ -220,7 +220,7 @@ export function LeagueConfigForm({ userId }: { userId: string }) {
 
               <div className="space-y-2">
                 <label htmlFor="team_count" className="text-sm font-medium">Teams</label>
-                <Input id="team_count" name="team_count" type="number" min={4} max={20} defaultValue={12} required />
+                <Input id="team_count" name="team_count" type="number" min={4} max={20} defaultValue={12} required className="ffi-form-input" />
               </div>
 
               {format === 'auction' && (
@@ -228,7 +228,7 @@ export function LeagueConfigForm({ userId }: { userId: string }) {
                   <label htmlFor="budget" className="text-sm font-medium">
                     Auction Budget ($)
                   </label>
-                  <Input id="budget" name="budget" type="number" min={1} defaultValue={200} required />
+                  <Input id="budget" name="budget" type="number" min={1} defaultValue={200} required className="ffi-form-input" />
                 </div>
               )}
 
@@ -238,7 +238,7 @@ export function LeagueConfigForm({ userId }: { userId: string }) {
                   id="scoring_format_select"
                   value={scoringFormat}
                   onChange={(e) => handleScoringFormatChange(e.target.value)}
-                  className="flex h-9 w-full rounded-md border border-input bg-card px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                  className="ffi-form-input flex h-9 w-full rounded-md border border-input bg-card px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none"
                 >
                   <option value="standard">Standard (Non-PPR)</option>
                   <option value="half_ppr">Half PPR</option>
@@ -279,7 +279,7 @@ export function LeagueConfigForm({ userId }: { userId: string }) {
                     min={0}
                     max={10}
                     defaultValue={slot.default}
-                    className="h-8"
+                    className="h-8 ffi-form-input"
                   />
                 </div>
               ))}
@@ -348,7 +348,7 @@ export function LeagueConfigForm({ userId }: { userId: string }) {
                                 updateScoring(field.key, parseFloat(e.target.value) || 0)
                                 if (scoringFormat !== 'custom') setScoringFormat('custom')
                               }}
-                              className="h-7 w-20 text-right text-xs tabular-nums"
+                              className="h-7 w-20 text-right text-xs tabular-nums ffi-form-input"
                               disabled={scoringFormat !== 'custom'}
                             />
                           </div>
@@ -397,7 +397,7 @@ export function LeagueConfigForm({ userId }: { userId: string }) {
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
                     <label htmlFor="max_keepers" className="text-sm font-medium">Max Keepers</label>
-                    <Input id="max_keepers" name="max_keepers" type="number" min={1} max={10} defaultValue={3} />
+                    <Input id="max_keepers" name="max_keepers" type="number" min={1} max={10} defaultValue={3} className="ffi-form-input" />
                   </div>
                   <div className="space-y-2">
                     <label htmlFor="keeper_cost_type" className="text-sm font-medium">Keeper Cost Type</label>
@@ -405,7 +405,7 @@ export function LeagueConfigForm({ userId }: { userId: string }) {
                       id="keeper_cost_type"
                       name="keeper_cost_type"
                       defaultValue={format === 'auction' ? 'auction_price' : 'round'}
-                      className="flex h-9 w-full rounded-md border border-input bg-card px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                      className="ffi-form-input flex h-9 w-full rounded-md border border-input bg-card px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none"
                     >
                       <option value="round">Round (snake)</option>
                       <option value="auction_price">Auction Price</option>
@@ -422,13 +422,13 @@ export function LeagueConfigForm({ userId }: { userId: string }) {
                       placeholder="Player name"
                       value={newKeeperName}
                       onChange={(e) => setNewKeeperName(e.target.value)}
-                      className="w-40"
+                      className="w-40 ffi-form-input"
                       onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addKeeper())}
                     />
                     <select
                       value={newKeeperPosition}
                       onChange={(e) => setNewKeeperPosition(e.target.value as Position)}
-                      className="flex h-9 w-20 rounded-md border border-input bg-card px-2 py-1 text-sm"
+                      className="ffi-form-input flex h-9 w-20 rounded-md border border-input bg-card px-2 py-1 text-sm"
                     >
                       <option value="QB">QB</option>
                       <option value="RB">RB</option>
@@ -442,7 +442,7 @@ export function LeagueConfigForm({ userId }: { userId: string }) {
                       placeholder={format === 'auction' ? 'Price $' : 'Round'}
                       value={newKeeperCost}
                       onChange={(e) => setNewKeeperCost(e.target.value)}
-                      className="w-24"
+                      className="w-24 ffi-form-input"
                       min={1}
                       onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addKeeper())}
                     />

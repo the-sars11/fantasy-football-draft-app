@@ -159,8 +159,8 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 
 ### UX-4: Prep Hub + Configure / Strategies
 > Goal: calm, premium entry surfaces and forms.
-- [ ] UX-4.1: Hub cards glass-interactive + gold-on-hover; menu/layout cleanup
-- [ ] UX-4.2: Glow-focus form inputs (NCAA `.form-input` pattern) for league config + strategy editor
+- [x] UX-4.1: Hub cards glass-interactive + gold-on-hover; menu/layout cleanup — icon container → v2.0 surface token; hover: title/icon/chevron all gold; `prep/page.tsx`
+- [x] UX-4.2: Glow-focus form inputs (NCAA `.form-input` pattern) for league config + strategy editor — `.ffi-form-input` gold glow added to `globals.css`; applied to all 11 inputs/selects in `league-config-form.tsx`; configure page header → v2.0 display class (`configure/page.tsx`)
 
 ### UX-5: Post-Draft Review + Celebration — ✅ grade reveal DONE 2026-06-03 (Sunday Night Gridiron)
 > Goal: a shareable, broadcast-grade finish.

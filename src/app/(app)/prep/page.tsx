@@ -34,21 +34,20 @@ function HubCard({ href, icon, title, subtitle }: HubCardProps) {
     <Link href={href} className="block group">
       <FFICard variant="interactive" className="h-full">
         <div className="flex items-center gap-4">
-          {/* Large icon container like mockup */}
-          <div className="w-12 h-12 rounded-xl bg-slate-800/80 border border-slate-700 flex items-center justify-center shrink-0 group-hover:bg-slate-700 transition-colors">
-            <div className="text-[var(--ffi-accent)]">
+          <div className="w-12 h-12 rounded-xl bg-[var(--color-surface-container)] border border-white/5 flex items-center justify-center shrink-0 group-hover:bg-gold/8 group-hover:border-gold/20 transition-all duration-200">
+            <div className="text-[var(--ffi-primary)] group-hover:text-gold transition-colors duration-200">
               {icon}
             </div>
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="font-bold text-slate-100 group-hover:text-[var(--ffi-accent)] transition-colors">
+            <h3 className="font-bold text-slate-100 group-hover:text-gold-bright transition-colors">
               {title}
             </h3>
             <p className="text-xs text-slate-400">
               {subtitle}
             </p>
           </div>
-          <ChevronRight className="h-5 w-5 text-slate-500 group-hover:text-[var(--ffi-accent)] group-hover:translate-x-1 transition-all shrink-0" />
+          <ChevronRight className="h-5 w-5 text-slate-500 group-hover:text-gold group-hover:translate-x-1 transition-all shrink-0" />
         </div>
       </FFICard>
     </Link>

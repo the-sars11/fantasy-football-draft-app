@@ -2,6 +2,17 @@
 
 ---
 
+## 2026-06-03 — UX-4: Prep Hub gold hover + Configure form glow (UX-4.1 + UX-4.2)
+
+**Task:** UX-4.1 (hub cards gold-on-hover) + UX-4.2 (glow-focus form inputs) | **Class:** `output` (visual only) | **Lenses:** Design, QA
+- `prep/page.tsx` `HubCard`: icon container updated from old slate-800 to v2.0 surface-container token; icon, title, and chevron hover colors changed from lime `--ffi-accent` to gold (`text-gold-bright`, `text-gold`, `group-hover:bg-gold/8 border-gold/20`). The `.ffi-card-interactive:hover` gold border was already in place; now the inner elements match.
+- `configure/page.tsx`: plain `<h1>` replaced with `<h2 className="ffi-display-md text-white">` + `<p className="ffi-body-md text-[var(--ffi-text-secondary)]">` matching the v2.0 section header pattern (server-component safe, no client import needed).
+- `globals.css`: added `.ffi-form-input:focus-visible/.ffi-form-input:focus` — gold glow focus ring (`border-color: rgba(224,194,122,0.55)`, `box-shadow: 0 0 0 3px rgba(224,194,122,0.12)`) with `!important` to override Tailwind's focus-visible ring utilities.
+- `league-config-form.tsx`: applied `ffi-form-input` class to all 11 form inputs and selects (league name, platform, team count, budget, scoring format, all 9 roster slots, scoring settings per-field, max keepers, keeper cost type, keeper name/position/cost).
+- **Verify:** type-check clean, 29/29 tests, 0 net-new lint errors, build passes. DOM confirms correct classes applied (`group-hover:text-gold-bright`, surface-container bg, `ffi-form-input` on all configure inputs).
+
+---
+
 ## 2026-06-03 — Sunday Night Gridiron: AAA UI moments + make-it-real fixes (Opus)
 
 **Task:** AAA UI/UX upgrade + code-review-driven P0 fixes  |  **Class:** `output` (UI) + `pipeline` + `bugfix` | **Lenses:** Design, QA, Architecture

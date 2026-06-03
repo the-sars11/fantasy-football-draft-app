@@ -280,37 +280,42 @@ export function FFICelebration({
   tone = 'accent',
   children,
 }: FFICelebrationProps) {
+  const prefersReduced = useReducedMotion()
   const ring = tone === 'gold' ? 'border-[var(--ffi-gold-bright)]' : 'border-[var(--ffi-accent)]'
   return (
     <AnimatePresence>
       {show && (
         <motion.div
           className={cn("relative", className)}
-          initial={{ opacity: 0, scale: 0.5 }}
+          initial={{ opacity: 0, scale: prefersReduced ? 1 : 0.5 }}
           animate={{
             opacity: 1,
-            scale: [0.5, 1.1, 1],
+            scale: prefersReduced ? 1 : [0.5, 1.1, 1],
           }}
-          exit={{ opacity: 0, scale: 0.8 }}
+          exit={{ opacity: 0, scale: prefersReduced ? 1 : 0.8 }}
           transition={{
             type: "spring",
             stiffness: 400,
             damping: 20,
           }}
         >
-          {/* Burst rings */}
-          <motion.div
-            className={cn("absolute inset-0 rounded-lg border-2", ring)}
-            initial={{ scale: 1, opacity: 1 }}
-            animate={{ scale: 2, opacity: 0 }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
-          />
-          <motion.div
-            className={cn("absolute inset-0 rounded-lg border-2", ring)}
-            initial={{ scale: 1, opacity: 1 }}
-            animate={{ scale: 2.5, opacity: 0 }}
-            transition={{ duration: 0.8, ease: "easeOut", delay: 0.1 }}
-          />
+          {/* Burst rings — skipped under prefers-reduced-motion (FFIConfettiBurst has same guard) */}
+          {!prefersReduced && (
+            <>
+              <motion.div
+                className={cn("absolute inset-0 rounded-lg border-2", ring)}
+                initial={{ scale: 1, opacity: 1 }}
+                animate={{ scale: 2, opacity: 0 }}
+                transition={{ duration: 0.6, ease: "easeOut" }}
+              />
+              <motion.div
+                className={cn("absolute inset-0 rounded-lg border-2", ring)}
+                initial={{ scale: 1, opacity: 1 }}
+                animate={{ scale: 2.5, opacity: 0 }}
+                transition={{ duration: 0.8, ease: "easeOut", delay: 0.1 }}
+              />
+            </>
+          )}
           {children}
         </motion.div>
       )}

@@ -739,6 +739,14 @@
   box-shadow: 0 0 0 3px rgba(85, 130, 230, 0.2);
 }
 
+/* Prep form inputs — gold glow on focus (configure + strategy editor) */
+.ffi-form-input:focus-visible,
+.ffi-form-input:focus {
+  outline: none !important;
+  border-color: rgba(224, 194, 122, 0.55) !important;
+  box-shadow: 0 0 0 3px rgba(224, 194, 122, 0.12), 0 0 10px rgba(224, 194, 122, 0.06) !important;
+}
+
 /* ========================================
    FFI Badge Variants
    ======================================== */

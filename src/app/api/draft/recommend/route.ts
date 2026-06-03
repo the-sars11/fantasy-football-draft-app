@@ -244,12 +244,13 @@ export async function POST(request: Request) {
   try {
     // maxTokens lifted from 384 to 600 so a full 3-target JSON is not truncated mid-object.
     // 8s timeout stays under the Vercel 10s ceiling, leaving room to return a fallback.
+    // timeoutMs 4s × 2 attempts + 300ms backoff = 8.3s worst-case, safely under maxDuration=10.
     const result = await askWithRetry<LLMAuctionRecommendation | LLMSnakeRecommendation>({
       system,
       prompt,
       maxTokens: 600,
       tier: 'fast',
-      timeoutMs: 8000,
+      timeoutMs: 4000,
     })
     return NextResponse.json({ recommendation: result, source: 'llm' })
   } catch (err) {
