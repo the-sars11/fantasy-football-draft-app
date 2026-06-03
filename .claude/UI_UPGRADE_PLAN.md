@@ -39,10 +39,10 @@ The app is functionally hardened (P0/P1 ~complete) but the visual layer read ~7.
 - [x] UX-2.3 Your-pick gold rail + gold name; `.ffi-pick-flash` gold glow on newest pick
 - [x] UX-2.4 Connection pill + trash-talk feed restyled to v2.0
 
-### UX-3 — Draft Board / Player Pool (data-dense)
-- [ ] UX-3.1 Rank → bold Space Grotesk (gold top-tier / blue rest); kill italic-30%
-- [ ] UX-3.2 Tabular JetBrains Mono numbers right-aligned; two-color hierarchy; spacing not borders
-- [ ] UX-3.3 Position badges → palette; sticky filter header; row-density modes; skeleton loaders
+### UX-3 — Draft Board / Player Pool (data-dense) — ✅ DONE 2026-06-03
+- [x] UX-3.1 Rank → bold Space Grotesk (gold top-tier / blue rest); kill italic-30%
+- [x] UX-3.2 Tabular JetBrains Mono numbers right-aligned; two-color hierarchy; spacing not borders
+- [x] UX-3.3 Position badges → palette; sticky filter header; row-density modes; skeleton loaders
 
 ### UX-4 — Prep Hub + Configure / Strategies
 - [ ] UX-4.1 Hub cards `glass-interactive` + gold hover; menu/layout cleanup

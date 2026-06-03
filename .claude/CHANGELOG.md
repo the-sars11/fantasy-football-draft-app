@@ -2,6 +2,22 @@
 
 ---
 
+## 2026-06-03 — UX-3: Stadium Primetime — Draft Board / Player Pool (data-dense)
+
+**Task:** UX-3.1–3.3  |  **Class:** `output` (UI) | **Lenses:** Design, QA
+**Commit:** `b513c3b`
+
+- **UX-3.1 Rank redesign:** `ffi-player-card.tsx` + `draft-board-table.tsx` — removed italic ghost (was `italic text-[#8bacff]/20`); ranks 1–24 = Stadium Gold (`rgb(224,194,122)`), ranks 25+ = Gridiron Blue (`rgb(85,130,230)`). Full opacity. Space Grotesk bold (font-headline). Confirms live: rank "01" = gold, rank "25" = blue.
+- **UX-3.2 Tabular mono numbers:** All player values (`$amount` / `Rd N`), ADP, score, range stats now use `font-mono tabular-nums` → JetBrains Mono confirmed live in computed styles. Value color = Stadium Gold. Expanded card stat sections: removed all `border-t` separators, replaced with top-margin spacing only.
+- **UX-3.3a Position badge active = blue:** `FFIPositionFilters` section header bar + active button: lime `#2ff801` → Gridiron Blue `#5582e6`. Board client's inline position pills also updated to blue. Confirmed live: active "ALL" button = `rgb(85,130,230)`.
+- **UX-3.3b Sticky filter headers:** `ffi-filter-sticky` CSS class (sticky/top-0/z-20/glass backdrop) applied to both the live-draft `PlayerPool` filter bar and the prep `DraftBoardClient` board filter bar. Both stick on scroll with a blurred glass backdrop.
+- **UX-3.3c Row-density toggle:** Compact/comfortable mode in `PlayerPool` and `DraftBoardClient` — icon button cycles between `LayoutList` (comfortable) and `AlignJustify` (compact). Compact reduces card padding, rank text size, and card spacing.
+- **UX-3.3d Skeleton loaders:** `PlayerListSkeleton` component renders 8 shimmer rows (`.ffi-skeleton` keyframe) in place of "Loading player data..." text on the prep board. `ffi-skeleton` added to `globals.css` with reduced-motion guard.
+- **Flash streak fix:** Updated lime `rgba(47,248,1,0.1)` → gold `rgba(224,194,122,0.07)` — highlighted player card streaks are now warm gold tint (the moment), not value-green.
+- **Verify:** type-check clean · 27/27 tests pass · 0 lint errors in changed files · sticky/z-index/bg confirmed via inspect · gold rank / blue rank / mono value / blue active-filter all confirmed via computed styles.
+
+---
+
 ## 2026-06-03 — UX-2: Stadium Primetime — Live Draft Room (AAA Visual Upgrade)
 
 **Task:** UX-2.1–2.4  |  **Class:** `output` (UI) | **Lenses:** Design, QA

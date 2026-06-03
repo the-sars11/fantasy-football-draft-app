@@ -149,11 +149,11 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 - [x] UX-2.3: Your-pick gold rail + gold name; card-reveal + gold flash on confirmed picks
 - [x] UX-2.4: Connection pill + trash-talk feed restyled to v2.0
 
-### UX-3: Draft Board / Player Pool (data-dense)
+### UX-3: Draft Board / Player Pool (data-dense) — ✅ DONE 2026-06-03
 > Goal: research-backed scannability for the big player list.
-- [ ] UX-3.1: Redesign rank (bold Space Grotesk, gold top-tier / blue rest; kill italic-30%)
-- [ ] UX-3.2: Tabular JetBrains Mono numbers right-aligned; two-color hierarchy; spacing not borders
-- [ ] UX-3.3: Position badges remapped to palette; sticky filter header; row-density modes; skeleton loaders
+- [x] UX-3.1: Redesign rank (bold Space Grotesk, gold top-tier / blue rest; kill italic-30%)
+- [x] UX-3.2: Tabular JetBrains Mono numbers right-aligned; two-color hierarchy; spacing not borders
+- [x] UX-3.3: Position badges remapped to palette; sticky filter header; row-density modes; skeleton loaders
 
 ### UX-4: Prep Hub + Configure / Strategies
 > Goal: calm, premium entry surfaces and forms.
