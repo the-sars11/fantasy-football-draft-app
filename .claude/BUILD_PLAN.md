@@ -142,12 +142,13 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 - [x] UX-1.7: Motion — `.ffi-animate-reveal` (scale + gold flash), `.ffi-animate-stagger`; reduced-motion guards
 - [x] UX-1.x: Active nav accent lime → gold (sidebar + bottom tabs)
 
-### UX-2: Live Draft Room (hero screen) — ✅ DONE 2026-06-03
+### UX-2: Live Draft Room (hero screen) — ✅ DONE 2026-06-03 · ⬆️ Opus elevation 2026-06-03
 > Goal: the screen used during a real draft is unmistakably AAA.
 - [x] UX-2.1: On-the-clock spotlight state (gold pulse) + AUCTION/SNAKE mode badge
 - [x] UX-2.2: Pinned quick-entry bar restyle (gold Record button, glass-heavy)
 - [x] UX-2.3: Your-pick gold rail + gold name; card-reveal + gold flash on confirmed picks
 - [x] UX-2.4: Connection pill + trash-talk feed restyled to v2.0
+- [x] UX-2 (Opus elevation): re-wired the on-the-clock spotlight to fire ONLY at the moment (snake: your turn; auction: player on the block) instead of the whole draft; added the on-the-clock HERO banner (gold glass + light-catch + spring reveal + breathing glow); finished the lime → blue/value-green recolor Sonnet left in `client.tsx`; gray hairline → light-catch. Verified live on snake + auction at 1280 + 390.
 
 ### UX-3: Draft Board / Player Pool (data-dense) — ✅ DONE 2026-06-03
 > Goal: research-backed scannability for the big player list.

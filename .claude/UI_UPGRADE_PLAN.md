@@ -33,11 +33,12 @@ The app is functionally hardened (P0/P1 ~complete) but the visual layer read ~7.
 - [x] UX-1.7 Motion: `.ffi-animate-reveal` (scale + gold flash), `.ffi-animate-stagger`; reduced-motion guards
 - Also: active nav accent shifted lime → gold (the spotlight follows where you are).
 
-### UX-2 — Live Draft Room (hero screen) — ✅ DONE 2026-06-03
+### UX-2 — Live Draft Room (hero screen) — ✅ DONE 2026-06-03 · ⬆️ Opus elevation 2026-06-03
 - [x] UX-2.1 On-the-clock `atmos-clock` spotlight + AUCTION/SNAKE mode badge
 - [x] UX-2.2 Pinned quick-entry bar → gold Record button, glass-heavy
 - [x] UX-2.3 Your-pick gold rail + gold name; `.ffi-pick-flash` gold glow on newest pick
 - [x] UX-2.4 Connection pill + trash-talk feed restyled to v2.0
+- **Opus elevation (2026-06-03):** Sonnet's UX-2 was a competent token-swap that missed the design-judgment core. Fixed: (1) the spotlight pulsed for the *entire* draft (`status !== 'completed'`), devaluing gold-as-the-moment — re-wired to a true `onTheClock` signal (snake: `current_manager` is you; auction: a player is on the block) via `body.ffi-on-the-clock`; (2) added the missing **on-the-clock HERO banner** (`.ffi-onclock-banner` — gold light-catch + breathing spotlight glow + Framer spring reveal); (3) completed the recolor Sonnet left behind — `--ffi-accent`/`--ffi-success` (both lime `#39ff14`) → blue for structure (StrategyPicker, MySquad Target) + `--value-green` for "Roster complete!"; (4) replaced a forbidden gray `--ffi-border` hairline with a white light-catch one. Visual-only (reads existing state). Verified live on snake + auction sessions at 1280 + 390; type-check / lint / 27 tests green.
 
 ### UX-3 — Draft Board / Player Pool (data-dense) — ✅ DONE 2026-06-03
 - [x] UX-3.1 Rank → bold Space Grotesk (gold top-tier / blue rest); kill italic-30%

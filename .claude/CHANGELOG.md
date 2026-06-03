@@ -2,6 +2,21 @@
 
 ---
 
+## 2026-06-03 — UX-2 (Opus elevation): On-the-clock hero + true moment-gated spotlight
+
+**Task:** UX-2 review/upgrade (Sonnet → Opus)  |  **Class:** `output` (UI) | **Lenses:** Design, QA
+
+Review of the Sonnet-built UX-2 found a competent recolor that missed the design-judgment core of the "hero screen" sprint. Elevated to Opus quality — all visual-only (reads existing draft state, no engine change):
+
+- **On-the-clock spotlight, re-wired to the MOMENT.** Sonnet's `body.draft-active` fired for the entire draft (`status !== 'completed'`) — a constant gold pulse that devalues "gold = the moment," the core of the v2.0 system. Replaced with a true `onTheClock` signal in `client.tsx` (snake → `current_manager` is you; auction → a player is on the block) driving `body.ffi-on-the-clock`. Verified live: the gold spotlight is correctly OFF on a live auction with no player on the block, and ON the instant a player is nominated / at your snake turn.
+- **On-the-clock HERO banner (the missing centerpiece).** New `.ffi-onclock-banner` (gold light-catch edge + breathing ambient spotlight glow; transform-free so Framer Motion owns the spring entrance). Snake → "YOU'RE ON THE CLOCK · Round X · Pick Y" (Clock icon); auction → "ON THE BLOCK · <player> · <pos>" (Gavel icon). `role="status"` + `aria-live="polite"`.
+- **Finished the recolor Sonnet left in the file it edited.** `--ffi-accent`/`--ffi-success` both resolve to lime `#39ff14`; recolored StrategyPicker (icon + active state) + MySquad Target icon → blue (structure), and "Roster complete!" → `--value-green` (success/value).
+- **No-Line fix:** MySquad's `border-t border-[var(--ffi-border)]/20` (gray) → `border-white/[0.06]` (light-catch hairline).
+- **CSS:** removed Sonnet's duplicate `body.draft-active .stadium-atmos` (byte-identical to `.stadium-atmos.atmos-clock`); added `body.ffi-on-the-clock .stadium-atmos` (intensified gold spotlight + pulse) + `.ffi-onclock-banner` / `@keyframes ffi-onclock-sheen`; both added to the reduced-motion guard.
+- **Verify:** type-check clean · 27/27 tests · 0 lint errors in changed files · banner + spotlight confirmed live in real snake + auction sessions at 1280 + 390 (DOM geometry + computed styles: gold border `rgba(253,239,182,0.38)`, gold glow shadow, atmos `atmos-clock-pulse`, 44px touch target, no 390px overflow). JPEG screenshots not capturable via the preview tool — the live draft polls continuously + double-mounts (no network-idle frame); verified via computed-style inspection instead, per the tool's own guidance.
+
+---
+
 ## 2026-06-03 — UX-3: Stadium Primetime — Draft Board / Player Pool (data-dense)
 
 **Task:** UX-3.1–3.3  |  **Class:** `output` (UI) | **Lenses:** Design, QA

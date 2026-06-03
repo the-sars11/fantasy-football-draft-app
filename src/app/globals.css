@@ -975,14 +975,36 @@
   }
 }
 
-/* UX-2.1: On-the-clock body class — applied from live draft client while draft is active */
-body.draft-active .stadium-atmos {
+/* UX-2.1 (Opus elevation): On-the-clock spotlight — the arena lights swing to YOU only
+   for the actual moment (snake: your turn; auction: a player is on the block), never a
+   constant whole-draft glow. Driven by body.ffi-on-the-clock from the live draft client. */
+body.ffi-on-the-clock .stadium-atmos {
   background:
-    radial-gradient(70% 55% at 50% -8%, rgba(253, 239, 182, 0.20) 0%, transparent 64%),
+    radial-gradient(74% 58% at 50% -8%, rgba(253, 239, 182, 0.26) 0%, transparent 64%),
     radial-gradient(45% 40% at 88% 92%, rgba(85, 130, 230, 0.10) 0%, transparent 60%),
     radial-gradient(50% 45% at 8% 85%, rgba(16, 70, 50, 0.24) 0%, transparent 62%),
-    linear-gradient(180deg, #02060d 0%, #050b16 45%, #01040a 100%);
+    linear-gradient(180deg, #03060f 0%, #060d1a 45%, #01040a 100%);
   animation: atmos-clock-pulse 3.2s ease-in-out infinite;
+}
+
+/* UX-2.1 (Opus elevation): On-the-clock hero banner — gold light-catch edge + ambient
+   spotlight glow that breathes. Transform-free so Framer Motion owns the entrance. */
+.ffi-onclock-banner {
+  border: 1px solid rgba(253, 239, 182, 0.38);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.36),
+    0 0 40px rgba(253, 239, 182, 0.16),
+    inset 0 1px 0 rgba(253, 239, 182, 0.22);
+  animation: ffi-onclock-sheen 3.2s ease-in-out infinite;
+}
+
+@keyframes ffi-onclock-sheen {
+  0%, 100% {
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.36), 0 0 36px rgba(253, 239, 182, 0.14), inset 0 1px 0 rgba(253, 239, 182, 0.22);
+  }
+  50% {
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.36), 0 0 56px rgba(253, 239, 182, 0.26), inset 0 1px 0 rgba(253, 239, 182, 0.30);
+  }
 }
 
 /* UX-2.3: Pick flash — box-shadow gold glow only (no scale; Framer Motion handles transform) */
@@ -1069,7 +1091,8 @@ body.draft-active .stadium-atmos {
   .ffi-animate-reveal,
   .ffi-animate-stagger,
   .stadium-atmos.atmos-clock,
-  body.draft-active .stadium-atmos,
+  body.ffi-on-the-clock .stadium-atmos,
+  .ffi-onclock-banner,
   .ffi-pick-flash,
   .animate-shake {
     animation: none;

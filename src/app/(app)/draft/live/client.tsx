@@ -17,6 +17,8 @@ import {
   Sparkles,
   Target,
   AlertTriangle,
+  Clock,
+  Gavel,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import {
@@ -93,7 +95,7 @@ function StrategyPicker({
         <div>
           <div className="ffi-caption text-[var(--ffi-text-muted)]">ACTIVE STRATEGY</div>
           <div className="ffi-title-md text-white flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-[var(--ffi-accent)]" />
+            <Sparkles className="h-4 w-4 text-[var(--ffi-primary)]" />
             {activeStrategy?.name ?? 'None Selected'}
           </div>
         </div>
@@ -115,7 +117,7 @@ function StrategyPicker({
               className={cn(
                 'w-full text-left px-3 py-2 transition-colors',
                 s.id === activeStrategy?.id
-                  ? 'bg-[var(--ffi-accent)]/10 text-[var(--ffi-accent)]'
+                  ? 'bg-[var(--ffi-primary)]/10 text-[var(--ffi-primary)]'
                   : 'hover:bg-[var(--ffi-surface)] text-white'
               )}
             >
@@ -251,7 +253,7 @@ function MySquadPanel({
     <FFICard variant="elevated">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <Target className="h-4 w-4 text-[var(--ffi-accent)]" />
+          <Target className="h-4 w-4 text-[var(--ffi-primary)]" />
           <span className="ffi-label text-[var(--ffi-text-secondary)]">YOUR SQUAD</span>
         </div>
         <span className="ffi-label text-[var(--ffi-text-muted)]">
@@ -285,14 +287,14 @@ function MySquadPanel({
             </FFIBadge>
           ))}
           {Object.keys(needs).length === 0 && (
-            <span className="ffi-body-md text-[var(--ffi-success)]">Roster complete!</span>
+            <span className="ffi-body-md text-[var(--value-green)]">Roster complete!</span>
           )}
         </div>
       </div>
 
       {/* Recent squad picks */}
       {picks.length > 0 && (
-        <div className="space-y-1 border-t border-[var(--ffi-border)]/20 pt-3">
+        <div className="space-y-1 border-t border-white/[0.06] pt-3">
           {picks.slice(-5).reverse().map((pick, idx) => (
             <div key={idx} className="flex items-center gap-2 text-sm">
               {pick.position && (
@@ -718,15 +720,21 @@ export function LiveDraftClient() {
     setDriftDismissed(true)
   }, [])
 
-  // UX-2.1: Body class drives atmos-clock gold spotlight while draft is active.
-  const draftIsActive = !!(state && state.status !== 'completed')
+  // UX-2.1 (Opus elevation): the on-the-clock spotlight follows the MOMENT, not the whole
+  // session. Snake → it's your turn; Auction → a player is on the block. Reads existing
+  // draft state only — visual-only, no engine change.
+  const myManagerForClock = state?.manager_order[0]
+  const onTheClock = !!(
+    state &&
+    state.status !== 'completed' &&
+    (state.format === 'auction'
+      ? onBlockPlayer !== null
+      : state.current_manager === myManagerForClock)
+  )
   useEffect(() => {
-    if (draftIsActive) {
-      document.body.classList.add('draft-active')
-      return () => document.body.classList.remove('draft-active')
-    }
-    document.body.classList.remove('draft-active')
-  }, [draftIsActive])
+    document.body.classList.toggle('ffi-on-the-clock', onTheClock)
+    return () => document.body.classList.remove('ffi-on-the-clock')
+  }, [onTheClock])
 
   // Strategy swap handler
   const handleStrategySwap = useCallback((newStrategy: DbStrategy, fromRecommendation = false) => {
@@ -869,6 +877,61 @@ export function LiveDraftClient() {
       </div>
 
       {/* Sheet sync errors now surfaced via ConnectionStatusPill (FF-259) */}
+
+      {/* UX-2.1 (Opus elevation): On-the-clock HERO — the primetime spotlight moment.
+          Snake: it's your pick. Auction: a player is on the block. Gold = the moment. */}
+      <AnimatePresence>
+        {onTheClock && (
+          <motion.div
+            key="on-the-clock"
+            initial={{ opacity: 0, y: -10, scale: 0.985 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -10, scale: 0.985 }}
+            transition={{ type: 'spring', stiffness: 380, damping: 28 }}
+            className="ffi-glass-heavy ffi-onclock-banner rounded-2xl px-4 py-3 flex items-center gap-3"
+            role="status"
+            aria-live="polite"
+          >
+            <div
+              className="shrink-0 grid place-items-center h-11 w-11 rounded-xl"
+              style={{ background: 'rgba(253,239,182,0.14)' }}
+            >
+              {isAuction
+                ? <Gavel className="h-5 w-5 text-[var(--ffi-gold-bright)]" />
+                : <Clock className="h-5 w-5 text-[var(--ffi-gold-bright)]" />}
+            </div>
+            <div className="min-w-0 flex-1">
+              <div
+                className="font-headline font-bold tracking-widest text-[13px] leading-none"
+                style={{ color: 'var(--ffi-gold-bright)' }}
+              >
+                {isAuction ? 'ON THE BLOCK' : "YOU'RE ON THE CLOCK"}
+              </div>
+              <div className="mt-1 truncate ffi-body-md text-white">
+                {isAuction ? (
+                  <>
+                    <span className="font-semibold text-[var(--ffi-gold)]">
+                      {onBlockPlayer?.name}
+                    </span>
+                    {onBlockPlayer?.position && (
+                      <span className="text-[var(--ffi-text-secondary)]"> · {onBlockPlayer.position}</span>
+                    )}
+                  </>
+                ) : (
+                  <span className="font-mono text-[var(--ffi-text-secondary)]">
+                    Round {state.current_round ?? '—'} · Pick {state.current_pick_in_round ?? '—'}
+                  </span>
+                )}
+              </div>
+            </div>
+            <span
+              className="shrink-0 h-2.5 w-2.5 rounded-full animate-pulse"
+              style={{ background: 'var(--ffi-gold-bright)', boxShadow: '0 0 10px rgba(253,239,182,0.8)' }}
+              aria-hidden="true"
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Main layout */}
       <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-4">
