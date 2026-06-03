@@ -63,7 +63,10 @@
   --color-ffi-danger: #ef4444;
   --color-ffi-info: #5582e6;
 
-  /* Stadium Primetime v2.0 — Stadium Gold (the "moment": your pick, draft complete, grade hero) */
+  /* Sunday Night Gridiron - broadcast cyan LIVE-DATA signal (never a CTA, never a value color) */
+  --color-ffi-live: #6fe3ff;
+
+  /* Stadium Primetime v2.0 - Stadium Gold (the "moment": your pick, draft complete, grade hero) */
   --color-gold: #e0c27a;
   --color-gold-bright: #fdefb6;
   --color-gold-deep: #d3c791;
@@ -171,6 +174,17 @@
   --value-green: #2ff801;
   --ffi-glow-gold: 0 0 20px rgba(253, 239, 182, 0.30);
   --ffi-glow-gold-strong: 0 0 36px rgba(253, 239, 182, 0.45);
+
+  /* Sunday Night Gridiron - broadcast cyan = live data only (pick wipes, ticker, score-bug).
+     Low chroma on purpose so it never competes with gold (the moment) or green (value). */
+  --ffi-live: #6fe3ff;
+  --ffi-live-dim: rgba(111, 227, 255, 0.14);
+  --ffi-glow-live: 0 0 18px rgba(111, 227, 255, 0.28);
+
+  /* Named motion curves (designed, not defaulted) */
+  --ease-broadcast: cubic-bezier(0.22, 1, 0.36, 1); /* lower-third wipes, ticker slides */
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1); /* reveals, pops */
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);    /* generic UI transitions */
 }
 
 /* FFIntelligence Dark Mode (Primary) */
@@ -221,6 +235,8 @@
   }
   body {
     @apply bg-background text-foreground;
+    /* Tabular figures everywhere so live numbers (budgets, scores, counts) never reflow */
+    font-variant-numeric: tabular-nums;
   }
   html {
     @apply font-sans;
@@ -871,7 +887,7 @@
   text-shadow: 0 0 30px currentColor;
 }
 
-.ffi-grade-a { color: #39ff14; }
+.ffi-grade-a { color: var(--ffi-gold-bright); } /* champion = gold (the moment) */
 .ffi-grade-b { color: #5582e6; }
 .ffi-grade-c { color: #fbbf24; }
 .ffi-grade-d { color: #f97316; }
@@ -880,6 +896,14 @@
 /* ========================================
    FFI Animations
    ======================================== */
+
+/* Animatable gradient angle for broadcast sheen sweeps (lower-third reveal, grade ring).
+   Registered so the angle can be transitioned/animated, which a plain custom prop cannot. */
+@property --ffi-sheen-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
 
 @keyframes ffi-glow-pulse {
   0%, 100% { box-shadow: 0 0 20px rgba(57, 255, 20, 0.4); }
@@ -1393,4 +1417,107 @@ body.ffi-on-the-clock .stadium-atmos {
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   margin: 0 -0.25rem;
   padding: 0.5rem 0.25rem;
+}
+
+/* ========================================
+   Sunday Night Gridiron - Broadcast Moments (Phase 2)
+   Lower-third pick reveal, position-run ticker, live score-bug.
+   ======================================== */
+
+/* Lower-third: a broadcast name-strip. The one-shot sheen sweep fires on each new pick
+   because the parent keys the element on pick_number (remount re-triggers the animation).
+   A fixed min-height on the wrapper keeps the feed from shifting as picks land. */
+.ffi-lower-third {
+  position: relative;
+  overflow: hidden;
+}
+
+.ffi-lower-third::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(100deg, transparent 35%, rgba(253, 239, 182, 0.22) 50%, transparent 65%);
+  background-size: 220% 100%;
+  background-position: -160% 0;
+  animation: ffi-sheen-sweep 0.7s var(--ease-broadcast, ease-out) 1;
+}
+
+/* Other managers' picks sweep broadcast cyan instead of gold (live, not "the moment") */
+.ffi-lower-third-live::after {
+  background: linear-gradient(100deg, transparent 35%, rgba(111, 227, 255, 0.20) 50%, transparent 65%);
+  background-size: 220% 100%;
+  background-position: -160% 0;
+}
+
+@keyframes ffi-sheen-sweep {
+  0% { background-position: -160% 0; }
+  100% { background-position: 260% 0; }
+}
+
+/* Position-run ticker - cyan broadcast insight strip */
+.ffi-ticker {
+  border: 1px solid rgba(111, 227, 255, 0.22);
+  background: linear-gradient(90deg, rgba(111, 227, 255, 0.10) 0%, rgba(111, 227, 255, 0.04) 100%);
+}
+
+/* Live score-bug - heavy-glass glanceable chip (Apple Live Activity feel) */
+.ffi-scorebug {
+  background: rgba(5, 21, 30, 0.72);
+  backdrop-filter: blur(14px) saturate(1.1);
+  -webkit-backdrop-filter: blur(14px) saturate(1.1);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* Flash a number cyan when it changes (broadcast live-update cue, zero layout shift) */
+@keyframes ffi-num-flash {
+  0% { color: var(--ffi-live); text-shadow: 0 0 12px rgba(111, 227, 255, 0.6); }
+  100% { color: inherit; text-shadow: none; }
+}
+.ffi-num-flash {
+  animation: ffi-num-flash 0.6s ease-out 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ffi-lower-third::after,
+  .ffi-lower-third-live::after,
+  .ffi-num-flash {
+    animation: none;
+  }
+}
+
+/* ========================================
+   Sunday Night Gridiron - Champion Grade Reveal (Phase 3)
+   ======================================== */
+
+/* Rotating conic gold ring around the grade circle for a champion (A) draft. Uses the
+   registered @property --ffi-sheen-angle so the conic angle can actually animate. The mask
+   trick shows only the ring (border), not the fill. */
+@keyframes ffi-grade-ring-spin {
+  to { --ffi-sheen-angle: 360deg; }
+}
+
+.ffi-grade-ring-sheen::before {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: inherit;
+  padding: 3px;
+  background: conic-gradient(
+    from var(--ffi-sheen-angle),
+    rgba(253, 239, 182, 0) 0deg,
+    rgba(253, 239, 182, 0) 210deg,
+    rgba(253, 239, 182, 0.9) 300deg,
+    rgba(253, 239, 182, 0) 360deg
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  animation: ffi-grade-ring-spin 4s linear infinite;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ffi-grade-ring-sheen::before { animation: none; }
 }

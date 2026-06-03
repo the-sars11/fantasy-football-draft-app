@@ -14,6 +14,7 @@ import {
   Loader2,
   AlertCircle,
   Trophy,
+  Flame,
   Target,
   TrendingUp,
   TrendingDown,
@@ -39,7 +40,9 @@ import {
   FFIGrade,
   FFISectionHeader,
 } from '@/components/ui/ffi-primitives'
-import { FFIFadeInUp } from '@/components/ui/ffi-motion'
+import { FFIFadeInUp, FFICelebration, FFIConfettiBurst } from '@/components/ui/ffi-motion'
+import { useHaptic } from '@/hooks/use-haptic'
+import { useSound } from '@/lib/sound/use-sound'
 import { TeamReports } from '@/components/draft/team-reports'
 import { RoastReportCard } from '@/components/draft/trash-talk'
 import { useUserTags } from '@/hooks/use-user-tags'
@@ -76,13 +79,22 @@ const verdictConfig: Record<PickVerdict, { label: string; class: string; icon: t
   },
 }
 
-// Grade glow colors
+// Grade glow colors. A (champion) is gold - the "moment" treatment - not lime.
 const gradeGlow: Record<string, string> = {
-  A: 'shadow-[0_0_40px_rgba(57,255,20,0.4)]',
+  A: 'shadow-[0_0_44px_rgba(253,239,182,0.5)]',
   B: 'shadow-[0_0_40px_rgba(34,197,94,0.3)]',
   C: 'shadow-[0_0_40px_rgba(251,191,36,0.3)]',
   D: 'shadow-[0_0_40px_rgba(249,115,22,0.3)]',
   F: 'shadow-[0_0_40px_rgba(239,68,68,0.4)]',
+}
+
+// Champion verdict word per grade (dry, declarative, Oswald broadcast voice)
+const gradeVerdict: Record<string, string> = {
+  A: 'ELITE DRAFT',
+  B: 'STRONG BOARD',
+  C: 'SOLID WORK',
+  D: 'ROOM TO RUN',
+  F: 'REBUILD MODE',
 }
 
 export function ReviewClient() {
@@ -342,7 +354,7 @@ export function ReviewClient() {
             >
               {sessions.map(s => (
                 <option key={s.id} value={s.id}>
-                  {s.format === 'auction' ? 'Auction' : 'Snake'} — {s.picks.length} picks — {new Date(s.created_at).toLocaleDateString()}
+                  {s.format === 'auction' ? 'Auction' : 'Snake'} - {s.picks.length} picks - {new Date(s.created_at).toLocaleDateString()}
                 </option>
               ))}
             </select>
@@ -394,13 +406,14 @@ export function ReviewClient() {
             <button
               onClick={() => setViewMode('trash-talk')}
               className={cn(
-                'flex-1 min-h-[44px] py-2.5 px-4 rounded-lg text-sm font-semibold transition-all',
+                'flex-1 min-h-[44px] py-2.5 px-4 rounded-lg text-sm font-semibold transition-all inline-flex items-center justify-center gap-1.5',
                 viewMode === 'trash-talk'
                   ? 'bg-[var(--ffi-danger)] text-white'
                   : 'bg-[var(--ffi-surface)]/50 text-[var(--ffi-text-secondary)] hover:bg-[var(--ffi-surface)]'
               )}
             >
-              🔥 Trash Talk
+              <Flame className="h-4 w-4" aria-hidden="true" />
+              Trash Talk
             </button>
           </div>
         )}
@@ -643,6 +656,21 @@ function GradeHero({
 }) {
   const letter = review.overallGrade.charAt(0)
   const glowClass = gradeGlow[letter] || ''
+  const verdict = gradeVerdict[letter] ?? ''
+  const isTopGrade = letter === 'A'
+  const isChampion = letter === 'A' || letter === 'B'
+  const haptic = useHaptic()
+  const { play } = useSound()
+  const [celebrate, setCelebrate] = useState(false)
+  useEffect(() => {
+    if (!isChampion) return
+    const t = setTimeout(() => {
+      setCelebrate(true)
+      haptic('champion')
+      play('champion')
+    }, 350)
+    return () => clearTimeout(t)
+  }, [isChampion, haptic, play])
 
   return (
     <motion.div
@@ -651,24 +679,44 @@ function GradeHero({
       className="ffi-card-elevated"
     >
       <div className="flex flex-col sm:flex-row items-center gap-6">
-        {/* Grade Circle with Glow */}
-        <motion.div
-          initial={{ scale: 0.5, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ type: 'spring', stiffness: 400, damping: 25, delay: 0.2 }}
-          className={cn(
-            'w-28 h-28 rounded-2xl ffi-glass flex items-center justify-center shrink-0',
-            glowClass
-          )}
-        >
-          <FFIGrade grade={review.overallGrade} size="lg" />
-        </motion.div>
+        {/* Grade circle with glow + champion gold ring + celebration burst */}
+        <div className="relative shrink-0">
+          <FFICelebration show={celebrate} tone="gold" className="absolute inset-0">
+            <span className="sr-only">Draft graded</span>
+          </FFICelebration>
+          <FFIConfettiBurst show={celebrate} />
+          <motion.div
+            initial={{ scale: 0.5, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 25, delay: 0.2 }}
+            className={cn(
+              'relative w-28 h-28 rounded-2xl ffi-glass flex items-center justify-center',
+              isTopGrade && 'ffi-grade-ring-sheen',
+              glowClass
+            )}
+          >
+            <FFIGrade grade={review.overallGrade} size="lg" />
+          </motion.div>
+        </div>
 
         {/* Summary */}
         <div className="flex-1 text-center sm:text-left">
+          {verdict && (
+            <div
+              className={cn(
+                'font-display font-bold tracking-widest text-sm mb-1',
+                isTopGrade ? 'text-[var(--ffi-gold-bright)]' : 'text-[var(--ffi-text-secondary)]',
+              )}
+            >
+              {verdict}
+            </div>
+          )}
           <h2 className="ffi-display-md text-white mb-1">{review.summary}</h2>
           <p className="ffi-body-md text-[var(--ffi-text-secondary)]">
-            Score: <span className="text-[var(--ffi-accent)] font-mono font-bold">{review.overallScore}</span>/100
+            Score: <span className={cn(
+              'font-mono font-bold',
+              isTopGrade ? 'text-[var(--ffi-gold)]' : 'text-white',
+            )}>{review.overallScore}</span>/100
             {' · '}{managerName}&apos;s draft
             {strategyName && <> vs. &ldquo;{strategyName}&rdquo;</>}
           </p>

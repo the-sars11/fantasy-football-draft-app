@@ -19,6 +19,8 @@ import {
   AlertTriangle,
   Clock,
   Gavel,
+  Lock,
+  Check,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import {
@@ -31,6 +33,8 @@ import {
 } from '@/components/ui/ffi-primitives'
 import { useDraftState } from '@/hooks/use-draft-state'
 import { useUserTags } from '@/hooks/use-user-tags'
+import { useHaptic } from '@/hooks/use-haptic'
+import { useSound } from '@/lib/sound/use-sound'
 import { ConnectionStatusPill } from '@/components/draft/connection-status-pill'
 import { ManualPickEntry } from '@/components/draft/manual-pick-entry'
 import { PlayerPool } from '@/components/draft/player-pool'
@@ -41,6 +45,9 @@ import { DraftFlowAlerts } from '@/components/draft/draft-flow-alerts'
 import { PivotHistory } from '@/components/draft/pivot-history'
 import { AuctionAdvisor } from '@/components/draft/auction-advisor'
 import { SnakeAdvisor } from '@/components/draft/snake-advisor'
+import { PickLowerThird } from '@/components/draft/pick-lower-third'
+import { PositionRunTicker } from '@/components/draft/position-run-ticker'
+import { LiveScoreBug } from '@/components/draft/live-scorebug'
 import type { PivotEntry } from '@/components/draft/pivot-history'
 import { scorePlayersWithStrategy, buildIntelContextMap } from '@/lib/research/strategy/scoring'
 import { calculateScarcityExtended, explainPlayer } from '@/lib/draft/explain'
@@ -153,7 +160,10 @@ function PickFeed({
   myManager?: string
 }) {
   const isAuction = format === 'auction'
-  const recentPicks = [...picks].reverse().slice(0, 10)
+  const ordered = [...picks].reverse() // newest first
+  const latestPick = ordered[0] ?? null
+  const latestIsMine = !!(myManager && latestPick && latestPick.manager === myManager)
+  const history = ordered.slice(1, 10) // older picks shown under the hero strip
 
   return (
     <FFICard className="overflow-hidden">
@@ -165,45 +175,38 @@ function PickFeed({
         </span>
       </div>
 
-      {picks.length === 0 ? (
-        <p className="ffi-body-md text-[var(--ffi-text-muted)] text-center py-4">
-          Waiting for first pick...
-        </p>
-      ) : (
-        <div className="space-y-1 max-h-48 overflow-auto">
+      {/* Broadcast lower-third: the most recent pick, large, wiping in */}
+      <PickLowerThird pick={latestPick} format={format} isMyPick={latestIsMine} />
+
+      {history.length > 0 && (
+        <div className="space-y-1 max-h-44 overflow-auto">
           <AnimatePresence mode="popLayout">
-            {recentPicks.map((pick, idx) => {
+            {history.map(pick => {
               const isMyPick = !!(myManager && pick.manager === myManager)
+              const keeper = isKeeperPick(pick)
               return (
                 <motion.div
                   key={`${pick.manager}-${pick.pick_number}`}
                   layout
-                  initial={{ opacity: 0, scale: 0.8, y: -20 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.9 }}
-                  transition={{
-                    type: 'spring',
-                    stiffness: 500,
-                    damping: 25,
-                  }}
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ type: 'spring', stiffness: 500, damping: 28 }}
                   className={cn(
                     'flex items-center gap-2 py-1.5 px-2 rounded-lg transition-colors',
-                    idx === 0 && 'ffi-pick-flash',
-                    isMyPick
-                      ? 'border-l-2 border-[var(--ffi-gold)] bg-[var(--ffi-gold)]/5'
-                      : idx === 0 ? 'bg-[var(--ffi-primary)]/10' : null,
+                    isMyPick && 'border-l-2 border-[var(--ffi-gold)] bg-[var(--ffi-gold)]/5',
                   )}
                 >
-                  <span className="ffi-caption text-[var(--ffi-text-muted)] w-6 text-right">
+                  <span className="ffi-caption text-[var(--ffi-text-muted)] w-6 text-right tabular-nums">
                     {displayPickNum(pick.pick_number)}
                   </span>
                   {pick.position && (
                     <FFIPositionBadge position={pick.position.toUpperCase() as Position} />
                   )}
-                  {isKeeperPick(pick) && <span className="text-[10px] shrink-0" aria-label="Keeper">🔒</span>}
+                  {keeper && <Lock className="h-2.5 w-2.5 shrink-0 text-[#94a3b8]" aria-label="Keeper" />}
                   <span className={cn(
                     'ffi-body-md font-medium flex-1 truncate',
-                    isKeeperPick(pick) ? 'text-[#94a3b8]' :
+                    keeper ? 'text-[#94a3b8]' :
                     isMyPick ? 'text-[var(--ffi-gold-bright)]' : 'text-white',
                   )}>
                     {pick.player_name}
@@ -211,9 +214,9 @@ function PickFeed({
                   <span className="ffi-body-md text-[var(--ffi-text-secondary)] truncate max-w-20">
                     {pick.manager}
                   </span>
-                  {!isKeeperPick(pick) && isAuction && pick.price != null && (
+                  {!keeper && isAuction && pick.price != null && (
                     <span className={cn(
-                      'ffi-label font-mono',
+                      'ffi-label font-mono tabular-nums',
                       isMyPick ? 'text-[var(--ffi-gold)]' : 'text-[var(--ffi-text-secondary)]',
                     )}>
                       ${pick.price}
@@ -731,10 +734,30 @@ export function LiveDraftClient() {
       ? onBlockPlayer !== null
       : state.current_manager === myManagerForClock)
   )
+  // Sensory layer (opt-in sound + Android haptics). Fires the moment it becomes your turn
+  // and on each new pick. The visuals always stand alone; these are bonuses.
+  const haptic = useHaptic()
+  const { play } = useSound()
+  const prevOnClockRef = useRef(false)
   useEffect(() => {
     document.body.classList.toggle('ffi-on-the-clock', onTheClock)
+    if (onTheClock && !prevOnClockRef.current) {
+      haptic('yourTurn')
+      play('yourTurn')
+    }
+    prevOnClockRef.current = onTheClock
     return () => document.body.classList.remove('ffi-on-the-clock')
-  }, [onTheClock])
+  }, [onTheClock, haptic, play])
+
+  const prevPicksRef = useRef<number | null>(null)
+  useEffect(() => {
+    const n = state?.total_picks ?? 0
+    if (prevPicksRef.current !== null && n > prevPicksRef.current) {
+      haptic('pick')
+      play('pick')
+    }
+    prevPicksRef.current = n
+  }, [state?.total_picks, haptic, play])
 
   // Strategy swap handler
   const handleStrategySwap = useCallback((newStrategy: DbStrategy, fromRecommendation = false) => {
@@ -857,7 +880,15 @@ export function LiveDraftClient() {
               status={aifError ? 'danger' : aifConnected ? 'success' : 'info'}
               title={aifError ?? (aifConnected ? `${aifImportedCount} picks imported from Auctioneer` : 'Waiting for Auctioneer data...')}
             >
-              AA {aifConnected ? `✓${aifImportedCount > 0 ? ` ${aifImportedCount}` : ''}` : '…'}
+              AA{' '}
+              {aifConnected ? (
+                <>
+                  <Check className="inline h-3 w-3 align-[-2px]" aria-hidden="true" />
+                  {aifImportedCount > 0 ? ` ${aifImportedCount}` : ''}
+                </>
+              ) : (
+                '...'
+              )}
             </FFIBadge>
           )}
           {/* FF-312: Sleeper sync indicator — snake-only */}
@@ -866,7 +897,15 @@ export function LiveDraftClient() {
               status={sleeperError ? 'danger' : sleeperConnected ? 'success' : 'info'}
               title={sleeperError ?? (sleeperConnected ? `${sleeperImportedCount} picks from Sleeper` : 'Connecting to Sleeper...')}
             >
-              SL {sleeperConnected ? `✓${sleeperImportedCount > 0 ? ` ${sleeperImportedCount}` : ''}` : '…'}
+              SL{' '}
+              {sleeperConnected ? (
+                <>
+                  <Check className="inline h-3 w-3 align-[-2px]" aria-hidden="true" />
+                  {sleeperImportedCount > 0 ? ` ${sleeperImportedCount}` : ''}
+                </>
+              ) : (
+                '...'
+              )}
             </FFIBadge>
           )}
           {saving && <Loader2 className="h-4 w-4 animate-spin text-[var(--ffi-primary)]" />}
@@ -919,7 +958,7 @@ export function LiveDraftClient() {
                   </>
                 ) : (
                   <span className="font-mono text-[var(--ffi-text-secondary)]">
-                    Round {state.current_round ?? '—'} · Pick {state.current_pick_in_round ?? '—'}
+                    Round {state.current_round ?? '-'} · Pick {state.current_pick_in_round ?? '-'}
                   </span>
                 )}
               </div>
@@ -932,6 +971,10 @@ export function LiveDraftClient() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Live score-bug + position-run ticker - broadcast glance layer */}
+      <LiveScoreBug state={state} myManager={myManager} />
+      {flow && <PositionRunTicker runs={flow.currentRuns} />}
 
       {/* Main layout */}
       <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-4">

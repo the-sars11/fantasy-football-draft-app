@@ -229,7 +229,7 @@ export function ManualPickEntry({
           </div>
         ) : (
           <div className="ffi-caption px-2 py-1 rounded bg-[var(--ffi-surface-2)] text-[var(--ffi-text-secondary)] shrink-0 text-sm">
-            Rd {currentRound ?? '—'}
+            Rd {currentRound ?? '-'}
           </div>
         )}
 
@@ -368,7 +368,7 @@ export function ManualPickEntry({
               <Badge variant="outline" className={`text-[10px] px-1 py-0 ${posColors[selectedPlayer.position] ?? ''}`}>
                 {selectedPlayer.position}
               </Badge>
-              {selectedPlayer.name} — {selectedPlayer.team}
+              {selectedPlayer.name} - {selectedPlayer.team}
             </div>
           )}
         </div>

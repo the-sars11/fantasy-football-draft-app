@@ -8,7 +8,7 @@
  */
 
 import { useState, useEffect, useMemo, useCallback } from 'react'
-import { Search, SlidersHorizontal, X, Target, Loader2 } from 'lucide-react'
+import { Search, SlidersHorizontal, X, Target, Loader2, AlertTriangle, Info } from 'lucide-react'
 import { FFIInput, FFIButton, FFIEmptyState } from '@/components/ui/ffi-primitives'
 import { FFIPlayerIntelCard } from '@/components/prep/ffi-player-intel-card'
 import { useUserTags, useToggleTag, useSystemTagActions } from '@/hooks/use-user-tags'
@@ -270,7 +270,7 @@ export function PlayerBrowserClient() {
   if (error) {
     return (
       <FFIEmptyState
-        icon="⚠️"
+        icon={<AlertTriangle className="h-8 w-8 text-[#ff716c]" aria-hidden="true" />}
         title="Failed to load players"
         description={error}
         action={
@@ -285,7 +285,7 @@ export function PlayerBrowserClient() {
   if (players.length === 0) {
     return (
       <FFIEmptyState
-        icon="📋"
+        icon={<Info className="h-8 w-8 text-[#9eadb8]" aria-hidden="true" />}
         title="No player data"
         description="Run a data refresh from the Prep Hub to load player rankings."
         action={
@@ -416,7 +416,7 @@ export function PlayerBrowserClient() {
                 className="flex-1 h-2 bg-surface-container-high rounded-full appearance-none cursor-pointer accent-[#8bacff]"
               />
               <span className="text-sm text-[#9eadb8] w-12 text-center">{adpRange[0]}</span>
-              <span className="text-[#9eadb8]">—</span>
+              <span className="text-[#9eadb8]">-</span>
               <input
                 type="range"
                 min={1}
@@ -478,7 +478,7 @@ export function PlayerBrowserClient() {
       {/* Player list - FF-250: Paginated for performance */}
       {filteredPlayers.length === 0 ? (
         <FFIEmptyState
-          icon="🔍"
+          icon={<Search className="h-8 w-8 text-[#9eadb8]" aria-hidden="true" />}
           title="No players match filters"
           description="Try adjusting your filters or search query."
           action={

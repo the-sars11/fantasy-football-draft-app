@@ -242,10 +242,10 @@ export function FFIPlayerIntelCard({
                 ${isTarget ? 'text-[#2ff801]' : isHighlighted ? 'text-[#2ff801]' : 'text-[#deedf9]'}
               `}
             >
-              {player.consensusAuctionValue > 0 ? `$${player.consensusAuctionValue}` : '—'}
+              {player.consensusAuctionValue > 0 ? `$${player.consensusAuctionValue}` : '-'}
             </div>
             <div className="font-body text-[10px] text-[#9eadb8]">
-              ADP {player.adp > 0 ? player.adp.toFixed(0) : '—'}
+              ADP {player.adp > 0 ? player.adp.toFixed(0) : '-'}
             </div>
           </div>
 

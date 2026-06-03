@@ -1,0 +1,71 @@
+# Code Review and North Star Audit (2026-06)
+
+Comprehensive review run as the research half of the "Sunday Night Gridiron" UI/UX upgrade.
+Findings were produced by reading the actual code (file:line evidence), then a subset was
+fixed in the same build. Each finding is tagged FIXED (this build) or BACKLOG (deferred).
+
+## Executive summary
+
+Overall grade at review time: C+ - a polished visual body around an unfinished nervous
+system. The design system, scoring engine, explainability layer, and trash-talk trigger
+engine are genuinely strong. The gaps were structural: the flagship live AI advisor did not
+fire on its own, cost control was unimplemented, the highest-risk logic was untested, and
+there were confirmed correctness bugs (keeper completion, cross-source dedup).
+
+The top items have now been addressed (see FIXED below). The remaining items are recorded as
+BACKLOG so they are tracked rather than lost.
+
+## North Star scorecard
+
+| # | Criterion | Verdict at review | Status after this build |
+|---|-----------|-------------------|-------------------------|
+| 1 | <=3s recommendations (pick detected -> on screen) | NOT MET for LLM path (manual button only) | FIXED: advisor now auto-fires on pick via use-auto-recommend (auction every pick, snake near your turn). Sub-3s end-to-end still needs a live dry run with an API key. |
+| 2 | Format purity (no auction metrics in snake and vice versa) | MOSTLY MET, one latent leak (PositionScarcityTracker showSpendRanges default true) | FIXED: default flipped to false; callers opt in. Recommendation modules already hard-throw on wrong mode. |
+| 3 | Explainability first-class | MET | Unchanged (strongest area). |
+| 4 | Proactive pivot within 3 picks | PARTIAL (rule-based fired; cited rec needed manual tap) | IMPROVED: the cited rec now auto-fires too. |
+| 5 | One-thumb mobile at arm's length | PARTIAL (tiny connection pill, sync badges 9-11px) | PARTIAL: broadcast score-bug adds glanceable numbers; connection-pill size bump is BACKLOG. |
+
+## Findings
+
+Severity: P0 blocker / P1 important / P2 nice. Effort: S/M/L.
+
+| # | Sev | Area | Location | Problem | Status |
+|---|-----|------|----------|---------|--------|
+| 1 | P0 | North Star / LLM | auction-advisor.tsx, snake-advisor.tsx | AI recommendation only fired on a manual button click. | FIXED - new src/hooks/use-auto-recommend.ts; debounced auto-fire keyed on state.picks.length; manual Refresh retained. |
+| 2 | P0 | Cost | lib/ai/claude.ts | No prompt caching; system context re-billed every call. | FIXED - system prompt now marked cache_control ephemeral by default (cacheSystem option). Note: caching only helps above the model min cache size, so the biggest beneficiary is the larger research/analyze prompts; live Haiku recommend prompts are small and already cheap. |
+| 3 | P0 | Resilience | api/draft/recommend/route.ts | maxTokens 384 risked truncated JSON -> 500; no timeout/retry/fallback. | FIXED - maxDuration=10, maxTokens 600, one retry with backoff, 8s per-call timeout, and a rule-based fallback (top available by strategy) tagged source:'fallback' so the route never 500s the live draft. |
+| 4 | P0 | State machine | lib/draft/state.ts:153 | Keeper leagues never completed (real picks alone never reach total_roster_spots). | FIXED - completion now counts state.keepers.length; covered by a new Vitest test. |
+| 5 | P1 | Testing | whole src | Only one unrelated test file existed. | PARTIAL - added src/lib/draft/__tests__/state.test.ts for the keeper-completion fix (non-keeper control + keeper case). Broader suite (snake math, dedup, format purity) is BACKLOG. |
+| 6 | P1 | Hard rule | trash-talk.tsx (+13 files) | 66 emoji across 14 files; em/en-dashes in user-facing strings. | FIXED - all emoji replaced with Lucide icons; em/en-dashes removed from string literals/JSX/templates; ESLint no-restricted-syntax guard added; trash-talk route strip now covers en-dash too. |
+| 7 | P1 | State / dedup | state.ts:171-193 (applySheetRows) | Picks keyed purely by array index; sheet reorder/correction/mixed-with-manual can misalign or duplicate; snake round inferred wrong when backfilling. | BACKLOG - needs the real Nasties sheet to confirm; dedup by stable identity (name+manager) and derive round from ceil(pick_number/teamCount). |
+| 8 | P1 | Architecture / dedup | use-draft-feed.ts, auction-feed-merge.ts | Double, mismatched dedup (real pick.id vs name-key); the merger's cross-source-with-Sheets path never actually runs. | BACKLOG - pick one dedup key; document the single source of truth. |
+| 9 | P1 | Giant components | live/client.tsx (~1140), review/client.tsx (~1200) | Mix data, 4 feeds, trash-talk, pivot logic, presentation; hard to test. | BACKLOG (explicitly out of this build's scope) - extract useLiveDraftData / useDraftFeeds / PickFeed etc. |
+| 10 | P1 | Resilience / UX | use-draft-polling.ts | Sheet poll has no failure backoff; callbacks in deps can restart the interval mid-draft. | BACKLOG - stabilize callbacks via refs (use-sleeper-draft-feed.ts is the template); add backoff. |
+| 11 | P1 | Keeper numbering | keepers.ts | keepersToPicks uses global negative numbers; applyKeepersToState uses per-manager - K labels can disagree. | BACKLOG - pick one numbering scheme. |
+| 12 | P1 | UX / mechanics | live/client.tsx, manual-pick-entry.tsx | No edit/correct of a mis-entered pick; only LIFO undo. | BACKLOG - per-pick edit / arbitrary undo (rebuild machinery already exists). |
+| 13 | P1 | A11y / mobile | connection-status-pill.tsx | Connection state renders at 9-11px; color-only LIVE/STALE/OFFLINE. | BACKLOG - bump to >=13px, add a per-state glyph (not color only). |
+| 14 | P2 | Code quality | claude.ts (content[0]) | Unsafe access if a non-text/empty content block returns. | FIXED - now finds the text block defensively. |
+| 15 | P2 | Format purity defense | position-scarcity.tsx | showSpendRanges defaulted true (unsafe). | FIXED - defaults false. |
+| 16 | P2 | Pre-existing lint debt | ~25 errors | no-explicit-any (6), react-hooks/refs (~12), no-unescaped-entities (5), prefer-const (2). | BACKLOG - present before this work; unrelated to the UI upgrade. Next 16 does not run ESLint during build, so these do not block the build, but `npm run lint` is not clean until they are addressed. |
+
+## Focused test plan (BACKLOG, highest value first)
+
+1. state.test.ts - extend: snake-order parity at picks 1/12/13/24/25; getMaxBid $1-reserve with keepers; applySheetRows backfill round math.
+2. format-purity.test.ts - fetchAuction/Snake throw in wrong mode; payload field disjointness; trash-talk auction-only triggers silent in snake.
+3. keepers.test.ts - budget deduction, roster fill, excluded from grading, numbering consistency, validateKeepers cases.
+4. auction-feed-merge.test.ts - dedup by pickId; cross-source same-player behavior once precedence is defined.
+5. sleeper-feed.test.ts - pickNoToManagerIdx must match state.ts snake math at boundaries.
+6. recommend-route.test.ts - truncated/invalid JSON returns fallback, not 500 (mock the SDK).
+
+## What is genuinely good (keep it)
+
+- explain.ts explainability engine (weighted factors, cited sources, thin-data guards).
+- Format-split recommendation modules with hard throws.
+- use-sleeper-draft-feed.ts is the model hook (refs for callbacks, stable deps) - use as the refactor template.
+- Trash-talk trigger engine, correctly format-gated at detection.
+
+## Process note
+
+WORKING_STATE/CHANGELOG should be read with mild skepticism: "27/27 tests" was one unrelated
+file, and "FF-265 fixed" was a render-layer band-aid over a data-layer default. Verify claims
+against code. This review did.

@@ -166,14 +166,14 @@ For each strategy, provide:
 - projected_ceiling: 1-100 (how high this strategy can score if it hits)
 - projected_floor: 1-100 (worst case outcome)
 - confidence: "high" | "medium" | "low"
-- budget_allocation: Object with QB, RB, WR, TE, K, DST, bench keys — percentages that sum to 100
+- budget_allocation: Object with QB, RB, WR, TE, K, DST, bench keys - percentages that sum to 100
 - max_bid_percentage: Maximum % of budget on a single player (10-70)
 
 IMPORTANT:
-- Do NOT include round_targets or position_round_priority — those are snake-only fields
-- Reference specific players from the data above — do not invent players
+- Do NOT include round_targets or position_round_priority - those are snake-only fields
+- Reference specific players from the data above - do not invent players
 - Cite actual auction values and tier breaks in your reasoning
-- Vary the strategies — include conservative, balanced, and aggressive options
+- Vary the strategies - include conservative, balanced, and aggressive options
 - Tailor to this league's specific settings (${league.size}-team, ${formatScoringLabel(league.scoringFormat)}, ${formatRosterSlots(league.rosterSlots)})`
 }
 
@@ -215,14 +215,14 @@ For each strategy, provide:
 - projected_ceiling: 1-100 (how high this strategy can score if it hits)
 - projected_floor: 1-100 (worst case outcome)
 - confidence: "high" | "medium" | "low"
-- round_targets: Object with QB, RB, WR, TE, K, DST keys — arrays of round numbers to target each position (e.g. RB: [1, 2, 5])
-- position_round_priority: Object with "early", "mid", "late" keys — arrays of position strings showing priority order per draft phase
+- round_targets: Object with QB, RB, WR, TE, K, DST keys - arrays of round numbers to target each position (e.g. RB: [1, 2, 5])
+- position_round_priority: Object with "early", "mid", "late" keys - arrays of position strings showing priority order per draft phase
 
 IMPORTANT:
-- Do NOT include budget_allocation or max_bid_percentage — those are auction-only fields
-- Reference specific players from the data above — do not invent players
+- Do NOT include budget_allocation or max_bid_percentage - those are auction-only fields
+- Reference specific players from the data above - do not invent players
 - Cite actual ADP values and tier breaks in your reasoning
-- Vary the strategies — include conservative, balanced, and aggressive options
+- Vary the strategies - include conservative, balanced, and aggressive options
 - Round targets should use rounds 1-${totalRounds}
 - Tailor to this league's specific settings (${league.size}-team, ${formatScoringLabel(league.scoringFormat)}, ${formatRosterSlots(league.rosterSlots)})`
 }

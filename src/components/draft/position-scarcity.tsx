@@ -84,7 +84,9 @@ interface PositionScarcityTrackerProps {
 export function PositionScarcityTracker({
   scarcity,
   maxStartable = 24,
-  showSpendRanges = true,
+  // Safe default: never show auction spend ranges unless a caller explicitly opts in.
+  // Keeps auction dollars from leaking into snake mode (format purity).
+  showSpendRanges = false,
   compact = false,
 }: PositionScarcityTrackerProps) {
   const criticalCount = scarcity.filter(
@@ -190,7 +192,7 @@ export function PositionScarcityTracker({
                       Spend Range
                     </span>
                     <span className="font-mono text-[var(--ffi-text-secondary)]">
-                      ${s.spendRange.low}–${s.spendRange.high}
+                      ${s.spendRange.low}-${s.spendRange.high}
                     </span>
                   </div>
                 </div>

@@ -131,16 +131,16 @@ function assessDataCoverage(player: Player): string | null {
   const hasRank = player.consensusRank > 0
 
   if (sourceCount === 0) {
-    return 'No source data — ranking unavailable'
+    return 'No source data - ranking unavailable'
   }
   if (sourceCount < 2 && !hasADP && !hasRank) {
-    return 'Single source, no ADP — estimate only'
+    return 'Single source, no ADP - estimate only'
   }
   if (sourceCount < 2) {
-    return `Only ${sourceCount} source — consensus unavailable`
+    return `Only ${sourceCount} source - consensus unavailable`
   }
   if (!hasADP && !hasRank) {
-    return 'No ADP or rank data — thin coverage'
+    return 'No ADP or rank data - thin coverage'
   }
   return null
 }
@@ -162,14 +162,14 @@ export function explainPlayer(
   if (scored.strategyScore >= 70) {
     factors.push({
       label: 'Strategy Fit',
-      detail: `Score of ${scored.strategyScore}/100 — strong match for your strategy.`,
+      detail: `Score of ${scored.strategyScore}/100 - strong match for your strategy.`,
       impact: 'positive',
       weight: 8,
     })
   } else if (scored.strategyScore < 40) {
     factors.push({
       label: 'Strategy Mismatch',
-      detail: `Score of ${scored.strategyScore}/100 — poor fit for your strategy.`,
+      detail: `Score of ${scored.strategyScore}/100 - poor fit for your strategy.`,
       impact: 'negative',
       weight: 7,
     })
@@ -182,21 +182,21 @@ export function explainPlayer(
     if (posScarcity.scarcityLevel === 'critical') {
       factors.push({
         label: 'Scarcity',
-        detail: `Only ${posScarcity.startableRemaining} startable ${player.position}s remain — critical scarcity.`,
+        detail: `Only ${posScarcity.startableRemaining} startable ${player.position}s remain - critical scarcity.`,
         impact: 'positive',
         weight: 9,
       })
     } else if (posScarcity.scarcityLevel === 'low') {
       factors.push({
         label: 'Scarcity',
-        detail: `${posScarcity.startableRemaining} startable ${player.position}s left — supply running low.`,
+        detail: `${posScarcity.startableRemaining} startable ${player.position}s left - supply running low.`,
         impact: 'positive',
         weight: 6,
       })
     } else if (posScarcity.scarcityLevel === 'abundant') {
       factors.push({
         label: 'Deep Position',
-        detail: `${posScarcity.startableRemaining} startable ${player.position}s available — no rush.`,
+        detail: `${posScarcity.startableRemaining} startable ${player.position}s available - no rush.`,
         impact: 'neutral',
         weight: 3,
       })
@@ -215,7 +215,7 @@ export function explainPlayer(
     if (needed > 0) {
       factors.push({
         label: 'Roster Need',
-        detail: `You still need ${needed} ${player.position}${needed > 1 ? 's' : ''} — ${filled}/${slotCount} filled.`,
+        detail: `You still need ${needed} ${player.position}${needed > 1 ? 's' : ''} - ${filled}/${slotCount} filled.`,
         impact: 'positive',
         weight: 7,
       })
@@ -236,14 +236,14 @@ export function explainPlayer(
     if (adjusted > consensus * 1.1) {
       factors.push({
         label: 'Premium Value',
-        detail: `Strategy values at $${adjusted} vs consensus $${consensus} — worth paying up.`,
+        detail: `Strategy values at $${adjusted} vs consensus $${consensus} - worth paying up.`,
         impact: 'positive',
         weight: 5,
       })
     } else if (adjusted < consensus * 0.9) {
       factors.push({
         label: 'Discount',
-        detail: `Strategy values at $${adjusted} vs consensus $${consensus} — potential bargain.`,
+        detail: `Strategy values at $${adjusted} vs consensus $${consensus} - potential bargain.`,
         impact: 'positive',
         weight: 4,
       })
@@ -256,7 +256,7 @@ export function explainPlayer(
     if (adjusted < adpRound) {
       factors.push({
         label: 'Reach Target',
-        detail: `Strategy says draft in Rd ${adjusted}, ADP suggests Rd ${adpRound} — draft earlier than consensus.`,
+        detail: `Strategy says draft in Rd ${adjusted}, ADP suggests Rd ${adpRound} - draft earlier than consensus.`,
         impact: 'positive',
         weight: 5,
       })
@@ -268,7 +268,7 @@ export function explainPlayer(
     if (player.analysis.isSleeper) {
       factors.push({
         label: 'Sleeper',
-        detail: 'Identified as a sleeper pick — upside outweighs ADP.',
+        detail: 'Identified as a sleeper pick - upside outweighs ADP.',
         impact: 'positive',
         weight: 4,
       })
@@ -276,7 +276,7 @@ export function explainPlayer(
     if (player.analysis.riskLevel === 'high') {
       factors.push({
         label: 'High Risk',
-        detail: player.analysis.reasoning || 'Elevated risk profile — injury or role uncertainty.',
+        detail: player.analysis.reasoning || 'Elevated risk profile - injury or role uncertainty.',
         impact: 'negative',
         weight: 4,
       })
@@ -309,7 +309,7 @@ export function explainPlayer(
   if (dataWarning) {
     factors.push({
       label: 'Thin Data',
-      detail: `Low confidence — ${dataWarning}`,
+      detail: `Low confidence: ${dataWarning}`,
       impact: 'neutral',
       weight: 0,
     })
@@ -333,9 +333,9 @@ export function explainPlayer(
   const topFactor = factors[0]
   let summary: string
   if (scored.targetStatus === 'avoid') {
-    summary = `Avoid ${player.name} — ${topFactor?.detail || 'does not fit your strategy.'}`
+    summary = `Avoid ${player.name}: ${topFactor?.detail || 'does not fit your strategy.'}`
   } else if (scored.strategyScore >= 70) {
-    summary = `${player.name} is a strong pick — ${topFactor?.detail || 'fits your strategy well.'}`
+    summary = `${player.name} is a strong pick - ${topFactor?.detail || 'fits your strategy well.'}`
   } else if (scored.strategyScore >= 50) {
     summary = `${player.name} is a reasonable pick. ${topFactor?.detail || ''}`
   } else {

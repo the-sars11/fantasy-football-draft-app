@@ -143,7 +143,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<TrashTalk
         : null
 
     // Hard-strip em-dashes regardless of prompt compliance — this is the enforcement layer
-    const line = raw ? raw.replace(/\u2014/g, '-').replace(/--/g, '-') : null
+    const line = raw ? raw.replace(/\u2014/g, '-').replace(/\u2013/g, '-').replace(/--/g, '-') : null
 
     return NextResponse.json({ line })
   } catch {

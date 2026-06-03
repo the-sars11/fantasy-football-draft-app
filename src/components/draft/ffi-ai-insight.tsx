@@ -7,6 +7,7 @@
  * Shows tactical reasoning with confidence bar.
  */
 
+import { AlertTriangle } from 'lucide-react'
 import type { Explanation } from '@/lib/draft/explain'
 
 interface FFIAIInsightProps {
@@ -35,9 +36,9 @@ export function FFIAIInsight({ explanation, confidence }: FFIAIInsightProps) {
       {/* FF-270: Thin data warning banner */}
       {isThinData && (
         <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-[#f59e0b]/10 border border-[#f59e0b]/30">
-          <span className="text-[#f59e0b] text-[10px]">⚠</span>
+          <AlertTriangle className="h-3 w-3 text-[#f59e0b]" aria-hidden="true" />
           <span className="text-[9px] font-bold text-[#f59e0b] uppercase tracking-wider">
-            Low confidence — {explanation.dataWarning}
+            Low confidence: {explanation.dataWarning}
           </span>
         </div>
       )}

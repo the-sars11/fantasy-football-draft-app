@@ -394,7 +394,7 @@ export function DraftBoardClient() {
 
         {!activeStrategy && !dataLoading && players.length > 0 && (
           <span className="text-xs text-muted-foreground">
-            No active strategy &mdash;{' '}
+            No active strategy -{' '}
             <a href="/prep/strategies" className="text-primary underline underline-offset-4">
               set one
             </a>

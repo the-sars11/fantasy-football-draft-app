@@ -278,7 +278,7 @@ function CompactPlayerCard({ sp, rank, format, isExpanded, onToggle, onToggleTar
               </div>
               <div>
                 <div className="ffi-caption text-[var(--ffi-text-muted)]">ADP</div>
-                <div className="font-mono font-bold tabular-nums text-[var(--color-on-surface)]">{p.adp > 0 ? p.adp.toFixed(1) : '—'}</div>
+                <div className="font-mono font-bold tabular-nums text-[var(--color-on-surface)]">{p.adp > 0 ? p.adp.toFixed(1) : '-'}</div>
               </div>
               <div>
                 <div className="ffi-caption text-[var(--ffi-text-muted)]">

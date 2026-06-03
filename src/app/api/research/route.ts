@@ -77,7 +77,7 @@ export async function POST(req: NextRequest) {
 
     if (!process.env.ANTHROPIC_API_KEY) {
       return NextResponse.json(
-        { error: 'AI features not configured — ANTHROPIC_API_KEY is missing' },
+        { error: 'AI features not configured - ANTHROPIC_API_KEY is missing' },
         { status: 503 }
       )
     }

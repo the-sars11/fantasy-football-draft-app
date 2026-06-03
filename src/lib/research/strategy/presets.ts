@@ -136,7 +136,7 @@ export const SNAKE_PRESETS: Record<SnakeArchetype, SnakePreset> = {
   },
   'robust-rb': {
     name: 'Robust RB',
-    description: 'Lock in 2-3 RBs in the first 4 rounds. Positional scarcity play — RB depth wins leagues.',
+    description: 'Lock in 2-3 RBs in the first 4 rounds. Positional scarcity play - RB depth wins leagues.',
     archetype: 'robust-rb',
     position_weights: { QB: 4, RB: 10, WR: 6, TE: 4, K: 1, DEF: 1 },
     risk_tolerance: 'conservative',

@@ -131,7 +131,7 @@ export function PositionBreakdown({ players, format }: PositionBreakdownProps) {
 
                         {/* Value */}
                         <span className="text-xs font-mono shrink-0">
-                          {isAuction ? `$${value}` : value > 0 ? `Rd ${typeof value === 'number' ? Math.round(value) : value}` : '—'}
+                          {isAuction ? `$${value}` : value > 0 ? `Rd ${typeof value === 'number' ? Math.round(value) : value}` : '-'}
                         </span>
 
                         {/* Score bar */}

@@ -388,7 +388,7 @@ export function LeagueConfigForm({ userId }: { userId: string }) {
               <span className="text-sm text-muted-foreground">
                 {keeperEnabled
                   ? 'Players can be kept from previous seasons'
-                  : 'Full redraft — no keepers'}
+                  : 'Full redraft - no keepers'}
               </span>
             </div>
 

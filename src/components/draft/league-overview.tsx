@@ -10,7 +10,7 @@
 import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { ChevronDown, ChevronRight, LayoutGrid } from 'lucide-react'
+import { ChevronDown, ChevronRight, LayoutGrid, Lock } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { DraftState } from '@/lib/draft/state'
 import { isKeeperPick, displayPickNum } from '@/lib/draft/keepers'
@@ -131,7 +131,7 @@ export function LeagueOverview({ state, myManager }: LeagueOverviewProps) {
                               {pick.player_name}
                             </span>
                             {keeper ? (
-                              <span className="text-[10px] ml-auto shrink-0" aria-label="Keeper">🔒</span>
+                              <Lock className="h-3 w-3 ml-auto shrink-0 text-[#9eadb8]" aria-label="Keeper" aria-hidden="false" />
                             ) : (
                               <>
                                 {isAuction && pick.price != null && (

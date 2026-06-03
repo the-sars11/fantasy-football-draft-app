@@ -27,6 +27,7 @@ import {
   ShieldAlert,
   Sparkles,
   AlertCircle,
+  AlertTriangle,
   Users,
   RefreshCw,
   Lightbulb,
@@ -729,7 +730,7 @@ function RulePreviewDisplay({ preview }: RulePreviewDisplayProps) {
       {validation.warnings.length > 0 && (
         <div className="text-[10px] text-on-surface-variant">
           {validation.warnings.map((warn, i) => (
-            <p key={i}>⚠️ {warn}</p>
+            <p key={i} className="flex items-center gap-1"><AlertTriangle className="h-3 w-3 shrink-0" aria-hidden="true" /> {warn}</p>
           ))}
         </div>
       )}

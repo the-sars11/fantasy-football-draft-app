@@ -1,5 +1,6 @@
 import { getUser } from '@/lib/supabase/server'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { SoundSettings } from '@/components/settings/sound-settings'
 
 export default async function SettingsPage() {
   const user = await getUser()
@@ -27,6 +28,8 @@ export default async function SettingsPage() {
           </div>
         </CardContent>
       </Card>
+
+      <SoundSettings />
     </div>
   )
 }

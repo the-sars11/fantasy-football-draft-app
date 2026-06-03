@@ -91,7 +91,7 @@ export function ConnectionStatusPill({
           WebkitBackdropFilter: 'blur(8px)',
         }}
         className="flex items-center gap-[5px] px-[10px] py-[5px] rounded-[20px] cursor-default"
-        aria-label={`Connection status: ${cfg.label}${elapsed ? ` — ${elapsed} ago` : ''}`}
+        aria-label={`Connection status: ${cfg.label}${elapsed ? ` - ${elapsed} ago` : ''}`}
       >
         {/* Dot */}
         <span
@@ -124,7 +124,7 @@ export function ConnectionStatusPill({
           style={{ borderColor: 'rgba(239,68,68,0.22)' }}
         >
           <p style={{ fontSize: 10, color: '#f87171', lineHeight: 1.4, flex: 1 }}>
-            {error ?? 'Sheet unreachable — check share permissions or your connection. Picks entered manually will still save.'}
+            {error ?? 'Sheet unreachable - check share permissions or your connection. Picks entered manually will still save.'}
           </p>
           <div className="flex items-center gap-1 shrink-0">
             {onRetry && (

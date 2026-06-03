@@ -205,7 +205,7 @@ function detectOverpay(
 
     const messages = severity === 'savage'
       ? [
-          `${pick.manager} just LIT MONEY ON FIRE 🔥`,
+          `${pick.manager} just LIT MONEY ON FIRE`,
           `Someone call the police, ${pick.manager} just got ROBBED`,
           `${pick.manager} said "I don't need this money anyway"`,
         ]
@@ -225,7 +225,7 @@ function detectOverpay(
       type: 'overpay',
       managerName: pick.manager,
       message: messages[Math.floor(Math.random() * messages.length)],
-      detail: `Paid $${price} for ${pick.player_name} — that's $${overpayAmount} OVER consensus value ($${expectedValue}). Easy target for trash talk.`,
+      detail: `Paid $${price} for ${pick.player_name} - that's $${overpayAmount} OVER consensus value ($${expectedValue}). Easy target for trash talk.`,
       pickNumber: pick.pick_number,
       severity,
       timestamp: Date.now(),
@@ -364,7 +364,7 @@ function detectSteal(
         type: 'steal',
         managerName: pick.manager,
         message: `${pick.manager} just got away with robbery`,
-        detail: `Snagged ${pick.player_name} for $${pick.price} — that's $${discount} under value ($${expectedValue}). League was sleeping.`,
+        detail: `Snagged ${pick.player_name} for $${pick.price} - that's $${discount} under value ($${expectedValue}). League was sleeping.`,
         pickNumber: pick.pick_number,
         severity: discount >= 20 ? 'medium' : 'mild',
         timestamp: Date.now(),
@@ -583,7 +583,7 @@ function detectFirstDefenseBuy(
     id: `first_defense_buy-${pick.pick_number}`,
     type: 'first_defense_buy',
     managerName: pick.manager,
-    message: `${pick.manager} is the first to grab a defense — bold early move`,
+    message: `${pick.manager} is the first to grab a defense - bold early move`,
     detail: `First DEF bought at pick #${pick.pick_number}; all other teams still have zero defenses`,
     pickNumber: pick.pick_number,
     severity: 'mild',
@@ -611,7 +611,7 @@ function detectLoneWolfQb(
     type: 'lone_wolf_qb',
     managerName: pick.manager,
     message: `${pick.manager} still has no QB after ${pickCount} picks`,
-    detail: `${pickCount} players drafted and still no QB — either a genius or a disaster waiting to happen`,
+    detail: `${pickCount} players drafted and still no QB - either a genius or a disaster waiting to happen`,
     pickNumber: pick.pick_number,
     severity: pickCount >= 12 ? 'medium' : 'mild',
     timestamp: Date.now(),
@@ -656,7 +656,7 @@ function detectMarketMismatch(
           message: isSteal
             ? `${pick.manager} got ${pick.player_name} at a steal vs comparable picks`
             : `${pick.manager} paid a premium vs comparable picks at the same tier`,
-          detail: `${pick.player_name} (ADP ${Math.round(pickAdp)}) at $${pick.price} — ${comp.manager} got comparable ${comp.player_name} (ADP ${Math.round(compPlayer.adp)}) for $${comp.price}`,
+          detail: `${pick.player_name} (ADP ${Math.round(pickAdp)}) at $${pick.price} - ${comp.manager} got comparable ${comp.player_name} (ADP ${Math.round(compPlayer.adp)}) for $${comp.price}`,
           pickNumber: pick.pick_number,
           severity: spread >= 0.5 ? 'medium' : 'mild',
           timestamp: Date.now(),
@@ -677,7 +677,7 @@ function detectMarketMismatch(
           message: isLater
             ? `${pick.manager} snagged ${pick.player_name} way later than a comparable pick`
             : `${pick.manager} reached early vs a comparable pick`,
-          detail: `${pick.player_name} (ADP ${Math.round(pickAdp)}) drafted Round ${pick.round}; comparable ${comp.player_name} (ADP ${Math.round(compPlayer.adp)}) went to ${comp.manager} Round ${comp.round} — ${n} rounds ${isLater ? 'cheaper/later' : 'earlier'} for similar-tier ${pos}`,
+          detail: `${pick.player_name} (ADP ${Math.round(pickAdp)}) drafted Round ${pick.round}; comparable ${comp.player_name} (ADP ${Math.round(compPlayer.adp)}) went to ${comp.manager} Round ${comp.round} - ${n} rounds ${isLater ? 'cheaper/later' : 'earlier'} for similar-tier ${pos}`,
           pickNumber: pick.pick_number,
           severity: n >= 5 ? 'medium' : 'mild',
           timestamp: Date.now(),
@@ -709,7 +709,7 @@ function detectLateRosterQbPanic(
     id: `late_roster_qb_panic-${pick.pick_number}`,
     type: 'late_roster_qb_panic',
     managerName: pick.manager,
-    message: `${pick.manager} still no QB — Round ${currentRound} problem incoming`,
+    message: `${pick.manager} still no QB - Round ${currentRound} problem incoming`,
     detail: `Team has ${pickCount} players and still no QB; just drafted another ${pick.position ?? '?'} in Round ${currentRound}`,
     pickNumber: pick.pick_number,
     severity: pickCount >= 10 ? 'savage' : pickCount >= 8 ? 'medium' : 'mild',
@@ -745,7 +745,7 @@ export function analyzeKeeperPicksForTrashTalk(
           type: 'keeper_steal',
           managerName: keeper.manager,
           message: `${keeper.manager} kept ${keeper.player_name} at a STEAL`,
-          detail: `Kept at Round ${keeperRound} — ADP is Round ${adpRound}. That's ${surplus} rounds of free value.`,
+          detail: `Kept at Round ${keeperRound} - ADP is Round ${adpRound}. That's ${surplus} rounds of free value.`,
           pickNumber: -(i + 1),
           severity: surplus >= 5 ? 'savage' : 'medium',
           timestamp: Date.now(),
@@ -958,7 +958,7 @@ export function generateRoastReport(
       entries.push({
         managerName: manager,
         roastType: 'bye_disaster',
-        title: '💀 Bye Week Catastrophe',
+        title: 'Bye Week Catastrophe',
         description: byeDisaster.detail,
         severity: byeDisaster.severity,
       })
@@ -977,7 +977,7 @@ export function generateRoastReport(
       entries.push({
         managerName: manager,
         roastType: 'hoarding',
-        title: '🏃 RB Hoarding Syndrome',
+        title: 'RB Hoarding Syndrome',
         description: `${manager} drafted ${posCounts.RB} RBs and only ${posCounts.WR} WRs. Did they forget WRs exist?`,
         severity: 'medium',
       })
@@ -986,7 +986,7 @@ export function generateRoastReport(
       entries.push({
         managerName: manager,
         roastType: 'hoarding',
-        title: '📡 WR Collector',
+        title: 'WR Collector',
         description: `${manager} went Zero-RB... and then Zero-RB again. ${posCounts.WR} WRs, ${posCounts.RB} RBs.`,
         severity: 'medium',
       })
@@ -999,7 +999,7 @@ export function generateRoastReport(
     entries.push({
       managerName: sortedOverpay[0][0],
       roastType: 'overpay',
-      title: '🔥 MVP of Overpaying',
+      title: 'MVP of Overpaying',
       description: `${sortedOverpay[0][0]} overpaid by $${sortedOverpay[0][1]} total. That's not how auctions work.`,
       severity: sortedOverpay[0][1] >= 40 ? 'savage' : 'medium',
     })
@@ -1011,7 +1011,7 @@ export function generateRoastReport(
     entries.push({
       managerName: sortedReaches[0][0],
       roastType: 'reach',
-      title: '😬 Serial Reacher',
+      title: 'Serial Reacher',
       description: `${sortedReaches[0][0]} reached on ${sortedReaches[0][1]} picks. Panic mode: ENGAGED.`,
       severity: sortedReaches[0][1] >= 5 ? 'savage' : 'medium',
     })
@@ -1023,7 +1023,7 @@ export function generateRoastReport(
     entries.push({
       managerName: sortedSteals[0][0],
       roastType: 'steal',
-      title: '🎯 Lucky Bastard Award',
+      title: 'Lucky Bastard Award',
       description: `${sortedSteals[0][0]} got ${sortedSteals[0][1]} steals. Either they're good or you all weren't paying attention.`,
       severity: 'mild',
     })

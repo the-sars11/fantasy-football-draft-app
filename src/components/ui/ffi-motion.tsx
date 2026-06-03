@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { createContext, useContext } from "react"
-import { motion, AnimatePresence, useMotionValue, useTransform, type PanInfo, LayoutGroup } from "framer-motion"
+import { motion, AnimatePresence, useMotionValue, useTransform, useReducedMotion, type PanInfo, LayoutGroup } from "framer-motion"
 import { cn } from "@/lib/utils"
 
 /* ========================================
@@ -269,14 +269,18 @@ export function FFIBounceIn({
 interface FFICelebrationProps {
   className?: string
   show: boolean
+  /** 'gold' for the champion moment (post-draft grade); 'accent' (green) otherwise. */
+  tone?: 'accent' | 'gold'
   children?: React.ReactNode
 }
 
 export function FFICelebration({
   className,
   show,
+  tone = 'accent',
   children,
 }: FFICelebrationProps) {
+  const ring = tone === 'gold' ? 'border-[var(--ffi-gold-bright)]' : 'border-[var(--ffi-accent)]'
   return (
     <AnimatePresence>
       {show && (
@@ -296,13 +300,13 @@ export function FFICelebration({
         >
           {/* Burst rings */}
           <motion.div
-            className="absolute inset-0 rounded-lg border-2 border-[var(--ffi-accent)]"
+            className={cn("absolute inset-0 rounded-lg border-2", ring)}
             initial={{ scale: 1, opacity: 1 }}
             animate={{ scale: 2, opacity: 0 }}
             transition={{ duration: 0.6, ease: "easeOut" }}
           />
           <motion.div
-            className="absolute inset-0 rounded-lg border-2 border-[var(--ffi-accent)]"
+            className={cn("absolute inset-0 rounded-lg border-2", ring)}
             initial={{ scale: 1, opacity: 1 }}
             animate={{ scale: 2.5, opacity: 0 }}
             transition={{ duration: 0.8, ease: "easeOut", delay: 0.1 }}
@@ -311,6 +315,38 @@ export function FFICelebration({
         </motion.div>
       )}
     </AnimatePresence>
+  )
+}
+
+/* ========================================
+   Confetti Burst — gold particle pop for the champion grade reveal
+   ======================================== */
+
+export function FFIConfettiBurst({ show, count = 18 }: { show: boolean; count?: number }) {
+  const prefersReduced = useReducedMotion()
+  if (prefersReduced || !show) return null
+
+  const golds = ["var(--ffi-gold)", "var(--ffi-gold-bright)", "var(--ffi-gold-deep)"]
+
+  return (
+    <div className="pointer-events-none absolute inset-0 overflow-visible" aria-hidden="true">
+      {Array.from({ length: count }).map((_, i) => {
+        const angle = (i / count) * Math.PI * 2
+        const dist = 70 + (i % 5) * 24
+        const x = Math.cos(angle) * dist
+        const y = Math.sin(angle) * dist - 30
+        return (
+          <motion.span
+            key={i}
+            className="absolute left-1/2 top-1/2 block h-2 w-1.5 rounded-[1px]"
+            style={{ background: golds[i % golds.length] }}
+            initial={{ x: 0, y: 0, opacity: 1, rotate: 0 }}
+            animate={{ x, y, opacity: 0, rotate: (i * 53) % 360 }}
+            transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
+          />
+        )
+      })}
+    </div>
   )
 }
 

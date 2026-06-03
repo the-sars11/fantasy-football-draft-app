@@ -16,9 +16,12 @@ import {
   CheckCheck,
   ChevronDown,
   ChevronUp,
+  ChevronRight,
   Trophy,
   AlertTriangle,
   Users,
+  Check,
+  X,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import {
@@ -112,8 +115,9 @@ export function TeamReports({ picks, managers, format, budget }: TeamReportsProp
           </div>
           <div className="space-y-2">
             {leagueReport.leagueHighlights.map((h, i) => (
-              <p key={i} className="ffi-body-md text-[var(--ffi-text-secondary)]">
-                ★ {h}
+              <p key={i} className="ffi-body-md text-[var(--ffi-text-secondary)] flex items-start gap-1.5">
+                <ChevronRight className="h-4 w-4 shrink-0 mt-px text-[var(--ffi-accent)]" aria-hidden="true" />
+                {h}
               </p>
             ))}
           </div>
@@ -268,8 +272,9 @@ function TeamReportCard({
                       <p className="ffi-label text-[var(--ffi-success)] mb-2">STRENGTHS</p>
                       <ul className="space-y-1">
                         {report.strengths.map((s, i) => (
-                          <li key={i} className="ffi-body-md text-[var(--ffi-text-secondary)]">
-                            ✓ {s}
+                          <li key={i} className="ffi-body-md text-[var(--ffi-text-secondary)] flex items-start gap-1.5">
+                            <Check className="h-3.5 w-3.5 shrink-0 mt-px text-[var(--ffi-success)]" aria-hidden="true" />
+                            {s}
                           </li>
                         ))}
                       </ul>
@@ -280,8 +285,9 @@ function TeamReportCard({
                       <p className="ffi-label text-[var(--ffi-warning)] mb-2">NEEDS WORK</p>
                       <ul className="space-y-1">
                         {report.weaknesses.map((w, i) => (
-                          <li key={i} className="ffi-body-md text-[var(--ffi-text-secondary)]">
-                            ✗ {w}
+                          <li key={i} className="ffi-body-md text-[var(--ffi-text-secondary)] flex items-start gap-1.5">
+                            <X className="h-3.5 w-3.5 shrink-0 mt-px text-[var(--ffi-warning)]" aria-hidden="true" />
+                            {w}
                           </li>
                         ))}
                       </ul>

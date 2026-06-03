@@ -198,10 +198,10 @@ export async function readSheet(
 
   if (!res.ok) {
     if (res.status === 404) {
-      throw new Error('Sheet not found — check the URL')
+      throw new Error('Sheet not found - check the URL')
     }
     if (res.status === 403 || res.status === 401) {
-      throw new Error('Sheet is not publicly shared — set to "Anyone with the link"')
+      throw new Error('Sheet is not publicly shared - set to "Anyone with the link"')
     }
     throw new Error(`Failed to read sheet: ${res.status} ${res.statusText}`)
   }

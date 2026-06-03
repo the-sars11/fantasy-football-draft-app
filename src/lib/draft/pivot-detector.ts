@@ -157,12 +157,12 @@ function scoreAlternative(
       // If budget-rich late in draft, aggressive strategy better
       if (budgetPct > 0.5 && pickPct > 0.4 && alt.risk_tolerance === 'aggressive') {
         score += 5
-        reasons.push('Budget surplus — can be aggressive')
+        reasons.push('Budget surplus - can be aggressive')
       }
       // If budget-tight early, conservative better
       if (budgetPct < 0.3 && pickPct < 0.4 && alt.risk_tolerance === 'conservative') {
         score += 5
-        reasons.push('Budget tight — shift conservative')
+        reasons.push('Budget tight - shift conservative')
       }
     }
   }

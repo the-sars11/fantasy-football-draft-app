@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Trash2, Plus, Loader2 } from 'lucide-react'
+import { Trash2, Plus, Loader2, FileSpreadsheet, Activity, PenLine, Gamepad2, Check, VolumeX, Smile, Flame, Link, FolderOpen, Lock } from 'lucide-react'
 import type { DraftFormat, Position } from '@/lib/supabase/database.types'
 import {
   FFICard,
@@ -258,7 +258,7 @@ export function DraftSetupClient() {
               <SelectContent>
                 {leagues.map(league => (
                   <SelectItem key={league.id} value={league.id}>
-                    {league.name} — {league.format}
+                    {league.name} - {league.format}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -327,7 +327,7 @@ export function DraftSetupClient() {
             className="w-full"
           >
             {selectedLeague
-              ? `Confirm — Start ${isAuction ? 'Auction' : 'Snake'} Draft →`
+              ? `Confirm - Start ${isAuction ? 'Auction' : 'Snake'} Draft ->`
               : 'Select a league to continue'
             }
           </FFIButton>
@@ -357,12 +357,12 @@ export function DraftSetupClient() {
 
         <div className="space-y-3">
           {([
-            { mode: 'sheets'  as DraftMode, icon: '📊', label: 'Google Sheets', desc: 'Auto-import picks from a shared spreadsheet', forceShow: true },
-            { mode: 'sleeper' as DraftMode, icon: '🏈', label: 'Sleeper',        desc: 'Auto-import picks from your Sleeper draft room', forceShow: false },
-            { mode: 'manual'  as DraftMode, icon: '✏️', label: 'Manual Entry',  desc: 'Enter each pick by hand as it happens',           forceShow: true },
-            { mode: 'sim'     as DraftMode, icon: '🎮', label: 'Offline Sim',   desc: 'Practice run — no real draft',                    forceShow: true },
+            { mode: 'sheets'  as DraftMode, Icon: FileSpreadsheet, label: 'Google Sheets', desc: 'Auto-import picks from a shared spreadsheet', forceShow: true },
+            { mode: 'sleeper' as DraftMode, Icon: Activity,        label: 'Sleeper',        desc: 'Auto-import picks from your Sleeper draft room', forceShow: false },
+            { mode: 'manual'  as DraftMode, Icon: PenLine,         label: 'Manual Entry',  desc: 'Enter each pick by hand as it happens',           forceShow: true },
+            { mode: 'sim'     as DraftMode, Icon: Gamepad2,        label: 'Offline Sim',   desc: 'Practice run - no real draft',                    forceShow: true },
           ] as const).filter(({ mode, forceShow }) => forceShow || (mode === 'sleeper' && !isAuction))
-          .map(({ mode, icon, label, desc }) => (
+          .map(({ mode, Icon, label, desc }) => (
             <button
               key={mode}
               onClick={() => setDraftMode(mode)}
@@ -372,13 +372,15 @@ export function DraftSetupClient() {
                   : 'border-[var(--ffi-border)]/20 bg-[var(--ffi-surface)] hover:border-[#8bacff]/30'
                 }`}
             >
-              <span className="text-2xl w-10 text-center shrink-0">{icon}</span>
+              <span className="w-10 flex items-center justify-center shrink-0">
+                <Icon className="h-5 w-5 text-[#9eadb8]" aria-hidden="true" />
+              </span>
               <div className="flex-1 min-w-0">
                 <div className="ffi-title-md text-white font-semibold">{label}</div>
                 <div className="ffi-body-md text-[var(--ffi-text-secondary)] text-sm">{desc}</div>
               </div>
               {draftMode === mode && (
-                <span className="text-[#2ff801] text-lg shrink-0">✓</span>
+                <Check className="h-5 w-5 text-[#2ff801] shrink-0" aria-hidden="true" />
               )}
             </button>
           ))}
@@ -418,7 +420,7 @@ export function DraftSetupClient() {
           </button>
           <FFISectionHeader
             title="Session Details"
-            subtitle={`Mode: ${draftMode === 'sheets' ? '📊 Google Sheets' : draftMode === 'sleeper' ? '🏈 Sleeper' : draftMode === 'manual' ? '✏️ Manual Entry' : '🎮 Offline Sim'}`}
+            subtitle={`Mode: ${draftMode === 'sheets' ? 'Google Sheets' : draftMode === 'sleeper' ? 'Sleeper' : draftMode === 'manual' ? 'Manual Entry' : 'Offline Sim'}`}
           />
         </div>
 
@@ -446,10 +448,10 @@ export function DraftSetupClient() {
           </div>
           <div className="grid grid-cols-3 gap-2">
             {([
-              { mode: 'off' as TrashTalkMode, emoji: '🔇', label: 'Off', desc: 'Silent' },
-              { mode: 'family-safe' as TrashTalkMode, emoji: '😄', label: 'Family-Safe', desc: 'PG-13' },
-              { mode: 'adult-only' as TrashTalkMode, emoji: '🔥', label: 'Adult-Only', desc: 'No filter' },
-            ] as const).map(({ mode, emoji, label, desc }) => (
+              { mode: 'off' as TrashTalkMode, Icon: VolumeX, label: 'Off', desc: 'Silent' },
+              { mode: 'family-safe' as TrashTalkMode, Icon: Smile, label: 'Family-Safe', desc: 'PG-13' },
+              { mode: 'adult-only' as TrashTalkMode, Icon: Flame, label: 'Adult-Only', desc: 'No filter' },
+            ] as const).map(({ mode, Icon, label, desc }) => (
               <button
                 key={mode}
                 type="button"
@@ -460,7 +462,7 @@ export function DraftSetupClient() {
                     : 'border-[var(--ffi-border)]/20 bg-[var(--ffi-surface)] hover:border-[#8bacff]/30'
                   }`}
               >
-                <span className="text-xl">{emoji}</span>
+                <Icon className="h-5 w-5" aria-hidden="true" />
                 <span className={`ffi-caption font-semibold ${trashTalkMode === mode ? 'text-[#2ff801]' : 'text-white'}`}>
                   {label}
                 </span>
@@ -500,7 +502,7 @@ export function DraftSetupClient() {
               onChange={e => setSleeperDraftInput(e.target.value)}
             />
             <p className="ffi-caption text-[var(--ffi-text-secondary)] mt-1">
-              Paste the URL from your Sleeper draft room. No account needed — picks sync automatically every 5 seconds.
+              Paste the URL from your Sleeper draft room. No account needed - picks sync automatically every 5 seconds.
             </p>
           </div>
         )}
@@ -510,7 +512,7 @@ export function DraftSetupClient() {
           <FFICard>
             <div className="ffi-title-md text-white font-semibold mb-1">Auctioneer Sync</div>
             <div className="ffi-body-md text-[var(--ffi-text-secondary)] mb-3 text-sm">
-              Import picks from the Auctioneer app in real time. Optional — skip if not using it.
+              Import picks from the Auctioneer app in real time. Optional - skip if not using it.
             </div>
             <div className="space-y-2">
               {/* Same-device localStorage path */}
@@ -527,15 +529,15 @@ export function DraftSetupClient() {
                     : 'border-[var(--ffi-border)]/20 bg-[var(--ffi-surface)] hover:border-[#8bacff]/30'
                   }`}
               >
-                <span className="text-xl shrink-0">🔗</span>
+                <Link className="h-5 w-5 shrink-0 text-[#9eadb8]" aria-hidden="true" />
                 <div className="flex-1 min-w-0">
                   <div className="ffi-body-md text-white font-semibold">Same Device</div>
                   <div className="ffi-caption text-[var(--ffi-text-secondary)]">
-                    Auctioneer running in the same browser — picks sync automatically
+                    Auctioneer running in the same browser - picks sync automatically
                   </div>
                 </div>
                 {auctioneerConnectionType === 'localstorage' && (
-                  <span className="text-[#2ff801] shrink-0">✓</span>
+                  <Check className="h-5 w-5 text-[#2ff801] shrink-0" aria-hidden="true" />
                 )}
               </button>
 
@@ -569,17 +571,17 @@ export function DraftSetupClient() {
                     : 'border-[var(--ffi-border)]/20 bg-[var(--ffi-surface)] hover:border-[#8bacff]/30'
                   }`}
               >
-                <span className="text-xl shrink-0">📂</span>
+                <FolderOpen className="h-5 w-5 shrink-0 text-[#9eadb8]" aria-hidden="true" />
                 <div className="flex-1 min-w-0">
                   <div className="ffi-body-md text-white font-semibold">Export File</div>
                   <div className="ffi-caption text-[var(--ffi-text-secondary)] truncate">
                     {auctioneerConnectionType === 'file' && auctioneerFileName
                       ? `Connected: ${auctioneerFileName}`
-                      : "Pick Auctioneer's exported JSON file — re-polled every 3s"}
+                      : "Pick Auctioneer's exported JSON file - re-polled every 3s"}
                   </div>
                 </div>
                 {auctioneerConnectionType === 'file' && (
-                  <span className="text-[#2ff801] shrink-0">✓</span>
+                  <Check className="h-5 w-5 text-[#2ff801] shrink-0" aria-hidden="true" />
                 )}
               </button>
             </div>
@@ -589,7 +591,7 @@ export function DraftSetupClient() {
             )}
             {auctioneerConnectionType === null && (
               <p className="ffi-caption text-[var(--ffi-text-muted)] mt-2">
-                Not using Auctioneer? Leave this unset — no impact on the draft.
+                Not using Auctioneer? Leave this unset - no impact on the draft.
               </p>
             )}
           </FFICard>
@@ -751,7 +753,7 @@ export function DraftSetupClient() {
                   <span className="ffi-caption font-mono text-[var(--ffi-text-muted)] shrink-0">
                     {isAuction ? `$${keeper.cost}` : `Rd ${keeper.cost}`}
                   </span>
-                  <span className="text-[10px] ml-1 shrink-0">🔒</span>
+                  <Lock className="h-3 w-3 ml-1 shrink-0 text-[#9eadb8]" aria-hidden="true" />
                 </div>
               ))}
             </div>

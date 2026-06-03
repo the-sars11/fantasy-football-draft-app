@@ -326,7 +326,7 @@ export function FFIPlayerCard({
             <div className="font-mono text-[10px] tabular-nums text-[#9eadb8] flex items-center justify-end gap-1.5">
               {isAuction
                 ? `$${valueRangeLow}-$${valueRangeHigh} RANGE`
-                : `ADP ${player.adp > 0 ? player.adp.toFixed(1) : '—'}`
+                : `ADP ${player.adp > 0 ? player.adp.toFixed(1) : '-'}`
               }
               {/* FF-278: ADP divergence indicator */}
               {adpDivergence != null && adpDivergence > 10 && (

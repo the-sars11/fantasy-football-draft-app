@@ -339,7 +339,7 @@ export function analyzeDraft(
       `at pick ${pivotHistory[pivotHistory.length - 1].atPick}.`
   }
 
-  const summary = overallScore >= 85 ? 'Excellent draft — executed strategy well'
+  const summary = overallScore >= 85 ? 'Excellent draft - executed strategy well'
     : overallScore >= 75 ? 'Solid draft with minor deviations from plan'
     : overallScore >= 65 ? 'Decent draft but significant strategy drift'
     : 'Draft deviated substantially from strategy'

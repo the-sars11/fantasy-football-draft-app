@@ -101,13 +101,13 @@ export function formatScoringBonuses(settings?: ScoringSettings | null): string 
   if (settings.rec_200 > 0) impacts.push(`200+ yd receiving game bonus: +${settings.rec_200} pts (elite WR ceiling premium)`)
 
   // Non-standard base scoring
-  if (settings.pass_td !== 4) impacts.push(`Passing TD: ${settings.pass_td} pts (${settings.pass_td > 4 ? 'QB premium — draft QBs earlier' : 'QB discount — wait on QBs'})`)
-  if (settings.pass_int !== -2) impacts.push(`Interception: ${settings.pass_int} pts (${settings.pass_int < -2 ? 'harsh — favor safe QBs' : 'lenient — gunslinger QBs less penalized'})`)
-  if (settings.fumble_lost !== -2) impacts.push(`Fumble lost: ${settings.fumble_lost} pts (${settings.fumble_lost < -2 ? 'harsh — avoid fumble-prone players' : 'lenient'})`)
+  if (settings.pass_td !== 4) impacts.push(`Passing TD: ${settings.pass_td} pts (${settings.pass_td > 4 ? 'QB premium - draft QBs earlier' : 'QB discount - wait on QBs'})`)
+  if (settings.pass_int !== -2) impacts.push(`Interception: ${settings.pass_int} pts (${settings.pass_int < -2 ? 'harsh - favor safe QBs' : 'lenient - gunslinger QBs less penalized'})`)
+  if (settings.fumble_lost !== -2) impacts.push(`Fumble lost: ${settings.fumble_lost} pts (${settings.fumble_lost < -2 ? 'harsh - avoid fumble-prone players' : 'lenient'})`)
 
   // D/ST deviations from standard
-  if (settings.dst_int > 2) impacts.push(`D/ST interception: ${settings.dst_int} pts (premium — favor ballhawk defenses)`)
-  if (settings.dst_fr > 2) impacts.push(`D/ST fumble recovery: ${settings.dst_fr} pts (premium — favor aggressive defenses)`)
+  if (settings.dst_int > 2) impacts.push(`D/ST interception: ${settings.dst_int} pts (premium - favor ballhawk defenses)`)
+  if (settings.dst_fr > 2) impacts.push(`D/ST fumble recovery: ${settings.dst_fr} pts (premium - favor aggressive defenses)`)
 
   if (impacts.length === 0) return null
 
@@ -154,13 +154,13 @@ function formatPlayerData(
     return posPlayers.map((sp) => {
       const p = sp.player
       const adjVal = sp.adjustedAuctionValue ?? p.consensusAuctionValue
-      return `${p.name} (${p.team}) — consensus $${p.consensusAuctionValue}, strategy-adj $${adjVal}, score ${sp.strategyScore}, ADP ${Math.round(p.adp)}, proj ${Math.round(p.projections.points)} pts${sp.targetStatus !== 'neutral' ? ` [${sp.targetStatus}]` : ''}`
+      return `${p.name} (${p.team}) - consensus $${p.consensusAuctionValue}, strategy-adj $${adjVal}, score ${sp.strategyScore}, ADP ${Math.round(p.adp)}, proj ${Math.round(p.projections.points)} pts${sp.targetStatus !== 'neutral' ? ` [${sp.targetStatus}]` : ''}`
     }).join('\n')
   } else {
     return posPlayers.map((sp) => {
       const p = sp.player
       const adjRound = sp.adjustedRoundValue ?? Math.ceil(p.adp / 12)
-      return `${p.name} (${p.team}) — ADP ${Math.round(p.adp)}, round ${Math.ceil(p.adp / 12)}, strategy-adj round ${adjRound}, score ${sp.strategyScore}, proj ${Math.round(p.projections.points)} pts${sp.targetStatus !== 'neutral' ? ` [${sp.targetStatus}]` : ''}`
+      return `${p.name} (${p.team}) - ADP ${Math.round(p.adp)}, round ${Math.ceil(p.adp / 12)}, strategy-adj round ${adjRound}, score ${sp.strategyScore}, proj ${Math.round(p.projections.points)} pts${sp.targetStatus !== 'neutral' ? ` [${sp.targetStatus}]` : ''}`
     }).join('\n')
   }
 }
@@ -289,11 +289,11 @@ export async function analyzeValueAdjustments(
     const p = sp.player
     if (format === 'auction') {
       const adj = sp.adjustedAuctionValue ?? p.consensusAuctionValue
-      return `${p.name} (${p.position}, ${p.team}) — consensus $${p.consensusAuctionValue}, strategy-adj $${adj}, score ${sp.strategyScore}, proj ${Math.round(p.projections.points)} pts${sp.targetStatus !== 'neutral' ? ` [${sp.targetStatus}]` : ''}`
+      return `${p.name} (${p.position}, ${p.team}) - consensus $${p.consensusAuctionValue}, strategy-adj $${adj}, score ${sp.strategyScore}, proj ${Math.round(p.projections.points)} pts${sp.targetStatus !== 'neutral' ? ` [${sp.targetStatus}]` : ''}`
     } else {
       const baseRound = Math.ceil(p.adp / 12)
       const adj = sp.adjustedRoundValue ?? baseRound
-      return `${p.name} (${p.position}, ${p.team}) — ADP ${Math.round(p.adp)}, round ${baseRound}, strategy-adj round ${adj}, score ${sp.strategyScore}, proj ${Math.round(p.projections.points)} pts${sp.targetStatus !== 'neutral' ? ` [${sp.targetStatus}]` : ''}`
+      return `${p.name} (${p.position}, ${p.team}) - ADP ${Math.round(p.adp)}, round ${baseRound}, strategy-adj round ${adj}, score ${sp.strategyScore}, proj ${Math.round(p.projections.points)} pts${sp.targetStatus !== 'neutral' ? ` [${sp.targetStatus}]` : ''}`
     }
   }).join('\n')
 
@@ -390,9 +390,9 @@ export async function analyzeTargetsAndAvoids(
   const playerLines = top80.map((sp) => {
     const p = sp.player
     if (format === 'auction') {
-      return `${p.name} (${p.position}, ${p.team}) — $${p.consensusAuctionValue}, adj $${sp.adjustedAuctionValue ?? p.consensusAuctionValue}, score ${sp.strategyScore}, proj ${Math.round(p.projections.points)} pts${sp.targetStatus !== 'neutral' ? ` [${sp.targetStatus}]` : ''}`
+      return `${p.name} (${p.position}, ${p.team}) - $${p.consensusAuctionValue}, adj $${sp.adjustedAuctionValue ?? p.consensusAuctionValue}, score ${sp.strategyScore}, proj ${Math.round(p.projections.points)} pts${sp.targetStatus !== 'neutral' ? ` [${sp.targetStatus}]` : ''}`
     } else {
-      return `${p.name} (${p.position}, ${p.team}) — ADP ${Math.round(p.adp)}, adj round ${sp.adjustedRoundValue ?? Math.ceil(p.adp / 12)}, score ${sp.strategyScore}, proj ${Math.round(p.projections.points)} pts${sp.targetStatus !== 'neutral' ? ` [${sp.targetStatus}]` : ''}`
+      return `${p.name} (${p.position}, ${p.team}) - ADP ${Math.round(p.adp)}, adj round ${sp.adjustedRoundValue ?? Math.ceil(p.adp / 12)}, score ${sp.strategyScore}, proj ${Math.round(p.projections.points)} pts${sp.targetStatus !== 'neutral' ? ` [${sp.targetStatus}]` : ''}`
     }
   }).join('\n')
 
@@ -419,12 +419,12 @@ TARGETS (best value plays):
 AVOIDS (overpriced, risky, or poor strategy fit):
 - name, position, team
 - value: ${format === 'auction' ? 'consensus $ value (what others will pay)' : 'ADP round'}
-- reasoning: 1-2 sentences citing data (why to avoid — overpriced, injury risk, bad fit, etc.)
+- reasoning: 1-2 sentences citing data (why to avoid - overpriced, injury risk, bad fit, etc.)
 - severity: "hard-avoid" | "overpriced" | "risky"
 
 Include players marked [target] in strategy as targets (if data supports it).
 Include players marked [avoid] in strategy as avoids.
-Also find VALUE plays not in the target list — players whose consensus value underestimates their worth for this strategy.
+Also find VALUE plays not in the target list - players whose consensus value underestimates their worth for this strategy.
 
 Provide a "summary": 2-3 sentences on the overall target/avoid landscape.`
 
@@ -506,7 +506,7 @@ For each tier break:
 - endsAtRank: position rank where this tier ends
 - players: array of player names in this tier
 - dropoffSeverity: "cliff" (massive drop), "moderate" (notable drop), "gradual" (gentle decline)
-- insight: 1 sentence on what this tier break means for the strategy (e.g. "After tier 2 WR, value drops sharply — prioritize WR in rounds 2-4")
+- insight: 1 sentence on what this tier break means for the strategy (e.g. "After tier 2 WR, value drops sharply - prioritize WR in rounds 2-4")
 
 For each position, identify 3-5 tiers.
 
@@ -580,9 +580,9 @@ export async function analyzeSleeperPicks(
   const playerLines = candidates.slice(0, 60).map((sp) => {
     const p = sp.player
     if (format === 'auction') {
-      return `${p.name} (${p.position}, ${p.team}) — $${p.consensusAuctionValue}, adj $${sp.adjustedAuctionValue ?? p.consensusAuctionValue}, score ${sp.strategyScore}, proj ${Math.round(p.projections.points)} pts, rank ${p.consensusRank}${sp.targetStatus !== 'neutral' ? ` [${sp.targetStatus}]` : ''}${p.injuryStatus ? ` [${p.injuryStatus}]` : ''}`
+      return `${p.name} (${p.position}, ${p.team}) - $${p.consensusAuctionValue}, adj $${sp.adjustedAuctionValue ?? p.consensusAuctionValue}, score ${sp.strategyScore}, proj ${Math.round(p.projections.points)} pts, rank ${p.consensusRank}${sp.targetStatus !== 'neutral' ? ` [${sp.targetStatus}]` : ''}${p.injuryStatus ? ` [${p.injuryStatus}]` : ''}`
     } else {
-      return `${p.name} (${p.position}, ${p.team}) — ADP ${Math.round(p.adp)}, adj round ${sp.adjustedRoundValue ?? Math.ceil(p.adp / 12)}, score ${sp.strategyScore}, proj ${Math.round(p.projections.points)} pts, rank ${p.consensusRank}${sp.targetStatus !== 'neutral' ? ` [${sp.targetStatus}]` : ''}${p.injuryStatus ? ` [${p.injuryStatus}]` : ''}`
+      return `${p.name} (${p.position}, ${p.team}) - ADP ${Math.round(p.adp)}, adj round ${sp.adjustedRoundValue ?? Math.ceil(p.adp / 12)}, score ${sp.strategyScore}, proj ${Math.round(p.projections.points)} pts, rank ${p.consensusRank}${sp.targetStatus !== 'neutral' ? ` [${sp.targetStatus}]` : ''}${p.injuryStatus ? ` [${p.injuryStatus}]` : ''}`
     }
   }).join('\n')
 
@@ -596,7 +596,7 @@ ${formatStrategyContext(strategy)}
 ${playerLines}
 
 ## Task
-Identify 10 SLEEPER PICKS — undervalued players who could significantly outperform their consensus ranking.
+Identify 10 SLEEPER PICKS - undervalued players who could significantly outperform their consensus ranking.
 
 For each sleeper:
 - name: exact player name

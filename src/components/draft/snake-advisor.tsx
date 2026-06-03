@@ -33,6 +33,7 @@ import {
   type TradeSuggestion,
 } from '@/lib/draft/snake-advisor'
 import { fetchSnakeRecommendation, type LLMSnakeRecommendation } from '@/lib/draft/recommend-snake'
+import { useAutoRecommend } from '@/hooks/use-auto-recommend'
 import { getManagerKeepers } from '@/lib/draft/keepers'
 import type { DraftState } from '@/lib/draft/state'
 import type { ScoredPlayer } from '@/lib/research/strategy/scoring'
@@ -102,6 +103,15 @@ export function SnakeAdvisor({
       setLoadingRec(false)
     }
   }, [state, managerName, scoredPlayers, draftedNames, strategy])
+
+  // Auto-fire targets when it is (almost) your turn, so a rec is on screen the moment you
+  // are up. Snake only calls the LLM near your pick to keep cost down.
+  useAutoRecommend({
+    enabled: state.format === 'snake',
+    active: !!posInfo && state.status !== 'completed' && (posInfo.isMyPick || posInfo.picksUntilMyTurn <= 2),
+    triggerKey: state.picks.length,
+    onFetch: handleGetTargets,
+  })
 
   if (state.format !== 'snake') return null
   if (!posInfo) return null

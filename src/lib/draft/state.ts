@@ -149,8 +149,10 @@ export function applyPick(state: DraftState, pick: DraftPick): DraftState {
     currentManager = state.manager_order[orderIdx] || state.manager_order[0]
   }
 
-  // Check if draft is complete
-  const isComplete = newTotal >= state.total_roster_spots
+  // Check if draft is complete. Keepers fill roster slots but live in state.keepers
+  // (and per-manager picks), not state.picks, so they must be counted here or a keeper
+  // league can never reach total_roster_spots and never flips to 'completed'.
+  const isComplete = newTotal + state.keepers.length >= state.total_roster_spots
 
   return {
     ...state,

@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { Sparkles, Flame, AlertTriangle, Skull, Meh, Target } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 /* ========================================
@@ -315,7 +316,7 @@ export function FFITacticalInsight({
   return (
     <div className={cn("ffi-card ffi-animate-slide-in", className)} {...props}>
       <div className="flex items-center gap-2 mb-3">
-        <span className="text-[var(--ffi-accent)]">✦</span>
+        <Sparkles className="h-4 w-4 text-[var(--ffi-primary)]" aria-hidden="true" />
         <span className="ffi-label text-[var(--ffi-text-secondary)]">TACTICAL INSIGHT</span>
       </div>
       <p className="ffi-body-md text-white mb-4">{insight}</p>
@@ -362,13 +363,14 @@ export function FFITrashTalkAlert({
   className,
   ...props
 }: FFITrashTalkAlertProps) {
-  const icons: Record<TrashTalkType, string> = {
-    overpay: "🔥",
-    imbalance: "⚠️",
-    bye_disaster: "💀",
-    reach: "😬",
-    steal: "🎯",
+  const icons: Record<TrashTalkType, typeof Flame> = {
+    overpay: Flame,
+    imbalance: AlertTriangle,
+    bye_disaster: Skull,
+    reach: Meh,
+    steal: Target,
   }
+  const Icon = icons[type]
 
   return (
     <div
@@ -384,8 +386,8 @@ export function FFITrashTalkAlert({
       {...props}
     >
       <div className="flex items-center gap-2 mb-2">
-        <span className="text-lg">{icons[type]}</span>
-        <span className="ffi-label text-[var(--ffi-accent)]">TRASH TALK ALERT</span>
+        <Icon className="h-5 w-5 text-white" aria-hidden="true" />
+        <span className="ffi-label text-[var(--ffi-text-secondary)]">TRASH TALK ALERT</span>
       </div>
       <p className="ffi-body-md text-white mb-3">{message}</p>
       <div className="flex gap-2">
@@ -434,11 +436,7 @@ export function FFIAIRecommendation({
   return (
     <div
       className={cn(
-        "relative overflow-hidden rounded-3xl p-6",
-        "bg-gradient-to-br from-slate-900/90 to-slate-900/60",
-        "border border-slate-700/80",
-        "backdrop-blur-lg",
-        "shadow-[0_8px_30px_rgba(0,0,0,0.6),0_0_15px_rgba(85,130,230,0.1)]",
+        "ffi-card-elevated relative overflow-hidden",
         className
       )}
       {...props}
@@ -452,12 +450,12 @@ export function FFIAIRecommendation({
 
       <div className="relative z-10">
         {/* Status badge */}
-        <span className="inline-block px-3 py-1 rounded-full bg-slate-800 border border-slate-700 text-[10px] font-bold text-[var(--ffi-accent)] tracking-widest uppercase mb-4 shadow-[0_0_10px_rgba(57,255,20,0.2)]">
+        <span className="inline-block px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] text-[10px] font-bold text-[var(--ffi-primary)] tracking-widest uppercase mb-4">
           {variant === "strategic" ? "System Status" : "AI Recommendation"}
         </span>
 
         {/* Title */}
-        <h2 className="text-2xl font-black italic uppercase tracking-tight text-white mb-2 leading-none">
+        <h2 className="font-headline text-2xl font-bold tracking-tight text-white mb-2 leading-tight">
           {title}
         </h2>
 
@@ -472,7 +470,7 @@ export function FFIAIRecommendation({
             {primaryAction && (
               <button
                 onClick={primaryAction.onClick}
-                className="flex-1 bg-[var(--ffi-accent)] text-black font-extrabold py-3 px-4 rounded-xl hover:brightness-110 transition-all shadow-[0_4px_20px_rgba(57,255,20,0.4)] text-sm tracking-tight uppercase"
+                className="flex-1 bg-[var(--ffi-primary)] text-white font-bold py-3 px-4 rounded-xl hover:brightness-110 transition-all shadow-[0_4px_20px_rgba(85,130,230,0.4)] text-sm tracking-tight"
               >
                 {primaryAction.label}
               </button>
@@ -480,7 +478,7 @@ export function FFIAIRecommendation({
             {secondaryAction && (
               <button
                 onClick={secondaryAction.onClick}
-                className="flex-1 bg-slate-800/80 border border-slate-700 text-white font-bold py-3 px-4 rounded-xl hover:bg-slate-700 transition-colors text-sm"
+                className="flex-1 bg-[rgba(15,23,42,0.8)] border border-white/[0.08] text-white font-bold py-3 px-4 rounded-xl hover:bg-[rgba(30,41,59,0.9)] transition-colors text-sm"
               >
                 {secondaryAction.label}
               </button>

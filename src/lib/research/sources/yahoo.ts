@@ -20,17 +20,17 @@
 // TODO: FF-011 — Implement Yahoo data fetching (OAuth flow)
 
 export async function fetchYahooRankings() {
-  throw new Error('Yahoo adapter not yet implemented — requires OAuth setup')
+  throw new Error('Yahoo adapter not yet implemented - requires OAuth setup')
 }
 
 export async function fetchYahooProjections() {
-  throw new Error('Yahoo adapter not yet implemented — requires OAuth setup')
+  throw new Error('Yahoo adapter not yet implemented - requires OAuth setup')
 }
 
 export async function fetchYahooAuctionValues() {
-  throw new Error('Yahoo adapter not yet implemented — requires OAuth setup')
+  throw new Error('Yahoo adapter not yet implemented - requires OAuth setup')
 }
 
 export async function fetchYahooADP() {
-  throw new Error('Yahoo adapter not yet implemented — requires OAuth setup')
+  throw new Error('Yahoo adapter not yet implemented - requires OAuth setup')
 }

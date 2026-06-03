@@ -159,9 +159,9 @@ export function projectBestAvailable(
     }
 
     let reason: string
-    if (survival >= 80) reason = `ADP ${adp} — likely available`
-    else if (survival >= 50) reason = `ADP ${adp} — may get picked (${picksUntil} picks away)`
-    else reason = `ADP ${adp} — unlikely to last ${picksUntil} more picks`
+    if (survival >= 80) reason = `ADP ${adp} - likely available`
+    else if (survival >= 50) reason = `ADP ${adp} - may get picked (${picksUntil} picks away)`
+    else reason = `ADP ${adp} - unlikely to last ${picksUntil} more picks`
 
     results.push({ player: sp, survivalProbability: Math.round(survival), reason })
   }
@@ -236,7 +236,7 @@ export function getTradeSuggestions(
         targetPlayer: target.player.player.name,
         targetPosition: pos,
         threatManager: threatManagers[0],
-        reasoning: `${target.player.player.name} (${pos}) has ${target.survivalProbability}% chance of surviving — ${threatManagers[0]} also needs ${pos}`,
+        reasoning: `${target.player.player.name} (${pos}) has ${target.survivalProbability}% chance of surviving - ${threatManagers[0]} also needs ${pos}`,
         urgency: target.survivalProbability < 25 ? 'high' : 'medium',
       })
     }

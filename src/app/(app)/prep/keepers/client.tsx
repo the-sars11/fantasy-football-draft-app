@@ -476,7 +476,7 @@ export function KeeperDeclarationClient() {
                       : kv.surplus < 0 ? 'text-[var(--ffi-danger)]'
                       : 'text-[var(--ffi-text-secondary)]'
                     const surplusLabel =
-                      !kv.hasData ? '—'
+                      !kv.hasData ? '-'
                       : kv.surplus > 0 ? `+${surplusAbs}${isAuction ? ' $' : ' rd'}`
                       : kv.surplus < 0 ? `-${surplusAbs}${isAuction ? ' $' : ' rd'}`
                       : `±0`

@@ -10,7 +10,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react'
-import { Play, Loader2, AlertCircle, Trophy, AlertTriangle, ChevronRight } from 'lucide-react'
+import { Play, Loader2, AlertCircle, Trophy, AlertTriangle, ChevronRight, Star } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -383,14 +383,14 @@ export function SimulateClient() {
 
           {strategy && (
             <Badge variant="secondary" className="gap-1">
-              <span className="text-yellow-500">★</span>
+              <Star className="h-3 w-3 text-yellow-500" aria-hidden="true" />
               {strategy.name}
             </Badge>
           )}
 
           {!strategy && (
             <span className="text-xs text-muted-foreground">
-              No active strategy —{' '}
+              No active strategy -{' '}
               <a href="/prep/strategies" className="text-primary underline underline-offset-4">
                 set one
               </a>{' '}

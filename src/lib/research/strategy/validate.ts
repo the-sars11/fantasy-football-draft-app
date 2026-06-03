@@ -28,10 +28,10 @@ export function validateStrategy(
     const isSnakeArchetype = (SNAKE_ARCHETYPES as readonly string[]).includes(strategy.archetype)
 
     if (format === 'auction' && isSnakeArchetype) {
-      errors.push(`Archetype "${strategy.archetype}" is a snake archetype — cannot use with auction format`)
+      errors.push(`Archetype "${strategy.archetype}" is a snake archetype - cannot use with auction format`)
     }
     if (format === 'snake' && isAuctionArchetype) {
-      errors.push(`Archetype "${strategy.archetype}" is an auction archetype — cannot use with snake format`)
+      errors.push(`Archetype "${strategy.archetype}" is an auction archetype - cannot use with snake format`)
     }
   }
 

@@ -34,6 +34,7 @@ import {
   type PositionUrgencyWarning,
 } from '@/lib/draft/auction-advisor'
 import { fetchAuctionRecommendation, type LLMAuctionRecommendation } from '@/lib/draft/recommend-auction'
+import { useAutoRecommend } from '@/hooks/use-auto-recommend'
 import type { DraftState } from '@/lib/draft/state'
 import type { ScoredPlayer } from '@/lib/research/strategy/scoring'
 import type { Strategy as DbStrategy } from '@/lib/supabase/database.types'
@@ -116,6 +117,15 @@ export function AuctionAdvisor({
       setLoadingRec(false)
     }
   }, [state, managerName, scoredPlayers, draftedNames, strategy])
+
+  // Auto-fire targets when the board changes (no manual tap). The 30s client cache in
+  // fetchAuctionRecommendation dedupes; the manual Refresh button still overrides.
+  useAutoRecommend({
+    enabled: state.format === 'auction',
+    active: state.status !== 'completed',
+    triggerKey: state.picks.length,
+    onFetch: handleGetTargets,
+  })
 
   if (state.format !== 'auction') return null
 
@@ -242,7 +252,7 @@ export function AuctionAdvisor({
                     }`}>
                       {row.delta > 0 ? `+$${row.delta}` :
                        row.delta < 0 ? `-$${Math.abs(row.delta)}` :
-                       '—'}
+                       '-'}
                     </span>
                   )}
                 </div>

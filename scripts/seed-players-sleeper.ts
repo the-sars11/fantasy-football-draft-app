@@ -80,7 +80,7 @@ async function main() {
   console.log(`After filter (active, QB/RB/WR/TE/DEF): ${filtered.length} players`)
 
   if (filtered.length < 300) {
-    console.warn(`WARNING: Only ${filtered.length} players — expected 300+. Continuing anyway.`)
+    console.warn(`WARNING: Only ${filtered.length} players - expected 300+. Continuing anyway.`)
   }
 
   // 3. Normalize to players_cache schema
@@ -172,7 +172,7 @@ async function main() {
   if ((count ?? 0) >= 300) {
     console.log('FFT-004 PASS: 300+ players confirmed in players_cache')
   } else {
-    console.error(`FFT-004 FAIL: Only ${count} players in cache — expected 300+`)
+    console.error(`FFT-004 FAIL: Only ${count} players in cache - expected 300+`)
     process.exit(1)
   }
 }

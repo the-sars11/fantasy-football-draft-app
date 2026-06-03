@@ -54,14 +54,14 @@ export function calculateMaxBidAdvice(
     factors.push({
       label: 'Strategy target',
       impact: 'increases',
-      detail: `Score ${strategyScore}/100 — worth paying up`,
+      detail: `Score ${strategyScore}/100 - worth paying up`,
     })
   } else if (strategyScore < 40) {
     recommendedMax = Math.round(recommendedMax * 0.75)
     factors.push({
       label: 'Low strategy fit',
       impact: 'decreases',
-      detail: `Score ${strategyScore}/100 — let others overpay`,
+      detail: `Score ${strategyScore}/100 - let others overpay`,
     })
   }
 
@@ -137,10 +137,10 @@ export function calculateMaxBidAdvice(
   recommendedMax = Math.max(1, Math.min(absoluteMax, Math.round(recommendedMax)))
 
   const reasoning = recommendedMax >= consensusValue * 1.2
-    ? `Worth stretching — high strategy fit + limited alternatives`
+    ? `Worth stretching - high strategy fit + limited alternatives`
     : recommendedMax <= consensusValue * 0.8
     ? `Let it go if bidding exceeds $${recommendedMax}`
-    : `Fair value range — bid up to $${recommendedMax}`
+    : `Fair value range - bid up to $${recommendedMax}`
 
   return { maxBid: recommendedMax, reasoning, factors }
 }
@@ -184,9 +184,9 @@ export function analyzeBudgetStrategy(
     suggestion = `Spending faster than draft pace. ${remainingPicks} picks left with $${mgr.budget_remaining}. Consider bargain targets to balance.`
   } else if (pctSpent < pctPicks - 15) {
     status = 'behind'
-    suggestion = `Under-spending — $${mgr.budget_remaining} for ${remainingPicks} picks. Can afford to be aggressive on next key target.`
+    suggestion = `Under-spending: $${mgr.budget_remaining} for ${remainingPicks} picks. Can afford to be aggressive on next key target.`
   } else {
-    suggestion = `On pace — $${avgPrice} avg/pick, $${mgr.budget_remaining} remaining for ${remainingPicks} picks.`
+    suggestion = `On pace: $${avgPrice} avg/pick, $${mgr.budget_remaining} remaining for ${remainingPicks} picks.`
   }
 
   return {

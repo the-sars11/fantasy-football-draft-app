@@ -57,7 +57,7 @@ export function reviewToShareText(
 ): string {
   const lines: string[] = []
 
-  lines.push(`DRAFT REVIEW — ${managerName}`)
+  lines.push(`DRAFT REVIEW - ${managerName}`)
   lines.push(`Grade: ${review.overallGrade} (${review.overallScore}/100)`)
   lines.push(review.summary)
   lines.push('')
@@ -85,7 +85,7 @@ export function reviewToShareText(
       const cost = p.price != null ? ` ($${p.price})` : p.round != null ? ` (Rd ${p.round})` : ''
       return `${p.name}${cost}`
     }).join(', ')
-    lines.push(`  ${pg.position}: ${pg.grade} — ${playerList}`)
+    lines.push(`  ${pg.position}: ${pg.grade} - ${playerList}`)
   }
   lines.push('')
 
@@ -93,7 +93,7 @@ export function reviewToShareText(
     lines.push('STRATEGY TARGETS:')
     for (const tr of review.targetResults) {
       const icon = tr.status === 'hit' ? 'HIT' : tr.status === 'missed' ? 'MISS' : tr.status === 'avoided_success' ? 'AVOIDED' : 'DRAFTED'
-      lines.push(`  [${icon}] ${tr.playerName} — ${tr.detail}`)
+      lines.push(`  [${icon}] ${tr.playerName} - ${tr.detail}`)
     }
     lines.push('')
   }
@@ -510,13 +510,13 @@ export function teamReportToText(report: TeamReport, format: 'auction' | 'snake'
 
   if (report.strengths.length > 0) {
     lines.push('STRENGTHS:')
-    report.strengths.forEach(s => lines.push(`  ✓ ${s}`))
+    report.strengths.forEach(s => lines.push(`  + ${s}`))
     lines.push('')
   }
 
   if (report.weaknesses.length > 0) {
     lines.push('AREAS TO IMPROVE:')
-    report.weaknesses.forEach(w => lines.push(`  ✗ ${w}`))
+    report.weaknesses.forEach(w => lines.push(`  - ${w}`))
     lines.push('')
   }
 
@@ -564,7 +564,7 @@ export function leagueReportToText(report: LeagueReport): string {
 
   if (report.leagueHighlights.length > 0) {
     lines.push('LEAGUE HIGHLIGHTS:')
-    report.leagueHighlights.forEach(h => lines.push(`  ★ ${h}`))
+    report.leagueHighlights.forEach(h => lines.push(`  * ${h}`))
     lines.push('')
   }
 
@@ -632,7 +632,7 @@ export function teamReportToHTML(report: TeamReport, format: 'auction' | 'snake'
   <div class="section">
     <div class="section-title">Strengths</div>
     <ul class="list">
-      ${report.strengths.map(s => `<li class="strength">✓ ${s}</li>`).join('')}
+      ${report.strengths.map(s => `<li class="strength">+ ${s}</li>`).join('')}
     </ul>
   </div>
   ` : ''}
@@ -641,7 +641,7 @@ export function teamReportToHTML(report: TeamReport, format: 'auction' | 'snake'
   <div class="section">
     <div class="section-title">Areas to Improve</div>
     <ul class="list">
-      ${report.weaknesses.map(w => `<li class="weakness">✗ ${w}</li>`).join('')}
+      ${report.weaknesses.map(w => `<li class="weakness">- ${w}</li>`).join('')}
     </ul>
   </div>
   ` : ''}

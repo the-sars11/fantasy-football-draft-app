@@ -2,6 +2,39 @@
 
 ---
 
+## 2026-06-03 — Sunday Night Gridiron: AAA UI moments + make-it-real fixes (Opus)
+
+**Task:** AAA UI/UX upgrade + code-review-driven P0 fixes  |  **Class:** `output` (UI) + `pipeline` + `bugfix` | **Lenses:** Design, QA, Architecture
+Personality "Sunday Night Gridiron" (NFL primetime broadcast graphics) chosen by Joe; scope = visual + make-it-real fixes; extras = opt-in sound + Android haptics. Two research deliverables written: `.claude/CODE_REVIEW_2026-06.md`, `.claude/AAA_UI_RESEARCH.md`.
+
+**Phase 0 - foundation + hard-rule hygiene**
+- `globals.css`: added `--ffi-live` broadcast cyan token (live-data signal, never CTA/value), named easing vars (`--ease-broadcast/spring/standard`), a registered `@property --ffi-sheen-angle`, and global `font-variant-numeric: tabular-nums`.
+- Emoji purge: all 66 emoji across 14 files replaced with Lucide icons (trash-talk config + renders + AwardBadge, ffi-primitives FFITrashTalkAlert/FFITacticalInsight, setup/players/team-reports/league-overview/export/etc., live keeper lock + sync checks, review trash-talk tab).
+- Em/en-dash sweep across all `src` string literals/JSX/templates; trash-talk route strip now removes en-dash too; added ESLint `no-restricted-syntax` guard so dashes cannot return.
+- `FFIAIRecommendation` de-drifted to v2.0 (killed italic/uppercase headline, lime CTA, hardcoded slate borders).
+
+**Phase 1 - make-it-real P0 fixes**
+- Auto-fire AI advisor: new `src/hooks/use-auto-recommend.ts`; AuctionAdvisor fires on every pick, SnakeAdvisor near your turn (debounced, ref-stable). Flagship "<=3s after a pick" now happens without a manual tap; manual Refresh retained.
+- `claude.ts`: prompt caching (system marked `cache_control` ephemeral by default) + defensive text-block parse.
+- `api/draft/recommend/route.ts`: `maxDuration=10`, maxTokens 384->600, one retry+backoff, 8s timeout, rule-based fallback (`source:'fallback'`) so the live draft never 500s.
+- Keeper-completion bug fixed in `state.ts` (`total_picks + keepers.length`); new `src/lib/draft/__tests__/state.test.ts` (29 tests pass).
+- Format purity: `position-scarcity.tsx` `showSpendRanges` default true->false.
+
+**Phase 2 - signature LIVE broadcast moments**
+- `pick-lower-third.tsx`: most-recent pick wipes in as a TV lower-third (gold rail for your pick, cyan for others), one-shot sheen, fixed height = zero layout shift. PickFeed now shows it as the hero with history below.
+- `live-scorebug.tsx`: persistent heavy-glass score-bug (budget/round/roster, tabular mono, cyan flash on change). Format-pure.
+- `position-run-ticker.tsx`: cyan insight strip on a 3+ position run (counts only).
+
+**Phase 3 - champion REVIEW moment**
+- GradeHero: grade is now GOLD (was lime) - `gradeGlow.A`, `.ffi-grade-a`, score color; rotating conic gold ring (`.ffi-grade-ring-sheen` via `@property`); wired `FFICelebration` (new `tone="gold"`) + new `FFIConfettiBurst`; Oswald verdict word ("ELITE DRAFT"). Reduced-motion -> static.
+
+**Phase 4 - sensory + continuity**
+- `use-haptic.ts` (Android-only, no-op iOS, reduced-motion aware), `use-sound.ts` (opt-in, muted default, Web Audio synth, `useSyncExternalStore`), settings toggle (`sound-settings.tsx`). Cues wired: your-turn + each pick (live), champion (review). `view-transition.ts` helper shipped.
+
+**Verify:** type-check clean; `npm run build` succeeds (all routes); 29/29 tests; lint has 0 net-new errors (25 pre-existing debt documented in CODE_REVIEW_2026-06.md, BACKLOG). Visual: settings sound toggle, live score-bug + lower-third, and 375px one-thumb layout confirmed via preview screenshots. Marquee animations (lower-third wipe with a real pick, gold grade hero + confetti) render in layout; full motion proof needs a seeded/live session. Live AI auto-fire end-to-end needs `ANTHROPIC_API_KEY` + Joe's typed cost approval (gated).
+
+---
+
 ## 2026-06-03 — UX-2 (Opus elevation): On-the-clock hero + true moment-gated spotlight
 
 **Task:** UX-2 review/upgrade (Sonnet → Opus)  |  **Class:** `output` (UI) | **Lenses:** Design, QA

@@ -8,7 +8,7 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Bookmark, Flame, AlertTriangle, Skull, Target, Meh } from 'lucide-react'
+import { X, Bookmark, Flame, AlertTriangle, Skull, Target, Meh, DollarSign, Wallet, Coins, Crown, Shield, BarChart3, Lock } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import {
   FFICard,
@@ -25,112 +25,96 @@ import type {
 // Icon and color config for trash talk types
 const trashTalkConfig: Record<TrashTalkType, {
   icon: typeof Flame
-  emoji: string
   bgClass: string
   borderClass: string
   textClass: string
 }> = {
   overpay: {
     icon: Flame,
-    emoji: '🔥',
     bgClass: 'bg-[var(--ffi-danger)]/10',
     borderClass: 'border-l-[var(--ffi-danger)]',
     textClass: 'text-[var(--ffi-danger)]',
   },
   imbalance: {
     icon: AlertTriangle,
-    emoji: '⚠️',
     bgClass: 'bg-[var(--ffi-warning)]/10',
     borderClass: 'border-l-[var(--ffi-warning)]',
     textClass: 'text-[var(--ffi-warning)]',
   },
   bye_disaster: {
     icon: Skull,
-    emoji: '💀',
     bgClass: 'bg-purple-500/10',
     borderClass: 'border-l-purple-500',
     textClass: 'text-purple-400',
   },
   reach: {
     icon: Meh,
-    emoji: '😬',
     bgClass: 'bg-orange-500/10',
     borderClass: 'border-l-orange-500',
     textClass: 'text-orange-400',
   },
   steal: {
     icon: Target,
-    emoji: '🎯',
     bgClass: 'bg-[var(--value-green)]/8',
     borderClass: 'border-l-[var(--value-green)]',
     textClass: 'text-[var(--value-green)]',
   },
   budget_buster: {
-    icon: Flame,
-    emoji: '💸',
+    icon: DollarSign,
     bgClass: 'bg-[var(--ffi-danger)]/10',
     borderClass: 'border-l-[var(--ffi-danger)]',
     textClass: 'text-[var(--ffi-danger)]',
   },
   last_big_spender: {
-    icon: Target,
-    emoji: '💰',
+    icon: Wallet,
     bgClass: 'bg-[var(--ffi-warning)]/10',
     borderClass: 'border-l-[var(--ffi-warning)]',
     textClass: 'text-[var(--ffi-warning)]',
   },
   cheapskate_special: {
-    icon: Meh,
-    emoji: '🪙',
+    icon: Coins,
     bgClass: 'bg-orange-500/10',
     borderClass: 'border-l-orange-500',
     textClass: 'text-orange-400',
   },
   budget_dominance: {
-    icon: Target,
-    emoji: '👑',
+    icon: Crown,
     bgClass: 'bg-[var(--value-green)]/8',
     borderClass: 'border-l-[var(--value-green)]',
     textClass: 'text-[var(--value-green)]',
   },
   first_defense_buy: {
-    icon: AlertTriangle,
-    emoji: '🛡️',
+    icon: Shield,
     bgClass: 'bg-blue-500/10',
     borderClass: 'border-l-blue-500',
     textClass: 'text-blue-400',
   },
   lone_wolf_qb: {
     icon: AlertTriangle,
-    emoji: '🐺',
     bgClass: 'bg-[var(--ffi-warning)]/10',
     borderClass: 'border-l-[var(--ffi-warning)]',
     textClass: 'text-[var(--ffi-warning)]',
   },
   market_mismatch: {
-    icon: Target,
-    emoji: '📊',
+    icon: BarChart3,
     bgClass: 'bg-blue-500/10',
     borderClass: 'border-l-blue-500',
     textClass: 'text-blue-400',
   },
   late_roster_qb_panic: {
     icon: AlertTriangle,
-    emoji: '😱',
     bgClass: 'bg-[var(--ffi-danger)]/10',
     borderClass: 'border-l-[var(--ffi-danger)]',
     textClass: 'text-[var(--ffi-danger)]',
   },
   keeper_steal: {
-    icon: Target,
-    emoji: '🔒',
+    icon: Lock,
     bgClass: 'bg-[var(--value-green)]/8',
     borderClass: 'border-l-[var(--value-green)]',
     textClass: 'text-[var(--value-green)]',
   },
   bad_keeper: {
     icon: Flame,
-    emoji: '🔥',
     bgClass: 'bg-[var(--ffi-warning)]/10',
     borderClass: 'border-l-[var(--ffi-warning)]',
     textClass: 'text-[var(--ffi-warning)]',
@@ -179,7 +163,7 @@ export function LiveTrashTalkAlert({ alert, onDismiss, onSave }: LiveTrashTalkAl
       <div className="relative">
         {/* Header */}
         <div className="flex items-center gap-2 mb-2">
-          <span className="text-lg">{config.emoji}</span>
+          <Icon className={cn('h-5 w-5', config.textClass)} aria-hidden="true" />
           <span className={cn('ffi-label font-bold', config.textClass)}>
             TRASH TALK ALERT
           </span>
@@ -288,7 +272,7 @@ export function RoastReportCard({ report }: RoastReportCardProps) {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
         {report.mvpOfOverpaying && (
           <AwardBadge
-            emoji="🔥"
+            icon={Flame}
             title="MVP of Overpaying"
             winner={report.mvpOfOverpaying}
             color="danger"
@@ -296,7 +280,7 @@ export function RoastReportCard({ report }: RoastReportCardProps) {
         )}
         {report.mostPanicked && (
           <AwardBadge
-            emoji="😬"
+            icon={Meh}
             title="Most Panicked"
             winner={report.mostPanicked}
             color="warning"
@@ -304,7 +288,7 @@ export function RoastReportCard({ report }: RoastReportCardProps) {
         )}
         {report.luckyBastard && (
           <AwardBadge
-            emoji="🎯"
+            icon={Target}
             title="Lucky Bastard"
             winner={report.luckyBastard}
             color="success"
@@ -312,7 +296,7 @@ export function RoastReportCard({ report }: RoastReportCardProps) {
         )}
         {report.byeWeekChampion && (
           <AwardBadge
-            emoji="💀"
+            icon={Skull}
             title="Bye Week Disaster"
             winner={report.byeWeekChampion}
             color="purple"
@@ -340,13 +324,13 @@ export function RoastReportCard({ report }: RoastReportCardProps) {
 }
 
 interface AwardBadgeProps {
-  emoji: string
+  icon: typeof Flame
   title: string
   winner: string
   color: 'danger' | 'warning' | 'success' | 'purple'
 }
 
-function AwardBadge({ emoji, title, winner, color }: AwardBadgeProps) {
+function AwardBadge({ icon: Icon, title, winner, color }: AwardBadgeProps) {
   const colorClasses = {
     danger: 'border-[var(--ffi-danger)]/30 bg-[var(--ffi-danger)]/10',
     warning: 'border-[var(--ffi-warning)]/30 bg-[var(--ffi-warning)]/10',
@@ -359,7 +343,7 @@ function AwardBadge({ emoji, title, winner, color }: AwardBadgeProps) {
       'rounded-lg border p-3 text-center',
       colorClasses[color]
     )}>
-      <div className="text-2xl mb-1">{emoji}</div>
+      <Icon className="h-6 w-6 mx-auto mb-1 text-white" aria-hidden="true" />
       <div className="ffi-label text-[var(--ffi-text-muted)] mb-0.5">{title}</div>
       <div className="ffi-body-md text-white font-semibold truncate">{winner}</div>
     </div>
@@ -451,6 +435,7 @@ export function SavedTrashTalk({ alerts, onRemove }: SavedTrashTalkProps) {
       <div className="space-y-2">
         {alerts.map(alert => {
           const config = trashTalkConfig[alert.type]
+          const Icon = config.icon
           return (
             <div
               key={alert.id}
@@ -460,7 +445,7 @@ export function SavedTrashTalk({ alerts, onRemove }: SavedTrashTalkProps) {
                 config.bgClass
               )}
             >
-              <span className="text-lg">{config.emoji}</span>
+              <Icon className={cn('h-5 w-5 shrink-0', config.textClass)} aria-hidden="true" />
               <div className="flex-1 min-w-0">
                 <p className="ffi-body-md text-white font-medium">{alert.message}</p>
                 <p className="ffi-body-md text-[var(--ffi-text-secondary)] text-sm mt-0.5">

@@ -35,6 +35,14 @@ export interface ClaudeJsonRequest {
   maxTokens?: number
   /** Model tier: 'fast' for live draft, 'default' for analysis (default: 'default') */
   tier?: ModelTier
+  /**
+   * Cache the system prompt across calls (Anthropic prompt caching). Default true.
+   * Repeated league/scoring context is billed once and reused, which the live draft
+   * loop relies on for cost control. Has no effect below the model's minimum cache size.
+   */
+  cacheSystem?: boolean
+  /** Per-request timeout in ms. The SDK aborts the call if exceeded. */
+  timeoutMs?: number
 }
 
 /**
@@ -45,17 +53,28 @@ export async function askClaudeJson<T>(req: ClaudeJsonRequest): Promise<T> {
   const anthropic = getClient()
   const model = MODEL_MAP[req.tier ?? 'default']
 
-  const response = await anthropic.messages.create({
-    model,
-    max_tokens: req.maxTokens ?? 4096,
-    system: req.system,
-    messages: [
-      { role: 'user', content: req.prompt },
-      { role: 'assistant', content: '{' },
-    ],
-  })
+  // Mark the system prompt cacheable by default so repeated league context is not re-billed.
+  const system = req.cacheSystem === false
+    ? req.system
+    : [{ type: 'text' as const, text: req.system, cache_control: { type: 'ephemeral' as const } }]
 
-  const text = '{' + (response.content[0].type === 'text' ? response.content[0].text : '')
+  const response = await anthropic.messages.create(
+    {
+      model,
+      max_tokens: req.maxTokens ?? 4096,
+      system,
+      messages: [
+        { role: 'user', content: req.prompt },
+        { role: 'assistant', content: '{' },
+      ],
+    },
+    req.timeoutMs ? { timeout: req.timeoutMs } : undefined,
+  )
+
+  // Find the first text block defensively: a tool/refusal block or empty content would
+  // otherwise throw on response.content[0].
+  const textBlock = response.content.find(b => b.type === 'text')
+  const text = '{' + (textBlock && textBlock.type === 'text' ? textBlock.text : '')
 
   try {
     return JSON.parse(text) as T
