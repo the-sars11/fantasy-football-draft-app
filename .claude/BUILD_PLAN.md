@@ -170,7 +170,7 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 ### UX-6: Cross-cutting polish + QA gate
 > Goal: AAA everywhere, verified.
 - [x] UX-6.1: Empty states + skeletons across remaining screens — `page-skeleton.tsx` upgraded to `.ffi-skeleton` shimmer + v2.0 surface tokens; runs + strategies clients: `Loader2` spinners replaced with shimmer rows; empty states upgraded to glass; page headers match configure v2.0 pattern
-- [ ] UX-6.2: WCAG ≥4.5:1 contrast pass; reduced-motion audit
+- [x] UX-6.2: WCAG ≥4.5:1 contrast pass; reduced-motion audit — `--ffi-text-muted` #64748b→#7d8fa8 (4.31:1→5.33:1 on surface); `glass-interactive:hover` added to reduced-motion block; all 11 Framer Motion components now guard spatial transforms + persistent animations via `useReducedMotion()`
 - [ ] UX-6.3: Background-layer performance (GPU promote); arm's-length mobile re-test (ties FF-269/FFT-008)
 - [ ] UX-6.4: Before/after screenshot set
 

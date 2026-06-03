@@ -56,7 +56,7 @@
   --color-ffi-accent: #39ff14;
   --color-ffi-text-primary: #ffffff;
   --color-ffi-text-secondary: #94a3b8;
-  --color-ffi-text-muted: #64748b;
+  --color-ffi-text-muted: #7d8fa8;
   --color-ffi-border: #334155;
   --color-ffi-success: #39ff14;
   --color-ffi-warning: #fbbf24;
@@ -152,7 +152,7 @@
   --ffi-accent: #39ff14;
   --ffi-text-primary: #ffffff;
   --ffi-text-secondary: #94a3b8;
-  --ffi-text-muted: #64748b;
+  --ffi-text-muted: #7d8fa8;
   --ffi-border: #334155;
   --ffi-success: #39ff14;
   --ffi-warning: #fbbf24;
@@ -1133,7 +1133,8 @@ body.ffi-on-the-clock .stadium-atmos {
   .ffi-btn-primary:hover,
   .ffi-btn-hero:hover,
   .ffi-btn-value:hover,
-  .ffi-card-interactive:hover {
+  .ffi-card-interactive:hover,
+  .glass-interactive:hover {
     transform: none;
   }
 }

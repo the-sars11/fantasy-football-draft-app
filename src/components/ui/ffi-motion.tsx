@@ -56,6 +56,7 @@ export function FFIMotionCard({
   onClick,
   children,
 }: FFIMotionCardProps) {
+  const prefersReduced = useReducedMotion()
   const variants = {
     default: "ffi-card",
     elevated: "ffi-card-elevated",
@@ -66,10 +67,10 @@ export function FFIMotionCard({
     <motion.div
       layoutId={layoutId}
       className={cn(variants[variant], className)}
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: prefersReduced ? 0 : 20 }}
       animate={{ opacity: 1, y: 0 }}
-      whileHover={{ scale: 1.01, y: -2 }}
-      whileTap={{ scale: 0.98 }}
+      whileHover={prefersReduced ? {} : { scale: 1.01, y: -2 }}
+      whileTap={prefersReduced ? {} : { scale: 0.98 }}
       transition={{ type: "spring", stiffness: 400, damping: 25 }}
       onClick={onClick}
     >
@@ -103,6 +104,7 @@ export function FFIMotionList({
   staggerDelay = 0.05,
   children,
 }: FFIMotionListProps) {
+  const prefersReduced = useReducedMotion()
   const childArray = React.Children.toArray(children)
 
   return (
@@ -110,13 +112,13 @@ export function FFIMotionList({
       {childArray.map((child, index) => (
         <motion.div
           key={index}
-          initial={{ opacity: 0, x: -20 }}
+          initial={{ opacity: 0, x: prefersReduced ? 0 : -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{
             type: "spring",
             stiffness: 400,
             damping: 25,
-            delay: index * staggerDelay,
+            delay: prefersReduced ? 0 : index * staggerDelay,
           }}
         >
           {child}
@@ -143,6 +145,7 @@ export function FFIMotionGrid({
   staggerDelay = 0.03,
   children,
 }: FFIMotionGridProps) {
+  const prefersReduced = useReducedMotion()
   const childArray = React.Children.toArray(children)
   const gridCols = {
     2: "grid-cols-1 sm:grid-cols-2",
@@ -155,13 +158,13 @@ export function FFIMotionGrid({
       {childArray.map((child, index) => (
         <motion.div
           key={index}
-          initial={{ opacity: 0, scale: 0.9, y: 20 }}
+          initial={{ opacity: 0, scale: prefersReduced ? 1 : 0.9, y: prefersReduced ? 0 : 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           transition={{
             type: "spring",
             stiffness: 400,
             damping: 25,
-            delay: index * staggerDelay,
+            delay: prefersReduced ? 0 : index * staggerDelay,
           }}
         >
           {child}
@@ -188,6 +191,7 @@ export function FFISwipeDismissCard({
   slideDirection = "right",
   children,
 }: FFISwipeDismissCardProps) {
+  const prefersReduced = useReducedMotion()
   const x = useMotionValue(0)
   const rotate = useTransform(x, [-200, 0, 200], [-15, 0, 15])
   const opacity = useTransform(x, [-200, -100, 0, 100, 200], [0, 0.5, 1, 0.5, 0])
@@ -201,9 +205,9 @@ export function FFISwipeDismissCard({
   return (
     <motion.div
       className={cn("ffi-card-elevated cursor-grab active:cursor-grabbing", className)}
-      initial={{ opacity: 0, x: slideDirection === "right" ? 100 : -100 }}
+      initial={{ opacity: 0, x: prefersReduced ? 0 : slideDirection === "right" ? 100 : -100 }}
       animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: slideDirection === "right" ? -200 : 200 }}
+      exit={{ opacity: 0, x: prefersReduced ? 0 : slideDirection === "right" ? -200 : 200 }}
       style={{ x, rotate, opacity }}
       drag="x"
       dragConstraints={{ left: 0, right: 0 }}
@@ -233,23 +237,20 @@ export function FFIBounceIn({
   delay = 0,
   children,
 }: FFIBounceInProps) {
+  const prefersReduced = useReducedMotion()
   return (
     <motion.div
       className={cn(className)}
-      initial={{ opacity: 0, scale: 0.3, y: -50 }}
-      animate={{
-        opacity: 1,
-        scale: 1,
-        y: 0,
-      }}
+      initial={{ opacity: 0, scale: prefersReduced ? 1 : 0.3, y: prefersReduced ? 0 : -50 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
       transition={{
         type: "spring",
         stiffness: 500,
         damping: 25,
-        delay,
+        delay: prefersReduced ? 0 : delay,
       }}
     >
-      {highlight && (
+      {highlight && !prefersReduced && (
         <motion.div
           className="absolute inset-0 rounded-lg bg-[var(--ffi-accent)]/20"
           initial={{ opacity: 0.8, scale: 1 }}
@@ -372,10 +373,11 @@ export function FFIPressScale({
   children,
   onClick,
 }: FFIPressScaleProps) {
+  const prefersReduced = useReducedMotion()
   return (
     <motion.div
       className={cn(className)}
-      whileTap={{ scale }}
+      whileTap={prefersReduced ? {} : { scale }}
       transition={{ type: "spring", stiffness: 500, damping: 30 }}
       onClick={onClick}
     >
@@ -401,14 +403,15 @@ export function FFIFadeInUp({
   duration = 0.4,
   children,
 }: FFIFadeInUpProps) {
+  const prefersReduced = useReducedMotion()
   return (
     <motion.div
       className={cn(className)}
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: prefersReduced ? 0 : 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{
-        duration,
-        delay,
+        duration: prefersReduced ? 0.15 : duration,
+        delay: prefersReduced ? 0 : delay,
         ease: [0.25, 0.46, 0.45, 0.94],
       }}
     >
@@ -434,6 +437,7 @@ export function FFIGlowPulse({
   intensity = "medium",
   children,
 }: FFIGlowPulseProps) {
+  const prefersReduced = useReducedMotion()
   const colors = {
     accent: "rgba(57, 255, 20, VAR)",
     primary: "rgba(85, 130, 230, VAR)",
@@ -453,7 +457,7 @@ export function FFIGlowPulse({
   return (
     <motion.div
       className={cn("relative", className)}
-      animate={{
+      animate={prefersReduced ? {} : {
         boxShadow: [
           `0 0 ${blur}px ${colorBase.replace("VAR", String(min))}`,
           `0 0 ${blur + 10}px ${colorBase.replace("VAR", String(max))}`,
@@ -486,16 +490,17 @@ export function FFIScaleIn({
   delay = 0,
   children,
 }: FFIScaleInProps) {
+  const prefersReduced = useReducedMotion()
   return (
     <motion.div
       className={cn(className)}
-      initial={{ opacity: 0, scale: 0.5, filter: "blur(4px)" }}
+      initial={{ opacity: 0, scale: prefersReduced ? 1 : 0.5, filter: prefersReduced ? "none" : "blur(4px)" }}
       animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
       transition={{
         type: "spring",
         stiffness: 400,
         damping: 20,
-        delay,
+        delay: prefersReduced ? 0 : delay,
       }}
     >
       {children}
@@ -516,12 +521,13 @@ export function FFITrashTalkEntrance({
   className,
   children,
 }: FFITrashTalkEntranceProps) {
+  const prefersReduced = useReducedMotion()
   return (
     <motion.div
       className={cn(className)}
-      initial={{ opacity: 0, x: 100, rotate: 2 }}
+      initial={{ opacity: 0, x: prefersReduced ? 0 : 100, rotate: prefersReduced ? 0 : 2 }}
       animate={{ opacity: 1, x: 0, rotate: 0 }}
-      exit={{ opacity: 0, x: -100, rotate: -2 }}
+      exit={{ opacity: 0, x: prefersReduced ? 0 : -100, rotate: prefersReduced ? 0 : -2 }}
       transition={{
         type: "spring",
         stiffness: 400,
@@ -566,6 +572,7 @@ export function SharedPlayerCard({
   variant = "compact",
   children,
 }: SharedPlayerCardProps) {
+  const prefersReduced = useReducedMotion()
   const positionColors: Record<PositionType, string> = {
     QB: "text-red-400",
     RB: "text-green-400",
@@ -584,8 +591,8 @@ export function SharedPlayerCard({
         className
       )}
       onClick={onClick}
-      whileHover={{ scale: 1.02, y: -2 }}
-      whileTap={{ scale: 0.98 }}
+      whileHover={prefersReduced ? {} : { scale: 1.02, y: -2 }}
+      whileTap={prefersReduced ? {} : { scale: 0.98 }}
       transition={{ type: "spring", stiffness: 400, damping: 25 }}
     >
       <div className="flex items-start justify-between">

@@ -2,6 +2,23 @@
 
 ---
 
+## 2026-06-03 — UX-6.2: WCAG ≥4.5:1 contrast pass + reduced-motion audit
+
+**Task:** UX-6.2 | **Class:** `output` (CSS tokens + motion components) | **Lenses:** Design, QA
+
+**Contrast fix:**
+- `src/app/globals.css`: `--ffi-text-muted` bumped from `#64748b` (4.31:1 on main bg / 3.69:1 on `#0a1b25` — both below WCAG AA 4.5:1) to `#7d8fa8` (6.23:1 on main bg / 5.33:1 on `#0a1b25` / 5.83:1 on glass). Updated in both `@theme` and `:root` blocks. Visual change is a barely perceptible lightening of muted labels; hierarchy vs `--ffi-text-secondary` (#94a3b8) preserved. All other color tokens already pass AA.
+- Calculated contrast ratios: #deedf9 (primary) ≥14:1; #94a3b8 (secondary) 7.99:1; #7d8fa8 (muted, new) 5.33:1; all position badges 4.5:1+; gold #e0c27a 5.6:1; value green #2ff801 12:1+.
+
+**Reduced-motion audit:**
+- `src/app/globals.css`: added `.glass-interactive:hover { transform: none; }` to `prefers-reduced-motion: reduce` block (previously omitted while the four sibling `.ffi-btn-*` and `.ffi-card-interactive` hover transforms were covered).
+- `src/components/ui/ffi-motion.tsx`: added `useReducedMotion()` checks to all 11 animation components. Pattern: (1) persistent/looping animations (`FFIGlowPulse` `repeat: Infinity` box-shadow) → skip `animate` entirely when reduced; (2) entrance spatial transforms (y, x, scale, rotate) → zero out but preserve opacity fade; (3) hover/tap transforms (`FFIMotionCard`, `SharedPlayerCard`, `FFIPressScale`) → empty `{}` when reduced; (4) `FFIBounceIn` burst ring → conditionally rendered; (5) stagger delays zeroed so items appear immediately.
+- Components already correct before this change: `FFICelebration`, `FFIConfettiBurst`.
+
+**Verify:** `--ffi-text-muted: #7d8fa8` confirmed in live DOM via preview_inspect. type-check clean, 29/29 tests, 0 net-new lint errors, build clean.
+
+---
+
 ## 2026-06-03 — UX-6.1: Empty states + skeletons across remaining screens
 
 **Task:** UX-6.1 | **Class:** `output` (visual only) | **Lenses:** Delivery, QA
