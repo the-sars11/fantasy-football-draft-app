@@ -2,6 +2,25 @@
 
 ---
 
+## 2026-06-03 — UX-6.3: Background-layer GPU promotion
+
+**Task:** UX-6.3 | **Class:** `output` (CSS-only) | **Lenses:** Design, QA
+
+**Why:** The two atmospheric background layers (`.stadium-atmos`, `.atmos-grain`) were not guaranteed separate GPU compositor layers. `.atmos-grain` had no transform, so it painted into the main document layer and could trigger full-page compositing on every opacity/blend change. The filter-brightness animation on `.stadium-atmos.atmos-clock` was not hinted, so the browser had to invalidate the compositor state each animation frame.
+
+**What changed (`src/app/globals.css` only):**
+- `.atmos-grain`: added `transform: translateZ(0)` — forces a dedicated GPU compositor layer (same pattern already on `.stadium-atmos`). Verified: `getComputedStyle().transform` changed from `none` to `matrix(1, 0, 0, 1, 0, 0)` in the running preview.
+- `.stadium-atmos.atmos-clock` + `body.ffi-on-the-clock .stadium-atmos`: added `will-change: filter` — pre-allocates GPU resources for the `filter: brightness()` animation so the compositor doesn't need to re-rasterize on each frame.
+- `@media (prefers-reduced-motion: reduce)`: added `will-change: auto` reset on both animated selectors — releases GPU memory when animations are suppressed and the hint is no longer needed.
+
+**Visual effect:** None (GPU hints are invisible to the eye).
+
+**Verify:** type-check clean, 29/29 tests, 0 net-new lint errors, build clean.
+
+**Deferred:** FFT-008 arm's-length mobile physical test still needs Joe on phone.
+
+---
+
 ## 2026-06-03 — UX-6.2: WCAG ≥4.5:1 contrast pass + reduced-motion audit
 
 **Task:** UX-6.2 | **Class:** `output` (CSS tokens + motion components) | **Lenses:** Design, QA

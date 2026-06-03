@@ -171,7 +171,7 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 > Goal: AAA everywhere, verified.
 - [x] UX-6.1: Empty states + skeletons across remaining screens — `page-skeleton.tsx` upgraded to `.ffi-skeleton` shimmer + v2.0 surface tokens; runs + strategies clients: `Loader2` spinners replaced with shimmer rows; empty states upgraded to glass; page headers match configure v2.0 pattern
 - [x] UX-6.2: WCAG ≥4.5:1 contrast pass; reduced-motion audit — `--ffi-text-muted` #64748b→#7d8fa8 (4.31:1→5.33:1 on surface); `glass-interactive:hover` added to reduced-motion block; all 11 Framer Motion components now guard spatial transforms + persistent animations via `useReducedMotion()`
-- [ ] UX-6.3: Background-layer performance (GPU promote); arm's-length mobile re-test (ties FF-269/FFT-008)
+- [x] UX-6.3: Background-layer GPU promote — `globals.css`: `.atmos-grain` gets `transform: translateZ(0)` (own compositor layer); `.stadium-atmos.atmos-clock` + `body.ffi-on-the-clock .stadium-atmos` get `will-change: filter`; reduced-motion block resets `will-change: auto` on animated selectors. Arm's-length mobile re-test (FFT-008) still deferred — needs Joe on phone.
 - [ ] UX-6.4: Before/after screenshot set
 
 ### UX-7: Sim Draft / Demo Mode (dev-only) [showcase + QA fixture]
