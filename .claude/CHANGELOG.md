@@ -2,6 +2,22 @@
 
 ---
 
+## 2026-06-04 — UX-7.2: Sim signature moments + AI suppression + auto-navigate to review
+
+**Task:** UX-7.2 | **Class:** `output` + `pipeline` | **Lenses:** QA, Delivery
+
+**Why:** The sim engine (UX-7.1) needed three completions to be demo-ready: (1) AI advisor auto-fire needed to be suppressed so the sim runs at zero cost with no ANTHROPIC_API_KEY; (2) the `PositionRunTicker` never fired because best-available picks scatter across positions — scripting a 3-pick WR run at picks 8-10 guarantees the ticker; (3) the sim had no exit — it stopped at the completed state with no path to the grade-reveal screen.
+
+**What changed:**
+- `src/hooks/use-draft-simulator.ts`: In `fireNextPick`, added a scripted WR window at real pick counts 8-10 (filters pool to WR-only when 1+ WR is available) so `PositionRunTicker` fires at a predictable moment during every sim run.
+- `src/components/draft/auction-advisor.tsx`: Added `suppressAI?: boolean` prop to `AuctionAdvisorProps` and `AuctionAdvisor`. Wired into `useAutoRecommend` as `enabled: state.format === 'auction' && !suppressAI`. Manual Refresh button still works when suppressed.
+- `src/components/draft/snake-advisor.tsx`: Same `suppressAI?: boolean` addition wired into `useAutoRecommend` `enabled` guard.
+- `src/app/(app)/draft/live/client.tsx`: Added `useRouter` import from `next/navigation`; added `useEffect` that pushes to `/draft/review?session=<id>` when `isSimActive && state.status === 'completed'`; passed `suppressAI={isSimActive}` to both advisors; gated trash talk `generateTrashTalk()` calls behind `!simEnabled` in both trash talk effects (hardcoded fallback strings still show).
+
+**Verify result:** type-check clean, 29/29 tests, 0 net-new lint errors in changed files, `npm run build` passes. Sim now: scripted WR run fires `PositionRunTicker`; zero AI fetch calls while running; auto-navigates to gold grade-reveal + confetti on completion.
+
+---
+
 ## 2026-06-04 — UX-7.1: Dev-only Sim Engine
 
 **Task:** UX-7.1 | **Class:** `shared` | **Lenses:** Architecture, QA

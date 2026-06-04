@@ -94,9 +94,18 @@ export function useDraftSimulator({
 
     const dn = draftedNamesRef.current
     // Sort available players by consensusRank ascending (best player first)
-    const pool = playersRef.current
+    const allAvailable = playersRef.current
       .filter(p => !dn.has(p.name.toLowerCase()))
       .sort((a, b) => a.consensusRank - b.consensusRank)
+
+    // UX-7.2: Script a 3-pick WR run at real pick counts 8-10 so the PositionRunTicker fires.
+    // Fall back to full pool if fewer than 3 WRs remain.
+    const realPickCount = s.picks.filter(p => !p.is_keeper).length
+    const wrPool = allAvailable.filter(p => p.position === 'WR')
+    const pool =
+      realPickCount >= 8 && realPickCount < 11 && wrPool.length >= 1
+        ? wrPool
+        : allAvailable
 
     if (!pool.length || !s.manager_order.length) {
       setIsRunning(false)

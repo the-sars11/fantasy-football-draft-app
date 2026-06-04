@@ -54,6 +54,8 @@ interface SnakeAdvisorProps {
   scoredPlayers: ScoredPlayer[]
   draftedNames: Set<string>
   strategy: DbStrategy | null
+  /** UX-7.2: suppress auto-fire AI calls (e.g. when sim is running). Manual Refresh still works. */
+  suppressAI?: boolean
 }
 
 function survivalColor(pct: number): string {
@@ -69,6 +71,7 @@ export function SnakeAdvisor({
   scoredPlayers,
   draftedNames,
   strategy,
+  suppressAI = false,
 }: SnakeAdvisorProps) {
   const [recommendation, setRecommendation] = useState<LLMSnakeRecommendation | null>(null)
   const [loadingRec, setLoadingRec] = useState(false)
@@ -107,7 +110,7 @@ export function SnakeAdvisor({
   // Auto-fire targets when it is (almost) your turn, so a rec is on screen the moment you
   // are up. Snake only calls the LLM near your pick to keep cost down.
   useAutoRecommend({
-    enabled: state.format === 'snake',
+    enabled: state.format === 'snake' && !suppressAI,
     active: !!posInfo && state.status !== 'completed' && (posInfo.isMyPick || posInfo.picksUntilMyTurn <= 2),
     triggerKey: state.picks.length,
     onFetch: handleGetTargets,

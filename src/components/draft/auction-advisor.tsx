@@ -45,6 +45,8 @@ interface AuctionAdvisorProps {
   scoredPlayers: ScoredPlayer[]
   draftedNames: Set<string>
   strategy: DbStrategy | null
+  /** UX-7.2: suppress auto-fire AI calls (e.g. when sim is running). Manual Refresh still works. */
+  suppressAI?: boolean
 }
 
 const statusIcon = {
@@ -71,6 +73,7 @@ export function AuctionAdvisor({
   scoredPlayers,
   draftedNames,
   strategy,
+  suppressAI = false,
 }: AuctionAdvisorProps) {
   const [recommendation, setRecommendation] = useState<LLMAuctionRecommendation | null>(null)
   const [loadingRec, setLoadingRec] = useState(false)
@@ -121,7 +124,7 @@ export function AuctionAdvisor({
   // Auto-fire targets when the board changes (no manual tap). The 30s client cache in
   // fetchAuctionRecommendation dedupes; the manual Refresh button still overrides.
   useAutoRecommend({
-    enabled: state.format === 'auction',
+    enabled: state.format === 'auction' && !suppressAI,
     active: state.status !== 'completed',
     triggerKey: state.picks.length,
     onFetch: handleGetTargets,

@@ -8,7 +8,7 @@
  */
 
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Loader2,
@@ -330,6 +330,7 @@ type TrashTalkMode = 'off' | 'family-safe' | 'adult-only'
 
 export function LiveDraftClient() {
   const searchParams = useSearchParams()
+  const router = useRouter()
   const sessionId = searchParams.get('session')
   const trashTalkMode = (searchParams.get('ttm') ?? 'family-safe') as TrashTalkMode
   // FF-279: Auctioneer connection type from setup (?aif=localstorage|file)
@@ -628,6 +629,14 @@ export function LiveDraftClient() {
       addManualPick,
     })
 
+  // UX-7.2: When sim runs to completion, auto-navigate to the grade reveal.
+  useEffect(() => {
+    if (!isSimActive) return
+    if (state?.status !== 'completed') return
+    if (!sessionId) return
+    router.push(`/draft/review?session=${sessionId}`)
+  }, [isSimActive, state?.status, sessionId, router])
+
   // Build owner map once when manager_order is first populated
   useEffect(() => {
     if (teamOwnerMapRef.current !== null) return
@@ -676,18 +685,21 @@ export function LiveDraftClient() {
 
     if (newAlerts.length > 0) {
       setTrashTalkAlerts(prev => [...prev, ...newAlerts])
-      // Fire-and-forget: enrich each alert's message with AI-generated line
-      for (const alert of newAlerts) {
-        const owner = teamOwnerMapRef.current?.[alert.managerName] ?? null
-        const historyBlock = buildHistoryBlock(alert.type, owner) || undefined
-        void generateTrashTalk(alert, trashTalkMode as 'family-safe' | 'adult-only', historyBlock).then(line => {
-          if (line) {
-            setTrashTalkAlerts(prev => prev.map(a => a.id === alert.id ? { ...a, message: line } : a))
-          }
-        })
+      // Fire-and-forget: enrich each alert's message with AI-generated line.
+      // Suppressed in sim mode — use hardcoded fallback strings only (zero paid calls).
+      if (!simEnabled) {
+        for (const alert of newAlerts) {
+          const owner = teamOwnerMapRef.current?.[alert.managerName] ?? null
+          const historyBlock = buildHistoryBlock(alert.type, owner) || undefined
+          void generateTrashTalk(alert, trashTalkMode as 'family-safe' | 'adult-only', historyBlock).then(line => {
+            if (line) {
+              setTrashTalkAlerts(prev => prev.map(a => a.id === alert.id ? { ...a, message: line } : a))
+            }
+          })
+        }
       }
     }
-  }, [state, players, trashTalkMode])
+  }, [state, players, trashTalkMode, simEnabled])
 
   // One-time keeper value analysis at draft start (keeper leagues only)
   useEffect(() => {
@@ -705,18 +717,20 @@ export function LiveDraftClient() {
     )
     if (keeperAlerts.length > 0) {
       setTrashTalkAlerts(prev => [...prev, ...keeperAlerts])
-      // Fire-and-forget: enrich keeper alerts with AI-generated lines
-      for (const alert of keeperAlerts) {
-        const owner = teamOwnerMapRef.current?.[alert.managerName] ?? null
-        const historyBlock = buildHistoryBlock(alert.type, owner) || undefined
-        void generateTrashTalk(alert, trashTalkMode as 'family-safe' | 'adult-only', historyBlock).then(line => {
-          if (line) {
-            setTrashTalkAlerts(prev => prev.map(a => a.id === alert.id ? { ...a, message: line } : a))
-          }
-        })
+      // Suppressed in sim mode — use hardcoded fallback strings only (zero paid calls).
+      if (!simEnabled) {
+        for (const alert of keeperAlerts) {
+          const owner = teamOwnerMapRef.current?.[alert.managerName] ?? null
+          const historyBlock = buildHistoryBlock(alert.type, owner) || undefined
+          void generateTrashTalk(alert, trashTalkMode as 'family-safe' | 'adult-only', historyBlock).then(line => {
+            if (line) {
+              setTrashTalkAlerts(prev => prev.map(a => a.id === alert.id ? { ...a, message: line } : a))
+            }
+          })
+        }
       }
     }
-  }, [state, players, trashTalkMode])
+  }, [state, players, trashTalkMode, simEnabled])
 
   const handleDismissTrashTalk = useCallback((id: string) => {
     setTrashTalkAlerts(prev => prev.filter(a => a.id !== id))
@@ -1078,6 +1092,7 @@ export function LiveDraftClient() {
               scoredPlayers={scoredPlayers}
               draftedNames={draftedNames}
               strategy={strategy}
+              suppressAI={isSimActive}
             />
           ) : (
             <SnakeAdvisor
@@ -1086,6 +1101,7 @@ export function LiveDraftClient() {
               scoredPlayers={scoredPlayers}
               draftedNames={draftedNames}
               strategy={strategy}
+              suppressAI={isSimActive}
             />
           )}
 
