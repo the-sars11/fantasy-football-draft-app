@@ -1,0 +1,415 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>GRIDIRON — Live Draft Room (Direction v1)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Saira:wght@400;500;600;700&family=Saira+Condensed:wght@600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* =====================================================================
+     DIRECTION v1 — "Friday Night Lights / FUT"
+     EA FC Ultimate Team energy + Linear discipline.
+     SET PALETTE: deep colorful-dark base + volt-green (moment/value)
+     + electric blue (structure) + neutrals. No gold-glass. No rainbow.
+     Performant: gradients + box-shadow glows + transform/opacity only.
+     (No stacked backdrop-filter blur — that's what made the old build
+      unable to even screenshot. This runs smooth on a phone.)
+     ===================================================================== */
+  :root {
+    /* base — the darkness has COLOR + DEPTH, never flat black */
+    --bg-0:#05080F;            /* deepest */
+    --bg-1:#080D18;
+    --surface-1:#0C1322;       /* lifted panel */
+    --surface-2:#111A2E;       /* card */
+    --surface-3:#16223A;       /* card raised */
+    --hairline:rgba(150,180,255,0.10);
+    --hairline-bright:rgba(180,205,255,0.18);
+
+    /* THE ACCENT SYSTEM (tight, meaning-driven) */
+    --volt:#8BFF45;            /* energy / your moment / value / primary CTA */
+    --volt-deep:#5FE21F;
+    --volt-ink:#0a1f02;
+    --volt-glow:rgba(139,255,69,0.32);
+
+    --blue:#4D82FF;            /* structure / info / secondary */
+    --blue-bright:#79A6FF;
+    --blue-glow:rgba(77,130,255,0.28);
+
+    /* rare / "special card" — used at <2% surface, hero moments only */
+    --rare-a:#FF5CA8;
+    --rare-b:#FFB23D;
+
+    /* text */
+    --ink:#EAF1FF;
+    --ink-2:#9FB0CE;
+    --ink-3:#637396;
+
+    /* position chips — controlled saturation, never loud */
+    --pos-qb:#FF6E8A; --pos-rb:#56E0A0; --pos-wr:#6CA8FF; --pos-te:#FFB05C;
+
+    --font-display:"Anton", "Saira Condensed", sans-serif;
+    --font-cond:"Saira Condensed", sans-serif;
+    --font-ui:"Saira", system-ui, sans-serif;
+    --font-num:"JetBrains Mono", monospace;
+    --r:18px;
+  }
+
+  * { box-sizing:border-box; margin:0; padding:0; }
+  html,body { height:100%; }
+  body {
+    font-family:var(--font-ui);
+    color:var(--ink);
+    background:
+      radial-gradient(900px 600px at 18% -8%, rgba(77,130,255,0.16), transparent 60%),
+      radial-gradient(800px 700px at 92% 8%, rgba(139,255,69,0.07), transparent 55%),
+      radial-gradient(1000px 800px at 50% 120%, rgba(120,80,255,0.10), transparent 60%),
+      linear-gradient(180deg, #060A14 0%, #04060D 100%);
+    min-height:100%;
+    display:flex; flex-direction:column; align-items:center;
+    padding:34px 16px 60px;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  .stage-label{
+    font-family:var(--font-cond); font-weight:700; letter-spacing:.32em;
+    text-transform:uppercase; font-size:11px; color:var(--ink-3);
+    margin-bottom:18px; text-align:center;
+  }
+  .stage-label b{ color:var(--volt); }
+
+  /* ---- phone frame ---- */
+  .phone{
+    width:430px; max-width:100%;
+    border-radius:46px;
+    padding:12px;
+    background:linear-gradient(160deg,#1c2740,#0a0f1c 60%);
+    box-shadow:
+      0 40px 120px -30px rgba(0,0,0,0.9),
+      0 0 0 1px rgba(150,180,255,0.08) inset,
+      0 0 70px -20px var(--blue-glow);
+    position:relative;
+  }
+  .screen{
+    background:
+      radial-gradient(700px 380px at 50% -6%, rgba(120,150,255,0.10), transparent 58%),
+      radial-gradient(500px 500px at 88% 102%, rgba(139,255,69,0.06), transparent 60%),
+      linear-gradient(180deg, var(--bg-1), var(--bg-0));
+    border-radius:36px;
+    overflow:hidden;
+    position:relative;
+    height:880px;
+    display:flex; flex-direction:column;
+  }
+  .notch{
+    position:absolute; top:10px; left:50%; transform:translateX(-50%);
+    width:120px; height:26px; background:#04060D; border-radius:14px; z-index:30;
+  }
+
+  /* ---- scrollable content ---- */
+  .content{ flex:1; overflow:hidden; position:relative; padding:48px 16px 0; }
+
+  /* ===== top bar ===== */
+  .topbar{ display:flex; align-items:center; justify-content:space-between; }
+  .league{ display:flex; align-items:center; gap:10px; }
+  .crest{
+    width:34px; height:34px; border-radius:9px;
+    background:linear-gradient(150deg,var(--blue),#2748b8);
+    display:grid; place-items:center; font-family:var(--font-display);
+    font-size:16px; color:#fff; box-shadow:0 6px 18px -6px var(--blue-glow);
+  }
+  .league h1{ font-family:var(--font-cond); font-weight:800; font-size:18px; letter-spacing:.02em; line-height:1; }
+  .league .sub{ font-family:var(--font-cond); font-weight:600; font-size:10.5px; letter-spacing:.22em; color:var(--ink-3); text-transform:uppercase; margin-top:3px; }
+  .live{
+    display:flex; align-items:center; gap:7px;
+    font-family:var(--font-cond); font-weight:700; font-size:11px; letter-spacing:.2em;
+    color:var(--volt); text-transform:uppercase;
+    padding:7px 11px; border-radius:999px;
+    background:rgba(139,255,69,0.08); border:1px solid rgba(139,255,69,0.22);
+  }
+  .dot{ width:8px; height:8px; border-radius:50%; background:var(--volt); box-shadow:0 0 10px var(--volt); animation:pulse 1.6s ease-in-out infinite; }
+  @keyframes pulse{ 0%,100%{ opacity:1; transform:scale(1);} 50%{ opacity:.45; transform:scale(.7);} }
+
+  .roundrow{ display:flex; gap:8px; margin-top:14px; }
+  .pill{
+    flex:1; background:var(--surface-1); border:1px solid var(--hairline);
+    border-radius:12px; padding:9px 12px;
+  }
+  .pill .k{ font-family:var(--font-cond); font-weight:600; font-size:9.5px; letter-spacing:.2em; color:var(--ink-3); text-transform:uppercase; }
+  .pill .v{ font-family:var(--font-num); font-weight:700; font-size:17px; margin-top:2px; }
+  .pill .v small{ font-size:11px; color:var(--ink-3); font-weight:600; }
+
+  /* ===== ON THE BLOCK — hero ===== */
+  .block-head{ display:flex; align-items:center; justify-content:space-between; margin:18px 2px 9px; }
+  .block-head .lbl{ font-family:var(--font-cond); font-weight:800; font-size:12px; letter-spacing:.26em; color:var(--ink-2); text-transform:uppercase; }
+  .timer{ font-family:var(--font-num); font-weight:700; font-size:14px; color:var(--volt); display:flex; align-items:center; gap:6px; }
+  .timer .ring{ width:9px; height:9px; border-radius:50%; border:2px solid var(--volt); animation:pulse 1s linear infinite; }
+
+  .hero{
+    position:relative; border-radius:var(--r); overflow:hidden;
+    background:
+      radial-gradient(120% 90% at 0% 0%, rgba(77,130,255,0.22), transparent 55%),
+      radial-gradient(120% 120% at 100% 0%, rgba(139,255,69,0.10), transparent 50%),
+      linear-gradient(160deg, var(--surface-3), var(--surface-2) 70%);
+    border:1px solid var(--hairline-bright);
+    box-shadow:0 22px 50px -22px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.02) inset;
+    padding:16px 16px 15px;
+  }
+  /* iridescent "special card" edge sweep — texture, not palette */
+  .hero::before{
+    content:""; position:absolute; inset:0; border-radius:var(--r); padding:1px;
+    background:linear-gradient(115deg, transparent 30%, rgba(255,255,255,0.55) 47%, rgba(139,255,69,0.5) 52%, transparent 70%);
+    -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite:xor; mask-composite:exclude;
+    background-size:280% 280%; animation:sheen 5.5s ease-in-out infinite; opacity:.7;
+  }
+  @keyframes sheen{ 0%,100%{ background-position:0% 50%;} 50%{ background-position:100% 50%;} }
+  .jersey{ position:absolute; right:-6px; top:-22px; font-family:var(--font-display); font-size:150px; line-height:1; color:rgba(255,255,255,0.035); pointer-events:none; }
+
+  .hero .top{ display:flex; align-items:flex-start; gap:11px; position:relative; }
+  .poschip{
+    font-family:var(--font-cond); font-weight:800; font-size:12px; letter-spacing:.08em;
+    padding:6px 9px; border-radius:8px; color:#04070d; line-height:1; margin-top:5px;
+  }
+  .poschip.wr{ background:var(--pos-wr); }
+  .name h2{ font-family:var(--font-display); font-size:40px; line-height:.92; letter-spacing:.01em; }
+  .name .meta{ font-family:var(--font-cond); font-weight:600; font-size:12px; letter-spacing:.14em; color:var(--ink-2); text-transform:uppercase; margin-top:5px; }
+  .name .meta b{ color:var(--blue-bright); }
+
+  .hero .stats{ display:flex; gap:18px; margin-top:14px; position:relative; }
+  .stat .k{ font-family:var(--font-cond); font-weight:600; font-size:9px; letter-spacing:.2em; color:var(--ink-3); text-transform:uppercase; }
+  .stat .v{ font-family:var(--font-num); font-weight:700; font-size:16px; margin-top:1px; }
+
+  .bidline{ display:flex; align-items:flex-end; justify-content:space-between; margin-top:16px; position:relative; }
+  .curbid .k{ font-family:var(--font-cond); font-weight:700; font-size:10px; letter-spacing:.22em; color:var(--ink-3); text-transform:uppercase; }
+  .curbid .v{ font-family:var(--font-num); font-weight:700; font-size:42px; line-height:1; }
+  .curbid .by{ font-family:var(--font-cond); font-weight:600; font-size:11px; letter-spacing:.12em; color:var(--ink-2); text-transform:uppercase; margin-top:4px; }
+  .curbid .by b{ color:var(--ink); }
+  .maxbid{
+    text-align:right; padding:9px 12px; border-radius:12px;
+    background:rgba(139,255,69,0.10); border:1px solid rgba(139,255,69,0.30);
+  }
+  .maxbid .k{ font-family:var(--font-cond); font-weight:700; font-size:9.5px; letter-spacing:.2em; color:var(--volt); text-transform:uppercase; }
+  .maxbid .v{ font-family:var(--font-num); font-weight:700; font-size:24px; color:var(--volt); }
+  .maxbid .note{ font-family:var(--font-ui); font-size:10px; color:var(--ink-3); margin-top:1px; }
+
+  /* ===== bid actions ===== */
+  .actions{ display:flex; gap:10px; margin-top:13px; }
+  .stepper{ display:flex; align-items:center; background:var(--surface-1); border:1px solid var(--hairline); border-radius:14px; overflow:hidden; }
+  .stepper button{ width:46px; height:54px; background:transparent; border:none; color:var(--ink); font-size:22px; font-family:var(--font-ui); cursor:pointer; }
+  .stepper .amt{ width:62px; text-align:center; font-family:var(--font-num); font-weight:700; font-size:20px; }
+  .bid-btn{
+    flex:1; height:54px; border:none; border-radius:14px; cursor:pointer;
+    font-family:var(--font-cond); font-weight:800; font-size:18px; letter-spacing:.1em; text-transform:uppercase;
+    color:var(--volt-ink);
+    background:linear-gradient(180deg, var(--volt), var(--volt-deep));
+    box-shadow:0 14px 30px -10px var(--volt-glow), 0 1px 0 rgba(255,255,255,0.4) inset;
+  }
+
+  /* ===== AI READ ===== */
+  .airead{
+    margin-top:13px; border-radius:14px; padding:12px 13px;
+    background:linear-gradient(180deg, rgba(77,130,255,0.10), rgba(77,130,255,0.04));
+    border:1px solid rgba(77,130,255,0.24);
+    display:flex; gap:11px; align-items:flex-start;
+  }
+  .airead .badge{ font-family:var(--font-cond); font-weight:800; font-size:10px; letter-spacing:.18em; color:var(--blue-bright); text-transform:uppercase; white-space:nowrap; padding-top:1px; }
+  .airead p{ font-size:12.5px; line-height:1.45; color:var(--ink); }
+  .airead p b{ color:var(--volt); }
+  .airead .conf{ margin-left:auto; font-family:var(--font-num); font-weight:700; font-size:13px; color:var(--blue-bright); }
+
+  /* ===== budget + squad ===== */
+  .sec-head{ font-family:var(--font-cond); font-weight:800; font-size:11px; letter-spacing:.24em; color:var(--ink-3); text-transform:uppercase; margin:18px 2px 9px; display:flex; justify-content:space-between; }
+  .budget{ background:var(--surface-1); border:1px solid var(--hairline); border-radius:14px; padding:13px; }
+  .budget .row{ display:flex; justify-content:space-between; align-items:baseline; }
+  .budget .spent{ font-family:var(--font-num); font-weight:700; font-size:22px; }
+  .budget .spent small{ color:var(--ink-3); font-size:13px; }
+  .budget .max{ font-family:var(--font-num); font-weight:700; font-size:13px; color:var(--volt); }
+  .bar{ height:8px; border-radius:6px; background:rgba(255,255,255,0.06); margin-top:9px; overflow:hidden; }
+  .bar i{ display:block; height:100%; width:73%; border-radius:6px; background:linear-gradient(90deg,var(--blue),var(--volt)); }
+  .slots{ display:flex; gap:5px; margin-top:11px; }
+  .slot{ flex:1; height:30px; border-radius:7px; background:var(--surface-2); border:1px solid var(--hairline); display:grid; place-items:center; font-family:var(--font-cond); font-weight:700; font-size:10px; letter-spacing:.08em; color:var(--ink-3); }
+  .slot.filled{ color:#04070d; border-color:transparent; }
+  .slot.qb{ background:var(--pos-qb);} .slot.rb{ background:var(--pos-rb);} .slot.wr{ background:var(--pos-wr);} .slot.te{ background:var(--pos-te);}
+
+  /* ===== feed (broadcast lower-thirds) ===== */
+  .feed{ display:flex; flex-direction:column; gap:7px; }
+  .pick{
+    display:flex; align-items:center; gap:11px; padding:10px 12px;
+    background:var(--surface-1); border:1px solid var(--hairline); border-radius:12px;
+    position:relative; overflow:hidden;
+  }
+  .pick.new{ border-color:rgba(139,255,69,0.30); }
+  .pick.new::before{ content:""; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--volt); box-shadow:0 0 12px var(--volt); }
+  .pk-pos{ font-family:var(--font-cond); font-weight:800; font-size:10px; padding:4px 7px; border-radius:6px; color:#04070d; }
+  .pk-pos.rb{ background:var(--pos-rb);} .pk-pos.qb{ background:var(--pos-qb);} .pk-pos.te{ background:var(--pos-te);} .pk-pos.wr{ background:var(--pos-wr);}
+  .pk-name{ font-family:var(--font-cond); font-weight:700; font-size:15px; flex:1; letter-spacing:.01em; }
+  .pk-mgr{ font-family:var(--font-cond); font-weight:600; font-size:10.5px; letter-spacing:.1em; color:var(--ink-3); text-transform:uppercase; }
+  .pk-price{ font-family:var(--font-num); font-weight:700; font-size:16px; }
+  .pk-price.steal{ color:var(--volt); }
+
+  .content::after{ content:""; position:absolute; left:0; right:0; bottom:0; height:54px; background:linear-gradient(180deg, transparent, var(--bg-0)); pointer-events:none; }
+
+  /* ===== bottom nav ===== */
+  .nav{
+    display:flex; padding:10px 22px 16px; gap:6px;
+    background:linear-gradient(180deg, transparent, rgba(4,6,13,0.9) 35%);
+    border-top:1px solid var(--hairline);
+  }
+  .tab{ flex:1; text-align:center; font-family:var(--font-cond); font-weight:700; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3); padding:8px 0; }
+  .tab .ico{ display:block; width:22px; height:22px; margin:0 auto 5px; border-radius:6px; background:currentColor; opacity:.55; }
+  .tab.active{ color:var(--volt); }
+  .tab.active .ico{ opacity:1; box-shadow:0 0 16px var(--volt-glow); }
+
+  .legend{ margin-top:22px; max-width:430px; font-size:12px; color:var(--ink-3); line-height:1.6; }
+  .legend b{ color:var(--ink-2); }
+  .sw{ display:inline-block; width:11px; height:11px; border-radius:3px; vertical-align:-1px; margin:0 2px 0 8px; }
+</style>
+</head>
+<body>
+  <div class="stage-label">Direction v1 &nbsp;·&nbsp; <b>EA FC energy + Linear discipline</b> &nbsp;·&nbsp; Live Auction Draft Room</div>
+
+  <div class="phone">
+    <div class="notch"></div>
+    <div class="screen">
+      <div class="content">
+
+        <!-- TOP BAR -->
+        <div class="topbar">
+          <div class="league">
+            <div class="crest">N</div>
+            <div>
+              <h1>THE NASTIES</h1>
+              <div class="sub">Auction · PPR · 12</div>
+            </div>
+          </div>
+          <div class="live"><span class="dot"></span> Live</div>
+        </div>
+
+        <div class="roundrow">
+          <div class="pill"><div class="k">Pick</div><div class="v">47 <small>/ 192</small></div></div>
+          <div class="pill"><div class="k">Your Budget</div><div class="v">$146 <small>left</small></div></div>
+          <div class="pill"><div class="k">Roster</div><div class="v">6 <small>/ 16</small></div></div>
+        </div>
+
+        <!-- ON THE BLOCK -->
+        <div class="block-head">
+          <div class="lbl">On The Block</div>
+          <div class="timer"><span class="ring"></span> 0:14</div>
+        </div>
+
+        <div class="hero">
+          <div class="jersey">1</div>
+          <div class="top">
+            <div class="poschip wr">WR</div>
+            <div class="name">
+              <h2>JA'MARR<br>CHASE</h2>
+              <div class="meta">CIN · <b>Bye 10</b> · Tier 1</div>
+            </div>
+          </div>
+          <div class="stats">
+            <div class="stat"><div class="k">Proj Pts</div><div class="v">312.4</div></div>
+            <div class="stat"><div class="k">ADP</div><div class="v">3.1</div></div>
+            <div class="stat"><div class="k">Pos Rank</div><div class="v">WR1</div></div>
+            <div class="stat"><div class="k">Vona</div><div class="v" style="color:var(--volt)">+38</div></div>
+          </div>
+          <div class="bidline">
+            <div class="curbid">
+              <div class="k">Current Bid</div>
+              <div class="v">$54</div>
+              <div class="by">High: <b>Tyler</b></div>
+            </div>
+            <div class="maxbid">
+              <div class="k">Your Max</div>
+              <div class="v">$61</div>
+              <div class="note">value to $61, stop at $63</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ACTIONS -->
+        <div class="actions">
+          <div class="stepper">
+            <button>–</button>
+            <div class="amt">$55</div>
+            <button>+</button>
+          </div>
+          <button class="bid-btn">Place Bid $55</button>
+        </div>
+
+        <!-- AI READ -->
+        <div class="airead">
+          <div class="badge">AI Read</div>
+          <p>WR run is on. <b>3 gone in the last 5 picks.</b> Chase is the last elite at the position. Worth stretching to your max.</p>
+          <div class="conf">92%</div>
+        </div>
+
+        <!-- BUDGET / SQUAD -->
+        <div class="sec-head"><span>Your Squad</span><span style="color:var(--ink-3)">$24 max bid left</span></div>
+        <div class="budget">
+          <div class="row">
+            <div class="spent">$54 <small>spent</small></div>
+            <div class="max">$146 / $200</div>
+          </div>
+          <div class="bar"><i></i></div>
+          <div class="slots">
+            <div class="slot qb filled">QB</div>
+            <div class="slot rb filled">RB</div>
+            <div class="slot rb filled">RB</div>
+            <div class="slot wr filled">WR</div>
+            <div class="slot">WR</div>
+            <div class="slot te filled">TE</div>
+            <div class="slot">FLX</div>
+          </div>
+        </div>
+
+        <!-- FEED -->
+        <div class="sec-head"><span>The Feed</span><span style="color:var(--ink-3)">Last 4</span></div>
+        <div class="feed">
+          <div class="pick new">
+            <div class="pk-pos rb">RB</div>
+            <div class="pk-name">Bijan Robinson</div>
+            <div class="pk-mgr">Hodgkiss</div>
+            <div class="pk-price">$67</div>
+          </div>
+          <div class="pick">
+            <div class="pk-pos wr">WR</div>
+            <div class="pk-name">Puka Nacua</div>
+            <div class="pk-mgr">Tyler</div>
+            <div class="pk-price steal">$41</div>
+          </div>
+          <div class="pick">
+            <div class="pk-pos qb">QB</div>
+            <div class="pk-name">Josh Allen</div>
+            <div class="pk-mgr">Rasar</div>
+            <div class="pk-price">$33</div>
+          </div>
+          <div class="pick">
+            <div class="pk-pos te">TE</div>
+            <div class="pk-name">Brock Bowers</div>
+            <div class="pk-mgr">Deluca</div>
+            <div class="pk-price">$29</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- NAV -->
+      <div class="nav">
+        <div class="tab"><span class="ico"></span>Prep</div>
+        <div class="tab active"><span class="ico"></span>Draft</div>
+        <div class="tab"><span class="ico"></span>Squad</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="legend">
+    <b>The set palette:</b>
+    <span class="sw" style="background:#080D18;border:1px solid var(--hairline)"></span>colorful-dark canvas (blue + violet + faint turf depth, never flat black),
+    <span class="sw" style="background:#8BFF45"></span><b>volt</b> = the moment / value / your action,
+    <span class="sw" style="background:#4D82FF"></span><b>electric blue</b> = structure / info / depth.
+    Position chips muted. One iridescent sheen on the hero card (texture, not a color). Type: Anton (broadcast hero) + Saira Condensed (labels) + JetBrains Mono (every number).
+  </div>
+</body>
+</html>

@@ -9,15 +9,16 @@
     { "name": "UI redesign + player intel (Phase 6-7.5)", "done": true },
     { "name": "In-season AI companion (Phase 8)", "done": true },
     { "name": "P0 — Personal season hardening (Aug 2026 drafts)", "done": false },
-    { "name": "UX — AAA Visual Upgrade (Stadium Primetime)", "done": false },
+    { "name": "UX — AAA Visual Upgrade (Stadium Primetime) [SUPERSEDED 2026-06-04]", "done": false },
+    { "name": "UX-V2: GRIDIRON Redesign (EA FC + Linear) [ACTIVE]", "done": false },
     { "name": "P1 — Auctioneer integration", "done": false },
     { "name": "P2 — Pre-season validation", "done": false },
     { "name": "P3+ — Commercialization (CONDITIONAL)", "done": false }
   ],
   "nextItems": [
-    "UX-1.1: Stadium Primetime v2.0 design system + globals tokens",
-    "UX-1.4: Atmospheric background system (app-shell)",
-    "FF-269: Arm's-length physical test — fix anything requiring precision tapping"
+    "UXV2-1: Lock GRIDIRON direction on the live-auction mockup (accent, energy, live-price tracker)",
+    "UXV2-2: DESIGN_SYSTEM v3 (GRIDIRON) globals tokens + font stack + components",
+    "UXV2-6: Rebuild Live Auction Draft Room in React to match the locked mockup"
   ]
 }
 -->
@@ -125,7 +126,47 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 
 ---
 
-## UX — AAA Visual Upgrade ("Stadium Primetime")
+## UX-V2: GRIDIRON Redesign (ACTIVE visual track)
+> **Why this exists:** On 2026-06-04 Joe reviewed the shipped "Stadium Primetime / Sunday Night Gridiron" UI and rejected it as generic AI slop (deep navy + glass + gold glow + gradients, the no-opinion default every AI produces). It rendered correctly (verified live) but had no point of view. This track replaces it.
+> **Direction (Joe-chosen from a 10-app reference review):** EA Sports FC Ultimate Team energy + Linear discipline. Bold where the draft is live, disciplined everywhere else.
+> **Status:** Direction LIKED, not yet LOCKED. Live-auction co-pilot mockup approved in concept; finalizing accent color, energy level, and a live-price-tracker question before applying the system across all screens.
+> **Hard rule:** Visual rebuild only. Reuse engine / data / advisor / feed logic untouched. Performance is a mandate: NO stacked backdrop-filter blur (the old build was so filter-heavy it could not even be screenshotted, which is also a phone-perf red flag). Gradients + box-shadow + transform/opacity only.
+
+### Reference bar (what "AAA" means here) - Joe's reactions, 2026-06-04
+- Love / north star: EA Sports FC Ultimate Team menus ("YES this is what I'm talking about").
+- Elegance bar: Linear.
+- Liked with caveats: Family (animation quality yes; no light mode, no cheese), Raycast + Linear (beautiful but too black, want color + depth), Copilot Money (beautiful but too many colors, want a SET palette), Sleeper (good color, not elegant enough).
+- Hard no: Underdog (too flat / minimal).
+
+### Locked design DNA (frozen on UXV2-1 sign-off)
+- Canvas: colorful-DARK. Deep midnight with blue + violet + faint turf-green lit depth. Never flat black, never light.
+- Set palette: volt green = the moment / value / your action ONLY; electric blue = structure / info / depth; position chips muted; one iridescent sheen on the hero card (texture, not a fourth color). No gold-glass anywhere.
+- Type: Anton (broadcast hero), Saira Condensed (labels), JetBrains Mono (every number, tabular).
+
+### Corrected product model (Joe, 2026-06-04) - applies to all auction screens
+- Joe's draft is a LIVE IN-PERSON auction. The app does NOT place or manage bids.
+- The app does two things: (1) STRATEGY for Joe ("Bid Up To $X", value, estimated cost, spend cap, AI run/pace reads), and (2) TRACK RESULTS (record each sale: final price + winner; feed + budget + roster update from logged results via Sheets / Auctioneer feed / manual entry).
+- Therefore: no bid stepper and no "Place Bid" button anywhere. The live hero = strategy block + a "Record Sale" action.
+
+### Artifacts
+- `.claude/mockups/draft-room-phone.html` - live auction co-pilot, mobile, Direction v1 (current source of truth for the look).
+- `.claude/mockups/live-draft-room-v1.html` - desktop-framed product shot of the same screen.
+- Rendered to PNG via headless Edge for remote/phone viewing (remote mode cannot download local files).
+
+### Plan
+- [~] UXV2-1: Lock the direction on the Live Auction Draft Room mockup - confirm accent (volt vs cyan/orange), energy level (FUT-max vs Linear-restraint), and whether to add an optional live "going for" price tracker. Output: approved mockup; DNA section above frozen.
+- [ ] UXV2-2: DESIGN_SYSTEM v3 "GRIDIRON" - new `globals.css` tokens (set palette + colorful-dark canvas + performant atmosphere), font stack (Anton / Saira / Saira Condensed / JetBrains Mono), component classes (hero card, decision block, record-sale, broadcast feed). Archive v2.0 Stadium Primetime + its `UI_UPGRADE_PLAN.md`.
+- [ ] UXV2-3: Apply to Prep Hub + Configure (Linear-refined analytical surfaces).
+- [ ] UXV2-4: Apply to Draft Board / Player Pool (data-dense, Copilot-grade numbers, set palette).
+- [ ] UXV2-5: Apply to Post-Draft Review (broadcast grade hero in the new palette, no gold).
+- [ ] UXV2-6: Rebuild the Live Auction Draft Room in React to match the locked mockup (strategy + record-sale model; reuse advisor / feed / state machine).
+- [ ] UXV2-7: Performance + arm's-length pass - confirm screenshot-able + smooth on Joe's phone (the old build's exact failure mode); reduced-motion guards on every animation.
+- [ ] UXV2-8: VERIFY (lint + tests + build) + commit + update DESIGN docs + WORKING_STATE.
+
+---
+
+## UX — AAA Visual Upgrade ("Stadium Primetime") [SUPERSEDED 2026-06-04]
+> **SUPERSEDED 2026-06-04:** Joe reviewed the shipped result and rejected this gold-glass direction as generic AI slop. Replaced by UX-V2 GRIDIRON above. Items below are preserved as the history of what was built (the engine + infra is reusable; the look is being rebuilt). Do not resume this track.
 > **Goal:** Take the app from ~7.5/10 to AAA. Full plan: `.claude/UI_UPGRADE_PLAN.md`.
 > **Per-session prompt:** `.claude/UX_SESSION_PROMPT.md` — paste into a fresh session to do the next sprint; loop until every UX item is `[x]`. (Opus for UX-2/UX-5, Sonnet for UX-3/UX-4/UX-6.)
 > **Direction:** Keep Gridiron Blue structure; add NCAA arena depth (CSS atmospheric backgrounds + spotlight glows + grain); metallic GOLD = the moment (your pick, draft complete, grade hero); electric GREEN demoted to value/steal/success only.

@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#05080F" />
+<title>GRIDIRON — Draft Room</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Saira:wght@400;500;600;700&family=Saira+Condensed:wght@600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* DIRECTION v1 — phone build. EA FC energy + Linear discipline.
+     SET PALETTE: colorful-dark canvas + volt (moment/value) + electric blue (structure).
+     Performant: gradients + box-shadow + transform/opacity only. */
+  :root{
+    --bg-0:#05080F; --bg-1:#080D18;
+    --surface-1:#0C1322; --surface-2:#111A2E; --surface-3:#16223A;
+    --hairline:rgba(150,180,255,0.10); --hairline-bright:rgba(180,205,255,0.18);
+    --volt:#8BFF45; --volt-deep:#5FE21F; --volt-ink:#0a1f02; --volt-glow:rgba(139,255,69,0.32);
+    --blue:#4D82FF; --blue-bright:#79A6FF; --blue-glow:rgba(77,130,255,0.28);
+    --ink:#EAF1FF; --ink-2:#9FB0CE; --ink-3:#637396;
+    --pos-qb:#FF6E8A; --pos-rb:#56E0A0; --pos-wr:#6CA8FF; --pos-te:#FFB05C;
+    --font-display:"Anton","Saira Condensed",sans-serif;
+    --font-cond:"Saira Condensed",sans-serif;
+    --font-ui:"Saira",system-ui,sans-serif;
+    --font-num:"JetBrains Mono",monospace;
+    --r:18px;
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html,body{ height:100%; }
+  body{
+    font-family:var(--font-ui); color:var(--ink);
+    background:
+      radial-gradient(700px 480px at 22% -6%, rgba(77,130,255,0.18), transparent 58%),
+      radial-gradient(620px 560px at 92% 4%, rgba(139,255,69,0.07), transparent 55%),
+      radial-gradient(800px 700px at 50% 116%, rgba(120,80,255,0.12), transparent 60%),
+      linear-gradient(180deg,#060A14,#04060D);
+    background-attachment:fixed;
+    -webkit-font-smoothing:antialiased;
+  }
+  .app{ max-width:520px; margin:0 auto; min-height:100dvh; padding-bottom:96px; }
+
+  /* sticky header */
+  header{
+    position:sticky; top:0; z-index:20;
+    padding:calc(env(safe-area-inset-top) + 14px) 16px 12px;
+    background:linear-gradient(180deg, rgba(5,8,15,0.96) 60%, rgba(5,8,15,0));
+  }
+  .topbar{ display:flex; align-items:center; justify-content:space-between; }
+  .league{ display:flex; align-items:center; gap:11px; }
+  .crest{ width:38px; height:38px; border-radius:10px; background:linear-gradient(150deg,var(--blue),#2748b8); display:grid; place-items:center; font-family:var(--font-display); font-size:18px; color:#fff; box-shadow:0 6px 18px -6px var(--blue-glow); }
+  .league h1{ font-family:var(--font-cond); font-weight:800; font-size:20px; line-height:1; }
+  .league .sub{ font-family:var(--font-cond); font-weight:600; font-size:11px; letter-spacing:.22em; color:var(--ink-3); text-transform:uppercase; margin-top:3px; }
+  .live{ display:flex; align-items:center; gap:7px; font-family:var(--font-cond); font-weight:700; font-size:12px; letter-spacing:.2em; color:var(--volt); text-transform:uppercase; padding:8px 12px; border-radius:999px; background:rgba(139,255,69,0.08); border:1px solid rgba(139,255,69,0.22); }
+  .dot{ width:8px; height:8px; border-radius:50%; background:var(--volt); box-shadow:0 0 10px var(--volt); animation:pulse 1.6s ease-in-out infinite; }
+  @keyframes pulse{ 0%,100%{ opacity:1; transform:scale(1);} 50%{ opacity:.45; transform:scale(.7);} }
+  .roundrow{ display:flex; gap:8px; margin-top:13px; }
+  .pill{ flex:1; background:var(--surface-1); border:1px solid var(--hairline); border-radius:12px; padding:9px 12px; }
+  .pill .k{ font-family:var(--font-cond); font-weight:600; font-size:10px; letter-spacing:.2em; color:var(--ink-3); text-transform:uppercase; }
+  .pill .v{ font-family:var(--font-num); font-weight:700; font-size:18px; margin-top:2px; }
+  .pill .v small{ font-size:11px; color:var(--ink-3); font-weight:600; }
+
+  main{ padding:4px 16px 0; }
+
+  .block-head{ display:flex; align-items:center; justify-content:space-between; margin:16px 2px 9px; }
+  .block-head .lbl{ font-family:var(--font-cond); font-weight:800; font-size:13px; letter-spacing:.26em; color:var(--ink-2); text-transform:uppercase; }
+  .timer{ font-family:var(--font-num); font-weight:700; font-size:15px; color:var(--volt); display:flex; align-items:center; gap:6px; }
+  .timer .ring{ width:9px; height:9px; border-radius:50%; border:2px solid var(--volt); animation:pulse 1s linear infinite; }
+
+  .hero{ position:relative; border-radius:var(--r); overflow:hidden;
+    background:radial-gradient(120% 90% at 0% 0%, rgba(77,130,255,0.22), transparent 55%), radial-gradient(120% 120% at 100% 0%, rgba(139,255,69,0.10), transparent 50%), linear-gradient(160deg,var(--surface-3),var(--surface-2) 70%);
+    border:1px solid var(--hairline-bright); box-shadow:0 22px 50px -22px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.02) inset; padding:17px 17px 16px; }
+  .hero::before{ content:""; position:absolute; inset:0; border-radius:var(--r); padding:1px; background:linear-gradient(115deg, transparent 30%, rgba(255,255,255,0.55) 47%, rgba(139,255,69,0.5) 52%, transparent 70%); -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite:xor; mask-composite:exclude; background-size:280% 280%; animation:sheen 5.5s ease-in-out infinite; opacity:.7; }
+  @keyframes sheen{ 0%,100%{ background-position:0% 50%;} 50%{ background-position:100% 50%;} }
+  .jersey{ position:absolute; right:-6px; top:-26px; font-family:var(--font-display); font-size:170px; line-height:1; color:rgba(255,255,255,0.035); pointer-events:none; }
+  .hero .top{ display:flex; align-items:flex-start; gap:12px; position:relative; }
+  .poschip{ font-family:var(--font-cond); font-weight:800; font-size:13px; letter-spacing:.08em; padding:6px 10px; border-radius:8px; color:#04070d; line-height:1; margin-top:6px; }
+  .poschip.wr{ background:var(--pos-wr); }
+  .name h2{ font-family:var(--font-display); font-size:46px; line-height:.92; letter-spacing:.01em; }
+  .name .meta{ font-family:var(--font-cond); font-weight:600; font-size:13px; letter-spacing:.14em; color:var(--ink-2); text-transform:uppercase; margin-top:6px; }
+  .name .meta b{ color:var(--blue-bright); }
+  .hero .stats{ display:flex; gap:20px; margin-top:15px; position:relative; }
+  .stat .k{ font-family:var(--font-cond); font-weight:600; font-size:9.5px; letter-spacing:.2em; color:var(--ink-3); text-transform:uppercase; }
+  .stat .v{ font-family:var(--font-num); font-weight:700; font-size:17px; margin-top:1px; }
+  .bidline{ display:flex; align-items:flex-end; justify-content:space-between; margin-top:17px; position:relative; }
+  .curbid .k{ font-family:var(--font-cond); font-weight:700; font-size:11px; letter-spacing:.22em; color:var(--ink-3); text-transform:uppercase; }
+  .curbid .v{ font-family:var(--font-num); font-weight:700; font-size:46px; line-height:1; }
+  .curbid .by{ font-family:var(--font-cond); font-weight:600; font-size:12px; letter-spacing:.12em; color:var(--ink-2); text-transform:uppercase; margin-top:5px; }
+  .curbid .by b{ color:var(--ink); }
+  .maxbid{ text-align:right; padding:10px 13px; border-radius:12px; background:rgba(139,255,69,0.10); border:1px solid rgba(139,255,69,0.30); }
+  .maxbid .k{ font-family:var(--font-cond); font-weight:700; font-size:10px; letter-spacing:.2em; color:var(--volt); text-transform:uppercase; }
+  .maxbid .v{ font-family:var(--font-num); font-weight:700; font-size:26px; color:var(--volt); }
+  .maxbid .note{ font-family:var(--font-ui); font-size:10.5px; color:var(--ink-3); margin-top:1px; }
+
+  .actions{ display:flex; gap:10px; margin-top:14px; }
+  .stepper{ display:flex; align-items:center; background:var(--surface-1); border:1px solid var(--hairline); border-radius:14px; overflow:hidden; }
+  .stepper button{ width:50px; height:58px; background:transparent; border:none; color:var(--ink); font-size:24px; font-family:var(--font-ui); }
+  .stepper .amt{ width:66px; text-align:center; font-family:var(--font-num); font-weight:700; font-size:21px; }
+  .bid-btn{ flex:1; height:58px; border:none; border-radius:14px; font-family:var(--font-cond); font-weight:800; font-size:19px; letter-spacing:.1em; text-transform:uppercase; color:var(--volt-ink); background:linear-gradient(180deg,var(--volt),var(--volt-deep)); box-shadow:0 14px 30px -10px var(--volt-glow), 0 1px 0 rgba(255,255,255,0.4) inset; }
+
+  /* recommendation tag (replaces the app-managed timer — auction is run by a live person) */
+  .rec-tag{ font-family:var(--font-cond); font-weight:800; font-size:12px; letter-spacing:.18em; text-transform:uppercase; color:var(--volt-ink); background:var(--volt); padding:6px 12px; border-radius:8px; box-shadow:0 0 16px var(--volt-glow); }
+
+  /* decision block — strategy for you, no bidding */
+  .decide{ display:flex; gap:13px; margin-top:16px; position:relative; align-items:stretch; }
+  .yourmax{ flex:1; padding:12px 15px; border-radius:13px; background:rgba(139,255,69,0.10); border:1px solid rgba(139,255,69,0.30); }
+  .yourmax .k{ font-family:var(--font-cond); font-weight:700; font-size:10.5px; letter-spacing:.2em; color:var(--volt); text-transform:uppercase; }
+  .yourmax .v{ font-family:var(--font-num); font-weight:700; font-size:40px; line-height:1.05; color:var(--volt); }
+  .yourmax .note{ font-family:var(--font-ui); font-size:10.5px; color:var(--ink-3); margin-top:3px; }
+  .market{ width:128px; display:flex; flex-direction:column; justify-content:center; gap:9px; }
+  .mrow{ display:flex; justify-content:space-between; align-items:baseline; font-family:var(--font-cond); font-weight:600; font-size:11px; letter-spacing:.05em; color:var(--ink-3); text-transform:uppercase; }
+  .mrow b{ font-family:var(--font-num); font-weight:700; font-size:14px; color:var(--ink); letter-spacing:0; }
+
+  /* record sale — the tracking action (replaces Place Bid) */
+  .record{ margin-top:13px; background:var(--surface-1); border:1px solid var(--hairline); border-radius:16px; padding:13px 13px 14px; }
+  .rec-head{ font-family:var(--font-cond); font-weight:800; font-size:11px; letter-spacing:.24em; color:var(--ink-3); text-transform:uppercase; margin-bottom:10px; }
+  .rec-row{ display:flex; gap:10px; align-items:stretch; }
+  .rec-row .stepper{ flex:1; }
+  .winner{ width:120px; padding:8px 14px; border-radius:14px; background:var(--surface-2); border:1px solid var(--hairline); display:flex; flex-direction:column; justify-content:center; }
+  .winner span{ font-family:var(--font-cond); font-weight:600; font-size:9.5px; letter-spacing:.16em; color:var(--ink-3); text-transform:uppercase; }
+  .winner b{ font-family:var(--font-cond); font-weight:800; font-size:17px; letter-spacing:.02em; color:var(--ink); margin-top:1px; }
+  .rec-btn{ width:100%; height:54px; margin-top:11px; border:none; border-radius:14px; font-family:var(--font-cond); font-weight:800; font-size:18px; letter-spacing:.1em; text-transform:uppercase; color:var(--volt-ink); background:linear-gradient(180deg,var(--volt),var(--volt-deep)); box-shadow:0 14px 30px -10px var(--volt-glow), 0 1px 0 rgba(255,255,255,0.4) inset; }
+
+  .airead{ margin-top:14px; border-radius:14px; padding:13px 14px; background:linear-gradient(180deg, rgba(77,130,255,0.10), rgba(77,130,255,0.04)); border:1px solid rgba(77,130,255,0.24); display:flex; gap:11px; align-items:flex-start; }
+  .airead .badge{ font-family:var(--font-cond); font-weight:800; font-size:10.5px; letter-spacing:.18em; color:var(--blue-bright); text-transform:uppercase; white-space:nowrap; padding-top:1px; }
+  .airead p{ font-size:13px; line-height:1.45; color:var(--ink); }
+  .airead p b{ color:var(--volt); }
+  .airead .conf{ margin-left:auto; font-family:var(--font-num); font-weight:700; font-size:14px; color:var(--blue-bright); }
+
+  .sec-head{ font-family:var(--font-cond); font-weight:800; font-size:12px; letter-spacing:.24em; color:var(--ink-3); text-transform:uppercase; margin:19px 2px 9px; display:flex; justify-content:space-between; }
+  .budget{ background:var(--surface-1); border:1px solid var(--hairline); border-radius:14px; padding:14px; }
+  .budget .row{ display:flex; justify-content:space-between; align-items:baseline; }
+  .budget .spent{ font-family:var(--font-num); font-weight:700; font-size:24px; }
+  .budget .spent small{ color:var(--ink-3); font-size:13px; }
+  .budget .max{ font-family:var(--font-num); font-weight:700; font-size:14px; color:var(--volt); }
+  .bar{ height:9px; border-radius:6px; background:rgba(255,255,255,0.06); margin-top:10px; overflow:hidden; }
+  .bar i{ display:block; height:100%; width:73%; border-radius:6px; background:linear-gradient(90deg,var(--blue),var(--volt)); }
+  .slots{ display:flex; gap:5px; margin-top:12px; }
+  .slot{ flex:1; height:32px; border-radius:7px; background:var(--surface-2); border:1px solid var(--hairline); display:grid; place-items:center; font-family:var(--font-cond); font-weight:700; font-size:11px; letter-spacing:.08em; color:var(--ink-3); }
+  .slot.filled{ color:#04070d; border-color:transparent; }
+  .slot.qb{ background:var(--pos-qb);} .slot.rb{ background:var(--pos-rb);} .slot.wr{ background:var(--pos-wr);} .slot.te{ background:var(--pos-te);}
+
+  .feed{ display:flex; flex-direction:column; gap:7px; }
+  .pick{ display:flex; align-items:center; gap:12px; padding:11px 13px; background:var(--surface-1); border:1px solid var(--hairline); border-radius:12px; position:relative; overflow:hidden; }
+  .pick.new{ border-color:rgba(139,255,69,0.30); }
+  .pick.new::before{ content:""; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--volt); box-shadow:0 0 12px var(--volt); }
+  .pk-pos{ font-family:var(--font-cond); font-weight:800; font-size:11px; padding:5px 8px; border-radius:6px; color:#04070d; }
+  .pk-pos.rb{ background:var(--pos-rb);} .pk-pos.qb{ background:var(--pos-qb);} .pk-pos.te{ background:var(--pos-te);} .pk-pos.wr{ background:var(--pos-wr);}
+  .pk-name{ font-family:var(--font-cond); font-weight:700; font-size:16px; flex:1; }
+  .pk-mgr{ font-family:var(--font-cond); font-weight:600; font-size:11px; letter-spacing:.1em; color:var(--ink-3); text-transform:uppercase; }
+  .pk-price{ font-family:var(--font-num); font-weight:700; font-size:17px; }
+  .pk-price.steal{ color:var(--volt); }
+
+  /* fixed bottom nav */
+  nav{
+    position:fixed; bottom:0; left:50%; transform:translateX(-50%);
+    width:100%; max-width:520px; display:flex; padding:10px 24px calc(env(safe-area-inset-bottom) + 12px); gap:6px;
+    background:linear-gradient(180deg, transparent, rgba(4,6,13,0.96) 38%);
+    border-top:1px solid var(--hairline); z-index:20;
+  }
+  .tab{ flex:1; text-align:center; font-family:var(--font-cond); font-weight:700; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3); padding:6px 0; }
+  .tab .ico{ display:block; width:22px; height:22px; margin:0 auto 5px; border-radius:6px; background:currentColor; opacity:.55; }
+  .tab.active{ color:var(--volt); }
+  .tab.active .ico{ opacity:1; box-shadow:0 0 16px var(--volt-glow); }
+</style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="topbar">
+        <div class="league">
+          <div class="crest">N</div>
+          <div><h1>THE NASTIES</h1><div class="sub">Auction · PPR · 12</div></div>
+        </div>
+        <div class="live"><span class="dot"></span> Live</div>
+      </div>
+      <div class="roundrow">
+        <div class="pill"><div class="k">Pick</div><div class="v">47 <small>/ 192</small></div></div>
+        <div class="pill"><div class="k">Budget</div><div class="v">$146 <small>left</small></div></div>
+        <div class="pill"><div class="k">Roster</div><div class="v">6 <small>/ 16</small></div></div>
+      </div>
+    </header>
+
+    <main>
+      <div class="block-head">
+        <div class="lbl">On The Block</div>
+        <div class="rec-tag">Target</div>
+      </div>
+
+      <div class="hero">
+        <div class="jersey">1</div>
+        <div class="top">
+          <div class="poschip wr">WR</div>
+          <div class="name"><h2>JA'MARR<br>CHASE</h2><div class="meta">CIN · <b>Bye 10</b> · Tier 1 · fills WR2</div></div>
+        </div>
+        <div class="stats">
+          <div class="stat"><div class="k">Proj Pts</div><div class="v">312.4</div></div>
+          <div class="stat"><div class="k">ADP</div><div class="v">3.1</div></div>
+          <div class="stat"><div class="k">Pos Rank</div><div class="v">WR1</div></div>
+          <div class="stat"><div class="k">VONA</div><div class="v" style="color:var(--volt)">+38</div></div>
+        </div>
+        <div class="decide">
+          <div class="yourmax">
+            <div class="k">Bid Up To</div>
+            <div class="v">$61</div>
+            <div class="note">value $61 · walk away at $63</div>
+          </div>
+          <div class="market">
+            <div class="mrow"><span>Est. cost</span><b>$50</b></div>
+            <div class="mrow"><span>Budget</span><b>$146</b></div>
+            <div class="mrow"><span>Spend cap</span><b style="color:var(--volt)">$137</b></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- live in-person auction: the app TRACKS the result, it does not place bids -->
+      <div class="record">
+        <div class="rec-head">Record Sale</div>
+        <div class="rec-row">
+          <div class="stepper"><button>–</button><div class="amt">$54</div><button>+</button></div>
+          <div class="winner"><span>Won by</span><b>You ▾</b></div>
+        </div>
+        <button class="rec-btn">Record Pick</button>
+      </div>
+
+      <div class="airead">
+        <div class="badge">AI Read</div>
+        <p>WR run is on. <b>3 gone in the last 5 picks.</b> Chase is the last elite at the position. Worth stretching to your max.</p>
+        <div class="conf">92%</div>
+      </div>
+
+      <div class="sec-head"><span>Your Squad</span><span style="color:var(--ink-3)">Spend cap $137</span></div>
+      <div class="budget">
+        <div class="row"><div class="spent">$54 <small>spent</small></div><div class="max">$146 / $200</div></div>
+        <div class="bar"><i></i></div>
+        <div class="slots">
+          <div class="slot qb filled">QB</div><div class="slot rb filled">RB</div><div class="slot rb filled">RB</div>
+          <div class="slot wr filled">WR</div><div class="slot">WR</div><div class="slot te filled">TE</div><div class="slot">FLX</div>
+        </div>
+      </div>
+
+      <div class="sec-head"><span>Sold</span><span style="color:var(--ink-3)">Last 4</span></div>
+      <div class="feed">
+        <div class="pick new"><div class="pk-pos rb">RB</div><div class="pk-name">Bijan Robinson</div><div class="pk-mgr">Hodgkiss</div><div class="pk-price">$67</div></div>
+        <div class="pick"><div class="pk-pos wr">WR</div><div class="pk-name">Puka Nacua</div><div class="pk-mgr">Tyler</div><div class="pk-price steal">$41</div></div>
+        <div class="pick"><div class="pk-pos qb">QB</div><div class="pk-name">Josh Allen</div><div class="pk-mgr">Rasar</div><div class="pk-price">$33</div></div>
+        <div class="pick"><div class="pk-pos te">TE</div><div class="pk-name">Brock Bowers</div><div class="pk-mgr">Deluca</div><div class="pk-price">$29</div></div>
+      </div>
+    </main>
+
+    <nav>
+      <div class="tab"><span class="ico"></span>Prep</div>
+      <div class="tab active"><span class="ico"></span>Draft</div>
+      <div class="tab"><span class="ico"></span>Squad</div>
+    </nav>
+  </div>
+</body>
+</html>
