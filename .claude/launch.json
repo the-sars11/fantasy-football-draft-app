@@ -1,17 +1,1 @@
-{
-  "version": "0.0.1",
-  "configurations": [
-    {
-      "name": "dev",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev"],
-      "port": 3003
-    },
-    {
-      "name": "ui-mockups",
-      "runtimeExecutable": "python",
-      "runtimeArgs": ["-m", "http.server", "8765", "--directory", "UI"],
-      "port": 8765
-    }
-  ]
-}
+{"version":"0.0.1","configurations":[{"name":"fantasy-football","runtimeExecutable":"npm","runtimeArgs":["run","dev"],"port":3003}]}

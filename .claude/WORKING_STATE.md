@@ -2,13 +2,14 @@
 
 ## Current Session
 - **Date:** 2026-06-04
-- **Focus:** UX-7.2 — Sim signature moments
-- **Status:** COMPLETE. Scripted WR position run at picks 8-10 fires `PositionRunTicker`; `suppressAI` prop on both advisors kills auto-AI-fetch while sim runs; auto-navigates to `/draft/review?session=<id>` when draft completes; trash talk AI generation suppressed in sim. type-check clean, 29/29 tests, 0 net-new lint errors, build passes.
-- **NEXT:** UX-7.3 — One-tap demo entry (dev launcher so Joe can pull up the sim on a phone).
+- **Focus:** UX-7.3 — One-tap demo entry
+- **Status:** COMPLETE. `DEMO_SESSION`+`DEMO_LEAGUE` constants in `live/client.tsx` let `/draft/live?sim=1` load with no real session (12 Nasties managers, $200 auction, real seeded players). Amber "Demo Draft" card on Draft Hub (`draft/page.tsx`, dev-only). Verified: draft room loads, SIM HUD active, all 12 managers in tendencies panel. type-check clean, 29/29 tests, 0 net-new lint errors, build passes.
+- **NEXT:** UX track is fully done. Next unchecked item is **FF-313** (app-shell double-mount) — awaiting Joe's approach pick (D vs B) before implementing.
 - **GATED:** FF-313 awaits Joe's approach pick (D vs B). FFT-008 needs Joe on phone. Live AI calls need `ANTHROPIC_API_KEY` + typed cost approval.
 - **BACKLOG (deferred, tracked in CODE_REVIEW_2026-06.md):** giant-component extraction (live/review clients), broader test suite, sheet/dedup hardening, connection-pill a11y size, 25 pre-existing lint errors (unrelated debt).
 
 ## Last Completed (most recent first)
+- **UX-7.3** (2026-06-04): One-tap demo entry. `DEMO_SESSION`+`DEMO_LEAGUE` constants added above the component in `live/client.tsx` — 12 Nasties managers, $200 budget, ESPN/PPR auction. Session-load `useEffect` now branches: `simEnabled && !sessionId` injects mock data + fetches real players (persistence 404s fail silently). Amber "Demo Draft" card added to `draft/page.tsx` (`NODE_ENV === 'development'` guard, links to `/draft/live?sim=1`). Verified via DOM snapshot: room shows "The Nasties (Demo)", 12 teams, $200, SIM HUD, all managers. type-check clean, 29/29 tests, 0 net-new lint errors, build passes.
 - **UX-7.2** (2026-06-04): Sim signature moments. Scripted 3-pick WR run at picks 8-10 in `use-draft-simulator.ts` so `PositionRunTicker` fires reliably. Added `suppressAI?: boolean` to `AuctionAdvisor` + `SnakeAdvisor` (wired into `useAutoRecommend` `enabled` guard). `live/client.tsx`: `useRouter` added; `useEffect` auto-pushes to `/draft/review?session=<id>` when `isSimActive && state.status === 'completed'`; `suppressAI={isSimActive}` passed to both advisors; trash talk `generateTrashTalk()` gated behind `!simEnabled`. type-check clean, 29/29 tests, 0 net-new lint errors, build passes.
 - **UX-7.1** (2026-06-04): Dev-only sim engine. NEW `src/hooks/use-draft-simulator.ts`: `useDraftSimulator` hook gated on `NODE_ENV !== 'production' && ?sim=1`. Ref pattern (mirrors use-sleeper-draft-feed). Players sorted by consensusRank; auction price from consensusAuctionValue; snake uses `state.current_manager`; auction cycles round-robin via `auctionMgrIdxRef`. Speed control: slow 3s / medium 1.5s / fast 0.6s. `live/client.tsx`: added `simEnabled` check, hook call, and sim HUD bar (amber SIM badge + Start/Pause + Reset + speed selector + pick counter). Gate: production build strips it entirely. type-check clean, 29/29 tests, 0 net-new lint errors, build passes.
 - **UX-6.4** (2026-06-03): UX-6 QA gate close-out. DOM-level snapshot audit of 6 screens (Prep Hub, Configure, Draft Board, Draft Setup, Live Auction Draft Room, Post-Draft Review) at desktop 1280px + mobile 375px. All panels render without errors. Real player data confirmed (3093 cached, 8 INJURY WATCH entries, 180+ player pool, 12 managers). `preview_screenshot` timed out on all attempts (heavy CSS filter stack); `preview_snapshot` substituted as authoritative record. Audit document: `.claude/UX6_AFTER_AUDIT.md`. No source code changed.
@@ -197,6 +198,31 @@ npm run test:run     # Vitest single run (advisory on commit)
 npm run test         # Vitest watch mode
 npm run test:coverage # Coverage report
 ```
+
+### Demo Draft Launch (dev only — UX-7.3)
+
+Open this URL in any browser on the same network as the dev server:
+
+```
+http://localhost:3003/draft/live?sim=1
+```
+
+For phone access (replace IP with your machine's local Wi-Fi IP):
+
+```
+http://192.168.x.x:3003/draft/live?sim=1
+```
+
+Get your local IP in PowerShell:
+```powershell
+(Get-NetIPAddress -AddressFamily IPv4 | Where-Object { $_.InterfaceAlias -like '*Wi-Fi*' }).IPAddress
+```
+
+- No login or Supabase session required (DEV_MODE bypass + mock session)
+- Loads with 12 Nasties managers, $200 budget, ESPN/PPR auction, real seeded players
+- Hit **Start** in the amber SIM HUD to auto-play picks
+- Draft Hub (`/draft`) shows an amber "Demo Draft" card in dev only
+- Gate: `NODE_ENV !== 'production'` — card and mock session are stripped from the Vercel build
 
 ### Bug Hunt Status
 

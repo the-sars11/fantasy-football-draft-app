@@ -2,6 +2,21 @@
 
 ---
 
+## 2026-06-04 — UX-7.3: One-tap demo entry
+
+**Task:** UX-7.3 | **Class:** `output` | **Lenses:** QA, Design
+
+**Why:** The sim was already built (UX-7.1/7.2) but required a real Supabase draft session to exist before it could load — making it impossible to demo on a phone without going through the full 3-step setup flow. Needed a zero-setup path so Joe can open one URL and show anyone the full broadcast experience.
+
+**What changed:**
+- `src/app/(app)/draft/live/client.tsx`: Added `DEMO_SESSION` (12 Nasties managers, $200 auction, ESPN/PPR) and `DEMO_LEAGUE` constants above the component. Modified session-load `useEffect`: when `simEnabled && !sessionId`, inject the mock session + league and fetch real players from `/api/players` instead of showing the "no session" error. Persistence calls to `/api/draft/sessions/demo` fail silently (try/catch already in place).
+- `src/app/(app)/draft/page.tsx`: Added `Play` import; added dev-only "Demo Draft" card (amber-tinted, `NODE_ENV === 'development'` guard) linking to `/draft/live?sim=1`.
+- `.claude/WORKING_STATE.md`: Added Demo Draft Launch section to Commands Reference.
+
+**Verify result:** type-check clean, 29/29 tests, 0 net-new lint errors in changed files, `npm run build` passes. `/draft/live?sim=1` loads live draft room with "The Nasties (Demo)", 12 managers, $200 budget, real seeded players, SIM HUD active — no login or session setup required. Draft Hub shows amber "Demo Draft" card in dev only.
+
+---
+
 ## 2026-06-04 — UX-7.2: Sim signature moments + AI suppression + auto-navigate to review
 
 **Task:** UX-7.2 | **Class:** `output` + `pipeline` | **Lenses:** QA, Delivery

@@ -84,6 +84,54 @@ const DEFAULT_ROSTER: RosterSlots = {
   qb: 1, rb: 2, wr: 2, te: 1, flex: 1, k: 1, dst: 1, bench: 6, ir: 0,
 }
 
+// UX-7.3: Mock session + league for sim demo mode (?sim=1 with no ?session=)
+// Persistence calls to /api/draft/sessions/demo will 404 and fail silently.
+const DEMO_SESSION: DraftSession = {
+  id: 'demo',
+  user_id: 'demo-user',
+  league_id: 'demo-league',
+  sheet_url: null,
+  format: 'auction',
+  status: 'live',
+  managers: [
+    { name: 'Rasar', budget: 200 },
+    { name: 'Bruce', budget: 200 },
+    { name: 'Garrett', budget: 200 },
+    { name: 'Kevin', budget: 200 },
+    { name: 'Cross', budget: 200 },
+    { name: 'Moonshine', budget: 200 },
+    { name: 'Reggie', budget: 200 },
+    { name: 'Moe', budget: 200 },
+    { name: 'Robbie', budget: 200 },
+    { name: 'Hendrickson', budget: 200 },
+    { name: 'Simmons', budget: 200 },
+    { name: 'Murphy', budget: 200 },
+  ],
+  picks: [],
+  keepers: [],
+  recommendations: [],
+  created_at: '2026-08-01T00:00:00.000Z',
+  updated_at: '2026-08-01T00:00:00.000Z',
+}
+
+const DEMO_LEAGUE: League = {
+  id: 'demo-league',
+  user_id: 'demo-user',
+  name: 'The Nasties (Demo)',
+  platform: 'espn',
+  format: 'auction',
+  team_count: 12,
+  budget: 200,
+  scoring_format: 'ppr',
+  scoring_settings: null,
+  roster_slots: { qb: 1, rb: 2, wr: 2, te: 1, flex: 1, k: 0, dst: 1, bench: 6, ir: 0 },
+  keeper_enabled: false,
+  keeper_settings: null,
+  is_active: true,
+  created_at: '2026-08-01T00:00:00.000Z',
+  updated_at: '2026-08-01T00:00:00.000Z',
+}
+
 // Strategy Picker Dropdown Component
 function StrategyPicker({
   strategies,
@@ -371,8 +419,19 @@ export function LiveDraftClient() {
   // Load session + league + players + active strategy
   useEffect(() => {
     if (!sessionId) {
-      setError('No session ID in URL. Go back to Draft Setup.')
-      setLoading(false)
+      if (simEnabled) {
+        // UX-7.3: Demo mode — inject mock session + league, still fetch real players
+        setSession(DEMO_SESSION)
+        setLeague(DEMO_LEAGUE)
+        fetch('/api/players')
+          .then(r => r.json())
+          .then(data => { if (data.players) setPlayers(data.players) })
+          .catch(() => {})
+          .finally(() => setLoading(false))
+      } else {
+        setError('No session ID in URL. Go back to Draft Setup.')
+        setLoading(false)
+      }
       return
     }
 
@@ -412,6 +471,7 @@ export function LiveDraftClient() {
     }
 
     load()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sessionId])
 
   const rosterSlots = (league?.roster_slots ?? DEFAULT_ROSTER) as RosterSlots

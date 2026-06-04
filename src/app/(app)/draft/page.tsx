@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Zap, FileSpreadsheet, Trophy } from 'lucide-react'
+import { Zap, FileSpreadsheet, Trophy, Play } from 'lucide-react'
 
 const btnPrimary = 'inline-flex items-center justify-center rounded-lg bg-primary px-2.5 h-8 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/80'
 const btnSecondary = 'inline-flex items-center justify-center rounded-lg bg-secondary px-2.5 h-8 text-sm font-medium text-secondary-foreground transition-colors hover:bg-secondary/80'
@@ -52,6 +52,21 @@ export default function DraftPage() {
             <Link href="/draft/review" className={btnSecondary}>Review</Link>
           </CardContent>
         </Card>
+
+        {process.env.NODE_ENV === 'development' && (
+          <Card className="border-amber-500/30 bg-amber-500/5">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-amber-400">
+                <Play className="h-5 w-5" />
+                Demo Draft
+              </CardTitle>
+              <CardDescription>Dev only - launches the sim without a real session</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Link href="/draft/live?sim=1" className={btnPrimary}>Launch Demo</Link>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   )
