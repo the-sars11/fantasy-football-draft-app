@@ -2,6 +2,27 @@
 
 ---
 
+## 2026-06-03 — UX-6.4: Stadium Primetime "after" state audit (UX-6 QA gate close-out)
+
+**Task:** UX-6.4 | **Class:** `docs` | **Lenses:** QA, Delivery
+
+**Why:** UX-6 required a before/after screenshot set as the QA gate for the Stadium Primetime track. No "before" screenshots existed (the redesign happened across in-flight sessions). This closes the gate with an "after" DOM-level audit as the permanent record.
+
+**What changed:**
+- Created `.claude/UX6_AFTER_AUDIT.md`: live DOM audit of 6 screens (Prep Hub, Configure, Draft Board, Draft Setup, Live Auction Draft Room, Post-Draft Review) at 1280px desktop + 375px mobile via `preview_snapshot`. Before/after token comparison table included. All screens PASS.
+- `BUILD_PLAN.md`: UX-6.4 marked `[x]`
+- `WORKING_STATE.md`: Current session + Last Completed updated; next item noted (UX-7.1)
+
+**Verify result:**
+- 6/6 screens render without console errors (2 pre-existing ThemeToggle hydration issues, non-blocking)
+- Real player data confirmed live: 3093 cached players, 8 INJURY WATCH entries, 180+ player pool rows, 12 managers in League Overview
+- Mobile 375px: identical DOM structure to desktop — all panels reachable
+- `preview_screenshot` timed out on all attempts (heavy CSS filter/animation stack overwhelms headless renderer); `preview_snapshot` is the authoritative substitute
+
+**UX-6 track fully complete. Next: UX-7 (Sim Draft / Demo Mode).**
+
+---
+
 ## 2026-06-03 — UX-6.3: Background-layer GPU promotion
 
 **Task:** UX-6.3 | **Class:** `output` (CSS-only) | **Lenses:** Design, QA
