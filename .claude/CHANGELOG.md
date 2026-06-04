@@ -2,6 +2,20 @@
 
 ---
 
+## 2026-06-04 — FF-313: App-shell double-mount fix (Option D)
+
+**Task:** FF-313 | **Class:** `shared` + `bugfix` | **Lenses:** Architecture, QA
+
+**Why:** `AppShell` rendered `{children}` in two sibling wrappers simultaneously — `hidden md:block` (desktop) and `md:hidden` (SwipeCarousel/mobile). CSS `display:none` hides elements visually but does not unmount React, so every authenticated page mounted twice. For `LiveDraftClient` specifically: 2× `/api/players` + 2× `/api/draft/sessions` on mount; 2× Sheets poll (~17 req/min); 2× Sleeper poll (~48 external req/min); 2× `scorePlayersWithStrategy` + O(n²) `maxBidAdviceMap` per pick. More critically: manual entry only reached the visible instance; when the hidden instance's feed-driven PATCH (full-array replace) fired next, it clobbered any manually-entered picks — silent data loss on draft day.
+
+**What changed:**
+- `src/hooks/use-is-mobile.ts` (new): `useIsMobile()` hook. Uses `window.matchMedia('(max-width: 767px)')`, updates on resize via `addEventListener('change', …)`, defaults `false` (desktop) for SSR safety.
+- `src/components/layout/app-shell.tsx`: Added `useIsMobile` import + `const isMobile = useIsMobile()` call. Replaced the parallel `hidden md:block` / `md:hidden` sibling-wrapper block with a single `{isMobile ? <SwipeCarousel>…{children}… : …{children}…}` ternary. Desktop layout (padding, max-width, PageTransition) and mobile layout (SwipeCarousel, `pb-24` safe-area padding) are both preserved exactly.
+
+**Verify result:** type-check clean, 29/29 tests, 0 net-new lint errors, `npm run build` passes. DOM check via `preview_eval`: `document.querySelectorAll('.mx-auto.max-w-6xl').length === 1` at both 1280px (desktop) and 375px (mobile). Previously 2.
+
+---
+
 ## 2026-06-04 — UX-7.3: One-tap demo entry
 
 **Task:** UX-7.3 | **Class:** `output` | **Lenses:** QA, Design

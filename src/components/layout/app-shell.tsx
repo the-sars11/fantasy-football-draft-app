@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useIsMobile } from '@/hooks/use-is-mobile'
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
@@ -64,6 +65,7 @@ export function AppShell({
 }) {
   const pathname = usePathname()
   const [collapsed, setCollapsed] = useState(false)
+  const isMobile = useIsMobile()
   const displayName = user.user_metadata?.full_name || user.email || 'User'
   const initials = displayName.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()
 
@@ -187,21 +189,23 @@ export function AppShell({
         </div>
       </header>
 
-      {/* Main content — fills space between header and bottom nav on mobile */}
+      {/* Main content — single render; wrapper chosen at runtime to prevent double-mount (FF-313) */}
       <main className="flex-1 overflow-y-auto relative z-10">
-        {/* Desktop: just page transition. Mobile: swipe carousel + page transition */}
-        <div className="hidden md:block h-full">
-          <PageTransition>
-            <div className="mx-auto max-w-6xl p-4 md:p-6 pb-6">{children}</div>
-          </PageTransition>
-        </div>
-        <div className="md:hidden h-full">
-          <SwipeCarousel>
+        {isMobile ? (
+          <div className="h-full">
+            <SwipeCarousel>
+              <PageTransition>
+                <div className="mx-auto max-w-6xl p-4 pb-24">{children}</div>
+              </PageTransition>
+            </SwipeCarousel>
+          </div>
+        ) : (
+          <div className="h-full">
             <PageTransition>
-              <div className="mx-auto max-w-6xl p-4 pb-24">{children}</div>
+              <div className="mx-auto max-w-6xl p-4 md:p-6 pb-6">{children}</div>
             </PageTransition>
-          </SwipeCarousel>
-        </div>
+          </div>
+        )}
       </main>
 
       {/* Mobile bottom tab bar — hidden on desktop (FF-103: Tactical Hologram nav) */}
