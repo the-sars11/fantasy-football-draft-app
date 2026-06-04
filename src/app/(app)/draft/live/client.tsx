@@ -21,6 +21,9 @@ import {
   Gavel,
   Lock,
   Check,
+  Play,
+  Pause,
+  RotateCcw,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import {
@@ -74,6 +77,8 @@ import {
   type NormalizedPickEvent,
 } from '@/hooks/use-draft-feed'
 import { useSleeperDraftFeed } from '@/hooks/use-sleeper-draft-feed'
+import { useDraftSimulator } from '@/hooks/use-draft-simulator'
+import type { SimSpeed } from '@/hooks/use-draft-simulator'
 
 const DEFAULT_ROSTER: RosterSlots = {
   qb: 1, rb: 2, wr: 2, te: 1, flex: 1, k: 1, dst: 1, bench: 6, ir: 0,
@@ -331,6 +336,8 @@ export function LiveDraftClient() {
   const aifParam = searchParams.get('aif') as AuctioneerConnectionType
   // FF-312: Sleeper draft ID from setup (?sdi=...)
   const sdiParam = searchParams.get('sdi')
+  // UX-7.1: Dev-only sim (?sim=1, NODE_ENV !== 'production' gate)
+  const simEnabled = process.env.NODE_ENV !== 'production' && searchParams.get('sim') === '1'
 
   // On Block: player nominated via BID button in the player pool
   const [onBlockPlayer, setOnBlockPlayer] = useState<Player | null>(null)
@@ -611,6 +618,16 @@ export function LiveDraftClient() {
     return map
   }, [state, scoredPlayers, draftedNames, strategy])
 
+  // UX-7.1: Dev-only sim engine
+  const { isSimActive, isRunning: simRunning, speed: simSpeed, setSpeed: setSimSpeed, start: simStart, pause: simPause, reset: simReset } =
+    useDraftSimulator({
+      enabled: simEnabled,
+      players,
+      draftedNames,
+      state,
+      addManualPick,
+    })
+
   // Build owner map once when manager_order is first populated
   useEffect(() => {
     if (teamOwnerMapRef.current !== null) return
@@ -841,6 +858,44 @@ export function LiveDraftClient() {
 
   return (
     <div className="space-y-4 pb-32">
+      {/* UX-7.1: Dev-only sim HUD (NODE_ENV !== 'production' + ?sim=1) */}
+      {isSimActive && (
+        <div className="sticky top-0 z-20 flex items-center gap-3 px-3 py-2 rounded-xl border border-amber-400/30 bg-[#0a1b25]/90 backdrop-blur-sm text-xs font-mono">
+          <span className="text-amber-400 tracking-widest font-bold uppercase">SIM</span>
+          <div className="h-4 w-px bg-white/10" />
+          <button
+            onClick={simRunning ? simPause : simStart}
+            className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-amber-400/10 text-amber-300 hover:bg-amber-400/20 transition-colors"
+            aria-label={simRunning ? 'Pause sim' : 'Start sim'}
+          >
+            {simRunning ? <Pause className="h-3 w-3" /> : <Play className="h-3 w-3" />}
+            <span>{simRunning ? 'Pause' : 'Start'}</span>
+          </button>
+          <button
+            onClick={simReset}
+            className="flex items-center gap-1 p-1.5 rounded-lg text-white/40 hover:text-white/70 hover:bg-white/5 transition-colors"
+            aria-label="Reset sim"
+          >
+            <RotateCcw className="h-3 w-3" />
+          </button>
+          <div className="h-4 w-px bg-white/10" />
+          {(['slow', 'medium', 'fast'] as SimSpeed[]).map(s => (
+            <button
+              key={s}
+              onClick={() => setSimSpeed(s)}
+              className={cn(
+                'px-1.5 py-0.5 rounded transition-colors capitalize',
+                simSpeed === s ? 'text-amber-400 bg-amber-400/10' : 'text-white/30 hover:text-white/60',
+              )}
+            >
+              {s}
+            </button>
+          ))}
+          <div className="ml-auto text-white/30 tabular-nums">
+            {state.picks.filter(p => !p.is_keeper).length} picks
+          </div>
+        </div>
+      )}
       {/* Header — UX-2.1 gold spotlight + mode badge */}
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-3 min-w-0">

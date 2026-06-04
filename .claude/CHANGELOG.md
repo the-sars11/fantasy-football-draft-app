@@ -2,6 +2,20 @@
 
 ---
 
+## 2026-06-04 — UX-7.1: Dev-only Sim Engine
+
+**Task:** UX-7.1 | **Class:** `shared` | **Lenses:** Architecture, QA
+
+**Why:** Needed a way to auto-play the full draft experience without running a real draft, so every broadcast moment (lower-third, score-bug, on-the-clock banner, trash talk, grade reveal) can be validated end-to-end without coordinating with other people. Also enables showing the app to others on demand.
+
+**What changed:**
+- NEW `src/hooks/use-draft-simulator.ts`: `useDraftSimulator` hook. Gate: `NODE_ENV !== 'production' && enabled` prop. Uses ref pattern for all reactive values (mirrors `use-sleeper-draft-feed.ts`). Players sorted by `consensusRank` ascending; auction price from `player.consensusAuctionValue` capped at 40% of manager budget; snake reads `state.current_manager` from the state machine; auction cycles managers round-robin via `auctionMgrIdxRef`. Speed control: slow (3s), medium (1.5s), fast (0.6s). Draft completion detected inside `fireNextPick` (avoids synchronous setState in effect). Returns `{ isSimActive, isRunning, speed, setSpeed, start, pause, reset }`.
+- `src/app/(app)/draft/live/client.tsx`: Added `Play`, `Pause`, `RotateCcw` Lucide imports; `useDraftSimulator` + `SimSpeed` imports; `simEnabled` derived from `NODE_ENV !== 'production' && ?sim=1`; hook call; amber SIM HUD bar rendered when `isSimActive` (sticky top-0, dev-only, amber glass border).
+
+**Verify result:** type-check clean, 29/29 tests, 0 net-new lint errors in changed files, `npm run build` passes. Sim HUD visual verification deferred (requires active session to pass the `state && session` guard; launch: `/draft/live?session=<id>&sim=1`).
+
+---
+
 ## 2026-06-03 — UX-6.4: Stadium Primetime "after" state audit (UX-6 QA gate close-out)
 
 **Task:** UX-6.4 | **Class:** `docs` | **Lenses:** QA, Delivery
