@@ -1,159 +1,174 @@
-# FFIntelligence Design System — "Stadium Primetime"
+# FFIntelligence Design System — "GRIDIRON"
 
-> **Status: LOCKED** — Do not modify palette, typography, or core classes without Joe's explicit approval.
-> **Version:** 2.0 (2026-06-02)
-> **Supersedes:** v1.2 "Tactical Hologram" (archived in Version History below).
-> **Track:** `.claude/UI_UPGRADE_PLAN.md` (UX sprint track). Implemented in `src/app/globals.css`.
+> **Status: LOCKED** — Do not modify palette, typography, or core tokens without Joe's explicit approval.
+> **Version:** 3.0 (2026-06-04)
+> **Supersedes:** v2.0 "Stadium Primetime" (rejected 2026-06-04 as generic AI slop; archived in Version History).
+> **Direction chosen by Joe** from a 10-app reference review: **EA Sports FC Ultimate Team energy + Linear discipline.**
+> **Track:** BUILD_PLAN `UX-V2`. Implemented in `src/app/globals.css` + `src/app/layout.tsx`.
 
 ## Version History
 
 | Version | Date | Changes |
 |---------|------|---------|
-| 1.0 | 2026-03-22 | Initial Tactical Hologram token lock |
-| 1.1 | 2026-03-22 | Migration checklist + Tailwind usage patterns |
-| 1.2 | 2026-04-14 | P0 redesign patterns: pinned entry bar, draft mode selector, connection status, keeper row markers |
-| **2.0** | **2026-06-02** | **Stadium Primetime: atmospheric backgrounds, real font loading, gold "moment" accent, green demoted to value-only, light-catch glass, motion reveal. Built UX-1.** |
+| 1.0-1.2 | 2026-03 / 04 | Tactical Hologram (lime accent) |
+| 2.0 | 2026-06-02 | Stadium Primetime (navy + glass + gold "moment") — **REJECTED 2026-06-04 as generic AI slop** |
+| **3.0** | **2026-06-04** | **GRIDIRON: colorful-dark canvas + volt/electric-blue SET palette, broadcast type (Anton/Saira), performant (no backdrop-filter stacks), auction co-pilot components. Built UXV2-2.** |
 
-## Creative North Star — Stadium Primetime
+## Creative North Star — GRIDIRON
 
-The app should feel like **NFL primetime broadcast graphics**: a dark stadium-night arena, lit from above by a warm spotlight, with cool ambient field light and a faint turf glow. Structure and data are rendered in cool **Gridiron Blue**; the big **moments** (your pick, draft complete, the grade hero, the champion) glow in warm **metallic gold**; and **value** (a steal, a positive ADP delta, success) reads in **electric green**. Surfaces are light-emitting glass suspended in an atmospheric void — never flat panels on a flat page.
+The app should feel like an **EA Sports FC Ultimate Team menu run with Linear's discipline**: bold and confident where the draft is *live*, ruthlessly clean everywhere else. A deep, **colorful-dark** arena (not flat black, never light), one tight accent system, broadcast-weight typography, and player cards as hero objects. It must have a **point of view** — the opposite of the no-opinion dark-glass-gradient default that was rejected.
 
 **Key principles**
-- **Color carries meaning:** Blue = structure/action. Gold = the moment/focal point. Green = value/steal/success. Never decorative.
-- **Lit, not filled:** every surface reads as lit (spotlight, ambient glow, light-catch hairline), not a solid fill.
-- **Surgical glass:** glassmorphism for panels/nav/overlays, not everything.
-- **Atmosphere first:** a fixed, layered, fuzzy stadium background under all content.
-- **Premium restraint:** depth and warmth over neon overload.
+- **One committed point of view.** Bold where live (EA FC), disciplined elsewhere (Linear). Never the mushy middle.
+- **Color carries meaning, on a SET palette.** Volt = the moment / value / your action. Electric blue = structure / info / depth. Nothing decorative, never a rainbow.
+- **Colorful-dark, with depth.** The dark itself has hue (blue + violet + faint turf-green lit depth). Never flat black, never light mode.
+- **Type and numbers are craft.** Heavy broadcast display + tabular mono numbers.
+- **Performance is design.** Solid layered surfaces + box-shadow glows + transform/opacity motion. NO stacked `backdrop-filter: blur()` (it killed the old build's perf and screenshots).
 
 ---
 
-## Color Palette
+## Color Palette (SET — do not add hues)
 
-### Core tokens (in `globals.css` `@theme` + `:root`)
 ```
-/* Base atmosphere (deep stadium-night navy) */
---ffi-background: #01040a;   --color-surface-dim: #031018;
---color-surface-container-low: #05151e;  --color-surface-container: #0a1b25;
---color-surface-container-high: #0f222c; --color-surface-container-highest: #142834;
+/* Colorful-dark canvas (depth via layered radial glows, never flat black) */
+--ffi-bg-0:        #05080F   /* deepest */
+--ffi-bg-1:        #080D18   /* app base */
+--ffi-surface-1:   #0C1322   /* lifted panel */
+--ffi-surface-2:   #111A2E   /* card */
+--ffi-surface-3:   #16223A   /* raised / hero */
+--ffi-hairline:        rgba(150,180,255,0.10)   /* light-catch edge */
+--ffi-hairline-bright: rgba(180,205,255,0.18)
 
-/* Structure / action — Gridiron Blue */
---color-gridiron-primary / --ffi-primary: #5582e6   (bright: #8bacff)
+/* VOLT — the moment / value / your action ONLY (on-the-clock, your max, CTAs, steal, your pick) */
+--ffi-volt:        #8BFF45   --ffi-volt-deep: #5FE21F   --ffi-volt-ink: #0a1f02
+--ffi-volt-glow:   rgba(139,255,69,0.32)
 
-/* THE MOMENT — Stadium Gold (your pick, draft complete, grade hero, on-the-clock, metallic names) */
---ffi-gold / --color-gold:        #e0c27a   (antique gold, primary)
---ffi-gold-bright / -bright:      #fdefb6   (highlight)
---ffi-gold-deep / -deep:          #d3c791
---ffi-gold-ink / -ink:            #383008   (text on gold)
---ffi-gold-glow:                  rgba(253,239,182,0.30)
-
-/* VALUE / STEAL / SUCCESS only — Electric Green (demoted from generic CTA) */
---value-green / --color-value-green: #2ff801   (legacy --ffi-accent #39ff14 retained for back-compat)
-
-/* Semantic */
---ffi-warning: #fbbf24    --ffi-danger: #ef4444
+/* ELECTRIC BLUE — structure / info / depth (nav, links, secondary, AI read, crest) */
+--ffi-blue:        #4D82FF   --ffi-blue-bright: #79A6FF
+--ffi-blue-glow:   rgba(77,130,255,0.28)
 
 /* Text */
---color-on-surface: #deedf9   --color-on-surface-variant: #9eadb8   --ffi-text-muted: #64748b
+--ffi-ink:   #EAF1FF   --ffi-ink-2: #9FB0CE   --ffi-ink-3: #637396
+
+/* Position chips — MUTED on purpose (never loud, never rainbow) */
+--ffi-pos-qb: #FF6E8A   --ffi-pos-rb: #56E0A0   --ffi-pos-wr: #6CA8FF   --ffi-pos-te: #FFB05C
+
+/* Semantic (reuse volt/blue where possible) */
+--ffi-warning: #FFB05C   --ffi-danger: #FF6E8A
 ```
 
-**Meaning rule (enforce in every component):**
-- **Blue** — navigation, primary actions, structural data, active-link structure.
-- **Gold** — the focal moment only: your pick/team, pick reveal, draft-complete, grade/champion hero, "on the clock", metallic name treatments, active nav (the spotlight follows you).
-- **Green** — value signals only: steal, great value, positive delta, success/confirmation.
+**Meaning rule (enforce everywhere):**
+- **Volt** — the moment + value + the user's own action: on-the-clock, your max bid, primary CTA (Record Pick), a steal, your pick, active nav, positive delta.
+- **Electric blue** — structure: nav, info, AI-read panel, secondary data, depth highlights.
+- **Muted position chips** — QB/RB/WR/TE identity only, small.
+- **One iridescent sheen** rides the hero card edge — that is *texture*, not a fourth color.
+- **NO gold. NO rainbow. NO decorative color.**
 
 ---
 
-## Typography
+## Typography (no blur, big confidence)
 
-Loaded via `next/font/google` in `src/app/layout.tsx` (distinct variable names so the `.font-*` classes resolve at runtime):
-
+Loaded via `next/font/google` in `layout.tsx`:
 ```
---font-space-grotesk → Space Grotesk   (headlines, labels, numbers)   .font-headline / .font-label
---font-manrope        → Manrope          (body, default app font)        .font-body / base font-sans
---font-jetbrains      → JetBrains Mono    (stats, tabular numbers)        font-mono
---font-oswald         → Oswald            (condensed primetime display)   .font-display
+Anton            → broadcast hero (player names, big stats, verdicts)   .font-display
+Saira Condensed  → labels, section heads, mode badges (uppercase)       .font-cond / .font-label
+Saira            → body + UI (default app font)                          .font-body / font-sans
+JetBrains Mono   → EVERY number (budgets, prices, ranks), tabular        font-mono
 ```
-- **Numbers in data lists:** JetBrains Mono, `tabular-nums`, right-aligned.
-- Base app font is **Manrope** (warm, legible). Inter is removed.
+- All numbers: JetBrains Mono, `tabular-nums`, right-aligned in lists.
+- Labels: Saira Condensed, uppercase, wide letter-spacing.
+- Hero moments: Anton, large, tight leading.
 
 ---
 
-## Atmospheric Background System (UX-1.4)
+## Canvas & Atmosphere (performant)
 
-Two fixed, full-bleed layers behind all content (content sits at `z-10`), rendered in `app-shell.tsx`:
-
-```html
-<div className="stadium-atmos" aria-hidden="true" />   <!-- overhead gold spotlight + cool ambient + turf hint + night-navy base -->
-<div className="atmos-grain" aria-hidden="true" />      <!-- film grain, top layer, ~4% overlay -->
+One fixed, full-bleed colorful-dark layer behind content. Layered radial glows + a vertical gradient. **No animated blur, no grain-behind-blur, no stacked filters.**
+```css
+body background:
+  radial-gradient(... at 22% -6%, rgba(77,130,255,0.16), transparent 58%)   /* blue light */
+  radial-gradient(... at 92% 6%,  rgba(139,255,69,0.07), transparent 55%)    /* faint turf */
+  radial-gradient(... at 50% 120%, rgba(120,80,255,0.10), transparent 60%)   /* violet depth */
+  linear-gradient(180deg, #060A14, #04060D)
 ```
-- `.stadium-atmos` — layered radial gradients (warm gold at 50%/-5%, cool blue bottom-right, turf-green bottom-left) over a vertical night-navy gradient. GPU-promoted.
-- `.atmos-grain` — SVG `fractalNoise` at ~4% `mix-blend-mode: overlay`. Grain is a **top** layer, never behind a blur.
-- `.stadium-atmos.atmos-clock` — per-screen tint: intensifies the overhead gold spotlight + a slow brightness pulse for the live "on the clock" state (disabled under reduced-motion).
+On-the-clock: brighten the top blue/turf glow + a slow `filter: brightness` pulse (reduced-motion → static). No spotlight blur layers.
 
 ---
 
-## Glass System (UX-1.5) — light-catch, not gray lines
+## Surfaces, Glass & Cards (light-catch, NOT blur)
 
-The v1.2 **"No-Line Rule"** still holds: no gray 1px structural borders. Boundaries come from tonal shift + blur + a **light-catch hairline** (translucent white ≤10%, the spec's permitted ghost border).
+The "No-Line Rule" holds: boundaries from tonal shift + a light-catch hairline (white-blue ≤18%), **not** gray borders and **not** backdrop-blur.
+```css
+.ffi-card          { background: var(--ffi-surface-2); border:1px solid var(--ffi-hairline);
+                     box-shadow: 0 8px 32px rgba(0,0,0,.36), 0 0 15px var(--ffi-blue-glow)/.4; border-radius: 16px; }
+.ffi-card-interactive:hover { transform: translateY(-2px); border-color: var(--ffi-hairline-bright); }
+.ffi-hero          { background: layered blue+volt radial over surface-3; border: hairline-bright;
+                     + ::before iridescent sheen sweep (texture). }
+```
+Old `.ffi-glass*` / `.glass-*` names are KEPT but re-skinned to solid layered surfaces (no `backdrop-filter`).
+
+---
+
+## Auction Co-Pilot Components (the live draft room)
+
+> **Product model:** live IN-PERSON auction. The app does NOT bid. It (1) advises and (2) records results. No bid stepper, no "Place Bid".
+
+- **`.ffi-hero` (On The Block):** player as a hero card — position chip + Anton name + meta + stat row (Proj/ADP/PosRank/VONA) + iridescent edge.
+- **Decision block:** `BID UP TO $X` (volt, the hero number) + value note; market column (Est. cost / Budget / Spend cap).
+- **`.ffi-record` (Record Sale):** price stepper + winner select + full-width volt `Record Pick` button. This replaces "Place Bid".
+- **`.ffi-feed` (broadcast lower-thirds):** sold rows — muted position chip + Saira Condensed name + mono price + manager; newest gets a volt left rail.
+- **AI Read:** electric-blue panel, dry declarative copy, mono confidence %.
+
+---
+
+## Buttons (meaning-driven)
 
 ```css
-.ffi-glass        { background: rgba(10,27,37,0.58); backdrop-filter: blur(12px) saturate(1.1); border: 1px solid rgba(255,255,255,0.06); }
-.ffi-glass-heavy  { background: rgba(5,21,30,0.72);  backdrop-filter: blur(18px) saturate(1.1); }   /* nav, pinned bar, modals */
-.glass-panel      { background: rgba(10,27,37,0.6);  backdrop-filter: blur(16px) saturate(1.1); border: 1px solid rgba(255,255,255,0.06); }
-.glass-interactive{ /* + hover: lift, gold edge rgba(253,239,182,0.35), gold ambient glow */ }
-.ffi-scrim        { linear-gradient(180deg, transparent, rgba(1,4,10,0.35)); }   /* legibility over busy bg */
+.ffi-btn-hero     /* VOLT gradient, --ffi-volt-ink text — the moment: Record Pick, Start Draft, Confirm */
+.ffi-btn-primary  /* ELECTRIC BLUE gradient, white — structure/default action */
+.ffi-btn-value    /* VOLT — value/steal confirmation (same family as hero; use hero for primary commits) */
+.ffi-btn-secondary/* surface-1 + hairline ghost */     .ffi-btn-ghost /* text ghost */
 ```
-**Cards** (`.ffi-card`, `.ffi-card-elevated`, `.ffi-card-interactive`) now use the hairline + `0 8px 32px rgba(0,0,0,0.36)` shadow; interactive hover lifts with a **gold** light-catch edge (was lime).
+44px min touch target, `:active` press feedback, reduced-motion guards.
 
 ---
 
-## Buttons (UX-1.6) — meaning-driven
+## Motion (FIRST-CLASS — this is half of "AAA")
 
-```css
-.ffi-btn-primary  /* BLUE gradient #5582e6→#3f63c4, white text — structure/action (default) */
-.ffi-btn-hero     /* GOLD gradient #fdefb6→#e0c27a→#d3c791, #383008 text — commit moments (Record Pick, Start Draft, Confirm) */
-.ffi-btn-value    /* GREEN gradient #39ff14→#2de210, black text — value/steal/positive confirmation */
-.ffi-btn-secondary/* glass ghost */     .ffi-btn-ghost /* text ghost */
-```
-`FFIButton variant="primary" | "hero" | "value" | "secondary" | "ghost"`. All keep 44px mobile touch targets + `:active` press feedback + reduced-motion guards.
+Motion is a primary pillar, not polish. The bar is Family (fluid, weighted, nothing just appears) + EA FC (cinematic moments) + Linear (crisp, never gratuitous). Tech: Framer Motion + View Transitions API (`src/lib/view-transition.ts`) + CSS `@property`. Named curves: `--ease-broadcast` (wipes), `--ease-spring` (reveals/pops), `--ease-standard` (UI).
 
----
+**Signature moments (cinematic):**
+- On-the-clock: hero card spring-in (scale 0.9->1), canvas glow brightens + breathes, one-shot volt edge sheen, "Bid Up To" counts up.
+- Pick lands: feed row wipes in (broadcast lower-third) + sheen, list springs down, price counts up.
+- Steal: volt flash on the row, small burst for a big one.
+- Record Pick: button depress + volt glow ring, player morphs into the squad slot (shared element), budget ticks down, slot pops.
+- Draft complete: grade hero spring-in, volt ring sweep, Anton verdict word snap, confetti.
 
-## Motion (UX-1.7)
+**Transitions (continuity):** Board->Live morphs the tapped player card into the on-the-block hero (View Transitions / `layoutId`). Tabs/routes spring cross-fade, never a hard cut.
 
-Spring easing `cubic-bezier(0.34, 1.56, 0.64, 1)`.
-- `.ffi-animate-reveal` — pick/moment reveal: scale 0.85→1.05→1 **+ gold flash** (`ffi-reveal` + `ffi-gold-flash`). Use on confirmed-pick / hero reveals.
-- `.ffi-animate-stagger` — list entrance fade-up.
-- Existing: `.ffi-animate-expand/-grade/-success/-attention/-trash-talk`. All disabled under `prefers-reduced-motion`.
+**Micro (everywhere, Linear-crisp):** button press scale+glow, card lift, stepper number roll, filter-pill slide. Numbers tick + flash on change (volt=value, blue=info), tabular so zero layout shift. Lists cascade-in + FLIP reorder.
 
----
+**Discipline (elegant, not exhausting):** cinematic on the moments; routine picks get a ~200ms acknowledgment only (a fast auction must not become a fireworks show). Reserve celebration for the user's picks, steals, and the finish.
 
-## Component Patterns (still current)
-
-The v1.2 P0 component patterns remain valid under v2.0 — apply the new palette/glass/buttons to them:
-- **Pinned Quick-Entry Bar (FF-257)** — `ffi-glass-heavy`; Record button becomes `.ffi-btn-hero` (gold).
-- **Draft Mode Selector (FF-258)** — selected card edge shifts to gold; "Start Draft" = `.ffi-btn-hero`.
-- **Connection Status Pill (FF-259)** — 4-state (LIVE/STALE/OFFLINE/MANUAL) unchanged in logic.
-- **Keeper Pick Row Markers (FF-274)** — 🔒 + muted name + K1/K2/K3 unchanged.
-- **Player Card / Position Filters / Grade Hero / Timeline** — see `UI/*/code.html`; rank → bold Space Grotesk (gold top-tier), value → green, grade hero → metallic gold (UX-3/UX-5).
+**Perf + a11y (non-negotiable):** transform / opacity / box-shadow only (no layout thrash, no blur) so it stays smooth on a phone during rapid-fire input. Every animation collapses under `prefers-reduced-motion`.
 
 ---
 
 ## What NOT to Do
 
-**PROHIBITED classes** (in draft components): `bg-muted`, `text-muted-foreground`, `border-border`, generic `<Table>/<TableRow>` for player lists.
-
-**PROHIBITED patterns**
-- **NO gray 1px solid borders** — use tonal shift + blur + light-catch hairline (white ≤10%).
-- **NO green as a generic CTA** — green = value/steal/success only; commit actions are gold, structure is blue.
-- **NO film grain behind a blur** — grain is a top overlay layer.
-- **NO rounded corners larger than `2xl`** — keep it tactical.
-- **NO HTML tables for player lists** — card-based layouts.
+- **NO gold, NO glassmorphism-as-everything, NO gradient-glow wallpaper** (that was the rejected slop).
+- **NO stacked `backdrop-filter: blur()`** — solid layered surfaces + box-shadow only.
+- **NO rainbow** — volt + blue + muted position chips, period.
+- **NO flat black and NO light mode** — colorful-dark only.
+- **NO bidding UI** in the auction room — advise + record results only.
+- **NO em-dashes, NO emojis** in any rendered copy (ESLint dash guard stays).
+- **NO HTML tables for player lists** — card/row layouts.
 
 ---
 
 ## Implementation Notes
 
-- Tokens registered in `globals.css` `@theme inline` (Tailwind utilities like `text-gold-bright`, `bg-gold`) and `:root` (raw `var(--ffi-gold*)` for inline styles).
-- Atmospheric layers + glass are GPU-promoted; verify performance on mobile (UX-6).
-- Reduced-motion: every animation + the atmos-clock pulse collapse to none.
+- Re-skin in place: keep existing class/token NAMES (`.ffi-card`, `.ffi-btn-*`, `--ffi-primary`, etc.) so all screens shift at once; map their VALUES to the GRIDIRON palette.
+- `globals.css` `@theme inline` registers Tailwind utilities; `:root`/`.dark` hold raw vars for inline styles.
+- Reference mockup (source of truth for the look): `.claude/mockups/draft-room-phone.html`.
+- Verify on a real phone width + reduced-motion; confirm screenshot-able (the old build was not).

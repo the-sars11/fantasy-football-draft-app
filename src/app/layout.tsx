@@ -1,34 +1,35 @@
 import type { Metadata, Viewport } from 'next'
-import { Space_Grotesk, Manrope, JetBrains_Mono, Oswald } from 'next/font/google'
+import { Anton, Saira, Saira_Condensed, JetBrains_Mono } from 'next/font/google'
 import { ThemeProvider } from '@/components/theme-provider'
 import './globals.css'
 
-// Stadium Primetime v2.0 type system (UX-1.3):
-// Space Grotesk = headlines/labels/numbers, Manrope = body, JetBrains Mono = stats, Oswald = condensed display.
+// GRIDIRON v3 type system (UXV2-2):
+// Anton = broadcast hero (names, big stats, verdicts), Saira = body/UI default,
+// Saira Condensed = labels/section heads, JetBrains Mono = every number (tabular).
 // Distinct variable names so the .font-* custom classes resolve to the loaded families at runtime.
-const spaceGrotesk = Space_Grotesk({
-  variable: '--font-space-grotesk',
+const anton = Anton({
+  variable: '--font-anton',
+  subsets: ['latin'],
+  weight: ['400'],
+  display: 'swap',
+})
+
+const saira = Saira({
+  variable: '--font-saira',
   subsets: ['latin'],
   weight: ['400', '500', '600', '700'],
   display: 'swap',
 })
 
-const manrope = Manrope({
-  variable: '--font-manrope',
+const sairaCondensed = Saira_Condensed({
+  variable: '--font-saira-cond',
   subsets: ['latin'],
-  weight: ['400', '500', '600', '700', '800'],
+  weight: ['600', '700', '800'],
   display: 'swap',
 })
 
 const jetbrainsMono = JetBrains_Mono({
   variable: '--font-jetbrains',
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
-  display: 'swap',
-})
-
-const oswald = Oswald({
-  variable: '--font-oswald',
   subsets: ['latin'],
   weight: ['500', '600', '700'],
   display: 'swap',
@@ -51,7 +52,11 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={`dark ${spaceGrotesk.variable} ${manrope.variable} ${jetbrainsMono.variable} ${oswald.variable} h-full antialiased`} suppressHydrationWarning>
+    <html
+      lang="en"
+      className={`dark ${anton.variable} ${saira.variable} ${sairaCondensed.variable} ${jetbrainsMono.variable} h-full antialiased`}
+      suppressHydrationWarning
+    >
       <body className="min-h-full flex flex-col">
         <ThemeProvider>{children}</ThemeProvider>
       </body>

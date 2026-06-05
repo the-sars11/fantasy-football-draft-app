@@ -4,12 +4,21 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* ============================================================
+   GRIDIRON v3 (UXV2-2) — EA FC energy + Linear discipline.
+   SET palette: colorful-dark canvas + VOLT (moment/value/action)
+   + ELECTRIC BLUE (structure). No gold. No backdrop-filter blur.
+   Class/token NAMES are kept stable from v2.0 so every screen
+   re-skins at once; only values + treatments changed.
+   ============================================================ */
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-saira), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-jetbrains), ui-monospace, monospace;
-  --font-display: var(--font-oswald), "Oswald Fallback", ui-sans-serif, sans-serif;
+  --font-display: var(--font-anton), ui-sans-serif, sans-serif;
+  --font-cond: var(--font-saira-cond), ui-sans-serif, sans-serif;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -47,65 +56,76 @@
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
 
-  /* FFIntelligence custom colors */
-  --color-ffi-background: #01040a;
-  --color-ffi-background-secondary: #050a1b;
-  --color-ffi-surface: #0f172a;
-  --color-ffi-surface-elevated: #1e293b;
-  --color-ffi-primary: #5582e6;
-  --color-ffi-accent: #39ff14;
-  --color-ffi-text-primary: #ffffff;
-  --color-ffi-text-secondary: #94a3b8;
-  --color-ffi-text-muted: #7d8fa8;
-  --color-ffi-border: #334155;
-  --color-ffi-success: #39ff14;
-  --color-ffi-warning: #fbbf24;
-  --color-ffi-danger: #ef4444;
-  --color-ffi-info: #5582e6;
+  /* FFIntelligence custom colors — GRIDIRON values */
+  --color-ffi-background: #080d18;
+  --color-ffi-background-secondary: #0c1322;
+  --color-ffi-surface: #0c1322;
+  --color-ffi-surface-elevated: #16223a;
+  --color-ffi-primary: #4d82ff;
+  --color-ffi-accent: #8bff45;
+  --color-ffi-text-primary: #eaf1ff;
+  --color-ffi-text-secondary: #9fb0ce;
+  --color-ffi-text-muted: #637396;
+  --color-ffi-border: rgba(150, 180, 255, 0.1);
+  --color-ffi-success: #8bff45;
+  --color-ffi-warning: #ffb05c;
+  --color-ffi-danger: #ff6e8a;
+  --color-ffi-info: #4d82ff;
 
-  /* Sunday Night Gridiron - broadcast cyan LIVE-DATA signal (never a CTA, never a value color) */
-  --color-ffi-live: #6fe3ff;
+  /* live-data signal — remapped into palette (electric blue, never cyan/gold) */
+  --color-ffi-live: #79a6ff;
 
-  /* Stadium Primetime v2.0 - Stadium Gold (the "moment": your pick, draft complete, grade hero) */
-  --color-gold: #e0c27a;
-  --color-gold-bright: #fdefb6;
-  --color-gold-deep: #d3c791;
-  --color-gold-ink: #383008;
-  --color-value-green: #2ff801;
+  /* THE MOMENT / VALUE / ACTION = VOLT (gold-named tokens remapped to volt for back-compat) */
+  --color-volt: #8bff45;
+  --color-volt-bright: #b6ff7a;
+  --color-volt-deep: #5fe21f;
+  --color-gold: #8bff45;
+  --color-gold-bright: #b6ff7a;
+  --color-gold-deep: #5fe21f;
+  --color-gold-ink: #0a1f02;
+  --color-value-green: #8bff45;
 
-  /* Tactical Hologram Palette (from UI/draft_board/code.html) */
-  --color-surface-dim: #031018;
-  --color-surface-bright: #192f3b;
-  --color-surface-container: #0a1b25;
-  --color-surface-container-low: #05151e;
-  --color-surface-container-high: #0f222c;
-  --color-surface-container-highest: #142834;
-  --color-surface-container-lowest: #000000;
-  --color-surface-variant: #142834;
-  --color-surface-tint: #8bacff;
-  --color-on-surface: #deedf9;
-  --color-on-surface-variant: #9eadb8;
-  --color-gridiron-primary: #8bacff;
-  --color-gridiron-secondary: #2ff801;
-  --color-on-secondary: #0b5800;
-  --color-secondary-container: #106e00;
+  /* Electric blue ramp + colorful-dark surfaces */
+  --color-blue: #4d82ff;
+  --color-blue-bright: #79a6ff;
+  --color-surface-dim: #05080f;
+  --color-surface-bright: #16223a;
+  --color-surface-container: #111a2e;
+  --color-surface-container-low: #0c1322;
+  --color-surface-container-high: #16223a;
+  --color-surface-container-highest: #1b2a44;
+  --color-surface-container-lowest: #05080f;
+  --color-surface-variant: #16223a;
+  --color-surface-tint: #79a6ff;
+  --color-on-surface: #eaf1ff;
+  --color-on-surface-variant: #9fb0ce;
+  --color-gridiron-primary: #79a6ff;
+  --color-gridiron-secondary: #8bff45;
+  --color-on-secondary: #0a1f02;
+  --color-secondary-container: #1f7a12;
   --color-on-secondary-container: #e7ffd9;
-  --color-primary-container: #275abc;
-  --color-on-primary-container: #002054;
-  --color-outline: #697782;
-  --color-outline-variant: #3c4a53;
-  --color-error-dim: #ff716c;
-  --color-on-error: #490006;
-  --color-on-error-container: #ffa8a3;
+  --color-primary-container: #274fb8;
+  --color-on-primary-container: #d6e3ff;
+  --color-outline: #4a5a78;
+  --color-outline-variant: #2a3754;
+  --color-error-dim: #ff8aa0;
+  --color-on-error: #3a0009;
+  --color-on-error-container: #ffd0d8;
 
-  /* Font families */
-  --font-headline: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
-  --font-body: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
-  --font-label: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
+  /* Position chips — muted */
+  --color-pos-qb: #ff6e8a;
+  --color-pos-rb: #56e0a0;
+  --color-pos-wr: #6ca8ff;
+  --color-pos-te: #ffb05c;
+
+  /* Font roles */
+  --font-headline: var(--font-saira-cond), ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-saira), ui-sans-serif, system-ui, sans-serif;
+  --font-label: var(--font-saira-cond), ui-sans-serif, system-ui, sans-serif;
 }
 
 /* ========================================
-   FFIntelligence Design System Tokens
+   GRIDIRON Design Tokens
    ======================================== */
 
 :root {
@@ -133,7 +153,7 @@
   --chart-3: oklch(0.439 0 0);
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);
-  --radius: 0.75rem;
+  --radius: 0.85rem;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: oklch(0.205 0 0);
@@ -143,90 +163,118 @@
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
 
-  /* FFI Semantic tokens */
-  --ffi-background: #01040a;
-  --ffi-background-secondary: #050a1b;
-  --ffi-surface: #0f172a;
-  --ffi-surface-elevated: #1e293b;
-  --ffi-primary: #5582e6;
-  --ffi-accent: #39ff14;
-  --ffi-text-primary: #ffffff;
-  --ffi-text-secondary: #94a3b8;
-  --ffi-text-muted: #7d8fa8;
-  --ffi-border: #334155;
-  --ffi-success: #39ff14;
-  --ffi-warning: #fbbf24;
-  --ffi-danger: #ef4444;
-  --ffi-info: #5582e6;
+  /* GRIDIRON colorful-dark canvas */
+  --ffi-bg-0: #05080f;
+  --ffi-bg-1: #080d18;
+  --ffi-surface-1: #0c1322;
+  --ffi-surface-2: #111a2e;
+  --ffi-surface-3: #16223a;
+  --ffi-hairline: rgba(150, 180, 255, 0.1);
+  --ffi-hairline-bright: rgba(180, 205, 255, 0.18);
 
-  /* Effects */
-  --ffi-glow-accent: 0 0 20px rgba(57, 255, 20, 0.4);
-  --ffi-glow-primary: 0 0 15px rgba(85, 130, 230, 0.3);
-  --ffi-shadow-card: 0 8px 30px rgba(0, 0, 0, 0.6), 0 0 15px rgba(85, 130, 230, 0.1);
-  --ffi-shadow-elevated: 0 12px 40px rgba(0, 0, 0, 0.7), 0 0 20px rgba(85, 130, 230, 0.15);
+  /* VOLT — moment / value / action */
+  --ffi-volt: #8bff45;
+  --ffi-volt-deep: #5fe21f;
+  --ffi-volt-ink: #0a1f02;
+  --ffi-volt-glow: rgba(139, 255, 69, 0.32);
 
-  /* Stadium Primetime v2.0 — Stadium Gold + atmosphere (shared across light/dark) */
-  --ffi-gold: #e0c27a;
-  --ffi-gold-bright: #fdefb6;
-  --ffi-gold-deep: #d3c791;
-  --ffi-gold-ink: #383008;
-  --ffi-gold-glow: rgba(253, 239, 182, 0.30);
-  --value-green: #2ff801;
-  --ffi-glow-gold: 0 0 20px rgba(253, 239, 182, 0.30);
-  --ffi-glow-gold-strong: 0 0 36px rgba(253, 239, 182, 0.45);
+  /* ELECTRIC BLUE — structure / info / depth */
+  --ffi-blue: #4d82ff;
+  --ffi-blue-bright: #79a6ff;
+  --ffi-blue-glow: rgba(77, 130, 255, 0.28);
 
-  /* Sunday Night Gridiron - broadcast cyan = live data only (pick wipes, ticker, score-bug).
-     Low chroma on purpose so it never competes with gold (the moment) or green (value). */
-  --ffi-live: #6fe3ff;
-  --ffi-live-dim: rgba(111, 227, 255, 0.14);
-  --ffi-glow-live: 0 0 18px rgba(111, 227, 255, 0.28);
+  /* Ink */
+  --ffi-ink: #eaf1ff;
+  --ffi-ink-2: #9fb0ce;
+  --ffi-ink-3: #637396;
 
-  /* Named motion curves (designed, not defaulted) */
-  --ease-broadcast: cubic-bezier(0.22, 1, 0.36, 1); /* lower-third wipes, ticker slides */
-  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1); /* reveals, pops */
-  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);    /* generic UI transitions */
+  /* Position chips */
+  --ffi-pos-qb: #ff6e8a;
+  --ffi-pos-rb: #56e0a0;
+  --ffi-pos-wr: #6ca8ff;
+  --ffi-pos-te: #ffb05c;
+
+  /* Semantic tokens (names kept; values = GRIDIRON) */
+  --ffi-background: #080d18;
+  --ffi-background-secondary: #0c1322;
+  --ffi-surface: #0c1322;
+  --ffi-surface-elevated: #16223a;
+  --ffi-surface-bright: #16223a;
+  --ffi-primary: #4d82ff;
+  --ffi-accent: #8bff45;
+  --ffi-text-primary: #eaf1ff;
+  --ffi-text-secondary: #9fb0ce;
+  --ffi-text-muted: #637396;
+  --ffi-border: rgba(150, 180, 255, 0.1);
+  --ffi-success: #8bff45;
+  --ffi-warning: #ffb05c;
+  --ffi-danger: #ff6e8a;
+  --ffi-info: #4d82ff;
+
+  /* Effects (volt + blue, no blur) */
+  --ffi-glow-accent: 0 0 22px rgba(139, 255, 69, 0.32);
+  --ffi-glow-primary: 0 0 18px rgba(77, 130, 255, 0.28);
+  --ffi-shadow-card: 0 8px 32px rgba(0, 0, 0, 0.45), 0 0 15px rgba(77, 130, 255, 0.08);
+  --ffi-shadow-elevated: 0 16px 44px rgba(0, 0, 0, 0.55), 0 0 22px rgba(77, 130, 255, 0.12);
+
+  /* gold-named tokens remapped to VOLT so legacy usages read on-palette */
+  --ffi-gold: #8bff45;
+  --ffi-gold-bright: #b6ff7a;
+  --ffi-gold-deep: #5fe21f;
+  --ffi-gold-ink: #0a1f02;
+  --ffi-gold-glow: rgba(139, 255, 69, 0.3);
+  --value-green: #8bff45;
+  --ffi-glow-gold: 0 0 22px rgba(139, 255, 69, 0.3);
+  --ffi-glow-gold-strong: 0 0 38px rgba(139, 255, 69, 0.45);
+
+  /* live-data signal = electric blue (kept name) */
+  --ffi-live: #79a6ff;
+  --ffi-live-dim: rgba(121, 166, 255, 0.14);
+  --ffi-glow-live: 0 0 18px rgba(121, 166, 255, 0.28);
+
+  /* Named motion curves */
+  --ease-broadcast: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* FFIntelligence Dark Mode (Primary) */
+/* GRIDIRON Dark Mode (primary) */
 .dark {
   color-scheme: dark;
 
-  /* Base shadcn tokens mapped to FFI palette */
-  --background: #01040a;
-  --foreground: #ffffff;
-  --card: rgba(15, 23, 42, 0.6);
-  --card-foreground: #ffffff;
-  --popover: #0f172a;
-  --popover-foreground: #ffffff;
-  --primary: #5582e6;
+  --background: #080d18;
+  --foreground: #eaf1ff;
+  --card: #111a2e;
+  --card-foreground: #eaf1ff;
+  --popover: #0c1322;
+  --popover-foreground: #eaf1ff;
+  --primary: #4d82ff;
   --primary-foreground: #ffffff;
-  --secondary: #1e293b;
-  --secondary-foreground: #ffffff;
-  --muted: #1e293b;
-  --muted-foreground: #94a3b8;
-  --accent: #39ff14;
-  --accent-foreground: #000000;
-  --destructive: #ef4444;
-  --border: rgba(51, 65, 85, 0.25);
-  --input: rgba(51, 65, 85, 0.4);
-  --ring: #5582e6;
+  --secondary: #16223a;
+  --secondary-foreground: #eaf1ff;
+  --muted: #16223a;
+  --muted-foreground: #9fb0ce;
+  --accent: #8bff45;
+  --accent-foreground: #0a1f02;
+  --destructive: #ff6e8a;
+  --border: rgba(150, 180, 255, 0.1);
+  --input: rgba(150, 180, 255, 0.14);
+  --ring: #4d82ff;
 
-  /* Charts using FFI palette */
-  --chart-1: #5582e6;
-  --chart-2: #39ff14;
-  --chart-3: #fbbf24;
-  --chart-4: #ef4444;
-  --chart-5: #94a3b8;
+  --chart-1: #4d82ff;
+  --chart-2: #8bff45;
+  --chart-3: #79a6ff;
+  --chart-4: #ffb05c;
+  --chart-5: #9fb0ce;
 
-  /* Sidebar */
-  --sidebar: #050a1b;
-  --sidebar-foreground: #ffffff;
-  --sidebar-primary: #5582e6;
+  --sidebar: #0c1322;
+  --sidebar-foreground: #eaf1ff;
+  --sidebar-primary: #4d82ff;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #39ff14;
-  --sidebar-accent-foreground: #000000;
-  --sidebar-border: rgba(51, 65, 85, 0.25);
-  --sidebar-ring: #5582e6;
+  --sidebar-accent: #8bff45;
+  --sidebar-accent-foreground: #0a1f02;
+  --sidebar-border: rgba(150, 180, 255, 0.1);
+  --sidebar-ring: #4d82ff;
 }
 
 @layer base {
@@ -235,7 +283,9 @@
   }
   body {
     @apply bg-background text-foreground;
-    /* Tabular figures everywhere so live numbers (budgets, scores, counts) never reflow */
+    /* Colorful-dark base so the canvas is never flat black even before .stadium-atmos mounts */
+    background-color: #060a14;
+    /* Tabular figures everywhere so live numbers never reflow */
     font-variant-numeric: tabular-nums;
   }
   html {
@@ -244,215 +294,69 @@
 }
 
 /* ========================================
-   FFI Typography Scale
+   GRIDIRON Typography Scale
    ======================================== */
 
-.ffi-display-xl {
-  font-size: 3rem;
-  line-height: 1.1;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-}
-
-.ffi-display-lg {
-  font-size: 2.25rem;
-  line-height: 1.15;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-}
-
-.ffi-display-md {
-  font-size: 1.5rem;
-  line-height: 1.25;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-}
-
-.ffi-title-lg {
-  font-size: 1.25rem;
-  line-height: 1.3;
-  font-weight: 700;
-}
-
-.ffi-title-md {
-  font-size: 1rem;
-  line-height: 1.4;
-  font-weight: 600;
-}
-
-.ffi-body-lg {
-  font-size: 1rem;
-  line-height: 1.6;
-  font-weight: 400;
-}
-
-.ffi-body-md {
-  font-size: 0.875rem;
-  line-height: 1.5;
-  font-weight: 400;
-}
-
+.ffi-display-xl { font-size: 3rem; line-height: 1.05; font-weight: 800; letter-spacing: -0.01em; }
+.ffi-display-lg { font-size: 2.25rem; line-height: 1.1; font-weight: 800; letter-spacing: -0.01em; }
+.ffi-display-md { font-size: 1.5rem; line-height: 1.2; font-weight: 700; letter-spacing: -0.005em; }
+.ffi-title-lg { font-size: 1.25rem; line-height: 1.3; font-weight: 700; }
+.ffi-title-md { font-size: 1rem; line-height: 1.4; font-weight: 600; }
+.ffi-body-lg { font-size: 1rem; line-height: 1.6; font-weight: 400; }
+.ffi-body-md { font-size: 0.875rem; line-height: 1.5; font-weight: 400; }
 .ffi-label {
-  font-size: 0.75rem;
-  line-height: 1.4;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  font-family: var(--font-saira-cond), ui-sans-serif, sans-serif;
+  font-size: 0.75rem; line-height: 1.4; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.16em;
 }
-
 .ffi-caption {
-  font-size: 0.625rem;
-  line-height: 1.3;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+  font-family: var(--font-saira-cond), ui-sans-serif, sans-serif;
+  font-size: 0.625rem; line-height: 1.3; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.2em;
 }
 
-/* Accent font for headlines */
-.font-display {
-  font-family: var(--font-oswald), "Oswald", ui-sans-serif, sans-serif;
-}
+/* Font role classes */
+.font-display { font-family: var(--font-anton), ui-sans-serif, sans-serif; letter-spacing: 0.01em; }
+.font-headline { font-family: var(--font-saira-cond), ui-sans-serif, system-ui, sans-serif; }
+.font-body { font-family: var(--font-saira), ui-sans-serif, system-ui, sans-serif; }
+.font-label { font-family: var(--font-saira-cond), ui-sans-serif, system-ui, sans-serif; }
+.font-cond { font-family: var(--font-saira-cond), ui-sans-serif, system-ui, sans-serif; }
 
 /* ========================================
-   FFI Glassmorphism & Surface Utilities
+   GRIDIRON Surfaces, Glass & Cards (light-catch, NO blur)
    ======================================== */
 
-/* Stadium Primetime v2.0 glass system (UX-1.5) — navy-tinted, light-catch hairline (the spec's
-   allowed ghost border ≤10%), surgical blur. Three tiers: panel / heavy / interactive. */
-
-/* Card with glassmorphism effect */
 .ffi-glass {
-  background: rgba(10, 27, 37, 0.58);
-  backdrop-filter: blur(12px) saturate(1.1);
-  -webkit-backdrop-filter: blur(12px) saturate(1.1);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(17, 26, 46, 0.92);
+  border: 1px solid var(--ffi-hairline);
 }
-
-/* Heavy glass — nav bars, pinned bar, modals (border left to the element so nav edges stay single) */
 .ffi-glass-heavy {
-  background: rgba(5, 21, 30, 0.72);
-  backdrop-filter: blur(18px) saturate(1.1);
-  -webkit-backdrop-filter: blur(18px) saturate(1.1);
+  background: rgba(8, 13, 24, 0.96);
+  border: 1px solid var(--ffi-hairline);
 }
-
-/* Glass panel (from UI/draft_board/code.html) */
 .glass-panel {
-  backdrop-filter: blur(16px) saturate(1.1);
-  -webkit-backdrop-filter: blur(16px) saturate(1.1);
-  background: rgba(10, 27, 37, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(17, 26, 46, 0.92);
+  border: 1px solid var(--ffi-hairline);
 }
-
-/* Interactive glass — hover lift + gold light-catch edge */
 .glass-interactive {
-  background: rgba(10, 27, 37, 0.58);
-  backdrop-filter: blur(12px) saturate(1.1);
-  -webkit-backdrop-filter: blur(12px) saturate(1.1);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  background: var(--ffi-surface-2);
+  border: 1px solid var(--ffi-hairline);
+  transition: transform 0.2s var(--ease-standard), border-color 0.2s ease, box-shadow 0.2s ease;
 }
 .glass-interactive:hover {
   transform: translateY(-2px);
-  border-color: rgba(253, 239, 182, 0.35);
-  box-shadow: 0 10px 34px rgba(0, 0, 0, 0.5), 0 0 22px rgba(253, 239, 182, 0.12);
+  border-color: var(--ffi-hairline-bright);
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.5), 0 0 22px rgba(77, 130, 255, 0.16);
 }
+.ffi-scrim { background: linear-gradient(180deg, rgba(5, 8, 15, 0) 0%, rgba(5, 8, 15, 0.4) 100%); }
+.flash-streak { background: linear-gradient(115deg, transparent 0%, rgba(139, 255, 69, 0.07) 50%, transparent 100%); }
 
-/* Scrim — keeps text legible over the atmospheric background inside glass surfaces */
-.ffi-scrim {
-  background: linear-gradient(180deg, rgba(1, 4, 10, 0) 0%, rgba(1, 4, 10, 0.35) 100%);
-}
-
-/* Flash streak effect — gold (the moment: your pick / target highlight) */
-.flash-streak {
-  background: linear-gradient(115deg, transparent 0%, rgba(224, 194, 122, 0.07) 50%, transparent 100%);
-}
-
-/* Tactical hologram light streak effects (from mockup) */
-.light-streak {
-  position: fixed;
-  width: 250%;
-  height: 3px;
-  background: linear-gradient(90deg,
-    transparent 0%,
-    transparent 20%,
-    rgba(57, 255, 20, 0.7) 40%,
-    rgba(57, 255, 20, 0.9) 50%,
-    rgba(57, 255, 20, 0.7) 60%,
-    transparent 80%,
-    transparent 100%
-  );
-  transform: rotate(-45deg);
-  top: 20%;
-  left: -75%;
-  z-index: 1;
-  filter: blur(0.5px);
-  box-shadow: 0 0 15px rgba(57, 255, 20, 0.5), 0 0 30px rgba(57, 255, 20, 0.3);
-}
-
-.light-streak-2 {
-  position: fixed;
-  width: 250%;
-  height: 2px;
-  background: linear-gradient(90deg,
-    transparent 0%,
-    transparent 25%,
-    rgba(85, 130, 230, 0.5) 45%,
-    rgba(85, 130, 230, 0.7) 50%,
-    rgba(85, 130, 230, 0.5) 55%,
-    transparent 75%,
-    transparent 100%
-  );
-  transform: rotate(-35deg);
-  top: 45%;
-  left: -60%;
-  z-index: 1;
-  box-shadow: 0 0 10px rgba(85, 130, 230, 0.4);
-}
-
-/* Third streak for more depth */
-.light-streak-3 {
-  position: fixed;
-  width: 200%;
-  height: 1px;
-  background: linear-gradient(90deg,
-    transparent 0%,
-    transparent 30%,
-    rgba(57, 255, 20, 0.4) 50%,
-    transparent 70%,
-    transparent 100%
-  );
-  transform: rotate(-50deg);
-  top: 65%;
-  left: -50%;
-  z-index: 1;
-}
-
-.flash-effect {
-  position: fixed;
-  width: 600px;
-  height: 600px;
-  background: radial-gradient(circle, rgba(85, 130, 230, 0.25) 0%, rgba(85, 130, 230, 0.1) 30%, transparent 70%);
-  top: -250px;
-  right: -200px;
-  z-index: 1;
-}
-
-/* Secondary flash in bottom left */
-.flash-effect-2 {
-  position: fixed;
-  width: 500px;
-  height: 500px;
-  background: radial-gradient(circle, rgba(23, 37, 84, 0.8) 0%, transparent 60%);
-  bottom: -200px;
-  left: -150px;
-  z-index: 1;
-}
+/* Legacy tactical streak/flash selectors kept as on-palette no-cost layers */
+.light-streak, .light-streak-2, .light-streak-3 { position: fixed; pointer-events: none; z-index: 0; }
+.flash-effect, .flash-effect-2 { position: fixed; pointer-events: none; z-index: 0; }
 
 /* ========================================
-   Stadium Primetime v2.0 — Atmospheric Background System (UX-1.4)
-   Layer 1: stadium-atmos (overhead gold spotlight + cool ambient + turf hint)
-   Layer 2: atmos-grain (film grain, top layer, NOT behind blur)
-   Both are fixed, full-bleed, behind content (content sits at z-10).
+   GRIDIRON Atmosphere — colorful-dark, performant (no blur, no gold)
    ======================================== */
 
 .stadium-atmos {
@@ -461,10 +365,10 @@
   z-index: 0;
   pointer-events: none;
   background:
-    radial-gradient(60% 45% at 50% -5%, rgba(253, 239, 182, 0.10) 0%, transparent 60%),
-    radial-gradient(45% 40% at 88% 92%, rgba(85, 130, 230, 0.10) 0%, transparent 60%),
-    radial-gradient(50% 45% at 8% 85%, rgba(16, 70, 50, 0.26) 0%, transparent 62%),
-    linear-gradient(180deg, #02060d 0%, #031018 45%, #01040a 100%);
+    radial-gradient(60% 42% at 22% -6%, rgba(77, 130, 255, 0.16) 0%, transparent 58%),
+    radial-gradient(46% 40% at 92% 6%, rgba(139, 255, 69, 0.06) 0%, transparent 55%),
+    radial-gradient(60% 50% at 50% 116%, rgba(120, 80, 255, 0.12) 0%, transparent 60%),
+    linear-gradient(180deg, #070c16 0%, #05090f 50%, #04060d 100%);
   transform: translateZ(0);
 }
 
@@ -473,408 +377,240 @@
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  opacity: 0.04;
+  opacity: 0.035;
   mix-blend-mode: overlay;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   transform: translateZ(0);
 }
 
-/* Per-screen tint — On the Clock: intensify the overhead gold spotlight + slow pulse (apply on the shell during live draft) */
-.stadium-atmos.atmos-clock {
+/* On the Clock — brighten the blue/turf glow + slow brightness pulse (no blur) */
+.stadium-atmos.atmos-clock,
+body.ffi-on-the-clock .stadium-atmos {
   background:
-    radial-gradient(70% 55% at 50% -8%, rgba(253, 239, 182, 0.20) 0%, transparent 64%),
-    radial-gradient(45% 40% at 88% 92%, rgba(85, 130, 230, 0.10) 0%, transparent 60%),
-    radial-gradient(50% 45% at 8% 85%, rgba(16, 70, 50, 0.24) 0%, transparent 62%),
-    linear-gradient(180deg, #02060d 0%, #050b16 45%, #01040a 100%);
+    radial-gradient(70% 50% at 50% -8%, rgba(77, 130, 255, 0.26) 0%, transparent 62%),
+    radial-gradient(46% 42% at 90% 6%, rgba(139, 255, 69, 0.1) 0%, transparent 55%),
+    radial-gradient(60% 52% at 50% 116%, rgba(120, 80, 255, 0.14) 0%, transparent 60%),
+    linear-gradient(180deg, #08101f 0%, #060b14 50%, #04060d 100%);
   animation: atmos-clock-pulse 3.2s ease-in-out infinite;
   will-change: filter;
 }
 
 @keyframes atmos-clock-pulse {
   0%, 100% { filter: brightness(1); }
-  50% { filter: brightness(1.1); }
+  50% { filter: brightness(1.12); }
 }
 
-/* Neon glow shadow */
-.neon-glow {
-  box-shadow: 0 0 20px rgba(57, 255, 20, 0.4);
-}
+.neon-glow { box-shadow: 0 0 22px rgba(139, 255, 69, 0.4); }
+.shadow-card-glow { box-shadow: var(--ffi-shadow-card); }
 
-/* Card glow shadow */
-.shadow-card-glow {
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6), 0 0 15px rgba(85, 130, 230, 0.1);
-}
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-/* No scrollbar utility */
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
-}
-.no-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
+.ffi-ghost-border { border: 1px solid var(--ffi-hairline); }
+.ffi-ghost-border-hover:hover { border-color: var(--ffi-hairline-bright); }
 
-/* Font families from prototypes */
-.font-headline {
-  font-family: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
-}
-.font-body {
-  font-family: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
-}
-.font-label {
-  font-family: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
-}
-
-/* Ghost border (subtle, accessibility-friendly) */
-.ffi-ghost-border {
-  border: 1px solid rgba(51, 65, 85, 0.15);
-}
-
-.ffi-ghost-border-hover:hover {
-  border-color: rgba(51, 65, 85, 0.3);
-}
-
-/* Surface hierarchy */
-.ffi-surface {
-  background-color: var(--ffi-surface);
-}
-
-.ffi-surface-elevated {
-  background-color: var(--ffi-surface-elevated);
-}
-
-.ffi-surface-secondary {
-  background-color: var(--ffi-background-secondary);
-}
+.ffi-surface { background-color: var(--ffi-surface-1); }
+.ffi-surface-elevated { background-color: var(--ffi-surface-3); }
+.ffi-surface-secondary { background-color: var(--ffi-surface-1); }
 
 /* ========================================
-   FFI Shadow & Glow Effects
+   GRIDIRON Shadow & Glow
    ======================================== */
 
-.ffi-shadow-card {
-  box-shadow: var(--ffi-shadow-card);
-}
-
-.ffi-shadow-elevated {
-  box-shadow: var(--ffi-shadow-elevated);
-}
-
-.ffi-glow-accent {
-  box-shadow: var(--ffi-glow-accent);
-}
-
-.ffi-glow-primary {
-  box-shadow: var(--ffi-glow-primary);
-}
-
-/* Neon glow on hover */
-.ffi-glow-hover:hover {
-  box-shadow: 0 0 25px rgba(57, 255, 20, 0.5);
-}
+.ffi-shadow-card { box-shadow: var(--ffi-shadow-card); }
+.ffi-shadow-elevated { box-shadow: var(--ffi-shadow-elevated); }
+.ffi-glow-accent { box-shadow: var(--ffi-glow-accent); }
+.ffi-glow-primary { box-shadow: var(--ffi-glow-primary); }
+.ffi-glow-hover:hover { box-shadow: 0 0 26px rgba(139, 255, 69, 0.45); }
 
 /* ========================================
-   FFI Gradient Utilities
+   GRIDIRON Gradients
    ======================================== */
 
-/* Main app background gradient */
 .ffi-bg-gradient {
   background:
-    radial-gradient(circle at 20% 30%, #172554 0%, transparent 50%),
-    radial-gradient(circle at 80% 70%, #050a1b 0%, transparent 60%),
-    #01040a;
+    radial-gradient(circle at 20% 30%, #16223a 0%, transparent 50%),
+    radial-gradient(circle at 80% 70%, #0c1322 0%, transparent 60%),
+    #05080f;
 }
-
-/* Primary button gradient */
-.ffi-gradient-primary {
-  background: linear-gradient(135deg, #39ff14 0%, #2de210 100%);
-}
-
-/* Progress bar gradient */
-.ffi-gradient-progress {
-  background: linear-gradient(90deg, #5582e6 0%, #39ff14 100%);
-}
+.ffi-gradient-primary { background: linear-gradient(135deg, #8bff45 0%, #5fe21f 100%); }
+.ffi-gradient-progress { background: linear-gradient(90deg, #4d82ff 0%, #8bff45 100%); }
 
 /* ========================================
-   FFI Button Variants
+   GRIDIRON Buttons (meaning-driven)
    ======================================== */
 
-/* Blue pill primary button — structure / default action */
 .ffi-btn-primary {
-  @apply inline-flex items-center justify-center gap-2 px-6 py-2.5
-         rounded-full font-semibold text-white
-         transition-all duration-200;
-  background: linear-gradient(135deg, #5582e6 0%, #3f63c4 100%);
+  @apply inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-full font-semibold text-white transition-all duration-200;
+  background: linear-gradient(180deg, #4d82ff 0%, #2e5bff 100%);
+  box-shadow: 0 8px 22px -8px rgba(77, 130, 255, 0.5);
 }
+.ffi-btn-primary:hover { box-shadow: 0 10px 28px -8px rgba(77, 130, 255, 0.6); transform: translateY(-1px); }
+.ffi-btn-primary:active { transform: translateY(0); }
 
-.ffi-btn-primary:hover {
-  box-shadow: 0 0 24px rgba(85, 130, 230, 0.45);
-  transform: translateY(-1px);
-}
-
-.ffi-btn-primary:active {
-  transform: translateY(0);
-}
-
-/* Gold hero button — the "moment": Record Pick, Start Draft, Confirm */
+/* VOLT hero button — the moment: Record Pick, Start Draft, Confirm */
 .ffi-btn-hero {
-  @apply inline-flex items-center justify-center gap-2 px-6 py-2.5
-         rounded-full font-bold transition-all duration-200;
-  color: var(--ffi-gold-ink);
-  background: linear-gradient(135deg, #fdefb6 0%, #e0c27a 50%, #d3c791 100%);
-  box-shadow: 0 4px 15px rgba(224, 194, 122, 0.30);
+  @apply inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-full font-bold transition-all duration-200;
+  color: var(--ffi-volt-ink);
+  background: linear-gradient(180deg, #8bff45 0%, #5fe21f 100%);
+  box-shadow: 0 12px 28px -10px var(--ffi-volt-glow), inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
+.ffi-btn-hero:hover { box-shadow: 0 16px 34px -10px var(--ffi-volt-glow); transform: translateY(-2px); }
+.ffi-btn-hero:active { transform: translateY(0); }
 
-.ffi-btn-hero:hover {
-  box-shadow: 0 6px 26px rgba(224, 194, 122, 0.45);
-  transform: translateY(-2px);
-}
-
-.ffi-btn-hero:active {
-  transform: translateY(0);
-}
-
-/* Green value button — value / steal / positive confirmation */
 .ffi-btn-value {
-  @apply inline-flex items-center justify-center gap-2 px-6 py-2.5
-         rounded-full font-bold text-black
-         transition-all duration-200;
-  background: linear-gradient(135deg, #39ff14 0%, #2de210 100%);
+  @apply inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-full font-bold transition-all duration-200;
+  color: var(--ffi-volt-ink);
+  background: linear-gradient(180deg, #8bff45 0%, #5fe21f 100%);
 }
+.ffi-btn-value:hover { box-shadow: 0 0 26px rgba(139, 255, 69, 0.5); transform: translateY(-1px); }
+.ffi-btn-value:active { transform: translateY(0); }
 
-.ffi-btn-value:hover {
-  box-shadow: 0 0 24px rgba(57, 255, 20, 0.5);
-  transform: translateY(-1px);
-}
-
-.ffi-btn-value:active {
-  transform: translateY(0);
-}
-
-/* Glass secondary button */
 .ffi-btn-secondary {
-  @apply inline-flex items-center justify-center gap-2 px-6 py-2.5
-         rounded-xl font-semibold text-white
-         transition-all duration-200;
-  background: rgba(15, 23, 42, 0.8);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(51, 65, 85, 0.2);
+  @apply inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl font-semibold text-white transition-all duration-200;
+  background: var(--ffi-surface-1);
+  border: 1px solid var(--ffi-hairline);
 }
+.ffi-btn-secondary:hover { background: var(--ffi-surface-2); border-color: var(--ffi-hairline-bright); }
 
-.ffi-btn-secondary:hover {
-  background: rgba(30, 41, 59, 0.9);
-  border-color: rgba(51, 65, 85, 0.4);
-}
-
-/* Ghost button */
 .ffi-btn-ghost {
-  @apply inline-flex items-center justify-center gap-2 px-4 py-2
-         rounded-lg font-medium text-[var(--ffi-text-secondary)]
-         transition-all duration-200;
+  @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-200;
+  color: var(--ffi-ink-2);
   background: transparent;
 }
-
-.ffi-btn-ghost:hover {
-  background: rgba(51, 65, 85, 0.2);
-  color: var(--ffi-text-primary);
-}
+.ffi-btn-ghost:hover { background: rgba(150, 180, 255, 0.08); color: var(--ffi-ink); }
 
 /* ========================================
-   FFI Card Variants
+   GRIDIRON Cards (solid surfaces + light-catch hairline, NO blur)
    ======================================== */
 
-/* Standard card — glass with light-catch hairline (no more gray 1px lines) */
 .ffi-card {
   @apply rounded-2xl p-4;
-  background: rgba(10, 27, 37, 0.58);
-  backdrop-filter: blur(12px) saturate(1.1);
-  -webkit-backdrop-filter: blur(12px) saturate(1.1);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.36), 0 0 15px rgba(85, 130, 230, 0.06);
+  background: var(--ffi-surface-2);
+  border: 1px solid var(--ffi-hairline);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.36), 0 0 15px rgba(77, 130, 255, 0.06);
 }
-
-/* Elevated card with stronger shadow */
 .ffi-card-elevated {
   @apply rounded-2xl p-5;
-  background: linear-gradient(135deg, rgba(15, 34, 44, 0.92) 0%, rgba(10, 27, 37, 0.7) 100%);
-  backdrop-filter: blur(16px) saturate(1.1);
-  -webkit-backdrop-filter: blur(16px) saturate(1.1);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5), 0 0 20px rgba(85, 130, 230, 0.08);
+  background: linear-gradient(160deg, var(--ffi-surface-3) 0%, var(--ffi-surface-2) 75%);
+  border: 1px solid var(--ffi-hairline-bright);
+  box-shadow: 0 16px 44px rgba(0, 0, 0, 0.5), 0 0 22px rgba(77, 130, 255, 0.1);
 }
-
-/* Interactive card — gold light-catch edge on hover */
 .ffi-card-interactive {
   @apply rounded-2xl p-4 cursor-pointer transition-all duration-200;
-  background: rgba(10, 27, 37, 0.58);
-  backdrop-filter: blur(12px) saturate(1.1);
-  -webkit-backdrop-filter: blur(12px) saturate(1.1);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.36), 0 0 15px rgba(85, 130, 230, 0.06);
+  background: var(--ffi-surface-2);
+  border: 1px solid var(--ffi-hairline);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.36), 0 0 15px rgba(77, 130, 255, 0.06);
 }
-
 .ffi-card-interactive:hover {
   transform: translateY(-2px);
-  background: rgba(15, 34, 44, 0.66);
-  border-color: rgba(253, 239, 182, 0.30);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5), 0 0 22px rgba(253, 239, 182, 0.12);
+  background: var(--ffi-surface-3);
+  border-color: var(--ffi-hairline-bright);
+  box-shadow: 0 16px 44px rgba(0, 0, 0, 0.5), 0 0 22px rgba(77, 130, 255, 0.16);
+}
+
+/* GRIDIRON hero card — On The Block (player as hero object + iridescent sheen) */
+.ffi-hero {
+  position: relative;
+  border-radius: 18px;
+  overflow: hidden;
+  background:
+    radial-gradient(120% 90% at 0% 0%, rgba(77, 130, 255, 0.22), transparent 55%),
+    radial-gradient(120% 120% at 100% 0%, rgba(139, 255, 69, 0.1), transparent 50%),
+    linear-gradient(160deg, var(--ffi-surface-3), var(--ffi-surface-2) 70%);
+  border: 1px solid var(--ffi-hairline-bright);
+  box-shadow: 0 22px 50px -22px rgba(0, 0, 0, 0.8);
+}
+.ffi-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, 0.55) 47%, rgba(139, 255, 69, 0.5) 52%, transparent 70%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  background-size: 280% 280%;
+  animation: ffi-hero-sheen 5.5s ease-in-out infinite;
+  opacity: 0.7;
+  pointer-events: none;
+}
+@keyframes ffi-hero-sheen {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
 }
 
 /* ========================================
-   FFI Input Styles
+   GRIDIRON Inputs
    ======================================== */
 
-/* Recessed input field */
 .ffi-input {
-  @apply w-full px-4 py-2.5 rounded-xl text-white
-         transition-all duration-200;
-  background: rgba(15, 23, 42, 0.8);
-  border: 1px solid rgba(51, 65, 85, 0.25);
+  @apply w-full px-4 py-2.5 rounded-xl text-white transition-all duration-200;
+  background: var(--ffi-surface-1);
+  border: 1px solid var(--ffi-hairline);
 }
-
-.ffi-input::placeholder {
-  color: var(--ffi-text-muted);
-}
-
+.ffi-input::placeholder { color: var(--ffi-ink-3); }
 .ffi-input:focus {
   outline: none;
-  border-color: var(--ffi-primary);
-  box-shadow: 0 0 0 3px rgba(85, 130, 230, 0.2);
+  border-color: rgba(77, 130, 255, 0.55);
+  box-shadow: 0 0 0 3px rgba(77, 130, 255, 0.18);
 }
 
-/* Prep form inputs — gold glow on focus (configure + strategy editor) */
+/* Prep form inputs — volt glow on focus */
 .ffi-form-input:focus-visible,
 .ffi-form-input:focus {
   outline: none !important;
-  border-color: rgba(224, 194, 122, 0.55) !important;
-  box-shadow: 0 0 0 3px rgba(224, 194, 122, 0.12), 0 0 10px rgba(224, 194, 122, 0.06) !important;
+  border-color: rgba(139, 255, 69, 0.55) !important;
+  box-shadow: 0 0 0 3px rgba(139, 255, 69, 0.14), 0 0 12px rgba(139, 255, 69, 0.08) !important;
 }
 
 /* ========================================
-   FFI Badge Variants
+   GRIDIRON Badges / Position chips (muted)
    ======================================== */
 
-/* Position badges */
-.ffi-badge {
-  @apply inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold;
-}
+.ffi-badge { @apply inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold; }
+.ffi-badge-qb { background: rgba(255, 110, 138, 0.18); color: #ff6e8a; }
+.ffi-badge-rb { background: rgba(86, 224, 160, 0.18); color: #56e0a0; }
+.ffi-badge-wr { background: rgba(108, 168, 255, 0.18); color: #6ca8ff; }
+.ffi-badge-te { background: rgba(255, 176, 92, 0.18); color: #ffb05c; }
+.ffi-badge-k { background: rgba(159, 176, 206, 0.18); color: #9fb0ce; }
+.ffi-badge-def { background: rgba(159, 176, 206, 0.18); color: #9fb0ce; }
+.ffi-badge-success { background: rgba(139, 255, 69, 0.16); color: #8bff45; }
+.ffi-badge-warning { background: rgba(255, 176, 92, 0.16); color: #ffb05c; }
+.ffi-badge-danger { background: rgba(255, 110, 138, 0.16); color: #ff6e8a; }
+.ffi-badge-info { background: rgba(77, 130, 255, 0.16); color: #79a6ff; }
+.ffi-tag { @apply inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wide; }
 
-.ffi-badge-qb {
-  background: rgba(239, 68, 68, 0.2);
-  color: #ef4444;
-}
-
-.ffi-badge-rb {
-  background: rgba(34, 197, 94, 0.2);
-  color: #22c55e;
-}
-
-.ffi-badge-wr {
-  background: rgba(59, 130, 246, 0.2);
-  color: #3b82f6;
-}
-
-.ffi-badge-te {
-  background: rgba(249, 115, 22, 0.2);
-  color: #f97316;
-}
-
-.ffi-badge-k {
-  background: rgba(168, 85, 247, 0.2);
-  color: #a855f7;
-}
-
-.ffi-badge-def {
-  background: rgba(148, 163, 184, 0.2);
-  color: #94a3b8;
-}
-
-/* Status badges */
-.ffi-badge-success {
-  background: rgba(57, 255, 20, 0.15);
-  color: #39ff14;
-}
-
-.ffi-badge-warning {
-  background: rgba(251, 191, 36, 0.15);
-  color: #fbbf24;
-}
-
-.ffi-badge-danger {
-  background: rgba(239, 68, 68, 0.15);
-  color: #ef4444;
-}
-
-.ffi-badge-info {
-  background: rgba(85, 130, 230, 0.15);
-  color: #5582e6;
-}
-
-/* Tag style badge (small pill) */
-.ffi-tag {
-  @apply inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wide;
-}
+/* Solid position chips (for hero/feed) */
+.ffi-poschip { font-family: var(--font-saira-cond), sans-serif; font-weight: 800; color: #04070d; border-radius: 8px; }
+.ffi-poschip-qb { background: var(--ffi-pos-qb); }
+.ffi-poschip-rb { background: var(--ffi-pos-rb); }
+.ffi-poschip-wr { background: var(--ffi-pos-wr); }
+.ffi-poschip-te { background: var(--ffi-pos-te); }
 
 /* ========================================
-   FFI Progress Bar
+   GRIDIRON Progress
    ======================================== */
 
-.ffi-progress {
-  @apply w-full h-2 rounded-full overflow-hidden;
-  background: rgba(51, 65, 85, 0.3);
-}
+.ffi-progress { @apply w-full h-2 rounded-full overflow-hidden; background: rgba(150, 180, 255, 0.1); }
+.ffi-progress-bar { @apply h-full rounded-full transition-all duration-500; background: linear-gradient(90deg, #4d82ff 0%, #8bff45 100%); }
+.ffi-progress-critical .ffi-progress-bar { background: linear-gradient(90deg, #ff6e8a 0%, #ffb05c 100%); }
+.ffi-progress-stable .ffi-progress-bar { background: linear-gradient(90deg, #ffb05c 0%, #4d82ff 100%); }
+.ffi-progress-elite .ffi-progress-bar { background: linear-gradient(90deg, #4d82ff 0%, #8bff45 100%); }
 
-.ffi-progress-bar {
-  @apply h-full rounded-full transition-all duration-500;
-  background: linear-gradient(90deg, #5582e6 0%, #39ff14 100%);
-}
-
-/* Scarcity status indicators */
-.ffi-progress-critical .ffi-progress-bar {
-  background: linear-gradient(90deg, #ef4444 0%, #fbbf24 100%);
-}
-
-.ffi-progress-stable .ffi-progress-bar {
-  background: linear-gradient(90deg, #fbbf24 0%, #5582e6 100%);
-}
-
-.ffi-progress-elite .ffi-progress-bar {
-  background: linear-gradient(90deg, #5582e6 0%, #39ff14 100%);
-}
-
-/* Segmented Progress Bars (Post-Draft Power Rankings) */
-.segmented-progress {
-  display: flex;
-  gap: 2px;
-}
-
-.segment {
-  height: 8px;
-  flex: 1;
-  border-radius: 1px;
-}
-
-.segment-filled {
-  background: var(--ffi-primary);
-}
-
-.segment-filled.danger {
-  background: var(--ffi-danger);
-}
-
-.segment-empty {
-  background: var(--ffi-surface-bright, #192f3b);
-}
+.segmented-progress { display: flex; gap: 2px; }
+.segment { height: 8px; flex: 1; border-radius: 1px; }
+.segment-filled { background: var(--ffi-blue); }
+.segment-filled.danger { background: var(--ffi-danger); }
+.segment-empty { background: var(--ffi-surface-3); }
 
 /* ========================================
-   FFI Navigation
+   GRIDIRON Navigation
    ======================================== */
 
-/* Bottom nav active state with glow */
-.ffi-nav-active {
-  color: var(--ffi-accent);
-  text-shadow: 0 0 10px rgba(57, 255, 20, 0.5);
-}
-
+.ffi-nav-active { color: var(--ffi-volt); text-shadow: 0 0 12px rgba(139, 255, 69, 0.5); }
 .ffi-nav-active::after {
   content: '';
   position: absolute;
@@ -884,31 +620,25 @@
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  background: var(--ffi-accent);
-  box-shadow: 0 0 8px rgba(57, 255, 20, 0.6);
+  background: var(--ffi-volt);
+  box-shadow: 0 0 10px rgba(139, 255, 69, 0.6);
 }
 
 /* ========================================
-   FFI Grade Display
+   GRIDIRON Grade Display
    ======================================== */
 
-.ffi-grade {
-  @apply inline-flex items-center justify-center rounded-2xl font-extrabold;
-  text-shadow: 0 0 30px currentColor;
-}
-
-.ffi-grade-a { color: var(--ffi-gold-bright); } /* champion = gold (the moment) */
-.ffi-grade-b { color: #5582e6; }
-.ffi-grade-c { color: #fbbf24; }
-.ffi-grade-d { color: #f97316; }
-.ffi-grade-f { color: #ef4444; }
+.ffi-grade { @apply inline-flex items-center justify-center rounded-2xl font-extrabold; font-family: var(--font-anton), sans-serif; text-shadow: 0 0 30px currentColor; }
+.ffi-grade-a { color: var(--ffi-volt); }
+.ffi-grade-b { color: var(--ffi-blue-bright); }
+.ffi-grade-c { color: #ffb05c; }
+.ffi-grade-d { color: #ff9a5c; }
+.ffi-grade-f { color: #ff6e8a; }
 
 /* ========================================
-   FFI Animations
+   GRIDIRON Animations
    ======================================== */
 
-/* Animatable gradient angle for broadcast sheen sweeps (lower-third reveal, grade ring).
-   Registered so the angle can be transitioned/animated, which a plain custom prop cannot. */
 @property --ffi-sheen-angle {
   syntax: "<angle>";
   inherits: false;
@@ -916,603 +646,242 @@
 }
 
 @keyframes ffi-glow-pulse {
-  0%, 100% { box-shadow: 0 0 20px rgba(57, 255, 20, 0.4); }
-  50% { box-shadow: 0 0 30px rgba(57, 255, 20, 0.6); }
+  0%, 100% { box-shadow: 0 0 20px rgba(139, 255, 69, 0.4); }
+  50% { box-shadow: 0 0 30px rgba(139, 255, 69, 0.6); }
 }
-
 @keyframes ffi-shake {
   0%, 100% { transform: translateX(0); }
   25% { transform: translateX(-4px); }
   75% { transform: translateX(4px); }
 }
-
 @keyframes ffi-slide-in {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
-
-/* FF-078: Success pulse for draft pick confirmation */
 @keyframes ffi-success-pulse {
-  0% {
-    box-shadow: 0 0 0 0 rgba(57, 255, 20, 0.5);
-  }
-  50% {
-    box-shadow: 0 0 0 8px rgba(57, 255, 20, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(57, 255, 20, 0);
-  }
+  0% { box-shadow: 0 0 0 0 rgba(139, 255, 69, 0.5); }
+  50% { box-shadow: 0 0 0 8px rgba(139, 255, 69, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(139, 255, 69, 0); }
 }
-
-/* FF-078: Card expand animation with spring feel */
 @keyframes ffi-expand {
-  0% {
-    opacity: 0;
-    max-height: 0;
-    transform: scaleY(0.95);
-  }
-  100% {
-    opacity: 1;
-    max-height: 500px;
-    transform: scaleY(1);
-  }
+  0% { opacity: 0; max-height: 0; transform: scaleY(0.95); }
+  100% { opacity: 1; max-height: 500px; transform: scaleY(1); }
 }
-
-/* FF-078: Grade reveal animation */
 @keyframes ffi-grade-reveal {
-  0% {
-    opacity: 0;
-    transform: scale(0.5);
-    filter: blur(4px);
-  }
-  50% {
-    opacity: 1;
-    transform: scale(1.1);
-    filter: blur(0);
-  }
-  100% {
-    transform: scale(1);
-  }
+  0% { opacity: 0; transform: scale(0.5); }
+  60% { opacity: 1; transform: scale(1.08); }
+  100% { transform: scale(1); }
 }
-
-/* FF-078: Recommendation card attention pulse */
 @keyframes ffi-attention {
-  0%, 100% {
-    box-shadow: 0 0 20px rgba(57, 255, 20, 0.2), 0 8px 30px rgba(0, 0, 0, 0.4);
-  }
-  50% {
-    box-shadow: 0 0 30px rgba(57, 255, 20, 0.4), 0 8px 30px rgba(0, 0, 0, 0.4);
-  }
+  0%, 100% { box-shadow: 0 0 20px rgba(139, 255, 69, 0.2), 0 8px 30px rgba(0, 0, 0, 0.4); }
+  50% { box-shadow: 0 0 30px rgba(139, 255, 69, 0.4), 0 8px 30px rgba(0, 0, 0, 0.4); }
 }
-
-/* FF-078: Trash talk alert entrance */
 @keyframes ffi-trash-talk-enter {
-  0% {
-    opacity: 0;
-    transform: translateX(100%) rotate(2deg);
-  }
-  60% {
-    transform: translateX(-5%) rotate(-1deg);
-  }
-  80% {
-    transform: translateX(2%) rotate(0.5deg);
-  }
-  100% {
-    opacity: 1;
-    transform: translateX(0) rotate(0);
-  }
+  0% { opacity: 0; transform: translateX(100%) rotate(2deg); }
+  60% { transform: translateX(-5%) rotate(-1deg); }
+  80% { transform: translateX(2%) rotate(0.5deg); }
+  100% { opacity: 1; transform: translateX(0) rotate(0); }
 }
 
-/* UX-2.1 (Opus elevation): On-the-clock spotlight — the arena lights swing to YOU only
-   for the actual moment (snake: your turn; auction: a player is on the block), never a
-   constant whole-draft glow. Driven by body.ffi-on-the-clock from the live draft client. */
-body.ffi-on-the-clock .stadium-atmos {
-  background:
-    radial-gradient(74% 58% at 50% -8%, rgba(253, 239, 182, 0.26) 0%, transparent 64%),
-    radial-gradient(45% 40% at 88% 92%, rgba(85, 130, 230, 0.10) 0%, transparent 60%),
-    radial-gradient(50% 45% at 8% 85%, rgba(16, 70, 50, 0.24) 0%, transparent 62%),
-    linear-gradient(180deg, #03060f 0%, #060d1a 45%, #01040a 100%);
-  animation: atmos-clock-pulse 3.2s ease-in-out infinite;
-  will-change: filter;
-}
-
-/* UX-2.1 (Opus elevation): On-the-clock hero banner — gold light-catch edge + ambient
-   spotlight glow that breathes. Transform-free so Framer Motion owns the entrance. */
+/* On-the-clock hero banner — volt light-catch edge + breathing glow (was gold) */
 .ffi-onclock-banner {
-  border: 1px solid rgba(253, 239, 182, 0.38);
-  box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.36),
-    0 0 40px rgba(253, 239, 182, 0.16),
-    inset 0 1px 0 rgba(253, 239, 182, 0.22);
+  border: 1px solid rgba(139, 255, 69, 0.4);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.36), 0 0 40px rgba(139, 255, 69, 0.16), inset 0 1px 0 rgba(139, 255, 69, 0.22);
   animation: ffi-onclock-sheen 3.2s ease-in-out infinite;
 }
-
 @keyframes ffi-onclock-sheen {
-  0%, 100% {
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.36), 0 0 36px rgba(253, 239, 182, 0.14), inset 0 1px 0 rgba(253, 239, 182, 0.22);
-  }
-  50% {
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.36), 0 0 56px rgba(253, 239, 182, 0.26), inset 0 1px 0 rgba(253, 239, 182, 0.30);
-  }
+  0%, 100% { box-shadow: 0 8px 32px rgba(0, 0, 0, 0.36), 0 0 36px rgba(139, 255, 69, 0.14), inset 0 1px 0 rgba(139, 255, 69, 0.22); }
+  50% { box-shadow: 0 8px 32px rgba(0, 0, 0, 0.36), 0 0 56px rgba(139, 255, 69, 0.26), inset 0 1px 0 rgba(139, 255, 69, 0.3); }
 }
 
-/* UX-2.3: Pick flash — box-shadow gold glow only (no scale; Framer Motion handles transform) */
-.ffi-pick-flash {
-  animation: ffi-gold-flash 0.7s ease-out 0.1s both;
-}
+.ffi-pick-flash { animation: ffi-volt-flash 0.7s ease-out 0.1s both; }
 
-/* Stadium Primetime v2.0 motion (UX-1.7) — pick/moment reveal, gold flash, stagger */
 @keyframes ffi-reveal {
   0% { opacity: 0; transform: scale(0.85); }
   60% { opacity: 1; transform: scale(1.05); }
   100% { opacity: 1; transform: scale(1); }
 }
-
-@keyframes ffi-gold-flash {
-  0% { box-shadow: 0 0 0 rgba(253, 239, 182, 0); }
-  40% { box-shadow: 0 0 50px rgba(253, 239, 182, 0.55), 0 0 100px rgba(253, 239, 182, 0.22); }
-  100% { box-shadow: 0 0 16px rgba(253, 239, 182, 0.14); }
+@keyframes ffi-volt-flash {
+  0% { box-shadow: 0 0 0 rgba(139, 255, 69, 0); }
+  40% { box-shadow: 0 0 50px rgba(139, 255, 69, 0.55), 0 0 100px rgba(139, 255, 69, 0.22); }
+  100% { box-shadow: 0 0 16px rgba(139, 255, 69, 0.14); }
 }
-
+/* legacy name kept */
+@keyframes ffi-gold-flash {
+  0% { box-shadow: 0 0 0 rgba(139, 255, 69, 0); }
+  40% { box-shadow: 0 0 50px rgba(139, 255, 69, 0.55), 0 0 100px rgba(139, 255, 69, 0.22); }
+  100% { box-shadow: 0 0 16px rgba(139, 255, 69, 0.14); }
+}
 @keyframes ffi-stagger-fade {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
-.ffi-animate-reveal {
-  animation: ffi-reveal 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both,
-             ffi-gold-flash 0.6s ease-out both;
-}
+.ffi-animate-reveal { animation: ffi-reveal 0.5s var(--ease-spring) both, ffi-volt-flash 0.6s ease-out both; }
+.ffi-animate-stagger { animation: ffi-stagger-fade 0.4s var(--ease-standard) both; }
+.ffi-animate-glow { animation: ffi-glow-pulse 2s ease-in-out infinite; }
+.ffi-animate-shake { animation: ffi-shake 0.3s ease-in-out; }
+.ffi-animate-slide-in { animation: ffi-slide-in 0.2s var(--ease-standard); }
+.ffi-animate-success { animation: ffi-success-pulse 0.6s ease-out; }
+.ffi-animate-expand { animation: ffi-expand 0.25s var(--ease-spring); transform-origin: top; }
+.ffi-animate-grade { animation: ffi-grade-reveal 0.5s var(--ease-spring); }
+.ffi-animate-attention { animation: ffi-attention 2s ease-in-out infinite; }
+.ffi-animate-trash-talk { animation: ffi-trash-talk-enter 0.4s var(--ease-spring); }
+.animate-shake { animation: ffi-shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both; }
 
-.ffi-animate-stagger {
-  animation: ffi-stagger-fade 0.4s ease-out both;
-}
-
-.ffi-animate-glow {
-  animation: ffi-glow-pulse 2s ease-in-out infinite;
-}
-
-.ffi-animate-shake {
-  animation: ffi-shake 0.3s ease-in-out;
-}
-
-.ffi-animate-slide-in {
-  animation: ffi-slide-in 0.2s ease-out;
-}
-
-/* FF-078: New animation utilities */
-.ffi-animate-success {
-  animation: ffi-success-pulse 0.6s ease-out;
-}
-
-.ffi-animate-expand {
-  animation: ffi-expand 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
-  transform-origin: top;
-}
-
-.ffi-animate-grade {
-  animation: ffi-grade-reveal 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.ffi-animate-attention {
-  animation: ffi-attention 2s ease-in-out infinite;
-}
-
-.ffi-animate-trash-talk {
-  animation: ffi-trash-talk-enter 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-/* Animate.css style shake for severe alerts */
-.animate-shake {
-  animation: ffi-shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
-}
-
-/* Respect reduced motion */
 @media (prefers-reduced-motion: reduce) {
-  .ffi-animate-glow,
-  .ffi-animate-shake,
-  .ffi-animate-slide-in,
-  .ffi-animate-success,
-  .ffi-animate-expand,
-  .ffi-animate-grade,
-  .ffi-animate-attention,
-  .ffi-animate-trash-talk,
-  .ffi-animate-reveal,
-  .ffi-animate-stagger,
-  .stadium-atmos.atmos-clock,
-  body.ffi-on-the-clock .stadium-atmos,
-  .ffi-onclock-banner,
-  .ffi-pick-flash,
-  .animate-shake {
+  .ffi-animate-glow, .ffi-animate-shake, .ffi-animate-slide-in, .ffi-animate-success,
+  .ffi-animate-expand, .ffi-animate-grade, .ffi-animate-attention, .ffi-animate-trash-talk,
+  .ffi-animate-reveal, .ffi-animate-stagger, .stadium-atmos.atmos-clock,
+  body.ffi-on-the-clock .stadium-atmos, .ffi-onclock-banner, .ffi-pick-flash,
+  .ffi-hero::before, .animate-shake {
     animation: none;
   }
-
-  .stadium-atmos.atmos-clock,
-  body.ffi-on-the-clock .stadium-atmos {
-    will-change: auto;
-  }
-
-  .ffi-btn-primary:hover,
-  .ffi-btn-hero:hover,
-  .ffi-btn-value:hover,
-  .ffi-card-interactive:hover,
-  .glass-interactive:hover {
-    transform: none;
-  }
+  .stadium-atmos.atmos-clock, body.ffi-on-the-clock .stadium-atmos { will-change: auto; }
+  .ffi-btn-primary:hover, .ffi-btn-hero:hover, .ffi-btn-value:hover,
+  .ffi-card-interactive:hover, .glass-interactive:hover { transform: none; }
 }
 
 /* ========================================
-   Mobile Safe Areas
+   Mobile Safe Areas + Touch Targets
    ======================================== */
 
-.safe-bottom {
-  padding-bottom: env(safe-area-inset-bottom, 0px);
-}
+.safe-bottom { padding-bottom: env(safe-area-inset-bottom, 0px); }
+.safe-top { padding-top: env(safe-area-inset-top, 0px); }
 
-.safe-top {
-  padding-top: env(safe-area-inset-top, 0px);
-}
-
-/* ========================================
-   Mobile Polish (FF-077)
-   44px touch targets + responsive layouts
-   ======================================== */
-
-/* Mobile touch target minimums (44x44px per Apple HIG) */
 @media (max-width: 768px) {
-  /* Primary / hero / value buttons: full 44px height */
-  .ffi-btn-primary,
-  .ffi-btn-hero,
-  .ffi-btn-value {
-    min-height: 44px;
-    padding-top: 0.75rem;
-    padding-bottom: 0.75rem;
-  }
-
-  /* Secondary buttons: 44px height */
-  .ffi-btn-secondary {
-    min-height: 44px;
-    padding-top: 0.75rem;
-    padding-bottom: 0.75rem;
-  }
-
-  /* Ghost buttons: maintain 44px tap zone */
-  .ffi-btn-ghost {
-    min-height: 44px;
-    padding-top: 0.625rem;
-    padding-bottom: 0.625rem;
-  }
-
-  /* Inputs: 44px minimum height */
-  .ffi-input,
-  select.ffi-input {
-    min-height: 44px;
-    padding-top: 0.625rem;
-    padding-bottom: 0.625rem;
-    font-size: 16px; /* Prevents iOS zoom on focus */
-  }
-
-  /* Cards: tighter mobile padding */
-  .ffi-card,
-  .ffi-card-elevated,
-  .ffi-card-interactive {
-    padding: 0.875rem;
-  }
-
-  /* Interactive elements: add tap highlight area */
-  .ffi-card-interactive {
-    min-height: 48px;
-    touch-action: manipulation; /* Disable double-tap zoom */
-  }
-
-  /* Badges: slightly larger for easier tapping */
-  .ffi-badge {
-    min-height: 28px;
-    padding: 0.375rem 0.625rem;
-  }
-
-  /* Progress bars: larger touch area when interactive */
-  .ffi-progress {
-    min-height: 12px;
-  }
-
-  /* Typography: slightly larger body text for readability */
-  .ffi-body-md {
-    font-size: 0.9375rem;
-    line-height: 1.55;
-  }
-
-  /* Grade display: scale down for mobile */
-  .ffi-grade {
-    transform: scale(0.9);
-  }
-
-  /* Display text: responsive sizing */
-  .ffi-display-xl {
-    font-size: 2.25rem;
-  }
-
-  .ffi-display-lg {
-    font-size: 1.75rem;
-  }
-
-  .ffi-display-md {
-    font-size: 1.25rem;
-  }
+  .ffi-btn-primary, .ffi-btn-hero, .ffi-btn-value { min-height: 44px; padding-top: 0.75rem; padding-bottom: 0.75rem; }
+  .ffi-btn-secondary { min-height: 44px; padding-top: 0.75rem; padding-bottom: 0.75rem; }
+  .ffi-btn-ghost { min-height: 44px; padding-top: 0.625rem; padding-bottom: 0.625rem; }
+  .ffi-input, select.ffi-input { min-height: 44px; padding-top: 0.625rem; padding-bottom: 0.625rem; font-size: 16px; }
+  .ffi-card, .ffi-card-elevated, .ffi-card-interactive { padding: 0.875rem; }
+  .ffi-card-interactive { min-height: 48px; touch-action: manipulation; }
+  .ffi-badge { min-height: 28px; padding: 0.375rem 0.625rem; }
+  .ffi-progress { min-height: 12px; }
+  .ffi-body-md { font-size: 0.9375rem; line-height: 1.55; }
+  .ffi-grade { transform: scale(0.9); }
+  .ffi-display-xl { font-size: 2.25rem; }
+  .ffi-display-lg { font-size: 1.75rem; }
+  .ffi-display-md { font-size: 1.25rem; }
 }
 
-/* Small mobile (iPhone SE, etc.) */
 @media (max-width: 375px) {
-  .ffi-display-xl {
-    font-size: 1.875rem;
-  }
-
-  .ffi-display-lg {
-    font-size: 1.5rem;
-  }
-
-  .ffi-display-md {
-    font-size: 1.125rem;
-  }
-
-  /* Even tighter card padding */
-  .ffi-card,
-  .ffi-card-elevated,
-  .ffi-card-interactive {
-    padding: 0.75rem;
-  }
+  .ffi-display-xl { font-size: 1.875rem; }
+  .ffi-display-lg { font-size: 1.5rem; }
+  .ffi-display-md { font-size: 1.125rem; }
+  .ffi-card, .ffi-card-elevated, .ffi-card-interactive { padding: 0.75rem; }
 }
 
-/* Ensure adequate spacing between tap targets */
-.ffi-touch-spacing > * + * {
-  margin-top: 0.75rem;
-}
+.ffi-touch-spacing > * + * { margin-top: 0.75rem; }
+@media (max-width: 768px) { .ffi-touch-spacing > * + * { margin-top: 1rem; } }
+
+.ffi-grid-mobile-stack { display: grid; grid-template-columns: 1fr; gap: 0.75rem; }
+@media (min-width: 640px) { .ffi-grid-mobile-stack { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 1024px) { .ffi-grid-mobile-stack { grid-template-columns: repeat(3, 1fr); } }
+
+.ffi-bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; z-index: 50; padding-bottom: env(safe-area-inset-bottom, 0.5rem); }
+.ffi-main-content { padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px)); }
+@media (min-width: 768px) { .ffi-main-content { padding-bottom: 0; } }
+
+.ffi-no-select { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+.ffi-scroll-container { -webkit-overflow-scrolling: touch; scroll-behavior: smooth; overscroll-behavior: contain; }
+.ffi-fixed-header { position: sticky; top: 0; z-index: 40; overscroll-behavior: none; }
 
 @media (max-width: 768px) {
-  .ffi-touch-spacing > * + * {
-    margin-top: 1rem;
-  }
-}
-
-/* Mobile-first grid utilities */
-.ffi-grid-mobile-stack {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 0.75rem;
-}
-
-@media (min-width: 640px) {
-  .ffi-grid-mobile-stack {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (min-width: 1024px) {
-  .ffi-grid-mobile-stack {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-/* Bottom navigation safe zone */
-.ffi-bottom-nav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 50;
-  padding-bottom: env(safe-area-inset-bottom, 0.5rem);
-}
-
-/* Content area with bottom nav clearance */
-.ffi-main-content {
-  padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px));
-}
-
-@media (min-width: 768px) {
-  .ffi-main-content {
-    padding-bottom: 0;
-  }
-}
-
-/* Disable text selection on interactive elements (prevents accidental selection) */
-.ffi-no-select {
-  -webkit-user-select: none;
-  user-select: none;
-  -webkit-touch-callout: none;
-}
-
-/* Smooth scrolling container for mobile */
-.ffi-scroll-container {
-  -webkit-overflow-scrolling: touch;
-  scroll-behavior: smooth;
-  overscroll-behavior: contain;
-}
-
-/* Pull-to-refresh prevention on fixed headers */
-.ffi-fixed-header {
-  position: sticky;
-  top: 0;
-  z-index: 40;
-  overscroll-behavior: none;
-}
-
-/* Optimized animations for mobile */
-@media (max-width: 768px) {
-  .ffi-card-interactive:hover {
-    transform: none; /* Disable hover transforms on touch */
-  }
-
-  .ffi-btn-primary:hover,
-  .ffi-btn-hero:hover,
-  .ffi-btn-value:hover {
-    transform: none;
-  }
-
-  /* Active states instead of hover */
-  .ffi-card-interactive:active {
-    transform: scale(0.98);
-    transition: transform 0.1s ease-out;
-  }
-
-  .ffi-btn-primary:active {
-    transform: scale(0.97);
-    box-shadow: 0 0 15px rgba(85, 130, 230, 0.4);
-  }
-
-  .ffi-btn-hero:active {
-    transform: scale(0.97);
-    box-shadow: 0 0 15px rgba(224, 194, 122, 0.45);
-  }
-
-  .ffi-btn-value:active {
-    transform: scale(0.97);
-    box-shadow: 0 0 15px rgba(57, 255, 20, 0.4);
-  }
-
-  .ffi-btn-secondary:active {
-    transform: scale(0.98);
-    background: rgba(30, 41, 59, 0.95);
-  }
-
-  .ffi-btn-ghost:active {
-    background: rgba(51, 65, 85, 0.3);
-  }
+  .ffi-card-interactive:hover { transform: none; }
+  .ffi-btn-primary:hover, .ffi-btn-hero:hover, .ffi-btn-value:hover { transform: none; }
+  .ffi-card-interactive:active { transform: scale(0.98); transition: transform 0.1s ease-out; }
+  .ffi-btn-primary:active { transform: scale(0.97); box-shadow: 0 0 15px rgba(77, 130, 255, 0.4); }
+  .ffi-btn-hero:active { transform: scale(0.97); box-shadow: 0 0 15px rgba(139, 255, 69, 0.45); }
+  .ffi-btn-value:active { transform: scale(0.97); box-shadow: 0 0 15px rgba(139, 255, 69, 0.4); }
+  .ffi-btn-secondary:active { transform: scale(0.98); background: var(--ffi-surface-2); }
+  .ffi-btn-ghost:active { background: rgba(150, 180, 255, 0.12); }
 }
 
 /* ========================================
-   UX-3: Data-dense list utilities
+   Data-dense list utilities
    ======================================== */
 
-/* Skeleton loader — shimmer shimmer for loading states */
 @keyframes ffi-skeleton-shimmer {
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
 }
-
 .ffi-skeleton {
-  background: linear-gradient(
-    90deg,
-    rgba(10, 27, 37, 0.9) 25%,
-    rgba(20, 40, 52, 0.95) 50%,
-    rgba(10, 27, 37, 0.9) 75%
-  );
+  background: linear-gradient(90deg, rgba(17, 26, 46, 0.9) 25%, rgba(27, 42, 68, 0.95) 50%, rgba(17, 26, 46, 0.9) 75%);
   background-size: 200% 100%;
   animation: ffi-skeleton-shimmer 1.5s ease-in-out infinite;
-  border: 1px solid rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--ffi-hairline);
   border-radius: 1rem;
 }
-
 @media (prefers-reduced-motion: reduce) {
-  .ffi-skeleton {
-    animation: none;
-    background: rgba(10, 27, 37, 0.9);
-  }
+  .ffi-skeleton { animation: none; background: var(--ffi-surface-2); }
 }
 
-/* Compact density mode — tighter card padding for data-dense lists */
 [data-density="compact"] .ffi-card,
 [data-density="compact"] .ffi-card-elevated,
-[data-density="compact"] .ffi-card-interactive {
-  padding: 0.5rem 0.75rem;
-  border-radius: 0.75rem;
-}
+[data-density="compact"] .ffi-card-interactive { padding: 0.5rem 0.75rem; border-radius: 0.75rem; }
 
-/* Sticky filter bar — glass backdrop for position/sort header rows */
+/* Sticky filter bar — solid (no blur) */
 .ffi-filter-sticky {
   position: sticky;
   top: 0;
   z-index: 20;
-  background: rgba(1, 4, 10, 0.88);
-  backdrop-filter: blur(14px) saturate(1.1);
-  -webkit-backdrop-filter: blur(14px) saturate(1.1);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(6, 10, 20, 0.94);
+  border-bottom: 1px solid var(--ffi-hairline);
   margin: 0 -0.25rem;
   padding: 0.5rem 0.25rem;
 }
 
 /* ========================================
-   Sunday Night Gridiron - Broadcast Moments (Phase 2)
-   Lower-third pick reveal, position-run ticker, live score-bug.
+   Broadcast moments — lower-third, ticker, score-bug, number flash
    ======================================== */
 
-/* Lower-third: a broadcast name-strip. The one-shot sheen sweep fires on each new pick
-   because the parent keys the element on pick_number (remount re-triggers the animation).
-   A fixed min-height on the wrapper keeps the feed from shifting as picks land. */
-.ffi-lower-third {
-  position: relative;
-  overflow: hidden;
-}
-
+.ffi-lower-third { position: relative; overflow: hidden; }
 .ffi-lower-third::after {
   content: "";
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: linear-gradient(100deg, transparent 35%, rgba(253, 239, 182, 0.22) 50%, transparent 65%);
+  background: linear-gradient(100deg, transparent 35%, rgba(139, 255, 69, 0.22) 50%, transparent 65%);
   background-size: 220% 100%;
   background-position: -160% 0;
-  animation: ffi-sheen-sweep 0.7s var(--ease-broadcast, ease-out) 1;
+  animation: ffi-sheen-sweep 0.7s var(--ease-broadcast) 1;
 }
-
-/* Other managers' picks sweep broadcast cyan instead of gold (live, not "the moment") */
 .ffi-lower-third-live::after {
-  background: linear-gradient(100deg, transparent 35%, rgba(111, 227, 255, 0.20) 50%, transparent 65%);
+  background: linear-gradient(100deg, transparent 35%, rgba(121, 166, 255, 0.2) 50%, transparent 65%);
   background-size: 220% 100%;
   background-position: -160% 0;
 }
-
 @keyframes ffi-sheen-sweep {
   0% { background-position: -160% 0; }
   100% { background-position: 260% 0; }
 }
 
-/* Position-run ticker - cyan broadcast insight strip */
 .ffi-ticker {
-  border: 1px solid rgba(111, 227, 255, 0.22);
-  background: linear-gradient(90deg, rgba(111, 227, 255, 0.10) 0%, rgba(111, 227, 255, 0.04) 100%);
+  border: 1px solid rgba(121, 166, 255, 0.22);
+  background: linear-gradient(90deg, rgba(121, 166, 255, 0.1) 0%, rgba(121, 166, 255, 0.04) 100%);
 }
 
-/* Live score-bug - heavy-glass glanceable chip (Apple Live Activity feel) */
 .ffi-scorebug {
-  background: rgba(5, 21, 30, 0.72);
-  backdrop-filter: blur(14px) saturate(1.1);
-  -webkit-backdrop-filter: blur(14px) saturate(1.1);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(8, 13, 24, 0.96);
+  border: 1px solid var(--ffi-hairline);
 }
 
-/* Flash a number cyan when it changes (broadcast live-update cue, zero layout shift) */
 @keyframes ffi-num-flash {
-  0% { color: var(--ffi-live); text-shadow: 0 0 12px rgba(111, 227, 255, 0.6); }
+  0% { color: var(--ffi-volt); text-shadow: 0 0 12px rgba(139, 255, 69, 0.6); }
   100% { color: inherit; text-shadow: none; }
 }
-.ffi-num-flash {
-  animation: ffi-num-flash 0.6s ease-out 1;
-}
+.ffi-num-flash { animation: ffi-num-flash 0.6s ease-out 1; }
 
 @media (prefers-reduced-motion: reduce) {
-  .ffi-lower-third::after,
-  .ffi-lower-third-live::after,
-  .ffi-num-flash {
-    animation: none;
-  }
+  .ffi-lower-third::after, .ffi-lower-third-live::after, .ffi-num-flash { animation: none; }
 }
 
 /* ========================================
-   Sunday Night Gridiron - Champion Grade Reveal (Phase 3)
+   Champion grade reveal — rotating volt ring (was gold)
    ======================================== */
 
-/* Rotating conic gold ring around the grade circle for a champion (A) draft. Uses the
-   registered @property --ffi-sheen-angle so the conic angle can actually animate. The mask
-   trick shows only the ring (border), not the fill. */
-@keyframes ffi-grade-ring-spin {
-  to { --ffi-sheen-angle: 360deg; }
-}
+@keyframes ffi-grade-ring-spin { to { --ffi-sheen-angle: 360deg; } }
 
 .ffi-grade-ring-sheen::before {
   content: "";
@@ -1522,10 +891,10 @@ body.ffi-on-the-clock .stadium-atmos {
   padding: 3px;
   background: conic-gradient(
     from var(--ffi-sheen-angle),
-    rgba(253, 239, 182, 0) 0deg,
-    rgba(253, 239, 182, 0) 210deg,
-    rgba(253, 239, 182, 0.9) 300deg,
-    rgba(253, 239, 182, 0) 360deg
+    rgba(139, 255, 69, 0) 0deg,
+    rgba(139, 255, 69, 0) 210deg,
+    rgba(139, 255, 69, 0.9) 300deg,
+    rgba(139, 255, 69, 0) 360deg
   );
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;

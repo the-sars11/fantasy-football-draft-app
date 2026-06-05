@@ -16,9 +16,9 @@
     { "name": "P3+ — Commercialization (CONDITIONAL)", "done": false }
   ],
   "nextItems": [
-    "UXV2-1: Lock GRIDIRON direction on the live-auction mockup (accent, energy, live-price tracker)",
     "UXV2-2: DESIGN_SYSTEM v3 (GRIDIRON) globals tokens + font stack + components",
-    "UXV2-6: Rebuild Live Auction Draft Room in React to match the locked mockup"
+    "UXV2-6: Rebuild Live Auction Draft Room in React to match the locked mockup",
+    "UXV2-3/4/5: Roll GRIDIRON to Prep/Board/Review (parallel agents)"
   ]
 }
 -->
@@ -129,7 +129,7 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 ## UX-V2: GRIDIRON Redesign (ACTIVE visual track)
 > **Why this exists:** On 2026-06-04 Joe reviewed the shipped "Stadium Primetime / Sunday Night Gridiron" UI and rejected it as generic AI slop (deep navy + glass + gold glow + gradients, the no-opinion default every AI produces). It rendered correctly (verified live) but had no point of view. This track replaces it.
 > **Direction (Joe-chosen from a 10-app reference review):** EA Sports FC Ultimate Team energy + Linear discipline. Bold where the draft is live, disciplined everywhere else.
-> **Status:** Direction LIKED, not yet LOCKED. Live-auction co-pilot mockup approved in concept; finalizing accent color, energy level, and a live-price-tracker question before applying the system across all screens.
+> **Status:** Direction LOCKED 2026-06-04 - volt green accent, EA-FC-meets-Linear energy as in the mockup, clean on-the-block card (no live "going for" tracker). Building DESIGN_SYSTEM v3 + the real live room next; the per-screen rollout (UXV2-3/4/5) runs as PARALLEL agents (Joe, 2026-06-04).
 > **Hard rule:** Visual rebuild only. Reuse engine / data / advisor / feed logic untouched. Performance is a mandate: NO stacked backdrop-filter blur (the old build was so filter-heavy it could not even be screenshotted, which is also a phone-perf red flag). Gradients + box-shadow + transform/opacity only.
 
 ### Reference bar (what "AAA" means here) - Joe's reactions, 2026-06-04
@@ -138,15 +138,17 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 - Liked with caveats: Family (animation quality yes; no light mode, no cheese), Raycast + Linear (beautiful but too black, want color + depth), Copilot Money (beautiful but too many colors, want a SET palette), Sleeper (good color, not elegant enough).
 - Hard no: Underdog (too flat / minimal).
 
-### Locked design DNA (frozen on UXV2-1 sign-off)
+### Locked design DNA (LOCKED 2026-06-04)
 - Canvas: colorful-DARK. Deep midnight with blue + violet + faint turf-green lit depth. Never flat black, never light.
 - Set palette: volt green = the moment / value / your action ONLY; electric blue = structure / info / depth; position chips muted; one iridescent sheen on the hero card (texture, not a fourth color). No gold-glass anywhere.
 - Type: Anton (broadcast hero), Saira Condensed (labels), JetBrains Mono (every number, tabular).
+- Premium FEEL is core, EQUAL WEIGHT to the visuals (Joe, 2026-06-04: "I want that premium app feel"): Family-grade fluid motion, tactile micro-interactions on every touch, cinematic signature moments. Motion is half of AAA (see UXV2-2b + DESIGN_SYSTEM Motion). If it does not feel alive in the hand, it is not done.
 
 ### Corrected product model (Joe, 2026-06-04) - applies to all auction screens
 - Joe's draft is a LIVE IN-PERSON auction. The app does NOT place or manage bids.
 - The app does two things: (1) STRATEGY for Joe ("Bid Up To $X", value, estimated cost, spend cap, AI run/pace reads), and (2) TRACK RESULTS (record each sale: final price + winner; feed + budget + roster update from logged results via Sheets / Auctioneer feed / manual entry).
 - Therefore: no bid stepper and no "Place Bid" button anywhere. The live hero = strategy block + a "Record Sale" action.
+- On-the-block card stays clean: your max + value + estimated cost, then Record Sale. No live "going for" price field for now (trivial to add later if Joe wants it on a real draft night).
 
 ### Artifacts
 - `.claude/mockups/draft-room-phone.html` - live auction co-pilot, mobile, Direction v1 (current source of truth for the look).
@@ -154,11 +156,13 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 - Rendered to PNG via headless Edge for remote/phone viewing (remote mode cannot download local files).
 
 ### Plan
-- [~] UXV2-1: Lock the direction on the Live Auction Draft Room mockup - confirm accent (volt vs cyan/orange), energy level (FUT-max vs Linear-restraint), and whether to add an optional live "going for" price tracker. Output: approved mockup; DNA section above frozen.
-- [ ] UXV2-2: DESIGN_SYSTEM v3 "GRIDIRON" - new `globals.css` tokens (set palette + colorful-dark canvas + performant atmosphere), font stack (Anton / Saira / Saira Condensed / JetBrains Mono), component classes (hero card, decision block, record-sale, broadcast feed). Archive v2.0 Stadium Primetime + its `UI_UPGRADE_PLAN.md`.
-- [ ] UXV2-3: Apply to Prep Hub + Configure (Linear-refined analytical surfaces).
-- [ ] UXV2-4: Apply to Draft Board / Player Pool (data-dense, Copilot-grade numbers, set palette).
-- [ ] UXV2-5: Apply to Post-Draft Review (broadcast grade hero in the new palette, no gold).
+- [x] UXV2-1: Direction LOCKED 2026-06-04 - volt green accent; EA-FC-meets-Linear energy as in the mockup; clean on-the-block card (no live "going for" tracker). Signed off on `.claude/mockups/draft-room-phone.html`; DNA above frozen.
+- [x] UXV2-2 [DONE 2026-06-04: globals.css + layout.tsx re-skinned to GRIDIRON, all selector names kept; compiles clean (Turbopack), /prep renders clean (colorful-dark + volt + blue, no gold, no backdrop-filter blur)]: DESIGN_SYSTEM v3 "GRIDIRON" - new `globals.css` tokens (set palette + colorful-dark canvas + performant atmosphere), font stack (Anton / Saira / Saira Condensed / JetBrains Mono), component classes (hero card, decision block, record-sale, broadcast feed). Archive v2.0 Stadium Primetime + its `UI_UPGRADE_PLAN.md`.
+- [ ] UXV2-2b: Motion system (FIRST-CLASS - this is half of AAA, per Joe 2026-06-04). Foundational layer: defined curves (spring/broadcast/standard), a number-ticker hook, shared-element setup (Framer `layoutId` + View Transitions helper), reduced-motion guards. Signature moments: on-the-clock spring entrance + breathing glow, pick-lands lower-third wipe + sheen, steal volt flash/burst, Record Pick -> player morphs to squad slot + budget tick, draft-complete grade reveal + confetti. Micro: button press scale+glow, card lift, stepper number roll, filter-pill slide. Numbers tick+flash on change (tabular, zero shift). Lists cascade/FLIP. Discipline: cinematic on the moments, ~200ms crisp on routine picks (no rapid-fire fatigue). Perf: transform/opacity/box-shadow only (also keeps it fast on phone); full reduced-motion fallback. Each screen (UXV2-3/4/5/6) applies the relevant moves; the live room (UXV2-6) carries the most.
+> UXV2-3 through UXV2-5 run as PARALLEL agents (one screen each) once UXV2-2 locks the system (Joe, 2026-06-04). Each agent owns its own screen/components; shared `globals.css` is frozen by UXV2-2 so agents do not collide on it.
+- [ ] UXV2-3 [parallel agent]: Apply to Prep Hub + Configure (Linear-refined analytical surfaces).
+- [ ] UXV2-4 [parallel agent]: Apply to Draft Board / Player Pool (data-dense, Copilot-grade numbers, set palette).
+- [ ] UXV2-5 [parallel agent]: Apply to Post-Draft Review (broadcast grade hero in the new palette, no gold).
 - [ ] UXV2-6: Rebuild the Live Auction Draft Room in React to match the locked mockup (strategy + record-sale model; reuse advisor / feed / state machine).
 - [ ] UXV2-7: Performance + arm's-length pass - confirm screenshot-able + smooth on Joe's phone (the old build's exact failure mode); reduced-motion guards on every animation.
 - [ ] UXV2-8: VERIFY (lint + tests + build) + commit + update DESIGN docs + WORKING_STATE.
