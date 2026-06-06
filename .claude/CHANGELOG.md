@@ -2,6 +2,42 @@
 
 ---
 
+## 2026-06-06 — UXV2-2b: Motion System (GRIDIRON foundation)
+
+**Task:** UXV2-2b | **Class:** `shared` | **Lenses:** Design, QA
+
+**Why:** Motion is half of AAA (Joe, 2026-06-04). The GRIDIRON visual layer ships with the right palette and type stack, but without a coordinated motion system it reads as "flat." This establishes the shared foundation that UXV2-4/5/6 will consume — every moving number, every card lift, the on-the-clock entrance, steal bursts, filter pills, cascade lists.
+
+**What changed:**
+- `src/lib/motion.ts` (new): 5 Framer Motion transition presets (`spring`, `springFast`, `broadcast`, `standard`, `swift`) + 7 named variant sets (`otcVariants`, `otcBadgeVariants`, `lowerThirdVariants`, `cascadeContainerVariants`, `cascadeItemVariants`, `fadeVariants`). Single source of truth — import in any screen.
+- `src/hooks/use-number-ticker.ts` (new): `useNumberTicker(value)` hook. Detects value changes, emits `{ flashing, direction, delta }` for 1.4s. Drives CSS animation class toggles without Framer overhead on routine number updates (budget, rank, bid).
+- `src/components/motion/` (new folder): 6 components + barrel export.
+  - `NumberTicker.tsx` — number display with flash-up/flash-down class application + optional delta label.
+  - `OtcEntrance.tsx` — `AnimatePresence` spring-in wrapper for the on-the-clock hero card. `OtcBadge` delays 180ms for layered reveal.
+  - `LowerThird.tsx` — broadcast-curve wipe from bottom for pick-lands (replaces/supplements `pick-lower-third.tsx` for full-width in-room moments).
+  - `StealFlash.tsx` — volt burst wrapper. Increment `trigger` to fire; cooldown prevents double-fire.
+  - `FilterPillBar.tsx` — pill bar with Framer `layoutId` sliding indicator; generic over any string union.
+  - `CascadeList.tsx` — staggered children (48ms gap) via `cascadeContainerVariants`. Re-triggers on `listKey` change.
+- `src/app/globals.css`: Duration tokens (`--dur-micro/fast/standard/cinematic/reveal`) + `--ease-swift` added to `:root`. `ffi-card-interactive` gains `position:relative` + spring transition + iridescent border sheen `::before` (hidden by default, reveals on `:active`) + spring lift `:active` state. New keyframes: `ffi-num-flash`, `ffi-steal-burst`, `ffi-steal-banner-pop`, `ffi-otc-breathe`. New utility classes: `.ffi-num-value` / `.ffi-num-delta` (flash states), `.ffi-steal-card` / `.ffi-steal-banner` (volt burst), `.ffi-otc-on-block` (breathing glow), `.ffi-pill-bar` / `.ffi-pill-indicator` / `.ffi-pill-item` (filter pills), `.ffi-cascade-item` (stagger). Reduced-motion block updated to cover all new animations.
+
+**Verify result:** type-check clean (0 errors). All components are `'use client'`, no new server/shared coupling. Zero paid API calls.
+
+---
+
+## 2026-06-06 — UXV2-3: Prep Hub GRIDIRON redesign
+
+**Task:** UXV2-3 | **Class:** `output` | **Lenses:** Design, QA
+
+**Why:** The Prep Hub page was a flat list of 7 identical hub cards — generic layout with zero visual hierarchy. UX-V2 GRIDIRON direction requires a real composition: a featured hero card, a full-width status card, secondary tiles, and a distinct footer strip. Per design DNA: colorful-dark canvas, volt green for action/value, electric blue for structure, Saira Condensed labels, JetBrains Mono for all numbers, no backdrop-filter blur.
+
+**What changed:**
+- `src/app/(app)/prep/page.tsx`: Full rewrite. Four sections via `SectLabel` divider (Setup, Research, Players, Draft Day). Setup = full-width Configure League card using `ffi-card-interactive`. Research = `ffi-hero` hero card (iridescent sheen class) with eye-label, 26px headline, stat row (Players/Last Run/Saved Runs in JetBrains Mono), blue AI Read panel, volt `ffi-btn-hero` CTA — plus 3-tile grid below (Board/Strategies/Runs). Players = 2-col grid (Player Browser green, Keepers amber). Draft Day = 2-col strip (Dry Run ghost, Start Draft volt-gradient + volt glow border). DataFreshness preserved at 50% opacity.
+- `.claude/mockups/prep-hub-phone.html` + `public/mockups/prep-hub-phone.html` (new): approved phone-width mockup used as design reference. Background uses `body::before { position:fixed }` fixed pseudo-element technique (avoids iOS `background-attachment:fixed` breakage).
+
+**Verify result:** type-check clean, 29/29 tests, 0 net-new lint errors, `npm run build` passes. All four sections (Setup/Research/Players/Draft Day) confirmed in DOM snapshot. Commit 5676f96.
+
+---
+
 ## 2026-06-04 — FF-313: App-shell double-mount fix (Option D)
 
 **Task:** FF-313 | **Class:** `shared` + `bugfix` | **Lenses:** Architecture, QA

@@ -236,6 +236,14 @@
   --ease-broadcast: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
   --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-swift: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Duration tokens (UXV2-2b) */
+  --dur-micro: 100ms;
+  --dur-fast: 200ms;
+  --dur-standard: 320ms;
+  --dur-cinematic: 480ms;
+  --dur-reveal: 640ms;
 }
 
 /* GRIDIRON Dark Mode (primary) */
@@ -497,10 +505,14 @@ body.ffi-on-the-clock .stadium-atmos {
   box-shadow: 0 16px 44px rgba(0, 0, 0, 0.5), 0 0 22px rgba(77, 130, 255, 0.1);
 }
 .ffi-card-interactive {
-  @apply rounded-2xl p-4 cursor-pointer transition-all duration-200;
+  @apply rounded-2xl p-4 cursor-pointer;
+  position: relative;
   background: var(--ffi-surface-2);
   border: 1px solid var(--ffi-hairline);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.36), 0 0 15px rgba(77, 130, 255, 0.06);
+  transition: transform var(--dur-fast) var(--ease-spring), box-shadow var(--dur-fast) var(--ease-spring), border-color var(--dur-fast), background var(--dur-fast);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 .ffi-card-interactive:hover {
   transform: translateY(-2px);
@@ -508,6 +520,24 @@ body.ffi-on-the-clock .stadium-atmos {
   border-color: var(--ffi-hairline-bright);
   box-shadow: 0 16px 44px rgba(0, 0, 0, 0.5), 0 0 22px rgba(77, 130, 255, 0.16);
 }
+.ffi-card-interactive::before {
+  content: "";
+  position: absolute; inset: 0; border-radius: inherit; padding: 1px;
+  background: linear-gradient(115deg, transparent 20%, rgba(77,130,255,0.5) 45%, rgba(139,255,69,0.3) 55%, transparent 80%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity var(--dur-fast);
+  pointer-events: none;
+}
+.ffi-card-interactive:active {
+  transform: translateY(-3px) scale(1.01);
+  box-shadow: 0 16px 44px rgba(0,0,0,0.65), 0 0 0 1px rgba(255,255,255,0.04) inset;
+  border-color: var(--ffi-hairline-bright);
+}
+.ffi-card-interactive:active::before { opacity: 1; }
 
 /* GRIDIRON hero card — On The Block (player as hero object + iridescent sheen) */
 .ffi-hero {
@@ -729,17 +759,169 @@ body.ffi-on-the-clock .stadium-atmos {
 .ffi-animate-trash-talk { animation: ffi-trash-talk-enter 0.4s var(--ease-spring); }
 .animate-shake { animation: ffi-shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both; }
 
+/* ========================================
+   UXV2-2b Motion System Additions
+   ======================================== */
+
+/* Number flash — translateY drop + scale bounce on value change */
+@keyframes ffi-num-flash {
+  0%   { opacity: 0.3; transform: translateY(-6px) scale(0.92); }
+  60%  { opacity: 1;   transform: translateY(2px)  scale(1.04); }
+  100% { opacity: 1;   transform: translateY(0)    scale(1); }
+}
+
+/* Steal card burst — volt ring flash then settle */
+@keyframes ffi-steal-burst {
+  0%   { box-shadow: none; }
+  25%  { box-shadow: 0 0 0 3px rgba(139,255,69,0.7), 0 0 60px -6px rgba(139,255,69,0.6); background: rgba(139,255,69,0.14); }
+  60%  { box-shadow: 0 0 0 2px rgba(139,255,69,0.4), 0 0 30px -8px rgba(139,255,69,0.3); background: rgba(139,255,69,0.07); }
+  100% { box-shadow: 0 0 0 1px rgba(139,255,69,0.2); background: rgba(139,255,69,0.04); }
+}
+
+/* Steal banner pop — Anton text scales in then fades */
+@keyframes ffi-steal-banner-pop {
+  0%   { opacity: 0; transform: translate(-50%,-50%) scale(0.4); }
+  45%  { opacity: 1; transform: translate(-50%,-50%) scale(1.12); }
+  70%  { opacity: 1; transform: translate(-50%,-50%) scale(0.98); }
+  100% { opacity: 0; transform: translate(-50%,-50%) scale(0.94); }
+}
+
+/* OTC hero breathing glow */
+@keyframes ffi-otc-breathe {
+  0%, 100% {
+    box-shadow: 0 22px 50px -22px rgba(0,0,0,0.8),
+                0 0 0 1px rgba(255,255,255,0.02) inset,
+                0 0 0 2px rgba(139,255,69,0.35),
+                0 0 40px -8px rgba(139,255,69,0.22);
+  }
+  50% {
+    box-shadow: 0 22px 50px -22px rgba(0,0,0,0.8),
+                0 0 0 1px rgba(255,255,255,0.02) inset,
+                0 0 0 2px rgba(139,255,69,0.55),
+                0 0 60px -4px rgba(139,255,69,0.36);
+  }
+}
+
+/* Number Ticker */
+.ffi-num-value {
+  font-family: var(--font-jetbrains), monospace;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  position: relative;
+}
+.ffi-num-value.flash-up {
+  color: var(--ffi-volt);
+  animation: ffi-num-flash 0.35s var(--ease-broadcast) forwards;
+}
+.ffi-num-value.flash-down {
+  color: var(--ffi-danger);
+  animation: ffi-num-flash 0.35s var(--ease-broadcast) forwards;
+}
+.ffi-num-delta {
+  font-family: var(--font-jetbrains), monospace;
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.ffi-num-delta.show { opacity: 1; }
+.ffi-num-delta.pos  { color: var(--ffi-volt); }
+.ffi-num-delta.neg  { color: var(--ffi-danger); }
+
+/* OTC on-block breathing */
+.ffi-otc-on-block {
+  animation: ffi-otc-breathe 2.4s ease-in-out infinite;
+}
+
+/* Steal Flash */
+.ffi-steal-card {
+  position: relative;
+  overflow: hidden;
+}
+.ffi-steal-card.is-steal {
+  animation: ffi-steal-burst 0.6s var(--ease-broadcast) forwards;
+}
+.ffi-steal-banner {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%,-50%) scale(0);
+  font-family: var(--font-anton), sans-serif;
+  font-size: 1.625rem;
+  color: var(--ffi-volt);
+  text-shadow: 0 0 20px var(--ffi-volt-glow);
+  white-space: nowrap;
+  z-index: 2;
+  opacity: 0;
+  pointer-events: none;
+}
+.ffi-steal-banner.fire {
+  animation: ffi-steal-banner-pop 0.55s var(--ease-spring) forwards;
+}
+
+/* Filter Pill Bar */
+.ffi-pill-bar {
+  display: flex;
+  position: relative;
+  background: var(--ffi-surface-1);
+  border-radius: 12px;
+  padding: 4px;
+  border: 1px solid var(--ffi-hairline);
+  -webkit-tap-highlight-color: transparent;
+}
+.ffi-pill-indicator {
+  position: absolute;
+  top: 4px; bottom: 4px;
+  background: linear-gradient(135deg, rgba(77,130,255,0.22), rgba(77,130,255,0.12));
+  border: 1px solid rgba(77,130,255,0.35);
+  border-radius: 8px;
+  pointer-events: none;
+  transition: left var(--dur-fast) var(--ease-spring), width var(--dur-fast) var(--ease-spring);
+}
+.ffi-pill-item {
+  flex: 1;
+  text-align: center;
+  font-family: var(--font-saira-cond), sans-serif;
+  font-weight: 700;
+  font-size: 0.8125rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ffi-ink-3);
+  padding: 9px 6px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: color var(--dur-fast);
+  user-select: none;
+  position: relative;
+  -webkit-tap-highlight-color: transparent;
+}
+.ffi-pill-item.active { color: var(--ffi-blue-bright); }
+
+/* Cascade list items — stagger via JS/React */
+.ffi-cascade-item {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity var(--dur-fast) var(--ease-spring), transform var(--dur-fast) var(--ease-spring);
+}
+.ffi-cascade-item.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .ffi-animate-glow, .ffi-animate-shake, .ffi-animate-slide-in, .ffi-animate-success,
   .ffi-animate-expand, .ffi-animate-grade, .ffi-animate-attention, .ffi-animate-trash-talk,
   .ffi-animate-reveal, .ffi-animate-stagger, .stadium-atmos.atmos-clock,
   body.ffi-on-the-clock .stadium-atmos, .ffi-onclock-banner, .ffi-pick-flash,
-  .ffi-hero::before, .animate-shake {
+  .ffi-hero::before, .animate-shake,
+  .ffi-num-value.flash-up, .ffi-num-value.flash-down,
+  .ffi-steal-card.is-steal, .ffi-steal-banner.fire, .ffi-otc-on-block {
     animation: none;
   }
   .stadium-atmos.atmos-clock, body.ffi-on-the-clock .stadium-atmos { will-change: auto; }
   .ffi-btn-primary:hover, .ffi-btn-hero:hover, .ffi-btn-value:hover,
-  .ffi-card-interactive:hover, .glass-interactive:hover { transform: none; }
+  .ffi-card-interactive:hover, .ffi-card-interactive:active, .glass-interactive:hover { transform: none; }
+  .ffi-cascade-item { opacity: 1; transform: none; transition: none; }
+  .ffi-pill-indicator { transition: none; }
 }
 
 /* ========================================
