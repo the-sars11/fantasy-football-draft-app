@@ -1,0 +1,758 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#05080F" />
+<title>GRIDIRON -- Post-Draft Review</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Saira:wght@400;500;600;700&family=Saira+Condensed:wght@600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+/* GRIDIRON v3 -- Post-Draft Review
+   UXV2-5: Broadcast-grade hero, no gold, volt = the moment.
+   PALETTE: colorful-dark + volt (A grade / steal) + electric blue (B/C / structure)
+   TYPE: Anton (grade letter) / Saira Condensed (labels) / JetBrains Mono (numbers) */
+:root {
+  --bg-0:#05080F; --bg-1:#080D18;
+  --s1:#0C1322; --s2:#111A2E; --s3:#16223A;
+  --h: rgba(150,180,255,0.10);
+  --hb:rgba(180,205,255,0.18);
+  --volt:#8BFF45; --vd:#5FE21F; --vi:#0a1f02; --vg:rgba(139,255,69,0.32);
+  --blue:#2E5FD9; --bb:#4D82FF; --bbright:#79A6FF; --bg2:rgba(77,130,255,0.28);
+  --ink:#EEF2FF; --i2:#8A97C8; --i3:#525E8A;
+  --warn:#FFB05C;
+  --danger:#FF6E8A;
+  --pos-qb:#FF6E8A;
+  --pos-rb:#56E0A0;
+  --pos-wr:#6CA8FF;
+  --pos-te:#FFB05C;
+  --pos-k:#A78BFA;
+  --pos-def:#637396;
+  --fd:"Anton",sans-serif;
+  --fc:"Saira Condensed",sans-serif;
+  --fu:"Saira",system-ui,sans-serif;
+  --fn:"JetBrains Mono",monospace;
+  --r:16px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{
+  font-family:var(--fu); color:var(--ink); overflow-x:hidden;
+  background:#04060D;
+  -webkit-font-smoothing:antialiased;
+}
+/* Fixed atmosphere layer -- exact values from approved draft-room-phone.html */
+body::before{
+  content:"";
+  position:fixed; inset:0; z-index:-1; pointer-events:none;
+  background:
+    radial-gradient(700px 480px at 22% -6%, rgba(77,130,255,0.18), transparent 58%),
+    radial-gradient(620px 560px at 92%  4%, rgba(139,255,69,0.07),  transparent 55%),
+    radial-gradient(800px 700px at 50% 116%, rgba(120,80,255,0.12), transparent 60%),
+    linear-gradient(180deg, #060A14, #04060D);
+}
+.app{max-width:430px;margin:0 auto;min-height:100dvh;padding-bottom:88px;}
+
+/* ===== HEADER ===== */
+header{
+  position:sticky;top:0;z-index:20;
+  padding:calc(env(safe-area-inset-top) + 14px) 16px 12px;
+  background:linear-gradient(180deg,rgba(5,8,15,0.97) 70%,rgba(5,8,15,0));
+}
+.topbar{display:flex;align-items:center;gap:10px;}
+.back-btn{
+  width:34px;height:34px;border-radius:10px;flex-shrink:0;
+  background:var(--s2);border:1px solid var(--h);
+  display:grid;place-items:center;cursor:pointer;
+}
+.back-btn svg{width:16px;height:16px;stroke:var(--i2);stroke-width:2.2;fill:none;}
+.page-title-block{flex:1;min-width:0;}
+.page-eyebrow{
+  font-family:var(--fc);font-weight:700;font-size:9px;
+  letter-spacing:.30em;color:var(--i3);text-transform:uppercase;
+}
+.page-title{
+  font-family:var(--fc);font-weight:800;font-size:22px;line-height:1;
+  margin-top:1px;
+}
+
+/* Draft selector pill */
+.draft-selector{
+  display:flex;align-items:center;gap:6px;
+  padding:7px 11px 7px 13px;border-radius:999px;
+  background:var(--s2);border:1px solid var(--h);
+  font-family:var(--fc);font-weight:700;font-size:11px;
+  letter-spacing:.10em;text-transform:uppercase;color:var(--i2);
+  cursor:pointer;white-space:nowrap;
+}
+.draft-selector svg{width:12px;height:12px;stroke:var(--i3);stroke-width:2;fill:none;flex-shrink:0;}
+
+/* ===== VIEW TABS ===== */
+main{padding:8px 16px 0;}
+.view-tabs{
+  display:flex;gap:3px;
+  background:var(--s1);border:1px solid var(--h);border-radius:12px;padding:3px;
+  margin-bottom:16px;
+}
+.vtab{
+  flex:1;font-family:var(--fc);font-weight:700;font-size:11px;
+  letter-spacing:.12em;text-transform:uppercase;
+  padding:9px 8px;border-radius:9px;text-align:center;cursor:pointer;
+  transition:background .15s,color .15s;color:var(--i3);
+}
+.vtab.active{
+  background:var(--bb);color:#fff;
+  box-shadow:0 4px 14px -4px rgba(77,130,255,0.5);
+}
+.vtab.fire{
+  display:flex;align-items:center;justify-content:center;gap:5px;
+}
+.vtab.fire.active-fire{
+  background:var(--danger);color:#fff;
+  box-shadow:0 4px 14px -4px rgba(255,110,138,0.4);
+}
+
+/* ===== GRADE HERO (broadcast) ===== */
+.grade-hero{
+  position:relative;overflow:hidden;
+  border-radius:20px;
+  background:var(--s2);border:1px solid var(--h);
+  padding:28px 20px 22px;
+  margin-bottom:12px;
+}
+/* Iridescent sheen */
+.grade-hero::before{
+  content:"";position:absolute;inset:0;border-radius:20px;
+  background:linear-gradient(135deg,rgba(139,255,69,0.08) 0%,rgba(77,130,255,0.06) 40%,rgba(120,80,255,0.04) 100%);
+  pointer-events:none;
+}
+/* Volt atmosphere blob for A grade */
+.grade-hero .hero-glow{
+  position:absolute;top:-40px;left:50%;transform:translateX(-50%);
+  width:240px;height:180px;
+  background:radial-gradient(ellipse at 50% 30%,rgba(139,255,69,0.22),transparent 70%);
+  pointer-events:none;
+}
+.grade-hero .hero-content{position:relative;z-index:1;}
+
+/* Verdict label (broadcast voice) */
+.hero-verdict{
+  font-family:var(--fc);font-weight:800;font-size:11px;
+  letter-spacing:.40em;text-transform:uppercase;
+  color:var(--volt);
+  text-align:center;margin-bottom:18px;
+}
+/* Grade letter + ring */
+.grade-ring{
+  position:relative;
+  width:120px;height:120px;
+  margin:0 auto 18px;
+}
+.grade-ring-bg{
+  position:absolute;inset:0;border-radius:22px;
+  background:var(--s3);
+  border:2px solid rgba(139,255,69,0.35);
+  box-shadow:
+    0 0 0 1px rgba(139,255,69,0.08),
+    0 0 44px rgba(139,255,69,0.30),
+    0 0 80px rgba(139,255,69,0.12),
+    inset 0 1px 0 rgba(255,255,255,0.05);
+}
+/* Volt corner accent lines */
+.grade-ring-bg::before{
+  content:"";position:absolute;
+  top:-1px;left:12px;right:12px;height:2px;
+  background:linear-gradient(90deg,transparent,var(--volt),transparent);
+  border-radius:1px;
+}
+.grade-ring-bg::after{
+  content:"";position:absolute;
+  bottom:-1px;left:12px;right:12px;height:2px;
+  background:linear-gradient(90deg,transparent,var(--vd),transparent);
+  border-radius:1px;
+}
+.grade-letter{
+  position:absolute;inset:0;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--fd);font-size:72px;line-height:1;
+  color:var(--volt);
+}
+/* Grade score row */
+.grade-score-row{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  margin-bottom:6px;
+}
+.grade-score{
+  font-family:var(--fn);font-weight:700;font-size:28px;
+  color:var(--volt);
+  line-height:1;
+}
+.grade-score-denom{
+  font-family:var(--fc);font-weight:700;font-size:13px;
+  color:var(--i3);align-self:flex-end;padding-bottom:3px;
+}
+.grade-summary{
+  font-family:var(--fc);font-weight:700;font-size:16px;
+  color:var(--ink);text-align:center;
+  margin-bottom:3px;
+}
+.grade-meta{
+  font-family:var(--fu);font-size:12px;
+  color:var(--i3);text-align:center;margin-bottom:20px;
+}
+/* Action row */
+.hero-actions{
+  display:flex;gap:8px;
+}
+.hero-btn{
+  flex:1;display:flex;align-items:center;justify-content:center;gap:6px;
+  padding:10px 14px;border-radius:10px;
+  font-family:var(--fc);font-weight:700;font-size:12px;
+  letter-spacing:.12em;text-transform:uppercase;
+  cursor:pointer;
+}
+.hero-btn.sec{
+  background:var(--s3);border:1px solid var(--h);color:var(--i2);
+}
+.hero-btn svg{width:14px;height:14px;stroke:currentColor;stroke-width:2;fill:none;flex-shrink:0;}
+
+/* ===== QUICK STATS 2x2 ===== */
+.stats-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:8px;
+  margin-bottom:12px;
+}
+.stat-tile{
+  border-radius:14px;
+  background:var(--s2);border:1px solid var(--h);
+  padding:14px 14px 12px;
+}
+.stat-tile.volt-hi{border-color:rgba(139,255,69,0.22);}
+.stat-tile.danger-hi{border-color:rgba(255,110,138,0.22);}
+.stat-label{
+  display:flex;align-items:center;gap:6px;
+  font-family:var(--fc);font-weight:700;font-size:9px;
+  letter-spacing:.26em;text-transform:uppercase;color:var(--i3);
+  margin-bottom:6px;
+}
+.stat-label svg{width:12px;height:12px;stroke:currentColor;stroke-width:2;fill:none;flex-shrink:0;}
+.stat-num{
+  font-family:var(--fn);font-weight:700;font-size:32px;
+  line-height:1;
+}
+.stat-num.volt{color:var(--volt);}
+.stat-num.danger{color:var(--danger);}
+.stat-num.blue{color:var(--bb);}
+.stat-num.muted{color:var(--i2);}
+
+/* ===== SECTION HEADER ===== */
+.sect{
+  font-family:var(--fc);font-weight:700;font-size:9px;
+  letter-spacing:.30em;color:var(--i3);text-transform:uppercase;
+  margin-top:20px;margin-bottom:10px;display:flex;align-items:center;gap:8px;
+}
+.sect-line{flex:1;height:1px;background:var(--h);}
+
+/* ===== STRENGTHS / WEAKNESSES ===== */
+.sw-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:8px;
+  margin-bottom:4px;
+}
+.sw-card{
+  border-radius:14px;background:var(--s2);border:1px solid var(--h);
+  padding:13px 13px 12px;
+}
+.sw-head{
+  font-family:var(--fc);font-weight:800;font-size:11px;
+  letter-spacing:.18em;text-transform:uppercase;
+  display:flex;align-items:center;gap:6px;
+  margin-bottom:9px;
+}
+.sw-head.wins{color:var(--volt);}
+.sw-head.risks{color:var(--warn);}
+.sw-head svg{width:13px;height:13px;stroke:currentColor;stroke-width:2;fill:none;flex-shrink:0;}
+.sw-item{
+  display:flex;align-items:flex-start;gap:5px;
+  font-family:var(--fu);font-size:11px;color:var(--i2);
+  margin-bottom:6px;line-height:1.4;
+}
+.sw-item:last-child{margin-bottom:0;}
+.sw-dot{
+  width:5px;height:5px;border-radius:50%;flex-shrink:0;margin-top:5px;
+}
+.sw-dot.v{background:var(--volt);}
+.sw-dot.w{background:var(--warn);}
+
+/* ===== PICK TIMELINE ===== */
+.pick-list{display:flex;flex-direction:column;gap:4px;}
+.pick-row{
+  display:flex;align-items:center;gap:10px;
+  padding:11px 14px;border-radius:13px;
+  background:var(--s2);border:1px solid var(--h);
+  cursor:pointer;
+}
+.pick-num{
+  text-align:center;flex-shrink:0;width:36px;
+}
+.pick-num .pick-lbl{
+  font-family:var(--fc);font-weight:700;font-size:8px;
+  letter-spacing:.22em;color:var(--i3);text-transform:uppercase;
+}
+.pick-num .pick-n{
+  font-family:var(--fn);font-weight:700;font-size:14px;
+  color:var(--i2);
+}
+.pick-divider{width:1px;height:32px;background:var(--h);flex-shrink:0;}
+.pick-info{flex:1;min-width:0;}
+.pick-name{
+  font-family:var(--fc);font-weight:700;font-size:15px;
+  color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  margin-bottom:3px;
+}
+.pick-sub{
+  display:flex;align-items:center;gap:6px;
+}
+.pos-chip{
+  font-family:var(--fc);font-weight:800;font-size:9px;
+  letter-spacing:.14em;padding:2px 7px;border-radius:5px;
+  text-transform:uppercase;
+}
+.pos-chip.rb{background:rgba(86,224,160,0.15);color:var(--pos-rb);border:1px solid rgba(86,224,160,0.22);}
+.pos-chip.wr{background:rgba(108,168,255,0.12);color:var(--pos-wr);border:1px solid rgba(108,168,255,0.20);}
+.pos-chip.qb{background:rgba(255,110,138,0.12);color:var(--pos-qb);border:1px solid rgba(255,110,138,0.20);}
+.pos-chip.te{background:rgba(255,176,92,0.12);color:var(--pos-te);border:1px solid rgba(255,176,92,0.20);}
+.pick-price{
+  font-family:var(--fn);font-weight:600;font-size:11px;
+  color:var(--i3);
+}
+.pick-delta{
+  font-family:var(--fn);font-weight:700;font-size:11px;
+}
+.pick-delta.pos{color:var(--volt);}
+.pick-delta.neg{color:var(--danger);}
+
+/* Verdict badge */
+.verdict{
+  flex-shrink:0;
+  display:flex;align-items:center;gap:4px;
+  padding:4px 9px;border-radius:999px;
+  font-family:var(--fc);font-weight:800;font-size:9px;
+  letter-spacing:.18em;text-transform:uppercase;
+  border:1px solid;
+}
+.verdict.steal{
+  background:rgba(139,255,69,0.12);
+  color:var(--volt);
+  border-color:rgba(139,255,69,0.28);
+}
+.verdict.reach{
+  background:rgba(255,110,138,0.10);
+  color:var(--danger);
+  border-color:rgba(255,110,138,0.24);
+}
+.verdict.fair{
+  background:rgba(77,130,255,0.10);
+  color:var(--bb);
+  border-color:rgba(77,130,255,0.22);
+}
+.verdict.pivot{
+  background:rgba(167,139,250,0.10);
+  color:#a78bfa;
+  border-color:rgba(167,139,250,0.22);
+}
+.verdict svg{width:9px;height:9px;stroke:currentColor;stroke-width:2.5;fill:none;}
+
+/* Expanded pick narrative */
+.pick-expand{
+  padding:10px 14px 12px;
+  border-radius:0 0 13px 13px;
+  margin-top:-4px;
+  background:var(--s2);border:1px solid var(--h);border-top:none;
+}
+.pick-expand p{
+  font-family:var(--fu);font-size:12px;color:var(--i2);line-height:1.55;
+}
+
+/* ===== POSITION POWER RANKINGS ===== */
+.ppr-list{display:flex;flex-direction:column;gap:14px;}
+.ppr-row{}
+.ppr-head{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-bottom:7px;
+}
+.ppr-pos{
+  font-family:var(--fc);font-weight:800;font-size:12px;
+  letter-spacing:.18em;text-transform:uppercase;color:var(--ink);
+}
+.ppr-score{
+  font-family:var(--fn);font-weight:700;font-size:14px;
+}
+.ppr-score.hi{color:var(--volt);}
+.ppr-score.mid{color:var(--bb);}
+.ppr-score.lo{color:var(--danger);}
+
+.segs{display:flex;gap:3px;}
+.seg{
+  flex:1;height:6px;border-radius:3px;
+}
+.seg.filled-hi{background:var(--volt);}
+.seg.filled-mid{background:var(--bb);}
+.seg.filled-lo{background:var(--danger);}
+.seg.empty{background:var(--s3);}
+
+/* ===== BOTTOM NAV ===== */
+.bottom-nav{
+  position:fixed;bottom:0;left:50%;transform:translateX(-50%);
+  width:100%;max-width:430px;
+  background:linear-gradient(0deg,rgba(5,8,15,0.98) 70%,transparent);
+  padding:8px 20px calc(env(safe-area-inset-bottom) + 8px);
+  z-index:30;
+}
+.nav-row{
+  display:flex;justify-content:space-around;align-items:flex-end;
+}
+.nav-item{
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  font-family:var(--fc);font-weight:700;font-size:8px;
+  letter-spacing:.20em;text-transform:uppercase;
+  padding:6px 12px;cursor:pointer;
+}
+.nav-item svg{width:20px;height:20px;stroke:var(--i3);stroke-width:1.8;fill:none;}
+.nav-item.active svg{stroke:var(--bb);}
+.nav-item.active{color:var(--bb);}
+.nav-item:not(.active){color:var(--i3);}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- HEADER -->
+  <header>
+    <div class="topbar">
+      <button class="back-btn">
+        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <div class="page-title-block">
+        <div class="page-eyebrow">FFI Gridiron</div>
+        <div class="page-title">Post-Draft</div>
+      </div>
+      <button class="draft-selector">
+        Auction &middot; 15 picks
+        <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN -->
+  <main>
+
+    <!-- View Tabs -->
+    <div class="view-tabs">
+      <div class="vtab active">My Draft</div>
+      <div class="vtab">All Teams</div>
+      <div class="vtab fire">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--i3)" stroke-width="2.2"><path d="M8.5 14.5A2.5 2.5 0 0011 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 11-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 002.5 3z"/></svg>
+        Trash Talk
+      </div>
+    </div>
+
+    <!-- GRADE HERO -->
+    <div class="grade-hero">
+      <div class="hero-glow"></div>
+      <div class="hero-content">
+        <!-- Verdict label -->
+        <div class="hero-verdict">Elite Draft</div>
+
+        <!-- Grade ring -->
+        <div class="grade-ring">
+          <div class="grade-ring-bg"></div>
+          <div class="grade-letter">A</div>
+        </div>
+
+        <!-- Score -->
+        <div class="grade-score-row">
+          <div class="grade-score">88</div>
+          <div class="grade-score-denom">/ 100</div>
+        </div>
+
+        <!-- Summary -->
+        <div class="grade-summary">Textbook value build with two key steals</div>
+        <div class="grade-meta">JoeRasar &middot; Balanced Attack &middot; Jun 6 2026</div>
+
+        <!-- Actions -->
+        <div class="hero-actions">
+          <button class="hero-btn sec">
+            <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export CSV
+          </button>
+          <button class="hero-btn sec">
+            <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            Share
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- QUICK STATS 2x2 -->
+    <div class="stats-grid">
+      <div class="stat-tile volt-hi">
+        <div class="stat-label" style="color:var(--volt)">
+          <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          Steals
+        </div>
+        <div class="stat-num volt">3</div>
+      </div>
+      <div class="stat-tile danger-hi">
+        <div class="stat-label" style="color:var(--danger)">
+          <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          Reaches
+        </div>
+        <div class="stat-num danger">1</div>
+      </div>
+      <div class="stat-tile">
+        <div class="stat-label" style="color:var(--bb)">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          Targets Hit
+        </div>
+        <div class="stat-num blue">4</div>
+      </div>
+      <div class="stat-tile">
+        <div class="stat-label">
+          <svg viewBox="0 0 24 24"><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/></svg>
+          Total Picks
+        </div>
+        <div class="stat-num muted">15</div>
+      </div>
+    </div>
+
+    <!-- STRENGTHS & WEAKNESSES -->
+    <div class="sect">
+      Breakdown
+      <div class="sect-line"></div>
+    </div>
+    <div class="sw-grid">
+      <div class="sw-card">
+        <div class="sw-head wins">
+          <svg viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+          Strengths
+        </div>
+        <div class="sw-item"><div class="sw-dot v"></div>Elite WR depth, 3 top-24 receivers</div>
+        <div class="sw-item"><div class="sw-dot v"></div>Overpaid zero times at RB</div>
+        <div class="sw-item"><div class="sw-dot v"></div>TE value steal in round 4</div>
+      </div>
+      <div class="sw-card">
+        <div class="sw-head risks">
+          <svg viewBox="0 0 24 24"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></svg>
+          Watch
+        </div>
+        <div class="sw-item"><div class="sw-dot w"></div>QB1 reach, 12 spots early</div>
+        <div class="sw-item"><div class="sw-dot w"></div>Thin at K/DEF depth</div>
+        <div class="sw-item"><div class="sw-dot w"></div>$0 left on bench</div>
+      </div>
+    </div>
+
+    <!-- PICK BREAKDOWN -->
+    <div class="sect" style="margin-top:20px;">
+      Pick by Pick
+      <div class="sect-line"></div>
+    </div>
+    <div class="pick-list">
+
+      <!-- Expanded pick (steal) -->
+      <div>
+        <div class="pick-row" style="border-radius:13px 13px 0 0;border-bottom:none;">
+          <div class="pick-num">
+            <div class="pick-lbl">Pick</div>
+            <div class="pick-n">#3</div>
+          </div>
+          <div class="pick-divider"></div>
+          <div class="pick-info">
+            <div class="pick-name">CeeDee Lamb</div>
+            <div class="pick-sub">
+              <span class="pos-chip wr">WR</span>
+              <span class="pick-price">$62</span>
+              <span class="pick-delta pos">+$14</span>
+            </div>
+          </div>
+          <div class="verdict steal">
+            <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            Steal
+          </div>
+        </div>
+        <div class="pick-expand">
+          <p>Paid $14 below consensus at an ADP of $76. Competition stalled at $60; pushed to $62 for a top-3 WR with massive upside. Best value pick of the night.</p>
+        </div>
+      </div>
+
+      <!-- Normal pick (fair) -->
+      <div class="pick-row">
+        <div class="pick-num">
+          <div class="pick-lbl">Pick</div>
+          <div class="pick-n">#1</div>
+        </div>
+        <div class="pick-divider"></div>
+        <div class="pick-info">
+          <div class="pick-name">Christian McCaffrey</div>
+          <div class="pick-sub">
+            <span class="pos-chip rb">RB</span>
+            <span class="pick-price">$68</span>
+          </div>
+        </div>
+        <div class="verdict fair">
+          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          Fair
+        </div>
+      </div>
+
+      <!-- Reach -->
+      <div class="pick-row">
+        <div class="pick-num">
+          <div class="pick-lbl">Pick</div>
+          <div class="pick-n">#2</div>
+        </div>
+        <div class="pick-divider"></div>
+        <div class="pick-info">
+          <div class="pick-name">Patrick Mahomes</div>
+          <div class="pick-sub">
+            <span class="pos-chip qb">QB</span>
+            <span class="pick-price">$38</span>
+            <span class="pick-delta neg">-$9</span>
+          </div>
+        </div>
+        <div class="verdict reach">
+          <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+          Reach
+        </div>
+      </div>
+
+      <!-- AI Pivot -->
+      <div class="pick-row">
+        <div class="pick-num">
+          <div class="pick-lbl">Pick</div>
+          <div class="pick-n">#7</div>
+        </div>
+        <div class="pick-divider"></div>
+        <div class="pick-info">
+          <div class="pick-name">Travis Kelce</div>
+          <div class="pick-sub">
+            <span class="pos-chip te">TE</span>
+            <span class="pick-price">$28</span>
+            <span class="pick-delta pos">+$8</span>
+          </div>
+        </div>
+        <div class="verdict pivot">
+          <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          AI Pivot
+        </div>
+      </div>
+
+      <!-- Another steal -->
+      <div class="pick-row">
+        <div class="pick-num">
+          <div class="pick-lbl">Pick</div>
+          <div class="pick-n">#11</div>
+        </div>
+        <div class="pick-divider"></div>
+        <div class="pick-info">
+          <div class="pick-name">Amon-Ra St. Brown</div>
+          <div class="pick-sub">
+            <span class="pos-chip wr">WR</span>
+            <span class="pick-price">$31</span>
+            <span class="pick-delta pos">+$11</span>
+          </div>
+        </div>
+        <div class="verdict steal">
+          <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          Steal
+        </div>
+      </div>
+
+    </div>
+
+    <!-- POSITIONAL POWER RANKINGS -->
+    <div class="sect" style="margin-top:24px;">
+      Position Grades
+      <div class="sect-line"></div>
+    </div>
+    <div class="ppr-list">
+      <div class="ppr-row">
+        <div class="ppr-head">
+          <span class="ppr-pos">Wide Receiver</span>
+          <span class="ppr-score hi">92</span>
+        </div>
+        <div class="segs">
+          <div class="seg filled-hi"></div><div class="seg filled-hi"></div>
+          <div class="seg filled-hi"></div><div class="seg filled-hi"></div>
+          <div class="seg filled-hi"></div><div class="seg filled-hi"></div>
+          <div class="seg filled-hi"></div><div class="seg filled-hi"></div>
+          <div class="seg filled-hi"></div><div class="seg empty"></div>
+        </div>
+      </div>
+      <div class="ppr-row">
+        <div class="ppr-head">
+          <span class="ppr-pos">Running Back</span>
+          <span class="ppr-score mid">77</span>
+        </div>
+        <div class="segs">
+          <div class="seg filled-mid"></div><div class="seg filled-mid"></div>
+          <div class="seg filled-mid"></div><div class="seg filled-mid"></div>
+          <div class="seg filled-mid"></div><div class="seg filled-mid"></div>
+          <div class="seg filled-mid"></div><div class="seg filled-mid"></div>
+          <div class="seg empty"></div><div class="seg empty"></div>
+        </div>
+      </div>
+      <div class="ppr-row">
+        <div class="ppr-head">
+          <span class="ppr-pos">Tight End</span>
+          <span class="ppr-score hi">85</span>
+        </div>
+        <div class="segs">
+          <div class="seg filled-hi"></div><div class="seg filled-hi"></div>
+          <div class="seg filled-hi"></div><div class="seg filled-hi"></div>
+          <div class="seg filled-hi"></div><div class="seg filled-hi"></div>
+          <div class="seg filled-hi"></div><div class="seg filled-hi"></div>
+          <div class="seg filled-hi"></div><div class="seg empty"></div>
+        </div>
+      </div>
+      <div class="ppr-row">
+        <div class="ppr-head">
+          <span class="ppr-pos">Quarterback</span>
+          <span class="ppr-score lo">48</span>
+        </div>
+        <div class="segs">
+          <div class="seg filled-lo"></div><div class="seg filled-lo"></div>
+          <div class="seg filled-lo"></div><div class="seg filled-lo"></div>
+          <div class="seg filled-lo"></div><div class="seg empty"></div>
+          <div class="seg empty"></div><div class="seg empty"></div>
+          <div class="seg empty"></div><div class="seg empty"></div>
+        </div>
+      </div>
+    </div>
+
+  </main><!-- /main -->
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <div class="nav-row">
+      <div class="nav-item">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Prep
+      </div>
+      <div class="nav-item">
+        <svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+        Board
+      </div>
+      <div class="nav-item">
+        <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        Draft
+      </div>
+      <div class="nav-item active">
+        <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Review
+      </div>
+    </div>
+  </nav>
+
+</div>
+</body>
+</html>

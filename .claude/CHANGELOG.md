@@ -2,6 +2,18 @@
 
 ---
 
+## 2026-06-06 — UXV2-5: Post-Draft Review GRIDIRON rebuild
+
+**Task:** UXV2-5 | **Class:** `output` | **Lenses:** Design, QA
+
+**What changed:**
+- `src/app/(app)/draft/review/client.tsx` — full visual rebuild. New `gradeColors` map: volt for A, blue-bright for B, warning for C/D, danger for F (no gold anywhere). New `verdictConfig` with GRIDIRON palette. `GradeHero` uses `.ffi-hero` card + Anton grade letter + grade-colored ring + glow blob + ffi-caption verdict label + mono score. 2x2 `StatTile` grid with 36px JetBrains Mono numbers (volt/danger/blue by type). `SwCard` two-column strengths/weaknesses with 5px dot bullets. `SectHeader` with hairline divider. `PickCard` uses `ffi-card-interactive` + `ffi-badge-*` position chips + mono price+delta + verdict pill badge. `PositionalPowerRankings` segments colored volt (score>=80) / blue (>=50) / danger (<50). `BudgetAnalysisCard`, `SnakeAnalysisCard`, `TagAccuracyCard`, `MiniStat`, `TagPillGroup` all updated to GRIDIRON palette. View tabs use blue/danger active states. Session/manager selects styled as compact `ffi-input` row. All data logic (hooks, effects, memos, analyzeDraft) untouched.
+- `src/app/(app)/draft/review/page.tsx` — updated to GRIDIRON eyebrow (`ffi-caption`) + Saira Condensed title header.
+
+**Verify result:** type-check clean (0 errors). Page renders: GRIDIRON header + empty state card confirmed via preview screenshot.
+
+---
+
 ## 2026-06-06 — UXV2-4: Draft Board / Player Pool GRIDIRON rebuild
 
 **Task:** UXV2-4 | **Class:** `output` | **Lenses:** Design, QA

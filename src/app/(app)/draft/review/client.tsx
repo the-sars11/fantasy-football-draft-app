@@ -1,13 +1,5 @@
 'use client'
 
-/**
- * ReviewClient (FF-053, FF-074 Redesign)
- *
- * Premium post-draft review with FFI design system.
- * Features: Letter grade hero with glow, story-driven pick breakdown,
- * STEAL/REACH/AI PIVOT badges.
- */
-
 import { useState, useEffect, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
@@ -31,6 +23,7 @@ import {
   Sparkles,
   Zap,
   AlertTriangle,
+  ChevronDown,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import {
@@ -55,40 +48,86 @@ import type { Player } from '@/lib/players/types'
 
 type ViewMode = 'my-draft' | 'all-teams' | 'trash-talk'
 
-// Verdict styling configuration
-const verdictConfig: Record<PickVerdict, { label: string; class: string; icon: typeof Sparkles }> = {
+// Grade color map — volt for A, blue for B/C, warning for D, danger for F. No gold.
+const gradeColors: Record<string, {
+  letter: string; borderColor: string; glow: string; blob: string; verdictColor: string
+}> = {
+  A: {
+    letter: 'var(--ffi-volt)',
+    borderColor: 'rgba(139,255,69,0.38)',
+    glow: '0 0 44px rgba(139,255,69,0.32), 0 0 80px rgba(139,255,69,0.12)',
+    blob: 'rgba(139,255,69,0.20)',
+    verdictColor: 'var(--ffi-volt)',
+  },
+  B: {
+    letter: 'var(--ffi-blue-bright)',
+    borderColor: 'rgba(77,130,255,0.38)',
+    glow: '0 0 40px rgba(77,130,255,0.30)',
+    blob: 'rgba(77,130,255,0.18)',
+    verdictColor: 'var(--ffi-blue-bright)',
+  },
+  C: {
+    letter: 'var(--ffi-warning)',
+    borderColor: 'rgba(255,176,92,0.30)',
+    glow: '0 0 36px rgba(255,176,92,0.22)',
+    blob: 'rgba(255,176,92,0.10)',
+    verdictColor: 'var(--ffi-warning)',
+  },
+  D: {
+    letter: 'var(--ffi-warning)',
+    borderColor: 'rgba(255,176,92,0.22)',
+    glow: '0 0 28px rgba(255,176,92,0.16)',
+    blob: 'rgba(255,176,92,0.07)',
+    verdictColor: 'var(--ffi-warning)',
+  },
+  F: {
+    letter: 'var(--ffi-danger)',
+    borderColor: 'rgba(255,110,138,0.38)',
+    glow: '0 0 40px rgba(255,110,138,0.30)',
+    blob: 'rgba(255,110,138,0.14)',
+    verdictColor: 'var(--ffi-danger)',
+  },
+}
+
+// Verdict badge styling — GRIDIRON palette
+const verdictConfig: Record<PickVerdict, {
+  label: string
+  bg: string
+  border: string
+  color: string
+  icon: typeof Sparkles
+}> = {
   steal: {
     label: 'STEAL',
-    class: 'bg-[var(--ffi-success)]/15 text-[var(--ffi-success)] border-[var(--ffi-success)]/30',
+    bg: 'rgba(139,255,69,0.12)',
+    border: 'rgba(139,255,69,0.28)',
+    color: 'var(--ffi-volt)',
     icon: Sparkles,
   },
   reach: {
     label: 'REACH',
-    class: 'bg-[var(--ffi-danger)]/15 text-[var(--ffi-danger)] border-[var(--ffi-danger)]/30',
+    bg: 'rgba(255,110,138,0.10)',
+    border: 'rgba(255,110,138,0.24)',
+    color: 'var(--ffi-danger)',
     icon: AlertTriangle,
   },
   fair: {
     label: 'FAIR VALUE',
-    class: 'bg-[var(--ffi-primary)]/15 text-[var(--ffi-primary)] border-[var(--ffi-primary)]/30',
+    bg: 'rgba(77,130,255,0.10)',
+    border: 'rgba(77,130,255,0.22)',
+    color: 'var(--ffi-blue-bright)',
     icon: Check,
   },
   ai_pivot: {
     label: 'AI PIVOT',
-    class: 'bg-[var(--ffi-accent)]/15 text-[var(--ffi-accent)] border-[var(--ffi-accent)]/30',
+    bg: 'rgba(167,139,250,0.10)',
+    border: 'rgba(167,139,250,0.22)',
+    color: '#a78bfa',
     icon: Zap,
   },
 }
 
-// Grade glow colors. A (champion) is gold - the "moment" treatment - not lime.
-const gradeGlow: Record<string, string> = {
-  A: 'shadow-[0_0_44px_rgba(253,239,182,0.5)]',
-  B: 'shadow-[0_0_40px_rgba(34,197,94,0.3)]',
-  C: 'shadow-[0_0_40px_rgba(251,191,36,0.3)]',
-  D: 'shadow-[0_0_40px_rgba(249,115,22,0.3)]',
-  F: 'shadow-[0_0_40px_rgba(239,68,68,0.4)]',
-}
-
-// Champion verdict word per grade (dry, declarative, Oswald broadcast voice)
+// Champion verdict word per grade
 const gradeVerdict: Record<string, string> = {
   A: 'ELITE DRAFT',
   B: 'STRONG BOARD',
@@ -103,7 +142,7 @@ export function ReviewClient() {
   const [session, setSession] = useState<DraftSession | null>(null)
   const [league, setLeague] = useState<League | null>(null)
   const [strategy, setStrategy] = useState<Strategy | null>(null)
-  const [players, setPlayers] = useState<Player[]>([]) // FF-248: For tag accuracy analysis
+  const [players, setPlayers] = useState<Player[]>([])
   const [loading, setLoading] = useState(true)
   const [detailLoading, setDetailLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -112,7 +151,6 @@ export function ReviewClient() {
   const [expandedPick, setExpandedPick] = useState<number | null>(null)
   const [viewMode, setViewMode] = useState<ViewMode>('my-draft')
 
-  // FF-248: Load user tags for tag accuracy analysis
   const playerCacheIds = useMemo(() => players.map(p => p.id), [players])
   const { userTagsMap } = useUserTags({
     playerCacheIds,
@@ -121,64 +159,34 @@ export function ReviewClient() {
     enabled: players.length > 0,
   })
 
-  // FF-248: Calculate tag accuracy analysis
   const tagAccuracyAnalysis = useMemo(() => {
     if (!session || !managerName || Object.keys(userTagsMap).length === 0 || players.length === 0) {
       return null
     }
-
-    // Get drafted player names for this manager
     const myPicks = (session.picks || []).filter(p => p.manager === managerName)
     const draftedNames = new Set(myPicks.map(p => p.player_id?.toLowerCase()))
-
-    // Build a map of player name to cache ID
     const nameToIdMap: Record<string, string> = {}
     for (const player of players) {
       nameToIdMap[player.name.toLowerCase()] = player.id
     }
-
-    // Analyze TARGET tags
     const targetPlayers: Array<{ name: string; id: string; drafted: boolean }> = []
     const avoidPlayers: Array<{ name: string; id: string; drafted: boolean }> = []
-
     for (const [playerId, tagData] of Object.entries(userTagsMap)) {
       const player = players.find(p => p.id === playerId)
       if (!player) continue
-
-      const playerName = player.name
-      const isDrafted = draftedNames.has(playerName.toLowerCase())
-
-      if (tagData.tags.includes('target')) {
-        targetPlayers.push({ name: playerName, id: playerId, drafted: isDrafted })
-      }
-      if (tagData.tags.includes('avoid')) {
-        avoidPlayers.push({ name: playerName, id: playerId, drafted: isDrafted })
-      }
+      const isDrafted = draftedNames.has(player.name.toLowerCase())
+      if (tagData.tags.includes('target')) targetPlayers.push({ name: player.name, id: playerId, drafted: isDrafted })
+      if (tagData.tags.includes('avoid')) avoidPlayers.push({ name: player.name, id: playerId, drafted: isDrafted })
     }
-
     const targetsHit = targetPlayers.filter(p => p.drafted)
     const targetsMissed = targetPlayers.filter(p => !p.drafted)
     const avoidsSuccessful = avoidPlayers.filter(p => !p.drafted)
     const avoidsViolated = avoidPlayers.filter(p => p.drafted)
-
-    const totalTargets = targetPlayers.length
-    const totalAvoids = avoidPlayers.length
-    const hitRate = totalTargets > 0 ? Math.round((targetsHit.length / totalTargets) * 100) : 0
-    const avoidRate = totalAvoids > 0 ? Math.round((avoidsSuccessful.length / totalAvoids) * 100) : 0
-
-    return {
-      targetsHit,
-      targetsMissed,
-      avoidsSuccessful,
-      avoidsViolated,
-      totalTargets,
-      totalAvoids,
-      hitRate,
-      avoidRate,
-    }
+    const hitRate = targetPlayers.length > 0 ? Math.round((targetsHit.length / targetPlayers.length) * 100) : 0
+    const avoidRate = avoidPlayers.length > 0 ? Math.round((avoidsSuccessful.length / avoidPlayers.length) * 100) : 0
+    return { targetsHit, targetsMissed, avoidsSuccessful, avoidsViolated, totalTargets: targetPlayers.length, totalAvoids: avoidPlayers.length, hitRate, avoidRate }
   }, [session, managerName, userTagsMap, players])
 
-  // Load sessions list
   useEffect(() => {
     async function fetchSessions() {
       try {
@@ -189,9 +197,7 @@ export function ReviewClient() {
           (s: DraftSession) => s.picks && s.picks.length > 0
         )
         setSessions(completed)
-        if (completed.length > 0) {
-          setSelectedId(completed[0].id)
-        }
+        if (completed.length > 0) setSelectedId(completed[0].id)
       } catch (e) {
         setError(e instanceof Error ? e.message : 'Failed to load sessions')
       } finally {
@@ -201,37 +207,26 @@ export function ReviewClient() {
     fetchSessions()
   }, [])
 
-  // Load selected session details
   useEffect(() => {
     if (!selectedId) return
     let cancelled = false
-
     async function loadSession() {
       setDetailLoading(true)
       try {
-        // Load session, players, and strategy in parallel
         const [sessionRes, playersRes] = await Promise.all([
           fetch(`/api/draft/sessions/${selectedId}`),
           fetch('/api/players?limit=500'),
         ])
-
         if (!sessionRes.ok) throw new Error('Failed to load session')
         const data = await sessionRes.json()
-
         if (cancelled) return
         setSession(data.session)
         setLeague(data.league)
-
-        // FF-248: Load players for tag accuracy analysis
         if (playersRes.ok) {
           const playersData = await playersRes.json()
           setPlayers(playersData.players || [])
         }
-
-        if (data.session?.managers?.length > 0) {
-          setManagerName(data.session.managers[0].name)
-        }
-
+        if (data.session?.managers?.length > 0) setManagerName(data.session.managers[0].name)
         if (data.league?.id) {
           const stratRes = await fetch(`/api/strategies?leagueId=${data.league.id}`)
           if (stratRes.ok && !cancelled) {
@@ -250,10 +245,8 @@ export function ReviewClient() {
     return () => { cancelled = true }
   }, [selectedId])
 
-  // Build roast report
   const roastReport = useMemo(() => {
     if (!session) return null
-
     const draftPicks: DraftPick[] = (session.picks || []).map(p => ({
       pick_number: p.pick_number,
       player_name: p.player_id,
@@ -262,24 +255,14 @@ export function ReviewClient() {
       price: p.price,
       round: p.round,
     }))
-
-    return generateRoastReport(
-      draftPicks,
-      [], // Players not loaded in this view - roster imbalance checks still work
-      session.managers.map(m => m.name),
-      session.format,
-      session.managers.length,
-    )
+    return generateRoastReport(draftPicks, [], session.managers.map(m => m.name), session.format, session.managers.length)
   }, [session])
 
-  // Build review
   const review = useMemo<DraftReview | null>(() => {
     if (!session || !managerName) return null
-
     const rosterSlots: RosterSlots = league?.roster_slots || {
       qb: 1, rb: 2, wr: 2, te: 1, flex: 1, k: 1, dst: 1, bench: 6, ir: 0,
     }
-
     const draftPicks: DraftPick[] = (session.picks || []).map(p => ({
       pick_number: p.pick_number,
       player_name: p.player_id,
@@ -288,15 +271,7 @@ export function ReviewClient() {
       price: p.price,
       round: p.round,
     }))
-
-    return analyzeDraft(
-      draftPicks,
-      managerName,
-      strategy,
-      rosterSlots,
-      session.format,
-      league?.budget ?? undefined,
-    )
+    return analyzeDraft(draftPicks, managerName, strategy, rosterSlots, session.format, league?.budget ?? undefined)
   }, [session, managerName, strategy, league])
 
   // --- Render ---
@@ -304,71 +279,64 @@ export function ReviewClient() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-16">
-        <div className="flex items-center gap-3 text-[var(--ffi-text-secondary)]">
-          <Loader2 className="h-5 w-5 animate-spin text-[var(--ffi-primary)]" />
-          <span className="ffi-body-md">Loading draft sessions...</span>
-        </div>
+        <Loader2 className="h-5 w-5 animate-spin text-[var(--ffi-blue)]" />
+        <span className="ffi-label text-[var(--ffi-ink-3)] ml-3">Loading sessions...</span>
       </div>
     )
   }
 
   if (error) {
     return (
-      <FFICard className="border-l-4 border-l-[var(--ffi-danger)]">
+      <div className="ffi-card border-l-4" style={{ borderLeftColor: 'var(--ffi-danger)' }}>
         <div className="flex items-start gap-3">
-          <AlertCircle className="h-5 w-5 text-[var(--ffi-danger)] shrink-0 mt-0.5" />
+          <AlertCircle className="h-5 w-5 shrink-0 mt-0.5" color="var(--ffi-danger)" />
           <div>
-            <p className="ffi-title-md text-white">Error Loading Draft</p>
-            <p className="ffi-body-md text-[var(--ffi-text-secondary)] mt-1">{error}</p>
+            <p className="font-headline font-bold text-white">Error Loading Draft</p>
+            <p className="ffi-body-md text-[var(--ffi-ink-3)] mt-1">{error}</p>
           </div>
         </div>
-      </FFICard>
+      </div>
     )
   }
 
   if (sessions.length === 0) {
     return (
-      <FFICard className="text-center py-12">
-        <Trophy className="h-12 w-12 text-[var(--ffi-text-muted)] mx-auto mb-4" />
-        <h3 className="ffi-title-lg text-white mb-2">No Drafts to Review</h3>
-        <p className="ffi-body-md text-[var(--ffi-text-secondary)] max-w-md mx-auto">
+      <div className="ffi-card text-center py-12">
+        <Trophy className="h-10 w-10 mx-auto mb-4" color="var(--ffi-ink-3)" />
+        <p className="font-headline font-bold text-lg text-white mb-2">No Drafts to Review</p>
+        <p className="ffi-body-md text-[var(--ffi-ink-3)] max-w-xs mx-auto">
           Complete a live draft first, then come back here to see your grades and analysis.
         </p>
-      </FFICard>
+      </div>
     )
   }
 
   return (
-    <div className="space-y-6">
-      {/* Session Selector + View Toggle */}
-      <FFICard>
-        <div className="flex flex-wrap items-center gap-4">
-          <div className="flex-1 min-w-[200px]">
-            <label className="ffi-label text-[var(--ffi-text-muted)] mb-1.5 block">
-              SELECT DRAFT
-            </label>
+    <div className="space-y-3">
+      {/* Session + Manager selectors */}
+      <div className="ffi-card p-3">
+        <div className="flex gap-3 flex-wrap">
+          <div className="flex-1 min-w-[180px]">
+            <p className="ffi-caption text-[var(--ffi-ink-3)] mb-1.5">SELECT DRAFT</p>
             <select
               value={selectedId ?? ''}
               onChange={(e) => setSelectedId(e.target.value)}
-              className="ffi-input w-full"
+              className="ffi-input w-full text-sm"
             >
               {sessions.map(s => (
                 <option key={s.id} value={s.id}>
-                  {s.format === 'auction' ? 'Auction' : 'Snake'} - {s.picks.length} picks - {new Date(s.created_at).toLocaleDateString()}
+                  {s.format === 'auction' ? 'Auction' : 'Snake'} &middot; {s.picks.length} picks &middot; {new Date(s.created_at).toLocaleDateString()}
                 </option>
               ))}
             </select>
           </div>
-
           {session && session.managers.length > 0 && viewMode === 'my-draft' && (
-            <div className="flex-1 min-w-[180px]">
-              <label className="ffi-label text-[var(--ffi-text-muted)] mb-1.5 block">
-                SELECT MANAGER
-              </label>
+            <div className="flex-1 min-w-[140px]">
+              <p className="ffi-caption text-[var(--ffi-ink-3)] mb-1.5">SELECT MANAGER</p>
               <select
                 value={managerName}
                 onChange={(e) => setManagerName(e.target.value)}
-                className="ffi-input w-full"
+                className="ffi-input w-full text-sm"
               >
                 {session.managers.map(m => (
                   <option key={m.name} value={m.name}>{m.name}</option>
@@ -378,66 +346,54 @@ export function ReviewClient() {
           )}
         </div>
 
-        {/* View Mode Toggle */}
+        {/* View Tabs */}
         {session && (
-          <div className="flex gap-2 mt-4 pt-4 border-t border-[var(--ffi-border)]/20">
-            <button
-              onClick={() => setViewMode('my-draft')}
-              className={cn(
-                'flex-1 min-h-[44px] py-2.5 px-4 rounded-lg text-sm font-semibold transition-all',
-                viewMode === 'my-draft'
-                  ? 'bg-[var(--ffi-primary)] text-white'
-                  : 'bg-[var(--ffi-surface)]/50 text-[var(--ffi-text-secondary)] hover:bg-[var(--ffi-surface)]'
-              )}
-            >
-              My Draft
-            </button>
-            <button
-              onClick={() => setViewMode('all-teams')}
-              className={cn(
-                'flex-1 min-h-[44px] py-2.5 px-4 rounded-lg text-sm font-semibold transition-all',
-                viewMode === 'all-teams'
-                  ? 'bg-[var(--ffi-primary)] text-white'
-                  : 'bg-[var(--ffi-surface)]/50 text-[var(--ffi-text-secondary)] hover:bg-[var(--ffi-surface)]'
-              )}
-            >
-              All Teams
-            </button>
-            <button
-              onClick={() => setViewMode('trash-talk')}
-              className={cn(
-                'flex-1 min-h-[44px] py-2.5 px-4 rounded-lg text-sm font-semibold transition-all inline-flex items-center justify-center gap-1.5',
-                viewMode === 'trash-talk'
-                  ? 'bg-[var(--ffi-danger)] text-white'
-                  : 'bg-[var(--ffi-surface)]/50 text-[var(--ffi-text-secondary)] hover:bg-[var(--ffi-surface)]'
-              )}
-            >
-              <Flame className="h-4 w-4" aria-hidden="true" />
-              Trash Talk
-            </button>
+          <div
+            className="flex gap-1 mt-3 rounded-xl p-1"
+            style={{ background: 'var(--ffi-surface-1)', border: '1px solid var(--ffi-hairline)' }}
+          >
+            {(['my-draft', 'all-teams', 'trash-talk'] as ViewMode[]).map((mode) => {
+              const isActive = viewMode === mode
+              const label = mode === 'my-draft' ? 'My Draft' : mode === 'all-teams' ? 'All Teams' : 'Trash Talk'
+              const activeStyle = mode === 'trash-talk'
+                ? { background: 'var(--ffi-danger)', boxShadow: '0 4px 14px -4px rgba(255,110,138,0.4)' }
+                : { background: 'var(--ffi-blue)', boxShadow: '0 4px 14px -4px rgba(77,130,255,0.5)' }
+              return (
+                <button
+                  key={mode}
+                  onClick={() => setViewMode(mode)}
+                  className="flex-1 min-h-[40px] flex items-center justify-center gap-1.5 rounded-lg transition-all"
+                  style={isActive ? activeStyle : {}}
+                >
+                  {mode === 'trash-talk' && (
+                    <Flame className="h-3.5 w-3.5" color={isActive ? '#fff' : 'var(--ffi-ink-3)'} />
+                  )}
+                  <span
+                    className="ffi-label"
+                    style={{ color: isActive ? '#fff' : 'var(--ffi-ink-3)', letterSpacing: '.12em' }}
+                  >
+                    {label}
+                  </span>
+                </button>
+              )
+            })}
           </div>
         )}
-      </FFICard>
+      </div>
 
       {detailLoading && (
-        <div className="flex items-center justify-center py-8">
-          <Loader2 className="h-5 w-5 animate-spin text-[var(--ffi-primary)]" />
-          <span className="ffi-body-md text-[var(--ffi-text-secondary)] ml-3">
-            Analyzing draft...
-          </span>
+        <div className="flex items-center justify-center py-8 gap-2">
+          <Loader2 className="h-4 w-4 animate-spin" color="var(--ffi-blue)" />
+          <span className="ffi-label text-[var(--ffi-ink-3)]">Analyzing draft...</span>
         </div>
       )}
 
-      {/* All Teams View */}
+      {/* All Teams */}
       {session && !detailLoading && viewMode === 'all-teams' && (
         <TeamReports
           picks={(session.picks || []).map(p => ({
-            pick_number: p.pick_number,
-            player_name: p.player_id,
-            position: undefined,
-            manager: p.manager,
-            price: p.price,
-            round: p.round,
+            pick_number: p.pick_number, player_name: p.player_id, position: undefined,
+            manager: p.manager, price: p.price, round: p.round,
           }))}
           managers={session.managers.map(m => m.name)}
           format={session.format}
@@ -445,18 +401,17 @@ export function ReviewClient() {
         />
       )}
 
-      {/* Trash Talk View */}
+      {/* Trash Talk */}
       {session && !detailLoading && viewMode === 'trash-talk' && roastReport && (
         <FFIFadeInUp>
           <RoastReportCard report={roastReport} />
         </FFIFadeInUp>
       )}
 
-      {/* My Draft View */}
+      {/* My Draft */}
       {review && !detailLoading && viewMode === 'my-draft' && (
         <FFIFadeInUp>
-          <div className="space-y-6">
-            {/* Grade Hero Card */}
+          <div className="space-y-3">
             <GradeHero
               review={review}
               managerName={managerName}
@@ -464,11 +419,8 @@ export function ReviewClient() {
               onExportCSV={() => {
                 if (!session) return
                 const draftPicks: DraftPick[] = (session.picks || []).map(p => ({
-                  pick_number: p.pick_number,
-                  player_name: p.player_id,
-                  manager: p.manager,
-                  price: p.price,
-                  round: p.round,
+                  pick_number: p.pick_number, player_name: p.player_id,
+                  manager: p.manager, price: p.price, round: p.round,
                 }))
                 const csv = picksToCSV(draftPicks, session.format)
                 const date = new Date(session.created_at).toISOString().split('T')[0]
@@ -477,88 +429,61 @@ export function ReviewClient() {
               onShare={async () => {
                 const text = reviewToShareText(review, managerName, session!.format, strategy?.name)
                 const ok = await copyToClipboard(text)
-                if (ok) {
-                  setCopied(true)
-                  setTimeout(() => setCopied(false), 2000)
-                }
+                if (ok) { setCopied(true); setTimeout(() => setCopied(false), 2000) }
               }}
               copied={copied}
             />
 
-            {/* Quick Stats */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <StatCard
+            {/* Quick Stats 2x2 */}
+            <div className="grid grid-cols-2 gap-2">
+              <StatTile
                 label="STEALS"
                 value={review.stealCount}
-                icon={<Sparkles className="h-4 w-4 text-[var(--ffi-success)]" />}
-                highlight={review.stealCount > 0 ? 'success' : undefined}
+                icon={<Sparkles className="h-3.5 w-3.5" color="var(--ffi-volt)" />}
+                valueColor={review.stealCount > 0 ? 'var(--ffi-volt)' : 'var(--ffi-ink-2)'}
+                accentBorder={review.stealCount > 0 ? 'rgba(139,255,69,0.22)' : undefined}
               />
-              <StatCard
+              <StatTile
                 label="REACHES"
                 value={review.reachCount}
-                icon={<AlertTriangle className="h-4 w-4 text-[var(--ffi-danger)]" />}
-                highlight={review.reachCount > 0 ? 'danger' : undefined}
+                icon={<AlertTriangle className="h-3.5 w-3.5" color="var(--ffi-danger)" />}
+                valueColor={review.reachCount > 0 ? 'var(--ffi-danger)' : 'var(--ffi-ink-2)'}
+                accentBorder={review.reachCount > 0 ? 'rgba(255,110,138,0.22)' : undefined}
               />
-              <StatCard
+              <StatTile
                 label="TARGETS HIT"
                 value={review.targetResults.filter(t => t.status === 'hit').length}
-                icon={<Target className="h-4 w-4 text-[var(--ffi-primary)]" />}
+                icon={<Target className="h-3.5 w-3.5" color="var(--ffi-blue)" />}
+                valueColor="var(--ffi-blue-bright)"
               />
-              <StatCard
+              <StatTile
                 label="TOTAL PICKS"
                 value={review.pickAnalysis.length}
-                icon={<Hash className="h-4 w-4 text-[var(--ffi-text-muted)]" />}
+                icon={<Hash className="h-3.5 w-3.5" color="var(--ffi-ink-3)" />}
+                valueColor="var(--ffi-ink-2)"
               />
             </div>
 
             {/* Strengths & Weaknesses */}
-            <div className="grid gap-4 sm:grid-cols-2">
-              <FFICard>
-                <FFISectionHeader
-                  title="Strengths"
-                  action={<TrendingUp className="h-4 w-4 text-[var(--ffi-success)]" />}
-                />
-                {review.strengths.length === 0 ? (
-                  <p className="ffi-body-md text-[var(--ffi-text-muted)]">No standout strengths</p>
-                ) : (
-                  <ul className="space-y-2">
-                    {review.strengths.map((s, i) => (
-                      <li key={i} className="flex items-start gap-2 ffi-body-md text-white">
-                        <Check className="h-4 w-4 text-[var(--ffi-success)] shrink-0 mt-0.5" />
-                        {s}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </FFICard>
-
-              <FFICard>
-                <FFISectionHeader
-                  title="Areas to Improve"
-                  action={<TrendingDown className="h-4 w-4 text-[var(--ffi-warning)]" />}
-                />
-                {review.weaknesses.length === 0 ? (
-                  <p className="ffi-body-md text-[var(--ffi-text-muted)]">No major weaknesses</p>
-                ) : (
-                  <ul className="space-y-2">
-                    {review.weaknesses.map((w, i) => (
-                      <li key={i} className="flex items-start gap-2 ffi-body-md text-white">
-                        <AlertCircle className="h-4 w-4 text-[var(--ffi-warning)] shrink-0 mt-0.5" />
-                        {w}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </FFICard>
+            <div className="grid grid-cols-2 gap-2">
+              <SwCard
+                title="Strengths"
+                type="wins"
+                items={review.strengths}
+                emptyText="No standout strengths"
+              />
+              <SwCard
+                title="Watch"
+                type="risks"
+                items={review.weaknesses}
+                emptyText="No major weaknesses"
+              />
             </div>
 
-            {/* Pick-by-Pick Story */}
-            <FFICard>
-              <FFISectionHeader
-                title="Pick-by-Pick Breakdown"
-                subtitle="Your draft story, one pick at a time"
-              />
-              <div className="space-y-2">
+            {/* Pick-by-Pick */}
+            <div>
+              <SectHeader title="Pick by Pick" />
+              <div className="space-y-1">
                 {review.pickAnalysis.map((pick, index) => (
                   <PickCard
                     key={pick.pickNumber}
@@ -566,70 +491,54 @@ export function ReviewClient() {
                     format={session!.format}
                     index={index}
                     expanded={expandedPick === pick.pickNumber}
-                    onToggle={() => setExpandedPick(
-                      expandedPick === pick.pickNumber ? null : pick.pickNumber
-                    )}
+                    onToggle={() => setExpandedPick(expandedPick === pick.pickNumber ? null : pick.pickNumber)}
                   />
                 ))}
               </div>
-            </FFICard>
+            </div>
 
-            {/* Positional Power Rankings (FF-074 segmented bars) */}
+            {/* Positional Power Rankings */}
             {review.positionGrades.length > 0 && (
-              <PositionalPowerRankings grades={review.positionGrades} />
+              <div>
+                <SectHeader title="Position Grades" />
+                <PositionalPowerRankings grades={review.positionGrades} />
+              </div>
             )}
 
-            {/* Position Grades (detailed breakdown) */}
-            <FFICard>
-              <FFISectionHeader title="Position Grades" subtitle="Detailed breakdown by position" />
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {review.positionGrades.map(pg => (
-                  <PositionGradeCard key={pg.position} grade={pg} />
-                ))}
-              </div>
-            </FFICard>
-
-            {/* FF-248: Tag Accuracy Analysis */}
+            {/* Tag Accuracy */}
             {tagAccuracyAnalysis && (tagAccuracyAnalysis.totalTargets > 0 || tagAccuracyAnalysis.totalAvoids > 0) && (
               <TagAccuracyCard analysis={tagAccuracyAnalysis} />
             )}
 
             {/* Strategy Targets */}
             {review.targetResults.length > 0 && (
-              <FFICard>
-                <FFISectionHeader
-                  title="Strategy Target Report"
-                  action={<Target className="h-4 w-4 text-[var(--ffi-primary)]" />}
-                />
-                <div className="space-y-1">
+              <div className="ffi-card">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="ffi-caption text-[var(--ffi-ink-3)]">STRATEGY TARGETS</span>
+                  <Target className="h-3.5 w-3.5" color="var(--ffi-blue)" />
+                </div>
+                <div className="space-y-0.5">
                   {review.targetResults.map((tr, i) => (
-                    <div
-                      key={i}
-                      className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-[var(--ffi-surface)]/50 transition-colors"
-                    >
-                      <div className="flex items-center gap-3">
-                        {tr.status === 'hit' && <Check className="h-4 w-4 text-[var(--ffi-success)]" />}
-                        {tr.status === 'missed' && <X className="h-4 w-4 text-[var(--ffi-danger)]" />}
-                        {tr.status === 'avoided_success' && <ShieldCheck className="h-4 w-4 text-[var(--ffi-success)]" />}
-                        {tr.status === 'avoided_fail' && <ShieldAlert className="h-4 w-4 text-[var(--ffi-danger)]" />}
-                        <span className="ffi-body-md text-white font-medium">{tr.playerName}</span>
+                    <div key={i} className="flex items-center justify-between py-2 px-2 rounded-lg hover:bg-[var(--ffi-surface-3)] transition-colors">
+                      <div className="flex items-center gap-2.5">
+                        {tr.status === 'hit' && <Check className="h-4 w-4" color="var(--ffi-volt)" />}
+                        {tr.status === 'missed' && <X className="h-4 w-4" color="var(--ffi-danger)" />}
+                        {tr.status === 'avoided_success' && <ShieldCheck className="h-4 w-4" color="var(--ffi-volt)" />}
+                        {tr.status === 'avoided_fail' && <ShieldAlert className="h-4 w-4" color="var(--ffi-danger)" />}
+                        <span className="font-headline font-bold text-sm text-white">{tr.playerName}</span>
                       </div>
-                      <span className="ffi-body-md text-[var(--ffi-text-secondary)]">{tr.detail}</span>
+                      <span className="ffi-body-md text-[var(--ffi-ink-3)]">{tr.detail}</span>
                     </div>
                   ))}
                 </div>
-              </FFICard>
+              </div>
             )}
 
             {/* Budget Analysis */}
-            {review.budgetAnalysis && (
-              <BudgetAnalysisCard analysis={review.budgetAnalysis} />
-            )}
+            {review.budgetAnalysis && <BudgetAnalysisCard analysis={review.budgetAnalysis} />}
 
             {/* Snake Analysis */}
-            {review.snakeAnalysis && (
-              <SnakeAnalysisCard analysis={review.snakeAnalysis} />
-            )}
+            {review.snakeAnalysis && <SnakeAnalysisCard analysis={review.snakeAnalysis} />}
           </div>
         </FFIFadeInUp>
       )}
@@ -640,12 +549,7 @@ export function ReviewClient() {
 // --- Sub-components ---
 
 function GradeHero({
-  review,
-  managerName,
-  strategyName,
-  onExportCSV,
-  onShare,
-  copied,
+  review, managerName, strategyName, onExportCSV, onShare, copied,
 }: {
   review: DraftReview
   managerName: string
@@ -655,13 +559,13 @@ function GradeHero({
   copied: boolean
 }) {
   const letter = review.overallGrade.charAt(0)
-  const glowClass = gradeGlow[letter] || ''
+  const colors = gradeColors[letter] ?? gradeColors['C']
   const verdict = gradeVerdict[letter] ?? ''
-  const isTopGrade = letter === 'A'
   const isChampion = letter === 'A' || letter === 'B'
   const haptic = useHaptic()
   const { play } = useSound()
   const [celebrate, setCelebrate] = useState(false)
+
   useEffect(() => {
     if (!isChampion) return
     const t = setTimeout(() => {
@@ -674,183 +578,261 @@ function GradeHero({
 
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
+      initial={{ opacity: 0, scale: 0.96 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="ffi-card-elevated"
+      transition={{ type: 'spring', stiffness: 320, damping: 28 }}
+      className="ffi-hero p-6"
     >
-      <div className="flex flex-col sm:flex-row items-center gap-6">
-        {/* Grade circle with glow + champion gold ring + celebration burst */}
-        <div className="relative shrink-0">
+      {/* Atmosphere blob */}
+      <div
+        aria-hidden
+        style={{
+          position: 'absolute', top: -50, left: '50%', transform: 'translateX(-50%)',
+          width: 260, height: 200, pointerEvents: 'none',
+          background: `radial-gradient(ellipse at 50% 30%, ${colors.blob}, transparent 70%)`,
+        }}
+      />
+
+      <div className="relative z-10 flex flex-col items-center text-center">
+        {/* Celebration burst */}
+        <div className="relative">
           <FFICelebration show={celebrate} tone="gold" className="absolute inset-0">
             <span className="sr-only">Draft graded</span>
           </FFICelebration>
           <FFIConfettiBurst show={celebrate} />
+
+          {/* Verdict label above ring */}
+          {verdict && (
+            <p className="ffi-caption mb-3" style={{ letterSpacing: '.38em', color: colors.verdictColor }}>
+              {verdict}
+            </p>
+          )}
+
+          {/* Grade ring */}
           <motion.div
             initial={{ scale: 0.5, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            transition={{ type: 'spring', stiffness: 400, damping: 25, delay: 0.2 }}
-            className={cn(
-              'relative w-28 h-28 rounded-2xl ffi-glass flex items-center justify-center',
-              isTopGrade && 'ffi-grade-ring-sheen',
-              glowClass
-            )}
+            transition={{ type: 'spring', stiffness: 380, damping: 24, delay: 0.18 }}
+            style={{
+              width: 112, height: 112,
+              borderRadius: 20,
+              background: 'var(--ffi-surface-3)',
+              border: `2px solid ${colors.borderColor}`,
+              boxShadow: colors.glow,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              margin: '0 auto',
+            }}
           >
-            <FFIGrade grade={review.overallGrade} size="lg" />
+            <span
+              className="font-display"
+              style={{ fontSize: 68, lineHeight: 1, color: colors.letter }}
+            >
+              {letter}
+            </span>
           </motion.div>
         </div>
 
-        {/* Summary */}
-        <div className="flex-1 text-center sm:text-left">
-          {verdict && (
-            <div
-              className={cn(
-                'font-display font-bold tracking-widest text-sm mb-1',
-                isTopGrade ? 'text-[var(--ffi-gold-bright)]' : 'text-[var(--ffi-text-secondary)]',
-              )}
-            >
-              {verdict}
-            </div>
-          )}
-          <h2 className="ffi-display-md text-white mb-1">{review.summary}</h2>
-          <p className="ffi-body-md text-[var(--ffi-text-secondary)]">
-            Score: <span className={cn(
-              'font-mono font-bold',
-              isTopGrade ? 'text-[var(--ffi-gold)]' : 'text-white',
-            )}>{review.overallScore}</span>/100
-            {' · '}{managerName}&apos;s draft
-            {strategyName && <> vs. &ldquo;{strategyName}&rdquo;</>}
-          </p>
-          {review.pivotImpact && (
-            <p className="ffi-body-md text-[var(--ffi-text-muted)] mt-2 flex items-center gap-1.5">
-              <ArrowRight className="h-3.5 w-3.5 text-[var(--ffi-accent)]" />
-              {review.pivotImpact}
-            </p>
-          )}
+        {/* Score */}
+        <div className="flex items-baseline gap-1.5 mt-4 mb-1">
+          <span
+            className="font-mono font-bold"
+            style={{ fontSize: 30, lineHeight: 1, color: colors.letter }}
+          >
+            {review.overallScore}
+          </span>
+          <span className="ffi-caption text-[var(--ffi-ink-3)]">/ 100</span>
         </div>
 
+        {/* Summary */}
+        <p className="font-headline font-bold text-lg text-white mb-1">{review.summary}</p>
+        <p className="ffi-body-md text-[var(--ffi-ink-3)] mb-1">
+          {managerName}&apos;s draft{strategyName && <> &middot; &ldquo;{strategyName}&rdquo;</>}
+        </p>
+        {review.pivotImpact && (
+          <p className="ffi-body-md text-[var(--ffi-ink-3)] flex items-center gap-1.5 mb-3">
+            <ArrowRight className="h-3.5 w-3.5" color="var(--ffi-blue)" />
+            {review.pivotImpact}
+          </p>
+        )}
+
         {/* Actions */}
-        <div className="flex gap-2 shrink-0">
-          <FFIButton variant="secondary" size="sm" onClick={onExportCSV}>
-            <Download className="h-4 w-4 mr-1.5" />
+        <div className="flex gap-2 mt-4 w-full">
+          <button
+            onClick={onExportCSV}
+            className="flex-1 flex items-center justify-center gap-2 min-h-[42px] rounded-xl ffi-label"
+            style={{
+              background: 'var(--ffi-surface-3)',
+              border: '1px solid var(--ffi-hairline)',
+              color: 'var(--ffi-ink-2)',
+              letterSpacing: '.12em',
+            }}
+          >
+            <Download className="h-4 w-4" />
             CSV
-          </FFIButton>
-          <FFIButton variant="secondary" size="sm" onClick={onShare}>
+          </button>
+          <button
+            onClick={onShare}
+            className="flex-1 flex items-center justify-center gap-2 min-h-[42px] rounded-xl ffi-label"
+            style={{
+              background: 'var(--ffi-surface-3)',
+              border: '1px solid var(--ffi-hairline)',
+              color: copied ? 'var(--ffi-volt)' : 'var(--ffi-ink-2)',
+              letterSpacing: '.12em',
+            }}
+          >
             {copied
-              ? <CheckCheck className="h-4 w-4 mr-1.5 text-[var(--ffi-success)]" />
-              : <Copy className="h-4 w-4 mr-1.5" />
+              ? <><CheckCheck className="h-4 w-4" />Copied!</>
+              : <><Copy className="h-4 w-4" />Share</>
             }
-            {copied ? 'Copied!' : 'Share'}
-          </FFIButton>
+          </button>
         </div>
       </div>
     </motion.div>
   )
 }
 
-function StatCard({
-  label,
-  value,
-  icon,
-  highlight,
+function StatTile({
+  label, value, icon, valueColor, accentBorder,
 }: {
   label: string
   value: number
   icon: React.ReactNode
-  highlight?: 'success' | 'danger'
+  valueColor: string
+  accentBorder?: string
 }) {
   return (
-    <FFICard className={cn(
-      highlight === 'success' && 'border border-[var(--ffi-success)]/20',
-      highlight === 'danger' && 'border border-[var(--ffi-danger)]/20',
-    )}>
-      <div className="flex items-center gap-2 mb-1">
+    <div
+      className="rounded-2xl p-4"
+      style={{
+        background: 'var(--ffi-surface-2)',
+        border: `1px solid ${accentBorder ?? 'var(--ffi-hairline)'}`,
+        boxShadow: '0 8px 32px rgba(0,0,0,0.36)',
+      }}
+    >
+      <div className="flex items-center gap-1.5 mb-2">
         {icon}
-        <span className="ffi-label text-[var(--ffi-text-muted)]">{label}</span>
+        <span className="ffi-caption text-[var(--ffi-ink-3)]">{label}</span>
       </div>
-      <span className={cn(
-        'ffi-display-md font-mono font-bold',
-        highlight === 'success' && 'text-[var(--ffi-success)]',
-        highlight === 'danger' && 'text-[var(--ffi-danger)]',
-        !highlight && 'text-white',
-      )}>
+      <span
+        className="font-mono font-bold"
+        style={{ fontSize: 36, lineHeight: 1, color: valueColor }}
+      >
         {value}
       </span>
-    </FFICard>
+    </div>
   )
 }
 
-function PickCard({
-  pick,
-  format,
-  index,
-  expanded,
-  onToggle,
-}: {
+function SwCard({ title, type, items, emptyText }: {
+  title: string
+  type: 'wins' | 'risks'
+  items: string[]
+  emptyText: string
+}) {
+  const dotColor = type === 'wins' ? 'var(--ffi-volt)' : 'var(--ffi-warning)'
+  const headColor = type === 'wins' ? 'var(--ffi-volt)' : 'var(--ffi-warning)'
+  const Icon = type === 'wins' ? TrendingUp : TrendingDown
+
+  return (
+    <div className="ffi-card">
+      <div className="flex items-center gap-1.5 mb-3">
+        <Icon className="h-3.5 w-3.5" color={headColor} />
+        <span className="ffi-caption" style={{ color: headColor, letterSpacing: '.22em' }}>{title.toUpperCase()}</span>
+      </div>
+      {items.length === 0 ? (
+        <p className="ffi-body-md text-[var(--ffi-ink-3)]">{emptyText}</p>
+      ) : (
+        <ul className="space-y-2">
+          {items.map((s, i) => (
+            <li key={i} className="flex items-start gap-2">
+              <span
+                className="mt-[5px] shrink-0 rounded-full"
+                style={{ width: 5, height: 5, background: dotColor }}
+              />
+              <span className="ffi-body-md text-[var(--ffi-ink-2)] leading-snug">{s}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  )
+}
+
+function SectHeader({ title }: { title: string }) {
+  return (
+    <div className="flex items-center gap-3 mb-2 mt-1">
+      <span className="ffi-caption text-[var(--ffi-ink-3)]">{title.toUpperCase()}</span>
+      <div className="flex-1 h-px" style={{ background: 'var(--ffi-hairline)' }} />
+    </div>
+  )
+}
+
+function PickCard({ pick, format, index, expanded, onToggle }: {
   pick: PickAnalysis
   format: 'auction' | 'snake'
   index: number
   expanded: boolean
   onToggle: () => void
 }) {
-  const config = verdictConfig[pick.verdict]
-  const VerdictIcon = config.icon
+  const vc = verdictConfig[pick.verdict]
+  const VerdictIcon = vc.icon
 
   return (
     <motion.div
-      initial={{ opacity: 0, x: -20 }}
+      initial={{ opacity: 0, x: -16 }}
       animate={{ opacity: 1, x: 0 }}
-      transition={{ delay: index * 0.03 }}
-      className={cn(
-        'ffi-card-interactive',
-        expanded && 'ffi-card-elevated'
-      )}
-      onClick={onToggle}
+      transition={{ delay: index * 0.025, duration: 0.22 }}
     >
-      {/* Main row */}
-      <div className="flex items-center gap-4">
-        {/* Pick number */}
-        <div className="text-center w-12 shrink-0">
-          {format === 'snake' && pick.round ? (
-            <>
-              <div className="ffi-label text-[var(--ffi-text-muted)]">RD {pick.round}</div>
-              <div className="ffi-body-md text-[var(--ffi-text-secondary)] font-mono">#{pick.pickNumber}</div>
-            </>
-          ) : (
-            <>
-              <div className="ffi-label text-[var(--ffi-text-muted)]">PICK</div>
-              <div className="ffi-body-md text-[var(--ffi-text-secondary)] font-mono">#{pick.pickNumber}</div>
-            </>
-          )}
-        </div>
-
-        {/* Player info */}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <span className="ffi-title-md text-white truncate">{pick.playerName}</span>
-            <FFIPositionBadge position={pick.position as any} className="text-[10px] px-1.5" />
+      <div
+        className="ffi-card-interactive"
+        style={{ borderRadius: expanded ? '14px 14px 0 0' : 14, borderBottomColor: expanded ? 'transparent' : undefined }}
+        onClick={onToggle}
+      >
+        <div className="flex items-center gap-3">
+          {/* Pick number */}
+          <div className="text-center shrink-0 w-10">
+            <p className="ffi-caption text-[var(--ffi-ink-3)]">
+              {format === 'snake' && pick.round ? `RD ${pick.round}` : 'PICK'}
+            </p>
+            <p className="font-mono font-bold text-sm text-[var(--ffi-ink-2)]">#{pick.pickNumber}</p>
           </div>
-          {format === 'auction' && pick.price != null && (
-            <div className="ffi-body-md text-[var(--ffi-text-secondary)]">
-              ${pick.price}
+
+          {/* Divider */}
+          <div className="w-px h-8 shrink-0" style={{ background: 'var(--ffi-hairline)' }} />
+
+          {/* Player info */}
+          <div className="flex-1 min-w-0">
+            <p className="font-headline font-bold text-[15px] text-white truncate mb-0.5">{pick.playerName}</p>
+            <div className="flex items-center gap-2">
+              <FFIPositionBadge position={pick.position as any} className="text-[10px] px-1.5 py-0.5" />
+              {format === 'auction' && pick.price != null && (
+                <span className="font-mono text-xs text-[var(--ffi-ink-3)]">${pick.price}</span>
+              )}
               {pick.adpValue != null && (
-                <span className={cn(
-                  'ml-2 font-mono',
-                  pick.adpValue > 0 ? 'text-[var(--ffi-success)]' : 'text-[var(--ffi-danger)]'
-                )}>
-                  {pick.adpValue > 0 ? '+' : ''}{pick.adpValue} value
+                <span
+                  className="font-mono font-bold text-xs"
+                  style={{ color: pick.adpValue > 0 ? 'var(--ffi-volt)' : 'var(--ffi-danger)' }}
+                >
+                  {pick.adpValue > 0 ? '+' : ''}{pick.adpValue}
                 </span>
               )}
             </div>
-          )}
-        </div>
+          </div>
 
-        {/* Verdict badge */}
-        <div className={cn(
-          'flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[11px] font-bold uppercase tracking-wider shrink-0',
-          config.class
-        )}>
-          <VerdictIcon className="h-3 w-3" />
-          {config.label}
+          {/* Verdict badge */}
+          <div
+            className="shrink-0 flex items-center gap-1 px-2 py-1 rounded-full ffi-caption"
+            style={{
+              background: vc.bg,
+              border: `1px solid ${vc.border}`,
+              color: vc.color,
+              fontSize: 9,
+              letterSpacing: '.18em',
+            }}
+          >
+            <VerdictIcon className="h-2.5 w-2.5" />
+            {vc.label}
+          </div>
         </div>
       </div>
 
@@ -863,12 +845,13 @@ function PickCard({
             exit={{ height: 0, opacity: 0 }}
             className="overflow-hidden"
           >
-            <div className="mt-3 pt-3 border-t border-[var(--ffi-border)]/20">
-              <p className="ffi-body-md text-[var(--ffi-text-secondary)]">
-                {pick.narrative}
-              </p>
+            <div
+              className="px-4 pb-4 pt-3 rounded-b-[14px]"
+              style={{ background: 'var(--ffi-surface-2)', border: '1px solid var(--ffi-hairline)', borderTop: 'none' }}
+            >
+              <p className="ffi-body-md text-[var(--ffi-ink-2)] leading-relaxed">{pick.narrative}</p>
               {!pick.strategyAlignment && (
-                <p className="ffi-body-md text-[var(--ffi-warning)] mt-2 flex items-center gap-1.5">
+                <p className="ffi-body-md mt-2 flex items-center gap-1.5" style={{ color: 'var(--ffi-warning)' }}>
                   <AlertTriangle className="h-3.5 w-3.5" />
                   Deviated from strategy at this pick
                 </p>
@@ -881,132 +864,86 @@ function PickCard({
   )
 }
 
-/**
- * PositionalPowerRankings (FF-074)
- * Segmented progress bars like the prototype (lines 174-205)
- */
 function PositionalPowerRankings({ grades }: { grades: DraftReview['positionGrades'] }) {
   const SEGMENTS = 10
-
-  // Position name mapping for display
   const positionNames: Record<string, string> = {
-    QB: 'Quarterback',
-    RB: 'Running Back',
-    WR: 'Wide Receiver',
-    TE: 'Tight End',
-    K: 'Kicker',
-    DEF: 'Defense',
+    QB: 'Quarterback', RB: 'Running Back', WR: 'Wide Receiver',
+    TE: 'Tight End', K: 'Kicker', DEF: 'Defense',
+  }
+
+  function segColor(score: number, filled: boolean) {
+    if (!filled) return 'var(--ffi-surface-3)'
+    if (score >= 80) return 'var(--ffi-volt)'
+    if (score >= 50) return 'var(--ffi-blue)'
+    return 'var(--ffi-danger)'
+  }
+
+  function scoreColor(score: number) {
+    if (score >= 80) return 'var(--ffi-volt)'
+    if (score >= 50) return 'var(--ffi-blue-bright)'
+    return 'var(--ffi-danger)'
   }
 
   return (
-    <FFICard>
-      <FFISectionHeader title="Positional Power Rankings" />
-      <div className="space-y-6">
-        {grades.map(grade => {
-          const filledCount = Math.round(grade.score / 10)
-          const isDanger = grade.score < 50
-
-          return (
-            <div key={grade.position} className="space-y-2">
-              <div className="flex justify-between items-end">
-                <span className="ffi-label text-white uppercase tracking-wider">
-                  {positionNames[grade.position] || grade.position}
-                </span>
-                <span
-                  className={cn(
-                    'font-headline text-lg font-bold',
-                    isDanger ? 'text-[var(--ffi-danger)]' : 'text-[var(--ffi-primary)]'
-                  )}
-                >
-                  {grade.score}
-                </span>
-              </div>
-              <div className="segmented-progress">
-                {Array.from({ length: SEGMENTS }).map((_, i) => (
-                  <div
-                    key={i}
-                    className={cn(
-                      'segment',
-                      i < filledCount
-                        ? isDanger ? 'segment-filled danger' : 'segment-filled'
-                        : 'segment-empty'
-                    )}
-                  />
-                ))}
-              </div>
+    <div className="ffi-card space-y-5">
+      {grades.map(grade => {
+        const filledCount = Math.round(grade.score / 10)
+        return (
+          <div key={grade.position}>
+            <div className="flex justify-between items-center mb-2">
+              <span className="font-headline font-bold text-sm text-white">
+                {positionNames[grade.position] || grade.position}
+              </span>
+              <span className="font-mono font-bold text-sm" style={{ color: scoreColor(grade.score) }}>
+                {grade.score}
+              </span>
             </div>
-          )
-        })}
-      </div>
-    </FFICard>
-  )
-}
-
-function PositionGradeCard({ grade }: { grade: DraftReview['positionGrades'][0] }) {
-  const letter = grade.grade.charAt(0)
-  const gradeColor = letter === 'A' ? 'text-[var(--ffi-success)]'
-    : letter === 'B' ? 'text-green-400'
-    : letter === 'C' ? 'text-[var(--ffi-warning)]'
-    : letter === 'D' ? 'text-orange-400'
-    : 'text-[var(--ffi-danger)]'
-
-  return (
-    <FFICard>
-      <div className="flex items-center justify-between mb-2">
-        <FFIPositionBadge position={grade.position as any} />
-        <span className={cn('ffi-display-md font-bold', gradeColor)}>
-          {grade.grade}
-        </span>
-      </div>
-      <div className="space-y-1">
-        {grade.picks.map((p, i) => (
-          <div key={i} className="flex items-center justify-between text-[12px]">
-            <span className="text-[var(--ffi-text-secondary)] truncate">{p.name}</span>
-            <span className="text-[var(--ffi-text-muted)] font-mono shrink-0 ml-2">
-              {p.price != null ? `$${p.price}` : p.round != null ? `Rd ${p.round}` : ''}
-            </span>
+            <div className="flex gap-[3px]">
+              {Array.from({ length: SEGMENTS }).map((_, i) => (
+                <div
+                  key={i}
+                  className="flex-1 h-1.5 rounded-sm"
+                  style={{ background: segColor(grade.score, i < filledCount) }}
+                />
+              ))}
+            </div>
           </div>
-        ))}
-      </div>
-      {grade.notes.length > 0 && (
-        <div className="mt-2 pt-2 border-t border-[var(--ffi-border)]/10 space-y-0.5">
-          {grade.notes.map((n, i) => (
-            <p key={i} className="text-[10px] text-[var(--ffi-text-muted)]">{n}</p>
-          ))}
-        </div>
-      )}
-    </FFICard>
+        )
+      })}
+    </div>
   )
 }
 
 function BudgetAnalysisCard({ analysis }: { analysis: NonNullable<DraftReview['budgetAnalysis']> }) {
   return (
-    <FFICard>
-      <FFISectionHeader
-        title="Budget Analysis"
-        action={<DollarSign className="h-4 w-4 text-[var(--ffi-accent)]" />}
-      />
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+    <div className="ffi-card">
+      <div className="flex items-center gap-2 mb-3">
+        <DollarSign className="h-3.5 w-3.5" color="var(--ffi-blue)" />
+        <span className="ffi-caption text-[var(--ffi-ink-3)]">BUDGET ANALYSIS</span>
+      </div>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
         <MiniStat label="SPENT" value={`$${analysis.totalSpent}`} />
         <MiniStat label="REMAINING" value={`$${analysis.remaining}`} />
         <MiniStat label="AVG PRICE" value={`$${analysis.avgPrice}`} />
         <MiniStat label="HIGHEST" value={`$${analysis.highestPick.price}`} sub={analysis.highestPick.name} />
       </div>
-
       {analysis.allocationVsPlan.length > 0 && (
-        <div className="pt-3 border-t border-[var(--ffi-border)]/10">
-          <p className="ffi-label text-[var(--ffi-text-muted)] mb-2">BUDGET VS. PLAN</p>
+        <div className="pt-3 border-t border-[var(--ffi-hairline)]">
+          <p className="ffi-caption text-[var(--ffi-ink-3)] mb-3">BUDGET VS. PLAN</p>
           <div className="space-y-2">
             {analysis.allocationVsPlan.map(a => (
               <div key={a.position} className="flex items-center gap-3">
-                <FFIPositionBadge position={a.position as any} className="w-10 text-[10px] px-1" />
-                <div className="flex-1 h-2 bg-[var(--ffi-surface)] rounded-full overflow-hidden">
+                <FFIPositionBadge position={a.position as any} className="text-[10px] px-1.5 w-10" />
+                <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--ffi-surface-3)' }}>
                   <div
-                    className="h-full rounded-full bg-gradient-to-r from-[var(--ffi-primary)] to-[var(--ffi-accent)]"
-                    style={{ width: `${Math.min(100, a.actual)}%` }}
+                    className="h-full rounded-full"
+                    style={{
+                      width: `${Math.min(100, a.actual)}%`,
+                      background: 'linear-gradient(90deg, var(--ffi-blue) 0%, var(--ffi-volt) 100%)',
+                    }}
                   />
                 </div>
-                <span className="ffi-body-md text-[var(--ffi-text-secondary)] font-mono w-20 text-right">
+                <span className="font-mono text-xs text-[var(--ffi-ink-3)] w-20 text-right">
                   {a.actual}% / {a.planned}%
                 </span>
               </div>
@@ -1014,53 +951,48 @@ function BudgetAnalysisCard({ analysis }: { analysis: NonNullable<DraftReview['b
           </div>
         </div>
       )}
-    </FFICard>
+    </div>
   )
 }
 
 function SnakeAnalysisCard({ analysis }: { analysis: NonNullable<DraftReview['snakeAnalysis']> }) {
   return (
-    <FFICard>
-      <FFISectionHeader
-        title="Draft Order Analysis"
-        action={<Hash className="h-4 w-4 text-[var(--ffi-primary)]" />}
-      />
-      <div className="grid grid-cols-3 gap-3 mb-4">
+    <div className="ffi-card">
+      <div className="flex items-center gap-2 mb-3">
+        <Hash className="h-3.5 w-3.5" color="var(--ffi-blue)" />
+        <span className="ffi-caption text-[var(--ffi-ink-3)]">DRAFT ORDER ANALYSIS</span>
+      </div>
+      <div className="grid grid-cols-3 gap-2 mb-4">
         <MiniStat label="TOTAL PICKS" value={String(analysis.totalPicks)} />
         <MiniStat label="ROUNDS" value={String(analysis.totalRounds)} />
         <MiniStat label="FIRST PICK" value={`Rd ${analysis.earliestPick.round}`} sub={analysis.earliestPick.name} />
       </div>
-
-      <div className="pt-3 border-t border-[var(--ffi-border)]/10">
-        <p className="ffi-label text-[var(--ffi-text-muted)] mb-2">ROUND BY ROUND</p>
+      <div className="pt-3 border-t border-[var(--ffi-hairline)]">
+        <p className="ffi-caption text-[var(--ffi-ink-3)] mb-2">ROUND BY ROUND</p>
         <div className="space-y-1">
           {analysis.positionByRound.map((p, i) => (
             <div key={i} className="flex items-center gap-3 py-1">
-              <span className="ffi-body-md text-[var(--ffi-text-muted)] font-mono w-12">Rd {p.round}</span>
+              <span className="font-mono text-xs text-[var(--ffi-ink-3)] w-12">Rd {p.round}</span>
               <FFIPositionBadge position={p.position as any} className="text-[10px] px-1.5" />
-              <span className="ffi-body-md text-white truncate">{p.name}</span>
+              <span className="font-headline font-bold text-sm text-white truncate">{p.name}</span>
             </div>
           ))}
         </div>
       </div>
-    </FFICard>
+    </div>
   )
 }
 
 function MiniStat({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
-    <div className="rounded-lg bg-[var(--ffi-surface)]/40 p-2.5">
-      <p className="ffi-label text-[var(--ffi-text-muted)]">{label}</p>
-      <p className="ffi-title-md text-white font-mono">{value}</p>
-      {sub && <p className="text-[10px] text-[var(--ffi-text-muted)] truncate">{sub}</p>}
+    <div className="rounded-xl p-3" style={{ background: 'var(--ffi-surface-3)' }}>
+      <p className="ffi-caption text-[var(--ffi-ink-3)] mb-1">{label}</p>
+      <p className="font-mono font-bold text-sm text-white">{value}</p>
+      {sub && <p className="text-[10px] text-[var(--ffi-ink-3)] truncate mt-0.5">{sub}</p>}
     </div>
   )
 }
 
-/**
- * TagAccuracyCard (FF-248)
- * Shows how well user's pre-draft TARGET and AVOID tags matched their actual picks
- */
 function TagAccuracyCard({ analysis }: {
   analysis: {
     targetsHit: Array<{ name: string; id: string; drafted: boolean }>
@@ -1074,135 +1006,69 @@ function TagAccuracyCard({ analysis }: {
   }
 }) {
   return (
-    <FFICard>
-      <FFISectionHeader
-        title="Pre-Draft Tag Accuracy"
-        subtitle="How well did you stick to your targets and avoids?"
-        action={<Target className="h-4 w-4 text-[var(--ffi-accent)]" />}
-      />
-
-      {/* Summary stats */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
-        <div className="rounded-lg bg-[var(--ffi-surface)]/40 p-2.5">
-          <p className="ffi-label text-[var(--ffi-text-muted)]">TARGETS SET</p>
-          <p className="ffi-title-md text-white font-mono">{analysis.totalTargets}</p>
-        </div>
-        <div className={cn(
-          'rounded-lg p-2.5',
-          analysis.hitRate >= 70 ? 'bg-[var(--ffi-success)]/10' : 'bg-[var(--ffi-surface)]/40'
-        )}>
-          <p className="ffi-label text-[var(--ffi-text-muted)]">HIT RATE</p>
-          <p className={cn(
-            'ffi-title-md font-mono',
-            analysis.hitRate >= 70 ? 'text-[var(--ffi-success)]' : 'text-white'
-          )}>{analysis.hitRate}%</p>
-        </div>
-        <div className="rounded-lg bg-[var(--ffi-surface)]/40 p-2.5">
-          <p className="ffi-label text-[var(--ffi-text-muted)]">AVOIDS SET</p>
-          <p className="ffi-title-md text-white font-mono">{analysis.totalAvoids}</p>
-        </div>
-        <div className={cn(
-          'rounded-lg p-2.5',
-          analysis.avoidRate >= 80 ? 'bg-[var(--ffi-success)]/10' : analysis.avoidsViolated.length > 0 ? 'bg-[var(--ffi-danger)]/10' : 'bg-[var(--ffi-surface)]/40'
-        )}>
-          <p className="ffi-label text-[var(--ffi-text-muted)]">AVOID RATE</p>
-          <p className={cn(
-            'ffi-title-md font-mono',
-            analysis.avoidRate >= 80 ? 'text-[var(--ffi-success)]' : analysis.avoidsViolated.length > 0 ? 'text-[var(--ffi-danger)]' : 'text-white'
-          )}>{analysis.avoidRate}%</p>
-        </div>
+    <div className="ffi-card">
+      <div className="flex items-center gap-2 mb-3">
+        <Target className="h-3.5 w-3.5" color="var(--ffi-blue)" />
+        <span className="ffi-caption text-[var(--ffi-ink-3)]">PRE-DRAFT TAG ACCURACY</span>
       </div>
 
-      {/* Targets Hit */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
+        <MiniStat label="TARGETS SET" value={String(analysis.totalTargets)} />
+        <MiniStat
+          label="HIT RATE"
+          value={`${analysis.hitRate}%`}
+        />
+        <MiniStat label="AVOIDS SET" value={String(analysis.totalAvoids)} />
+        <MiniStat
+          label="AVOID RATE"
+          value={`${analysis.avoidRate}%`}
+        />
+      </div>
+
       {analysis.targetsHit.length > 0 && (
-        <div className="mb-4">
-          <p className="ffi-label text-[var(--ffi-success)] mb-2 flex items-center gap-1.5">
-            <Check className="h-3.5 w-3.5" />
-            TARGETS DRAFTED ({analysis.targetsHit.length})
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {analysis.targetsHit.map(p => (
-              <span
-                key={p.id}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-[var(--ffi-success)]/15 text-[var(--ffi-success)] border border-[var(--ffi-success)]/20"
-              >
-                <Target className="h-3 w-3" />
-                {p.name}
-              </span>
-            ))}
-          </div>
-        </div>
+        <TagPillGroup label="TARGETS DRAFTED" color="var(--ffi-volt)" items={analysis.targetsHit} icon={<Check className="h-3 w-3" />} />
       )}
-
-      {/* Targets Missed */}
       {analysis.targetsMissed.length > 0 && (
-        <div className="mb-4">
-          <p className="ffi-label text-[var(--ffi-warning)] mb-2 flex items-center gap-1.5">
-            <X className="h-3.5 w-3.5" />
-            TARGETS MISSED ({analysis.targetsMissed.length})
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {analysis.targetsMissed.map(p => (
-              <span
-                key={p.id}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-[var(--ffi-warning)]/15 text-[var(--ffi-warning)] border border-[var(--ffi-warning)]/20"
-              >
-                <Target className="h-3 w-3" />
-                {p.name}
-              </span>
-            ))}
-          </div>
-        </div>
+        <TagPillGroup label="TARGETS MISSED" color="var(--ffi-warning)" items={analysis.targetsMissed} icon={<X className="h-3 w-3" />} />
       )}
-
-      {/* Avoids Successful */}
       {analysis.avoidsSuccessful.length > 0 && (
-        <div className="mb-4">
-          <p className="ffi-label text-[var(--ffi-primary)] mb-2 flex items-center gap-1.5">
-            <ShieldCheck className="h-3.5 w-3.5" />
-            SUCCESSFULLY AVOIDED ({analysis.avoidsSuccessful.length})
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {analysis.avoidsSuccessful.map(p => (
-              <span
-                key={p.id}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-[var(--ffi-primary)]/10 text-[var(--ffi-primary)] border border-[var(--ffi-primary)]/20"
-              >
-                <AlertTriangle className="h-3 w-3" />
-                {p.name}
-              </span>
-            ))}
-          </div>
-        </div>
+        <TagPillGroup label="SUCCESSFULLY AVOIDED" color="var(--ffi-blue-bright)" items={analysis.avoidsSuccessful} icon={<ShieldCheck className="h-3 w-3" />} />
       )}
-
-      {/* Avoids Violated */}
       {analysis.avoidsViolated.length > 0 && (
-        <div>
-          <p className="ffi-label text-[var(--ffi-danger)] mb-2 flex items-center gap-1.5">
-            <ShieldAlert className="h-3.5 w-3.5" />
-            AVOIDS VIOLATED ({analysis.avoidsViolated.length})
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {analysis.avoidsViolated.map(p => (
-              <span
-                key={p.id}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-[var(--ffi-danger)]/15 text-[var(--ffi-danger)] border border-[var(--ffi-danger)]/20"
-              >
-                <AlertTriangle className="h-3 w-3" />
-                {p.name}
-              </span>
-            ))}
-          </div>
-        </div>
+        <TagPillGroup label="AVOIDS VIOLATED" color="var(--ffi-danger)" items={analysis.avoidsViolated} icon={<ShieldAlert className="h-3 w-3" />} />
       )}
+    </div>
+  )
+}
 
-      {/* No tags set message */}
-      {analysis.totalTargets === 0 && analysis.totalAvoids === 0 && (
-        <p className="ffi-body-md text-[var(--ffi-text-muted)] text-center py-4">
-          No pre-draft TARGET or AVOID tags were set. Set tags before your next draft to track accuracy!
-        </p>
-      )}
-    </FFICard>
+function TagPillGroup({ label, color, items, icon }: {
+  label: string
+  color: string
+  items: Array<{ name: string; id: string }>
+  icon: React.ReactNode
+}) {
+  return (
+    <div className="mb-3 last:mb-0">
+      <p className="ffi-caption mb-2 flex items-center gap-1.5" style={{ color }}>
+        {icon}
+        {label} ({items.length})
+      </p>
+      <div className="flex flex-wrap gap-1.5">
+        {items.map(p => (
+          <span
+            key={p.id}
+            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full ffi-caption"
+            style={{
+              background: `${color}18`,
+              border: `1px solid ${color}30`,
+              color,
+              fontSize: 10,
+            }}
+          >
+            {p.name}
+          </span>
+        ))}
+      </div>
+    </div>
   )
 }
