@@ -2,22 +2,17 @@
 
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Loader2, AlertCircle, ClipboardList, RefreshCw, CheckCircle2, TrendingUp, TrendingDown, AlignJustify, LayoutList } from 'lucide-react'
+import { Loader2, AlertCircle, ClipboardList, RefreshCw, CheckCircle2, TrendingDown, Star, ArrowDown, ArrowUp } from 'lucide-react'
 import { DraftBoardTable } from '@/components/prep/draft-board-table'
 import { PositionBreakdown } from '@/components/prep/position-breakdown'
 import {
   scorePlayersWithStrategy,
   buildIntelContextMap,
   type ScoredPlayer,
-  type PlayerIntelContext
 } from '@/lib/research/strategy/scoring'
 import { cacheToPlayers } from '@/lib/players/convert'
 import { useUserTags, useToggleTag } from '@/hooks/use-user-tags'
-import type { Strategy, SystemTag } from '@/lib/supabase/database.types'
+import type { Strategy } from '@/lib/supabase/database.types'
 import type { DraftFormat, Player, Position } from '@/lib/players/types'
 
 interface LeagueSummary {
@@ -30,14 +25,34 @@ interface LeagueSummary {
 }
 
 const POSITIONS: (Position | 'ALL')[] = ['ALL', 'QB', 'RB', 'WR', 'TE', 'K', 'DEF']
-
 type SortField = 'rank' | 'score' | 'value' | 'adp' | 'name'
+type TargetFilter = 'all' | 'target' | 'avoid' | 'neutral'
+
+const SORT_OPTIONS: { field: SortField; label: string }[] = [
+  { field: 'score', label: 'Score' },
+  { field: 'value', label: 'Value' },
+  { field: 'rank',  label: 'Rank' },
+  { field: 'adp',   label: 'ADP' },
+]
+
+const POS_PILL_COLORS: Record<string, { text: string; border: string }> = {
+  QB:  { text: '#FF6E8A', border: 'rgba(255,110,138,0.30)' },
+  RB:  { text: '#56E0A0', border: 'rgba(86,224,160,0.30)'  },
+  WR:  { text: '#6CA8FF', border: 'rgba(108,168,255,0.30)' },
+  TE:  { text: '#FFB05C', border: 'rgba(255,176,92,0.30)'  },
+  K:   { text: '#A78BFA', border: 'rgba(167,139,250,0.30)' },
+  DEF: { text: '#637396', border: 'rgba(99,115,150,0.30)'  },
+}
 
 function PlayerListSkeleton() {
   return (
-    <div className="space-y-2 mt-3">
+    <div className="flex flex-col gap-[6px] mt-2">
       {Array.from({ length: 8 }).map((_, i) => (
-        <div key={i} className="ffi-skeleton" style={{ height: '68px' }} />
+        <div
+          key={i}
+          className="rounded-[14px] animate-pulse"
+          style={{ height: '76px', background: 'var(--ffi-surface-2)', border: '1px solid var(--ffi-hairline)' }}
+        />
       ))}
     </div>
   )
@@ -53,26 +68,23 @@ export function DraftBoardClient() {
   const [players, setPlayers] = useState<Player[]>([])
   const [activeStrategy, setActiveStrategy] = useState<Strategy | null>(null)
   const [dataLoading, setDataLoading] = useState(false)
-  // FF-278: raw per-source ADP divergence map (playerId → max-min divergence)
   const [adpDivergenceMap, setAdpDivergenceMap] = useState<Map<string, number>>(new Map())
   const hasComputedMovers = useRef(false)
 
   // Filters
   const [positionFilter, setPositionFilter] = useState<Position | 'ALL'>('ALL')
-  const [targetFilter, setTargetFilter] = useState<'all' | 'target' | 'avoid' | 'neutral'>('all')
-  const [searchQuery, setSearchQuery] = useState('')
+  const [targetFilter, setTargetFilter] = useState<TargetFilter>('all')
   const [sortField, setSortField] = useState<SortField>('score')
   const [sortAsc, setSortAsc] = useState(false)
+  const [activeTab, setActiveTab] = useState<'board' | 'position'>('board')
 
-  // FF-028: Refresh state
+  // Refresh
   const [refreshing, setRefreshing] = useState(false)
   const [refreshFeedback, setRefreshFeedback] = useState<string | null>(null)
-  // UX-3: compact density mode
-  const [compact, setCompact] = useState(false)
 
   const selectedLeague = leagues.find((l) => l.id === selectedLeagueId)
 
-  // --- FF-245: Load user tags for intel integration ---
+  // Load user tags
   const playerCacheIds = useMemo(() => players.map(p => p.id), [players])
   const {
     userTagsMap,
@@ -86,7 +98,6 @@ export function DraftBoardClient() {
     includeGlobal: true,
     enabled: players.length > 0,
   })
-
   const { toggle: toggleTag, isLoading: toggleLoading } = useToggleTag(selectedLeagueId)
 
   // Fetch leagues
@@ -97,9 +108,7 @@ export function DraftBoardClient() {
         if (!res.ok) throw new Error('Failed to fetch leagues')
         const data = await res.json()
         setLeagues(data.leagues || [])
-        if (data.leagues?.length > 0) {
-          setSelectedLeagueId(data.leagues[0].id)
-        }
+        if (data.leagues?.length > 0) setSelectedLeagueId(data.leagues[0].id)
       } catch (e) {
         setError(e instanceof Error ? e.message : 'Failed to load leagues')
       } finally {
@@ -109,7 +118,7 @@ export function DraftBoardClient() {
     fetchLeagues()
   }, [])
 
-  // Fetch players + active strategy when league changes
+  // Fetch players + strategy on league change
   useEffect(() => {
     if (!selectedLeagueId) return
     let cancelled = false
@@ -125,7 +134,6 @@ export function DraftBoardClient() {
         if (!cancelled && playersRes.ok) {
           const pData = await playersRes.json()
           setPlayers(cacheToPlayers(pData.players || []))
-          // FF-278: compute cross-source ADP divergence from raw data
           if (!hasComputedMovers.current) {
             const divMap = new Map<string, number>()
             for (const raw of pData.players || []) {
@@ -147,21 +155,21 @@ export function DraftBoardClient() {
           setActiveStrategy(active)
         }
       } catch {
-        // Non-critical — board degrades to unsorted player list
+        // Board degrades to unsorted player list
       } finally {
         if (!cancelled) setDataLoading(false)
       }
     }
+
     fetchData()
     return () => { cancelled = true }
   }, [selectedLeagueId])
 
-  // FF-028: Full refresh — re-pull all sources, re-analyze with strategy, save as new run
+  // Full refresh
   const handleFullRefresh = useCallback(async () => {
     if (!selectedLeagueId || refreshing) return
     setRefreshing(true)
     setRefreshFeedback(null)
-
     try {
       const res = await fetch('/api/research', {
         method: 'POST',
@@ -169,19 +177,15 @@ export function DraftBoardClient() {
         body: JSON.stringify({ leagueId: selectedLeagueId, skipRefresh: false }),
       })
       const data = await res.json()
-
       if (!res.ok) throw new Error(data.error ?? 'Research failed')
 
-      // Reload board data with fresh players
       const [playersRes, strategiesRes] = await Promise.all([
         fetch('/api/players?limit=500'),
         fetch(`/api/strategies?leagueId=${selectedLeagueId}`),
       ])
-
       if (playersRes.ok) {
         const pData = await playersRes.json()
         setPlayers(cacheToPlayers(pData.players || []))
-        // FF-278: recompute divergence after refresh
         const divMap = new Map<string, number>()
         for (const raw of pData.players || []) {
           const vals = Object.values(raw.adp ?? {}).filter(
@@ -193,15 +197,13 @@ export function DraftBoardClient() {
         }
         setAdpDivergenceMap(divMap)
       }
-
       if (strategiesRes.ok) {
         const sData = await strategiesRes.json()
-        const active = (sData.strategies ?? []).find((s: Strategy) => s.is_active) ?? null
-        setActiveStrategy(active)
+        setActiveStrategy((sData.strategies ?? []).find((s: Strategy) => s.is_active) ?? null)
       }
 
       const stratName = data.strategy?.name ?? 'Balanced (default)'
-      setRefreshFeedback(`Refreshed ${data.analysis?.totalPlayers ?? 0} players with "${stratName}" strategy. Saved as new run.`)
+      setRefreshFeedback(`Refreshed ${data.analysis?.totalPlayers ?? 0} players with "${stratName}" strategy.`)
       setTimeout(() => setRefreshFeedback(null), 6000)
     } catch (err) {
       setRefreshFeedback(`Error: ${err instanceof Error ? err.message : 'Refresh failed'}`)
@@ -210,26 +212,20 @@ export function DraftBoardClient() {
     }
   }, [selectedLeagueId, refreshing])
 
-  // FF-245: Build intel context map from user tags
+  // Build intel context map
   const intelContextMap = useMemo(() => {
     if (Object.keys(userTagsMap).length === 0) return undefined
-
-    // Convert userTagsMap to the format expected by buildIntelContextMap
     const formattedMap: Record<string, { tags: string[]; dismissedSystemTags?: string[] }> = {}
     for (const [playerId, data] of Object.entries(userTagsMap)) {
-      formattedMap[playerId] = {
-        tags: data.tags,
-        dismissedSystemTags: data.dismissedSystemTags,
-      }
+      formattedMap[playerId] = { tags: data.tags, dismissedSystemTags: data.dismissedSystemTags }
     }
     return buildIntelContextMap(formattedMap)
   }, [userTagsMap])
 
-  // Score players through active strategy with intel context
+  // Score players
   const scoredPlayers = useMemo<ScoredPlayer[]>(() => {
     if (players.length === 0) return []
     if (!activeStrategy || !selectedLeague) {
-      // No strategy — return neutral scores but still apply user tags
       return players.map((p) => ({
         player: p,
         strategyScore: 50,
@@ -247,11 +243,11 @@ export function DraftBoardClient() {
       activeStrategy,
       selectedLeague.format,
       selectedLeague.budget ?? undefined,
-      intelContextMap, // FF-245: Pass intel context for tag-aware scoring
+      intelContextMap,
     )
   }, [players, activeStrategy, selectedLeague, intelContextMap, isTarget, isAvoid])
 
-  // FF-278: top movers — players with highest cross-source ADP divergence
+  // ADP Movers
   const topMovers = useMemo(() => {
     if (adpDivergenceMap.size === 0) return []
     return players
@@ -263,85 +259,56 @@ export function DraftBoardClient() {
   // Filter + sort
   const filteredPlayers = useMemo(() => {
     let result = scoredPlayers
-
-    // Position filter
-    if (positionFilter !== 'ALL') {
-      result = result.filter((sp) => sp.player.position === positionFilter)
-    }
-
-    // Target status filter
-    if (targetFilter !== 'all') {
-      result = result.filter((sp) => sp.targetStatus === targetFilter)
-    }
-
-    // Search
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase()
-      result = result.filter(
-        (sp) =>
-          sp.player.name.toLowerCase().includes(q) ||
-          sp.player.team.toLowerCase().includes(q),
-      )
-    }
-
-    // Sort
-    result = [...result].sort((a, b) => {
+    if (positionFilter !== 'ALL') result = result.filter((sp) => sp.player.position === positionFilter)
+    if (targetFilter !== 'all') result = result.filter((sp) => sp.targetStatus === targetFilter)
+    return [...result].sort((a, b) => {
       let cmp = 0
       switch (sortField) {
-        case 'rank':
-          cmp = a.player.consensusRank - b.player.consensusRank
-          break
-        case 'score':
-          cmp = b.strategyScore - a.strategyScore
-          break
+        case 'rank':  cmp = a.player.consensusRank - b.player.consensusRank; break
+        case 'score': cmp = b.strategyScore - a.strategyScore; break
         case 'value':
-          if (selectedLeague?.format === 'auction') {
-            cmp = (b.adjustedAuctionValue ?? b.player.consensusAuctionValue) -
-                  (a.adjustedAuctionValue ?? a.player.consensusAuctionValue)
-          } else {
-            cmp = (a.adjustedRoundValue ?? a.player.adp) - (b.adjustedRoundValue ?? b.player.adp)
-          }
+          cmp = selectedLeague?.format === 'auction'
+            ? (b.adjustedAuctionValue ?? b.player.consensusAuctionValue) - (a.adjustedAuctionValue ?? a.player.consensusAuctionValue)
+            : (a.adjustedRoundValue ?? a.player.adp) - (b.adjustedRoundValue ?? b.player.adp)
           break
-        case 'adp':
-          cmp = a.player.adp - b.player.adp
-          break
-        case 'name':
-          cmp = a.player.name.localeCompare(b.player.name)
-          break
+        case 'adp':  cmp = a.player.adp - b.player.adp; break
+        case 'name': cmp = a.player.name.localeCompare(b.player.name); break
       }
       return sortAsc ? -cmp : cmp
     })
-
-    return result
-  }, [scoredPlayers, positionFilter, targetFilter, searchQuery, sortField, sortAsc, selectedLeague])
+  }, [scoredPlayers, positionFilter, targetFilter, sortField, sortAsc, selectedLeague])
 
   const handleSort = (field: SortField) => {
-    if (sortField === field) {
-      setSortAsc(!sortAsc)
-    } else {
-      setSortField(field)
-      setSortAsc(false)
-    }
+    if (sortField === field) setSortAsc(!sortAsc)
+    else { setSortField(field); setSortAsc(false) }
   }
 
-  // --- Render ---
+  const cycleTargetFilter = () => {
+    const cycle: TargetFilter[] = ['all', 'target', 'avoid']
+    const next = cycle[(cycle.indexOf(targetFilter) + 1) % cycle.length]
+    setTargetFilter(next)
+  }
 
+  // ── Loading / error states ──
   if (loading) {
     return (
-      <div className="flex items-center gap-2 py-8 text-sm text-muted-foreground">
+      <div className="flex items-center gap-2 py-8" style={{ color: 'var(--ffi-ink-3)' }}>
         <Loader2 className="h-4 w-4 animate-spin" />
-        Loading leagues...
+        <span className="text-sm">Loading leagues...</span>
       </div>
     )
   }
 
   if (error) {
     return (
-      <div className="rounded-lg bg-destructive/10 border border-destructive/20 p-4 text-sm text-destructive flex items-start gap-3">
+      <div
+        className="rounded-[14px] p-4 text-sm flex items-start gap-3"
+        style={{ background: 'rgba(255,110,138,0.08)', border: '1px solid rgba(255,110,138,0.18)', color: '#FF6E8A' }}
+      >
         <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
         <div>
-          <p className="font-medium">Failed to load data</p>
-          <p className="text-destructive/80 mt-1">{error}</p>
+          <p className="font-bold" style={{ fontFamily: 'var(--font-cond)' }}>Failed to load data</p>
+          <p className="mt-1 opacity-80">{error}</p>
         </div>
       </div>
     )
@@ -349,238 +316,397 @@ export function DraftBoardClient() {
 
   if (leagues.length === 0) {
     return (
-      <div className="rounded-lg bg-muted/50 border border-border p-8 text-center space-y-2">
-        <ClipboardList className="h-8 w-8 text-muted-foreground mx-auto" />
-        <p className="text-sm font-medium">No leagues configured</p>
-        <p className="text-sm text-muted-foreground">
-          <a href="/prep/configure" className="text-primary underline underline-offset-4">
-            Configure a league
-          </a>{' '}
-          to build your draft board.
+      <div className="rounded-[14px] p-8 text-center" style={{ background: 'var(--ffi-surface-2)', border: '1px solid var(--ffi-hairline)' }}>
+        <ClipboardList className="h-8 w-8 mx-auto mb-2" style={{ color: 'var(--ffi-ink-3)' }} />
+        <p className="text-sm font-bold mb-1" style={{ fontFamily: 'var(--font-cond)', color: 'var(--ffi-ink)' }}>No leagues configured</p>
+        <p className="text-sm" style={{ color: 'var(--ffi-ink-3)' }}>
+          <a href="/prep/configure" style={{ color: 'var(--ffi-blue-bright)' }}>Configure a league</a> to build your draft board.
         </p>
       </div>
     )
   }
 
   return (
-    <div className="space-y-4">
-      {/* League selector + strategy badge */}
-      <div className="flex flex-wrap items-center gap-3">
+    <div className="pb-2">
+
+      {/* ── META STRIP ── */}
+      <div className="flex items-center gap-2 flex-wrap mb-4">
+        {/* League selector */}
         <Select value={selectedLeagueId ?? ''} onValueChange={setSelectedLeagueId}>
-          <SelectTrigger className="w-[220px]">
-            <SelectValue placeholder="Select a league" />
+          <SelectTrigger
+            className="h-auto text-[11px] font-bold rounded-full px-3 py-1.5"
+            style={{
+              fontFamily: 'var(--font-cond)',
+              letterSpacing: '0.14em',
+              background: 'var(--ffi-surface-2)',
+              border: '1px solid var(--ffi-hairline)',
+              color: 'var(--ffi-ink-2)',
+              width: 'auto',
+              minWidth: 0,
+            }}
+          >
+            <SelectValue />
           </SelectTrigger>
           <SelectContent>
             {leagues.map((league) => (
-              <SelectItem key={league.id} value={league.id}>
-                {league.name}
-              </SelectItem>
+              <SelectItem key={league.id} value={league.id}>{league.name}</SelectItem>
             ))}
           </SelectContent>
         </Select>
 
+        {/* Format badge */}
         {selectedLeague && (
-          <Badge variant="outline">
+          <span
+            className="font-bold text-[10px] uppercase rounded-full px-[10px] py-[4px]"
+            style={{
+              fontFamily: 'var(--font-cond)',
+              letterSpacing: '0.16em',
+              background: 'rgba(77,130,255,0.10)',
+              border: '1px solid rgba(77,130,255,0.18)',
+              color: 'var(--ffi-blue-bright)',
+            }}
+          >
             {selectedLeague.format === 'auction' ? 'Auction' : 'Snake'}
-          </Badge>
-        )}
-
-        {activeStrategy && (
-          <Badge variant="secondary" className="gap-1">
-            <span className="text-yellow-500">&#9733;</span>
-            {activeStrategy.name}
-          </Badge>
-        )}
-
-        {!activeStrategy && !dataLoading && players.length > 0 && (
-          <span className="text-xs text-muted-foreground">
-            No active strategy -{' '}
-            <a href="/prep/strategies" className="text-primary underline underline-offset-4">
-              set one
-            </a>
           </span>
         )}
 
-        {/* FF-028: Refresh & Re-analyze button */}
-        {selectedLeagueId && (
-          <Button
-            onClick={handleFullRefresh}
-            disabled={refreshing || dataLoading}
-            size="sm"
-            variant="outline"
-            className="ml-auto"
+        {/* Strategy badge */}
+        {activeStrategy && (
+          <span
+            className="flex items-center gap-1 font-bold text-[10px] uppercase rounded-full px-[10px] py-[4px]"
+            style={{
+              fontFamily: 'var(--font-cond)',
+              letterSpacing: '0.14em',
+              background: 'rgba(139,255,69,0.08)',
+              border: '1px solid rgba(139,255,69,0.16)',
+              color: 'var(--ffi-volt)',
+            }}
           >
-            {refreshing ? (
-              <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" />
-            ) : (
-              <RefreshCw className="h-3.5 w-3.5 mr-1.5" />
-            )}
-            {refreshing ? 'Refreshing...' : 'Refresh All'}
-          </Button>
+            <Star style={{ width: 11, height: 11 }} />
+            {activeStrategy.name}
+          </span>
         )}
+
+        {!activeStrategy && !dataLoading && players.length > 0 && (
+          <span className="text-[11px]" style={{ color: 'var(--ffi-ink-3)' }}>
+            <a href="/prep/strategies" style={{ color: 'var(--ffi-blue-bright)' }}>Set a strategy</a>
+          </span>
+        )}
+
+        {/* Player count + refresh */}
+        <div className="flex items-center gap-2 ml-auto">
+          {players.length > 0 && (
+            <span
+              className="font-bold text-[11px] tabular-nums"
+              style={{ fontFamily: 'var(--font-mono)', color: 'var(--ffi-ink-3)' }}
+            >
+              {filteredPlayers.length} players
+            </span>
+          )}
+          {selectedLeagueId && (
+            <button
+              onClick={handleFullRefresh}
+              disabled={refreshing || dataLoading}
+              className="flex items-center gap-1.5 rounded-full px-3 py-1.5 font-bold text-[11px] uppercase transition-opacity disabled:opacity-50"
+              style={{
+                fontFamily: 'var(--font-cond)',
+                letterSpacing: '0.12em',
+                background: 'var(--ffi-surface-2)',
+                border: '1px solid var(--ffi-hairline)',
+                color: 'var(--ffi-ink-2)',
+              }}
+            >
+              {refreshing
+                ? <Loader2 className="h-3 w-3 animate-spin" />
+                : <RefreshCw className="h-3 w-3" />
+              }
+              {refreshing ? 'Refreshing' : 'Refresh'}
+            </button>
+          )}
+        </div>
       </div>
 
-      {/* FF-028: Refresh feedback */}
+      {/* ── REFRESH FEEDBACK ── */}
       {refreshFeedback && (
-        <div className={`flex items-center gap-1.5 text-sm rounded-md px-3 py-2 ${
-          refreshFeedback.startsWith('Error')
-            ? 'bg-destructive/10 text-destructive border border-destructive/20'
-            : 'bg-green-500/10 text-green-600 dark:text-green-400 border border-green-500/20'
-        }`}>
-          {refreshFeedback.startsWith('Error') ? (
-            <AlertCircle className="h-4 w-4 shrink-0" />
-          ) : (
-            <CheckCircle2 className="h-4 w-4 shrink-0" />
-          )}
+        <div
+          className="flex items-center gap-2 text-sm rounded-[11px] px-3 py-2 mb-4"
+          style={
+            refreshFeedback.startsWith('Error')
+              ? { background: 'rgba(255,110,138,0.08)', border: '1px solid rgba(255,110,138,0.18)', color: '#FF6E8A' }
+              : { background: 'rgba(139,255,69,0.08)', border: '1px solid rgba(139,255,69,0.18)', color: 'var(--ffi-volt)' }
+          }
+        >
+          {refreshFeedback.startsWith('Error')
+            ? <AlertCircle className="h-4 w-4 shrink-0" />
+            : <CheckCircle2 className="h-4 w-4 shrink-0" />
+          }
           {refreshFeedback}
         </div>
       )}
 
-      {/* Content */}
+      {/* ── CONTENT ── */}
       {dataLoading ? (
         <PlayerListSkeleton />
       ) : players.length === 0 ? (
-        <div className="rounded-md bg-muted/50 border border-border p-6 text-center">
-          <p className="text-sm text-muted-foreground">
+        <div className="rounded-[14px] p-6 text-center" style={{ background: 'var(--ffi-surface-2)', border: '1px solid var(--ffi-hairline)' }}>
+          <p className="text-sm" style={{ color: 'var(--ffi-ink-3)' }}>
             No player data yet.{' '}
-            <a href="/prep" className="text-primary underline underline-offset-4">
-              Run a data refresh
-            </a>{' '}
+            <a href="/prep" style={{ color: 'var(--ffi-blue-bright)' }}>Run a data refresh</a>{' '}
             from the Prep hub.
           </p>
         </div>
       ) : (
         <>
-        {/* FF-278: ADP Movers — players with high cross-source divergence */}
-        {topMovers.length > 0 && (
-          <div className="rounded-lg border border-border/50 bg-muted/30 p-3 space-y-2">
-            <div className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
-              <TrendingUp className="h-3.5 w-3.5" />
-              ADP Movers
-              <span className="ml-auto text-[10px] font-normal">Cross-source divergence ↕ &gt;10 spots</span>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {topMovers.map((p) => {
-                const div = adpDivergenceMap.get(p.id) ?? 0
-                return (
-                  <div
-                    key={p.id}
-                    className="flex items-center gap-1.5 rounded-md bg-background/70 border border-border/40 px-2 py-1 text-xs"
-                    title={`ADP diverges ${div.toFixed(0)} spots across sources`}
-                  >
-                    <span className="text-muted-foreground font-medium w-7">{p.position}</span>
-                    <span className="font-medium truncate max-w-[100px]">{p.name}</span>
-                    <span className="text-[var(--ffi-warning)] font-mono font-bold text-[10px] flex items-center gap-0.5">
-                      <TrendingDown className="h-3 w-3" />
-                      ↕{div.toFixed(0)}
-                    </span>
-                  </div>
-                )
-              })}
-            </div>
-          </div>
-        )}
-
-        <Tabs defaultValue="board">
-          <TabsList>
-            <TabsTrigger value="board">All Players</TabsTrigger>
-            <TabsTrigger value="position">By Position</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="board" className="space-y-0 mt-2">
-            {/* Sticky filter bar with glass backdrop */}
-            <div className="ffi-filter-sticky mb-3">
-              <div className="flex flex-wrap items-center gap-2">
-                {/* Position pills — blue active state */}
-                <div className="flex gap-1 flex-wrap">
-                  {POSITIONS.map((pos) => (
-                    <button
-                      key={pos}
-                      onClick={() => setPositionFilter(pos)}
-                      className={`
-                        px-3 py-1 rounded-lg font-headline font-bold text-xs tracking-tight
-                        transition-all min-h-[32px] flex items-center justify-center
-                        ${positionFilter === pos
-                          ? 'bg-[#5582e6] text-white shadow-[0_0_10px_rgba(85,130,230,0.35)]'
-                          : 'bg-[#0f222c] text-[#9eadb8] hover:bg-[#192f3b]'
-                        }
-                      `}
+          {/* ── ADP MOVERS STRIP ── */}
+          {topMovers.length > 0 && (
+            <div className="mb-4">
+              <div
+                className="flex items-center gap-2 mb-2"
+                style={{ fontFamily: 'var(--font-cond)' }}
+              >
+                <span
+                  className="font-bold text-[9px] uppercase tracking-[0.30em]"
+                  style={{ color: 'var(--ffi-ink-3)' }}
+                >
+                  ADP Movers
+                </span>
+                <span
+                  className="font-bold text-[9px] rounded-full px-[7px] py-[2px]"
+                  style={{
+                    fontFamily: 'var(--font-mono)',
+                    background: 'rgba(255,176,92,0.12)',
+                    border: '1px solid rgba(255,176,92,0.22)',
+                    color: 'var(--ffi-warning)',
+                    letterSpacing: '0.02em',
+                  }}
+                >
+                  Cross-source divergence &gt;10
+                </span>
+              </div>
+              <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
+                {topMovers.map((p) => {
+                  const div = adpDivergenceMap.get(p.id) ?? 0
+                  const posColors = { QB: '#FF6E8A', RB: '#56E0A0', WR: '#6CA8FF', TE: '#FFB05C', K: '#A78BFA', DEF: '#637396' } as Record<string, string>
+                  return (
+                    <div
+                      key={p.id}
+                      className="flex-shrink-0 flex items-center gap-2 rounded-[11px] px-3 py-[9px]"
+                      style={{ background: 'var(--ffi-surface-2)', border: '1px solid var(--ffi-hairline)' }}
                     >
-                      {pos}
-                    </button>
-                  ))}
+                      <span
+                        className="font-bold text-[10px] px-[6px] py-[3px] rounded-[6px] flex-shrink-0"
+                        style={{
+                          fontFamily: 'var(--font-cond)',
+                          background: 'rgba(150,180,255,0.10)',
+                          color: posColors[p.position] ?? 'var(--ffi-ink-2)',
+                        }}
+                      >
+                        {p.position}
+                      </span>
+                      <span
+                        className="font-bold text-[13px] whitespace-nowrap"
+                        style={{ fontFamily: 'var(--font-cond)', color: 'var(--ffi-ink)' }}
+                      >
+                        {p.name}
+                      </span>
+                      <span
+                        className="flex items-center gap-1 font-bold text-[11px]"
+                        style={{ fontFamily: 'var(--font-mono)', color: 'var(--ffi-warning)' }}
+                      >
+                        <TrendingDown className="h-[11px] w-[11px]" />
+                        {div.toFixed(0)}
+                      </span>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* ── TABS ── */}
+          <div
+            className="flex gap-1 mb-0 rounded-[12px] p-1"
+            style={{ background: 'var(--ffi-surface-1)', border: '1px solid var(--ffi-hairline)' }}
+          >
+            {(['board', 'position'] as const).map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className="flex-1 rounded-[9px] py-[9px] font-bold text-[12px] uppercase transition-all"
+                style={{
+                  fontFamily: 'var(--font-cond)',
+                  letterSpacing: '0.12em',
+                  ...(activeTab === tab
+                    ? {
+                        background: 'var(--ffi-blue)',
+                        color: '#fff',
+                        boxShadow: '0 4px 14px -4px rgba(77,130,255,0.5)',
+                      }
+                    : {
+                        color: 'var(--ffi-ink-3)',
+                      }),
+                }}
+              >
+                {tab === 'board' ? 'All Players' : 'By Position'}
+              </button>
+            ))}
+          </div>
+
+          {activeTab === 'board' && (
+            <>
+              {/* ── FILTER BAR ── */}
+              <div className="py-2 sticky top-0 z-10" style={{ background: 'linear-gradient(180deg, var(--ffi-bg-0) 80%, transparent)' }}>
+                {/* Position pills */}
+                <div className="flex gap-1.5 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
+                  {POSITIONS.map((pos) => {
+                    const isActive = positionFilter === pos
+                    const posColor = pos !== 'ALL' ? POS_PILL_COLORS[pos] : null
+                    return (
+                      <button
+                        key={pos}
+                        onClick={() => setPositionFilter(pos)}
+                        className="flex-shrink-0 rounded-full font-bold text-[12px] uppercase whitespace-nowrap transition-all"
+                        style={{
+                          fontFamily: 'var(--font-cond)',
+                          letterSpacing: '0.10em',
+                          padding: '7px 13px',
+                          ...(pos === 'ALL' && isActive
+                            ? {
+                                background: 'var(--ffi-blue)',
+                                color: '#fff',
+                                boxShadow: '0 4px 14px -4px rgba(77,130,255,0.45)',
+                                border: 'none',
+                              }
+                            : pos === 'ALL'
+                              ? {
+                                  background: 'var(--ffi-surface-2)',
+                                  border: '1px solid var(--ffi-hairline)',
+                                  color: 'var(--ffi-ink-3)',
+                                }
+                            : isActive && posColor
+                              ? {
+                                  background: 'var(--ffi-surface-2)',
+                                  border: `1px solid ${posColor.border}`,
+                                  color: posColor.text,
+                                  boxShadow: `0 0 10px ${posColor.border}`,
+                                }
+                              : posColor
+                                ? {
+                                    background: 'var(--ffi-surface-2)',
+                                    border: `1px solid rgba(150,180,255,0.10)`,
+                                    color: posColor.text,
+                                  }
+                                : {
+                                    background: 'var(--ffi-surface-2)',
+                                    border: '1px solid var(--ffi-hairline)',
+                                    color: 'var(--ffi-ink-3)',
+                                  }),
+                        }}
+                      >
+                        {pos}
+                      </button>
+                    )
+                  })}
                 </div>
 
-                {/* Target filter */}
-                <Select value={targetFilter} onValueChange={(v) => setTargetFilter(v as typeof targetFilter)}>
-                  <SelectTrigger className="w-[110px] h-8 text-xs">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Players</SelectItem>
-                    <SelectItem value="target">Targets</SelectItem>
-                    <SelectItem value="avoid">Avoids</SelectItem>
-                    <SelectItem value="neutral">Neutral</SelectItem>
-                  </SelectContent>
-                </Select>
-
-                {/* Search */}
-                <Input
-                  placeholder="Search name or team..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="h-8 w-[160px] text-xs"
-                />
-
-                {/* Count + density toggle */}
-                <div className="flex items-center gap-2 ml-auto">
-                  <span className="font-mono text-xs tabular-nums text-[#9eadb8]">
-                    {filteredPlayers.length} players
-                  </span>
-                  <button
-                    onClick={() => setCompact(c => !c)}
-                    className={`
-                      p-1.5 rounded-lg transition-all min-h-[32px] min-w-[32px] flex items-center justify-center
-                      ${compact
-                        ? 'bg-[#5582e6]/20 text-[#8bacff]'
-                        : 'bg-[#0f222c] text-[#9eadb8] hover:bg-[#192f3b]'
-                      }
-                    `}
-                    title={compact ? 'Comfortable view' : 'Compact view'}
-                    aria-label="Toggle row density"
+                {/* Sort pills + target filter */}
+                <div className="flex items-center gap-1.5 mt-2 overflow-x-auto pb-0.5" style={{ scrollbarWidth: 'none' }}>
+                  <span
+                    className="font-bold text-[9px] uppercase flex-shrink-0"
+                    style={{ fontFamily: 'var(--font-cond)', letterSpacing: '0.25em', color: 'var(--ffi-ink-3)' }}
                   >
-                    {compact ? <AlignJustify className="h-3.5 w-3.5" /> : <LayoutList className="h-3.5 w-3.5" />}
+                    Sort
+                  </span>
+                  {SORT_OPTIONS.map(({ field, label }) => {
+                    const isActive = sortField === field
+                    return (
+                      <button
+                        key={field}
+                        onClick={() => handleSort(field)}
+                        className="flex-shrink-0 flex items-center gap-1 rounded-full font-bold text-[11px] uppercase transition-all"
+                        style={{
+                          fontFamily: 'var(--font-cond)',
+                          letterSpacing: '0.10em',
+                          padding: '5px 11px',
+                          ...(isActive
+                            ? {
+                                background: 'rgba(77,130,255,0.18)',
+                                border: '1px solid rgba(77,130,255,0.35)',
+                                color: 'var(--ffi-blue-bright)',
+                              }
+                            : {
+                                background: 'var(--ffi-surface-1)',
+                                border: '1px solid var(--ffi-hairline)',
+                                color: 'var(--ffi-ink-3)',
+                              }),
+                        }}
+                      >
+                        {label}
+                        {isActive && (sortAsc
+                          ? <ArrowUp style={{ width: 9, height: 9 }} />
+                          : <ArrowDown style={{ width: 9, height: 9 }} />
+                        )}
+                      </button>
+                    )
+                  })}
+
+                  {/* Target cycle filter */}
+                  <button
+                    onClick={cycleTargetFilter}
+                    className="flex-shrink-0 ml-auto flex items-center gap-1 rounded-full font-bold text-[11px] uppercase transition-all"
+                    style={{
+                      fontFamily: 'var(--font-cond)',
+                      letterSpacing: '0.10em',
+                      padding: '5px 11px',
+                      ...(targetFilter === 'target'
+                        ? {
+                            background: 'rgba(139,255,69,0.12)',
+                            border: '1px solid rgba(139,255,69,0.25)',
+                            color: 'var(--ffi-volt)',
+                          }
+                        : targetFilter === 'avoid'
+                          ? {
+                              background: 'rgba(255,110,138,0.10)',
+                              border: '1px solid rgba(255,110,138,0.22)',
+                              color: '#FF6E8A',
+                            }
+                          : {
+                              background: 'var(--ffi-surface-1)',
+                              border: '1px solid var(--ffi-hairline)',
+                              color: 'var(--ffi-ink-3)',
+                            }),
+                    }}
+                  >
+                    {targetFilter === 'target' ? 'Targets' : targetFilter === 'avoid' ? 'Avoids' : 'All'}
                   </button>
                 </div>
               </div>
+
+              {/* ── PLAYER LIST ── */}
+              <DraftBoardTable
+                players={filteredPlayers}
+                format={selectedLeague?.format ?? 'auction'}
+                onToggleTarget={async (playerId) => {
+                  const result = await toggleTag(playerId, 'target')
+                  if (result.success) refetchTags()
+                }}
+                onToggleAvoid={async (playerId) => {
+                  const result = await toggleTag(playerId, 'avoid')
+                  if (result.success) refetchTags()
+                }}
+                isTagLoading={toggleLoading || tagsLoading}
+              />
+            </>
+          )}
+
+          {activeTab === 'position' && (
+            <div className="mt-3">
+              <PositionBreakdown
+                players={scoredPlayers}
+                format={selectedLeague?.format ?? 'auction'}
+              />
             </div>
-
-            <DraftBoardTable
-              players={filteredPlayers}
-              format={selectedLeague?.format ?? 'auction'}
-              sortField={sortField}
-              sortAsc={sortAsc}
-              onSort={handleSort}
-              onToggleTarget={async (playerId) => {
-                const result = await toggleTag(playerId, 'target')
-                if (result.success) refetchTags()
-              }}
-              onToggleAvoid={async (playerId) => {
-                const result = await toggleTag(playerId, 'avoid')
-                if (result.success) refetchTags()
-              }}
-              isTagLoading={toggleLoading || tagsLoading}
-              compact={compact}
-            />
-          </TabsContent>
-
-          <TabsContent value="position" className="mt-3">
-            <PositionBreakdown
-              players={scoredPlayers}
-              format={selectedLeague?.format ?? 'auction'}
-            />
-          </TabsContent>
-        </Tabs>
+          )}
         </>
       )}
     </div>

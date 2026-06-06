@@ -2,6 +2,20 @@
 
 ---
 
+## 2026-06-06 — UXV2-4: Draft Board / Player Pool GRIDIRON rebuild
+
+**Task:** UXV2-4 | **Class:** `output` | **Lenses:** Design, QA
+
+**What changed:**
+- `src/components/prep/draft-board-table.tsx` — full rewrite. Removed shadcn primitives + old sort UI. New `PositionChip` (color-coded per position: QB red, RB green, WR blue, TE amber, K purple, DEF gray). New `PlayerCard`: rank (22px mono, blue-bright for top-24/blue for rest), position chip, name+team+bye, 3px score bar (volt fill 75+, blue-bright 55-74, muted below), value ($XX or Rd X at 20px mono) + ADP inline, chevron expand. Expanded state: insight panel with confidence meter gradient bar, target/avoid toggle buttons, 4-cell stats grid (ECR/ADP/Range/Bye). Target badge (volt glow pill) + avoid badge (red pill) inline on card. Boost tags (blue-tinted pills). Opacity 58% for avoid players. Left border 2.5px volt for targets.
+- `src/app/(app)/prep/board/client.tsx` — full rewrite. Replaced shadcn `Tabs` with custom tab buttons (blue active fill). New filter bar: position pills (ALL=blue-fill active; pos pills show position color text+border; box-shadow glow on active pos pill). Sort pills row (Score/Value/Rank/ADP with ArrowUp/Down indicator). Target cycle filter button (all→target→avoid→all, color-coded per state). ADP movers redesigned as horizontal scroll chip strip with position color + name + TrendingDown + divergence number. Meta strip: compact league Select + format badge (blue) + strategy badge (volt) + player count + refresh pill button. All error/loading/empty states updated to palette-correct colors.
+- `src/app/(app)/prep/board/page.tsx` — stripped to bare `<DraftBoardClient />` (old h1/p wrapper removed).
+- `.claude/mockups/draft-board-phone.html` — approved phone mockup (locked).
+
+**Verify result:** type-check clean (0 errors), `next build` passes, `/prep/board` in build output.
+
+---
+
 ## 2026-06-06 — UXV2-2b: Motion System (GRIDIRON foundation)
 
 **Task:** UXV2-2b | **Class:** `shared` | **Lenses:** Design, QA

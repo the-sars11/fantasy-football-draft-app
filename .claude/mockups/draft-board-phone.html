@@ -1,0 +1,807 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#05080F" />
+<title>GRIDIRON -- Draft Board</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Saira:wght@400;500;600;700&family=Saira+Condensed:wght@600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+/* GRIDIRON v3 -- Draft Board / Player Pool
+   UXV2-4: Data-dense, Copilot-grade numbers, set palette.
+   PALETTE: colorful-dark canvas + volt (moment/value) + electric blue (structure)
+   TYPE: Anton (hero) / Saira Condensed (labels/titles) / JetBrains Mono (numbers)
+   PERF: solid layered surfaces + box-shadow. NO backdrop-filter blur. */
+:root {
+  --bg-0:#05080F; --bg-1:#080D18;
+  --s1:#0C1322; --s2:#111A2E; --s3:#16223A;
+  --h: rgba(150,180,255,0.10);
+  --hb:rgba(180,205,255,0.18);
+  --volt:#8BFF45; --vd:#5FE21F; --vi:#0a1f02; --vg:rgba(139,255,69,0.32);
+  --blue:#2E5FD9; --bb:#4D82FF; --bbright:#79A6FF; --bg2:rgba(77,130,255,0.28);
+  --ink:#EEF2FF; --i2:#8A97C8; --i3:#525E8A;
+  --warn:#FFB05C;
+  --pos-qb:#FF6E8A;
+  --pos-rb:#56E0A0;
+  --pos-wr:#6CA8FF;
+  --pos-te:#FFB05C;
+  --pos-k:#A78BFA;
+  --pos-def:#637396;
+  --fd:"Anton",sans-serif;
+  --fc:"Saira Condensed",sans-serif;
+  --fu:"Saira",system-ui,sans-serif;
+  --fn:"JetBrains Mono",monospace;
+  --r:16px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{
+  font-family:var(--fu); color:var(--ink); overflow-x:hidden;
+  background:#04060D;
+  -webkit-font-smoothing:antialiased;
+}
+/* Fixed atmosphere layer -- exact values from approved draft-room-phone.html */
+body::before{
+  content:"";
+  position:fixed; inset:0; z-index:-1; pointer-events:none;
+  background:
+    radial-gradient(700px 480px at 22% -6%, rgba(77,130,255,0.18), transparent 58%),
+    radial-gradient(620px 560px at 92%  4%, rgba(139,255,69,0.07),  transparent 55%),
+    radial-gradient(800px 700px at 50% 116%, rgba(120,80,255,0.12), transparent 60%),
+    linear-gradient(180deg, #060A14, #04060D);
+}
+.app{max-width:430px;margin:0 auto;min-height:100dvh;padding-bottom:88px;}
+
+/* ===== HEADER ===== */
+header{
+  position:sticky;top:0;z-index:20;
+  padding:calc(env(safe-area-inset-top) + 14px) 16px 12px;
+  background:linear-gradient(180deg,rgba(5,8,15,0.97) 70%,rgba(5,8,15,0));
+}
+.topbar{display:flex;align-items:center;gap:10px;}
+.back-btn{
+  width:34px;height:34px;border-radius:10px;flex-shrink:0;
+  background:var(--s2);border:1px solid var(--h);
+  display:grid;place-items:center;cursor:pointer;
+}
+.back-btn svg{width:16px;height:16px;stroke:var(--i2);stroke-width:2.2;fill:none;}
+.page-title-block{flex:1;min-width:0;}
+.page-eyebrow{
+  font-family:var(--fc);font-weight:700;font-size:9px;
+  letter-spacing:.30em;color:var(--i3);text-transform:uppercase;
+}
+.page-title{
+  font-family:var(--fc);font-weight:800;font-size:22px;line-height:1;
+  margin-top:1px;
+}
+.refresh-btn{
+  display:flex;align-items:center;gap:6px;
+  padding:7px 12px;border-radius:999px;
+  background:var(--s2);border:1px solid var(--h);
+  font-family:var(--fc);font-weight:700;font-size:11px;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--i2);
+  cursor:pointer;white-space:nowrap;
+}
+.refresh-btn svg{width:13px;height:13px;stroke:var(--i2);stroke-width:2;fill:none;}
+
+/* league + strategy strip */
+.meta-strip{
+  display:flex;align-items:center;gap:8px;margin-top:11px;flex-wrap:wrap;
+}
+.meta-badge{
+  display:flex;align-items:center;gap:5px;
+  font-family:var(--fc);font-weight:700;font-size:10px;letter-spacing:.16em;
+  text-transform:uppercase;padding:4px 10px;border-radius:999px;
+}
+.meta-badge.format{
+  background:rgba(77,130,255,0.10);border:1px solid rgba(77,130,255,0.18);
+  color:var(--bbright);
+}
+.meta-badge.strat{
+  background:rgba(139,255,69,0.08);border:1px solid rgba(139,255,69,0.16);
+  color:var(--volt);
+}
+.meta-badge svg{width:11px;height:11px;stroke:currentColor;stroke-width:2;fill:none;}
+.player-count{
+  font-family:var(--fn);font-weight:600;font-size:11px;
+  color:var(--i3);margin-left:auto;letter-spacing:.02em;
+}
+
+/* ===== MAIN ===== */
+main{padding:8px 16px 0;}
+
+/* ===== ADP MOVERS STRIP ===== */
+.sect{
+  font-family:var(--fc);font-weight:700;font-size:9px;
+  letter-spacing:.30em;color:var(--i3);text-transform:uppercase;
+  margin-top:18px;margin-bottom:9px;display:flex;align-items:center;gap:8px;
+}
+.sect:first-child{margin-top:4px;}
+.sect-badge{
+  font-family:var(--fn);font-weight:600;font-size:9px;
+  background:rgba(255,176,92,0.12);border:1px solid rgba(255,176,92,0.22);
+  color:var(--warn);padding:2px 7px;border-radius:999px;letter-spacing:.02em;
+}
+
+.movers-scroll{
+  display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;
+  scrollbar-width:none;
+}
+.movers-scroll::-webkit-scrollbar{display:none;}
+
+.mover-chip{
+  flex-shrink:0;
+  display:flex;align-items:center;gap:7px;
+  background:var(--s2);border:1px solid var(--h);
+  border-radius:11px;padding:9px 12px;min-width:0;
+}
+.mover-pos{
+  font-family:var(--fc);font-weight:800;font-size:11px;
+  width:26px;text-align:center;flex-shrink:0;border-radius:6px;
+  padding:2px 0;
+}
+.mover-name{
+  font-family:var(--fc);font-weight:700;font-size:13px;
+  white-space:nowrap;
+}
+.mover-div{
+  display:flex;align-items:center;gap:3px;
+  font-family:var(--fn);font-weight:700;font-size:11px;
+  color:var(--warn);
+}
+.mover-div svg{width:11px;height:11px;stroke:var(--warn);stroke-width:2.5;fill:none;}
+
+/* ===== TABS ===== */
+.tabs{
+  display:flex;gap:4px;margin-top:18px;margin-bottom:0;
+  background:var(--s1);border:1px solid var(--h);border-radius:12px;padding:4px;
+}
+.tab{
+  flex:1;font-family:var(--fc);font-weight:700;font-size:12px;
+  letter-spacing:.12em;text-transform:uppercase;
+  padding:9px 12px;border-radius:9px;text-align:center;cursor:pointer;
+  transition:background .15s,color .15s;color:var(--i3);
+}
+.tab.active{
+  background:var(--bb);color:#fff;
+  box-shadow:0 4px 14px -4px rgba(77,130,255,0.5);
+}
+
+/* ===== STICKY FILTER BAR ===== */
+.filter-bar{
+  position:sticky;top:88px;z-index:10;
+  background:linear-gradient(180deg,rgba(4,6,13,0.96) 80%,transparent);
+  padding:10px 0 8px;margin:0 -16px;padding-left:16px;padding-right:16px;
+}
+
+/* position pills */
+.pos-pills{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;}
+.pos-pills::-webkit-scrollbar{display:none;}
+.pos-pill{
+  flex-shrink:0;
+  font-family:var(--fc);font-weight:800;font-size:12px;letter-spacing:.10em;
+  padding:7px 13px;border-radius:999px;text-transform:uppercase;
+  cursor:pointer;transition:all .15s;white-space:nowrap;
+}
+.pos-pill.all{
+  background:var(--bb);color:#fff;
+  box-shadow:0 4px 14px -4px rgba(77,130,255,0.45);
+}
+.pos-pill.pos{
+  background:var(--s2);border:1px solid var(--h);color:var(--i2);
+}
+.pos-pill.pos:hover{border-color:var(--hb);}
+.pos-pill.pos.qb  { border-color:rgba(255,110,138,0.22); color:var(--pos-qb); }
+.pos-pill.pos.rb  { border-color:rgba(86,224,160,0.22); color:var(--pos-rb); }
+.pos-pill.pos.wr  { border-color:rgba(108,168,255,0.22); color:var(--pos-wr); }
+.pos-pill.pos.te  { border-color:rgba(255,176,92,0.22); color:var(--pos-te); }
+
+/* sort + control row */
+.sort-row{
+  display:flex;align-items:center;gap:6px;margin-top:8px;overflow-x:auto;
+  scrollbar-width:none;
+}
+.sort-row::-webkit-scrollbar{display:none;}
+.sort-lbl{
+  font-family:var(--fc);font-weight:700;font-size:9px;
+  letter-spacing:.25em;text-transform:uppercase;color:var(--i3);
+  white-space:nowrap;flex-shrink:0;
+}
+.sort-pill{
+  flex-shrink:0;
+  font-family:var(--fc);font-weight:700;font-size:11px;letter-spacing:.10em;
+  padding:5px 11px;border-radius:999px;text-transform:uppercase;
+  cursor:pointer;transition:all .15s;
+  background:var(--s1);border:1px solid var(--h);color:var(--i3);
+}
+.sort-pill.active{
+  background:rgba(77,130,255,0.18);border-color:rgba(77,130,255,0.35);
+  color:var(--bbright);
+}
+.sort-pill .arrow{font-size:9px;margin-left:2px;}
+
+.target-filter{
+  flex-shrink:0;margin-left:auto;
+  display:flex;align-items:center;gap:5px;
+  font-family:var(--fc);font-weight:700;font-size:11px;letter-spacing:.10em;
+  padding:5px 11px;border-radius:999px;text-transform:uppercase;
+  background:var(--s1);border:1px solid var(--h);color:var(--i3);cursor:pointer;
+}
+.target-filter svg{width:11px;height:11px;stroke:currentColor;stroke-width:2;fill:none;}
+
+/* ===== PLAYER LIST ===== */
+.player-list{margin-top:8px;display:flex;flex-direction:column;gap:6px;}
+
+/* PLAYER ROW CARD */
+.pcard{
+  background:var(--s2);border:1px solid var(--h);
+  border-radius:14px;padding:12px 14px;
+  cursor:pointer;transition:border-color .15s,box-shadow .15s;
+  position:relative;overflow:hidden;
+}
+.pcard:hover{border-color:var(--hb);}
+/* left accent -- target/avoid/neutral */
+.pcard.target { border-left:2.5px solid var(--volt); }
+.pcard.avoid  { opacity:.58; }
+
+/* Main row */
+.prow{display:flex;align-items:center;gap:10px;}
+
+/* rank */
+.rank-num{
+  font-family:var(--fn);font-weight:700;
+  font-size:22px;line-height:1;
+  color:var(--bb);width:28px;text-align:center;flex-shrink:0;letter-spacing:-.02em;
+}
+.rank-num.elite{ color:var(--bbright); }
+
+/* position chip */
+.pos-chip{
+  font-family:var(--fc);font-weight:800;font-size:11px;
+  padding:4px 7px;border-radius:7px;flex-shrink:0;
+  line-height:1;color:#050810;
+}
+.pos-chip.QB { background:var(--pos-qb); }
+.pos-chip.RB { background:var(--pos-rb); }
+.pos-chip.WR { background:var(--pos-wr); }
+.pos-chip.TE { background:var(--pos-te); }
+.pos-chip.K  { background:var(--pos-k); }
+.pos-chip.DEF{ background:var(--pos-def);color:var(--i2); }
+
+/* player name block */
+.pname-block{flex:1;min-width:0;}
+.pname{
+  font-family:var(--fc);font-weight:800;font-size:16px;
+  line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.pmeta{
+  font-family:var(--fn);font-weight:500;font-size:10px;
+  color:var(--i3);margin-top:3px;letter-spacing:.02em;
+}
+
+/* score bar */
+.score-bar-wrap{
+  display:flex;align-items:center;gap:6px;margin-top:6px;
+}
+.score-bar-track{
+  flex:1;height:3px;border-radius:999px;
+  background:rgba(255,255,255,0.07);overflow:hidden;
+}
+.score-bar-fill{
+  height:100%;border-radius:999px;transition:width .4s ease;
+}
+.score-bar-fill.high { background:var(--volt); }
+.score-bar-fill.mid  { background:var(--bbright); }
+.score-bar-fill.low  { background:var(--i3); }
+.score-val{
+  font-family:var(--fn);font-weight:700;font-size:10px;
+  flex-shrink:0;letter-spacing:.02em;
+}
+.score-val.high { color:var(--volt); }
+.score-val.mid  { color:var(--bbright); }
+.score-val.low  { color:var(--i3); }
+
+/* value block (right) */
+.val-block{text-align:right;flex-shrink:0;}
+.val-main{
+  font-family:var(--fn);font-weight:700;font-size:20px;
+  color:var(--bb);line-height:1;letter-spacing:-.01em;
+}
+.val-adp{
+  font-family:var(--fn);font-weight:500;font-size:10px;
+  color:var(--i3);margin-top:3px;
+}
+
+/* expand chevron */
+.expand-chev{flex-shrink:0;opacity:.4;}
+.expand-chev svg{width:15px;height:15px;stroke:var(--i2);stroke-width:2;fill:none;
+  transition:transform .2s;}
+.pcard.open .expand-chev svg{transform:rotate(180deg);}
+
+/* target / avoid badge inline */
+.ptag{
+  display:inline-flex;align-items:center;gap:4px;
+  font-family:var(--fc);font-weight:700;font-size:9px;letter-spacing:.14em;
+  padding:2px 7px;border-radius:999px;text-transform:uppercase;
+  margin-top:6px;
+}
+.ptag.target{
+  background:rgba(139,255,69,0.15);border:1px solid rgba(139,255,69,0.28);
+  color:var(--volt);
+  box-shadow:0 0 10px rgba(139,255,69,0.15);
+}
+.ptag.avoid{
+  background:rgba(255,110,138,0.12);border:1px solid rgba(255,110,138,0.22);
+  color:#FF6E8A;
+}
+.ptag svg{width:10px;height:10px;stroke:currentColor;stroke-width:2.5;fill:none;}
+
+/* boost tags */
+.boost-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px;}
+.boost-tag{
+  font-family:var(--fc);font-weight:600;font-size:10px;
+  background:rgba(77,130,255,0.08);border:1px solid rgba(77,130,255,0.14);
+  color:var(--bbright);padding:2px 8px;border-radius:6px;
+}
+
+/* ===== EXPANDED SECTION ===== */
+.pexpand{
+  margin-top:14px;padding-top:13px;
+  border-top:1px solid rgba(150,180,255,0.08);
+}
+.insight-panel{
+  background:rgba(77,130,255,0.07);border:1px solid rgba(77,130,255,0.13);
+  border-radius:11px;padding:11px 13px;
+}
+.insight-lbl{
+  font-family:var(--fc);font-weight:700;font-size:9px;
+  letter-spacing:.26em;text-transform:uppercase;color:var(--bbright);margin-bottom:6px;
+}
+.insight-txt{font-size:12px;line-height:1.50;color:var(--i2);}
+
+/* confidence meter */
+.conf-row{display:flex;align-items:center;gap:8px;margin-top:9px;}
+.conf-track{flex:1;height:2px;border-radius:999px;background:rgba(255,255,255,0.07);overflow:hidden;}
+.conf-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--bb),var(--bbright));}
+.conf-lbl{
+  font-family:var(--fn);font-weight:600;font-size:10px;
+  color:var(--bbright);flex-shrink:0;
+}
+
+/* tag actions */
+.tag-actions{display:flex;gap:8px;margin-top:12px;}
+.tag-btn{
+  flex:1;display:flex;align-items:center;justify-content:center;gap:7px;
+  padding:10px 14px;border-radius:11px;
+  font-family:var(--fc);font-weight:800;font-size:12px;
+  letter-spacing:.10em;text-transform:uppercase;cursor:pointer;
+  transition:all .15s;
+}
+.tag-btn.target-set{
+  background:rgba(139,255,69,0.14);border:1px solid rgba(139,255,69,0.30);
+  color:var(--volt);box-shadow:0 0 14px rgba(139,255,69,0.14);
+}
+.tag-btn.target-idle{
+  background:var(--s3);border:1px solid var(--h);color:var(--i3);
+}
+.tag-btn.avoid-set{
+  background:rgba(255,110,138,0.12);border:1px solid rgba(255,110,138,0.24);
+  color:#FF6E8A;
+}
+.tag-btn.avoid-idle{
+  background:var(--s3);border:1px solid var(--h);color:var(--i3);
+}
+.tag-btn svg{width:13px;height:13px;stroke:currentColor;stroke-width:2.5;fill:none;}
+
+/* stats grid (expanded) */
+.stats-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:12px;
+  margin-top:14px;
+}
+.stat-cell .k{
+  font-family:var(--fc);font-weight:700;font-size:9px;
+  letter-spacing:.22em;text-transform:uppercase;color:var(--i3);
+}
+.stat-cell .v{
+  font-family:var(--fn);font-weight:700;font-size:16px;
+  margin-top:3px;line-height:1;
+}
+.stat-cell .v.blue{color:var(--bbright);}
+.stat-cell .v.volt{color:var(--volt);}
+.stat-cell .v.warn{color:var(--warn);}
+
+/* ===== BOTTOM NAV ===== */
+.nav{
+  position:fixed;bottom:0;left:0;right:0;z-index:30;
+  background:rgba(5,8,15,0.96);
+  border-top:1px solid var(--h);
+  padding:10px 0 calc(env(safe-area-inset-bottom) + 10px);
+}
+.nav-inner{
+  max-width:430px;margin:0 auto;
+  display:grid;grid-template-columns:repeat(3,1fr);
+}
+.nav-item{
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+  font-family:var(--fc);font-weight:700;font-size:10px;
+  letter-spacing:.14em;text-transform:uppercase;
+  color:var(--i3);cursor:pointer;padding:4px 0;
+}
+.nav-item.active{color:var(--bbright);}
+.nav-item svg{width:20px;height:20px;stroke:currentColor;stroke-width:1.8;fill:none;}
+.nav-dot{
+  width:4px;height:4px;border-radius:50%;background:var(--bbright);
+  margin-top:1px;box-shadow:0 0 6px var(--bbright);
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- ===== HEADER ===== -->
+<header>
+  <div class="topbar">
+    <button class="back-btn">
+      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <div class="page-title-block">
+      <div class="page-eyebrow">Prep Mode</div>
+      <div class="page-title">Draft Board</div>
+    </div>
+    <button class="refresh-btn">
+      <svg viewBox="0 0 24 24"><path d="M1 4v6h6"/><path d="M23 20v-6h-6"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4-4.64 4.36A9 9 0 0 1 3.51 15"/></svg>
+      Refresh
+    </button>
+  </div>
+  <div class="meta-strip">
+    <div class="meta-badge format">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+      Auction
+    </div>
+    <div class="meta-badge strat">
+      <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      Zero-RB
+    </div>
+    <span class="player-count">247 players</span>
+  </div>
+</header>
+
+<main>
+  <!-- ===== ADP MOVERS STRIP ===== -->
+  <div class="sect">
+    ADP Movers
+    <span class="sect-badge">Cross-source divergence &gt;10 spots</span>
+  </div>
+  <div class="movers-scroll">
+
+    <div class="mover-chip">
+      <span class="pos-chip WR" style="font-size:10px;padding:3px 6px;">WR</span>
+      <span class="mover-name">Cooper Kupp</span>
+      <div class="mover-div">
+        <svg viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+        18
+      </div>
+    </div>
+
+    <div class="mover-chip">
+      <span class="pos-chip RB" style="font-size:10px;padding:3px 6px;">RB</span>
+      <span class="mover-name">Isiah Pacheco</span>
+      <div class="mover-div">
+        <svg viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+        15
+      </div>
+    </div>
+
+    <div class="mover-chip">
+      <span class="pos-chip QB" style="font-size:10px;padding:3px 6px;">QB</span>
+      <span class="mover-name">Jordan Love</span>
+      <div class="mover-div">
+        <svg viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+        13
+      </div>
+    </div>
+
+    <div class="mover-chip">
+      <span class="pos-chip TE" style="font-size:10px;padding:3px 6px;">TE</span>
+      <span class="mover-name">Sam LaPorta</span>
+      <div class="mover-div">
+        <svg viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+        11
+      </div>
+    </div>
+
+    <div class="mover-chip">
+      <span class="pos-chip WR" style="font-size:10px;padding:3px 6px;">WR</span>
+      <span class="mover-name">Puka Nacua</span>
+      <div class="mover-div">
+        <svg viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+        11
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===== TABS ===== -->
+  <div class="tabs">
+    <div class="tab active">All Players</div>
+    <div class="tab">By Position</div>
+  </div>
+
+  <!-- ===== FILTER BAR ===== -->
+  <div class="filter-bar">
+    <!-- position pills -->
+    <div class="pos-pills">
+      <button class="pos-pill all">All</button>
+      <button class="pos-pill pos qb">QB</button>
+      <button class="pos-pill pos rb">RB</button>
+      <button class="pos-pill pos wr">WR</button>
+      <button class="pos-pill pos te">TE</button>
+      <button class="pos-pill pos" style="color:var(--pos-k);border-color:rgba(167,139,250,0.22);">K</button>
+      <button class="pos-pill pos" style="color:var(--pos-def);">DEF</button>
+    </div>
+    <!-- sort + target row -->
+    <div class="sort-row">
+      <span class="sort-lbl">Sort</span>
+      <button class="sort-pill active">Score <span class="arrow">&#8595;</span></button>
+      <button class="sort-pill">Value</button>
+      <button class="sort-pill">Rank</button>
+      <button class="sort-pill">ADP</button>
+      <button class="target-filter">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+        Targets
+      </button>
+    </div>
+  </div>
+
+  <!-- ===== PLAYER LIST ===== -->
+  <div class="player-list">
+
+    <!-- PLAYER 1 -- TARGET, expanded -->
+    <div class="pcard target open">
+      <!-- main row -->
+      <div class="prow">
+        <span class="rank-num elite">01</span>
+        <span class="pos-chip WR">WR</span>
+        <div class="pname-block">
+          <div class="pname">Ja'Marr Chase</div>
+          <div class="pmeta">CIN &middot; BYE 7</div>
+          <!-- score bar -->
+          <div class="score-bar-wrap" style="margin-top:5px;">
+            <div class="score-bar-track">
+              <div class="score-bar-fill high" style="width:91%;"></div>
+            </div>
+            <span class="score-val high">91</span>
+          </div>
+        </div>
+        <div class="val-block">
+          <div class="val-main">$54</div>
+          <div class="val-adp">ADP 3.2</div>
+        </div>
+        <div class="expand-chev">
+          <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+      </div>
+      <!-- target badge + boosts -->
+      <div class="ptag target">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+        Target Set
+      </div>
+      <div class="boost-tags" style="margin-top:6px;">
+        <span class="boost-tag">WR1 leader</span>
+        <span class="boost-tag">Zero-RB aligned</span>
+        <span class="boost-tag">High target share</span>
+      </div>
+
+      <!-- EXPANDED SECTION -->
+      <div class="pexpand">
+        <div class="insight-panel">
+          <div class="insight-lbl">Strategy Insight</div>
+          <div class="insight-txt">Elite Zero-RB anchor. Projected at $54 with upside to $62 in contested auctions. WR1 target share of 27% leads all receivers. Strategy fit: very high. Lock this at max value before the room resets.</div>
+          <div class="conf-row">
+            <span class="insight-lbl" style="margin-bottom:0;">Confidence</span>
+            <div class="conf-track">
+              <div class="conf-fill" style="width:88%;"></div>
+            </div>
+            <span class="conf-lbl">88%</span>
+          </div>
+        </div>
+
+        <div class="tag-actions">
+          <button class="tag-btn target-set">
+            <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            Target Set
+          </button>
+          <button class="tag-btn avoid-idle">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+            Mark Avoid
+          </button>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-cell">
+            <div class="k">ECR</div>
+            <div class="v blue">1</div>
+          </div>
+          <div class="stat-cell">
+            <div class="k">ADP</div>
+            <div class="v blue">3.2</div>
+          </div>
+          <div class="stat-cell">
+            <div class="k">Range</div>
+            <div class="v blue">$46&ndash;62</div>
+          </div>
+          <div class="stat-cell">
+            <div class="k">Bye</div>
+            <div class="v" style="color:var(--i2);">7</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PLAYER 2 -- high score, collapsed -->
+    <div class="pcard">
+      <div class="prow">
+        <span class="rank-num elite">02</span>
+        <span class="pos-chip RB">RB</span>
+        <div class="pname-block">
+          <div class="pname">Christian McCaffrey</div>
+          <div class="pmeta">SF &middot; BYE 9</div>
+          <div class="score-bar-wrap" style="margin-top:5px;">
+            <div class="score-bar-track">
+              <div class="score-bar-fill high" style="width:84%;"></div>
+            </div>
+            <span class="score-val high">84</span>
+          </div>
+        </div>
+        <div class="val-block">
+          <div class="val-main">$61</div>
+          <div class="val-adp">ADP 1.0</div>
+        </div>
+        <div class="expand-chev">
+          <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+      </div>
+      <div class="boost-tags" style="margin-top:7px;">
+        <span class="boost-tag">Elite RB floor</span>
+        <span class="boost-tag">Receiving upside</span>
+      </div>
+    </div>
+
+    <!-- PLAYER 3 -- mid score, collapsed -->
+    <div class="pcard">
+      <div class="prow">
+        <span class="rank-num">05</span>
+        <span class="pos-chip WR">WR</span>
+        <div class="pname-block">
+          <div class="pname">Tyreek Hill</div>
+          <div class="pmeta">MIA &middot; BYE 10</div>
+          <div class="score-bar-wrap" style="margin-top:5px;">
+            <div class="score-bar-track">
+              <div class="score-bar-fill mid" style="width:68%;"></div>
+            </div>
+            <span class="score-val mid">68</span>
+          </div>
+        </div>
+        <div class="val-block">
+          <div class="val-main">$48</div>
+          <div class="val-adp">ADP 4.8</div>
+        </div>
+        <div class="expand-chev">
+          <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- PLAYER 4 -- QB, mid score -->
+    <div class="pcard">
+      <div class="prow">
+        <span class="rank-num">08</span>
+        <span class="pos-chip QB">QB</span>
+        <div class="pname-block">
+          <div class="pname">Patrick Mahomes</div>
+          <div class="pmeta">KC &middot; BYE 6</div>
+          <div class="score-bar-wrap" style="margin-top:5px;">
+            <div class="score-bar-track">
+              <div class="score-bar-fill mid" style="width:62%;"></div>
+            </div>
+            <span class="score-val mid">62</span>
+          </div>
+        </div>
+        <div class="val-block">
+          <div class="val-main">$34</div>
+          <div class="val-adp">ADP 8.1</div>
+        </div>
+        <div class="expand-chev">
+          <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- PLAYER 5 -- AVOID, dimmed -->
+    <div class="pcard avoid">
+      <div class="prow">
+        <span class="rank-num">12</span>
+        <span class="pos-chip TE">TE</span>
+        <div class="pname-block">
+          <div class="pname">Travis Kelce</div>
+          <div class="pmeta">KC &middot; BYE 6</div>
+          <div class="score-bar-wrap" style="margin-top:5px;">
+            <div class="score-bar-track">
+              <div class="score-bar-fill low" style="width:34%;"></div>
+            </div>
+            <span class="score-val low">34</span>
+          </div>
+        </div>
+        <div class="val-block">
+          <div class="val-main">$28</div>
+          <div class="val-adp">ADP 12.4</div>
+        </div>
+        <div class="expand-chev">
+          <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+      </div>
+      <div class="ptag avoid" style="margin-top:6px;">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+        Avoid
+      </div>
+    </div>
+
+    <!-- PLAYER 6 -- low score, neutral -->
+    <div class="pcard">
+      <div class="prow">
+        <span class="rank-num">18</span>
+        <span class="pos-chip WR">WR</span>
+        <div class="pname-block">
+          <div class="pname">Davante Adams</div>
+          <div class="pmeta">NYJ &middot; BYE 12</div>
+          <div class="score-bar-wrap" style="margin-top:5px;">
+            <div class="score-bar-track">
+              <div class="score-bar-fill low" style="width:44%;"></div>
+            </div>
+            <span class="score-val low">44</span>
+          </div>
+        </div>
+        <div class="val-block">
+          <div class="val-main">$22</div>
+          <div class="val-adp">ADP 18.7</div>
+        </div>
+        <div class="expand-chev">
+          <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- fade-out indicator -- more players below -->
+    <div style="text-align:center;padding:12px 0 6px;">
+      <span style="font-family:var(--fn);font-size:10px;color:var(--i3);letter-spacing:.06em;">
+        +241 more players
+      </span>
+    </div>
+
+  </div><!-- /player-list -->
+</main>
+
+<!-- ===== BOTTOM NAV ===== -->
+<nav class="nav">
+  <div class="nav-inner">
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Prep
+    </div>
+    <div class="nav-item active">
+      <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      Board
+      <div class="nav-dot"></div>
+    </div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      Draft
+    </div>
+  </div>
+</nav>
+
+</div>
+</body>
+</html>

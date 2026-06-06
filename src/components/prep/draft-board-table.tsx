@@ -2,72 +2,38 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowUp, ArrowDown, Target, Ban, ChevronDown, Sparkles, Check, Loader2 } from 'lucide-react'
+import { Target, Ban, ChevronDown, Sparkles, Check, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import {
-  FFICard,
-  FFIPositionBadge,
-  FFIBadge,
-  FFITacticalInsight,
-} from '@/components/ui/ffi-primitives'
 import type { ScoredPlayer } from '@/lib/research/strategy/scoring'
-import type { DraftFormat, Position } from '@/lib/players/types'
-
-type SortField = 'rank' | 'score' | 'value' | 'adp' | 'name'
+import type { DraftFormat } from '@/lib/players/types'
 
 interface DraftBoardTableProps {
   players: ScoredPlayer[]
   format: DraftFormat
-  sortField: SortField
-  sortAsc: boolean
-  onSort: (field: SortField) => void
-  // FF-246: Tag toggle callbacks
   onToggleTarget?: (playerId: string) => Promise<void>
   onToggleAvoid?: (playerId: string) => Promise<void>
   isTagLoading?: boolean
-  compact?: boolean
 }
 
-function SortButton({
-  field,
-  label,
-  current,
-  asc,
-  onSort,
-}: {
-  field: SortField
-  label: string
-  current: SortField
-  asc: boolean
-  onSort: (f: SortField) => void
-}) {
-  const isActive = field === current
+const POS_COLORS: Record<string, { bg: string; text: string }> = {
+  QB:  { bg: 'rgba(255,110,138,0.18)', text: '#FF6E8A' },
+  RB:  { bg: 'rgba(86,224,160,0.18)',  text: '#56E0A0' },
+  WR:  { bg: 'rgba(108,168,255,0.18)', text: '#6CA8FF' },
+  TE:  { bg: 'rgba(255,176,92,0.18)',  text: '#FFB05C' },
+  K:   { bg: 'rgba(167,139,250,0.18)', text: '#A78BFA' },
+  DEF: { bg: 'rgba(99,115,150,0.18)',  text: '#637396' },
+}
+
+function PositionChip({ position }: { position: string }) {
+  const colors = POS_COLORS[position] ?? { bg: 'rgba(150,180,255,0.12)', text: '#9FB0CE' }
   return (
-    <button
-      onClick={() => onSort(field)}
-      className={cn(
-        'ffi-label px-2 py-1 rounded-md transition-all',
-        isActive
-          ? 'bg-[var(--ffi-primary)]/20 text-[var(--ffi-primary)]'
-          : 'text-[var(--ffi-text-muted)] hover:text-white hover:bg-[var(--ffi-surface)]'
-      )}
+    <span
+      className="font-bold text-[11px] px-[7px] py-[4px] rounded-[7px] flex-shrink-0 leading-none"
+      style={{ fontFamily: 'var(--font-cond)', background: colors.bg, color: colors.text }}
     >
-      {label}
-      {isActive && (
-        asc
-          ? <ArrowUp className="inline h-3 w-3 ml-1" />
-          : <ArrowDown className="inline h-3 w-3 ml-1" />
-      )}
-    </button>
+      {position}
+    </span>
   )
-}
-
-function scoreColor(score: number): string {
-  if (score >= 75) return 'text-[var(--ffi-success)]'
-  if (score >= 60) return 'text-emerald-400'
-  if (score >= 40) return 'text-[var(--ffi-text-secondary)]'
-  if (score >= 25) return 'text-[var(--ffi-warning)]'
-  return 'text-[var(--ffi-danger)]'
 }
 
 function generateInsight(sp: ScoredPlayer, format: DraftFormat): string {
@@ -88,213 +54,330 @@ function generateInsight(sp: ScoredPlayer, format: DraftFormat): string {
   return `${valueContext} ${boostText ? `Strategy factors: ${boostText}.` : 'Neutral fit for current strategy.'}`
 }
 
-interface CompactPlayerCardProps {
+interface PlayerCardProps {
   sp: ScoredPlayer
   rank: number
   format: DraftFormat
   isExpanded: boolean
   onToggle: () => void
-  // FF-246: Tag callbacks
   onToggleTarget?: (playerId: string) => Promise<void>
   onToggleAvoid?: (playerId: string) => Promise<void>
   isTagLoading?: boolean
-  compact?: boolean
 }
 
-function CompactPlayerCard({ sp, rank, format, isExpanded, onToggle, onToggleTarget, onToggleAvoid, isTagLoading, compact }: CompactPlayerCardProps) {
+function PlayerCard({
+  sp, rank, format, isExpanded, onToggle,
+  onToggleTarget, onToggleAvoid, isTagLoading,
+}: PlayerCardProps) {
   const p = sp.player
   const isAuction = format === 'auction'
   const value = isAuction
-    ? sp.adjustedAuctionValue ?? p.consensusAuctionValue
-    : sp.adjustedRoundValue ?? Math.ceil(p.adp / 12)
+    ? (sp.adjustedAuctionValue ?? p.consensusAuctionValue)
+    : (sp.adjustedRoundValue ?? Math.ceil(p.adp / 12))
   const valueRange = isAuction
     ? { low: Math.floor(value * 0.85), high: Math.ceil(value * 1.15) }
     : undefined
 
+  const isElite = rank <= 24
+  const score = sp.strategyScore
+  const scoreTier = score >= 75 ? 'volt' : score >= 55 ? 'mid' : 'low'
+  const scoreBarColor = { volt: 'var(--ffi-volt)', mid: 'var(--ffi-blue-bright)', low: 'var(--ffi-ink-3)' }[scoreTier]
+  const scoreTextColor = scoreBarColor
+
   return (
     <div
-      className={cn(
-        'transition-all duration-200',
-        sp.targetStatus === 'avoid' && 'opacity-60'
-      )}
+      className={cn('rounded-[14px] cursor-pointer transition-colors', sp.targetStatus === 'avoid' && 'opacity-[0.58]')}
+      style={{
+        background: 'var(--ffi-surface-2)',
+        borderTop: '1px solid var(--ffi-hairline)',
+        borderRight: '1px solid var(--ffi-hairline)',
+        borderBottom: '1px solid var(--ffi-hairline)',
+        borderLeft: sp.targetStatus === 'target'
+          ? '2.5px solid var(--ffi-volt)'
+          : '1px solid var(--ffi-hairline)',
+        padding: '12px 14px',
+      }}
+      onClick={onToggle}
     >
-      <FFICard
-        variant={isExpanded ? 'elevated' : 'interactive'}
-        className={cn(
-          'cursor-pointer',
-          compact && '!p-2 !rounded-xl',
-          sp.targetStatus === 'target' && 'border-l-2 border-l-[var(--ffi-success)]'
-        )}
-        onClick={onToggle}
-      >
-        {/* Main row */}
-        <div className={cn('flex items-center', compact ? 'gap-2' : 'gap-3')}>
-          {/* Rank — gold top-24 (elite tier), blue rest; no lime */}
-          <span className={cn(
-            'font-headline font-bold shrink-0 text-center',
-            compact ? 'text-xl w-7' : 'text-2xl w-8',
-            rank <= 24 ? 'text-[var(--ffi-gold)]' : 'text-[var(--ffi-primary)]'
-          )}>
-            {String(rank).padStart(2, '0')}
-          </span>
+      {/* Main row */}
+      <div className="flex items-center gap-[10px]">
+        {/* Rank */}
+        <span
+          className="font-bold text-[22px] leading-none w-7 text-center flex-shrink-0"
+          style={{
+            fontFamily: 'var(--font-mono)',
+            color: isElite ? 'var(--ffi-blue-bright)' : 'var(--ffi-blue)',
+            letterSpacing: '-0.02em',
+          }}
+        >
+          {String(rank).padStart(2, '0')}
+        </span>
 
-          {/* Position badge */}
-          <FFIPositionBadge position={p.position as Position} />
+        <PositionChip position={p.position} />
 
-          {/* Player info */}
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2">
-              <span className="ffi-title-md text-white font-semibold truncate">{p.name}</span>
-              {/* FF-246: Prominent TARGET badge with glow */}
-              {sp.isUserTarget && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold tracking-wider bg-[#2ff801]/30 text-[#2ff801] shadow-[0_0_8px_rgba(47,248,1,0.4)]">
-                  <Target className="h-3 w-3" />
-                  TARGET
-                </span>
-              )}
-              {sp.isUserAvoid && !sp.isUserTarget && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold tracking-wider bg-[#ff716c]/25 text-[#ff716c]">
-                  <Ban className="h-3 w-3" />
-                  AVOID
-                </span>
-              )}
-              {/* Strategy-based target/avoid icons (when no user tags) */}
-              {!sp.isUserTarget && !sp.isUserAvoid && sp.targetStatus === 'target' && (
-                <Target className="h-3.5 w-3.5 text-[var(--ffi-success)] shrink-0" />
-              )}
-              {!sp.isUserTarget && !sp.isUserAvoid && sp.targetStatus === 'avoid' && (
-                <Ban className="h-3.5 w-3.5 text-[var(--ffi-danger)] shrink-0" />
-              )}
-            </div>
-            <div className="ffi-body-md text-[var(--ffi-text-secondary)]">
-              {p.team} • BYE {p.byeWeek}
-            </div>
+        {/* Name + meta + score bar */}
+        <div className="flex-1 min-w-0">
+          <div
+            className="font-extrabold text-[16px] leading-none text-white truncate"
+            style={{ fontFamily: 'var(--font-cond)' }}
+          >
+            {p.name}
           </div>
-
-          {/* Value + Score */}
-          <div className="text-right shrink-0">
-            <div className={cn('font-mono tabular-nums font-bold text-[var(--ffi-gold)]', compact ? 'text-base' : 'text-lg')}>
-              {isAuction ? `$${value}` : `Rd ${value}`}
-            </div>
-            <div className={cn('font-mono text-[10px] font-bold tabular-nums', scoreColor(sp.strategyScore))}>
-              {sp.strategyScore}pts
-            </div>
+          <div
+            className="text-[10px] mt-[3px]"
+            style={{ fontFamily: 'var(--font-mono)', color: 'var(--ffi-ink-3)', letterSpacing: '0.02em' }}
+          >
+            {p.team} &middot; BYE {p.byeWeek}
           </div>
-
-          {/* Expand indicator */}
-          <ChevronDown className={cn(
-            'h-4 w-4 text-[var(--ffi-text-muted)] transition-transform shrink-0',
-            isExpanded && 'rotate-180'
-          )} />
+          {/* Score bar */}
+          <div className="flex items-center gap-[6px] mt-[5px]">
+            <div className="flex-1 rounded-full overflow-hidden" style={{ height: '3px', background: 'rgba(255,255,255,0.07)' }}>
+              <div
+                className="h-full rounded-full"
+                style={{ width: `${score}%`, background: scoreBarColor, transition: 'width 0.4s ease' }}
+              />
+            </div>
+            <span
+              className="font-bold text-[10px] flex-shrink-0"
+              style={{ fontFamily: 'var(--font-mono)', color: scoreTextColor, letterSpacing: '0.02em' }}
+            >
+              {score}
+            </span>
+          </div>
         </div>
 
-        {/* Tags row */}
-        {sp.boosts.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 mt-2 pl-11">
-            {sp.boosts.slice(0, 3).map((boost, i) => (
-              <FFIBadge key={i} variant="tag" status="info" className="text-[10px]">
-                {boost}
-              </FFIBadge>
-            ))}
-            {sp.boosts.length > 3 && (
-              <span className="text-[10px] text-[var(--ffi-text-muted)]">
-                +{sp.boosts.length - 3} more
-              </span>
-            )}
+        {/* Value + ADP */}
+        <div className="text-right flex-shrink-0">
+          <div
+            className="font-bold text-[20px] leading-none"
+            style={{ fontFamily: 'var(--font-mono)', color: 'var(--ffi-blue)', letterSpacing: '-0.01em' }}
+          >
+            {isAuction ? `$${value}` : `Rd ${value}`}
           </div>
-        )}
+          <div
+            className="text-[10px] mt-[3px]"
+            style={{ fontFamily: 'var(--font-mono)', color: 'var(--ffi-ink-3)' }}
+          >
+            ADP {p.adp > 0 ? p.adp.toFixed(1) : '-'}
+          </div>
+        </div>
 
-        {/* Expanded tactical insight */}
-        {isExpanded && (
-          <div className="mt-5">
-            <FFITacticalInsight
-              insight={generateInsight(sp, format)}
-              confidence={Math.min(100, sp.strategyScore + 20)}
-              className="bg-transparent p-0"
-            />
+        {/* Chevron */}
+        <ChevronDown
+          className={cn('flex-shrink-0 transition-transform opacity-40', isExpanded && 'rotate-180')}
+          style={{ width: 15, height: 15, color: 'var(--ffi-ink-2)' }}
+        />
+      </div>
 
-            {/* FF-246: Tag toggle controls */}
-            {(onToggleTarget || onToggleAvoid) && (
-              <div className="mt-5">
-                <div className="ffi-caption text-[var(--ffi-text-muted)] mb-2">YOUR TAGS</div>
-                <div className="flex flex-wrap gap-2">
-                  {onToggleTarget && (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        onToggleTarget(p.id)
-                      }}
-                      disabled={isTagLoading}
-                      className={cn(
-                        'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all',
-                        sp.isUserTarget
-                          ? 'bg-[#2ff801]/30 text-[#2ff801] shadow-[0_0_12px_rgba(47,248,1,0.3)]'
-                          : 'bg-[var(--ffi-surface)] text-[var(--ffi-text-muted)] hover:bg-[#2ff801]/10 hover:text-[#2ff801]',
-                        isTagLoading && 'opacity-50 cursor-not-allowed'
-                      )}
-                    >
-                      {isTagLoading ? (
-                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                      ) : sp.isUserTarget ? (
-                        <Check className="h-3.5 w-3.5" />
-                      ) : (
-                        <Target className="h-3.5 w-3.5" />
-                      )}
-                      {sp.isUserTarget ? 'TARGET SET' : 'Mark as Target'}
-                    </button>
-                  )}
-                  {onToggleAvoid && (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        onToggleAvoid(p.id)
-                      }}
-                      disabled={isTagLoading}
-                      className={cn(
-                        'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all',
-                        sp.isUserAvoid
-                          ? 'bg-[#ff716c]/25 text-[#ff716c]'
-                          : 'bg-[var(--ffi-surface)] text-[var(--ffi-text-muted)] hover:bg-[#ff716c]/10 hover:text-[#ff716c]',
-                        isTagLoading && 'opacity-50 cursor-not-allowed'
-                      )}
-                    >
-                      {isTagLoading ? (
-                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                      ) : (
-                        <Ban className="h-3.5 w-3.5" />
-                      )}
-                      {sp.isUserAvoid ? 'AVOIDING' : 'Mark to Avoid'}
-                    </button>
-                  )}
-                </div>
-              </div>
-            )}
+      {/* Target / Avoid badge */}
+      {sp.isUserTarget && (
+        <div
+          className="inline-flex items-center gap-1 mt-[6px] rounded-full font-bold uppercase"
+          style={{
+            fontFamily: 'var(--font-cond)',
+            fontSize: '9px',
+            letterSpacing: '0.14em',
+            padding: '2px 7px',
+            background: 'rgba(139,255,69,0.15)',
+            border: '1px solid rgba(139,255,69,0.28)',
+            color: 'var(--ffi-volt)',
+            boxShadow: '0 0 10px rgba(139,255,69,0.15)',
+          }}
+        >
+          <Target style={{ width: 10, height: 10 }} />
+          TARGET SET
+        </div>
+      )}
+      {sp.isUserAvoid && !sp.isUserTarget && (
+        <div
+          className="inline-flex items-center gap-1 mt-[6px] rounded-full font-bold uppercase"
+          style={{
+            fontFamily: 'var(--font-cond)',
+            fontSize: '9px',
+            letterSpacing: '0.14em',
+            padding: '2px 7px',
+            background: 'rgba(255,110,138,0.12)',
+            border: '1px solid rgba(255,110,138,0.22)',
+            color: '#FF6E8A',
+          }}
+        >
+          <Ban style={{ width: 10, height: 10 }} />
+          AVOID
+        </div>
+      )}
 
-            {/* Additional stats when expanded — tabular mono numbers, spacing not borders */}
-            <div className="grid grid-cols-3 gap-4 mt-5">
-              <div>
-                <div className="ffi-caption text-[var(--ffi-text-muted)]">RANK</div>
-                <div className="font-mono font-bold tabular-nums text-[var(--color-on-surface)]">{p.consensusRank}</div>
+      {/* Boost tags */}
+      {sp.boosts.length > 0 && (
+        <div className="flex flex-wrap gap-[5px] mt-[7px]">
+          {sp.boosts.slice(0, 3).map((boost, i) => (
+            <span
+              key={i}
+              className="text-[10px] font-semibold rounded-[6px]"
+              style={{
+                fontFamily: 'var(--font-cond)',
+                padding: '2px 8px',
+                background: 'rgba(77,130,255,0.08)',
+                border: '1px solid rgba(77,130,255,0.14)',
+                color: 'var(--ffi-blue-bright)',
+              }}
+            >
+              {boost}
+            </span>
+          ))}
+          {sp.boosts.length > 3 && (
+            <span className="text-[10px]" style={{ fontFamily: 'var(--font-mono)', color: 'var(--ffi-ink-3)' }}>
+              +{sp.boosts.length - 3}
+            </span>
+          )}
+        </div>
+      )}
+
+      {/* Expanded section */}
+      {isExpanded && (
+        <div className="mt-[14px] pt-[13px]" style={{ borderTop: '1px solid rgba(150,180,255,0.07)' }}>
+          {/* Insight panel */}
+          <div
+            className="rounded-[11px] p-[11px_13px]"
+            style={{ background: 'rgba(77,130,255,0.07)', border: '1px solid rgba(77,130,255,0.13)' }}
+          >
+            <div
+              className="font-bold text-[9px] uppercase mb-[6px]"
+              style={{ fontFamily: 'var(--font-cond)', letterSpacing: '0.26em', color: 'var(--ffi-blue-bright)' }}
+            >
+              Strategy Insight
+            </div>
+            <div className="text-[12px] leading-[1.50]" style={{ color: 'var(--ffi-ink-2)' }}>
+              {generateInsight(sp, format)}
+            </div>
+            {/* Confidence meter */}
+            <div className="flex items-center gap-[8px] mt-[9px]">
+              <span
+                className="font-bold text-[9px] uppercase flex-shrink-0"
+                style={{ fontFamily: 'var(--font-cond)', letterSpacing: '0.26em', color: 'var(--ffi-blue-bright)' }}
+              >
+                Confidence
+              </span>
+              <div className="flex-1 rounded-full overflow-hidden" style={{ height: '2px', background: 'rgba(255,255,255,0.07)' }}>
+                <div
+                  className="h-full rounded-full"
+                  style={{
+                    width: `${Math.min(100, score + 20)}%`,
+                    background: 'linear-gradient(90deg, var(--ffi-blue), var(--ffi-blue-bright))',
+                  }}
+                />
               </div>
-              <div>
-                <div className="ffi-caption text-[var(--ffi-text-muted)]">ADP</div>
-                <div className="font-mono font-bold tabular-nums text-[var(--color-on-surface)]">{p.adp > 0 ? p.adp.toFixed(1) : '-'}</div>
-              </div>
-              <div>
-                <div className="ffi-caption text-[var(--ffi-text-muted)]">
-                  {isAuction ? 'RANGE' : 'ECR'}
-                </div>
-                <div className="font-mono font-bold tabular-nums text-[var(--color-on-surface)]">
-                  {isAuction && valueRange
-                    ? `$${valueRange.low}-${valueRange.high}`
-                    : p.consensusRank
-                  }
-                </div>
-              </div>
+              <span
+                className="font-semibold text-[10px] flex-shrink-0"
+                style={{ fontFamily: 'var(--font-mono)', color: 'var(--ffi-blue-bright)' }}
+              >
+                {Math.min(100, score + 20)}%
+              </span>
             </div>
           </div>
-        )}
-      </FFICard>
+
+          {/* Tag toggles */}
+          {(onToggleTarget || onToggleAvoid) && (
+            <div className="flex gap-[8px] mt-[12px]">
+              {onToggleTarget && (
+                <button
+                  onClick={(e) => { e.stopPropagation(); onToggleTarget(p.id) }}
+                  disabled={isTagLoading}
+                  className={cn(
+                    'flex-1 flex items-center justify-center gap-[7px] py-[10px] px-[14px] rounded-[11px]',
+                    'font-bold text-[12px] uppercase transition-all',
+                    isTagLoading && 'opacity-50 cursor-not-allowed',
+                  )}
+                  style={{
+                    fontFamily: 'var(--font-cond)',
+                    letterSpacing: '0.10em',
+                    ...(sp.isUserTarget
+                      ? {
+                          background: 'rgba(139,255,69,0.14)',
+                          border: '1px solid rgba(139,255,69,0.30)',
+                          color: 'var(--ffi-volt)',
+                          boxShadow: '0 0 14px rgba(139,255,69,0.14)',
+                        }
+                      : {
+                          background: 'var(--ffi-surface-3)',
+                          border: '1px solid var(--ffi-hairline)',
+                          color: 'var(--ffi-ink-3)',
+                        }),
+                  }}
+                >
+                  {isTagLoading
+                    ? <Loader2 className="animate-spin" style={{ width: 13, height: 13 }} />
+                    : sp.isUserTarget
+                      ? <Check style={{ width: 13, height: 13 }} />
+                      : <Target style={{ width: 13, height: 13 }} />
+                  }
+                  {sp.isUserTarget ? 'Target Set' : 'Target'}
+                </button>
+              )}
+              {onToggleAvoid && (
+                <button
+                  onClick={(e) => { e.stopPropagation(); onToggleAvoid(p.id) }}
+                  disabled={isTagLoading}
+                  className={cn(
+                    'flex-1 flex items-center justify-center gap-[7px] py-[10px] px-[14px] rounded-[11px]',
+                    'font-bold text-[12px] uppercase transition-all',
+                    isTagLoading && 'opacity-50 cursor-not-allowed',
+                  )}
+                  style={{
+                    fontFamily: 'var(--font-cond)',
+                    letterSpacing: '0.10em',
+                    ...(sp.isUserAvoid
+                      ? {
+                          background: 'rgba(255,110,138,0.12)',
+                          border: '1px solid rgba(255,110,138,0.24)',
+                          color: '#FF6E8A',
+                        }
+                      : {
+                          background: 'var(--ffi-surface-3)',
+                          border: '1px solid var(--ffi-hairline)',
+                          color: 'var(--ffi-ink-3)',
+                        }),
+                  }}
+                >
+                  {isTagLoading
+                    ? <Loader2 className="animate-spin" style={{ width: 13, height: 13 }} />
+                    : <Ban style={{ width: 13, height: 13 }} />
+                  }
+                  {sp.isUserAvoid ? 'Avoiding' : 'Avoid'}
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* Stats grid */}
+          <div className="grid grid-cols-4 gap-[12px] mt-[14px]">
+            {[
+              { k: 'ECR',   v: String(p.consensusRank), color: 'var(--ffi-blue-bright)' },
+              { k: 'ADP',   v: p.adp > 0 ? p.adp.toFixed(1) : '-', color: 'var(--ffi-blue-bright)' },
+              {
+                k: isAuction ? 'RANGE' : 'ECR',
+                v: isAuction && valueRange ? `$${valueRange.low}-${valueRange.high}` : String(p.consensusRank),
+                color: 'var(--ffi-blue-bright)',
+              },
+              { k: 'BYE',   v: String(p.byeWeek), color: 'var(--ffi-ink-2)' },
+            ].map(({ k, v, color }) => (
+              <div key={k}>
+                <div
+                  className="font-bold text-[9px] uppercase"
+                  style={{ fontFamily: 'var(--font-cond)', letterSpacing: '0.22em', color: 'var(--ffi-ink-3)' }}
+                >
+                  {k}
+                </div>
+                <div
+                  className="font-bold text-[16px] mt-[3px] leading-none"
+                  style={{ fontFamily: 'var(--font-mono)', color }}
+                >
+                  {v}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -302,13 +385,9 @@ function CompactPlayerCard({ sp, rank, format, isExpanded, onToggle, onToggleTar
 export function DraftBoardTable({
   players,
   format,
-  sortField,
-  sortAsc,
-  onSort,
   onToggleTarget,
   onToggleAvoid,
   isTagLoading,
-  compact,
 }: DraftBoardTableProps) {
   const [expandedId, setExpandedId] = useState<string | null>(null)
 
@@ -316,65 +395,54 @@ export function DraftBoardTable({
     setExpandedId(expandedId === id ? null : id)
   }
 
-  return (
-    <div className="space-y-3">
-      {/* Sort controls */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1">
-        <span className="ffi-caption text-[var(--ffi-text-muted)] shrink-0">Sort:</span>
-        <SortButton field="score" label="Score" current={sortField} asc={sortAsc} onSort={onSort} />
-        <SortButton field="value" label={format === 'auction' ? 'Value' : 'Round'} current={sortField} asc={sortAsc} onSort={onSort} />
-        <SortButton field="rank" label="Rank" current={sortField} asc={sortAsc} onSort={onSort} />
-        <SortButton field="adp" label="ADP" current={sortField} asc={sortAsc} onSort={onSort} />
-        <SortButton field="name" label="Name" current={sortField} asc={sortAsc} onSort={onSort} />
-      </div>
+  if (players.length === 0) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+        className="rounded-2xl p-12 text-center"
+        style={{ background: 'var(--ffi-surface-2)', border: '1px solid var(--ffi-hairline)' }}
+      >
+        <Sparkles
+          className="mx-auto mb-2 opacity-50"
+          style={{ width: 32, height: 32, color: 'var(--ffi-ink-3)' }}
+        />
+        <p style={{ color: 'var(--ffi-ink-3)' }}>No players match your filters</p>
+      </motion.div>
+    )
+  }
 
-      {/* Player cards with cascade animation */}
-      {players.length === 0 ? (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-        >
-          <FFICard className="text-center py-12">
-            <div className="text-[var(--ffi-text-muted)]">
-              <Sparkles className="h-8 w-8 mx-auto mb-2 opacity-50" />
-              <p>No players match your filters</p>
-            </div>
-          </FFICard>
-        </motion.div>
-      ) : (
-        <motion.div className={compact ? 'space-y-1' : 'space-y-2'} layout>
-          <AnimatePresence mode="popLayout">
-            {players.map((sp, idx) => (
-              <motion.div
-                key={sp.player.id}
-                layout
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 20, scale: 0.95 }}
-                transition={{
-                  type: 'spring',
-                  stiffness: 400,
-                  damping: 30,
-                  delay: Math.min(idx * 0.02, 0.3),
-                }}
-              >
-                <CompactPlayerCard
-                  sp={sp}
-                  rank={idx + 1}
-                  format={format}
-                  isExpanded={expandedId === sp.player.id}
-                  onToggle={() => handleToggle(sp.player.id)}
-                  onToggleTarget={onToggleTarget}
-                  onToggleAvoid={onToggleAvoid}
-                  isTagLoading={isTagLoading}
-                  compact={compact}
-                />
-              </motion.div>
-            ))}
-          </AnimatePresence>
-        </motion.div>
-      )}
-    </div>
+  return (
+    <motion.div className="flex flex-col gap-[6px]" layout>
+      <AnimatePresence mode="popLayout">
+        {players.map((sp, idx) => (
+          <motion.div
+            key={sp.player.id}
+            layout
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 20, scale: 0.95 }}
+            transition={{
+              type: 'spring',
+              stiffness: 400,
+              damping: 30,
+              delay: Math.min(idx * 0.02, 0.3),
+            }}
+          >
+            <PlayerCard
+              sp={sp}
+              rank={idx + 1}
+              format={format}
+              isExpanded={expandedId === sp.player.id}
+              onToggle={() => handleToggle(sp.player.id)}
+              onToggleTarget={onToggleTarget}
+              onToggleAvoid={onToggleAvoid}
+              isTagLoading={isTagLoading}
+            />
+          </motion.div>
+        ))}
+      </AnimatePresence>
+    </motion.div>
   )
 }

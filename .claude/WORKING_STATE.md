@@ -3,8 +3,8 @@
 ## Current Session
 - **Date:** 2026-06-06
 - **Focus:** UX-V2 GRIDIRON redesign — motion system + per-screen rollout
-- **Status:** UXV2-2b Motion System DONE (2026-06-06). Full implementation: `src/lib/motion.ts`, `src/hooks/use-number-ticker.ts`, `src/components/motion/` (6 components). CSS: duration tokens, card interactive spring lift + iridescent sheen, steal burst, OTC breathe, num flash, filter pill, cascade list. type-check clean.
-- **NEXT:** UXV2-4 (Draft Board / Player Pool — data-dense, Copilot-grade numbers, set palette). Commit + push before starting.
+- **Status:** UXV2-4 Draft Board DONE (2026-06-06). Full rebuild of `draft-board-table.tsx` + `board/client.tsx` + `board/page.tsx`. Copilot-grade data density: score bar, rank color tiers, position chips, ADP movers strip, position pills, sort pills, target cycle filter.
+- **NEXT:** UXV2-5 (Post-Draft Review — broadcast-grade hero, no gold).
 - **GATED:** FFT-008 needs Joe on phone. Live AI calls need `ANTHROPIC_API_KEY` + typed cost approval.
 - **BACKLOG (deferred, tracked in CODE_REVIEW_2026-06.md):** giant-component extraction (live/review clients), broader test suite, sheet/dedup hardening, connection-pill a11y size, 25 pre-existing lint errors (unrelated debt).
 
