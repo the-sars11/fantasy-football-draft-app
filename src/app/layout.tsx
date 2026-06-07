@@ -36,14 +36,29 @@ const jetbrainsMono = JetBrains_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'Fantasy Football Intelligence',
+  title: 'FFI Gridiron',
   description: 'AI-powered fantasy football draft intelligence',
+  manifest: '/manifest.webmanifest',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'FFI Gridiron',
+  },
+  icons: {
+    icon: [
+      { url: '/icons/icon-16.png', sizes: '16x16', type: 'image/png' },
+      { url: '/icons/icon-32.png', sizes: '32x32', type: 'image/png' },
+    ],
+    apple: '/icons/icon-192.png',
+    shortcut: '/icons/icon-32.png',
+  },
 }
 
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',
+  themeColor: '#8BFF45',
 }
 
 export default function RootLayout({
