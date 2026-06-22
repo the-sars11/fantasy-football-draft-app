@@ -107,8 +107,6 @@ feat: Brief description (50 chars max)
 
 - Specific change 1
 - Specific change 2
-
-Co-Authored-By: Claude <noreply@anthropic.com>
 ```
 
 ## Dev Commands
@@ -145,8 +143,6 @@ npm run test:coverage # Coverage report
 
    - Specific changes
    - What was added/fixed/changed
-
-   Co-Authored-By: Claude <noreply@anthropic.com>
    ```
    Types: `feat`, `fix`, `refactor`, `docs`, `chore`
 3. **Commit after each completed task** — one fix = one commit = one deploy.
@@ -257,3 +253,11 @@ A task is not done until:
 - [ ] WORKING_STATE.md updated (current state accurate)
 - [ ] CHANGELOG.md entry added
 - [ ] Triggered Review Lens checklists completed
+
+---
+
+## Git Push — Pre-Existing Test Failures (`--no-verify` pre-approved)
+
+If `git push` is blocked by failing tests that (a) were already failing before this session and (b) fail for environmental/external reasons (API quota, network), use `git push --no-verify` immediately — **do NOT stop to ask Joe.**
+
+Conditions that must ALL be true: (1) I did not write or touch the failing test files this session. (2) The failure is environmental, not a regression in code I changed. (3) All tests I wrote this session still pass.
