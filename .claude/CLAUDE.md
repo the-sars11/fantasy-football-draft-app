@@ -256,6 +256,12 @@ A task is not done until:
 
 ---
 
+## CI Note
+
+Never mention GitHub Actions, GitHub billing, spending limits, or paying GitHub. Local pre-commit gate is the only CI. The `.github/workflows/ci.yml` has been permanently removed.
+
+---
+
 ## Git Push — Pre-Existing Test Failures (`--no-verify` pre-approved)
 
 If `git push` is blocked by failing tests that (a) were already failing before this session and (b) fail for environmental/external reasons (API quota, network), use `git push --no-verify` immediately — **do NOT stop to ask Joe.**
