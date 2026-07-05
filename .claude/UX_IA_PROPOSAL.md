@@ -1,6 +1,6 @@
 # UX IA Proposal - Fantasy Football Draft Advisor
 
-**Status:** LOCKED 2026-07-05. G1 passed - Joe "approval all" - all 8 bold moves (BM1-BM8) approved as recommended, plus the kill list and repurpose list. See `UX_REDESIGN_STATE.md` L4.
+**Status:** LOCKED 2026-07-05, AMENDED 2026-07-05. G1 passed - Joe "approval all" - all 8 bold moves approved. AMENDMENT (L5): Joe corrected that the app does NOT drive a TV/shared display. BM1 rewritten to phone-only (no TV board, no new `/draft/board` route); HERO set reduced from 5 to 4. See `UX_REDESIGN_STATE.md` L5.
 **Step:** 1 of the dev-workflow-builder UX/UI universal process.
 **Created:** 2026-07-05 (after G0 approval "yes, go").
 **Starting state:** FULL-BUT-TRASH. Engine untouched; UI rebuilt screen-by-screen.
@@ -16,7 +16,7 @@ The app has three real temporal modes plus settings. Mobile-first bottom nav, 4 
 | Group | Purpose | When it is the star |
 |---|---|---|
 | **Prep** | Research, board, strategies, keepers, runs, league config, simulate | Weeks before the draft |
-| **Draft** | Setup, live cockpit (phone), multi-team board (phone), TV board (shared), post-draft review | Draft day |
+| **Draft** | Setup, live cockpit (phone), multi-team board (phone), post-draft review | Draft day |
 | **Season** | Start/sit, waivers, matchups, trade | After the draft, weekly |
 | **More** | Settings, account, help | Anytime |
 
@@ -29,8 +29,7 @@ During a LIVE draft the cockpit is immersive and the bottom nav recedes (the dra
 | Screen | Route | Class | Notes |
 |---|---|---|---|
 | Live draft cockpit (phone) | `/draft/live` | **HERO** | Hero element = on-the-block card + max-bid advice + record-sale |
-| Multi-team board (phone) | `/draft/live` (view) or `/draft/board?view=me` | **HERO** | Your all-teams roster/budget view |
-| TV board (shared display) | `/draft/board` (NEW) | **HERO** | Room-safe broadcast HUD, no private advice |
+| Multi-team board (phone) | `/draft/live` (full-screen view) | **HERO** | Your all-teams roster/budget view, promoted from a cramped panel to a first-class surface |
 | Prep board / player pool | `/prep/board` | **HERO** | Dense rankable player list |
 | Post-draft review | `/draft/review` | **HERO** | Grade reveal + breakdown |
 | Draft setup | `/draft/setup` | SECONDARY | Mode -> league -> keeper review flow |
@@ -58,8 +57,8 @@ HERO = full spec + mockup + two-session build cadence. SECONDARY = token + primi
 
 Each move gets an approve / reject / revise vote. My recommendation is stated on each.
 
-**BM1 - Split the live draft into two surfaces.** A private **phone cockpit** (`/draft/live`, your max-bid advice) and a room-safe **TV board** (`/draft/board`, NEW, everyone's money + rosters, never your private advice). Different jobs, different audiences, different devices. Mirrors auctioneer's `/board` vs `/viewer` split.
-- *Recommend: APPROVE.* The current single live screen tries to serve both and does neither cleanly; a shared display that leaks your max bid is a real in-room problem.
+**BM1 (AMENDED L5) - Promote the multi-team board to a first-class full-screen surface.** The live draft stays a single phone cockpit whose hero is the private on-the-block card + advice + record-sale. The all-teams roster/budget view ("read the room") is promoted from a cramped drawer/panel to its own full-screen surface reachable from the cockpit. All on the phone. NO TV/shared display, NO new `/draft/board` route. (Original BM1 proposed a separate room-safe TV board; Joe corrected 2026-07-05 that the app does not drive a TV display, so that half is dropped.)
+- *Recommend: APPROVE (amended).* The valuable half was making the all-teams view a real surface instead of a squeezed panel; the shared-display half was a mis-port of the auctioneer two-device model and is removed.
 
 **BM2 - The cockpit hero is the on-the-block card, strategy + record-sale model.** No bid stepper, no "Place Bid" button (per the corrected product model in `BUILD_PLAN.md:147-152`: Joe's auction is live in-person; the app advises and records results, it does not place bids). Hero card = your max + value + estimated cost, then Record Sale.
 - *Recommend: APPROVE.* This is already the locked product model; the IA just makes it the visual center.
@@ -98,7 +97,7 @@ Each move gets an approve / reject / revise vote. My recommendation is stated on
 ## 5. Repurpose list (kept structurally, reskinned)
 
 - The entire engine, hooks, feeds, and sim mode - untouched logic, reskinned surfaces.
-- The route structure - kept, plus one new `/draft/board` TV route.
+- The route structure - kept as-is. No new routes (the TV board route was dropped at L5).
 - `explain.ts`, the format-split recommendation modules, the trash-talk trigger engine - keep.
 - The designed empty state at `review/client.tsx:302-312` - the one good state pattern; promote it as the template for every empty/loading/error state.
 - Auctioneer logic/state/patterns (state machine shape, board layout logic, feed dual-sync, trash-talk) - candidate reuse at build time, NOT its cockpit visual identity (cloning the look is convergence slop).
