@@ -16,9 +16,9 @@
     { "name": "P3+ — Commercialization (CONDITIONAL)", "done": false }
   ],
   "nextItems": [
-    "UXV2-2: DESIGN_SYSTEM v3 (GRIDIRON) globals tokens + font stack + components",
-    "UXV2-6: Rebuild Live Auction Draft Room in React to match the locked mockup",
-    "UXV2-3/4/5: Roll GRIDIRON to Prep/Board/Review (parallel agents)"
+    "UXV2-6 [DESIGN-BLOCKED, NOT ready to code]: Rebuild Live Auction Draft Room. Blocked on the multi-team draft board mockup (phone + TV hero) clearing the Reference Board step + Joe sign-off (first attempt rejected + deleted 2026-06-25). NOTE: the GRIDIRON mockups (.claude/mockups/draft-room-phone.html, live-draft-room-v1.html) are LEGACY as of the 2026-06-25 pivot — do NOT build to them. The on-the-block card WORKING_STATE calls locked at public/on-the-block.html is MISSING from disk + git — re-confirm with Joe before treating any artifact as the contract.",
+    "UXV2-7: Performance + arm's-length pass (only after UXV2-6 lands)",
+    "UXV2-8: VERIFY lint + tests + build + update DESIGN docs + WORKING_STATE (only after UXV2-6 lands)"
   ]
 }
 -->
