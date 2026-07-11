@@ -56,7 +56,7 @@
         },
         {
           "year": 2024,
-          "note": "Paid $82 for CMC (highest single-player price in league history) and finished last"
+          "note": "Paid $82 for CMC (second-highest single-player price on record, behind Leems' $84 for CMC in 2020) and finished last"
         }
       ],
       "signature_moments": [
@@ -66,7 +66,7 @@
           "player": "Christian McCaffrey",
           "price": 82,
           "outcome": "finished last",
-          "note": "League-record single-player spend. CMC missed significant time. Bruce finished last."
+          "note": "Second-highest single-player spend on record, behind Leems' $84 for CMC in 2020. CMC missed significant time. Bruce finished last."
         },
         {
           "year": 2013,
@@ -77,9 +77,9 @@
       "patterns": [
         "Goes all-in on a single elite RB at auction",
         "Team name has been a golden shower joke for years",
-        "Record single-player spend in 2024 resulted in last place"
+        "One of the biggest single-player spends in league history (2024) resulted in last place"
       ],
-      "roast_ammo": "Bruce paid $82 for Christian McCaffrey in 2024, a league-record single-player price, and finished last. He also went 1-12 in 2013, still one of the worst records in league history. Bruce commits fully to his studs strategy every year, and the results are historically inconsistent."
+      "roast_ammo": "Bruce paid $82 for Christian McCaffrey in 2024, a league-record single-player price, and finished last. He also went 1-12 in 2013, still one of the worst records in league history. That $82 is the second-highest single-player price on record, behind only Leems' $84 for CMC in 2020. Bruce commits fully to his studs strategy every year, and the results are historically inconsistent."
     },
     "garrett": {
       "id": "garrett",
@@ -137,21 +137,28 @@
       "signature_moments": [
         {
           "year": 2024,
-          "type": "steal",
-          "player": "Brock Bowers",
-          "price": 3,
-          "note": "Bowers went for $3 in the same draft where Travis Kelce went for $43. The spread on comparable-tier TEs was $40."
+          "type": "overpay",
+          "player": "Cee Dee Lamb",
+          "price": 74,
+          "note": "Paid $74 for Cee Dee Lamb and $70 for Ja'Marr Chase in the same 2024 draft, $144 on two wide receivers."
+        },
+        {
+          "year": 2019,
+          "type": "overpay",
+          "player": "Alvin Kamara",
+          "price": 80,
+          "note": "Spent $80 on Alvin Kamara in 2019."
         }
       ],
       "patterns": [
-        "Value hunter willing to wait for underpriced talent",
-        "2024 Bowers steal is the most extreme market mismatch in recent memory"
+        "Pays top of the market for elite skill players, usually receivers: Kamara $80 (2019), Chase $75 (2022), Lamb $74 plus Chase $70 (2024)",
+        "Routinely spends $64 or more on a single player"
       ],
-      "roast_ammo": "Cross got Brock Bowers for $3 in 2024, the same draft where Travis Kelce went for $43. That is a $40 spread on similar-tier tight ends. Cross either knows something the room does not, or he got lucky enough that it does not matter."
+      "roast_ammo": "Cross does not wait for value, he pays full retail. He spent $80 on Kamara in 2019, and in 2024 he paid $74 for Cee Dee Lamb and $70 for Ja'Marr Chase in the same draft, $144 on two wide receivers."
     },
     "moonshine": {
       "id": "moonshine",
-      "aliases": ["Moonshine", "Moonshine Express"],
+      "aliases": ["Moonshine", "Moonshine Express", "Danny"],
       "championships": [],
       "worst_seasons": [],
       "signature_moments": [
@@ -228,6 +235,13 @@
           "year": 2023,
           "type": "record",
           "note": "2-12 record, worst finish in the 14-game season era"
+        },
+        {
+          "year": 2024,
+          "type": "steal",
+          "player": "Brock Bowers",
+          "price": 3,
+          "note": "Got Brock Bowers for $3 in 2024, the same draft where Kelce went to Shultz for $43. The rare Robbie bargain."
         }
       ],
       "patterns": [
@@ -254,6 +268,111 @@
         "10-year member of the league"
       ],
       "roast_ammo": "Hendrickson is best known in league lore for losing what is widely considered the worst trade in Nasties history to Reggie. He has been in this league for a decade and that trade is still the first thing anyone mentions."
+    },
+    "leems": {
+      "id": "leems",
+      "aliases": ["Leems"],
+      "championships": [],
+      "worst_seasons": [],
+      "signature_moments": [
+        {
+          "year": 2020,
+          "type": "overpay",
+          "player": "Christian McCaffrey",
+          "price": 84,
+          "note": "Paid $84 for CMC in 2020, the single biggest price on record across every Nasties draft from 2010 to 2024."
+        },
+        {
+          "year": 2017,
+          "type": "overpay",
+          "player": "David Johnson",
+          "price": 78,
+          "note": "Dropped $78 on David Johnson in 2017."
+        },
+        {
+          "year": 2024,
+          "type": "overpay",
+          "player": "Tyreek Hill",
+          "price": 75,
+          "note": "Paid $75 for Tyreek Hill in 2024, one of at least four drafts where he spent $74 or more on a single player."
+        }
+      ],
+      "patterns": [
+        "Top-heavy every year: MJD $74 (2010), David Johnson $78 (2017), Antonio Brown $74 (2018), CMC $84 (2020), Tyreek $75 (2024)",
+        "Buys two or three studs and lets the back half of the roster go for $1",
+        "League member since the beginning (2010)"
+      ],
+      "roast_ammo": "Leems has spent $74 or more on a single player in at least four different drafts, topping out at $84 for Christian McCaffrey in 2020, the richest single price in recorded Nasties history. He builds the same team every year: a couple of studs and a bench full of guys making the minimum."
+    },
+    "crandall": {
+      "id": "crandall",
+      "aliases": ["Crandall"],
+      "championships": [],
+      "worst_seasons": [],
+      "signature_moments": [
+        {
+          "year": 2021,
+          "type": "overpay",
+          "player": "Alvin Kamara",
+          "price": 79,
+          "note": "Paid $79 for Kamara and $65 for Saquon in the same 2021 draft, then $40 more for Justin Jefferson, leaving $16 for his other eleven roster spots."
+        },
+        {
+          "year": 2011,
+          "type": "overpay",
+          "player": "Michael Vick",
+          "price": 65,
+          "note": "Spent $65 on Michael Vick at quarterback in 2011."
+        },
+        {
+          "year": 2024,
+          "type": "overpay",
+          "player": "Josh Allen",
+          "price": 33,
+          "note": "Paid $33 for Josh Allen in 2024, two years after paying $39 for him in 2022."
+        }
+      ],
+      "patterns": [
+        "Panics at QB: $49 Brees (2010), $65 Vick (2011), $41 Rodgers (2013), $39 and $33 Josh Allen (2022, 2024)",
+        "Stars-and-scrubs: blows huge money on two or three backs, then fills the roster with $1 fliers",
+        "League member since the beginning (2010)"
+      ],
+      "roast_ammo": "Crandall's whole strategy is to spend the GDP of a small country on two running backs and a quarterback, then draft eleven dollar-menu players. In 2021 he paid $79 for Kamara and $65 for Saquon in the same draft. He has paid $33 or more for a quarterback four separate times, including $65 for Michael Vick."
+    },
+    "shultz": {
+      "id": "shultz",
+      "aliases": ["Shultz"],
+      "championships": [],
+      "worst_seasons": [],
+      "signature_moments": [
+        {
+          "year": 2021,
+          "type": "overpay",
+          "player": "Travis Kelce",
+          "price": 61,
+          "note": "Paid $61 for Travis Kelce in 2021, the high point of five straight drafts paying top of the market for the same tight end."
+        },
+        {
+          "year": 2010,
+          "type": "overpay",
+          "player": "Adrian Peterson",
+          "price": 75,
+          "note": "Opened his Nasties career paying $75 for Adrian Peterson in 2010."
+        },
+        {
+          "year": 2012,
+          "type": "overpay",
+          "player": "Jimmy Graham",
+          "price": 42,
+          "note": "Paid $42 for Jimmy Graham in 2012 and $40 again in 2013, the tight-end habit predates Kelce."
+        }
+      ],
+      "patterns": [
+        "Always pays top of the market for the elite TE: Jimmy Graham ($42, $40), then Travis Kelce ($21, $42, $61, $49, $43 across five drafts)",
+        "Buys seven or eight priced starters then throws $1 darts at the bench",
+        "League member since the beginning (2010)"
+      ],
+      "roast_ammo": "Shultz has paid up for the number-one tight end every single year for over a decade, Jimmy Graham and then Travis Kelce five drafts running, including a $61 Kelce in 2021. Nobody in the league is more predictable at one position, and everybody still lets him have it."
     }
   }
 }
