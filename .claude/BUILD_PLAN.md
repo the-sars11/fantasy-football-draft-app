@@ -9,11 +9,12 @@
     { "name": "UI redesign + player intel (Phase 6-7.5)", "done": true },
     { "name": "In-season AI companion (Phase 8)", "done": true },
     { "name": "P0 — Personal season hardening (Aug 2026 drafts)", "done": false },
-    { "name": "UX — AAA Visual Upgrade (Stadium Primetime) [SUPERSEDED 2026-06-04]", "done": false },
+    { "name": "UX — AAA Visual Upgrade (Stadium Primetime) [SUPERSEDED 2026-06-04]", "done": true },
     { "name": "UX-V2: GRIDIRON Redesign (EA FC + Linear) [ACTIVE]", "done": false },
-    { "name": "P1 — Auctioneer integration", "done": false },
-    { "name": "P2 — Pre-season validation", "done": false },
-    { "name": "P3+ — Commercialization (CONDITIONAL)", "done": false }
+    { "name": "P1 — Auctioneer integration", "done": true },
+    { "name": "P1b — Remote/cross-device auctioneer live sync (FF-314)", "done": false },
+    { "name": "P2 — Pre-season validation (Joe auction only)", "done": false },
+    { "name": "P3+ — Commercialization [RETIRED 2026-08-06]", "done": true }
   ],
   "nextItems": [
     "UXV2-6 [DESIGN-BLOCKED, NOT ready to code]: Rebuild Live Auction Draft Room. Blocked on the multi-team draft board mockup (phone + TV hero) clearing the Reference Board step + Joe sign-off (first attempt rejected + deleted 2026-06-25). NOTE: the GRIDIRON mockups (.claude/mockups/draft-room-phone.html, live-draft-room-v1.html) are LEGACY as of the 2026-06-25 pivot — do NOT build to them. The on-the-block card WORKING_STATE calls locked at public/on-the-block.html is MISSING from disk + git — re-confirm with Joe before treating any artifact as the contract.",
@@ -103,7 +104,8 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 
 ---
 
-### Sub-tier 6: Tyler's Keeper League (Yahoo snake)
+### Sub-tier 6: Tyler's Keeper League (Yahoo snake) — ARCHIVED 2026-08-06
+> **ARCHIVED 2026-08-06:** Tyler's Sleeper/Yahoo snake league is out of scope. Focus is Joe's Nasties 12-person ESPN auction. All items below were completed and the code remains in the repo, but this sub-tier is not maintained going forward.
 
 - [x] FF-069: Tyler's league setup — T&A Keeper League scoring + keeper config entered; `TYLERS_SLEEPER_SCORING` in scoring-presets.ts; preset updated (2 FLEX, no K, 2 IR, 6pt passing TDs, 0.5 PPR, 4pt safety, yardage bonuses); draft order + keeper selections to be entered at draft setup time
 - [x] FF-273: Keeper discount calculator — keeper cost vs. current ADP value = keeper equity, sorted descending
@@ -238,6 +240,21 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 
 ---
 
+### Sub-tier 1b: Remote / Cross-Device Live Sync (auctioneer AA-FFI-2 counterpart)
+> **Why this is separate from FF-279–283:** those wire the auctioneer feed only when BOTH apps run on the SAME device (BroadcastChannel) or share a local JSON export. On real draft night the auctioneer runs on the host's laptop and this advisor runs on Joe's phone — different devices, different origins. This sub-tier adds the missing **over-the-network** path so the phone auto-connects to the live auctioneer with no cables and no manual export. Counterpart to the auctioneer's `AA-FFI-2`; designed to work against the auctioneer AS-BUILT so it needs zero auctioneer-side change to ship.
+> **Scope:** Joe's ESPN auction ONLY. Gated on `format === 'auction'`, identical to FF-279–283. Snake/Sleeper untouched.
+
+- [ ] FF-314: Remote auctioneer live-sync source — the advisor polls the deployed auctioneer's public state and folds its picks into the existing multi-source merge, so a phone at the draft table tracks picks live over the internet. **Verified contract (read from `fantasy_auction_auctioneer` as-built, 2026-08-07):**
+  - **Endpoint:** `GET https://fantasy-auction-auctioneer.vercel.app/api/state` (confirm the exact prod origin with `vercel ls` in the auctioneer repo before hardcoding). Returns the full synced payload or `null` when no draft is active / KV unconfigured. Backed by Upstash Redis, single global key `draft-current`, 24h TTL — exactly ONE active draft at a time, so no draft-code lookup is needed today.
+  - **Payload shape (as POSTed by the auctioneer `/draft` → `/api/sync`):** `{ id, name, savedAt, updatedAt, __syncTheme, state }`. Picks live at `state.picks[]`, each `{ id, player: { id, name, position, team, byeWeek, espnPprRank }, teamId, price, pickNumber, timestamp }`. Team id→name + budgets at `state.config.teams[]` (`{ id, name, budget, spent, roster }`); league shape at `state.config.budget` / `state.config.teamCount`. Draft lifecycle at `state.phase` (`'drafting'` when live) and `state.pickNumber`. Ignore `__syncTheme` (auctioneer's own theming, not schema).
+  - **CORS — the load-bearing design decision:** the auctioneer's `/api/state` sends NO `Access-Control-Allow-Origin`, so a browser fetch from this app's Vercel origin is cross-origin-blocked. Do NOT ask for an auctioneer change. Instead add a thin **server-side proxy** in THIS repo — `src/app/api/auctioneer-feed/route.ts` — that does the server-to-server `fetch(AUCTIONEER_ORIGIN + '/api/state')` (no CORS in Node) and returns the JSON to our own client. Origin comes from `process.env.NEXT_PUBLIC_AUCTIONEER_ORIGIN` with the prod URL as the fallback default. This keeps the feature self-contained and shippable independent of the auctioneer.
+  - **Auto-detect:** on the auction live screen, the client polls our proxy every ~3s (matches the auctioneer's `/board`+`/viewer` cadence). Non-null payload with `state.phase === 'drafting'` (or `state.picks.length > 0`) ⇒ a live auction is up ⇒ connect automatically and surface it on the existing `ConnectionStatusPill` (LIVE/STALE/OFFLINE); null/`404`/error ⇒ fall back silently to the current sources. No new UI mode — remote just becomes another feed.
+  - **Merge, don't fork:** normalize each remote pick into the SAME event shape `src/lib/draft/auction-feed-merge.ts` already dedups by `pickId`, and register remote as one more source in `src/hooks/use-draft-feed.ts`'s priority merge (suggested order: same-device BroadcastChannel > remote KV proxy > local JSON > Sheets — same-device wins when present, remote covers the cross-device case). Each new remote pick still triggers the FF-283 `calculateMaxBidAdvice()` recompute. Zero behavior change when `format !== 'auction'` or the proxy returns null.
+  - **Forward-compat with AA-FFI-2:** if the auctioneer later moves to per-draft keys/short codes (its AA-FFI-2 may), have the proxy accept an optional `?code=` and forward it; default (no code) keeps hitting the single `draft-current`. Design the client to pass an optional code now so no rewrite is needed later.
+  - **Success criterion:** with the auctioneer live on its Vercel URL and one pick recorded, this app on a DIFFERENT device shows that pick in the auction live feed within ~5s, budget/max-bid recompute, no CORS error in console, and snake mode is completely unaffected. | `pipeline`
+
+---
+
 ### Sub-tier 2: Trash Talk AI Upgrade
 > **Prerequisite:** FF-305 (live wiring) complete before starting this sub-tier. **Scope:** Auction-only triggers gated on `format === 'auction'`; snake/both-format triggers always apply. Reference implementation: `fantasy_auction_auctioneer/src/lib/trash-talk.ts` and `.claude/AA-TT-SPEC.md`.
 
@@ -307,7 +324,7 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 | ID | Description | Status |
 |----|-------------|--------|
 | FFT-006 / FF-072 | Auction live draft dry run — create a mock Google Sheet (public, anyone-with-link viewer) with 10 pre-filled picks. Connect FFI auction mode. Verify: Sheets polling detects picks, AI recommendations generate, budget math updates, trash talk fires on overpay/steal. | [ ] |
-| FFT-007 | Tyler's Sleeper dry run — create a test Sleeper draft (public, snake format). Connect FFI Sleeper mode. Simulate 5 picks. Verify: Sleeper polling detects picks, keeper visual distinction shows, AI recommendations fire. | [ ] |
+| ~~FFT-007~~ | ~~Tyler's Sleeper dry run~~ | RETIRED 2026-08-06 |
 | FFT-008 / FF-269 | Arm's-length physical test — Joe on phone at normal distance. Verify: all tap targets reachable one-handed, text readable, no precision tapping required. Note any issues in BUG_LOG. | [ ] |
 
 ---
@@ -328,65 +345,40 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 - [ ] FF-260: Document exact Sheets setup in `WORKING_STATE.md` — column names, format, share permissions confirmed from actual Nasties 2026 sheet _(Blocked: need real draft sheet ~Aug 2026)_
 - [ ] FF-072: Live draft dry run — mock Google Sheet + mock Sleeper draft, run through full auction + snake live draft flow end-to-end `ACTION`
 - [ ] FF-080: Full pre-draft data pull with 2026 season data — verify all sources working `ACTION`
-- [ ] FF-081: Draft day checklist — confirm Google Sheet template (Joe/auction), confirm Sleeper draft ID (Tyler/snake), verify mobile on both phones `ACTION`
+- [ ] FF-081: Draft day checklist — confirm Nasties Google Sheet template + column format, verify app on Joe's phone `ACTION`
 
 ---
 
-## P3 — Community Release [CONDITIONAL]
-> **Gate: 50 real non-Joe commissioner drafts AND 200 email signups. Do not start until gate is met.**
+## P3 — Community Release — RETIRED 2026-08-06
+> **RETIRED 2026-08-06:** Out of scope. This app is a personal tool for Joe's Nasties auction draft. No community release planned.
 
-- [ ] FF-284: Strip personal hardcoding — remove Joe/Tyler references, generalize for any commissioner
-- [ ] FF-285: Publish Auctioneer to GitHub (MIT license)
-- [ ] FF-286: Post to r/fantasyfootball, r/ffauctions, r/dynastyff — helpful posts, no spam
-- [ ] FF-287: Email capture on both landing pages — "Get notified when 2026 season starts"
-- [ ] FF-288: Basic marketing landing page — hero, features, email capture, zero paid spend
-- [ ] FF-289: SEO foundations — meta tags, sitemap, structured data for "fantasy football AI"
+- ~~[ ] FF-284 through FF-289~~ — retired
 
 ---
 
-## P4 — Session Layer Architecture [CONDITIONAL]
-> **Gate: Working session layer tested with 3+ real managers. Do not start until gate is met.**
-> **Absorbs old Phase 9 REST API items — the API is only needed once the session layer exists.**
+## P4 — Session Layer Architecture — RETIRED 2026-08-06
+> **RETIRED 2026-08-06:** Out of scope. Personal use only.
 
-- [ ] FF-290: Replace Sheets with Supabase Realtime session layer — commissioner creates session → room code → managers join on phones
-- [ ] FF-291: Live personalized recommendations per manager via session layer
-- [ ] FF-292: API route structure — `/api/v1/analyze-roster`, `/api/v1/recommend-waiver`, `/api/v1/evaluate-trade` _(was FF-140)_
-- [ ] FF-293: API key management + rate limiting — tiered by plan _(was FF-142/143)_
-- [ ] FF-294: API documentation site — OpenAPI spec, interactive playground _(was FF-145)_
+- ~~[ ] FF-290 through FF-294~~ — retired
 
 ---
 
-## P5 — Commercial Beta [CONDITIONAL]
-> **Gate: 1,000 users AND $10K ARR. Do not start until gate is met.**
+## P5 — Commercial Beta — RETIRED 2026-08-06
+> **RETIRED 2026-08-06:** Out of scope. Personal use only.
 
-- [ ] FF-295: Pricing tiers — Free (basic board) / Pro $19/yr (full AI) / Commissioner $49/yr (in-season)
-- [ ] FF-296: Feature gating + graceful upgrade prompts throughout app
-- [ ] FF-297: Stripe integration — subscription billing, annual plans
-- [ ] FF-298: Usage limits for free tier
-- [ ] FF-299: Trial experience — 7-day Pro trial for new users
-- [ ] FF-300: Analytics + conversion funnel — PostHog/Mixpanel
+- ~~[ ] FF-295 through FF-300~~ — retired
 
 ---
 
-## P6 — B2B Outreach [CONDITIONAL]
-> **Gate: 3 platform conversations AND 1 technical demo. Do not start until gate is met.**
-> **Target:** Fantrax → MyFantasyLeague → Fleaflicker → Underdog. Not ESPN/Yahoo (unreachable founders).
+## P6 — B2B Outreach — RETIRED 2026-08-06
+> **RETIRED 2026-08-06:** Out of scope. Personal use only.
 
-- [ ] FF-301: Target list — 20-30 potential partners with contact research
-- [ ] FF-302: Cold outreach sequence — personalized email + LinkedIn
-- [ ] FF-303: Demo script — 15-minute API walkthrough
-- [ ] FF-304: Partnership proposal template — pricing, integration scope, success metrics
+- ~~[ ] FF-301 through FF-304~~ — retired
 
 ---
 
-## P7 — Scale Decision [CONDITIONAL]
-> **Three outcomes — all are valid. The personal apps are worth building regardless.**
->
-> **(A)** B2C traction → double down on consumer product
-> **(B)** B2B deal → white-label for platform partner
-> **(C)** Neither → shut down commercial ambitions, open source, keep using personally
-
-_(Items TBD based on which outcome materializes)_
+## P7 — Scale Decision — RETIRED 2026-08-06
+> **RETIRED 2026-08-06:** Out of scope. Answer is already (C) — personal tool, keep using personally.
 
 ---
 

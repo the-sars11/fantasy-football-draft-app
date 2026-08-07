@@ -2,6 +2,18 @@
 
 ---
 
+## 2026-08-07 — FF-314 planned: remote/cross-device auctioneer live sync
+
+**Task:** FF-314 (plan add only — no code) | **Class:** `docs` | **Lenses:** Delivery
+
+**What changed:**
+- `.claude/BUILD_PLAN.md` — added **P1 Sub-tier 1b** and item **FF-314** for over-the-network sync to the deployed auctioneer. Existing FF-279–283 wire the auctioneer feed only same-device (BroadcastChannel / local JSON); FF-314 adds the cross-device path (host laptop + Joe's phone on different origins). Counterpart to the auctioneer's `AA-FFI-2`.
+- Contract captured from the `fantasy_auction_auctioneer` repo as-built (verified 2026-08-07): `GET /api/state` on the auctioneer's Vercel origin returns `{ id, name, savedAt, updatedAt, __syncTheme, state }` from Upstash key `draft-current` (single active draft, 24h TTL); picks at `state.picks[]`, teams at `state.config.teams[]`.
+- Load-bearing design decision recorded: the auctioneer route sends no CORS headers, so FF-314 fetches it through a THIS-repo server-side proxy (`src/app/api/auctioneer-feed/route.ts`) — ships with zero auctioneer-side change, and folds remote picks into the existing `auction-feed-merge.ts` / `use-draft-feed.ts` dedup so it's a new source, not a new mode. Auction-only gating unchanged.
+- `DASHBOARD_STATUS` header — added `P1b` milestone (`done: false`).
+
+---
+
 ## 2026-06-06 — UXV2-5: Post-Draft Review GRIDIRON rebuild
 
 **Task:** UXV2-5 | **Class:** `output` | **Lenses:** Design, QA
