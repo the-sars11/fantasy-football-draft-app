@@ -33,9 +33,14 @@ export async function GET(req: NextRequest) {
     const position = searchParams.get('position')
     const limit = parseInt(searchParams.get('limit') || '300')
 
+    // Only return players that have real ranking data (non-empty adp). The
+    // Sleeper seed left ~2,600 rows with empty adp/values (retired players,
+    // practice-squad fillers); excluding them keeps the board to the ~425
+    // draft-relevant players populated by populate-fantasypros.ts.
     let query = supabase
       .from('players_cache')
       .select('*')
+      .not('adp', 'eq', '{}')
       .order('last_updated_at', { ascending: false })
       .limit(limit)
 

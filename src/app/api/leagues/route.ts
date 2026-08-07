@@ -25,9 +25,14 @@ export async function GET() {
       return NextResponse.json({ error: 'Database not available' }, { status: 503 })
     }
 
+    // Active league first, then most-recently-updated. Every client defaults to
+    // leagues[0], so the active league must sort to the top -- otherwise the
+    // most-recently-saved league wins (which silently loaded Tyler's keeper
+    // league as Joe's default and bled keeper UI into his auction view).
     let query = supabase
       .from('leagues')
       .select('id, name, format, team_count, platform, scoring_format, budget, is_active, keeper_enabled, keeper_settings')
+      .order('is_active', { ascending: false })
       .order('updated_at', { ascending: false })
 
     // In dev mode, filter by dev user

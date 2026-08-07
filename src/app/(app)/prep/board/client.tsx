@@ -345,7 +345,11 @@ export function DraftBoardClient() {
               minWidth: 0,
             }}
           >
-            <SelectValue />
+            {/* base-ui renders the raw value (league id) unless given a
+                function child to resolve it to the league name. */}
+            <SelectValue>
+              {(value) => leagues.find((l) => l.id === value)?.name ?? 'Select league'}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
             {leagues.map((league) => (
