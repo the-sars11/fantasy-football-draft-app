@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Live Cockpit - Reference Board (FFDA)</title>
+<style>
+  :root{
+    --canvas:#0a0c11;
+    --panel:#12151d;
+    --panel-2:#161a24;
+    --line:rgba(255,255,255,0.09);
+    --line-strong:rgba(255,255,255,0.16);
+    --ink:rgba(255,255,255,0.94);
+    --ink-2:rgba(255,255,255,0.66);
+    --ink-3:rgba(255,255,255,0.44);
+    --accent:#5cc8ff;         /* board chrome only - NOT a brand proposal */
+    --steal:#54e6a0;
+    --short:#ff8a9b;
+    --eafc:#00e0b8;
+    --linear:#b9a3ff;
+    --shadow:0 18px 50px -24px rgba(0,0,0,0.85);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--canvas);color:var(--ink);
+    font-family:ui-sans-serif,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;line-height:1.5}
+  body{padding:0 0 96px}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 22px}
+  a{color:inherit}
+
+  /* header */
+  header{position:relative;overflow:hidden;border-bottom:1px solid var(--line);
+    background:
+      radial-gradient(120% 140% at 82% -20%, rgba(92,200,255,0.16), transparent 55%),
+      radial-gradient(90% 120% at 8% -10%, rgba(185,163,255,0.12), transparent 50%),
+      linear-gradient(180deg,#0d1017,#0a0c11);}
+  .head-in{max-width:1180px;margin:0 auto;padding:34px 22px 30px}
+  .eyebrow{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-3);
+    font-weight:600}
+  h1{font-size:31px;line-height:1.12;letter-spacing:-.02em;margin:12px 0 10px;font-weight:700}
+  .lede{max-width:760px;color:var(--ink-2);font-size:15px}
+  .anchors{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
+  .chip{display:inline-flex;align-items:center;gap:8px;padding:7px 13px;border:1px solid var(--line-strong);
+    border-radius:999px;font-size:12.5px;color:var(--ink);background:rgba(255,255,255,0.03)}
+  .dot{width:8px;height:8px;border-radius:50%}
+  .how{margin-top:20px;padding:13px 16px;border:1px solid var(--line);border-radius:12px;
+    background:var(--panel);font-size:13.5px;color:var(--ink-2);display:flex;gap:10px;align-items:flex-start}
+  .how b{color:var(--ink)}
+
+  /* problem-area section */
+  section{margin-top:40px}
+  .sec-head{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:6px}
+  .sec-num{font-variant-numeric:tabular-nums;font-size:12px;font-weight:700;color:var(--accent);
+    letter-spacing:.12em;border:1px solid var(--line-strong);border-radius:7px;padding:3px 8px}
+  .sec-head h2{font-size:20px;letter-spacing:-.01em;margin:0;font-weight:650}
+  .sec-problem{color:var(--ink-2);font-size:14px;margin:4px 0 18px;max-width:840px}
+
+  .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+  @media (max-width:720px){.grid{grid-template-columns:1fr}}
+
+  .tile{border:1px solid var(--line);border-radius:16px;background:var(--panel);
+    box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column}
+  .media{position:relative;aspect-ratio:16/9;
+    background:linear-gradient(135deg,#1b2130,#0e1119 70%);display:block;border-bottom:1px solid var(--line)}
+  .media img{width:100%;height:100%;object-fit:cover;display:block}
+  .media .fallback{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    text-align:center;padding:20px;color:var(--ink-3);font-size:12.5px;letter-spacing:.02em}
+  .src-tag{position:absolute;left:12px;top:12px;font-size:10.5px;font-weight:700;letter-spacing:.08em;
+    text-transform:uppercase;padding:4px 9px;border-radius:999px;background:rgba(0,0,0,0.62);
+    border:1px solid var(--line-strong);color:var(--ink)}
+  .play{position:absolute;right:12px;bottom:12px;font-size:11px;color:var(--ink-2);
+    background:rgba(0,0,0,0.6);border:1px solid var(--line);border-radius:999px;padding:4px 10px}
+  .body{padding:15px 16px 16px}
+  .tile-title{font-size:14.5px;font-weight:650;margin:0 0 3px}
+  .tile-what{font-size:12.5px;color:var(--ink-3);margin:0 0 12px}
+  .ann{font-size:13px;margin:0 0 9px;padding-left:14px;position:relative;color:var(--ink-2)}
+  .ann::before{content:"";position:absolute;left:0;top:8px;width:6px;height:6px;border-radius:50%}
+  .steal::before{background:var(--steal)}
+  .short::before{background:var(--short)}
+  .ann b{color:var(--ink);font-weight:600}
+  .lbl{font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+  .lbl.s1{color:var(--steal)} .lbl.s2{color:var(--short)}
+  .link{display:inline-flex;align-items:center;gap:6px;margin-top:6px;font-size:12.5px;
+    color:var(--accent);text-decoration:none;font-weight:600}
+  .link:hover{text-decoration:underline}
+  code{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:11.5px;
+    background:rgba(255,255,255,0.06);padding:1px 5px;border-radius:5px;color:var(--ink-2)}
+
+  footer{margin-top:44px;border-top:1px solid var(--line);padding-top:22px;color:var(--ink-2);font-size:13.5px}
+  footer b{color:var(--ink)}
+</style>
+</head>
+<body>
+<header>
+  <div class="head-in">
+    <div class="eyebrow">Fantasy Football Draft Advisor &middot; Step B2 Reference Board</div>
+    <h1>Live Draft Cockpit - align the references before we mock it up</h1>
+    <p class="lede">Naming an anchor is a claim. This board is the evidence. The cockpit is broken into its four real
+      design problems, each shown against real current EA FC 25 and Linear screens. Point at the tiles that actually
+      land for you; those become the locked references the first cockpit mockup is built against.</p>
+    <div class="anchors">
+      <span class="chip"><span class="dot" style="background:var(--eafc)"></span>EA FC 25 - cinematic intelligence cockpit (personality lead)</span>
+      <span class="chip"><span class="dot" style="background:var(--linear)"></span>Linear - density without claustrophobia (discipline)</span>
+    </div>
+    <div class="how">
+      <span>&#9755;</span>
+      <span><b>How to use this:</b> for each of the four problem areas, tell me which tile(s) are right and which are wrong.
+      A simple "1a and 2b yes, 3a no" is enough. Anything you mark becomes a locked reference; anything you reject I drop.
+      Then I build one high-fidelity cockpit mockup to exactly what you picked.</span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- AREA 1 -->
+  <section>
+    <div class="sec-head"><span class="sec-num">01</span><h2>The card - the on-the-block player as a hero object</h2></div>
+    <p class="sec-problem">The single most important pixels on the screen: the player on the block. Today it is a text row with a
+      colored two-letter chip and no imagery (<code>draft-board-table.tsx:18-32</code>, zero <code>&lt;Image&gt;</code> in the app).
+      EA FC treats one player as a confident, layered card object.</p>
+    <div class="grid">
+
+      <article class="tile">
+        <a class="media" href="https://www.youtube.com/watch?v=GcGJ4fe0iNk" target="_blank" rel="noopener">
+          <span class="src-tag" style="color:var(--eafc)">EA FC 25</span>
+          <img src="https://img.youtube.com/vi/GcGJ4fe0iNk/hqdefault.jpg" alt="EA FC 25 Ultimate Team official deep dive - item cards"
+            onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <span class="fallback" style="display:none">EA FC 25 UT Deep Dive &middot; item cards<br>view real screen &#8594;</span>
+          <span class="play">1a &middot; UT item card</span>
+        </a>
+        <div class="body">
+          <p class="tile-title">Ultimate Team player item card</p>
+          <p class="tile-what">Official UT deep dive &middot; the item as a hero object</p>
+          <p class="lbl s1">Steal</p>
+          <p class="ann steal">One player = <b>one layered card</b>: photo integral, rating and position anchored, key numbers legible at a glance. Rarity/tier read from the card's own material, not a label.</p>
+          <p class="lbl s2">Current build falls short</p>
+          <p class="ann short">FFDA has <b>no player imagery at all</b> and renders the on-block player as text + a 2-letter chip. No hero object, no material, no depth.</p>
+          <a class="link" href="https://www.youtube.com/watch?v=GcGJ4fe0iNk" target="_blank" rel="noopener">View real screen &#8594;</a>
+        </div>
+      </article>
+
+      <article class="tile">
+        <a class="media" href="https://www.youtube.com/watch?v=QXnmKW0_XmQ" target="_blank" rel="noopener">
+          <span class="src-tag" style="color:var(--eafc)">EA FC 25</span>
+          <img src="https://img.youtube.com/vi/QXnmKW0_XmQ/hqdefault.jpg" alt="EA FC 25 walkout card face explained"
+            onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <span class="fallback" style="display:none">EA FC 25 special card face<br>view real screen &#8594;</span>
+          <span class="play">1b &middot; special card face</span>
+        </a>
+        <div class="body">
+          <p class="tile-title">Special / high-rating card face</p>
+          <p class="tile-what">How a premium card signals its own value</p>
+          <p class="lbl s1">Steal</p>
+          <p class="ann steal">Value is communicated by the <b>card treatment itself</b> (finish, glow, foil), so a great player looks great before you read a number. Maps to "this is a steal / your target".</p>
+          <p class="lbl s2">Current build falls short</p>
+          <p class="ann short">FFDA signals target/value with tiny text and a <b>WCAG-failing muted color</b> (<code>--ffi-ink-3</code> at 3.65:1). No visual weight for the players that matter most.</p>
+          <a class="link" href="https://www.youtube.com/watch?v=QXnmKW0_XmQ" target="_blank" rel="noopener">View real screen &#8594;</a>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- AREA 2 -->
+  <section>
+    <div class="sec-head"><span class="sec-num">02</span><h2>The reveal - the on-the-clock moment that has to land</h2></div>
+    <p class="sec-problem">When a player goes on the block, that beat should feel like something. Today it is a spring + a pulse dot with a
+      literal gold hex bypassing the token system (<code>draft/live/client.tsx:985-1097</code>). EA FC's walkout is the reference for a reveal that earns attention.</p>
+    <div class="grid">
+
+      <article class="tile">
+        <a class="media" href="https://www.youtube.com/watch?v=hTF0p48Fvn0" target="_blank" rel="noopener">
+          <span class="src-tag" style="color:var(--eafc)">EA FC 25</span>
+          <img src="https://img.youtube.com/vi/hTF0p48Fvn0/hqdefault.jpg" alt="EA FC 25 walkout tunnel reveal animation"
+            onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <span class="fallback" style="display:none">EA FC 25 walkout tunnel reveal<br>view real screen &#8594;</span>
+          <span class="play">2a &middot; walkout reveal</span>
+        </a>
+        <div class="body">
+          <p class="tile-title">Walkout tunnel reveal</p>
+          <p class="tile-what">Dark silhouette to lit reveal, drama scaled to value</p>
+          <p class="lbl s1">Steal</p>
+          <p class="ann steal"><b>Silhouette then light</b>: the moment escalates, and the escalation is bigger when the player is bigger. A reveal that means something. Restrained to the moment, not every pick.</p>
+          <p class="lbl s2">Current build falls short</p>
+          <p class="ann short">FFDA's on-the-clock banner animates (good) but has <b>no imagery and a hardcoded gold</b> that lies about the token system. The beat is there; the payoff is not.</p>
+          <a class="link" href="https://www.youtube.com/watch?v=hTF0p48Fvn0" target="_blank" rel="noopener">View real screen &#8594;</a>
+        </div>
+      </article>
+
+      <article class="tile">
+        <a class="media" href="https://www.youtube.com/watch?v=KQqAPxjaVWk" target="_blank" rel="noopener">
+          <span class="src-tag" style="color:var(--eafc)">EA FC 25</span>
+          <img src="https://img.youtube.com/vi/KQqAPxjaVWk/hqdefault.jpg" alt="EA FC 25 first pack opening reveal drama"
+            onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <span class="fallback" style="display:none">EA FC 25 pack-opening drama<br>view real screen &#8594;</span>
+          <span class="play">2b &middot; pack-opening drama</span>
+        </a>
+        <div class="body">
+          <p class="tile-title">Pack-opening build and payoff</p>
+          <p class="tile-what">Anticipation, then release - the shape of a good reveal</p>
+          <p class="lbl s1">Steal</p>
+          <p class="ann steal">The <b>build-up before the payoff</b> is what makes it land: light, pace, a held beat. The draft equivalent: the two seconds before "on the block" resolves.</p>
+          <p class="lbl s2">Current build falls short</p>
+          <p class="ann short">FFDA cuts straight to state with <b>bare spinners</b> for transitions (<code>review/client.tsx:279-286</code>). No anticipation, no crafted transition.</p>
+          <a class="link" href="https://www.youtube.com/watch?v=KQqAPxjaVWk" target="_blank" rel="noopener">View real screen &#8594;</a>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- AREA 3 -->
+  <section>
+    <div class="sec-head"><span class="sec-num">03</span><h2>The live information hierarchy - advice, budget, feed</h2></div>
+    <p class="sec-problem">Under the card sits the actual work: your max bid, value, estimated cost, budget health, and the live feed.
+      This must be dense and calm at arm's length. EA FC's squad panels handle dense roster state; Linear is the reference for density without noise.</p>
+    <div class="grid">
+
+      <article class="tile">
+        <a class="media" href="https://www.youtube.com/watch?v=2Uh5E8wO2rA" target="_blank" rel="noopener">
+          <span class="src-tag" style="color:var(--eafc)">EA FC 25</span>
+          <img src="https://img.youtube.com/vi/2Uh5E8wO2rA/hqdefault.jpg" alt="EA FC 25 squad formation screen"
+            onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <span class="fallback" style="display:none">EA FC 25 squad / formation screen<br>view real screen &#8594;</span>
+          <span class="play">3a &middot; squad state</span>
+        </a>
+        <div class="body">
+          <p class="tile-title">Squad / formation panel</p>
+          <p class="tile-what">Many roster slots, whole-squad state at a glance</p>
+          <p class="lbl s1">Steal</p>
+          <p class="ann steal">A <b>full squad readable in one look</b>: filled vs open slots, chemistry/health signalled by color, compact per-slot cards. Directly maps to your budget + roster + all-teams read.</p>
+          <p class="lbl s2">Current build falls short</p>
+          <p class="ann short">FFDA crams this into a squeezed panel inside a 1255-line component, with <b>three drifting position palettes</b> and flat surfaces.</p>
+          <a class="link" href="https://www.youtube.com/watch?v=2Uh5E8wO2rA" target="_blank" rel="noopener">View real screen &#8594;</a>
+        </div>
+      </article>
+
+      <article class="tile">
+        <a class="media" href="https://www.saasui.design/application/linear" target="_blank" rel="noopener">
+          <span class="src-tag" style="color:var(--linear)">Linear</span>
+          <span class="fallback" style="display:flex">Linear &middot; dense list / inbox<br>real screenshots &#8594;</span>
+          <span class="play">3b &middot; calm density</span>
+        </a>
+        <div class="body">
+          <p class="tile-title">Linear list / inbox density</p>
+          <p class="tile-what">Real shipped screenshots (SaaS UI gallery)</p>
+          <p class="lbl s1">Steal</p>
+          <p class="ann steal"><b>Near-black substrate, hairline 0.5px borders, tight tracking, one accent used as a flashlight,</b> tabular numbers. Dense information that never feels loud. This is the calm the advice stack needs.</p>
+          <p class="lbl s2">Current build falls short</p>
+          <p class="ann short">FFDA leans on flat cards and a muted text token that fails contrast; density currently reads as clutter, not calm.</p>
+          <a class="link" href="https://www.saasui.design/application/linear" target="_blank" rel="noopener">View real screens &#8594;</a>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- AREA 4 -->
+  <section>
+    <div class="sec-head"><span class="sec-num">04</span><h2>Buttons, type and depth - the record-sale action and the numerals</h2></div>
+    <p class="sec-problem">The primary action (Record Sale), the controls, the display type, and the real light on surfaces. Today: Anton (NASCAR's
+      face), literal gold rgba, ambient <code>backdrop-blur</code> off the allowlist (<code>app-shell.tsx:212</code>), a letter-in-a-circle avatar.</p>
+    <div class="grid">
+
+      <article class="tile">
+        <a class="media" href="https://www.youtube.com/watch?v=JMuhHDPlP_8" target="_blank" rel="noopener">
+          <span class="src-tag" style="color:var(--eafc)">EA FC 25</span>
+          <img src="https://img.youtube.com/vi/JMuhHDPlP_8/hqdefault.jpg" alt="EA FC 25 menu and settings type and chrome"
+            onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <span class="fallback" style="display:none">EA FC 25 menu chrome &amp; type<br>view real screen &#8594;</span>
+          <span class="play">4a &middot; chrome &amp; type</span>
+        </a>
+        <div class="body">
+          <p class="tile-title">EA FC menu chrome, type and depth</p>
+          <p class="tile-what">Broadcast-weight display + real elevation</p>
+          <p class="lbl s1">Steal</p>
+          <p class="ann steal"><b>Confident display type, tabular numerals, real layered depth</b> (light from a source, not lazy gradient fill), a decisive primary action. Energy with discipline.</p>
+          <p class="lbl s2">Current build falls short</p>
+          <p class="ann short">FFDA ships <b>Anton</b> (a sibling app's locked face), a literal gold that dodges tokens, and ambient blur that flattens rather than lifts.</p>
+          <a class="link" href="https://www.youtube.com/watch?v=JMuhHDPlP_8" target="_blank" rel="noopener">View real screen &#8594;</a>
+        </div>
+      </article>
+
+      <article class="tile">
+        <a class="media" href="https://linear.app/now/behind-the-latest-design-refresh" target="_blank" rel="noopener">
+          <span class="src-tag" style="color:var(--linear)">Linear</span>
+          <span class="fallback" style="display:flex">Linear &middot; buttons, type, restraint<br>design refresh &#8594;</span>
+          <span class="play">4b &middot; restraint</span>
+        </a>
+        <div class="body">
+          <p class="tile-title">Linear buttons, type, restraint</p>
+          <p class="tile-what">Linear's own writeup of the current refresh</p>
+          <p class="lbl s1">Steal</p>
+          <p class="ann steal"><b>One accent, earned</b>: buttons quiet until the primary action, weights in a low band, geometry over shadow. The counterweight that keeps EA FC energy from becoming noise.</p>
+          <p class="lbl s2">Current build falls short</p>
+          <p class="ann short">FFDA's accent leaks everywhere (gold on the hero, three palettes, blur chrome); nothing is <b>earned</b>, so nothing reads as the moment.</p>
+          <a class="link" href="https://linear.app/now/behind-the-latest-design-refresh" target="_blank" rel="noopener">View real screen &#8594;</a>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <footer>
+    <p><b>Your move:</b> mark which tiles land per area (e.g. "1a yes, 1b no, 2a yes, 3b yes, 4a+4b yes"). The ones you keep
+    become the locked references for the cockpit mockup. If a whole area is missing a reference you want, name the real screen and I add it.
+    Nothing here is a design proposal yet - palette, fonts and layout are all still open and get decided from the mockup this board leads to.</p>
+    <p style="color:var(--ink-3);font-size:12px;margin-top:12px">Sources are real current screens: EA FC 25 Ultimate Team (official deep dive + walkout/pack + squad + menu walkthroughs, 2024-2025) and Linear (2024-2025 refresh). Thumbnails hotlink from YouTube; every tile links out to its real source.</p>
+  </footer>
+
+</div>
+</body>
+</html>

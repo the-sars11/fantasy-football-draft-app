@@ -1,0 +1,912 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#05080F" />
+<title>GRIDIRON -- Motion System Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Saira:wght@400;500;600;700&family=Saira+Condensed:wght@600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+/* UXV2-2b MOTION SYSTEM SHOWCASE
+   Interactive demo of all motion behaviors — approve before React impl.
+   PALETTE + atmosphere: exact from prep-hub-phone.html (locked). */
+:root {
+  --bg-0:#05080F; --bg-1:#080D18;
+  --s1:#0C1322; --s2:#111A2E; --s3:#16223A;
+  --h: rgba(150,180,255,0.10);
+  --hb:rgba(180,205,255,0.18);
+  --volt:#8BFF45; --vd:#5FE21F; --vi:#0a1f02; --vg:rgba(139,255,69,0.32);
+  --blue:#4D82FF; --bb:#79A6FF; --bg:rgba(77,130,255,0.28);
+  --warn:#FFB05C;
+  --ink:#EAF1FF; --i2:#9FB0CE; --i3:#637396;
+  --pos-qb:#FF6E8A; --pos-rb:#56E0A0; --pos-wr:#6CA8FF; --pos-te:#FFB05C;
+  --fd:"Anton",sans-serif;
+  --fc:"Saira Condensed",sans-serif;
+  --fu:"Saira",system-ui,sans-serif;
+  --fn:"JetBrains Mono",monospace;
+  --r:16px;
+
+  /* MOTION CURVES (shared tokens -- these become CSS custom properties + Framer variants) */
+  --ease-spring:  cubic-bezier(0.34, 1.56, 0.64, 1);   /* slight overshoot -- on-the-clock entrance, card reveal */
+  --ease-broadcast: cubic-bezier(0.22, 1, 0.36, 1);    /* fast out, floats to rest -- pick lands, lower-third */
+  --ease-standard: cubic-bezier(0.25, 0.46, 0.45, 0.94); /* standard ease-out -- routine UI, 200ms */
+  --ease-swift:   cubic-bezier(0.4, 0, 0.2, 1);         /* linear-like for micro < 120ms */
+
+  /* DURATION TOKENS */
+  --dur-micro: 100ms;
+  --dur-fast:  200ms;
+  --dur-standard: 320ms;
+  --dur-cinematic: 480ms;
+  --dur-reveal: 640ms;
+}
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+html,body { height:100%; }
+body {
+  font-family:var(--fu); color:var(--ink); overflow-x:hidden;
+  background:#04060D;
+  -webkit-font-smoothing:antialiased;
+}
+/* Fixed canvas layer -- exact values from approved draft-room-phone.html */
+body::before {
+  content:"";
+  position:fixed; inset:0; z-index:-1; pointer-events:none;
+  background:
+    radial-gradient(700px 480px at 22% -6%, rgba(77,130,255,0.18), transparent 58%),
+    radial-gradient(620px 560px at 92%  4%, rgba(139,255,69,0.07),  transparent 55%),
+    radial-gradient(800px 700px at 50% 116%, rgba(120,80,255,0.12), transparent 60%),
+    linear-gradient(180deg, #060A14, #04060D);
+}
+.app { max-width:430px; margin:0 auto; min-height:100dvh; padding-bottom:40px; }
+
+/* HEADER */
+header {
+  position:sticky; top:0; z-index:20;
+  padding:calc(env(safe-area-inset-top)+12px) 16px 10px;
+  background:linear-gradient(180deg,rgba(5,8,15,0.97) 70%,rgba(5,8,15,0));
+}
+.topbar { display:flex; align-items:center; justify-content:space-between; }
+.logo { font-family:var(--fd); font-size:22px; letter-spacing:.02em; }
+.logo span { color:var(--volt); }
+.badge-system {
+  font-family:var(--fc); font-weight:700; font-size:10px; letter-spacing:.22em;
+  color:var(--i3); text-transform:uppercase;
+  padding:5px 10px; border-radius:999px;
+  background:rgba(255,255,255,0.04); border:1px solid var(--h);
+}
+
+/* SECTION HEADERS */
+main { padding:8px 16px 0; }
+.section { margin-top:28px; }
+.section-label {
+  font-family:var(--fc); font-weight:700; font-size:11px; letter-spacing:.28em;
+  color:var(--i3); text-transform:uppercase;
+  margin-bottom:12px; display:flex; align-items:center; gap:8px;
+}
+.section-label::after {
+  content:""; flex:1; height:1px; background:var(--h);
+}
+.section-title {
+  font-family:var(--fc); font-weight:800; font-size:17px;
+  color:var(--ink); margin-bottom:4px;
+}
+.section-desc {
+  font-family:var(--fu); font-size:13px; color:var(--i2);
+  margin-bottom:14px; line-height:1.5;
+}
+
+/* SURFACE CARDS */
+.card {
+  background:var(--s2); border:1px solid var(--h);
+  border-radius:var(--r); padding:16px;
+}
+.card + .card { margin-top:10px; }
+
+/* =====================================================
+   1. TIMING CURVES -- visual demo of the 4 curves
+   ===================================================== */
+.curves-grid { display:flex; flex-direction:column; gap:12px; }
+.curve-row {
+  display:flex; align-items:center; gap:14px; padding:12px 14px;
+  background:var(--s1); border:1px solid var(--h); border-radius:12px;
+}
+.curve-name {
+  font-family:var(--fn); font-size:12px; color:var(--bb);
+  width:90px; flex-shrink:0;
+}
+.curve-track {
+  flex:1; height:6px; background:rgba(255,255,255,0.06);
+  border-radius:3px; position:relative; overflow:visible;
+}
+.curve-dot {
+  width:14px; height:14px; border-radius:50%; background:var(--volt);
+  box-shadow:0 0 12px var(--vg);
+  position:absolute; top:50%; transform:translate(0,-50%);
+  left:0;
+}
+.curve-row[data-curve="spring"]   .curve-dot { animation:curve-move-spring   2.4s var(--ease-spring)    infinite; }
+.curve-row[data-curve="broadcast"] .curve-dot { animation:curve-move-broadcast 2.4s var(--ease-broadcast) infinite; }
+.curve-row[data-curve="standard"] .curve-dot { animation:curve-move-standard  2.4s var(--ease-standard)  infinite; }
+.curve-row[data-curve="swift"]    .curve-dot { animation:curve-move-swift    2.4s var(--ease-swift)    infinite; }
+@keyframes curve-move-spring   { 0%,15%{ left:0; } 50%,85%{ left:calc(100% - 14px); } 100%{ left:0; } }
+@keyframes curve-move-broadcast{ 0%,15%{ left:0; } 50%,85%{ left:calc(100% - 14px); } 100%{ left:0; } }
+@keyframes curve-move-standard { 0%,15%{ left:0; } 50%,85%{ left:calc(100% - 14px); } 100%{ left:0; } }
+@keyframes curve-move-swift    { 0%,15%{ left:0; } 50%,85%{ left:calc(100% - 14px); } 100%{ left:0; } }
+.curve-dur { font-family:var(--fn); font-size:11px; color:var(--i3); width:44px; text-align:right; flex-shrink:0; }
+
+/* =====================================================
+   2. NUMBER TICKER
+   ===================================================== */
+.ticker-demo {
+  display:flex; flex-direction:column; gap:14px;
+}
+.ticker-row {
+  display:flex; align-items:baseline; justify-content:space-between;
+  padding:14px 16px; background:var(--s1); border:1px solid var(--h); border-radius:12px;
+}
+.ticker-label { font-family:var(--fc); font-weight:700; font-size:12px; letter-spacing:.18em; color:var(--i3); text-transform:uppercase; }
+.ticker-val {
+  font-family:var(--fn); font-weight:700; font-size:28px;
+  transition:all 0.3s var(--ease-broadcast);
+  position:relative;
+}
+.ticker-val.flash { animation:num-flash 0.35s var(--ease-broadcast) forwards; }
+.ticker-val.down  { color:var(--pos-qb); }
+.ticker-val.up    { color:var(--volt); }
+@keyframes num-flash {
+  0%   { opacity:0.3; transform:translateY(-6px) scale(0.92); }
+  60%  { opacity:1;   transform:translateY(2px) scale(1.04); }
+  100% { opacity:1;   transform:translateY(0) scale(1); }
+}
+.ticker-delta {
+  font-family:var(--fn); font-size:13px; margin-left:8px; opacity:0;
+  transition:opacity 0.2s; position:relative; top:-2px;
+}
+.ticker-delta.show { opacity:1; }
+.ticker-delta.neg { color:var(--pos-qb); }
+.ticker-delta.pos { color:var(--volt); }
+.ticker-trigger {
+  font-family:var(--fc); font-weight:700; font-size:12px; letter-spacing:.16em;
+  color:var(--bb); text-transform:uppercase; cursor:pointer; user-select:none;
+  padding:7px 12px; border-radius:8px; background:rgba(77,130,255,0.10);
+  border:1px solid rgba(77,130,255,0.22); transition:all 0.15s;
+  -webkit-tap-highlight-color:transparent;
+}
+.ticker-trigger:active { transform:scale(0.94); background:rgba(77,130,255,0.2); }
+
+/* =====================================================
+   3. BUTTON MICRO-INTERACTIONS
+   ===================================================== */
+.btn-demo-grid { display:flex; flex-direction:column; gap:14px; }
+.btn-demo-row { display:flex; gap:10px; align-items:center; }
+
+.ffi-btn-volt {
+  display:inline-flex; align-items:center; justify-content:center; gap:7px;
+  font-family:var(--fc); font-weight:800; font-size:15px; letter-spacing:.06em;
+  color:var(--vi); background:linear-gradient(135deg,var(--volt),var(--vd));
+  border:none; border-radius:999px; padding:14px 24px; cursor:pointer;
+  box-shadow:0 6px 22px -6px var(--vg), 0 2px 8px -4px rgba(0,0,0,0.6);
+  transition:transform var(--dur-micro) var(--ease-swift), box-shadow var(--dur-micro) var(--ease-swift);
+  -webkit-tap-highlight-color:transparent; user-select:none; position:relative; overflow:hidden;
+}
+.ffi-btn-volt:active {
+  transform:scale(0.93);
+  box-shadow:0 2px 8px -4px var(--vg), 0 1px 3px -2px rgba(0,0,0,0.6);
+}
+.ffi-btn-volt::after {
+  content:""; position:absolute; inset:0; border-radius:inherit;
+  background:radial-gradient(circle at center, rgba(255,255,255,0.3) 0%, transparent 70%);
+  opacity:0; transform:scale(0.3);
+  transition:opacity 0.4s, transform 0.4s;
+}
+.ffi-btn-volt.glow::after { opacity:1; transform:scale(1.2); }
+
+.ffi-btn-blue {
+  display:inline-flex; align-items:center; justify-content:center; gap:7px;
+  font-family:var(--fc); font-weight:700; font-size:13px; letter-spacing:.1em;
+  color:var(--ink); background:rgba(77,130,255,0.15);
+  border:1px solid rgba(77,130,255,0.28); border-radius:999px; padding:12px 20px; cursor:pointer;
+  transition:transform var(--dur-micro) var(--ease-swift), background var(--dur-micro), box-shadow var(--dur-micro);
+  -webkit-tap-highlight-color:transparent; user-select:none;
+}
+.ffi-btn-blue:active { transform:scale(0.94); background:rgba(77,130,255,0.28); box-shadow:0 0 14px -4px var(--bg); }
+
+.ffi-btn-ghost {
+  display:inline-flex; align-items:center; justify-content:center; gap:6px;
+  font-family:var(--fc); font-weight:700; font-size:13px; letter-spacing:.1em;
+  color:var(--i2); background:transparent;
+  border:1px solid var(--h); border-radius:999px; padding:12px 20px; cursor:pointer;
+  transition:transform var(--dur-micro) var(--ease-swift), border-color var(--dur-micro), color var(--dur-micro);
+  -webkit-tap-highlight-color:transparent; user-select:none;
+}
+.ffi-btn-ghost:active { transform:scale(0.95); border-color:var(--hb); color:var(--ink); }
+
+.btn-tag { font-family:var(--fc); font-size:11px; color:var(--i3); letter-spacing:.12em; }
+
+/* =====================================================
+   4. CARD LIFT (interactive ffi-card-interactive)
+   ===================================================== */
+.card-lift {
+  background:var(--s2); border:1px solid var(--h);
+  border-radius:var(--r); padding:16px;
+  cursor:pointer; user-select:none;
+  transition:transform var(--dur-fast) var(--ease-spring), box-shadow var(--dur-fast) var(--ease-spring), border-color var(--dur-fast);
+  -webkit-tap-highlight-color:transparent;
+  position:relative; overflow:hidden;
+}
+.card-lift::before {
+  content:""; position:absolute; inset:0; border-radius:inherit; padding:1px;
+  background:linear-gradient(115deg, transparent 20%, rgba(77,130,255,0.5) 45%, rgba(139,255,69,0.3) 55%, transparent 80%);
+  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor; mask-composite:exclude;
+  opacity:0; transition:opacity var(--dur-fast);
+}
+.card-lift:active {
+  transform:translateY(-3px) scale(1.01);
+  box-shadow:0 16px 40px -12px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.04) inset;
+  border-color:var(--hb);
+}
+.card-lift:active::before { opacity:1; }
+.card-lift-inner { display:flex; align-items:center; justify-content:space-between; }
+.card-lift-player { display:flex; align-items:center; gap:12px; }
+.pos-chip {
+  font-family:var(--fc); font-weight:800; font-size:13px;
+  padding:6px 10px; border-radius:8px; color:#04070d; line-height:1;
+}
+.pos-chip.wr { background:var(--pos-wr); }
+.pos-chip.rb { background:var(--pos-rb); }
+.card-lift-name { font-family:var(--fc); font-weight:800; font-size:18px; }
+.card-lift-meta { font-family:var(--fc); font-size:11px; color:var(--i3); letter-spacing:.14em; text-transform:uppercase; margin-top:2px; }
+.card-lift-val { font-family:var(--fn); font-weight:700; font-size:22px; color:var(--volt); }
+
+/* =====================================================
+   5. ON-THE-CLOCK ENTRANCE
+   ===================================================== */
+.otc-demo {
+  position:relative;
+}
+.otc-trigger-bar {
+  display:flex; gap:8px; margin-bottom:14px;
+}
+.otc-btn {
+  flex:1; font-family:var(--fc); font-weight:700; font-size:12px; letter-spacing:.14em;
+  color:var(--bb); text-transform:uppercase; cursor:pointer; padding:9px; border-radius:10px;
+  background:rgba(77,130,255,0.10); border:1px solid rgba(77,130,255,0.20);
+  transition:all 0.15s; -webkit-tap-highlight-color:transparent; text-align:center;
+}
+.otc-btn:active { transform:scale(0.95); }
+
+.otc-hero {
+  position:relative; border-radius:18px; overflow:hidden;
+  background:
+    radial-gradient(120% 90% at 0% 0%, rgba(77,130,255,0.22), transparent 55%),
+    radial-gradient(120% 120% at 100% 0%, rgba(139,255,69,0.10), transparent 50%),
+    linear-gradient(160deg,var(--s3),var(--s2) 70%);
+  border:1px solid var(--hb);
+  box-shadow:0 22px 50px -22px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.02) inset;
+  padding:17px; opacity:1;
+  transform:translateY(0) scale(1);
+  transition:all 0.4s var(--ease-spring);
+}
+.otc-hero.hidden { opacity:0; transform:translateY(24px) scale(0.94); }
+
+/* iridescent sheen */
+.otc-hero::before {
+  content:""; position:absolute; inset:0; border-radius:18px; padding:1px;
+  background:linear-gradient(115deg, transparent 30%, rgba(255,255,255,0.55) 47%, rgba(139,255,69,0.5) 52%, transparent 70%);
+  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor; mask-composite:exclude;
+  background-size:280% 280%;
+  animation:sheen 5.5s ease-in-out infinite;
+  opacity:.7;
+}
+@keyframes sheen { 0%,100%{ background-position:0% 50%; } 50%{ background-position:100% 50%; } }
+
+/* breathing glow on hero when "on clock" */
+.otc-hero.on-clock {
+  box-shadow:
+    0 22px 50px -22px rgba(0,0,0,0.8),
+    0 0 0 1px rgba(255,255,255,0.02) inset,
+    0 0 0 2px rgba(139,255,69,0.35),
+    0 0 40px -8px rgba(139,255,69,0.22);
+  animation:otc-breathe 2.4s ease-in-out infinite;
+}
+@keyframes otc-breathe {
+  0%,100% { box-shadow: 0 22px 50px -22px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.02) inset, 0 0 0 2px rgba(139,255,69,0.35), 0 0 40px -8px rgba(139,255,69,0.22); }
+  50%      { box-shadow: 0 22px 50px -22px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.02) inset, 0 0 0 2px rgba(139,255,69,0.55), 0 0 60px -4px rgba(139,255,69,0.36); }
+}
+
+.otc-hero-top { display:flex; align-items:flex-start; gap:12px; position:relative; }
+.otc-hero-name { font-family:var(--fd); font-size:44px; line-height:.92; }
+.otc-hero-meta { font-family:var(--fc); font-weight:600; font-size:11px; letter-spacing:.18em; color:var(--i2); text-transform:uppercase; margin-top:6px; }
+.otc-hero-stats { display:flex; gap:0; margin-top:16px; padding-top:14px; border-top:1px solid var(--h); }
+.otc-stat { flex:1; }
+.otc-stat + .otc-stat { border-left:1px solid var(--h); padding-left:14px; }
+.otc-stat-k { font-family:var(--fc); font-weight:600; font-size:10px; letter-spacing:.2em; color:var(--i3); text-transform:uppercase; }
+.otc-stat-v { font-family:var(--fn); font-weight:700; font-size:20px; margin-top:3px; }
+.otc-stat-v.volt { color:var(--volt); }
+.otc-clock-badge {
+  position:absolute; top:-2px; right:0;
+  display:flex; align-items:center; gap:6px;
+  font-family:var(--fc); font-weight:700; font-size:11px; letter-spacing:.2em;
+  color:var(--volt); text-transform:uppercase;
+  padding:6px 12px; border-radius:999px;
+  background:rgba(139,255,69,0.10); border:1px solid rgba(139,255,69,0.28);
+  opacity:0; transform:scale(0.8);
+  transition:all 0.3s var(--ease-spring) 0.18s;
+}
+.otc-clock-badge.show { opacity:1; transform:scale(1); }
+.otc-dot { width:7px; height:7px; border-radius:50%; background:var(--volt); box-shadow:0 0 8px var(--volt); animation:pulse 1.6s ease-in-out infinite; }
+@keyframes pulse { 0%,100%{ opacity:1; transform:scale(1); } 50%{ opacity:.45; transform:scale(.7); } }
+
+/* =====================================================
+   6. PICK LANDS -- lower-third wipe
+   ===================================================== */
+.lower-third-stage {
+  position:relative; height:72px; border-radius:12px; overflow:hidden;
+  background:var(--s1); border:1px solid var(--h);
+}
+.lower-third {
+  position:absolute; bottom:0; left:0; right:0;
+  padding:12px 16px;
+  display:flex; align-items:center; justify-content:space-between;
+  transform:translateY(100%);
+  transition:transform var(--dur-cinematic) var(--ease-broadcast);
+  background:linear-gradient(90deg, rgba(77,130,255,0.16), rgba(139,255,69,0.06));
+  border-top:1px solid rgba(139,255,69,0.22);
+}
+.lower-third.show { transform:translateY(0); }
+/* sheen wipe on lower-third */
+.lower-third::after {
+  content:""; position:absolute; inset:0;
+  background:linear-gradient(90deg, transparent, rgba(255,255,255,0.07) 40%, transparent 80%);
+  transform:translateX(-100%);
+  transition:transform 0.7s ease-out 0.1s;
+}
+.lower-third.show::after { transform:translateX(110%); }
+
+.lt-pick { font-family:var(--fc); font-weight:800; font-size:14px; }
+.lt-pick small { font-family:var(--fn); font-size:11px; color:var(--i3); font-weight:500; }
+.lt-price { font-family:var(--fn); font-weight:700; font-size:22px; color:var(--volt); }
+.lt-owner { font-family:var(--fc); font-size:11px; color:var(--i2); letter-spacing:.1em; text-transform:uppercase; }
+.lt-trigger {
+  margin-top:8px; font-family:var(--fc); font-weight:700; font-size:11px; letter-spacing:.16em;
+  color:var(--bb); text-transform:uppercase; cursor:pointer; padding:7px 12px; border-radius:8px;
+  background:rgba(77,130,255,0.10); border:1px solid rgba(77,130,255,0.22); display:inline-block;
+  -webkit-tap-highlight-color:transparent;
+}
+.lt-trigger:active { transform:scale(0.95); }
+
+/* =====================================================
+   7. STEAL VOLT FLASH / BURST
+   ===================================================== */
+.steal-stage {
+  position:relative; border-radius:12px; overflow:hidden;
+  background:var(--s1); border:1px solid var(--h); padding:16px;
+  text-align:center;
+}
+.steal-player-card {
+  display:flex; align-items:center; gap:12px; justify-content:center;
+  padding:12px; border-radius:10px; background:var(--s2);
+  border:1px solid var(--h);
+  transition:box-shadow 0.25s, background 0.25s;
+  position:relative; overflow:hidden;
+}
+.steal-player-card.flash-steal {
+  animation:steal-burst 0.6s var(--ease-broadcast) forwards;
+}
+@keyframes steal-burst {
+  0%   { box-shadow:none; background:var(--s2); }
+  25%  { box-shadow:0 0 0 3px rgba(139,255,69,0.7), 0 0 60px -6px rgba(139,255,69,0.6); background:rgba(139,255,69,0.14); }
+  60%  { box-shadow:0 0 0 2px rgba(139,255,69,0.4), 0 0 30px -8px rgba(139,255,69,0.3); background:rgba(139,255,69,0.07); }
+  100% { box-shadow:0 0 0 1px rgba(139,255,69,0.2); background:rgba(139,255,69,0.04); }
+}
+.steal-banner {
+  position:absolute; top:50%; left:50%; transform:translate(-50%,-50%) scale(0);
+  font-family:var(--fd); font-size:26px; color:var(--volt);
+  text-shadow:0 0 20px var(--vg);
+  white-space:nowrap; z-index:2;
+  opacity:0;
+  transition:none;
+}
+.steal-banner.fire {
+  animation:banner-pop 0.55s var(--ease-spring) forwards;
+}
+@keyframes banner-pop {
+  0%   { opacity:0; transform:translate(-50%,-50%) scale(0.4); }
+  45%  { opacity:1; transform:translate(-50%,-50%) scale(1.12); }
+  70%  { opacity:1; transform:translate(-50%,-50%) scale(0.98); }
+  100% { opacity:0; transform:translate(-50%,-50%) scale(0.94); }
+}
+.steal-name { font-family:var(--fc); font-weight:800; font-size:18px; }
+.steal-val-row { display:flex; gap:10px; align-items:center; margin-top:2px; }
+.steal-paid { font-family:var(--fn); font-size:13px; color:var(--i2); }
+.steal-value { font-family:var(--fn); font-weight:700; font-size:15px; color:var(--volt); }
+.steal-delta {
+  font-family:var(--fc); font-size:11px; color:var(--volt); background:rgba(139,255,69,0.14);
+  border:1px solid rgba(139,255,69,0.25); border-radius:6px; padding:2px 7px;
+}
+
+/* =====================================================
+   8. FILTER PILL SLIDE
+   ===================================================== */
+.pill-bar {
+  display:flex; gap:6px; position:relative;
+  background:var(--s1); border-radius:12px; padding:5px;
+  border:1px solid var(--h);
+}
+.pill-indicator {
+  position:absolute; top:5px; bottom:5px;
+  background:linear-gradient(135deg,rgba(77,130,255,0.22),rgba(77,130,255,0.12));
+  border:1px solid rgba(77,130,255,0.35); border-radius:8px;
+  transition:left var(--dur-fast) var(--ease-spring), width var(--dur-fast) var(--ease-spring);
+  pointer-events:none;
+}
+.pill-item {
+  flex:1; text-align:center; font-family:var(--fc); font-weight:700;
+  font-size:13px; letter-spacing:.12em; text-transform:uppercase;
+  color:var(--i3); padding:9px 6px; border-radius:8px; cursor:pointer;
+  transition:color var(--dur-fast); user-select:none; position:relative;
+  -webkit-tap-highlight-color:transparent;
+}
+.pill-item.active { color:var(--bb); }
+
+/* =====================================================
+   9. LIST CASCADE (FLIP-style entry)
+   ===================================================== */
+.player-list { display:flex; flex-direction:column; gap:6px; }
+.player-row {
+  display:flex; align-items:center; gap:10px; padding:12px 14px;
+  background:var(--s1); border:1px solid var(--h); border-radius:10px;
+  transition:transform var(--dur-fast) var(--ease-spring), opacity var(--dur-fast);
+  cursor:pointer; -webkit-tap-highlight-color:transparent;
+  opacity:0; transform:translateY(10px);
+}
+.player-row.visible { opacity:1; transform:translateY(0); }
+.player-row:active { transform:translateY(-1px) scale(1.01); background:var(--s2); }
+.player-rank { font-family:var(--fn); font-weight:700; font-size:13px; color:var(--i3); width:28px; flex-shrink:0; }
+.player-name-col { flex:1; min-width:0; }
+.player-name { font-family:var(--fc); font-weight:800; font-size:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.player-team { font-family:var(--fc); font-size:11px; color:var(--i3); letter-spacing:.12em; text-transform:uppercase; margin-top:1px; }
+.player-val { font-family:var(--fn); font-weight:700; font-size:16px; }
+.player-val.volt { color:var(--volt); }
+.player-val.blue { color:var(--bb); }
+.refresh-btn {
+  font-family:var(--fc); font-weight:700; font-size:12px; letter-spacing:.14em;
+  color:var(--bb); text-transform:uppercase; cursor:pointer; padding:8px 14px; border-radius:8px;
+  background:rgba(77,130,255,0.10); border:1px solid rgba(77,130,255,0.22);
+  display:inline-block; margin-bottom:10px;
+  -webkit-tap-highlight-color:transparent; transition:all 0.12s;
+}
+.refresh-btn:active { transform:scale(0.95); }
+
+/* reduced-motion override */
+@media (prefers-reduced-motion:reduce) {
+  *, *::before, *::after {
+    animation-duration:0.01ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:0.01ms !important;
+  }
+}
+
+/* utility */
+.mt8 { margin-top:8px; }
+.mt12 { margin-top:12px; }
+.row { display:flex; align-items:center; gap:8px; }
+.spacer { flex:1; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header>
+    <div class="topbar">
+      <div class="logo">GRID<span>IRON</span></div>
+      <div class="badge-system">Motion System</div>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- 1. TIMING CURVES -->
+    <div class="section">
+      <div class="section-label">01 -- Timing Curves</div>
+      <div class="section-title">4 Motion Curves</div>
+      <div class="section-desc">Everything moves on one of these four curves. Watch the dots -- same destination, different character.</div>
+      <div class="curves-grid">
+        <div class="curve-row" data-curve="spring">
+          <div class="curve-name">spring</div>
+          <div class="curve-track"><div class="curve-dot"></div></div>
+          <div class="curve-dur">320ms</div>
+        </div>
+        <div class="curve-row" data-curve="broadcast">
+          <div class="curve-name">broadcast</div>
+          <div class="curve-track"><div class="curve-dot"></div></div>
+          <div class="curve-dur">480ms</div>
+        </div>
+        <div class="curve-row" data-curve="standard">
+          <div class="curve-name">standard</div>
+          <div class="curve-track"><div class="curve-dot"></div></div>
+          <div class="curve-dur">200ms</div>
+        </div>
+        <div class="curve-row" data-curve="swift">
+          <div class="curve-name">swift</div>
+          <div class="curve-track"><div class="curve-dot"></div></div>
+          <div class="curve-dur">100ms</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. NUMBER TICKER -->
+    <div class="section">
+      <div class="section-label">02 -- Number Ticker</div>
+      <div class="section-title">Numbers Flash on Change</div>
+      <div class="section-desc">Budget, prices, ranks -- every number flashes and slides on change. Zero layout shift (tabular mono, fixed width).</div>
+
+      <div class="ticker-demo">
+        <div class="ticker-row">
+          <div>
+            <div class="ticker-label">Budget Remaining</div>
+            <div class="row mt8">
+              <div class="ticker-val" id="budget-val">$178</div>
+              <div class="ticker-delta" id="budget-delta">-$12</div>
+            </div>
+          </div>
+          <div class="ticker-trigger" onclick="tickBudget()">Record Pick</div>
+        </div>
+        <div class="ticker-row">
+          <div>
+            <div class="ticker-label">Player Max Bid</div>
+            <div class="row mt8">
+              <div class="ticker-val" id="bid-val">$44</div>
+              <div class="ticker-delta" id="bid-delta"></div>
+            </div>
+          </div>
+          <div class="ticker-trigger" onclick="tickBid()">Recalculate</div>
+        </div>
+        <div class="ticker-row">
+          <div>
+            <div class="ticker-label">ESPN Rank</div>
+            <div class="row mt8">
+              <div class="ticker-val" id="rank-val">#14</div>
+              <div class="ticker-delta" id="rank-delta"></div>
+            </div>
+          </div>
+          <div class="ticker-trigger" onclick="tickRank()">ADP Shift</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. BUTTON MICRO-INTERACTIONS -->
+    <div class="section">
+      <div class="section-label">03 -- Button Interactions</div>
+      <div class="section-title">Tactile on Every Touch</div>
+      <div class="section-desc">100ms press scale. Volt button gets a glow burst on release. Hold and release -- feel the snap.</div>
+
+      <div class="btn-demo-grid">
+        <div class="btn-demo-row">
+          <button class="ffi-btn-volt" id="volt-btn" onclick="voltGlow()">Record Sale</button>
+          <span class="btn-tag">Primary action -- volt</span>
+        </div>
+        <div class="btn-demo-row">
+          <button class="ffi-btn-blue">View Strategy</button>
+          <span class="btn-tag">Secondary -- blue</span>
+        </div>
+        <div class="btn-demo-row">
+          <button class="ffi-btn-ghost">Skip</button>
+          <span class="btn-tag">Ghost -- quiet</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. CARD LIFT -->
+    <div class="section">
+      <div class="section-label">04 -- Card Lift</div>
+      <div class="section-title">Tap to Lift</div>
+      <div class="section-desc">Spring up on press. Iridescent sheen reveals on lift. Every player card and interactive surface uses this.</div>
+
+      <div class="card-lift">
+        <div class="card-lift-inner">
+          <div class="card-lift-player">
+            <div class="pos-chip wr">WR</div>
+            <div>
+              <div class="card-lift-name">Ja'Marr Chase</div>
+              <div class="card-lift-meta">CIN -- WR1</div>
+            </div>
+          </div>
+          <div class="card-lift-val">$58</div>
+        </div>
+      </div>
+      <div class="card-lift mt8">
+        <div class="card-lift-inner">
+          <div class="card-lift-player">
+            <div class="pos-chip rb">RB</div>
+            <div>
+              <div class="card-lift-name">Saquon Barkley</div>
+              <div class="card-lift-meta">PHI -- RB1</div>
+            </div>
+          </div>
+          <div class="card-lift-val">$72</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. ON-THE-CLOCK ENTRANCE -->
+    <div class="section">
+      <div class="section-label">05 -- On-the-Clock Entrance</div>
+      <div class="section-title">Spring In, Breathe</div>
+      <div class="section-desc">Player hero card springs up (0.34, 1.56, 0.64, 1) when a new player hits the block. Badge delays 180ms for layered reveal. Breathing volt glow pulses while active.</div>
+
+      <div class="otc-trigger-bar">
+        <div class="otc-btn" onclick="showOtc()">Go On Block</div>
+        <div class="otc-btn" onclick="hideOtc()">Clear</div>
+      </div>
+
+      <div class="otc-hero hidden" id="otc-hero">
+        <div class="otc-clock-badge" id="otc-badge">
+          <div class="otc-dot"></div>
+          On the Block
+        </div>
+        <div class="otc-hero-top">
+          <div class="pos-chip wr">WR</div>
+          <div>
+            <div class="otc-hero-name">Amon-Ra St. Brown</div>
+            <div class="otc-hero-meta">DET -- WR2 Overall</div>
+          </div>
+        </div>
+        <div class="otc-hero-stats">
+          <div class="otc-stat">
+            <div class="otc-stat-k">Max Bid</div>
+            <div class="otc-stat-v volt">$41</div>
+          </div>
+          <div class="otc-stat" style="padding-left:14px;">
+            <div class="otc-stat-k">Value</div>
+            <div class="otc-stat-v">$48</div>
+          </div>
+          <div class="otc-stat" style="padding-left:14px;">
+            <div class="otc-stat-k">Est Cost</div>
+            <div class="otc-stat-v">$39</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6. PICK LANDS -->
+    <div class="section">
+      <div class="section-label">06 -- Pick Lands</div>
+      <div class="section-title">Lower-Third Wipe</div>
+      <div class="section-desc">When a sale is recorded, a lower-third wipes up from the bottom (broadcast curve, 480ms) with a light sheen sweep. Feed item follows.</div>
+
+      <div class="lower-third-stage">
+        <div class="lower-third" id="lower-third">
+          <div>
+            <div class="lt-pick">Ja'Marr Chase <small>WR -- CIN</small></div>
+            <div class="lt-owner">Sold to: The Nasties FC</div>
+          </div>
+          <div class="lt-price">$61</div>
+        </div>
+      </div>
+      <div class="mt8">
+        <div class="lt-trigger" onclick="toggleLowerThird()">Record Sale</div>
+      </div>
+    </div>
+
+    <!-- 7. STEAL VOLT FLASH -->
+    <div class="section">
+      <div class="section-label">07 -- Steal Flash</div>
+      <div class="section-title">Volt Burst on Steal</div>
+      <div class="section-desc">When paid price is below implied value by >20%, the card flashes volt and a banner pops. Cinematic but fast -- 0.6s total.</div>
+
+      <div class="steal-stage">
+        <div class="steal-player-card" id="steal-card">
+          <div class="steal-banner" id="steal-banner">STEAL</div>
+          <div class="pos-chip rb">RB</div>
+          <div>
+            <div class="steal-name">Derrick Henry</div>
+            <div class="steal-val-row">
+              <div class="steal-paid">Paid $22</div>
+              <div class="steal-value">Value $38</div>
+              <div class="steal-delta">+$16</div>
+            </div>
+          </div>
+        </div>
+        <div class="mt12">
+          <div class="lt-trigger" onclick="fireSteal()">Trigger Steal</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 8. FILTER PILL SLIDE -->
+    <div class="section">
+      <div class="section-label">08 -- Filter Pills</div>
+      <div class="section-title">Sliding Active Indicator</div>
+      <div class="section-desc">Background indicator slides (spring, 200ms) under the active pill. No jump-cut -- the indicator moves through intermediate space.</div>
+
+      <div class="pill-bar" id="pill-bar">
+        <div class="pill-indicator" id="pill-indicator"></div>
+        <div class="pill-item active" data-idx="0" onclick="selectPill(this,0)">ALL</div>
+        <div class="pill-item" data-idx="1" onclick="selectPill(this,1)">QB</div>
+        <div class="pill-item" data-idx="2" onclick="selectPill(this,2)">RB</div>
+        <div class="pill-item" data-idx="3" onclick="selectPill(this,3)">WR</div>
+        <div class="pill-item" data-idx="4" onclick="selectPill(this,4)">TE</div>
+      </div>
+    </div>
+
+    <!-- 9. LIST CASCADE -->
+    <div class="section">
+      <div class="section-label">09 -- List Cascade</div>
+      <div class="section-title">Staggered Entry on Filter</div>
+      <div class="section-desc">When a filter changes, rows cascade in with 40ms stagger (spring curve). Tap Reload to replay.</div>
+
+      <div class="refresh-btn" onclick="cascadeList()">Reload List</div>
+      <div class="player-list" id="player-list">
+        <!-- populated by JS -->
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+/* ===================== NUMBER TICKER ===================== */
+const budgetVals = [200, 188, 178, 162, 151, 140, 126, 110];
+let budgetIdx = 0;
+function tickBudget() {
+  budgetIdx = (budgetIdx + 1) % budgetVals.length;
+  const prev = budgetVals[(budgetIdx - 1 + budgetVals.length) % budgetVals.length];
+  const next = budgetVals[budgetIdx];
+  const delta = next - prev;
+  const el = document.getElementById('budget-val');
+  const de = document.getElementById('budget-delta');
+  el.textContent = '$' + next;
+  el.className = 'ticker-val down flash';
+  de.textContent = (delta < 0 ? '' : '+') + '$' + Math.abs(delta);
+  de.className = 'ticker-delta show ' + (delta < 0 ? 'neg' : 'pos');
+  setTimeout(() => { el.classList.remove('flash'); de.classList.remove('show'); }, 1400);
+}
+
+const bidVals = [44, 51, 38, 62, 29, 55, 41, 67];
+let bidIdx = 0;
+function tickBid() {
+  const prev = bidVals[bidIdx];
+  bidIdx = (bidIdx + 1) % bidVals.length;
+  const next = bidVals[bidIdx];
+  const delta = next - prev;
+  const el = document.getElementById('bid-val');
+  const de = document.getElementById('bid-delta');
+  el.textContent = '$' + next;
+  el.className = 'ticker-val flash ' + (delta > 0 ? 'up' : 'down');
+  de.textContent = (delta > 0 ? '+' : '') + '$' + delta;
+  de.className = 'ticker-delta show ' + (delta > 0 ? 'pos' : 'neg');
+  setTimeout(() => { el.classList.remove('flash'); de.classList.remove('show'); }, 1400);
+}
+
+const rankVals = [14, 9, 17, 22, 11, 7, 28, 15];
+let rankIdx = 0;
+function tickRank() {
+  const prev = rankVals[rankIdx];
+  rankIdx = (rankIdx + 1) % rankVals.length;
+  const next = rankVals[rankIdx];
+  const delta = prev - next; // lower rank = better (negative delta = worse for display)
+  const el = document.getElementById('rank-val');
+  const de = document.getElementById('rank-delta');
+  el.textContent = '#' + next;
+  el.className = 'ticker-val flash ' + (delta > 0 ? 'up' : 'down');
+  de.textContent = (delta > 0 ? '-' : '+') + Math.abs(delta) + ' spots';
+  de.className = 'ticker-delta show ' + (delta > 0 ? 'pos' : 'neg');
+  setTimeout(() => { el.classList.remove('flash'); de.classList.remove('show'); }, 1400);
+}
+
+/* ===================== VOLT GLOW ===================== */
+function voltGlow() {
+  const btn = document.getElementById('volt-btn');
+  btn.classList.add('glow');
+  setTimeout(() => btn.classList.remove('glow'), 500);
+}
+
+/* ===================== ON-THE-CLOCK ===================== */
+function showOtc() {
+  const hero = document.getElementById('otc-hero');
+  const badge = document.getElementById('otc-badge');
+  hero.classList.remove('hidden');
+  setTimeout(() => {
+    hero.classList.add('on-clock');
+    badge.classList.add('show');
+  }, 20);
+}
+function hideOtc() {
+  const hero = document.getElementById('otc-hero');
+  const badge = document.getElementById('otc-badge');
+  hero.classList.remove('on-clock');
+  badge.classList.remove('show');
+  setTimeout(() => hero.classList.add('hidden'), 50);
+}
+
+/* ===================== LOWER THIRD ===================== */
+let ltVisible = false;
+function toggleLowerThird() {
+  const lt = document.getElementById('lower-third');
+  ltVisible = !ltVisible;
+  if (ltVisible) {
+    lt.classList.add('show');
+  } else {
+    lt.classList.remove('show');
+  }
+}
+
+/* ===================== STEAL FLASH ===================== */
+let stealCooldown = false;
+function fireSteal() {
+  if (stealCooldown) return;
+  stealCooldown = true;
+  const card = document.getElementById('steal-card');
+  const banner = document.getElementById('steal-banner');
+  card.classList.add('flash-steal');
+  banner.classList.add('fire');
+  setTimeout(() => {
+    card.classList.remove('flash-steal');
+    banner.classList.remove('fire');
+    stealCooldown = false;
+  }, 800);
+}
+
+/* ===================== FILTER PILLS ===================== */
+function selectPill(el, idx) {
+  document.querySelectorAll('.pill-item').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  positionIndicator(idx);
+  // also reload the list for the cascade demo
+  cascadeList();
+}
+function positionIndicator(idx) {
+  const bar = document.getElementById('pill-bar');
+  const pills = bar.querySelectorAll('.pill-item');
+  const indicator = document.getElementById('pill-indicator');
+  const pill = pills[idx];
+  indicator.style.left = pill.offsetLeft + 'px';
+  indicator.style.width = pill.offsetWidth + 'px';
+}
+window.addEventListener('load', () => {
+  positionIndicator(0);
+  cascadeList();
+  // initialize lower-third hidden
+  document.getElementById('lower-third').classList.remove('show');
+});
+window.addEventListener('resize', () => {
+  const active = document.querySelector('.pill-item.active');
+  if (active) positionIndicator(parseInt(active.dataset.idx));
+});
+
+/* ===================== LIST CASCADE ===================== */
+const players = [
+  { rank:1, name:'Ja\'Marr Chase', team:'CIN -- WR', val:'$62', cls:'volt' },
+  { rank:2, name:'Justin Jefferson', team:'MIN -- WR', val:'$58', cls:'volt' },
+  { rank:3, name:'Saquon Barkley', team:'PHI -- RB', val:'$72', cls:'volt' },
+  { rank:4, name:'Tyreek Hill', team:'MIA -- WR', val:'$49', cls:'blue' },
+  { rank:5, name:'Davante Adams', team:'LV -- WR', val:'$34', cls:'blue' },
+];
+let cascadeTimer = null;
+function cascadeList() {
+  if (cascadeTimer) clearTimeout(cascadeTimer);
+  const list = document.getElementById('player-list');
+  list.innerHTML = '';
+  players.forEach((p, i) => {
+    const row = document.createElement('div');
+    row.className = 'player-row';
+    row.innerHTML = `
+      <div class="player-rank">${p.rank}</div>
+      <div class="player-name-col">
+        <div class="player-name">${p.name}</div>
+        <div class="player-team">${p.team}</div>
+      </div>
+      <div class="player-val ${p.cls}">${p.val}</div>
+    `;
+    list.appendChild(row);
+    // stagger each row by 40ms
+    cascadeTimer = setTimeout(() => row.classList.add('visible'), 30 + i * 48);
+  });
+}
+</script>
+</body>
+</html>
