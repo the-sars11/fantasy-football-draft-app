@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
+import { useSearchParams } from 'next/navigation'
+import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Loader2,
@@ -23,15 +25,10 @@ import {
   Sparkles,
   Zap,
   AlertTriangle,
-  ChevronDown,
+  ChevronLeft,
 } from 'lucide-react'
-import { cn } from '@/lib/utils'
 import {
-  FFICard,
-  FFIButton,
   FFIPositionBadge,
-  FFIGrade,
-  FFISectionHeader,
 } from '@/components/ui/ffi-primitives'
 import { FFIFadeInUp, FFICelebration, FFIConfettiBurst } from '@/components/ui/ffi-motion'
 import { useHaptic } from '@/hooks/use-haptic'
@@ -137,6 +134,9 @@ const gradeVerdict: Record<string, string> = {
 }
 
 export function ReviewClient() {
+  const searchParams = useSearchParams()
+  const paramSessionId = searchParams.get('session')
+
   const [sessions, setSessions] = useState<DraftSession[]>([])
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [session, setSession] = useState<DraftSession | null>(null)
@@ -197,7 +197,12 @@ export function ReviewClient() {
           (s: DraftSession) => s.picks && s.picks.length > 0
         )
         setSessions(completed)
-        if (completed.length > 0) setSelectedId(completed[0].id)
+        // URL param takes priority (navigated from live room); fall back to most recent.
+        if (paramSessionId) {
+          setSelectedId(paramSessionId)
+        } else if (completed.length > 0) {
+          setSelectedId(completed[0].id)
+        }
       } catch (e) {
         setError(e instanceof Error ? e.message : 'Failed to load sessions')
       } finally {
@@ -205,6 +210,7 @@ export function ReviewClient() {
       }
     }
     fetchSessions()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   useEffect(() => {
@@ -276,44 +282,84 @@ export function ReviewClient() {
 
   // --- Render ---
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-16">
-        <Loader2 className="h-5 w-5 animate-spin text-[var(--ffi-blue)]" />
-        <span className="ffi-label text-[var(--ffi-ink-3)] ml-3">Loading sessions...</span>
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <div className="ffi-card border-l-4" style={{ borderLeftColor: 'var(--ffi-danger)' }}>
-        <div className="flex items-start gap-3">
-          <AlertCircle className="h-5 w-5 shrink-0 mt-0.5" color="var(--ffi-danger)" />
-          <div>
-            <p className="font-headline font-bold text-white">Error Loading Draft</p>
-            <p className="ffi-body-md text-[var(--ffi-ink-3)] mt-1">{error}</p>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  if (sessions.length === 0) {
-    return (
-      <div className="ffi-card text-center py-12">
-        <Trophy className="h-10 w-10 mx-auto mb-4" color="var(--ffi-ink-3)" />
-        <p className="font-headline font-bold text-lg text-white mb-2">No Drafts to Review</p>
-        <p className="ffi-body-md text-[var(--ffi-ink-3)] max-w-xs mx-auto">
-          Complete a live draft first, then come back here to see your grades and analysis.
-        </p>
-      </div>
-    )
-  }
+  const sessionDateLabel = session
+    ? new Date(session.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+    : null
 
   return (
-    <div className="space-y-3">
-      {/* Session + Manager selectors */}
+    <div className="pb-2">
+      {/* ── Screen header (blueprint 9.7) ─────────────────────── */}
+      <div className="flex items-center justify-between mb-1">
+        <h1
+          className="font-extrabold text-[26px] leading-none"
+          style={{ fontFamily: 'var(--font-cond)', color: 'var(--ffi-ink)' }}
+        >
+          Review
+        </h1>
+        {sessionDateLabel && (
+          <span
+            className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-wider"
+            style={{
+              fontFamily: 'var(--font-cond)',
+              background: 'rgba(139,255,69,0.10)',
+              border: '1px solid rgba(139,255,69,0.18)',
+              color: 'var(--ffi-volt)',
+              letterSpacing: '0.14em',
+            }}
+          >
+            <Trophy className="w-3 h-3" />
+            {sessionDateLabel}
+          </span>
+        )}
+      </div>
+
+      {/* Back to Draft — secondary link */}
+      <Link
+        href="/draft"
+        className="inline-flex items-center gap-1 ffi-caption mb-4 transition-colors"
+        style={{ color: 'var(--ffi-ink-3)' }}
+      >
+        <ChevronLeft className="h-3 w-3" aria-hidden="true" />
+        Back to Draft
+      </Link>
+
+      {/* ── Loading ───────────────────────────────────────────── */}
+      {loading && (
+        <div className="flex items-center justify-center py-16">
+          <Loader2 className="h-5 w-5 animate-spin text-[var(--ffi-blue)]" />
+          <span className="ffi-label text-[var(--ffi-ink-3)] ml-3">Loading sessions...</span>
+        </div>
+      )}
+
+      {/* ── Error ─────────────────────────────────────────────── */}
+      {!loading && error && (
+        <div className="ffi-card border-l-4" style={{ borderLeftColor: 'var(--ffi-danger)' }}>
+          <div className="flex items-start gap-3">
+            <AlertCircle className="h-5 w-5 shrink-0 mt-0.5" color="var(--ffi-danger)" />
+            <div>
+              <p className="font-headline font-bold text-white">Error Loading Draft</p>
+              <p className="ffi-body-md text-[var(--ffi-ink-3)] mt-1">{error}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Empty state ────────────────────────────────────────── */}
+      {!loading && !error && sessions.length === 0 && (
+        <div className="ffi-card text-center py-12">
+          <Trophy className="h-10 w-10 mx-auto mb-4" color="var(--ffi-ink-3)" />
+          <p className="font-headline font-bold text-lg text-white mb-2">No completed draft yet</p>
+          <p className="ffi-body-md text-[var(--ffi-ink-3)] max-w-xs mx-auto">
+            Your grade shows up here after draft night.
+          </p>
+        </div>
+      )}
+
+      {/* ── Content ───────────────────────────────────────────── */}
+      {!loading && !error && sessions.length > 0 && (
+      <div className="space-y-3">
+      {/* Session + Manager selectors — hidden when session was pre-selected via URL */}
+      {!paramSessionId && (
       <div className="ffi-card p-3">
         <div className="flex gap-3 flex-wrap">
           <div className="flex-1 min-w-[180px]">
@@ -380,6 +426,7 @@ export function ReviewClient() {
           </div>
         )}
       </div>
+      )}
 
       {detailLoading && (
         <div className="flex items-center justify-center py-8 gap-2">
@@ -543,6 +590,8 @@ export function ReviewClient() {
         </FFIFadeInUp>
       )}
     </div>
+    )}
+  </div>
   )
 }
 
@@ -804,7 +853,7 @@ function PickCard({ pick, format, index, expanded, onToggle }: {
           <div className="flex-1 min-w-0">
             <p className="font-headline font-bold text-[15px] text-white truncate mb-0.5">{pick.playerName}</p>
             <div className="flex items-center gap-2">
-              <FFIPositionBadge position={pick.position as any} className="text-[10px] px-1.5 py-0.5" />
+              <FFIPositionBadge position={pick.position as "QB" | "RB" | "WR" | "TE" | "K" | "DEF"} className="text-[10px] px-1.5 py-0.5" />
               {format === 'auction' && pick.price != null && (
                 <span className="font-mono text-xs text-[var(--ffi-ink-3)]">${pick.price}</span>
               )}
@@ -933,7 +982,7 @@ function BudgetAnalysisCard({ analysis }: { analysis: NonNullable<DraftReview['b
           <div className="space-y-2">
             {analysis.allocationVsPlan.map(a => (
               <div key={a.position} className="flex items-center gap-3">
-                <FFIPositionBadge position={a.position as any} className="text-[10px] px-1.5 w-10" />
+                <FFIPositionBadge position={a.position as "QB" | "RB" | "WR" | "TE" | "K" | "DEF"} className="text-[10px] px-1.5 w-10" />
                 <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--ffi-surface-3)' }}>
                   <div
                     className="h-full rounded-full"
@@ -973,7 +1022,7 @@ function SnakeAnalysisCard({ analysis }: { analysis: NonNullable<DraftReview['sn
           {analysis.positionByRound.map((p, i) => (
             <div key={i} className="flex items-center gap-3 py-1">
               <span className="font-mono text-xs text-[var(--ffi-ink-3)] w-12">Rd {p.round}</span>
-              <FFIPositionBadge position={p.position as any} className="text-[10px] px-1.5" />
+              <FFIPositionBadge position={p.position as "QB" | "RB" | "WR" | "TE" | "K" | "DEF"} className="text-[10px] px-1.5" />
               <span className="font-headline font-bold text-sm text-white truncate">{p.name}</span>
             </div>
           ))}

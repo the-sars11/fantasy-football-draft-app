@@ -701,13 +701,14 @@ export function LiveDraftClient() {
       addManualPick,
     })
 
-  // UX-7.2: When sim runs to completion, auto-navigate to the grade reveal.
+  // UX-7.2 / UX-S6: Auto-navigate to Review when any draft completes (sim or real).
+  // Sim guard removed — real drafts with a sessionId now also route to Review on completion.
+  // Sim mode has no ?session= param, so sessionId is null there → the !sessionId guard still blocks.
   useEffect(() => {
-    if (!isSimActive) return
     if (state?.status !== 'completed') return
     if (!sessionId) return
     router.push(`/draft/review?session=${sessionId}`)
-  }, [isSimActive, state?.status, sessionId, router])
+  }, [state?.status, sessionId, router])
 
   // Build owner map once when manager_order is first populated
   useEffect(() => {
@@ -986,7 +987,13 @@ export function LiveDraftClient() {
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-3 min-w-0">
           <button
-            onClick={() => router.push('/draft')}
+            onClick={() =>
+              router.push(
+                state?.status === 'completed' && sessionId
+                  ? `/draft/review?session=${sessionId}`
+                  : '/draft',
+              )
+            }
             className="shrink-0 inline-flex items-center gap-1 pl-1.5 pr-2.5 py-1.5 rounded-lg text-[12px] font-semibold text-[var(--ffi-text-secondary)] hover:text-white hover:bg-white/[0.06] transition-colors"
             aria-label="Leave draft"
           >

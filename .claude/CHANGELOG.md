@@ -2,6 +2,19 @@
 
 ---
 
+## 2026-08-08 — UX-S6: Review tab wired to post-draft flow
+
+**Task:** UX-S6 | **Class:** `output` | **Lenses:** Delivery, QA, Design
+
+**What changed:**
+- `src/app/(app)/draft/live/client.tsx` — Removed `isSimActive` guard from the auto-navigate effect so real completed drafts (not just sim) route to `/draft/review?session=<id>`. Sim mode remains blocked because `sessionId` is null when `?sim=1` (no `?session=` param). Leave button now routes to `/draft/review?session=<id>` when draft is complete, otherwise `/draft`.
+- `src/app/(app)/draft/review/page.tsx` — Removed the server-rendered header; header ownership moved to `ReviewClient` (consistent with UX-S3+ pattern). Only the Suspense wrapper remains.
+- `src/app/(app)/draft/review/client.tsx` — Added `useSearchParams` + `paramSessionId = searchParams.get('session')`. Updated `fetchSessions` effect to prefer the URL param over auto-selecting the first session. Restructured render from multiple early-return branches to a single unified return containing: "Review" h1 header + volt session-date chip, "Back to Draft" `ChevronLeft` link, inline loading/error/empty states (empty: "No completed draft yet — Your grade shows up here after draft night."), and session selector hidden when `paramSessionId` is set. Also cleaned pre-existing lint issues: removed dead imports (`ChevronDown`, `cn`, `FFICard`, `FFIButton`, `FFIGrade`, `FFISectionHeader`) and replaced 3 `as any` casts with `as "QB" | "RB" | "WR" | "TE" | "K" | "DEF"`.
+
+**Verify result:** `tsc --noEmit` 0 errors; ESLint 0 problems on all 3 changed files (0 errors, 0 warnings). Live DOM verified against dev server (port 3003): `/draft/review` renders "Review" heading + "Back to Draft" link + empty state ("No completed draft yet / Your grade shows up here after draft night.") on both mobile 375 and desktop 1440. Review tab active in sidebar (`bg-[var(--ffi-gold)]/10 text-[var(--ffi-gold-bright)]`) and bottom nav (`text-[var(--ffi-gold-bright)]`) confirmed via JavaScript DOM query. No paid endpoints fired. Pre-existing ThemeToggle hydration warning unchanged (logged FFT-002, non-blocking). Pixel screenshots blocked (Browser pane not compositing); render verified via live DOM.
+
+---
+
 ## 2026-08-08 — UX-S5: Setup tab + data correctness
 
 **Task:** UX-S5 | **Class:** `pipeline` | **Lenses:** Architecture, QA, Security
