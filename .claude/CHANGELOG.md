@@ -2,6 +2,19 @@
 
 ---
 
+## 2026-08-08 — UX-S2.5: Per-screen UX layout blueprint (docs only)
+
+**Task:** UX-S2.5 | **Class:** `docs` | **Lenses:** Delivery
+
+**What changed:**
+- `.claude/UX_OVERHAUL_2026-08.md` — appended **Section 9: Per-screen layout blueprint** — the contract UX-S3..S6 build to. Global mobile-first frame conventions (9.0: one hero per screen, thumb-zone primary action, permanent tab bar except the full-screen live room, mandatory loading/empty/error states on every data surface) plus a blueprint for all 14 screens: Research landing (9.1), Player Browser (9.2), Draft Board (9.3), Strategies (9.4), Draft pre-Go-Live (9.5), live auction room (9.6), Review (9.7), Setup landing (9.8), League Config (9.9), Draft Setup (9.10), Run History (9.11), Account (9.12), Appearance (9.13), plus Parked-out-of-scope (9.14). Each screen defines its ONE hero, top-to-bottom section order, single primary action + secondary demotions, empty/loading/error states, and tap-flow in/out.
+- Grounded in the real routes confirmed on disk 2026-08-08 (`/prep`, `/prep/players`, `/prep/board`, `/prep/strategies`, `/prep/runs`, `/prep/simulate`, `/draft`, `/draft/live`, `/draft/setup`, `/draft/review`, `/settings`) and the locked Nasties config from `FANTASY_FOOTBALL_MASTER.md` (12 · $200 · Full PPR · QB1/RB1/WR1/TE1/FLEX3/DEF1/K0/Bench5/IR1 · 13 draftable · no keepers). Blueprint explicitly retires the known broken states (Board "Failed to fetch leagues", Draft Setup "No leagues configured", Account propermuse.co leak, wrong roster default, Draft sounds toggle) into their fixed target states, scheduled for S3/S5.
+- `.claude/BUILD_PLAN.md` — marked UX-S2.5 `[x]`; `DASHBOARD_STATUS.nextItems` advanced to UX-S3 (build to blueprints 9.1-9.4).
+
+**Verify result:** Docs-only session — no code touched, no route files moved, no slugs renamed. No build/test/lint applicable. Section 9 written and BUILD_PLAN advanced.
+
+---
+
 ## 2026-08-08 — UX-S2: 4-tab IA reskeleton (nav only)
 
 **Task:** UX-S2 | **Class:** `shared` | **Lenses:** Architecture, QA
