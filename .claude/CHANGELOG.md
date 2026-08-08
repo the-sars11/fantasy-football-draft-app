@@ -2,6 +2,23 @@
 
 ---
 
+## 2026-08-08 — UX-S5: Setup tab + data correctness
+
+**Task:** UX-S5 | **Class:** `pipeline` | **Lenses:** Architecture, QA, Security
+
+**What changed:**
+- `src/app/(app)/settings/page.tsx` — complete rebuild. Server Component; fetches `user` via `getUser()` (real Supabase auth, no hardcoded email) and league summary from Supabase. 5 sections: LEAGUE (-> /prep/configure with live league summary or "Not configured yet"), DRAFT (Draft Setup -> /draft/setup + Demo Draft -> /draft/live?sim=1 with "Dev" badge), HISTORY (Run History -> /prep/runs), ACCOUNT (inline Name/Email from user metadata + SignOutRow), APPEARANCE (ThemeRow). Helper components: `SectionLabel`, `SettingsGroup`, `NavRow` (Link-based, label/value/badge/chevron), `InfoRow` (label+value, no nav). Footnote: "Demo Draft launches a sim against real player data. No AI calls fired."
+- `src/app/(app)/settings/client.tsx` (NEW) — `ThemeRow` with `mounted` state guard (useState/useEffect) to prevent hydration mismatch; renders button only after client mount. `SignOutRow` using `signOut` form action from `@/app/(auth)/actions`.
+- `src/components/prep/league-config-form.tsx` — major cleanup. Removed snake format toggle, keeper settings section, Keeper/Tyler presets. Format locked to `'auction'` (static display "Auction (Nasties)"). Nasties roster defaults corrected: QB:1, RB:1 (was 2), WR:1 (was 2), TE:1, FLEX:3 (was 1), K:0 (was 1), D/ST:1, Bench:5 (was 6), IR:1 (was 0). League name defaults to "The Nasties". `keeper_enabled` hardcoded `"false"`, `keepers` hardcoded `"[]"`. Success redirect changed from `/prep/research` to `/settings`. Reset button relabeled "Reset to Nasties defaults".
+- `src/app/(app)/prep/configure/page.tsx` — added `<- Setup` back link to `/settings`; updated title to "League Config"; updated description to "The Nasties defaults are pre-filled. Edit as needed and save." (removed em-dash that was triggering lint).
+- `src/app/(app)/draft/setup/page.tsx` — added `<- Setup` back link to `/settings`; updated to `ffi-display-md`/`ffi-body-md` tokens.
+- `src/app/(app)/draft/setup/client.tsx` — empty state and "Wrong format?" link now route to `/settings` (was `/prep/configure` dead-end); added "Go to Setup -> League Config to add The Nasties." sub-copy.
+- `src/app/(app)/prep/runs/page.tsx` — added `<- Setup` back link to `/settings`.
+
+**Verify result:** `tsc --noEmit` 0 errors; ESLint 0 errors on all changed files. Live DOM verified against dev server (port 3003): `/settings` all 5 sections + real Supabase user email + correct nav targets; `/prep/configure` Nasties defaults auto-seeded (QB:1 RB:1 WR:1 TE:1 FLEX:3 K:0 D/ST:1 Bench:5 IR:1); `/draft/setup` back link present; `/prep/runs` back link + empty state. No paid endpoints fired (`/api/research`, `/api/strategies/propose` never called). Pre-existing sidebar ThemeToggle hydration warning (logged FFT-002, non-blocking) unchanged. Pixel screenshots blocked (Browser pane not compositing); render verified via live DOM.
+
+---
+
 ## 2026-08-08 — UX-S4: Draft tab = live auction room + FF-314 cross-device auto-connect
 
 **Task:** UX-S4 | **Class:** `pipeline` | **Lenses:** Architecture, QA, Security

@@ -229,11 +229,14 @@ export function DraftSetupClient() {
   if (leagues.length === 0) {
     return (
       <FFICard className="py-8 text-center">
-        <p className="ffi-body-md text-[var(--ffi-text-secondary)] mb-4">
-          No leagues configured yet. Set up a league first.
+        <p className="ffi-body-md text-[var(--ffi-text-secondary)] mb-2">
+          No league configured yet.
         </p>
-        <FFIButton variant="secondary" onClick={() => router.push('/prep/configure')}>
-          Configure League
+        <p className="ffi-caption text-[var(--ffi-text-muted)] mb-4">
+          Go to Setup → League Config to add The Nasties.
+        </p>
+        <FFIButton variant="secondary" onClick={() => router.push('/settings')}>
+          Go to Setup
         </FFIButton>
       </FFICard>
     )
@@ -306,10 +309,10 @@ export function DraftSetupClient() {
           <p className="text-center ffi-caption text-[var(--ffi-text-secondary)]">
             Wrong format?{' '}
             <button
-              onClick={() => router.push('/prep/configure')}
+              onClick={() => router.push('/settings')}
               className="text-[#8bacff] hover:underline transition-colors"
             >
-              Update your league config
+              Update in Setup
             </button>
           </p>
         )}

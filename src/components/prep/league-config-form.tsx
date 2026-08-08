@@ -6,67 +6,31 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import type { DraftFormat, Position, ScoringSettings } from '@/lib/supabase/database.types'
-import { Trash2, Plus, ChevronDown, ChevronRight } from 'lucide-react'
-import { getScoringPreset, JOES_ESPN_SCORING, TYLERS_SLEEPER_SCORING, SCORING_FIELDS } from '@/lib/scoring-presets'
+import type { DraftFormat, ScoringSettings } from '@/lib/supabase/database.types'
+import { ChevronDown, ChevronRight } from 'lucide-react'
+import { getScoringPreset, JOES_ESPN_SCORING, SCORING_FIELDS } from '@/lib/scoring-presets'
 
-interface KeeperEntry {
-  player_name: string
-  position: Position
-  cost: number
-}
-
-const PRESETS = {
-  joe: {
-    name: "Joe's ESPN League (Nasties)",
-    platform: 'espn',
-    format: 'auction' as DraftFormat,
-    team_count: 12,
-    budget: 200,
-    scoring_format: 'custom',
-    keeper_enabled: false,
-    roster: { qb: 1, rb: 1, wr: 1, te: 1, flex: 3, k: 0, dst: 1, bench: 5, ir: 1 },
-    scoring: JOES_ESPN_SCORING,
-  },
-  tyler: {
-    name: "Tyler's Sleeper League (T&A Keeper)",
-    platform: 'sleeper',
-    format: 'snake' as DraftFormat,
-    team_count: 12,
-    budget: null,
-    scoring_format: 'custom',
-    keeper_enabled: true,
-    roster: { qb: 1, rb: 2, wr: 2, te: 1, flex: 2, k: 0, dst: 1, bench: 6, ir: 2 },
-    scoring: TYLERS_SLEEPER_SCORING,
-  },
+// Nasties locked config — auto-seeded on first render. Source of truth: FANTASY_FOOTBALL_MASTER.md.
+const NASTIES_PRESET = {
+  name: 'The Nasties',
+  platform: 'espn',
+  format: 'auction' as DraftFormat,
+  team_count: 12,
+  budget: 200,
+  scoring_format: 'custom',
+  keeper_enabled: false,
+  roster: { qb: 1, rb: 1, wr: 1, te: 1, flex: 3, k: 0, dst: 1, bench: 5, ir: 1 },
+  scoring: JOES_ESPN_SCORING,
 }
 
 export function LeagueConfigForm({ userId }: { userId: string }) {
   const [state, formAction, pending] = useActionState<LeagueFormState, FormData>(createLeague, {})
-  const [format, setFormat] = useState<DraftFormat>('auction')
-  const [keeperEnabled, setKeeperEnabled] = useState(false)
-  const [presetApplied, setPresetApplied] = useState<string | null>(null)
-  const [scoringFormat, setScoringFormat] = useState('ppr')
-  const [scoringSettings, setScoringSettings] = useState<ScoringSettings>(() => getScoringPreset('ppr'))
+
+  // Format is always auction for the Nasties — no toggle exposed.
+  const [format] = useState<DraftFormat>('auction')
+  const [scoringFormat, setScoringFormat] = useState('custom')
+  const [scoringSettings, setScoringSettings] = useState<ScoringSettings>(() => ({ ...JOES_ESPN_SCORING }))
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({})
-
-  // Keeper management
-  const [keepers, setKeepers] = useState<KeeperEntry[]>([])
-  const [newKeeperName, setNewKeeperName] = useState('')
-  const [newKeeperPosition, setNewKeeperPosition] = useState<Position>('RB')
-  const [newKeeperCost, setNewKeeperCost] = useState('')
-
-  const addKeeper = useCallback(() => {
-    if (!newKeeperName.trim()) return
-    const cost = parseInt(newKeeperCost, 10) || (format === 'auction' ? 1 : 1)
-    setKeepers((prev) => [...prev, { player_name: newKeeperName.trim(), position: newKeeperPosition, cost }])
-    setNewKeeperName('')
-    setNewKeeperCost('')
-  }, [newKeeperName, newKeeperPosition, newKeeperCost, format])
-
-  const removeKeeper = useCallback((index: number) => {
-    setKeepers((prev) => prev.filter((_, i) => i !== index))
-  }, [])
 
   const toggleSection = useCallback((section: string) => {
     setExpandedSections((prev) => ({ ...prev, [section]: !prev[section] }))
@@ -83,18 +47,11 @@ export function LeagueConfigForm({ userId }: { userId: string }) {
     }
   }
 
-  function applyPreset(key: 'joe' | 'tyler') {
-    const preset = PRESETS[key]
-    setFormat(preset.format)
-    setKeeperEnabled(preset.keeper_enabled)
-    setPresetApplied(key)
-    setScoringFormat(preset.scoring_format)
-    if (preset.scoring) {
-      setScoringSettings({ ...preset.scoring })
-      setExpandedSections({})
-    }
+  function resetToNasties() {
+    setScoringFormat('custom')
+    setScoringSettings({ ...NASTIES_PRESET.scoring })
+    setExpandedSections({})
 
-    // Fill form fields via DOM
     const form = document.getElementById('league-form') as HTMLFormElement
     if (!form) return
     const setField = (name: string, value: string) => {
@@ -104,12 +61,11 @@ export function LeagueConfigForm({ userId }: { userId: string }) {
         el.dispatchEvent(new Event('input', { bubbles: true }))
       }
     }
-    setField('name', preset.name)
-    setField('team_count', String(preset.team_count))
-    setField('platform', preset.platform)
-    if (preset.budget) setField('budget', String(preset.budget))
-    // Set roster slots
-    for (const [slotKey, slotVal] of Object.entries(preset.roster)) {
+    setField('name', NASTIES_PRESET.name)
+    setField('team_count', String(NASTIES_PRESET.team_count))
+    setField('platform', NASTIES_PRESET.platform)
+    setField('budget', String(NASTIES_PRESET.budget))
+    for (const [slotKey, slotVal] of Object.entries(NASTIES_PRESET.roster)) {
       setField(`roster_${slotKey}`, String(slotVal))
     }
   }
@@ -118,15 +74,15 @@ export function LeagueConfigForm({ userId }: { userId: string }) {
     return (
       <Card>
         <CardContent className="py-8 text-center space-y-4">
-          <div className="text-2xl font-bold text-green-500">League Created</div>
+          <div className="text-2xl font-bold text-green-500">League Saved</div>
           <p className="text-muted-foreground">
-            Your league has been saved. Head to Research to start pulling data.
+            Your league config has been saved.
           </p>
           <a
-            href="/prep/research"
-            className="inline-flex items-center justify-center rounded-lg bg-primary px-2.5 h-8 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/80"
+            href="/settings"
+            className="inline-flex items-center justify-center rounded-lg bg-primary px-4 h-9 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/80"
           >
-            Run Research
+            Back to Setup
           </a>
         </CardContent>
       </Card>
@@ -135,24 +91,14 @@ export function LeagueConfigForm({ userId }: { userId: string }) {
 
   return (
     <div className="space-y-4">
-      {/* Quick presets */}
-      <div className="flex gap-2">
-        <Button
-          variant={presetApplied === 'joe' ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => applyPreset('joe')}
+      <div className="flex items-center justify-between">
+        <button
           type="button"
+          onClick={resetToNasties}
+          className="text-sm text-[#8bacff] hover:underline transition-colors"
         >
-          Joe&apos;s ESPN (Auction)
-        </Button>
-        <Button
-          variant={presetApplied === 'tyler' ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => applyPreset('tyler')}
-          type="button"
-        >
-          Tyler&apos;s Sleeper (Snake/Keeper)
-        </Button>
+          Reset to Nasties defaults
+        </button>
       </div>
 
       {state.error && (
@@ -166,8 +112,8 @@ export function LeagueConfigForm({ userId }: { userId: string }) {
         <input type="hidden" name="format" value={format} />
         <input type="hidden" name="scoring_format" value={scoringFormat} />
         <input type="hidden" name="scoring_settings" value={JSON.stringify(scoringSettings)} />
-        <input type="hidden" name="keeper_enabled" value={String(keeperEnabled)} />
-        <input type="hidden" name="keepers" value={JSON.stringify(keepers)} />
+        <input type="hidden" name="keeper_enabled" value="false" />
+        <input type="hidden" name="keepers" value="[]" />
 
         {/* Basic Info */}
         <Card>
@@ -178,7 +124,14 @@ export function LeagueConfigForm({ userId }: { userId: string }) {
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <label htmlFor="name" className="text-sm font-medium">League Name</label>
-                <Input id="name" name="name" placeholder="My Fantasy League" required className="ffi-form-input" />
+                <Input
+                  id="name"
+                  name="name"
+                  placeholder="The Nasties"
+                  defaultValue="The Nasties"
+                  required
+                  className="ffi-form-input"
+                />
               </div>
 
               <div className="space-y-2">
@@ -196,41 +149,40 @@ export function LeagueConfigForm({ userId }: { userId: string }) {
                 </select>
               </div>
 
+              {/* Format is auction-only — no toggle */}
               <div className="space-y-2">
                 <label className="text-sm font-medium">Draft Format</label>
-                <div className="flex gap-2">
-                  <Button
-                    type="button"
-                    variant={format === 'auction' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setFormat('auction')}
-                  >
-                    Auction
-                  </Button>
-                  <Button
-                    type="button"
-                    variant={format === 'snake' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setFormat('snake')}
-                  >
-                    Snake
-                  </Button>
+                <div className="flex items-center h-9 px-3 rounded-md border border-input bg-card text-sm text-muted-foreground">
+                  Auction (Nasties)
                 </div>
               </div>
 
               <div className="space-y-2">
                 <label htmlFor="team_count" className="text-sm font-medium">Teams</label>
-                <Input id="team_count" name="team_count" type="number" min={4} max={20} defaultValue={12} required className="ffi-form-input" />
+                <Input
+                  id="team_count"
+                  name="team_count"
+                  type="number"
+                  min={4}
+                  max={20}
+                  defaultValue={12}
+                  required
+                  className="ffi-form-input"
+                />
               </div>
 
-              {format === 'auction' && (
-                <div className="space-y-2">
-                  <label htmlFor="budget" className="text-sm font-medium">
-                    Auction Budget ($)
-                  </label>
-                  <Input id="budget" name="budget" type="number" min={1} defaultValue={200} required className="ffi-form-input" />
-                </div>
-              )}
+              <div className="space-y-2">
+                <label htmlFor="budget" className="text-sm font-medium">Auction Budget ($)</label>
+                <Input
+                  id="budget"
+                  name="budget"
+                  type="number"
+                  min={1}
+                  defaultValue={200}
+                  required
+                  className="ffi-form-input"
+                />
+              </div>
 
               <div className="space-y-2">
                 <label htmlFor="scoring_format_select" className="text-sm font-medium">Scoring Format</label>
@@ -250,7 +202,7 @@ export function LeagueConfigForm({ userId }: { userId: string }) {
           </CardContent>
         </Card>
 
-        {/* Roster Slots */}
+        {/* Roster Slots — pre-filled with locked Nasties values (QB1/RB1/WR1/TE1/FLEX3/DEF1/K0/Bench5/IR1) */}
         <Card>
           <CardHeader>
             <CardTitle>Roster Slots</CardTitle>
@@ -258,15 +210,15 @@ export function LeagueConfigForm({ userId }: { userId: string }) {
           <CardContent>
             <div className="grid grid-cols-3 gap-4 sm:grid-cols-5">
               {[
-                { key: 'qb', label: 'QB', default: 1 },
-                { key: 'rb', label: 'RB', default: 2 },
-                { key: 'wr', label: 'WR', default: 2 },
-                { key: 'te', label: 'TE', default: 1 },
-                { key: 'flex', label: 'FLEX', default: 1 },
-                { key: 'k', label: 'K', default: 1 },
-                { key: 'dst', label: 'D/ST', default: 1 },
-                { key: 'bench', label: 'Bench', default: 6 },
-                { key: 'ir', label: 'IR', default: 0 },
+                { key: 'qb',    label: 'QB',    default: 1 },
+                { key: 'rb',    label: 'RB',    default: 1 },
+                { key: 'wr',    label: 'WR',    default: 1 },
+                { key: 'te',    label: 'TE',    default: 1 },
+                { key: 'flex',  label: 'FLEX',  default: 3 },
+                { key: 'k',     label: 'K',     default: 0 },
+                { key: 'dst',   label: 'D/ST',  default: 1 },
+                { key: 'bench', label: 'Bench', default: 5 },
+                { key: 'ir',    label: 'IR',    default: 1 },
               ].map((slot) => (
                 <div key={slot.key} className="space-y-1">
                   <label htmlFor={`roster_${slot.key}`} className="text-xs font-medium text-muted-foreground">
@@ -367,129 +319,8 @@ export function LeagueConfigForm({ userId }: { userId: string }) {
           </CardContent>
         </Card>
 
-        {/* Keeper Settings */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              Keeper Settings
-              {keeperEnabled && <Badge variant="secondary">Enabled</Badge>}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center gap-3">
-              <Button
-                type="button"
-                variant={keeperEnabled ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setKeeperEnabled(!keeperEnabled)}
-              >
-                {keeperEnabled ? 'Keepers On' : 'Enable Keepers'}
-              </Button>
-              <span className="text-sm text-muted-foreground">
-                {keeperEnabled
-                  ? 'Players can be kept from previous seasons'
-                  : 'Full redraft - no keepers'}
-              </span>
-            </div>
-
-            {keeperEnabled && (
-              <div className="space-y-4">
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="space-y-2">
-                    <label htmlFor="max_keepers" className="text-sm font-medium">Max Keepers</label>
-                    <Input id="max_keepers" name="max_keepers" type="number" min={1} max={10} defaultValue={3} className="ffi-form-input" />
-                  </div>
-                  <div className="space-y-2">
-                    <label htmlFor="keeper_cost_type" className="text-sm font-medium">Keeper Cost Type</label>
-                    <select
-                      id="keeper_cost_type"
-                      name="keeper_cost_type"
-                      defaultValue={format === 'auction' ? 'auction_price' : 'round'}
-                      className="ffi-form-input flex h-9 w-full rounded-md border border-input bg-card px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none"
-                    >
-                      <option value="round">Round (snake)</option>
-                      <option value="auction_price">Auction Price</option>
-                    </select>
-                  </div>
-                </div>
-
-                {/* Add keeper form */}
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Your Keepers</label>
-                  <div className="flex flex-wrap gap-2">
-                    <Input
-                      type="text"
-                      placeholder="Player name"
-                      value={newKeeperName}
-                      onChange={(e) => setNewKeeperName(e.target.value)}
-                      className="w-40 ffi-form-input"
-                      onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addKeeper())}
-                    />
-                    <select
-                      value={newKeeperPosition}
-                      onChange={(e) => setNewKeeperPosition(e.target.value as Position)}
-                      className="ffi-form-input flex h-9 w-20 rounded-md border border-input bg-card px-2 py-1 text-sm"
-                    >
-                      <option value="QB">QB</option>
-                      <option value="RB">RB</option>
-                      <option value="WR">WR</option>
-                      <option value="TE">TE</option>
-                      <option value="K">K</option>
-                      <option value="DST">D/ST</option>
-                    </select>
-                    <Input
-                      type="number"
-                      placeholder={format === 'auction' ? 'Price $' : 'Round'}
-                      value={newKeeperCost}
-                      onChange={(e) => setNewKeeperCost(e.target.value)}
-                      className="w-24 ffi-form-input"
-                      min={1}
-                      onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addKeeper())}
-                    />
-                    <Button type="button" variant="outline" size="sm" onClick={addKeeper} disabled={!newKeeperName.trim()}>
-                      <Plus className="h-4 w-4 mr-1" />
-                      Add
-                    </Button>
-                  </div>
-                </div>
-
-                {/* Current keepers list */}
-                {keepers.length > 0 && (
-                  <div className="space-y-1">
-                    {keepers.map((k, idx) => (
-                      <div key={idx} className="flex items-center justify-between rounded bg-muted/50 px-3 py-1.5">
-                        <span className="text-sm">
-                          <Badge variant="outline" className="mr-2 text-xs">{k.position}</Badge>
-                          {k.player_name}
-                          <span className="ml-2 text-muted-foreground">
-                            {format === 'auction' ? `$${k.cost}` : `Rd ${k.cost}`}
-                          </span>
-                        </span>
-                        <Button type="button" variant="ghost" size="sm" onClick={() => removeKeeper(idx)} className="h-6 w-6 p-0">
-                          <Trash2 className="h-3.5 w-3.5 text-destructive" />
-                        </Button>
-                      </div>
-                    ))}
-                    {format === 'auction' && (
-                      <p className="text-xs text-muted-foreground mt-2">
-                        Total keeper cost: ${keepers.reduce((sum, k) => sum + k.cost, 0)}
-                      </p>
-                    )}
-                  </div>
-                )}
-
-                {keepers.length === 0 && (
-                  <p className="text-xs text-muted-foreground">
-                    Add your keepers above to exclude them from the draft pool and adjust your budget.
-                  </p>
-                )}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
         <Button type="submit" size="lg" disabled={pending} className="w-full sm:w-auto">
-          {pending ? 'Saving...' : 'Save League Configuration'}
+          {pending ? 'Saving...' : 'Save League Config'}
         </Button>
       </form>
     </div>
