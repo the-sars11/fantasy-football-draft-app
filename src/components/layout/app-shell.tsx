@@ -81,6 +81,11 @@ export function AppShell({
 }) {
   const pathname = usePathname()
   const activeHref = getActiveHref(pathname)
+  // UX-S4 / blueprint 9.6: the live auction room is full-screen — no sidebar, no
+  // mobile top header, no bottom tab bar. The room owns its own "Leave draft"
+  // affordance, and the swipe-carousel is bypassed so a stray horizontal swipe
+  // can't navigate Joe out mid-auction.
+  const isLiveRoom = pathname.startsWith('/draft/live')
   const [collapsed, setCollapsed] = useState(false)
   const isMobile = useIsMobile()
   const displayName = user.user_metadata?.full_name || user.email || 'User'
@@ -92,7 +97,8 @@ export function AppShell({
       {/* Stadium Primetime atmospheric background (UX-1.4) */}
       <div className="stadium-atmos" aria-hidden="true" />
       <div className="atmos-grain" aria-hidden="true" />
-      {/* Desktop sidebar — hidden on mobile */}
+      {/* Desktop sidebar — hidden on mobile, and entirely on the live room */}
+      {!isLiveRoom && (
       <aside
         className={cn(
           'hidden md:flex flex-col border-r border-[var(--ffi-border)]/20 ffi-surface-secondary transition-all duration-200 relative z-10',
@@ -185,8 +191,10 @@ export function AppShell({
           </form>
         </div>
       </aside>
+      )}
 
-      {/* Mobile top header — hidden on desktop */}
+      {/* Mobile top header — hidden on desktop, and entirely on the live room */}
+      {!isLiveRoom && (
       <header className="flex md:hidden items-center justify-between border-b border-[var(--ffi-border)]/20 ffi-surface-secondary px-4 h-12 shrink-0 relative z-10">
         <div className="flex items-center gap-2">
           <Image
@@ -205,16 +213,24 @@ export function AppShell({
           <ThemeToggleMobile />
         </div>
       </header>
+      )}
 
       {/* Main content — single render; wrapper chosen at runtime to prevent double-mount (FF-313) */}
       <main className="flex-1 overflow-y-auto relative z-10">
         {isMobile ? (
           <div className="h-full">
-            <SwipeCarousel>
+            {isLiveRoom ? (
+              // Live room: no swipe-carousel (a stray swipe must not leave the auction).
               <PageTransition>
                 <div className="mx-auto max-w-6xl p-4 pb-24">{children}</div>
               </PageTransition>
-            </SwipeCarousel>
+            ) : (
+              <SwipeCarousel>
+                <PageTransition>
+                  <div className="mx-auto max-w-6xl p-4 pb-24">{children}</div>
+                </PageTransition>
+              </SwipeCarousel>
+            )}
           </div>
         ) : (
           <div className="h-full">
@@ -225,7 +241,8 @@ export function AppShell({
         )}
       </main>
 
-      {/* Mobile bottom tab bar — hidden on desktop (FF-103: Tactical Hologram nav) */}
+      {/* Mobile bottom tab bar — hidden on desktop and on the live room (FF-103) */}
+      {!isLiveRoom && (
       <nav className="flex md:hidden items-center justify-around border-t border-white/5 backdrop-blur-2xl bg-[#031018]/90 h-16 shrink-0 safe-bottom rounded-t-xl shadow-[0_-4px_20px_rgba(0,0,0,0.5)]">
         {navItems.map((item) => {
           const isActive = item.href === activeHref
@@ -291,6 +308,7 @@ export function AppShell({
           )
         })}
       </nav>
+      )}
     </div>
     </NavProvider>
   )

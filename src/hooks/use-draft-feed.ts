@@ -5,11 +5,15 @@
  *
  * Generalizes useAuctioneerfeed (FF-279/FF-280) by wrapping its AuctioneerPick[]
  * output in NormalizedPickEvent[] via auction-feed-merge.ts (FF-281), providing
- * a consistent interface that is ready to absorb additional sources (e.g. Sheets)
- * in future sprints without changing the caller signature.
+ * a consistent interface that absorbs additional sources without changing the
+ * caller signature.
  *
- * Source priority (auction mode only):
- *   BroadcastChannel (instant) > localStorage poll (3 s fallback) > file poll
+ * Sources (auction mode only), all folded into ONE cross-source merger:
+ *   same-device BroadcastChannel (instant) > same-device localStorage/file poll (3s)
+ *   > remote KV proxy (FF-314, cross-device, 3s)
+ * Same-device wins when present; the remote proxy covers the cross-device case
+ * (host laptop + Joe's phone on different origins). Dedup is by player-name pickId
+ * so a player drafted in the auctioneer is never double-added across sources.
  *
  * Google Sheets polling is handled separately in use-draft-state.ts and is NOT
  * included here to avoid double-polling. Sheets picks are prevented from
@@ -19,12 +23,16 @@
  * Tyler's manual entry + Sheets polling path is completely unaffected.
  */
 
-import { useRef, useCallback } from 'react'
+import { useRef, useCallback, useEffect } from 'react'
 import {
   useAuctioneerfeed,
   type AuctioneerPick,
   type AuctioneerConnectionType,
 } from './use-auctioneer-feed'
+import {
+  useRemoteAuctioneerFeed,
+  type RemoteAuctioneerPick,
+} from './use-remote-auctioneer-feed'
 import {
   createPickMerger,
   playerNameToPickId,
@@ -47,28 +55,45 @@ interface UseDraftFeedOptions {
    */
   format: string | null | undefined
   /**
-   * Auctioneer connection path from the ?aif= URL param at setup time.
+   * Same-device Auctioneer connection path from the ?aif= URL param at setup time.
    * 'localstorage' — BroadcastChannel + localStorage poll (same device).
    * 'file'          — File System Access API poll.
-   * null            — Auctioneer not configured; feed is a no-op.
+   * null            — no same-device Auctioneer; the remote proxy still runs.
    */
   connectionType: AuctioneerConnectionType
   /**
-   * Fires with new, deduplicated NormalizedPickEvent[] from all Auctioneer paths.
-   * Must be stable (useCallback with [] deps) so the feed interval never restarts.
+   * Optional Auctioneer draft short-code for AA-FFI-2 forward-compat (FF-314).
+   * Omit today — the proxy hits the single global `draft-current` key.
+   */
+  draftCode?: string | null
+  /**
+   * Fires with new, deduplicated NormalizedPickEvent[] from ALL sources
+   * (same-device + remote). Must be stable (useCallback with [] deps) so the
+   * feed interval never restarts.
    */
   onNewPicks?: (picks: NormalizedPickEvent[]) => void
 }
 
 export interface UseDraftFeedResult {
-  /** True when Auctioneer data is actively being received. */
+  /** True when any source (same-device OR remote) is actively receiving data. */
   connected: boolean
-  /** Total Auctioneer picks imported since session start. */
+  /** Total picks imported across all sources since session start. */
   importedCount: number
-  /** Timestamp of the last successful sync, or null before first sync. */
+  /** Timestamp of the most recent successful sync from any source, or null. */
   lastSyncAt: Date | null
   /** Human-readable error, or null when healthy. */
   error: string | null
+  // --- FF-314: remote (cross-device) source, surfaced for the connection chip ---
+  /** True when the remote proxy last returned a live drafting payload. */
+  remoteConnected: boolean
+  /** Timestamp of the last successful REMOTE poll that returned live data. */
+  remoteLastSyncAt: Date | null
+  /** True once the remote proxy has been polled at least once. */
+  remoteHasPolled: boolean
+  /** Error from the last failed remote poll, or null. */
+  remoteError: string | null
+  /** Force an immediate remote poll (wire to the chip's Retry). */
+  remoteRetry: () => void
 }
 
 // ---------------------------------------------------------------------------
@@ -82,8 +107,8 @@ function connectionTypeToSource(ct: AuctioneerConnectionType): FeedSource {
 function toNormalizedEvent(pick: AuctioneerPick, source: FeedSource): NormalizedPickEvent {
   return {
     // Synthesize pickId from player name — unique per player within a draft session.
-    // When Sheets is added as a source, playerNameToPickId() ensures cross-source
-    // dedup: a player drafted in Auctioneer won't be double-added from Sheets.
+    // playerNameToPickId() ensures cross-source dedup: a player drafted via the
+    // remote proxy won't be double-added from the same-device path (and vice versa).
     pickId: playerNameToPickId(pick.player_name),
     playerName: pick.player_name,
     manager: pick.manager,
@@ -93,6 +118,23 @@ function toNormalizedEvent(pick: AuctioneerPick, source: FeedSource): Normalized
   }
 }
 
+function remoteToNormalizedEvent(pick: RemoteAuctioneerPick): NormalizedPickEvent {
+  return {
+    pickId: playerNameToPickId(pick.player_name),
+    playerName: pick.player_name,
+    manager: pick.manager,
+    price: pick.price,
+    position: pick.position,
+    source: 'remote',
+  }
+}
+
+function mostRecent(a: Date | null, b: Date | null): Date | null {
+  if (!a) return b
+  if (!b) return a
+  return a.getTime() >= b.getTime() ? a : b
+}
+
 // ---------------------------------------------------------------------------
 // Hook
 // ---------------------------------------------------------------------------
@@ -100,30 +142,69 @@ function toNormalizedEvent(pick: AuctioneerPick, source: FeedSource): Normalized
 export function useDraftFeed({
   format,
   connectionType,
+  draftCode,
   onNewPicks,
 }: UseDraftFeedOptions): UseDraftFeedResult {
-  const enabled = format === 'auction' && !!connectionType
+  const isAuction = format === 'auction'
+  const localEnabled = isAuction && !!connectionType
+  // Remote is auto-attempted for every auction session — it silently no-ops when
+  // the proxy returns null, so it costs nothing until an auctioneer is actually up.
+  const remoteEnabled = isAuction
 
-  // One merger per mount — deduplicates pickIds across BroadcastChannel + poll paths.
-  // Sheets picks can be routed through this merger in a future sprint without
-  // changing the caller interface.
+  // One merger per mount — deduplicates pickIds across ALL source paths
+  // (same-device BroadcastChannel + poll + remote proxy).
   const mergerRef = useRef(createPickMerger())
+
+  // Stable emit path — merge, then forward only the never-seen events.
+  // Latest-ref pattern (synced in an effect, never during render) keeps
+  // emitThroughMerger stable while always calling the current onNewPicks.
+  const onNewPicksRef = useRef(onNewPicks)
+  useEffect(() => {
+    onNewPicksRef.current = onNewPicks
+  }, [onNewPicks])
+  const emitThroughMerger = useCallback((events: NormalizedPickEvent[]) => {
+    const fresh = mergerRef.current.merge(events)
+    if (fresh.length > 0) onNewPicksRef.current?.(fresh)
+  }, [])
 
   const handleAuctioneerPicks = useCallback(
     (picks: AuctioneerPick[]) => {
       const source = connectionTypeToSource(connectionType)
-      const events = picks.map(p => toNormalizedEvent(p, source))
-      const newEvents = mergerRef.current.merge(events)
-      if (newEvents.length > 0) onNewPicks?.(newEvents)
+      emitThroughMerger(picks.map((p) => toNormalizedEvent(p, source)))
     },
-    [onNewPicks, connectionType],
+    [emitThroughMerger, connectionType],
   )
 
-  // Delegate entirely to the existing hook — it owns BroadcastChannel,
-  // localStorage poll, and file poll logic.
-  return useAuctioneerfeed({
-    enabled,
-    connectionType: enabled ? connectionType : null,
-    onNewPicks: enabled ? handleAuctioneerPicks : undefined,
+  const handleRemotePicks = useCallback(
+    (picks: RemoteAuctioneerPick[]) => {
+      emitThroughMerger(picks.map(remoteToNormalizedEvent))
+    },
+    [emitThroughMerger],
+  )
+
+  // Same-device path — owns BroadcastChannel, localStorage poll, and file poll.
+  const local = useAuctioneerfeed({
+    enabled: localEnabled,
+    connectionType: localEnabled ? connectionType : null,
+    onNewPicks: localEnabled ? handleAuctioneerPicks : undefined,
   })
+
+  // Remote (cross-device) path — polls this repo's server proxy (FF-314).
+  const remote = useRemoteAuctioneerFeed({
+    enabled: remoteEnabled,
+    draftCode,
+    onNewPicks: remoteEnabled ? handleRemotePicks : undefined,
+  })
+
+  return {
+    connected: local.connected || remote.connected,
+    importedCount: local.importedCount + remote.pickCount,
+    lastSyncAt: mostRecent(local.lastSyncAt, remote.lastSyncAt),
+    error: local.error ?? remote.error,
+    remoteConnected: remote.connected,
+    remoteLastSyncAt: remote.lastSyncAt,
+    remoteHasPolled: remote.hasPolled,
+    remoteError: remote.error,
+    remoteRetry: remote.retry,
+  }
 }

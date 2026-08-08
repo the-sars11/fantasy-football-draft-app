@@ -2,6 +2,25 @@
 
 ---
 
+## 2026-08-08 — UX-S4: Draft tab = live auction room + FF-314 cross-device auto-connect
+
+**Task:** UX-S4 | **Class:** `pipeline` | **Lenses:** Architecture, QA, Security
+
+**What changed:**
+- `src/app/(app)/draft/page.tsx` (blueprint 9.5, pre-Go-Live) — full rebuild. ONE hero = a large centered 4-state `ConnectionStatusPill` + plain-words status ("Checking for a live auction…" / "Auctioneer is LIVE" / "Auctioneer not detected yet"), an expandable error + Retry, a primary **Go Live** CTA (volt when the feed is detected, subdued "Waiting for auctioneer…" / "Checking…" otherwise), and a secondary **Start in Manual mode** text link. Below it a pre-flight card (league name + managers / budget / scoring) with Edit-in-Setup → `/prep/configure`. Full `loading` / `no-league` / `error` states. Go Live routes to the resumable auction session with `&aif=remote`; Manual routes to the same session with no `aif`.
+- `src/components/layout/app-shell.tsx` (blueprint 9.6, full-screen room) — added `isLiveRoom = pathname.startsWith('/draft/live')`; hides the desktop sidebar, the mobile top header, and the mobile bottom tab bar on the live room, and bypasses the `SwipeCarousel` there so a stray horizontal swipe can't navigate out mid-auction. The room owns its own single "Leave" affordance.
+- `src/app/(app)/draft/live/client.tsx` — added a "Leave" button (top-left, `ChevronLeft` → `/draft`). Translated the `?aif=` param so `aif=remote` leaves the same-device connection type null (the remote proxy runs automatically for every auction); only `localstorage` / `file` stay same-device. Rewired the header `ConnectionStatusPill` to reflect the remote proxy (`remoteLastSyncAt` / `remoteError` / `remoteRetry`) for an internet auction with no sheet, else the sheet poll — so Tyler's snake/Sheets MANUAL behavior is unchanged.
+- `src/app/api/auctioneer-feed/route.ts` (NEW) — server-side GET proxy that fetches the deployed auctioneer's state to dodge CORS (auctioneer sends no CORS headers). `force-dynamic`, 5s timeout, wraps the raw `DraftState` body in `{ state }`, returns `{ state: null }` on empty/error, all `no-store`. Upstash `draft-current` key; picks at top-level `picks[]`, teams at `config.teams[]`, phase at top-level `phase`.
+- `src/hooks/use-remote-auctioneer-feed.ts` (NEW) — polls the proxy every ~3s; `isLive` when `phase === 'drafting'` or picks are present. Interruption handling keeps last-known state, surfaces `error`, and backs off 3→6→12s (cap 15s), resetting to 3s on success. Per-session dedup by the auctioneer's pick id; `retry()` forces an immediate poll (wired to the chip's Retry).
+- `src/hooks/use-draft-feed.ts` — folded the remote proxy in as a NEW SOURCE (not a new mode): one cross-source merger dedups by synthesized player-name pickId so a player is never double-added across same-device + remote paths. `remoteEnabled = isAuction`. Fixed a `react-hooks/refs` lint error by syncing the latest `onNewPicks` in a `useEffect` instead of during render.
+- `src/lib/draft/auction-feed-merge.ts` — added `'remote'` to the `FeedSource` union.
+
+**Cost constraint (FF-314):** the proxy hits Upstash reads only (free). The paid POST endpoints (`/api/research`, `/api/strategies/propose`) were never fired during verification — network log shows only `/api/auctioneer-feed`, `/api/players`, `/api/leagues`, `/api/draft/sessions` (all GET reads).
+
+**Verify result:** `tsc --noEmit` 0 errors; ESLint 0 errors on all 7 changed files. Dev server (port 3003) compiled clean — no server errors. Render proof with real Nasties data on both mobile 390 and desktop 1440: pre-Go-Live shows OFFLINE chip + "Waiting for auctioneer…" + pre-flight (12 managers · $200 · Full PPR) with the sidebar kept on desktop; the live room confirms full-screen (no tab bar, no sidebar, "Leave" present) on both widths. Two pre-existing, out-of-scope issues flagged (not fixed): a dev-only React hydration warning that also appears on `/prep` (global theme-class mismatch), and `POST /api/user-tags/batch → 500` in the live room (existing `useUserTags` hook). Pixel screenshots were blocked in this environment (Browser pane not displayed); render verified via live DOM against the running server.
+
+---
+
 ## 2026-08-08 — UX-S3: Research tab consolidation (GRIDIRON rebuild)
 
 **Task:** UX-S3 | **Class:** `shared` | **Lenses:** Architecture, QA, Design

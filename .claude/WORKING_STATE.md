@@ -1,11 +1,11 @@
 # Working State — Fantasy Football Draft Advisor
 
 ## Current Session
-- **Date:** 2026-06-06
-- **Focus:** UX-V2 GRIDIRON redesign — deploy + PWA + per-screen rollout
-- **Status:** Production deploy live on personal Vercel account (the-sars11). PWA manifest added — Android Chrome "Add to Home Screen" ready with FFI icon + volt green theme. DEV_MODE removed from production env.
-- **LIVE URL:** https://fantasyfootballdraftapp-lac.vercel.app
-- **NEXT:** Reference Board step for the draft-board hero (TV + phone) — research real multi-team auction boards, annotate, Joe picks references, THEN one mockup, THEN UXV2-6 React rebuild. On-the-block card already locked (see 2026-06-25 entry). Full redesign away from legacy GRIDIRON; EA-FC team-color card is the new foundation; no bidding UI.
+- **Date:** 2026-08-08
+- **Focus:** UX-S4 — Draft tab = live auction room ONLY (blueprints 9.5 + 9.6) + FF-314 cross-device auto-connect
+- **Status:** DONE + committed/pushed to master. `/draft` rebuilt as the pre-Go-Live screen (ONE hero = 4-state ConnectionStatusPill + plain-words status, primary Go Live gated on feed detection, secondary Start in Manual mode, pre-flight card, full loading/no-league/error states). Live room is now full-screen (app-shell hides sidebar + mobile top header + bottom tab bar + swipe-carousel on /draft/live; single Leave affordance). FF-314 shipped: new server-side proxy `/api/auctioneer-feed` (CORS dodge, Upstash draft-current) + `use-remote-auctioneer-feed.ts` (3s poll, exp backoff, dedup, retry) folded into `use-draft-feed.ts` as a new SOURCE. Tyler's snake/Sheets/manual path untouched. VERIFIED: typecheck 0 + lint 0 on all 7 changed files, dev server clean, render proof (real Nasties data) mobile 390 + desktop 1440. Only free Upstash reads fired (no paid /api/research or /api/strategies/propose).
+- **NEXT:** UX-S5 — Setup tab + data correctness. League config with LOCKED Nasties defaults auto-seeded + editable (QB1/RB1/WR1/TE1/FLEX3/DEF1/K0/Bench5/IR1), draft setup, demo, run-history log, Account from the real signed-in user (remove hardcoded propermuse.co email), remove Draft sounds + snake + keeper, fix "failed to fetch leagues". See `.claude/UX_OVERHAUL_2026-08.md`.
+- **CAVEAT:** Pixel screenshots were blocked this session (Browser pane not displayed); render was verified via live DOM against the running dev server. Two pre-existing out-of-scope issues flagged (not fixed): dev-only React hydration warning (also on /prep — global theme-class mismatch), and `POST /api/user-tags/batch → 500` in the live room (existing useUserTags hook).
 - **GATED:** FFT-008 needs Joe on phone. Live AI calls need `ANTHROPIC_API_KEY` + typed cost approval.
 - **BACKLOG (deferred, tracked in CODE_REVIEW_2026-06.md):** giant-component extraction (live/review clients), broader test suite, sheet/dedup hardening, connection-pill a11y size, 25 pre-existing lint errors (unrelated debt).
 

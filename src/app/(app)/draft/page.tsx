@@ -1,73 +1,418 @@
-import Link from 'next/link'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Zap, FileSpreadsheet, Trophy, Play } from 'lucide-react'
+'use client'
 
-const btnPrimary = 'inline-flex items-center justify-center rounded-lg bg-primary px-2.5 h-8 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/80'
-const btnSecondary = 'inline-flex items-center justify-center rounded-lg bg-secondary px-2.5 h-8 text-sm font-medium text-secondary-foreground transition-colors hover:bg-secondary/80'
+/**
+ * Draft — pre-Go-Live "Go Live" screen (`/draft`) — UX-S4, blueprint 9.5.
+ *
+ * The Draft tab is the live auction room ONLY. This is its pre-draft face: ONE
+ * hero — the connection block — with the 4-state status in plain words, a single
+ * primary action (Go Live), a demoted Manual-mode text button, and a tiny
+ * pre-flight line (which league / managers, link to Setup if something's wrong).
+ *
+ * FF-314: the hero polls this repo's server proxy (`/api/auctioneer-feed`) via
+ * useRemoteAuctioneerFeed to auto-detect a live auctioneer over the internet, so
+ * a phone at the draft table lights up the moment the host goes live. Manual mode
+ * is always available so Joe is never blocked when the auctioneer isn't up.
+ *
+ * Client owns its own header (page.tsx wrappers must NOT add one — double-header bug).
+ */
+
+import { useState, useEffect, useCallback } from 'react'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import {
+  Radio,
+  Zap,
+  Hand,
+  AlertTriangle,
+  RotateCw,
+  Settings2,
+  Loader2,
+  DollarSign,
+  Users,
+  ListChecks,
+} from 'lucide-react'
+import { ConnectionStatusPill } from '@/components/draft/connection-status-pill'
+import { useRemoteAuctioneerFeed } from '@/hooks/use-remote-auctioneer-feed'
+
+const NASTIES = 'The Nasties'
+
+interface League {
+  id: string
+  name: string
+  format: string
+  team_count: number
+  budget: number | null
+  scoring_format: string | null
+}
+
+interface DraftSessionRow {
+  id: string
+  league_id: string
+  format: string
+  status: string
+  created_at: string
+}
+
+type Phase = 'loading' | 'no-league' | 'ready' | 'error'
+
+function scoringLabel(raw: string | null): string {
+  if (!raw) return 'PPR'
+  const v = raw.toLowerCase()
+  if (v === 'ppr') return 'Full PPR'
+  if (v === 'half_ppr' || v === 'half-ppr') return 'Half PPR'
+  if (v === 'standard') return 'Standard'
+  return raw
+}
 
 export default function DraftPage() {
+  const router = useRouter()
+  const [phase, setPhase] = useState<Phase>('loading')
+  const [league, setLeague] = useState<League | null>(null)
+  const [session, setSession] = useState<DraftSessionRow | null>(null)
+  const [errorExpanded, setErrorExpanded] = useState(false)
+
+  // FF-314: auto-detect a live auctioneer over the internet (auction-only).
+  const remote = useRemoteAuctioneerFeed({ enabled: true })
+
+  const load = useCallback(async () => {
+    setPhase('loading')
+    try {
+      const lgRes = await fetch('/api/leagues')
+      if (!lgRes.ok) throw new Error('leagues')
+      const lgData = await lgRes.json()
+      const lg: League | null = lgData.leagues?.[0] ?? null
+      setLeague(lg)
+
+      if (!lg) {
+        setPhase('no-league')
+        return
+      }
+
+      // Find a resumable auction session for this league (most recent, not done).
+      try {
+        const sessRes = await fetch('/api/draft/sessions')
+        if (sessRes.ok) {
+          const sessData = await sessRes.json()
+          const rows: DraftSessionRow[] = sessData.sessions ?? []
+          const resumable =
+            rows.find(
+              (s) =>
+                s.league_id === lg.id &&
+                s.format === 'auction' &&
+                s.status !== 'completed',
+            ) ?? null
+          setSession(resumable)
+        }
+      } catch {
+        // Sessions are optional here — Go Live falls back to Draft Setup.
+      }
+
+      setPhase('ready')
+    } catch {
+      setPhase('error')
+    }
+  }, [])
+
+  useEffect(() => {
+    load()
+  }, [load])
+
+  const detected = remote.connected
+  const checking = !remote.hasPolled
+
+  // Go Live resumes an existing session (remote sync auto-connects via aif=remote);
+  // with no session yet it routes through Draft Setup so it's never a dead end.
+  const goLiveHref = session
+    ? `/draft/live?session=${session.id}&aif=remote`
+    : '/draft/setup'
+  const manualHref = session ? `/draft/live?session=${session.id}` : '/draft/setup'
+
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Live Draft</h1>
-        <p className="text-muted-foreground">Real-time draft tracking and AI recommendations</p>
+    <div className="pb-2">
+      {/* ── Screen header ─────────────────────────────────────── */}
+      <div className="flex items-center justify-between mb-4">
+        <h1
+          className="font-extrabold text-[26px] leading-none"
+          style={{ fontFamily: 'var(--font-cond)', color: 'var(--ffi-ink)' }}
+        >
+          Draft
+        </h1>
+        <ConnectionStatusPill
+          lastPollAt={remote.lastSyncAt}
+          sheetConnected
+          error={remote.error}
+          onRetry={remote.retry}
+        />
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <FileSpreadsheet className="h-5 w-5" />
-              Draft Setup
-            </CardTitle>
-            <CardDescription>Connect your draft sheet, set managers, and import keepers</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Link href="/draft/setup" className={btnPrimary}>Setup Draft</Link>
-          </CardContent>
-        </Card>
+      {phase === 'loading' ? (
+        <HeroSkeleton />
+      ) : phase === 'no-league' ? (
+        <EmptyNoLeague onGoToSetup={() => router.push('/draft/setup')} />
+      ) : phase === 'error' ? (
+        <div className="ffi-hero p-5">
+          <div className="flex items-center gap-2.5">
+            <AlertTriangle className="w-5 h-5" color="var(--ffi-warning)" strokeWidth={2} />
+            <p
+              className="font-extrabold text-[19px]"
+              style={{ fontFamily: 'var(--font-cond)', color: 'var(--ffi-ink)' }}
+            >
+              Couldn&apos;t load your draft
+            </p>
+          </div>
+          <p className="text-[13px] mt-1.5" style={{ color: 'var(--ffi-ink-2)' }}>
+            We couldn&apos;t reach your league. Check your connection and try again.
+          </p>
+          <button
+            onClick={load}
+            className="ffi-btn-hero w-full mt-4 text-[14px] uppercase tracking-widest"
+            style={{ borderRadius: '12px' }}
+          >
+            <RotateCw className="w-[15px] h-[15px]" strokeWidth={2.5} color="var(--ffi-volt-ink)" />
+            Retry
+          </button>
+        </div>
+      ) : (
+        <>
+          {/* ── Hero: connection block ────────────────────────── */}
+          <div
+            className="ffi-hero p-5"
+            style={
+              detected
+                ? { borderColor: 'var(--ffi-volt)', boxShadow: '0 0 0 1px var(--ffi-volt-glow)' }
+                : undefined
+            }
+          >
+            <p
+              className="font-bold text-[10px] uppercase flex items-center gap-1.5"
+              style={{
+                fontFamily: 'var(--font-cond)',
+                letterSpacing: '0.26em',
+                color: detected ? 'var(--ffi-volt)' : 'var(--ffi-blue-bright)',
+              }}
+            >
+              <Radio className="w-3 h-3" strokeWidth={2.4} />
+              Auctioneer connection
+            </p>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Zap className="h-5 w-5" />
-              Live Draft
-            </CardTitle>
-            <CardDescription>Track picks in real time with AI-powered recommendations</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Link href="/draft/live" className={btnSecondary}>Go Live</Link>
-          </CardContent>
-        </Card>
+            {/* Big status word */}
+            <div className="flex items-center gap-2.5 mt-2">
+              <span
+                className={`w-3 h-3 rounded-full shrink-0${detected || checking ? ' animate-pulse' : ''}`}
+                style={{
+                  background: detected
+                    ? 'var(--ffi-volt)'
+                    : checking
+                      ? 'var(--ffi-blue-bright)'
+                      : 'var(--ffi-warning)',
+                  boxShadow: detected ? '0 0 10px var(--ffi-volt-glow)' : 'none',
+                }}
+              />
+              <p
+                className="font-extrabold text-[26px] leading-[1.05]"
+                style={{ fontFamily: 'var(--font-cond)', color: 'var(--ffi-ink)' }}
+              >
+                {checking
+                  ? 'Checking for a live auction…'
+                  : detected
+                    ? 'Auctioneer is LIVE'
+                    : 'Auctioneer not detected yet'}
+              </p>
+            </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Trophy className="h-5 w-5" />
-              Post-Draft Review
-            </CardTitle>
-            <CardDescription>Grade your draft and compare to pre-draft targets</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Link href="/draft/review" className={btnSecondary}>Review</Link>
-          </CardContent>
-        </Card>
+            <p className="text-[13px] leading-[1.45] mt-2" style={{ color: 'var(--ffi-ink-2)' }}>
+              {checking
+                ? 'Looking for a draft running on the host device.'
+                : detected
+                  ? `Picks are syncing over the internet${
+                      remote.pickCount > 0 ? ` · ${remote.pickCount} in so far` : ''
+                    }. Tap Go Live to enter the room.`
+                  : 'Start the draft on the host device and this will light up automatically. Not up yet? Record picks by hand in Manual mode.'}
+            </p>
 
-        {process.env.NODE_ENV === 'development' && (
-          <Card className="border-amber-500/30 bg-amber-500/5">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-amber-400">
-                <Play className="h-5 w-5" />
-                Demo Draft
-              </CardTitle>
-              <CardDescription>Dev only - launches the sim without a real session</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Link href="/draft/live?sim=1" className={btnPrimary}>Launch Demo</Link>
-            </CardContent>
-          </Card>
-        )}
-      </div>
+            {/* OFFLINE / error — expandable, Retry (Manual mode always still works) */}
+            {!detected && !checking && remote.error && (
+              <div className="mt-3">
+                <button
+                  onClick={() => setErrorExpanded((v) => !v)}
+                  className="text-[11px] font-semibold underline underline-offset-2"
+                  style={{ color: 'var(--ffi-warning)' }}
+                >
+                  {errorExpanded ? 'Hide details' : 'Why not connected?'}
+                </button>
+                {errorExpanded && (
+                  <div
+                    className="mt-2 rounded-[10px] p-3 flex items-start justify-between gap-2"
+                    style={{
+                      background: 'rgba(255,176,92,0.08)',
+                      border: '1px solid rgba(255,176,92,0.20)',
+                    }}
+                  >
+                    <p className="text-[11px] leading-[1.4]" style={{ color: 'var(--ffi-ink-2)' }}>
+                      {remote.error}
+                    </p>
+                    <button
+                      onClick={remote.retry}
+                      className="shrink-0 text-[10px] font-bold uppercase tracking-wide rounded-md px-2.5 py-1.5"
+                      style={{
+                        background: 'rgba(255,176,92,0.14)',
+                        color: 'var(--ffi-warning)',
+                        letterSpacing: '0.08em',
+                      }}
+                    >
+                      Retry now
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Primary CTA — thumb zone */}
+            {detected ? (
+              <Link
+                href={goLiveHref}
+                className="ffi-btn-hero w-full mt-4 text-[14px] uppercase tracking-widest"
+                style={{ borderRadius: '12px' }}
+              >
+                <Zap className="w-[15px] h-[15px]" strokeWidth={2.6} color="var(--ffi-volt-ink)" />
+                Go Live
+              </Link>
+            ) : (
+              <Link
+                href={goLiveHref}
+                className="ffi-btn-secondary w-full mt-4 text-[13px] font-bold uppercase tracking-widest inline-flex items-center justify-center gap-2"
+                style={{ borderRadius: '12px', padding: '0.85rem' }}
+              >
+                {checking ? (
+                  <Loader2 className="w-[14px] h-[14px] animate-spin" color="var(--ffi-ink-2)" />
+                ) : (
+                  <span
+                    className="w-2 h-2 rounded-full animate-pulse"
+                    style={{ background: 'var(--ffi-warning)' }}
+                  />
+                )}
+                {checking ? 'Checking…' : 'Waiting for auctioneer…'}
+              </Link>
+            )}
+
+            {/* Secondary — Manual mode (always available, never a co-equal card) */}
+            <Link
+              href={manualHref}
+              className="mt-3 w-full inline-flex items-center justify-center gap-2 text-[12px] font-semibold"
+              style={{ color: 'var(--ffi-ink-2)' }}
+            >
+              <Hand className="w-[14px] h-[14px]" strokeWidth={2} />
+              Start in Manual mode
+            </Link>
+          </div>
+
+          {/* ── Pre-flight line: league / managers, link to Setup ─ */}
+          {league && (
+            <div
+              className="mt-3 rounded-[13px] p-3.5"
+              style={{ background: 'var(--ffi-surface-1)', border: '1px solid var(--ffi-hairline)' }}
+            >
+              <div className="flex items-center justify-between">
+                <p
+                  className="font-bold text-[10px] uppercase"
+                  style={{
+                    fontFamily: 'var(--font-cond)',
+                    letterSpacing: '0.2em',
+                    color: 'var(--ffi-ink-3)',
+                  }}
+                >
+                  Pre-flight
+                </p>
+                <Link
+                  href="/prep/configure"
+                  className="inline-flex items-center gap-1 text-[11px] font-semibold"
+                  style={{ color: 'var(--ffi-blue-bright)' }}
+                >
+                  <Settings2 className="w-3.5 h-3.5" strokeWidth={2} />
+                  Edit in Setup
+                </Link>
+              </div>
+              <p
+                className="font-extrabold text-[15px] mt-1.5"
+                style={{ fontFamily: 'var(--font-cond)', color: 'var(--ffi-ink)' }}
+              >
+                {league.name || NASTIES}
+              </p>
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 mt-2">
+                <PreflightStat
+                  icon={<Users className="w-3.5 h-3.5" color="var(--ffi-blue-bright)" strokeWidth={2} />}
+                  value={`${league.team_count} managers`}
+                />
+                {league.budget != null && (
+                  <PreflightStat
+                    icon={<DollarSign className="w-3.5 h-3.5" color="var(--ffi-volt)" strokeWidth={2} />}
+                    value={`$${league.budget} budget`}
+                  />
+                )}
+                <PreflightStat
+                  icon={<ListChecks className="w-3.5 h-3.5" color="var(--ffi-warning)" strokeWidth={2} />}
+                  value={scoringLabel(league.scoring_format)}
+                />
+              </div>
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  )
+}
+
+function PreflightStat({ icon, value }: { icon: React.ReactNode; value: string }) {
+  return (
+    <span className="inline-flex items-center gap-1.5 text-[12px]" style={{ color: 'var(--ffi-ink-2)' }}>
+      {icon}
+      <span className="tabular-nums" style={{ fontFamily: 'var(--font-mono)' }}>
+        {value}
+      </span>
+    </span>
+  )
+}
+
+function EmptyNoLeague({ onGoToSetup }: { onGoToSetup: () => void }) {
+  return (
+    <div className="ffi-hero p-5">
+      <p
+        className="font-bold text-[10px] uppercase flex items-center gap-1.5"
+        style={{ fontFamily: 'var(--font-cond)', letterSpacing: '0.26em', color: 'var(--ffi-blue-bright)' }}
+      >
+        <Radio className="w-3 h-3" strokeWidth={2.4} />
+        Auctioneer connection
+      </p>
+      <p
+        className="font-extrabold text-[24px] leading-[1.08] mt-1.5"
+        style={{ fontFamily: 'var(--font-cond)', color: 'var(--ffi-ink)' }}
+      >
+        Set up your draft first
+      </p>
+      <p className="text-[13px] leading-[1.45] mt-1" style={{ color: 'var(--ffi-ink-2)' }}>
+        Confirm your league and managers, then this screen connects to the auctioneer and lights up
+        the moment your draft goes live.
+      </p>
+      <button
+        onClick={onGoToSetup}
+        className="ffi-btn-hero w-full mt-4 text-[14px] uppercase tracking-widest"
+        style={{ borderRadius: '12px' }}
+      >
+        <Settings2 className="w-[15px] h-[15px]" strokeWidth={2.5} color="var(--ffi-volt-ink)" />
+        Go to Draft Setup
+      </button>
+    </div>
+  )
+}
+
+function HeroSkeleton() {
+  return (
+    <div className="ffi-hero p-5">
+      <div className="ffi-skeleton h-3 w-40 rounded-full" />
+      <div className="ffi-skeleton h-8 w-64 rounded-lg mt-3" />
+      <div className="ffi-skeleton h-4 w-full rounded mt-3" />
+      <div className="ffi-skeleton h-4 w-2/3 rounded mt-1.5" />
+      <div className="ffi-skeleton h-12 w-full rounded-xl mt-4" />
     </div>
   )
 }

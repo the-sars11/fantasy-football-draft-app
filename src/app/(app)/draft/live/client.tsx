@@ -14,6 +14,7 @@ import {
   Loader2,
   Radio,
   ChevronDown,
+  ChevronLeft,
   Sparkles,
   Target,
   AlertTriangle,
@@ -381,8 +382,15 @@ export function LiveDraftClient() {
   const router = useRouter()
   const sessionId = searchParams.get('session')
   const trashTalkMode = (searchParams.get('ttm') ?? 'family-safe') as TrashTalkMode
-  // FF-279: Auctioneer connection type from setup (?aif=localstorage|file)
-  const aifParam = searchParams.get('aif') as AuctioneerConnectionType
+  // FF-279 / FF-314: Auctioneer connection from setup.
+  //   ?aif=localstorage|file → same-device feed (BroadcastChannel / File API).
+  //   ?aif=remote           → cross-device sync via this repo's server proxy.
+  // Only the two same-device values drive useAuctioneerfeed; 'remote' (and anything
+  // else) leaves it null. The remote proxy path runs automatically for every auction
+  // session inside useDraftFeed, so 'remote' needs no same-device wiring here.
+  const rawAif = searchParams.get('aif')
+  const aifParam: AuctioneerConnectionType =
+    rawAif === 'localstorage' || rawAif === 'file' ? rawAif : null
   // FF-312: Sleeper draft ID from setup (?sdi=...)
   const sdiParam = searchParams.get('sdi')
   // UX-7.1: Dev-only sim (?sim=1, NODE_ENV !== 'production' gate)
@@ -544,6 +552,10 @@ export function LiveDraftClient() {
     connected: aifConnected,
     importedCount: aifImportedCount,
     error: aifError,
+    // FF-314: cross-device remote source — surfaced for the connection chip.
+    remoteLastSyncAt,
+    remoteError,
+    remoteRetry,
   } = useDraftFeed({
     format: session?.format ?? null,
     connectionType: aifParam,
@@ -970,9 +982,17 @@ export function LiveDraftClient() {
           </div>
         </div>
       )}
-      {/* Header — UX-2.1 gold spotlight + mode badge */}
+      {/* Header — UX-2.1 gold spotlight + mode badge. Leave draft top-left (blueprint 9.6). */}
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-3 min-w-0">
+          <button
+            onClick={() => router.push('/draft')}
+            className="shrink-0 inline-flex items-center gap-1 pl-1.5 pr-2.5 py-1.5 rounded-lg text-[12px] font-semibold text-[var(--ffi-text-secondary)] hover:text-white hover:bg-white/[0.06] transition-colors"
+            aria-label="Leave draft"
+          >
+            <ChevronLeft className="h-4 w-4" />
+            Leave
+          </button>
           <div className="p-2 rounded-xl bg-[var(--ffi-gold)]/15">
             <Radio className="h-5 w-5 text-[var(--ffi-gold)]" />
           </div>
@@ -997,11 +1017,13 @@ export function LiveDraftClient() {
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
+          {/* FF-314: for an auction with no Google sheet, the chip reflects the
+              cross-device remote proxy; otherwise it stays on the sheet poll. */}
           <ConnectionStatusPill
-            lastPollAt={lastPollAt}
-            sheetConnected={!!session.sheet_url}
-            error={sheetError}
-            onRetry={undefined}
+            lastPollAt={isAuction && !session.sheet_url ? remoteLastSyncAt : lastPollAt}
+            sheetConnected={isAuction && !session.sheet_url ? true : !!session.sheet_url}
+            error={isAuction && !session.sheet_url ? remoteError : sheetError}
+            onRetry={isAuction && !session.sheet_url ? remoteRetry : undefined}
           />
           {/* FF-279: Auctioneer sync indicator — auction-only */}
           {aifEnabled && (
