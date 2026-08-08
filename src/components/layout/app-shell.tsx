@@ -12,7 +12,8 @@ import {
   LogOut,
   ChevronLeft,
   ChevronRight,
-  Home,
+  Search,
+  Trophy,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -29,11 +30,26 @@ interface NavItem {
   icon: React.ElementType
 }
 
+// UX-S2 (2026-08-08): 4-tab IA spine — Research (landing) / Draft (live only) /
+// Review / Setup. URL slugs still point at existing routes; content + slug
+// cleanup happens as each tab is rebuilt in UX-S3..S6. See
+// .claude/UX_OVERHAUL_2026-08.md.
 const navItems: NavItem[] = [
-  { label: 'Home', href: '/prep', icon: Home },
+  { label: 'Research', href: '/prep', icon: Search },
   { label: 'Draft', href: '/draft', icon: Zap },
-  { label: 'Settings', href: '/settings', icon: Settings },
+  { label: 'Review', href: '/draft/review', icon: Trophy },
+  { label: 'Setup', href: '/settings', icon: Settings },
 ]
+
+// Longest-prefix match so nested routes resolve to the right tab —
+// e.g. /draft/review lights up Review, not Draft.
+function getActiveHref(pathname: string): string | undefined {
+  return [...navItems]
+    .sort((a, b) => b.href.length - a.href.length)
+    .find(
+      (item) => pathname === item.href || pathname.startsWith(item.href + '/')
+    )?.href
+}
 
 function ProfileAvatar({
   initials,
@@ -64,6 +80,7 @@ export function AppShell({
   children: React.ReactNode
 }) {
   const pathname = usePathname()
+  const activeHref = getActiveHref(pathname)
   const [collapsed, setCollapsed] = useState(false)
   const isMobile = useIsMobile()
   const displayName = user.user_metadata?.full_name || user.email || 'User'
@@ -100,7 +117,7 @@ export function AppShell({
 
         <nav className="flex-1 space-y-1 p-2">
           {navItems.map((item) => {
-            const isActive = pathname.startsWith(item.href)
+            const isActive = item.href === activeHref
             const Icon = item.icon
             return (
               <Link
@@ -211,7 +228,7 @@ export function AppShell({
       {/* Mobile bottom tab bar — hidden on desktop (FF-103: Tactical Hologram nav) */}
       <nav className="flex md:hidden items-center justify-around border-t border-white/5 backdrop-blur-2xl bg-[#031018]/90 h-16 shrink-0 safe-bottom rounded-t-xl shadow-[0_-4px_20px_rgba(0,0,0,0.5)]">
         {navItems.map((item) => {
-          const isActive = pathname.startsWith(item.href)
+          const isActive = item.href === activeHref
           const Icon = item.icon
           return (
             <Link

@@ -1,1 +1,1 @@
-{"version":"0.0.1","configurations":[{"name":"fantasy-football","runtimeExecutable":"npm","runtimeArgs":["run","dev"],"port":3003}]}
+{"version":"0.0.1","configurations":[{"name":"fantasy-football","runtimeExecutable":"npm","runtimeArgs":["run","dev"],"port":3003},{"name":"ffi-s2-verify","runtimeExecutable":"npx","runtimeArgs":["next","dev","-p","3011"],"port":3011}]}

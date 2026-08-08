@@ -6,12 +6,28 @@ import { motion, useMotionValue, useTransform, animate } from 'framer-motion'
 import { useDrag } from '@use-gesture/react'
 import { cn } from '@/lib/utils'
 
-// Main sections for carousel navigation
+// Main sections for carousel navigation — must match the 4-tab IA in
+// app-shell.tsx (UX-S2). Order = swipe order.
 const sections = [
-  { href: '/prep', label: 'Home' },
+  { href: '/prep', label: 'Research' },
   { href: '/draft', label: 'Draft' },
-  { href: '/settings', label: 'Settings' },
+  { href: '/draft/review', label: 'Review' },
+  { href: '/settings', label: 'Setup' },
 ]
+
+// Longest-prefix match so /draft/review resolves to Review, not Draft.
+function activeSectionIndex(pathname: string): number {
+  let best = -1
+  let bestLen = -1
+  sections.forEach((s, i) => {
+    const match = pathname === s.href || pathname.startsWith(s.href + '/')
+    if (match && s.href.length > bestLen) {
+      best = i
+      bestLen = s.href.length
+    }
+  })
+  return best
+}
 
 interface SwipeCarouselProps {
   children: React.ReactNode
@@ -24,8 +40,8 @@ export function SwipeCarousel({ children }: SwipeCarouselProps) {
   const x = useMotionValue(0)
   const [isDragging, setIsDragging] = useState(false)
 
-  // Find current section index
-  const currentIndex = sections.findIndex(s => pathname.startsWith(s.href))
+  // Find current section index (longest-prefix match)
+  const currentIndex = activeSectionIndex(pathname)
   const activeIndex = currentIndex === -1 ? 0 : currentIndex
 
   // Rubber-band resistance factor

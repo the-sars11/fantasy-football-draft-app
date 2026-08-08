@@ -2,6 +2,21 @@
 
 ---
 
+## 2026-08-08 — UX-S2: 4-tab IA reskeleton (nav only)
+
+**Task:** UX-S2 | **Class:** `shared` | **Lenses:** Architecture, QA
+
+**What changed:**
+- `src/components/layout/app-shell.tsx` — replaced the 3-tab nav (Home/Draft/Settings) with the locked 4-tab IA: **Research** (`/prep`, Search icon), **Draft** (`/draft`, Zap), **Review** (`/draft/review`, Trophy), **Setup** (`/settings`, Settings). Applies to both the desktop sidebar and the mobile bottom tab bar. Added `getActiveHref()` longest-prefix matcher and swapped both `pathname.startsWith` active checks to `item.href === activeHref` so nested routes resolve to one tab.
+- `src/components/layout/swipe-carousel.tsx` — same 4 sections (sets swipe order + dot indicators); added `activeSectionIndex()` longest-prefix matcher replacing the first-match `findIndex`.
+- No visual polish, no content rebuild, no route-file moves. URL slugs still point at existing routes; slug + content cleanup happens as each tab is rebuilt in UX-S3..S6.
+
+**Why longest-prefix:** `/draft/review` startsWith `/draft`, so the old first-match logic would light up Draft on the Review page. Longest-prefix makes `/draft/review` → Review and `/draft`,`/draft/live`,`/draft/setup` → Draft.
+
+**Verify result:** typecheck 0 errors; ESLint 0 errors on both changed files (2 pre-existing warnings untouched). Nav + active-state proven via Playwright screenshots at 1440×900 (desktop sidebar) and 390×844 (mobile bottom bar + carousel dots), both nested directions (`/draft`→Draft, `/draft/review`→Review). Note: the Review page still shows "Failed to load sessions" — pre-existing broken data layer, scheduled for UX-S5/S6, not a nav regression.
+
+---
+
 ## 2026-08-07 — FF-314 planned: remote/cross-device auctioneer live sync
 
 **Task:** FF-314 (plan add only — no code) | **Class:** `docs` | **Lenses:** Delivery
