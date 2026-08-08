@@ -1,8 +1,9 @@
 <!-- DASHBOARD_STATUS
 {
-  "currentPhase": "P0 — Personal Season Hardening (Aug 2026)",
+  "currentPhase": "P0-UX — Full UX Overhaul (Nasties Auction only)",
   "status": "active",
   "milestones": [
+    { "name": "P0-UX — Full UX overhaul, auction-only, mobile-first [ACTIVE 2026-08-08]", "done": false },
     { "name": "Data pipeline + strategy engine (Phase 0-2)", "done": true },
     { "name": "Live draft mode (Phase 3)", "done": true },
     { "name": "Polish + scoring intelligence (Phase 4-5)", "done": true },
@@ -17,6 +18,7 @@
     { "name": "P3+ — Commercialization [RETIRED 2026-08-06]", "done": true }
   ],
   "nextItems": [
+    "UX-S1 done + IA spine LOCKED by Joe 2026-08-08 (4 tabs: Research/Draft/Review/Setup). NEXT: UX-S2 nav reskeleton per .claude/UX_OVERHAUL_2026-08.md Section 7.",
     "UXV2-6 [DESIGN-BLOCKED, NOT ready to code]: Rebuild Live Auction Draft Room. Blocked on the multi-team draft board mockup (phone + TV hero) clearing the Reference Board step + Joe sign-off (first attempt rejected + deleted 2026-06-25). NOTE: the GRIDIRON mockups (.claude/mockups/draft-room-phone.html, live-draft-room-v1.html) are LEGACY as of the 2026-06-25 pivot — do NOT build to them. The on-the-block card WORKING_STATE calls locked at public/on-the-block.html is MISSING from disk + git — re-confirm with Joe before treating any artifact as the contract.",
     "UXV2-7: Performance + arm's-length pass (only after UXV2-6 lands)",
     "UXV2-8: VERIFY lint + tests + build + update DESIGN docs + WORKING_STATE (only after UXV2-6 lands)"
@@ -43,6 +45,19 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 6. Tell human: "Ready to test [feature]"
 7. REPEAT
 ```
+
+---
+
+## P0-UX — Full UX Overhaul (Nasties Auction ONLY) [ACTIVE 2026-08-08]
+> **Goal:** Fix the information architecture and usability end-to-end. Auction-only (no snake/keeper), mobile-first. Full spec + per-screen "what buttons do" + session plan: `.claude/UX_OVERHAUL_2026-08.md`. Supersedes the July `UX_IA_PROPOSAL.md` spine.
+> **Rule:** Sessions run in order. Nothing after UX-S1 starts until Joe signs off on the 4-tab IA spine (doc Section 3). UI phase and works-for-real phase come AFTER the UX sessions.
+
+- [x] UX-S1: Review the actual app (9 screens + code) and document the overhaul approach — root problems, new 4-tab IA (Research/Draft/Review/Setup), per-screen spec, auction-only kill list, FF-314 connection UX, session plan. Output: `.claude/UX_OVERHAUL_2026-08.md`. **IA spine (4 tabs) LOCKED by Joe 2026-08-08 — UX-S2 cleared.**
+- [ ] UX-S2: IA reskeleton — replace 3-tab nav (Home/Draft/Settings) with 4 tabs (Research/Draft/Review/Setup); move routes to match; no visual polish. Prove nav works on mobile + desktop. | `shared`
+- [ ] UX-S3: Research tab consolidation — Research landing + Player Browser + Draft Board (fix broken data layer so it loads the Nasties league) + tiers/targets; delete the Home hub. | `shared`
+- [ ] UX-S4: Draft tab = live auction room ONLY + build FF-314 auto-connect, persistent 4-state connection chip, interruption/retry, manual fallback. | `pipeline`
+- [ ] UX-S5: Setup tab + data correctness — league config with LOCKED Nasties defaults auto-seeded + editable (QB1/RB1/WR1/TE1/FLEX3/DEF1/K0/Bench5/IR1), draft setup, demo, run-history log, Account from real signed-in user (remove hardcoded propermuse.co email), remove Draft sounds + snake + keeper; fix "failed to fetch leagues". | `pipeline`
+- [ ] UX-S6: Review as its own tab, linked from Draft post-draft. | `output`
 
 ---
 
