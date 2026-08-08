@@ -8,7 +8,8 @@
  */
 
 import { useState, useEffect, useMemo, useCallback } from 'react'
-import { Search, SlidersHorizontal, X, Target, Loader2, AlertTriangle, Info } from 'lucide-react'
+import Link from 'next/link'
+import { Search, SlidersHorizontal, X, Target, AlertTriangle, Info, Play } from 'lucide-react'
 import { FFIInput, FFIButton, FFIEmptyState } from '@/components/ui/ffi-primitives'
 import { FFIPlayerIntelCard } from '@/components/prep/ffi-player-intel-card'
 import { useUserTags, useToggleTag, useSystemTagActions } from '@/hooks/use-user-tags'
@@ -117,7 +118,6 @@ export function PlayerBrowserClient() {
   const playerCacheIds = useMemo(() => players.map(p => p.id), [players])
   const {
     userTagsMap,
-    isLoading: tagsLoading,
     refetch: refetchTags,
     isTarget,
     isAvoid,
@@ -131,27 +131,24 @@ export function PlayerBrowserClient() {
   const { dismissSystemTag, undismissSystemTag } = useSystemTagActions()
 
   // --- Fetch players ---
-  useEffect(() => {
-    async function fetchPlayers() {
-      setLoading(true)
-      setError(null)
-
-      try {
-        const res = await fetch('/api/players?limit=500')
-        if (!res.ok) throw new Error('Failed to fetch players')
-
-        const data = await res.json()
-        const converted = cacheToPlayers(data.players || [])
-        setPlayers(converted)
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load players')
-      } finally {
-        setLoading(false)
-      }
+  const fetchPlayers = useCallback(async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const res = await fetch('/api/players?limit=500')
+      if (!res.ok) throw new Error('Failed to fetch players')
+      const data = await res.json()
+      setPlayers(cacheToPlayers(data.players || []))
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load players')
+    } finally {
+      setLoading(false)
     }
-
-    fetchPlayers()
   }, [])
+
+  useEffect(() => {
+    fetchPlayers()
+  }, [fetchPlayers])
 
   // --- Filter logic ---
   const filteredPlayers = useMemo(() => {
@@ -260,52 +257,87 @@ export function PlayerBrowserClient() {
   // --- Render ---
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-6 w-6 animate-spin text-[#8bacff]" />
-        <span className="ml-2 text-[#9eadb8] text-sm">Loading players...</span>
+      <div className="pb-2">
+        <PlayersHeader count={null} />
+        <div className="ffi-skeleton h-11 w-full rounded-xl" />
+        <div className="flex gap-1.5 mt-3">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="ffi-skeleton h-8 w-14 rounded-full" />
+          ))}
+        </div>
+        <div className="flex flex-col gap-[6px] mt-4">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div
+              key={i}
+              className="ffi-skeleton rounded-[14px]"
+              style={{ height: '72px' }}
+            />
+          ))}
+        </div>
       </div>
     )
   }
 
   if (error) {
     return (
-      <FFIEmptyState
-        icon={<AlertTriangle className="h-8 w-8 text-[#ff716c]" aria-hidden="true" />}
-        title="Failed to load players"
-        description={error}
-        action={
-          <FFIButton variant="secondary" onClick={() => window.location.reload()}>
-            Retry
-          </FFIButton>
-        }
-      />
+      <div className="pb-2">
+        <PlayersHeader count={null} />
+        <div
+          className="rounded-[14px] p-6 text-center"
+          style={{ background: 'var(--ffi-surface-2)', border: '1px solid var(--ffi-hairline)' }}
+        >
+          <AlertTriangle className="h-7 w-7 mx-auto mb-2.5" style={{ color: 'var(--ffi-warning)' }} />
+          <p className="text-[15px] font-bold mb-1" style={{ fontFamily: 'var(--font-cond)', color: 'var(--ffi-ink)' }}>
+            Couldn&apos;t load players
+          </p>
+          <p className="text-[13px] mb-4" style={{ color: 'var(--ffi-ink-2)' }}>
+            The player database didn&apos;t respond. Check your connection and try again.
+          </p>
+          <FFIButton variant="secondary" onClick={fetchPlayers}>Retry</FFIButton>
+        </div>
+      </div>
     )
   }
 
   if (players.length === 0) {
     return (
-      <FFIEmptyState
-        icon={<Info className="h-8 w-8 text-[#9eadb8]" aria-hidden="true" />}
-        title="No player data"
-        description="Run a data refresh from the Prep Hub to load player rankings."
-        action={
-          <a href="/prep">
-            <FFIButton variant="secondary">Go to Prep Hub</FFIButton>
-          </a>
-        }
-      />
+      <div className="pb-2">
+        <PlayersHeader count={0} />
+        <div
+          className="rounded-[14px] p-8 text-center"
+          style={{ background: 'var(--ffi-surface-2)', border: '1px solid var(--ffi-hairline)' }}
+        >
+          <Info className="h-7 w-7 mx-auto mb-2.5" style={{ color: 'var(--ffi-ink-3)' }} />
+          <p className="text-[16px] font-bold mb-1" style={{ fontFamily: 'var(--font-cond)', color: 'var(--ffi-ink)' }}>
+            No player data yet
+          </p>
+          <p className="text-[13px] mb-4" style={{ color: 'var(--ffi-ink-2)' }}>
+            Run research to populate the pool, then browse every player here.
+          </p>
+          <Link
+            href="/prep"
+            className="ffi-btn-hero inline-flex items-center gap-2 text-[13px] uppercase tracking-widest"
+            style={{ borderRadius: '11px', padding: '0.7rem 1.4rem' }}
+          >
+            <Play className="w-[13px] h-[13px]" strokeWidth={2.5} color="var(--ffi-volt-ink)" />
+            Run research
+          </Link>
+        </div>
+      </div>
     )
   }
 
   return (
-    <div className="space-y-4">
+    <div className="pb-2">
+      <PlayersHeader count={filteredPlayers.length} />
+
       {/* FF-249: Mobile-responsive search and filter bar */}
       <div className="space-y-3">
         {/* Row 1: Search + Filter toggle + Count */}
         <div className="flex items-center gap-2 sm:gap-3">
           {/* Search - full width on mobile */}
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#9eadb8]" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4" style={{ color: 'var(--ffi-ink-3)' }} />
             <FFIInput
               placeholder="Search players..."
               value={searchQuery}
@@ -315,7 +347,9 @@ export function PlayerBrowserClient() {
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9eadb8] hover:text-[#deedf9]"
+                className="absolute right-3 top-1/2 -translate-y-1/2 transition-colors"
+                style={{ color: 'var(--ffi-ink-3)' }}
+                aria-label="Clear search"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -325,21 +359,16 @@ export function PlayerBrowserClient() {
           {/* Filter toggle */}
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className={`
-              p-2 rounded-lg transition-all shrink-0
-              ${showFilters
-                ? 'bg-[#8bacff]/20 text-[#8bacff]'
-                : 'bg-surface-container-high text-[#9eadb8] hover:bg-surface-bright'
-              }
-            `}
+            className="p-2 rounded-lg transition-all shrink-0"
+            style={
+              showFilters
+                ? { background: 'rgba(121,166,255,0.16)', color: 'var(--ffi-blue-bright)' }
+                : { background: 'var(--ffi-surface-2)', color: 'var(--ffi-ink-2)' }
+            }
+            aria-label="Toggle filters"
           >
             <SlidersHorizontal className="h-5 w-5" />
           </button>
-
-          {/* Player count - visible on larger screens inline */}
-          <span className="hidden sm:block text-xs text-[#9eadb8] shrink-0">
-            {filteredPlayers.length} players
-          </span>
         </div>
 
         {/* Row 2: Position pills - horizontal scroll on mobile */}
@@ -349,60 +378,68 @@ export function PlayerBrowserClient() {
               <button
                 key={pos}
                 onClick={() => setPositionFilter(pos)}
-                className={`
-                  px-3 sm:px-4 py-2 rounded-lg font-headline font-bold text-xs tracking-tight transition-all shrink-0
-                  ${positionFilter === pos
-                    ? 'bg-[#2ff801] text-[#0b5800] shadow-[0_0_15px_rgba(47,248,1,0.3)]'
-                    : 'bg-surface-container-high text-[#9eadb8] hover:bg-surface-bright'
-                  }
-                `}
+                className="px-3 sm:px-4 py-2 rounded-lg font-bold text-xs tracking-tight transition-all shrink-0"
+                style={
+                  positionFilter === pos
+                    ? {
+                        fontFamily: 'var(--font-cond)',
+                        background: 'var(--ffi-volt)',
+                        color: 'var(--ffi-volt-ink)',
+                        boxShadow: '0 0 15px var(--ffi-volt-glow)',
+                      }
+                    : {
+                        fontFamily: 'var(--font-cond)',
+                        background: 'var(--ffi-surface-2)',
+                        color: 'var(--ffi-ink-2)',
+                      }
+                }
               >
                 {pos}
               </button>
             ))}
           </div>
-
-          {/* Player count - mobile only */}
-          <span className="sm:hidden text-xs text-[#9eadb8] shrink-0">
-            {filteredPlayers.length}
-          </span>
         </div>
       </div>
 
       {/* FF-249: Mobile-friendly expanded filter panel */}
       {showFilters && (
-        <div className="glass-panel rounded-xl p-3 sm:p-4 space-y-4">
+        <div
+          className="rounded-xl p-3 sm:p-4 space-y-4 mt-3"
+          style={{ background: 'var(--ffi-surface-2)', border: '1px solid var(--ffi-hairline)' }}
+        >
           {/* Tag filter - scrollable on mobile */}
           <div>
-            <label className="block text-[10px] text-[#9eadb8] font-bold uppercase tracking-widest mb-2">
+            <label className="block text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: 'var(--ffi-ink-3)' }}>
               Filter by Tag
             </label>
             <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1 -mb-1 sm:flex-wrap">
-              {TAG_FILTERS.map((filter) => (
-                <button
-                  key={filter.value}
-                  onClick={() => setTagFilter(filter.value)}
-                  className={`
-                    px-3 py-2 sm:py-1.5 rounded-full text-xs font-bold transition-all shrink-0
-                    ${tagFilter === filter.value
-                      ? filter.value === 'target'
-                        ? 'bg-[#2ff801]/20 text-[#2ff801] shadow-[0_0_8px_rgba(47,248,1,0.3)]'
-                        : filter.value === 'avoid' || filter.value === 'bust'
-                        ? 'bg-[#ff716c]/20 text-[#ff716c]'
-                        : 'bg-[#8bacff]/20 text-[#8bacff]'
-                      : 'bg-surface-container-high text-[#9eadb8] hover:bg-surface-bright'
-                    }
-                  `}
-                >
-                  {filter.label}
-                </button>
-              ))}
+              {TAG_FILTERS.map((filter) => {
+                const active = tagFilter === filter.value
+                let activeStyle: React.CSSProperties
+                if (filter.value === 'target') {
+                  activeStyle = { background: 'rgba(139,255,69,0.18)', color: 'var(--ffi-volt)', boxShadow: '0 0 8px var(--ffi-volt-glow)' }
+                } else if (filter.value === 'avoid' || filter.value === 'bust') {
+                  activeStyle = { background: 'rgba(255,110,138,0.18)', color: '#FF6E8A' }
+                } else {
+                  activeStyle = { background: 'rgba(121,166,255,0.18)', color: 'var(--ffi-blue-bright)' }
+                }
+                return (
+                  <button
+                    key={filter.value}
+                    onClick={() => setTagFilter(filter.value)}
+                    className="px-3 py-2 sm:py-1.5 rounded-full text-xs font-bold transition-all shrink-0"
+                    style={active ? activeStyle : { background: 'var(--ffi-surface-1)', color: 'var(--ffi-ink-2)' }}
+                  >
+                    {filter.label}
+                  </button>
+                )
+              })}
             </div>
           </div>
 
           {/* ADP Range - stacked on mobile */}
           <div>
-            <label className="block text-[10px] text-[#9eadb8] font-bold uppercase tracking-widest mb-2">
+            <label className="block text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: 'var(--ffi-ink-3)' }}>
               ADP Range: {adpRange[0]} - {adpRange[1]}
             </label>
             {/* Desktop: side by side */}
@@ -413,45 +450,49 @@ export function PlayerBrowserClient() {
                 max={300}
                 value={adpRange[0]}
                 onChange={(e) => setAdpRange([Math.min(parseInt(e.target.value), adpRange[1] - 10), adpRange[1]])}
-                className="flex-1 h-2 bg-surface-container-high rounded-full appearance-none cursor-pointer accent-[#8bacff]"
+                className="flex-1 h-2 rounded-full appearance-none cursor-pointer"
+                style={{ background: 'var(--ffi-surface-1)', accentColor: 'var(--ffi-blue-bright)' }}
               />
-              <span className="text-sm text-[#9eadb8] w-12 text-center">{adpRange[0]}</span>
-              <span className="text-[#9eadb8]">-</span>
+              <span className="text-sm w-12 text-center" style={{ color: 'var(--ffi-ink-2)' }}>{adpRange[0]}</span>
+              <span style={{ color: 'var(--ffi-ink-3)' }}>-</span>
               <input
                 type="range"
                 min={1}
                 max={300}
                 value={adpRange[1]}
                 onChange={(e) => setAdpRange([adpRange[0], Math.max(parseInt(e.target.value), adpRange[0] + 10)])}
-                className="flex-1 h-2 bg-surface-container-high rounded-full appearance-none cursor-pointer accent-[#8bacff]"
+                className="flex-1 h-2 rounded-full appearance-none cursor-pointer"
+                style={{ background: 'var(--ffi-surface-1)', accentColor: 'var(--ffi-blue-bright)' }}
               />
-              <span className="text-sm text-[#9eadb8] w-12 text-center">{adpRange[1]}</span>
+              <span className="text-sm w-12 text-center" style={{ color: 'var(--ffi-ink-2)' }}>{adpRange[1]}</span>
             </div>
             {/* Mobile: stacked with larger touch targets */}
             <div className="sm:hidden space-y-3">
               <div className="flex items-center gap-3">
-                <span className="text-xs text-[#9eadb8] w-8">Min</span>
+                <span className="text-xs w-8" style={{ color: 'var(--ffi-ink-3)' }}>Min</span>
                 <input
                   type="range"
                   min={1}
                   max={300}
                   value={adpRange[0]}
                   onChange={(e) => setAdpRange([Math.min(parseInt(e.target.value), adpRange[1] - 10), adpRange[1]])}
-                  className="flex-1 h-3 bg-surface-container-high rounded-full appearance-none cursor-pointer accent-[#8bacff]"
+                  className="flex-1 h-3 rounded-full appearance-none cursor-pointer"
+                  style={{ background: 'var(--ffi-surface-1)', accentColor: 'var(--ffi-blue-bright)' }}
                 />
-                <span className="text-sm text-[#9eadb8] w-10 text-right">{adpRange[0]}</span>
+                <span className="text-sm w-10 text-right" style={{ color: 'var(--ffi-ink-2)' }}>{adpRange[0]}</span>
               </div>
               <div className="flex items-center gap-3">
-                <span className="text-xs text-[#9eadb8] w-8">Max</span>
+                <span className="text-xs w-8" style={{ color: 'var(--ffi-ink-3)' }}>Max</span>
                 <input
                   type="range"
                   min={1}
                   max={300}
                   value={adpRange[1]}
                   onChange={(e) => setAdpRange([adpRange[0], Math.max(parseInt(e.target.value), adpRange[0] + 10)])}
-                  className="flex-1 h-3 bg-surface-container-high rounded-full appearance-none cursor-pointer accent-[#8bacff]"
+                  className="flex-1 h-3 rounded-full appearance-none cursor-pointer"
+                  style={{ background: 'var(--ffi-surface-1)', accentColor: 'var(--ffi-blue-bright)' }}
                 />
-                <span className="text-sm text-[#9eadb8] w-10 text-right">{adpRange[1]}</span>
+                <span className="text-sm w-10 text-right" style={{ color: 'var(--ffi-ink-2)' }}>{adpRange[1]}</span>
               </div>
             </div>
           </div>
@@ -460,14 +501,15 @@ export function PlayerBrowserClient() {
 
       {/* Quick actions for filtered results */}
       {tagFilter === 'untagged' && filteredPlayers.length > 0 && (
-        <div className="flex items-center gap-2 text-sm text-[#9eadb8]">
+        <div className="flex items-center gap-2 text-sm mt-3" style={{ color: 'var(--ffi-ink-2)' }}>
           <span>Quick tag:</span>
           <button
             onClick={() => {
               // Mark first 5 as targets (demo)
               filteredPlayers.slice(0, 5).forEach(p => handleToggleTarget(p.id))
             }}
-            className="px-2 py-1 rounded bg-[#2ff801]/10 text-[#2ff801] text-xs font-bold hover:bg-[#2ff801]/20 transition-colors"
+            className="px-2 py-1 rounded text-xs font-bold transition-colors"
+            style={{ background: 'rgba(139,255,69,0.1)', color: 'var(--ffi-volt)' }}
           >
             <Target className="inline h-3 w-3 mr-1" />
             Top 5 as Targets
@@ -477,23 +519,25 @@ export function PlayerBrowserClient() {
 
       {/* Player list - FF-250: Paginated for performance */}
       {filteredPlayers.length === 0 ? (
-        <FFIEmptyState
-          icon={<Search className="h-8 w-8 text-[#9eadb8]" aria-hidden="true" />}
-          title="No players match filters"
-          description="Try adjusting your filters or search query."
-          action={
-            <FFIButton variant="ghost" onClick={() => {
-              setSearchQuery('')
-              setPositionFilter('ALL')
-              setTagFilter('all')
-              setAdpRange([1, 300])
-            }}>
-              Clear Filters
-            </FFIButton>
-          }
-        />
+        <div className="mt-4">
+          <FFIEmptyState
+            icon={<Search className="h-8 w-8" style={{ color: 'var(--ffi-ink-3)' }} aria-hidden="true" />}
+            title="No players match these filters"
+            description="Try adjusting your search or clear the filters to see everyone."
+            action={
+              <FFIButton variant="ghost" onClick={() => {
+                setSearchQuery('')
+                setPositionFilter('ALL')
+                setTagFilter('all')
+                setAdpRange([1, 300])
+              }}>
+                Clear filters
+              </FFIButton>
+            }
+          />
+        </div>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-3 mt-4">
           {displayedPlayers.map((player, idx) => (
             <FFIPlayerIntelCard
               key={player.id}
@@ -519,12 +563,13 @@ export function PlayerBrowserClient() {
             <div className="flex justify-center pt-4 pb-2">
               <button
                 onClick={loadMore}
-                className="
-                  flex items-center gap-2 text-[#9eadb8] hover:text-[#8bacff]
-                  transition-colors py-3 px-6 rounded-xl bg-surface-container-high
-                  hover:bg-surface-bright
-                  font-headline text-xs font-bold tracking-widest uppercase
-                "
+                className="flex items-center gap-2 transition-colors py-3 px-6 rounded-xl text-xs font-bold tracking-widest uppercase"
+                style={{
+                  fontFamily: 'var(--font-cond)',
+                  background: 'var(--ffi-surface-2)',
+                  color: 'var(--ffi-ink-2)',
+                  border: '1px solid var(--ffi-hairline)',
+                }}
               >
                 Load More ({filteredPlayers.length - displayCount} remaining)
               </button>
@@ -532,6 +577,31 @@ export function PlayerBrowserClient() {
           )}
         </div>
       )}
+    </div>
+  )
+}
+
+// --- Screen header (matches 9.1 / 9.3 pattern) ---
+function PlayersHeader({ count }: { count: number | null }) {
+  return (
+    <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center gap-2.5">
+        <h1
+          className="text-[26px] font-bold leading-none"
+          style={{ fontFamily: 'var(--font-cond)', color: 'var(--ffi-ink)', letterSpacing: '-0.01em' }}
+        >
+          Players
+        </h1>
+        {count !== null && (
+          <span
+            className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-widest"
+            style={{ background: 'rgba(121,166,255,0.14)', color: 'var(--ffi-blue-bright)' }}
+          >
+            <span className="tabular-nums" style={{ fontFamily: 'var(--font-mono)' }}>{count}</span>
+            in pool
+          </span>
+        )}
+      </div>
     </div>
   )
 }

@@ -2,6 +2,25 @@
 
 ---
 
+## 2026-08-08 — UX-S3: Research tab consolidation (GRIDIRON rebuild)
+
+**Task:** UX-S3 | **Class:** `shared` | **Lenses:** Architecture, QA, Design
+
+**What changed:**
+- `src/app/(app)/prep/page.tsx` (9.1 Research landing) — killed the card-dump. The Research Run panel is now the ONE hero with a single explicit "Run Research" button (the AI-cost tap guard) and an inline "uses AI, runs only when you tap" hint. Added quiet jump-rows to Players / Board / Strategies and a latest-run highlights strip. Full loading / empty / error states. Removed dead `runCount` state.
+- `src/app/(app)/prep/players/client.tsx` (9.2 Player Browser) — search + filter hero, result-count header chip, tap-to-expand rows, target/avoid toggle. No-players state deep-links to Run Research; filters-match-nothing shows Clear filters; load error shows a graceful card + Retry. `fetchPlayers` moved to `useCallback` for the Retry path.
+- `src/app/(app)/prep/board/client.tsx` (9.3 Draft Board) — ranked board hero + meta strip (format / strategy / player count / refresh) + filter/sort pills. Removed the league picker (single Nasties league). Real empty state with deep-link; graceful error + Retry replacing the old "Failed to fetch leagues" dead-end.
+- `src/app/(app)/prep/strategies/client.tsx` (9.4 Strategies) — active-strategy hero (name + archetype + budget-by-position bars, from `budget_allocation` or `position_weights` mapped to dollars) + editable saved list. Demoted Dry Run to a quiet power-tool row. Genuine "No strategy yet" empty hero. `fetchLeagues` moved to `useCallback` for Retry.
+- `src/app/(app)/prep/players/page.tsx` + `src/app/(app)/prep/strategies/page.tsx` — stripped the wrapper-level headers so the client GRIDIRON header (with the count / Nasties chip) is canonical. Fixes a double-header bug found during screenshot verify (board/page.tsx already deferred correctly).
+
+**Palette / lint:** all four screens repainted off the old palette onto GRIDIRON CSS vars (volt `--ffi-volt`, blue `--ffi-blue-bright`, ink scale, surfaces, hairlines). Coral for avoid/bust = `#FF6E8A`. Two en/em-dash ESLint errors introduced mid-build were fixed to colon/period (the `no-restricted-syntax` dash ban is a hard error).
+
+**AI-cost guard:** the paid POST endpoints (`/api/research`, board Refresh, `/api/strategies/propose`) were never fired during verification. Only GET reads ran.
+
+**Verify result:** `tsc --noEmit` 0 errors; ESLint 0 errors on all 6 changed files. 8 Playwright screenshots captured against the running dev server (each of the 4 screens x mobile 390x844 + desktop 1440x900) with real connected data (3,128-player pool on prep, 282 in the Players pool, 425 real ranked players on the Board, genuine "No strategy yet" empty for the Nasties). Single header confirmed on every screen post-fix.
+
+---
+
 ## 2026-08-08 — UX-S2.5: Per-screen UX layout blueprint (docs only)
 
 **Task:** UX-S2.5 | **Class:** `docs` | **Lenses:** Delivery

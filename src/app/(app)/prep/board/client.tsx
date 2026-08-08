@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Loader2, AlertCircle, ClipboardList, RefreshCw, CheckCircle2, TrendingDown, Star, ArrowDown, ArrowUp } from 'lucide-react'
+import Link from 'next/link'
+import { Loader2, AlertCircle, RefreshCw, CheckCircle2, TrendingDown, Star, ArrowDown, ArrowUp, Play } from 'lucide-react'
 import { DraftBoardTable } from '@/components/prep/draft-board-table'
 import { PositionBreakdown } from '@/components/prep/position-breakdown'
 import {
@@ -100,23 +100,26 @@ export function DraftBoardClient() {
   })
   const { toggle: toggleTag, isLoading: toggleLoading } = useToggleTag(selectedLeagueId)
 
-  // Fetch leagues
-  useEffect(() => {
-    async function fetchLeagues() {
-      try {
-        const res = await fetch('/api/leagues')
-        if (!res.ok) throw new Error('Failed to fetch leagues')
-        const data = await res.json()
-        setLeagues(data.leagues || [])
-        if (data.leagues?.length > 0) setSelectedLeagueId(data.leagues[0].id)
-      } catch (e) {
-        setError(e instanceof Error ? e.message : 'Failed to load leagues')
-      } finally {
-        setLoading(false)
-      }
+  // Fetch leagues — single-league app: The Nasties (is_active) sorts to leagues[0].
+  const fetchLeagues = useCallback(async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const res = await fetch('/api/leagues')
+      if (!res.ok) throw new Error('Failed to fetch leagues')
+      const data = await res.json()
+      setLeagues(data.leagues || [])
+      if (data.leagues?.length > 0) setSelectedLeagueId(data.leagues[0].id)
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to load leagues')
+    } finally {
+      setLoading(false)
     }
-    fetchLeagues()
   }, [])
+
+  useEffect(() => {
+    fetchLeagues()
+  }, [fetchLeagues])
 
   // Fetch players + strategy on league change
   useEffect(() => {
@@ -301,14 +304,27 @@ export function DraftBoardClient() {
 
   if (error) {
     return (
-      <div
-        className="rounded-[14px] p-4 text-sm flex items-start gap-3"
-        style={{ background: 'rgba(255,110,138,0.08)', border: '1px solid rgba(255,110,138,0.18)', color: '#FF6E8A' }}
-      >
-        <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
-        <div>
-          <p className="font-bold" style={{ fontFamily: 'var(--font-cond)' }}>Failed to load data</p>
-          <p className="mt-1 opacity-80">{error}</p>
+      <div className="pb-2">
+        <BoardHeader leagueName={selectedLeague?.name} />
+        <div
+          className="rounded-[14px] p-6 text-center"
+          style={{ background: 'var(--ffi-surface-2)', border: '1px solid var(--ffi-hairline)' }}
+        >
+          <AlertCircle className="h-7 w-7 mx-auto mb-2.5" style={{ color: 'var(--ffi-warning)' }} />
+          <p className="text-[15px] font-bold mb-1" style={{ fontFamily: 'var(--font-cond)', color: 'var(--ffi-ink)' }}>
+            Couldn&apos;t load the board
+          </p>
+          <p className="text-[13px] mb-4" style={{ color: 'var(--ffi-ink-2)' }}>
+            The player database didn&apos;t respond. Check your connection and try again.
+          </p>
+          <button
+            onClick={fetchLeagues}
+            className="ffi-btn-secondary inline-flex items-center gap-2 text-[13px] font-bold"
+            style={{ borderRadius: '11px', padding: '0.6rem 1.2rem' }}
+          >
+            <RefreshCw className="h-3.5 w-3.5" />
+            Retry
+          </button>
         </div>
       </div>
     )
@@ -316,12 +332,9 @@ export function DraftBoardClient() {
 
   if (leagues.length === 0) {
     return (
-      <div className="rounded-[14px] p-8 text-center" style={{ background: 'var(--ffi-surface-2)', border: '1px solid var(--ffi-hairline)' }}>
-        <ClipboardList className="h-8 w-8 mx-auto mb-2" style={{ color: 'var(--ffi-ink-3)' }} />
-        <p className="text-sm font-bold mb-1" style={{ fontFamily: 'var(--font-cond)', color: 'var(--ffi-ink)' }}>No leagues configured</p>
-        <p className="text-sm" style={{ color: 'var(--ffi-ink-3)' }}>
-          <a href="/prep/configure" style={{ color: 'var(--ffi-blue-bright)' }}>Configure a league</a> to build your draft board.
-        </p>
+      <div className="pb-2">
+        <BoardHeader />
+        <BoardEmpty />
       </div>
     )
   }
@@ -329,35 +342,11 @@ export function DraftBoardClient() {
   return (
     <div className="pb-2">
 
+      {/* ── SCREEN HEADER ── */}
+      <BoardHeader leagueName={selectedLeague?.name} />
+
       {/* ── META STRIP ── */}
       <div className="flex items-center gap-2 flex-wrap mb-4">
-        {/* League selector */}
-        <Select value={selectedLeagueId ?? ''} onValueChange={setSelectedLeagueId}>
-          <SelectTrigger
-            className="h-auto text-[11px] font-bold rounded-full px-3 py-1.5"
-            style={{
-              fontFamily: 'var(--font-cond)',
-              letterSpacing: '0.14em',
-              background: 'var(--ffi-surface-2)',
-              border: '1px solid var(--ffi-hairline)',
-              color: 'var(--ffi-ink-2)',
-              width: 'auto',
-              minWidth: 0,
-            }}
-          >
-            {/* base-ui renders the raw value (league id) unless given a
-                function child to resolve it to the league name. */}
-            <SelectValue>
-              {(value) => leagues.find((l) => l.id === value)?.name ?? 'Select league'}
-            </SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            {leagues.map((league) => (
-              <SelectItem key={league.id} value={league.id}>{league.name}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
         {/* Format badge */}
         {selectedLeague && (
           <span
@@ -452,13 +441,7 @@ export function DraftBoardClient() {
       {dataLoading ? (
         <PlayerListSkeleton />
       ) : players.length === 0 ? (
-        <div className="rounded-[14px] p-6 text-center" style={{ background: 'var(--ffi-surface-2)', border: '1px solid var(--ffi-hairline)' }}>
-          <p className="text-sm" style={{ color: 'var(--ffi-ink-3)' }}>
-            No player data yet.{' '}
-            <a href="/prep" style={{ color: 'var(--ffi-blue-bright)' }}>Run a data refresh</a>{' '}
-            from the Prep hub.
-          </p>
-        </div>
+        <BoardEmpty />
       ) : (
         <>
           {/* ── ADP MOVERS STRIP ── */}
@@ -713,6 +696,64 @@ export function DraftBoardClient() {
           )}
         </>
       )}
+    </div>
+  )
+}
+
+// ── Sticky screen header: "Draft Board" + fixed league chip (single-league app) ──
+function BoardHeader({ leagueName }: { leagueName?: string }) {
+  return (
+    <div className="flex items-center justify-between mb-4">
+      <h1
+        className="font-extrabold text-[26px] leading-none"
+        style={{ fontFamily: 'var(--font-cond)', color: 'var(--ffi-ink)' }}
+      >
+        Draft Board
+      </h1>
+      <span
+        className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-bold uppercase"
+        style={{
+          fontFamily: 'var(--font-cond)',
+          background: 'rgba(121,166,255,0.10)',
+          border: '1px solid rgba(121,166,255,0.20)',
+          color: 'var(--ffi-blue-bright)',
+          letterSpacing: '0.14em',
+        }}
+      >
+        <span
+          className="w-1.5 h-1.5 rounded-full"
+          style={{ background: 'var(--ffi-volt)', boxShadow: '0 0 6px var(--ffi-volt-glow)' }}
+        />
+        {leagueName ?? 'The Nasties'}
+      </span>
+    </div>
+  )
+}
+
+// ── Empty state: no board yet → deep-link to Research landing (9.1) ──
+function BoardEmpty() {
+  return (
+    <div
+      className="rounded-[14px] p-8 text-center"
+      style={{ background: 'var(--ffi-surface-2)', border: '1px solid var(--ffi-hairline)' }}
+    >
+      <p
+        className="text-[16px] font-bold mb-1"
+        style={{ fontFamily: 'var(--font-cond)', color: 'var(--ffi-ink)' }}
+      >
+        Run research to build your board
+      </p>
+      <p className="text-[13px] mb-4" style={{ color: 'var(--ffi-ink-2)' }}>
+        Your ranked cheat sheet appears here once the player pool is analyzed.
+      </p>
+      <Link
+        href="/prep"
+        className="ffi-btn-hero inline-flex items-center gap-2 text-[13px] uppercase tracking-widest"
+        style={{ borderRadius: '11px', padding: '0.7rem 1.4rem' }}
+      >
+        <Play className="w-[13px] h-[13px]" strokeWidth={2.5} color="var(--ffi-volt-ink)" />
+        Run research
+      </Link>
     </div>
   )
 }
