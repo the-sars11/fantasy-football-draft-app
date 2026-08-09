@@ -2,6 +2,26 @@
 
 ---
 
+## 2026-08-09 / Finding 9: giant-component extraction (full, 6 verified stages)
+
+**Task:** CODE_REVIEW_2026-06 finding 9 (P1, Architecture) | **Class:** `shared` (component/hook refactor) | **Lenses:** Architecture, QA
+
+**What changed (behavior-preserving; the two giant draft screens split into focused files):**
+- `review/client.tsx` 1123 -> 376 lines.
+  - Stage 1/2 (29cf13b, 72901e1): moved the presentational sub-components (GradeHero, StatTile, PickCard, PositionalPowerRankings, BudgetAnalysisCard, SnakeAnalysisCard, TagAccuracyCard, etc.) into `src/components/draft/review-cards.tsx` (648).
+  - Stage 3 (9e5d012): extracted all data loading + derived analysis (session list/selection, detail load, tags, roast/review/tag-accuracy memos) into `src/hooks/use-draft-review-data.ts` (184). UI-only state (expanded pick, view mode, copy) stayed in the component.
+- `live/client.tsx` 1444 -> 927 lines.
+  - Stage 1 (29cf13b): moved StrategyPicker, PickFeed, MySquadPanel to their own files under `src/components/draft/`.
+  - Stage 4 (4ec7052): extracted the initial data load + sim fixtures into `src/hooks/use-live-draft-data.ts` (151).
+  - Stage 5 (e6200eb): extracted the Auctioneer (FF-279/FF-282) + Sleeper (FF-312) feed wiring into `src/hooks/use-draft-feeds.ts` (127).
+  - Stage 6 (0c2c233): extracted the trash-talk alert engine (state, refs, owner-map/per-pick/keeper effects, handlers) into `src/hooks/use-trash-talk-engine.ts` (174).
+
+**Scope discipline:** each stage touched only its target client file plus the one new file, committed by explicit path. No prop/API/type/behavior change; the intentional every-render feed-ref assignments and derive-alert set-state-in-effect patterns were marked with targeted eslint-disable comments as they moved (the react-hooks compiler analyzer began surfacing these latent patterns once the components got small enough to analyze; the underlying code is byte-identical to what shipped).
+
+**Verify result (every stage):** `npm run type-check` 0 errors; `npx eslint` on changed files 0 problems; full-repo lint held at the 27-error pre-existing baseline (0 new); `npm run test:run` 107/107; `npm run build` compiled successfully with `/draft/live` and `/draft/review` in the route list. Zero em/en-dashes in authored code. No paid endpoints fired.
+
+---
+
 ## 2026-08-09 / Finding 5: broader test suite - 60 new tests across 4 modules
 
 **Task:** CODE_REVIEW_2026-06 finding 5 (P1, Testing) | **Class:** `bugfix` (test coverage) | **Lenses:** QA
