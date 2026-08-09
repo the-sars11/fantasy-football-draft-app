@@ -2,6 +2,22 @@
 
 ---
 
+## 2026-08-09 / Finding 7: applySheetRows identity dedup + snake round derivation
+
+**Task:** CODE_REVIEW_2026-06 finding 7 (P1, State/dedup) | **Class:** `bugfix` | **Lenses:** QA, Architecture
+
+**What changed:**
+- `src/lib/draft/state.ts` (`applySheetRows`): replaced index-based dedup (`pickNumber <= existingCount`) with a `name+manager` identity key (lowercase, trimmed). Sheet corrections, reorders, and repeated calls are now idempotent. Snake round is derived from `ceil(pick_number / teamCount)` instead of the advancing state machine turn, which gave wrong values on backfill. `row.pick_number` is used when present, falling back to array index.
+- `src/lib/draft/__tests__/state.test.ts`: added 7 new tests covering new-rows applied, idempotency, identity dedup, case/whitespace normalisation, partial-new rows, snake round derivation at 4-team boundaries (picks 1/4/5/8/9), and auction round passthrough.
+
+**Scope discipline:** two files only (state.ts + test file). No prop/API/type change.
+
+**Verify result:** `npm run type-check` 0 errors; `npx eslint` on changed files: 0 errors (1 pre-existing `Position` warning in state.ts, not introduced here); `npm run test:run` 47/47 (was 40, +7 new); `npm run build` deferred (pure logic change, no UI). Zero em/en-dashes. No paid endpoints fired. Commit c56ce68, pushed to origin/master.
+
+**Flag:** Logic hardened. Live-confirmed pending Joe's real Nasties sheet (demo data lacks realistic pick_number/manager alignment to exercise the identity dedup path end-to-end).
+
+---
+
 ## 2026-08-09 / Code-review finding 13: connection-pill a11y (size + per-state glyph)
 
 **Task:** CODE_REVIEW_2026-06 finding 13 (P1, A11y/mobile) | **Class:** `output` (UI) | **Lenses:** Design, QA
