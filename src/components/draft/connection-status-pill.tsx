@@ -4,12 +4,13 @@
  * ConnectionStatusPill (FF-259)
  *
  * 4-state connection indicator for the live draft header.
- * States: LIVE (<30s) · STALE (30s–2m) · OFFLINE (>2m) · MANUAL (no sheet)
+ * States: LIVE (<30s) · STALE (30s-2m) · OFFLINE (>2m) · MANUAL (no sheet)
  *
- * Spec: docs/superpowers/specs/2026-04-14-p0-redesign-design.md — Decision 3
+ * Spec: docs/superpowers/specs/2026-04-14-p0-redesign-design.md - Decision 3
  */
 
 import { useState, useEffect } from 'react'
+import { Radio, Clock, WifiOff, Keyboard, type LucideIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 type ConnState = 'LIVE' | 'STALE' | 'OFFLINE' | 'MANUAL'
@@ -31,11 +32,12 @@ const STATE_CONFIG: Record<ConnState, {
   border: string
   label: string
   pulse: boolean
+  Icon: LucideIcon
 }> = {
-  LIVE:    { bg: 'rgba(47,248,1,0.10)',    color: '#2ff801', border: 'rgba(47,248,1,0.22)',     label: 'LIVE',    pulse: true  },
-  STALE:   { bg: 'rgba(251,191,36,0.12)',  color: '#fbbf24', border: 'rgba(251,191,36,0.22)',   label: 'STALE',   pulse: false },
-  OFFLINE: { bg: 'rgba(239,68,68,0.12)',   color: '#ef4444', border: 'rgba(239,68,68,0.25)',    label: 'OFFLINE', pulse: false },
-  MANUAL:  { bg: 'rgba(148,163,184,0.08)', color: '#94a3b8', border: 'rgba(148,163,184,0.12)',  label: 'MANUAL',  pulse: false },
+  LIVE:    { bg: 'rgba(47,248,1,0.10)',    color: '#2ff801', border: 'rgba(47,248,1,0.22)',     label: 'LIVE',    pulse: true,  Icon: Radio    },
+  STALE:   { bg: 'rgba(251,191,36,0.12)',  color: '#fbbf24', border: 'rgba(251,191,36,0.22)',   label: 'STALE',   pulse: false, Icon: Clock    },
+  OFFLINE: { bg: 'rgba(239,68,68,0.12)',   color: '#ef4444', border: 'rgba(239,68,68,0.25)',    label: 'OFFLINE', pulse: false, Icon: WifiOff  },
+  MANUAL:  { bg: 'rgba(148,163,184,0.08)', color: '#94a3b8', border: 'rgba(148,163,184,0.12)',  label: 'MANUAL',  pulse: false, Icon: Keyboard },
 }
 
 function getElapsedLabel(lastPollAt: Date | null, now: number): string {
@@ -93,31 +95,30 @@ export function ConnectionStatusPill({
         className="flex items-center gap-[5px] px-[10px] py-[5px] rounded-[20px] cursor-default"
         aria-label={`Connection status: ${cfg.label}${elapsed ? ` - ${elapsed} ago` : ''}`}
       >
-        {/* Dot */}
-        <span
-          style={{ background: cfg.color }}
-          className={cn(
-            'w-2 h-2 rounded-full flex-shrink-0',
-            cfg.pulse && 'animate-pulse'
-          )}
+        {/* Per-state glyph - shape distinguishes state without relying on color */}
+        <cfg.Icon
+          aria-hidden="true"
+          size={14}
+          strokeWidth={2.5}
+          className={cn('flex-shrink-0', cfg.pulse && 'motion-safe:animate-pulse')}
         />
         {/* Label */}
         <span
-          style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.05em', lineHeight: 1 }}
+          style={{ fontSize: 13, fontWeight: 700, letterSpacing: '0.05em', lineHeight: 1 }}
         >
           {cfg.label}
         </span>
         {/* Elapsed timestamp */}
         {showTimestamp && elapsed && (
           <span
-            style={{ fontSize: 9, opacity: 0.65, fontWeight: 400, lineHeight: 1 }}
+            style={{ fontSize: 11, opacity: 0.7, fontWeight: 400, lineHeight: 1 }}
           >
             {elapsed}
           </span>
         )}
       </button>
 
-      {/* Error bar — OFFLINE only, expands below pill */}
+      {/* Error bar - OFFLINE only, expands below pill */}
       {connState === 'OFFLINE' && errorBarOpen && (
         <div
           className="mt-1 flex items-center justify-between gap-2 px-3 py-2 rounded-xl w-64 ffi-glass"

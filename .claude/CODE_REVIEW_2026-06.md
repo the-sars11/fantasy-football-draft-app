@@ -23,7 +23,7 @@ BACKLOG so they are tracked rather than lost.
 | 2 | Format purity (no auction metrics in snake and vice versa) | MOSTLY MET, one latent leak (PositionScarcityTracker showSpendRanges default true) | FIXED: default flipped to false; callers opt in. Recommendation modules already hard-throw on wrong mode. |
 | 3 | Explainability first-class | MET | Unchanged (strongest area). |
 | 4 | Proactive pivot within 3 picks | PARTIAL (rule-based fired; cited rec needed manual tap) | IMPROVED: the cited rec now auto-fires too. |
-| 5 | One-thumb mobile at arm's length | PARTIAL (tiny connection pill, sync badges 9-11px) | PARTIAL: broadcast score-bug adds glanceable numbers; connection-pill size bump is BACKLOG. |
+| 5 | One-thumb mobile at arm's length | PARTIAL (tiny connection pill, sync badges 9-11px) | IMPROVED: broadcast score-bug adds glanceable numbers; connection-pill bumped to 13px + per-state glyph (finding 13, 2026-08-09). Full arm's-length phone test (FFT-008) still needs Joe on device. |
 
 ## Findings
 
@@ -43,7 +43,7 @@ Severity: P0 blocker / P1 important / P2 nice. Effort: S/M/L.
 | 10 | P1 | Resilience / UX | use-draft-polling.ts | Sheet poll has no failure backoff; callbacks in deps can restart the interval mid-draft. | BACKLOG - stabilize callbacks via refs (use-sleeper-draft-feed.ts is the template); add backoff. |
 | 11 | P1 | Keeper numbering | keepers.ts | keepersToPicks uses global negative numbers; applyKeepersToState uses per-manager - K labels can disagree. | BACKLOG - pick one numbering scheme. |
 | 12 | P1 | UX / mechanics | live/client.tsx, manual-pick-entry.tsx | No edit/correct of a mis-entered pick; only LIFO undo. | BACKLOG - per-pick edit / arbitrary undo (rebuild machinery already exists). |
-| 13 | P1 | A11y / mobile | connection-status-pill.tsx | Connection state renders at 9-11px; color-only LIVE/STALE/OFFLINE. | BACKLOG - bump to >=13px, add a per-state glyph (not color only). |
+| 13 | P1 | A11y / mobile | connection-status-pill.tsx | Connection state renders at 9-11px; color-only LIVE/STALE/OFFLINE. | FIXED (2026-08-09) - label 11px->13px, elapsed 9px->11px; the color-only dot replaced with a per-state Lucide glyph (LIVE Radio / STALE Clock / OFFLINE WifiOff / MANUAL Keyboard) so state is distinguishable by shape, not color alone. LIVE pulse now motion-safe. |
 | 14 | P2 | Code quality | claude.ts (content[0]) | Unsafe access if a non-text/empty content block returns. | FIXED - now finds the text block defensively. |
 | 15 | P2 | Format purity defense | position-scarcity.tsx | showSpendRanges defaulted true (unsafe). | FIXED - defaults false. |
 | 16 | P2 | Pre-existing lint debt | ~25 errors | no-explicit-any (6), react-hooks/refs (~12), no-unescaped-entities (5), prefer-const (2). | BACKLOG - present before this work; unrelated to the UI upgrade. Next 16 does not run ESLint during build, so these do not block the build, but `npm run lint` is not clean until they are addressed. |

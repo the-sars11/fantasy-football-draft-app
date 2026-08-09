@@ -2,6 +2,19 @@
 
 ---
 
+## 2026-08-09 / Code-review finding 13: connection-pill a11y (size + per-state glyph)
+
+**Task:** CODE_REVIEW_2026-06 finding 13 (P1, A11y/mobile) | **Class:** `output` (UI) | **Lenses:** Design, QA
+
+**What changed:**
+- `src/components/draft/connection-status-pill.tsx`: fixed the arm's-length legibility gap flagged in the June review. (1) The connection state was distinguished only by color plus the word; added a per-state Lucide glyph so shape carries the meaning too: LIVE `Radio`, STALE `Clock`, OFFLINE `WifiOff`, MANUAL `Keyboard` (14px, `strokeWidth 2.5`, `aria-hidden` since the label text already conveys state to screen readers). The glyph replaces the old color-only 8px dot. (2) Bumped the state label 11px->13px and the elapsed-time text 9px->11px (opacity 0.65->0.70) so both clear the review's ">=13px" bar / stay readable. (3) The LIVE pulse moved from `animate-pulse` to `motion-safe:animate-pulse`, so it now respects reduced-motion (consistent with the live room's dial-down policy).
+
+**Scope discipline:** one component file. No prop/API change (signature identical), no behavior change to the state machine (`getConnState` untouched), no other files. The error-bar block and retry/dismiss targets were left as-is (already 44px from FF-269).
+
+**Verify result:** `npm run type-check` (`tsc --noEmit`) 0 errors; `npx eslint src/components/draft/connection-status-pill.tsx` clean (0 errors, 0 warnings); `npm run test:run` 40/40 pass; `npm run build` `✓ Compiled successfully in 4.0s`, `/draft/live` present in route list. Live DOM proof against the running dev server (`/draft` hub): pill in LIVE state renders `svg.lucide-radio flex-shrink-0 motion-safe:animate-pulse` at 14x14, label computed `font-size: 13px`, elapsed `font-size: 11px`. Pixel screenshot blocked in this environment (Browser pane not compositing), so render verified via computed-style DOM read, per the documented limitation. Zero em/en-dashes in changed code or this entry. No paid endpoints fired.
+
+---
+
 ## 2026-08-09 / UXV2-8: final UX-V2 VERIFY + DESIGN docs reconciled (closes UX-V2 track)
 
 **Task:** UXV2-8 | **Class:** `docs` | **Lenses:** Delivery, QA
