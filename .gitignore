@@ -55,3 +55,13 @@ Keys*Accounts*
 
 # Visual brainstorming session files
 .superpowers/
+
+# Dev scratch / one-off verification artifacts (never commit)
+/_dev_*.js
+/fp_*.html
+/out.txt
+/screenshot.mjs
+/.claude/screenshots/
+# Superseded live-room mockup iterations (v4 is the approved, committed reference)
+/.claude/mockups/draft-room-v2-phone.html
+/.claude/mockups/draft-room-v3-two-screen.html
