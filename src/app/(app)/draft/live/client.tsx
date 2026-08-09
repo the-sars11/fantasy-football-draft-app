@@ -52,6 +52,7 @@ import { SnakeAdvisor } from '@/components/draft/snake-advisor'
 import { PickLowerThird } from '@/components/draft/pick-lower-third'
 import { PositionRunTicker } from '@/components/draft/position-run-ticker'
 import { LiveScoreBug } from '@/components/draft/live-scorebug'
+import { AuctionDraftRoom } from '@/components/draft/live-room/auction-room'
 import type { PivotEntry } from '@/components/draft/pivot-history'
 import { scorePlayersWithStrategy, buildIntelContextMap } from '@/lib/research/strategy/scoring'
 import { calculateScarcityExtended, explainPlayer } from '@/lib/draft/explain'
@@ -410,6 +411,9 @@ export function LiveDraftClient() {
   const [driftDismissed, setDriftDismissed] = useState(false)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  // UXV2-6: collapsed "More tools" for the auction room (mount on open so the
+  // AI advisor never fires a paid call until Joe explicitly opens the panel).
+  const [showMore, setShowMore] = useState(false)
 
   // Trash talk alerts
   const [trashTalkAlerts, setTrashTalkAlerts] = useState<TrashTalkAlert[]>([])
@@ -943,46 +947,186 @@ export function LiveDraftClient() {
   const myNeeds = getNeeds(myManager)
   const myPicks = state.picks.filter(p => p.manager === myManager)
 
+  // UXV2-6: connection health for the room status pill. Sim has no real feed.
+  const online = simEnabled
+    ? true
+    : !(sheetError || remoteError || aifError || sleeperError)
+
+  // Record bar (who won, at what price). Shared by both layouts.
+  const recordBar =
+    state.status !== 'completed' ? (
+      <ManualPickEntry
+        players={players}
+        draftedNames={draftedNames}
+        managerNames={managerNames}
+        format={state.format}
+        currentManager={isAuction ? myManager : state.current_manager}
+        currentRound={state.current_round}
+        onSubmit={addManualPick}
+        onUndo={undoLastPick}
+        canUndo={state.picks.length > 0}
+        variant="bar"
+        onBlockPlayer={onBlockPlayer}
+        onClearBlock={() => setOnBlockPlayer(null)}
+      />
+    ) : undefined
+
+  // Dev-only sim HUD (?sim=1). Hoisted so both the auction room and the snake
+  // layout render the identical controls without duplicating the markup.
+  const simHud = isSimActive ? (
+    <div className="sticky top-0 z-20 flex items-center gap-3 px-3 py-2 rounded-xl border border-amber-400/30 bg-[#0a1b25]/90 backdrop-blur-sm text-xs font-mono">
+      <span className="text-amber-400 tracking-widest font-bold uppercase">SIM</span>
+      <div className="h-4 w-px bg-white/10" />
+      <button
+        onClick={simRunning ? simPause : simStart}
+        className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-amber-400/10 text-amber-300 hover:bg-amber-400/20 transition-colors"
+        aria-label={simRunning ? 'Pause sim' : 'Start sim'}
+      >
+        {simRunning ? <Pause className="h-3 w-3" /> : <Play className="h-3 w-3" />}
+        <span>{simRunning ? 'Pause' : 'Start'}</span>
+      </button>
+      <button
+        onClick={simReset}
+        className="flex items-center gap-1 p-1.5 rounded-lg text-white/40 hover:text-white/70 hover:bg-white/5 transition-colors"
+        aria-label="Reset sim"
+      >
+        <RotateCcw className="h-3 w-3" />
+      </button>
+      <div className="h-4 w-px bg-white/10" />
+      {(['slow', 'medium', 'fast'] as SimSpeed[]).map(s => (
+        <button
+          key={s}
+          onClick={() => setSimSpeed(s)}
+          className={cn(
+            'px-1.5 py-0.5 rounded transition-colors capitalize',
+            simSpeed === s ? 'text-amber-400 bg-amber-400/10' : 'text-white/30 hover:text-white/60',
+          )}
+        >
+          {s}
+        </button>
+      ))}
+      <div className="ml-auto text-white/30 tabular-nums">
+        {state.picks.filter(p => !p.is_keeper).length} picks
+      </div>
+    </div>
+  ) : null
+
+  const goBack = () =>
+    router.push(
+      state?.status === 'completed' && sessionId
+        ? `/draft/review?session=${sessionId}`
+        : '/draft',
+    )
+
+  // UXV2-6: Joe's auction path — the approved v4 decision-first room. Tyler's
+  // snake path falls through to the existing full dashboard below, unchanged.
+  if (isAuction) {
+    return (
+      <div className="space-y-4">
+        {simHud}
+        <AuctionDraftRoom
+          leagueName={league?.name ?? 'The Nasties'}
+          online={online}
+          state={state}
+          scoredPlayers={scoredPlayers}
+          draftedNames={draftedNames}
+          scarcity={scarcity}
+          maxBidMap={maxBidAdviceMap}
+          myBudget={myBudget}
+          myMaxBid={myMaxBid}
+          myPicks={myPicks}
+          rosterSlots={rosterSlots}
+          onBlockPlayer={onBlockPlayer}
+          setOnBlockPlayer={setOnBlockPlayer}
+          isTarget={isTarget}
+          isAvoid={isAvoid}
+          onLeave={goBack}
+          onNavigate={(href) => router.push(href)}
+          recordBar={recordBar}
+        />
+
+        {/* More tools — every secondary panel preserved, mounted only when
+            opened so nothing is silently dropped and no paid AI call fires
+            until Joe asks for it. */}
+        <div className="mx-auto max-w-md">
+          <button
+            onClick={() => setShowMore(v => !v)}
+            className="w-full ffi-card-interactive flex items-center justify-between gap-2 px-3 py-2.5"
+            aria-expanded={showMore}
+          >
+            <span className="ffi-label text-[var(--ffi-text-secondary)]">
+              {showMore ? 'Hide tools' : 'More tools'}
+            </span>
+            <ChevronDown
+              className={cn(
+                'h-4 w-4 text-[var(--ffi-text-muted)] transition-transform',
+                showMore && 'rotate-180',
+              )}
+            />
+          </button>
+        </div>
+        {showMore && (
+          <div className="space-y-4">
+            {flow && (
+              <DraftFlowAlerts
+                flow={flow}
+                pivotSuggestion={pivotSuggestion}
+                onAcceptPivot={(s) => handleStrategySwap(s, true)}
+                onDismissPivot={handleDismissPivot}
+                currentStrategy={strategy}
+                players={players}
+                draftedNames={draftedNames}
+                format={state.format}
+                leagueBudget={league?.budget ?? undefined}
+                driftAlert={driftAlert}
+                onDismissDrift={handleDismissDrift}
+              />
+            )}
+            <AuctionAdvisor
+              state={state}
+              managerName={myManager}
+              scoredPlayers={scoredPlayers}
+              draftedNames={draftedNames}
+              strategy={strategy}
+              suppressAI={isSimActive}
+            />
+            <StrategyPicker
+              strategies={allStrategies}
+              activeStrategy={strategy}
+              onSelect={(s) => handleStrategySwap(s, false)}
+            />
+            <PositionScarcityTracker scarcity={scarcity} showSpendRanges />
+            <InjuryWatch players={players} draftedNames={draftedNames} />
+            <ManagerTendencies state={state} myManager={myManager} />
+            <LeagueOverview state={state} myManager={myManager} />
+            {pivotHistory.length > 0 && <PivotHistory entries={pivotHistory} />}
+            <TrashTalkFeed
+              alerts={trashTalkAlerts}
+              onDismiss={handleDismissTrashTalk}
+              onSave={handleSaveTrashTalk}
+            />
+            {savedAlerts.length > 0 && (
+              <SavedTrashTalk alerts={savedAlerts} onRemove={handleRemoveSavedAlert} />
+            )}
+            <PlayerPool
+              scoredPlayers={scoredPlayers}
+              draftedNames={draftedNames}
+              format={state.format}
+              getExplanation={getExplanation}
+              onBidPlayer={handleBidPlayer}
+              maxBid={myMaxBid}
+              maxBidMap={maxBidAdviceMap}
+            />
+          </div>
+        )}
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-4 pb-32">
       {/* UX-7.1: Dev-only sim HUD (NODE_ENV !== 'production' + ?sim=1) */}
-      {isSimActive && (
-        <div className="sticky top-0 z-20 flex items-center gap-3 px-3 py-2 rounded-xl border border-amber-400/30 bg-[#0a1b25]/90 backdrop-blur-sm text-xs font-mono">
-          <span className="text-amber-400 tracking-widest font-bold uppercase">SIM</span>
-          <div className="h-4 w-px bg-white/10" />
-          <button
-            onClick={simRunning ? simPause : simStart}
-            className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-amber-400/10 text-amber-300 hover:bg-amber-400/20 transition-colors"
-            aria-label={simRunning ? 'Pause sim' : 'Start sim'}
-          >
-            {simRunning ? <Pause className="h-3 w-3" /> : <Play className="h-3 w-3" />}
-            <span>{simRunning ? 'Pause' : 'Start'}</span>
-          </button>
-          <button
-            onClick={simReset}
-            className="flex items-center gap-1 p-1.5 rounded-lg text-white/40 hover:text-white/70 hover:bg-white/5 transition-colors"
-            aria-label="Reset sim"
-          >
-            <RotateCcw className="h-3 w-3" />
-          </button>
-          <div className="h-4 w-px bg-white/10" />
-          {(['slow', 'medium', 'fast'] as SimSpeed[]).map(s => (
-            <button
-              key={s}
-              onClick={() => setSimSpeed(s)}
-              className={cn(
-                'px-1.5 py-0.5 rounded transition-colors capitalize',
-                simSpeed === s ? 'text-amber-400 bg-amber-400/10' : 'text-white/30 hover:text-white/60',
-              )}
-            >
-              {s}
-            </button>
-          ))}
-          <div className="ml-auto text-white/30 tabular-nums">
-            {state.picks.filter(p => !p.is_keeper).length} picks
-          </div>
-        </div>
-      )}
+      {simHud}
       {/* Header — UX-2.1 gold spotlight + mode badge. Leave draft top-left (blueprint 9.6). */}
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-3 min-w-0">

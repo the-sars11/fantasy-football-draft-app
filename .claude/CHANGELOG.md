@@ -2,6 +2,21 @@
 
 ---
 
+## 2026-08-09 — UXV2-6 (part 1): Live Auction Draft Room rebuild
+
+**Task:** UXV2-6 | **Class:** `output` (UI) + `shared` | **Lenses:** Design, QA, Architecture
+
+**What changed:**
+- `src/components/draft/live-room/` (NEW) — decision-first live auction room from the approved v4 mockup. Components: `auction-room.tsx` (composer), `status-bar.tsx` (Leave · LIVE/OFFLINE + elapsed · league chip), `on-the-block-card.tsx` (hero + What-To-Do block), `awareness-strip.tsx`, `budget-strip.tsx`, `tier-context.tsx` (tappable), `my-team-roster.tsx` (compact, bottom), `bottom-nav.tsx` (4-tab; room supplies its own because the app shell strips nav on `/draft/live`), `block-picker-sheet.tsx` (fast search + one-tap shortlist), `theme.ts` (locally-scoped amber-gold + lime-volt palette to avoid the app's green/gold conflict).
+- `src/lib/draft/what-to-do.ts` (NEW) — pure decision brain: turns the on-block player into one directive move (HOLD gold / BID volt / PUSH orange / PASS red) + a cap + one plain-English rationale (no jargon, no em/en dashes). Reuses existing engine outputs (ScoredPlayer, PositionScarcityExtended, strategy max bid, hard budget ceiling); no LLM, no network. Guards: tier → `UNRANKED` when source data is missing/NaN, and all displayed dollar caps floored to the $1 auction minimum so missing-value data never renders `$0`.
+- `src/lib/draft/__tests__/what-to-do.test.ts` (NEW) — 11 unit tests covering the PASS > PUSH > HOLD > BID precedence with realistic fixtures.
+- `src/app/(app)/draft/live/client.tsx` — early `if (isAuction) return <AuctionDraftRoom .../>` branch; Tyler's snake path falls through to the existing layout byte-for-byte unchanged. `simHud`/`recordBar` hoisted to shared variables. Every secondary panel (advisor, strategy, scarcity, injuries, tendencies, league overview, pivots, trash talk, player pool) preserved in a mount-on-open "More tools" section, so no paid `/api/draft/recommend` fires until Joe opens it.
+- `on-the-block-card.tsx` / `block-picker-sheet.tsx` — missing `byeWeek` now omits the "Bye" segment instead of printing a dangling "Bye ".
+
+**Verify result:** `npm run build` — `✓ Compiled successfully in 4.0s`, `/draft/live` in the route list. `npx vitest run what-to-do.test.ts` — 11/11 pass. `npm run type-check` (`tsc --noEmit`) — 0 errors. Live DOM proof (dev server :3003, sim mode, mobile 375): full room renders top-to-bottom; setting a player on the block renders the On-the-Block hero with `UNRANKED` (was `TNaN`), the omitted-bye meta (was dangling `Bye `), and the What-To-Do block `HOLD · bid only under $1 · Brandin Cooks ($1 to $1)...` (was `$0`). No paid endpoints fired (sim suppresses AI). Pixel screenshots blocked (Browser pane not compositing frames); render verified via live DOM text. Remaining in UXV2-6: Research-tab draft-mode screen.
+
+---
+
 ## 2026-08-08 — UX-S6: Review tab wired to post-draft flow
 
 **Task:** UX-S6 | **Class:** `output` | **Lenses:** Delivery, QA, Design
