@@ -71,12 +71,8 @@ import { analyzePickForTrashTalk, analyzeKeeperPicksForTrashTalk, generateTrashT
 import type { TrashTalkAlert } from '@/lib/draft/trash-talk'
 import { loadHistory, buildTeamOwnerMap, buildHistoryBlock } from '@/lib/draft/trash-talk-history'
 import type { TeamOwnerMap } from '@/lib/draft/trash-talk-history'
-import {
-  useDraftFeed,
-  type AuctioneerConnectionType,
-  type NormalizedPickEvent,
-} from '@/hooks/use-draft-feed'
-import { useSleeperDraftFeed } from '@/hooks/use-sleeper-draft-feed'
+import { type AuctioneerConnectionType } from '@/hooks/use-draft-feed'
+import { useDraftFeeds } from '@/hooks/use-draft-feeds'
 import { useDraftSimulator } from '@/hooks/use-draft-simulator'
 import type { SimSpeed } from '@/hooks/use-draft-simulator'
 
@@ -137,9 +133,6 @@ export function LiveDraftClient() {
   // Built once at draft start; maps manager name → OwnerHistory for history injection
   const teamOwnerMapRef = useRef<TeamOwnerMap | null>(null)
 
-  // FF-279/FF-282: ref declared early; assigned after useDraftState gives us draftedNames + addManualPick
-  const handleAuctioneerPicksRef = useRef<((picks: NormalizedPickEvent[]) => void) | null>(null)
-
   const rosterSlots = (league?.roster_slots ?? DEFAULT_ROSTER) as RosterSlots
 
   // FF-247: Load user tags for intel-aware recommendations
@@ -194,76 +187,26 @@ export function LiveDraftClient() {
     rosterSlots,
   })
 
-  // FF-279: Update Auctioneer handler ref every render so it always sees the
-  // latest draftedNames + addManualPick without rethrashing hook deps.
-  // Intentional every-render ref assignment (mirrors use-sleeper-draft-feed).
-  // eslint-disable-next-line react-hooks/refs
-  handleAuctioneerPicksRef.current = (picks: NormalizedPickEvent[]) => {
-    for (const pick of picks) {
-      // draftedNames keys are lowercase player names (see getDraftedPlayerNames)
-      if (!draftedNames.has(pick.playerName.toLowerCase())) {
-        addManualPick({
-          player_name: pick.playerName,
-          manager: pick.manager,
-          price: pick.price,
-          position: pick.position,
-        })
-      }
-    }
-  }
-
-  // FF-282: Unified draft feed — gating is internal (format + connectionType).
-  // onAuctioneerpicks is stable (empty deps) — routes through ref so it always
-  // sees latest draftedNames+addManualPick without restarting the feed interval.
-  const aifEnabled = !!aifParam && session?.format === 'auction'
-  const onAuctioneerpicks = useCallback(
-    (picks: NormalizedPickEvent[]) => handleAuctioneerPicksRef.current?.(picks),
-    [], // stable — routes through ref
-  )
+  // Live pick feeds (extracted: finding 9): Auctioneer + Sleeper
   const {
-    connected: aifConnected,
-    importedCount: aifImportedCount,
-    error: aifError,
-    // FF-314: cross-device remote source — surfaced for the connection chip.
+    aifEnabled,
+    aifConnected,
+    aifImportedCount,
+    aifError,
     remoteLastSyncAt,
     remoteError,
     remoteRetry,
-  } = useDraftFeed({
-    format: session?.format ?? null,
-    connectionType: aifParam,
-    onNewPicks: onAuctioneerpicks,
-  })
-
-  // FF-312: Sleeper live draft feed (snake mode only)
-  const handleSleeperPicksRef = useRef<((picks: NormalizedPickEvent[]) => void) | null>(null)
-  // Intentional every-render ref assignment (mirrors use-sleeper-draft-feed).
-  // eslint-disable-next-line react-hooks/refs
-  handleSleeperPicksRef.current = (picks: NormalizedPickEvent[]) => {
-    for (const pick of picks) {
-      if (!draftedNames.has(pick.playerName.toLowerCase())) {
-        addManualPick({
-          player_name: pick.playerName,
-          manager: pick.manager,
-          price: pick.price,
-          position: pick.position,
-        })
-      }
-    }
-  }
-  const sleeperEnabled = !!sdiParam && session?.format === 'snake'
-  const onSleeperPicks = useCallback(
-    (picks: NormalizedPickEvent[]) => handleSleeperPicksRef.current?.(picks),
-    [], // stable — routes through ref
-  )
-  const {
-    connected: sleeperConnected,
-    importedCount: sleeperImportedCount,
-    error: sleeperError,
-  } = useSleeperDraftFeed({
-    draftId: sdiParam,
-    enabled: sleeperEnabled,
+    sleeperEnabled,
+    sleeperConnected,
+    sleeperImportedCount,
+    sleeperError,
+  } = useDraftFeeds({
+    format: session?.format,
+    aifParam,
+    sdiParam,
+    draftedNames,
+    addManualPick,
     managerOrder: state?.manager_order ?? [],
-    onNewPicks: onSleeperPicks,
   })
 
   // Score players with active strategy and intel context (FF-247)
@@ -431,6 +374,8 @@ export function LiveDraftClient() {
     }
 
     if (newAlerts.length > 0) {
+      // Intentional: append trash-talk alerts derived from newly-arrived picks.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setTrashTalkAlerts(prev => [...prev, ...newAlerts])
       // Fire-and-forget: enrich each alert's message with AI-generated line.
       // Suppressed in sim mode — use hardcoded fallback strings only (zero paid calls).
@@ -463,6 +408,8 @@ export function LiveDraftClient() {
       state.manager_order.length,
     )
     if (keeperAlerts.length > 0) {
+      // Intentional: append keeper trash-talk alerts derived at draft start.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setTrashTalkAlerts(prev => [...prev, ...keeperAlerts])
       // Suppressed in sim mode — use hardcoded fallback strings only (zero paid calls).
       if (!simEnabled) {
