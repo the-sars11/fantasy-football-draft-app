@@ -8,7 +8,10 @@
 import { Search, Zap, Trophy, Settings } from 'lucide-react'
 import { ROOM } from './theme'
 
-type TabKey = 'research' | 'draft' | 'review' | 'setup'
+export type TabKey = 'research' | 'draft' | 'review' | 'setup'
+
+/** research + draft are internal room views; review + setup leave the room. */
+const VIEW_TABS: ReadonlySet<TabKey> = new Set<TabKey>(['research', 'draft'])
 
 const TABS: Array<{ key: TabKey; label: string; href: string; Icon: typeof Search }> = [
   { key: 'research', label: 'Research', href: '/prep', Icon: Search },
@@ -20,9 +23,12 @@ const TABS: Array<{ key: TabKey; label: string; href: string; Icon: typeof Searc
 export function BottomNav({
   active = 'draft',
   onNavigate,
+  onSelectView,
 }: {
   active?: TabKey
   onNavigate: (href: string) => void
+  /** Switch an internal room view (research/draft) without navigating away. */
+  onSelectView?: (key: 'research' | 'draft') => void
 }) {
   return (
     <div
@@ -39,7 +45,13 @@ export function BottomNav({
         return (
           <button
             key={tab.key}
-            onClick={() => (isActive ? undefined : onNavigate(tab.href))}
+            onClick={() => {
+              if (VIEW_TABS.has(tab.key) && onSelectView) {
+                if (!isActive) onSelectView(tab.key as 'research' | 'draft')
+                return
+              }
+              if (!isActive) onNavigate(tab.href)
+            }}
             className="relative flex flex-1 flex-col items-center gap-1 px-0 pb-1 pt-2"
             aria-current={isActive ? 'page' : undefined}
             aria-label={tab.label}

@@ -83,15 +83,16 @@ export function useUserTags({
   // Track the last fetched IDs to avoid redundant fetches
   const lastFetchedRef = useRef<string>('')
 
-  const fetchTags = useCallback(async () => {
+  const fetchTags = useCallback(async (force = false) => {
     if (!enabled || playerCacheIds.length === 0) {
       setUserTagsMap({})
       return
     }
 
-    // Build a cache key to avoid redundant fetches
+    // Build a cache key to avoid redundant fetches. `force` (used by refetch
+    // after a mutation) bypasses the guard so a toggle re-reads immediately.
     const cacheKey = `${leagueId ?? 'null'}-${playerCacheIds.sort().join(',')}`
-    if (cacheKey === lastFetchedRef.current) {
+    if (!force && cacheKey === lastFetchedRef.current) {
       return
     }
 
@@ -157,11 +158,13 @@ export function useUserTags({
     [hasTag]
   )
 
+  const refetch = useCallback(() => fetchTags(true), [fetchTags])
+
   return {
     userTagsMap,
     isLoading,
     error,
-    refetch: fetchTags,
+    refetch,
     getTagsForPlayer,
     hasTag,
     isTarget,

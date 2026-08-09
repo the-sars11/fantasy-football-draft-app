@@ -15,7 +15,7 @@ import { useMemo, useState, type ReactNode } from 'react'
 import type { Player, Position } from '@/lib/players/types'
 import type { ScoredPlayer } from '@/lib/research/strategy/scoring'
 import type { PositionScarcityExtended } from '@/lib/draft/explain'
-import type { DraftState } from '@/lib/draft/state'
+import type { DraftState, DraftPick } from '@/lib/draft/state'
 import type { RosterSlots } from '@/lib/supabase/database.types'
 import { computeWhatToDo } from '@/lib/draft/what-to-do'
 import { ROOM } from './theme'
@@ -27,6 +27,7 @@ import { TierContext, type TierRow } from './tier-context'
 import { MyTeamRoster } from './my-team-roster'
 import { BottomNav } from './bottom-nav'
 import { BlockPickerSheet, type BlockPickerFilter } from './block-picker-sheet'
+import { ResearchView } from './research-view'
 
 const TIER_POSITIONS: Position[] = ['QB', 'RB', 'WR', 'TE']
 
@@ -63,8 +64,16 @@ export interface AuctionRoomProps {
   isAvoid: (id: string) => boolean
   onLeave: () => void
   onNavigate: (href: string) => void
-  /** Rendered just above the bottom nav (the pick/record bar). */
+  /** Rendered just above the bottom nav (the pick/record bar). Draft view only. */
   recordBar?: ReactNode
+  /** Draft-order manager names for the Research view's inline record dropdown. */
+  managerNames: string[]
+  /** The user's own manager, pre-selected as the default winning team. */
+  myManager: string
+  /** Record a sale from the Research view (reuses the shared addManualPick). */
+  onRecordPick: (pick: Omit<DraftPick, 'pick_number'>) => void
+  /** Toggle a player's target star from the Research list. */
+  onToggleTarget: (playerId: string) => void
 }
 
 export function AuctionDraftRoom({
@@ -86,7 +95,12 @@ export function AuctionDraftRoom({
   onLeave,
   onNavigate,
   recordBar,
+  managerNames,
+  myManager,
+  onRecordPick,
+  onToggleTarget,
 }: AuctionRoomProps) {
+  const [view, setView] = useState<'draft' | 'research'>('draft')
   const [pickerOpen, setPickerOpen] = useState(false)
   const [pickerFilter, setPickerFilter] = useState<BlockPickerFilter | undefined>(undefined)
 
@@ -208,50 +222,67 @@ export function AuctionDraftRoom({
       </div>
 
       <div className="flex-1 px-3 pb-3">
-        <div className="pt-3">
-          <OnTheBlockCard
-            player={onBlockPlayer}
-            advice={advice}
-            onChangePlayer={() => openPicker()}
+        {view === 'research' ? (
+          <ResearchView
+            available={available}
+            maxBidMap={maxBidMap}
+            scarcity={scarcity}
+            teamCount={teamCount}
+            onBlockPlayer={onBlockPlayer}
+            setOnBlockPlayer={setOnBlockPlayer}
+            managerNames={managerNames}
+            myManager={myManager}
+            onRecordPick={onRecordPick}
+            onToggleTarget={onToggleTarget}
           />
-        </div>
+        ) : (
+          <>
+            <div className="pt-3">
+              <OnTheBlockCard
+                player={onBlockPlayer}
+                advice={advice}
+                onChangePlayer={() => openPicker()}
+              />
+            </div>
 
-        <div className="pt-2.5">
-          <AwarenessStrip items={awarenessItems} />
-        </div>
+            <div className="pt-2.5">
+              <AwarenessStrip items={awarenessItems} />
+            </div>
 
-        <div className="pt-2.5">
-          <BudgetStrip
-            remaining={myBudget}
-            maxBid={myMaxBid}
-            filledSlots={filledSlots}
-            totalSlots={totalSlots}
-          />
-        </div>
+            <div className="pt-2.5">
+              <BudgetStrip
+                remaining={myBudget}
+                maxBid={myMaxBid}
+                filledSlots={filledSlots}
+                totalSlots={totalSlots}
+              />
+            </div>
 
-        <SectionHeader
-          label="Tier Context"
-          action={
-            <button
-              onClick={() => openPicker()}
-              className="whitespace-nowrap text-[9.5px] font-bold uppercase tracking-wide underline"
-              style={{ color: ROOM.t2 }}
-            >
-              tap to filter
-            </button>
-          }
-        />
-        <TierContext
-          rows={tierRows}
-          onTapPosition={pos => openPicker({ position: pos })}
-          onTapTier={(pos, tier) => openPicker({ position: pos, tier })}
-        />
+            <SectionHeader
+              label="Tier Context"
+              action={
+                <button
+                  onClick={() => openPicker()}
+                  className="whitespace-nowrap text-[9.5px] font-bold uppercase tracking-wide underline"
+                  style={{ color: ROOM.t2 }}
+                >
+                  tap to filter
+                </button>
+              }
+            />
+            <TierContext
+              rows={tierRows}
+              onTapPosition={pos => openPicker({ position: pos })}
+              onTapTier={(pos, tier) => openPicker({ position: pos, tier })}
+            />
 
-        <SectionHeader label="My Team · glance only" />
-        <MyTeamRoster picks={myPicks} roster={rosterSlots} />
+            <SectionHeader label="My Team · glance only" />
+            <MyTeamRoster picks={myPicks} roster={rosterSlots} />
+          </>
+        )}
       </div>
 
-      {recordBar && (
+      {view === 'draft' && recordBar && (
         <div
           className="sticky bottom-[52px] z-20 px-3 py-2"
           style={{ background: ROOM.surface, borderTop: `1px solid ${ROOM.border2}` }}
@@ -261,7 +292,7 @@ export function AuctionDraftRoom({
       )}
 
       <div className="sticky bottom-0 z-30">
-        <BottomNav active="draft" onNavigate={onNavigate} />
+        <BottomNav active={view} onNavigate={onNavigate} onSelectView={setView} />
       </div>
 
       <BlockPickerSheet

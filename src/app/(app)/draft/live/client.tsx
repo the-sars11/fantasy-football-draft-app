@@ -36,7 +36,7 @@ import {
   FFISectionHeader,
 } from '@/components/ui/ffi-primitives'
 import { useDraftState } from '@/hooks/use-draft-state'
-import { useUserTags } from '@/hooks/use-user-tags'
+import { useUserTags, useToggleTag } from '@/hooks/use-user-tags'
 import { useHaptic } from '@/hooks/use-haptic'
 import { useSound } from '@/lib/sound/use-sound'
 import { ConnectionStatusPill } from '@/components/draft/connection-status-pill'
@@ -490,12 +490,24 @@ export function LiveDraftClient() {
 
   // FF-247: Load user tags for intel-aware recommendations
   const playerCacheIds = useMemo(() => players.map(p => p.id), [players])
-  const { userTagsMap, isTarget, isAvoid } = useUserTags({
+  const { userTagsMap, isTarget, isAvoid, refetch: refetchUserTags } = useUserTags({
     playerCacheIds,
     leagueId: session?.league_id,
     includeGlobal: true,
     enabled: players.length > 0,
   })
+
+  // Star toggle from the Research view: flip the target tag, then re-read tags
+  // so the list star (derived from userTagsMap) updates. Read-only PATCH, no
+  // paid endpoints.
+  const { toggle: toggleTag } = useToggleTag(session?.league_id)
+  const onToggleTarget = useCallback(
+    async (playerId: string) => {
+      const res = await toggleTag(playerId, 'target')
+      if (res.success) await refetchUserTags()
+    },
+    [toggleTag, refetchUserTags],
+  )
 
   // Build intel context map from user tags
   const intelContextMap = useMemo(() => {
@@ -1043,6 +1055,10 @@ export function LiveDraftClient() {
           onLeave={goBack}
           onNavigate={(href) => router.push(href)}
           recordBar={recordBar}
+          managerNames={managerNames}
+          myManager={myManager}
+          onRecordPick={addManualPick}
+          onToggleTarget={onToggleTarget}
         />
 
         {/* More tools — every secondary panel preserved, mounted only when

@@ -2,6 +2,23 @@
 
 ---
 
+## 2026-08-09 — UXV2-6 (part 2): Research-tab draft-mode screen
+
+**Task:** UXV2-6 | **Class:** `output` (UI) + `shared` | **Lenses:** Design, QA, Architecture
+
+**What changed:**
+- `src/components/draft/live-room/research-view.tsx` (NEW) — the Research tab as an internal room view (not a route change), from the locked v3 Phone 2 layout with Recent Sales removed per the v4 sign-off. Top to bottom: sticky on-the-block mini strip (position badge + name + tier chip + target star + team/bye meta, then range + inline record) → filter bar (position pills All/QB/WR/RB/TE/DEF + ★ Target View) → available player list (star toggle, position badge, name + optional real-data signal chip, tier chip, range or `AVOID` with dim + strikethrough) → tappable Tier Context (reuses `TierContext`) that filters the list above. Inline record reuses the shared `addManualPick` (price input + team dropdown defaulting to the user + RECORD). Signal chip renders only from real `player.analysis` (SLEEPER/RISK/VALUE) so nothing is fabricated when a research run has not populated it. Same dev-cache guards as the Draft tab: tier → `NR` when `consensusTier` is missing/NaN, ranges floored to the `$1` auction minimum, bye omitted when absent.
+- `src/components/draft/live-room/bottom-nav.tsx` — Research/Draft now switch an internal room view via a new `onSelectView` callback (with an exported `TabKey`); Review/Setup still navigate. Active tab is driven by the room's current view.
+- `src/components/draft/live-room/auction-room.tsx` — added a `view: 'draft' | 'research'` state; renders `ResearchView` vs the existing draft body; gates the bottom record bar to the Draft view (Research has its own inline record); threads `managerNames`/`myManager`/`onRecordPick`/`onToggleTarget` and drives `BottomNav active={view} onSelectView`.
+- `src/app/(app)/draft/live/client.tsx` — added `useToggleTag` + an `onToggleTarget` handler (toggle the target tag, then `refetch` user tags so the list star updates); threads `managerNames`, `myManager`, `onRecordPick={addManualPick}`, `onToggleTarget` into `AuctionDraftRoom`.
+- `src/hooks/use-user-tags.ts` — `refetch` now forces a re-read (new `force` bypass on the `lastFetchedRef` cache guard) so a star toggle reflects immediately; signature unchanged (`() => Promise<void>`).
+
+**Fixed during verify:** the player rows first nested the star `<button>` inside the row `<button>` (invalid HTML → hydration error). Restructured so the star and the tap-target are sibling buttons inside a `div` (confirmed `document.querySelectorAll('button button').length === 0`, no hydration warning after reload).
+
+**Verify result:** `tsc --noEmit` 0 errors; ESLint 0 errors/0 warnings on all 5 changed files (repo's 27 pre-existing errors are all in untouched research-pipeline files); `npm run test:run` 40/40 pass; `npm run build` `✓ Compiled successfully`, `/draft/live` in the route list. Live DOM proof (dev server :3003, `?sim=1`): bottom-nav Research switches the internal view (active tab = Research); empty on-block prompt shows; tapping a row sets the block and prefills the inline record (price + the user's manager); RECORD fired `addManualPick` (available 255→254, sim picks 83→84, player left the list, block cleared); QB pill filtered to 21 QBs; the RB tier-context badge filtered to 70 RBs; ★ Target View toggled to pressed with the correct empty state; zero nested-button hydration errors. Star **persistence** is not exercisable in sim (the demo session's `demo-league` id is not a valid league UUID, so the PATCH is rejected by the DB — the toggle is correctly wired and works against a real league). No paid endpoints fired. Pixel screenshots blocked (Browser pane not compositing frames); render verified via live DOM text.
+
+---
+
 ## 2026-08-09 — UXV2-6 (part 1): Live Auction Draft Room rebuild
 
 **Task:** UXV2-6 | **Class:** `output` (UI) + `shared` | **Lenses:** Design, QA, Architecture
