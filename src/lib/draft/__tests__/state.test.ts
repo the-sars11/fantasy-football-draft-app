@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { createInitialState, applyPick, applySheetRows, type DraftPick } from '../state'
+import { createInitialState, applyPick, applySheetRows, getMaxBid, type DraftPick, type DraftState } from '../state'
 import { applyKeepersToState, type KeeperAssignment } from '../keepers'
 import type { RosterSlots } from '../../supabase/database.types'
 import type { SheetRow } from '../../sheets'
@@ -151,5 +151,93 @@ describe('applySheetRows', () => {
     const result = applySheetRows(state, rows)
     expect(result.picks[0].round).toBe(99)
     expect(result.picks[1].round).toBeUndefined()
+  })
+})
+
+describe('getMaxBid (auction only)', () => {
+  const TWO_SLOT: RosterSlots = { qb: 1, rb: 1, wr: 0, te: 0, flex: 0, k: 0, dst: 0, bench: 0, ir: 0 }
+
+  it('returns null for snake format', () => {
+    const state = createInitialState('snake', [{ name: 'A', draft_position: 1 }], TWO_SLOT)
+    expect(getMaxBid(state, 'A')).toBeNull()
+  })
+
+  it('returns null for unknown manager', () => {
+    const state = createInitialState('auction', [{ name: 'A', budget: 200 }], TWO_SLOT)
+    expect(getMaxBid(state, 'NOBODY')).toBeNull()
+  })
+
+  it('reserves $1 per remaining empty slot', () => {
+    // 2 total slots, 0 filled, budget 200
+    // emptySlots = max(0, 2 - 0 - 1) = 1 => maxBid = 200 - 1 = 199
+    const state = createInitialState('auction', [{ name: 'A', budget: 200 }], TWO_SLOT)
+    expect(getMaxBid(state, 'A')).toBe(199)
+  })
+
+  it('reserve shrinks as slots fill up', () => {
+    // After 1 real pick ($50): budget_remaining=150, picks.length=1
+    // emptySlots = max(0, 2-1-1) = 0 => maxBid = 150
+    const state = createInitialState('auction', [{ name: 'A', budget: 200 }, { name: 'B', budget: 200 }], TWO_SLOT)
+    const after = applyPick(state, { pick_number: 1, player_name: 'CMC', manager: 'A', price: 50 })
+    expect(getMaxBid(after, 'A')).toBe(150)
+  })
+
+  it('floors at $1 when reserve equals remaining budget', () => {
+    // budget=1, 2 total slots, 0 filled
+    // emptySlots=1 => maxBid = max(1, 1-1) = 1
+    const state = createInitialState('auction', [{ name: 'A', budget: 1 }], TWO_SLOT)
+    expect(getMaxBid(state, 'A')).toBe(1)
+  })
+
+  it('counts keeper picks in manager.picks when calculating filled slots', () => {
+    // Keeper adds to manager.picks (is_keeper=true) and deducts budget
+    // budget=200, keeper cost=75 => budget_remaining=125, picks.length=1
+    // emptySlots = max(0, 2-1-1) = 0 => maxBid = 125
+    let state = createInitialState('auction', [{ name: 'A', budget: 200 }], TWO_SLOT)
+    const keepers: KeeperAssignment[] = [
+      { player_name: 'CMC', position: 'RB', manager: 'A', cost: 75 },
+    ]
+    state = applyKeepersToState(state, keepers, 'auction')
+    expect(getMaxBid(state, 'A')).toBe(125)
+  })
+})
+
+describe('snake draft order - 12-team parity', () => {
+  const ROSTER_3R: RosterSlots = { qb: 3, rb: 0, wr: 0, te: 0, flex: 0, k: 0, dst: 0, bench: 0, ir: 0 }
+  const MANAGERS = Array.from({ length: 12 }, (_, i) => ({ name: `M${i}`, draft_position: i + 1 }))
+
+  // Apply n picks using state.current_manager so the manager sequence is self-consistent
+  function applyN(n: number): DraftState {
+    let state = createInitialState('snake', MANAGERS, ROSTER_3R)
+    for (let i = 0; i < n; i++) {
+      state = applyPick(state, {
+        pick_number: i + 1,
+        player_name: `P${i + 1}`,
+        manager: state.current_manager!,
+        position: 'QB',
+      })
+    }
+    return state
+  }
+
+  it('M0 picks first (pick 1)', () => {
+    const state = createInitialState('snake', MANAGERS, ROSTER_3R)
+    expect(state.current_manager).toBe('M0')
+  })
+
+  it('M11 picks last in round 1 (pick 12)', () => {
+    expect(applyN(11).current_manager).toBe('M11')
+  })
+
+  it('M11 snakes back: picks first in round 2 (pick 13)', () => {
+    expect(applyN(12).current_manager).toBe('M11')
+  })
+
+  it('M0 picks last in round 2 (pick 24)', () => {
+    expect(applyN(23).current_manager).toBe('M0')
+  })
+
+  it('M0 opens round 3 again (pick 25)', () => {
+    expect(applyN(24).current_manager).toBe('M0')
   })
 })
