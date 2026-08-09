@@ -13,6 +13,7 @@
 | 1.0-1.2 | 2026-03 / 04 | Tactical Hologram (lime accent) |
 | 2.0 | 2026-06-02 | Stadium Primetime (navy + glass + gold "moment") — **REJECTED 2026-06-04 as generic AI slop** |
 | **3.0** | **2026-06-04** | **GRIDIRON: colorful-dark canvas + volt/electric-blue SET palette, broadcast type (Anton/Saira), performant (no backdrop-filter stacks), auction co-pilot components. Built UXV2-2.** |
+| **3.1** | **2026-08-09** | **Shipped Live Auction Room (UXV2-6/7). The room ships from its own locally-scoped `theme.ts` palette (amber-gold + a brighter lime-volt, four color-coded moves), lean by construction (no framer-motion, no filters, no will-change), with a reduced-motion DIAL-DOWN policy. This is a documented, scoped departure from the global GRIDIRON tokens; the rest of the app is unchanged. See "Shipped Live Auction Room" below.** |
 
 ## Creative North Star — GRIDIRON
 
@@ -121,6 +122,54 @@ Old `.ffi-glass*` / `.glass-*` names are KEPT but re-skinned to solid layered su
 
 ---
 
+## Shipped Live Auction Room (UXV2-6/7): as-built, scoped departure
+
+> This section documents what actually shipped in `src/components/draft/live-room/`, which intentionally differs from the global GRIDIRON tokens above. Everything in this section is scoped to the live auction room ONLY. The rest of the app (prep, board, review, shell) still uses the global palette, fonts, and motion described elsewhere in this file. Source of record for the look: `.claude/mockups/draft-room-v4-two-screen.html` (the approved v4 mockup); palette source of truth: `src/components/draft/live-room/theme.ts`.
+
+### Why a scoped palette
+The room's whole job is one at-a-glance directive: HOLD / BID / PUSH / PASS. Those four moves need four colors that read apart under arm's-length, fast-auction conditions. To get that separation the room uses its own `theme.ts` `ROOM` constant rather than the two-color global SET palette. This is deliberate and locally scoped (inline styles + the `.ffi-live-room` class), so it does not leak into or reskin the rest of the app.
+
+### Room palette (from `theme.ts`, authoritative)
+```
+/* Canvas + surfaces (darker, bluer than the global tokens) */
+bg      #060c14   surface #09121d   card #0d1a27   cardEl #132234
+border  rgba(255,255,255,0.07)   border2 rgba(255,255,255,0.04)
+
+/* Text */
+t1 #edf4fb   t2 #7a98b4   t3 #3d5a73
+
+/* The four color-coded moves (What-To-Do block) */
+volt   #d4ff00   -> BID  (brighter lime than the global --ffi-volt #8BFF45)
+gold   #f5a623   -> HOLD / target / the moment  (the room DOES use gold, on purpose)
+orange #f97316   -> PUSH
+red    #dc2626   -> PASS
+
+/* Status */
+live #22c55e   offline #f97316
+```
+- **Gold is intentional here.** The global "NO gold" rule (What NOT to Do) governs the app-wide palette; the room re-introduces a single amber gold as the HOLD / moment color because the four-move system needs it. This is the one sanctioned exception and it is scoped to the room.
+- **Position badges** in the room match the app-wide position colors via `posColors()` (QB green, RB red, WR blue, TE purple, DEF/K grey).
+
+### Performance stance: lean by construction
+The room ships with essentially no heavy motion or compositing cost, and that absence is the design:
+- **No framer-motion, no entrance keyframes, no persistent glows, no animating background/filter layers.** A live-DOM audit across 735 room elements found 0 CSS `filter` layers, 0 `backdrop-filter` layers, 0 animated `box-shadow` transitions, and 0 elements holding `will-change`.
+- The only motion in the room is Tailwind utilities: color/opacity cross-fades and two `active:scale` transform tap-feedbacks, plus one `motion-safe:animate-pulse` LIVE dot in the status bar.
+- This is why the room composites smoothly on a phone and does not reproduce the old build's heavy-filter-stack non-compositing failure. It is a deliberate contrast with the "Motion is FIRST-CLASS" cinematic section below, which describes the aspirational global system, not the shipped room.
+
+### Reduced-motion: DIAL-DOWN, not strict-off
+Per Joe's reduced-motion rule the room dials motion down rather than killing it. Scoped block in `globals.css` (guarded by `.ffi-live-room`, added right after the existing reduced-motion block):
+```css
+@media (prefers-reduced-motion: reduce) {
+  .ffi-live-room *, .ffi-live-room *::before, .ffi-live-room *::after {
+    transition-duration: 0.075s !important; /* cross-fades stay, halved from 150ms */
+  }
+  .ffi-live-room *:active { transform: none !important; } /* drop active:scale tap-feedback */
+}
+```
+Cross-fades (color/opacity) are kept so state changes still read, just at half duration; the `active:scale-90/95` tap-scale is neutralized. The LIVE dot pulse is separately gated by its `motion-safe:` variant, so it stops under reduced-motion with no extra rule.
+
+---
+
 ## Buttons (meaning-driven)
 
 ```css
@@ -134,6 +183,8 @@ Old `.ffi-glass*` / `.glass-*` names are KEPT but re-skinned to solid layered su
 ---
 
 ## Motion (FIRST-CLASS — this is half of "AAA")
+
+> **As-built note:** this cinematic motion vision describes the aspirational global system. The **shipped** Live Auction Room (UXV2-6/7) deliberately does NOT use it: it has no framer-motion and no signature-moment choreography, and it ships lean by construction. See "Shipped Live Auction Room" above for the room's actual motion (Tailwind cross-fades + `active:scale` only) and its reduced-motion dial-down policy.
 
 Motion is a primary pillar, not polish. The bar is Family (fluid, weighted, nothing just appears) + EA FC (cinematic moments) + Linear (crisp, never gratuitous). Tech: Framer Motion + View Transitions API (`src/lib/view-transition.ts`) + CSS `@property`. Named curves: `--ease-broadcast` (wipes), `--ease-spring` (reveals/pops), `--ease-standard` (UI).
 
@@ -156,7 +207,7 @@ Motion is a primary pillar, not polish. The bar is Family (fluid, weighted, noth
 
 ## What NOT to Do
 
-- **NO gold, NO glassmorphism-as-everything, NO gradient-glow wallpaper** (that was the rejected slop).
+- **NO gold, NO glassmorphism-as-everything, NO gradient-glow wallpaper** (that was the rejected slop). *(Exception: the shipped Live Auction Room uses a single scoped amber gold as its HOLD / moment color for the four-move system. See "Shipped Live Auction Room" above. That exception does not extend to the rest of the app.)*
 - **NO stacked `backdrop-filter: blur()`** — solid layered surfaces + box-shadow only.
 - **NO rainbow** — volt + blue + muted position chips, period.
 - **NO flat black and NO light mode** — colorful-dark only.
@@ -170,5 +221,5 @@ Motion is a primary pillar, not polish. The bar is Family (fluid, weighted, noth
 
 - Re-skin in place: keep existing class/token NAMES (`.ffi-card`, `.ffi-btn-*`, `--ffi-primary`, etc.) so all screens shift at once; map their VALUES to the GRIDIRON palette.
 - `globals.css` `@theme inline` registers Tailwind utilities; `:root`/`.dark` hold raw vars for inline styles.
-- Reference mockup (source of truth for the look): `.claude/mockups/draft-room-phone.html`.
+- Reference mockup for the global GRIDIRON direction: `.claude/mockups/draft-room-phone.html`. The **shipped** Live Auction Room follows the later approved v4 mockup `.claude/mockups/draft-room-v4-two-screen.html`, with palette in `src/components/draft/live-room/theme.ts` (see "Shipped Live Auction Room").
 - Verify on a real phone width + reduced-motion; confirm screenshot-able (the old build was not).

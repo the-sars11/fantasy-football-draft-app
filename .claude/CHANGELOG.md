@@ -2,6 +2,21 @@
 
 ---
 
+## 2026-08-09 / UXV2-8: final UX-V2 VERIFY + DESIGN docs reconciled (closes UX-V2 track)
+
+**Task:** UXV2-8 | **Class:** `docs` | **Lenses:** Delivery, QA
+
+**What changed:**
+- `.claude/DESIGN_SYSTEM.md`: added a v3.1 Version History row and a new "Shipped Live Auction Room (UXV2-6/7)" section documenting the room as-built: its locally-scoped `theme.ts` `ROOM` palette (canvas `#060c14`; four color-coded moves - lime-volt `#d4ff00` BID, amber-gold `#f5a623` HOLD/moment, orange `#f97316` PUSH, red `#dc2626` PASS), the lean/no-filter performance stance (no framer-motion, no keyframes, no backdrop-filter, no will-change; audited 0 across 735 room elements), and the reduced-motion DIAL-DOWN policy (cross-fades halve to 75ms, `active:scale` neutralized). Added reconciliation notes at the three spots that previously contradicted the shipped room: the "NO gold" What-NOT-to-Do bullet (now notes the room's single scoped-gold exception), the "Motion is FIRST-CLASS" section (now flagged as the aspirational global system, not the shipped room), and the reference-mockup line (now points at the approved v4 mockup `draft-room-v4-two-screen.html` + `theme.ts`).
+- `.claude/UI_DESIGN_SPEC.md`: added a top "Live Auction Room as-built" banner (overrides the general spec inside `/draft/live`: scoped palette, no Framer Motion in the room, dial-down reduced-motion) and updated the Section 13 reduced-motion line to record the room's dial-down exception vs the app-wide strict-off.
+- `.claude/BUILD_PLAN.md`: UXV2-8 marked `[x]`; noted it closes the UX-V2 track.
+
+**Scope discipline:** docs-only. No source files changed this session. Docs were made to match the code that already shipped in UXV2-6/7; no new design scope invented. Palette/motion claims were verified against `src/components/draft/live-room/theme.ts`, a grep of the live-room component dir (only motion present is one `motion-safe:animate-pulse`), and the `.ffi-live-room` reduced-motion block in `src/app/globals.css` (lines ~937-946).
+
+**Verify result (full UX-V2 track):** `npm run type-check` (`tsc --noEmit`) 0 errors; `npm run lint` 27 errors + 98 warnings, all pre-existing in untouched research-pipeline / supabase files (0 new - no source changed); `npm run test:run` 40/40 pass; `npm run build` `✓ Compiled successfully in 4.0s`, `/draft/live` present in the route list. Zero em/en-dashes in the added doc text (verified by grep). No paid endpoints fired.
+
+---
+
 ## 2026-08-09 — UXV2-7: reduced-motion dial-down + perf/arm's-length pass
 
 **Task:** UXV2-7 | **Class:** `output` (UI) | **Lenses:** Design, QA

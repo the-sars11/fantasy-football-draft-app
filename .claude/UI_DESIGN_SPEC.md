@@ -19,6 +19,14 @@
 
 ---
 
+> ## 🏟️ Live Auction Room as-built (UXV2-6/7, 2026-08-09): overrides this spec inside `/draft/live`
+> The shipped Live Auction Room (`src/components/draft/live-room/`) is the current source of truth for that screen and departs from the general spec below. Canonical detail lives in **`DESIGN_SYSTEM.md` -> "Shipped Live Auction Room"**; palette in **`src/components/draft/live-room/theme.ts`**; look-of-record mockup **`.claude/mockups/draft-room-v4-two-screen.html`**. Key differences from the sections below:
+> - **Scoped palette, not the global tokens.** Own `theme.ts` `ROOM` constant: canvas `#060c14`, and four color-coded moves - lime-volt `#d4ff00` (BID), amber-gold `#f5a623` (HOLD / moment), orange `#f97316` (PUSH), red `#dc2626` (PASS). The room deliberately uses a single scoped gold; the app-wide "no gold" rule still holds everywhere else.
+> - **Lean by construction, no Framer Motion in the room.** No framer-motion, no entrance keyframes, no `backdrop-filter`, no `will-change`, no animating filter layers (audited: 0 across 735 room elements). Motion is Tailwind cross-fades + two `active:scale` tap-feedbacks + one `motion-safe:animate-pulse` LIVE dot. This overrides Section 8 (Framer Motion physics) and the glass/backdrop-blur patterns in Section 9 for this screen.
+> - **Reduced-motion is DIAL-DOWN, not strict-off** for the room (see Section 13 note): cross-fades stay but halve to 75ms; `active:scale` tap-feedback is neutralized.
+
+---
+
 ## 1. Design Vision & Aesthetic Direction
 
 ### Visual Aesthetic
@@ -476,7 +484,7 @@ Physical verification required before draft day: Joe on phone at normal arm's le
 ### Animation Performance
 - **GPU acceleration:** Yes — Framer Motion uses `transform` and `opacity` only for animated properties; no layout-triggering props
 - **Frame rate target:** 60fps on mid-range phones (iPhone SE / Android mid-tier)
-- **Reduced motion:** `prefers-reduced-motion` respected via Framer Motion's `useReducedMotion()` hook — animations disabled, state changes are instant
+- **Reduced motion:** across the general app, `prefers-reduced-motion` is respected via Framer Motion's `useReducedMotion()` hook - animations disabled, state changes instant. **The shipped Live Auction Room is the exception: it DIALS DOWN rather than killing motion** (per Joe's reduced-motion rule) - cross-fades stay but halve to 75ms and `active:scale` tap-feedback is neutralized via the scoped `.ffi-live-room` block in `globals.css`. See `DESIGN_SYSTEM.md` -> "Shipped Live Auction Room".
 
 ### Bundle Size Targets
 - **CSS:** Tailwind CSS 4 (purged) — target ≤30kb gzipped
