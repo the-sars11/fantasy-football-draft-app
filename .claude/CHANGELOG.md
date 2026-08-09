@@ -2,6 +2,21 @@
 
 ---
 
+## 2026-08-09 / Finding 5: broader test suite - 60 new tests across 4 modules
+
+**Task:** CODE_REVIEW_2026-06 finding 5 (P1, Testing) | **Class:** `bugfix` (test coverage) | **Lenses:** QA
+
+**What changed (new/extended files, all in `src/`):**
+- `lib/draft/__tests__/state.test.ts`: added `getMaxBid` suite (null for snake/unknown, $1-reserve math, keeper-slot counting, $1 floor) and 12-team snake-order parity suite (M0 at picks 1/25, M11 at picks 12/13 snake-back).
+- `lib/draft/__tests__/keepers.test.ts` (new): `validateKeepers` (8 cases: max per manager, duplicates, unknown manager, zero/negative/non-integer cost), `keepersToPicks` (negative pick_numbers, format field mapping), `applyKeepersToState` (budget deduction, no deduction for snake, manager.picks, roster_count, state.keepers, multiple managers, silent skip), `isKeeperPick`, `displayPickNum`.
+- `lib/draft/__tests__/auction-feed-merge.test.ts` (new): `playerNameToPickId` (prefix, lowercase, trim, no-clash with Auctioneer IDs), `createPickMerger` (new picks pass through, cross-batch dedup, within-batch dedup, seenCount, reset, isolated instances, field passthrough).
+- `app/api/draft/recommend/__tests__/route.test.ts` (new): mocks `askClaudeJson` + `formatScoringBonuses`; verifies 200/source:fallback for auction and snake on LLM error, maxBid within budget on fallback, 400 on empty topAvailable, 400 on malformed JSON, source:llm + recommendation passthrough on success.
+- `lib/draft/__tests__/trash-talk.test.ts` (new): format gating (auction-only types absent in snake, reach/late_roster_qb_panic absent in auction), self-pick isolation, K/DEF null guard.
+
+**Verify result:** type-check 0 errors; lint 0 errors on all changed files; `npm run test:run` 107/107 (was 47, +60); no paid endpoints fired. Commit 67debd0, pushed to origin/master. NOTE: sleeper-feed pickNoToManagerIdx consistency deferred (React hook, needs full test env setup).
+
+---
+
 ## 2026-08-09 / Finding 7: applySheetRows identity dedup + snake round derivation
 
 **Task:** CODE_REVIEW_2026-06 finding 7 (P1, State/dedup) | **Class:** `bugfix` | **Lenses:** QA, Architecture
