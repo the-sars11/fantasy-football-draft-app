@@ -2,6 +2,20 @@
 
 ---
 
+## 2026-08-09 — UXV2-7: reduced-motion dial-down + perf/arm's-length pass
+
+**Task:** UXV2-7 | **Class:** `output` (UI) | **Lenses:** Design, QA
+
+**What changed:**
+- `src/app/globals.css` — new scoped `@media (prefers-reduced-motion: reduce)` block (right after the existing reduced-motion block) implementing Joe's DIAL-DOWN rule for the live auction room, not strict-off: `.ffi-live-room *, .ffi-live-room ::before, .ffi-live-room ::after { transition-duration: 0.075s !important; }` keeps cross-fades (color/opacity) but halves them from Tailwind's 150ms default; `.ffi-live-room :active { transform: none !important; }` neutralizes the `active:scale-90`/`active:scale-95` transform tap-feedback. Commented to record that the room has no framer-motion, no entrance keyframes, no persistent glows (the LIVE dot pulse is already gated by its `motion-safe:` variant), and no animating background/filter layers (so there is no `will-change` to release).
+- `src/components/draft/live-room/auction-room.tsx` — added the `ffi-live-room` class to the room root so the scoped block can target the whole room subtree (including the Research view and the block-picker sheet). className only; no layout change.
+
+**Performance / arm's-length:** the room ships lean by construction. Live-DOM audit across 735 room elements: 0 CSS `filter` layers, 0 `backdrop-filter` layers, 0 animated `box-shadow` transitions, 0 elements holding `will-change`. That absence is exactly why the room composites smoothly and does not reproduce the old build's heavy-filter-stack non-compositing failure. Mobile 375px: no document horizontal overflow, room fits at 343px, no inner horizontal overflow; primary decision text 15-22px (the 8.5-9.5px items are the locked v4 uppercase micro-labels and position badges, left as-is since the layout is locked).
+
+**Verify result:** `tsc --noEmit` 0 errors; ESLint clean on `auction-room.tsx` (globals.css is not linted); `npm run test:run` 40/40 pass; `npm run build` `✓ Compiled successfully`, `/draft/live` in the route list. Live proof on the running dev server (:3003, `?sim=1`): the two dial-down lines are present in the browser's parsed CSSOM; toggling the shipped rule's media condition to always-on drove real computed styles from `0.15s` -> `0.075s` on a `transition-opacity` cross-fade element AND on a `transition-transform` element, then restored to `0.15s` with the media condition back to `(prefers-reduced-motion: reduce)`; all 80 ResearchView `active:scale-90` tap buttons are inside `.ffi-live-room` and covered by the transform-neutralize rule; the LIVE dot uses `motion-safe:animate-pulse` (stops under reduced-motion). The Browser pane is 0x0 / non-compositing so pixel screenshots are unavailable (same documented limitation as UXV2-6); render + behavior verified via live DOM reads. No paid endpoints fired.
+
+---
+
 ## 2026-08-09 — UXV2-6 (part 2): Research-tab draft-mode screen
 
 **Task:** UXV2-6 | **Class:** `output` (UI) + `shared` | **Lenses:** Design, QA, Architecture

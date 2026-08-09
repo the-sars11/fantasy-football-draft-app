@@ -925,6 +925,27 @@ body.ffi-on-the-clock .stadium-atmos {
 }
 
 /* ========================================
+   Live auction room (UXV2-7) — reduced motion = DIAL-DOWN, not strict-off
+   ========================================
+   The room ships lean: no framer-motion, no entrance keyframes, no persistent
+   glows (the LIVE dot pulse is already gated by its motion-safe: variant), and
+   no animating background/filter layers, so there is no will-change to release.
+   The only remaining motion is Tailwind utilities: cross-fades (color/opacity)
+   and two transform tap-feedbacks (active:scale). Dial-down keeps the
+   cross-fades so state changes still read, halves their duration, and
+   neutralizes the transform tap-scale. */
+@media (prefers-reduced-motion: reduce) {
+  .ffi-live-room *,
+  .ffi-live-room *::before,
+  .ffi-live-room *::after {
+    transition-duration: 0.075s !important; /* halved from Tailwind's 150ms default */
+  }
+  .ffi-live-room *:active {
+    transform: none !important; /* drop active:scale tap-feedback */
+  }
+}
+
+/* ========================================
    Mobile Safe Areas + Touch Targets
    ======================================== */
 

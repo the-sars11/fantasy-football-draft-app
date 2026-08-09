@@ -214,7 +214,7 @@ export function AuctionDraftRoom({
 
   return (
     <div
-      className="mx-auto flex min-h-[calc(100vh-2rem)] max-w-md flex-col overflow-hidden rounded-2xl"
+      className="ffi-live-room mx-auto flex min-h-[calc(100vh-2rem)] max-w-md flex-col overflow-hidden rounded-2xl"
       style={{ background: ROOM.bg, border: `1px solid ${ROOM.border}` }}
     >
       <div className="sticky top-0 z-30">
