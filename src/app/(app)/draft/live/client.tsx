@@ -31,6 +31,7 @@ import {
   FFISectionHeader,
 } from '@/components/ui/ffi-primitives'
 import { useDraftState } from '@/hooks/use-draft-state'
+import { useLiveDraftData } from '@/hooks/use-live-draft-data'
 import { useUserTags, useToggleTag } from '@/hooks/use-user-tags'
 import { useHaptic } from '@/hooks/use-haptic'
 import { useSound } from '@/lib/sound/use-sound'
@@ -57,7 +58,7 @@ import { analyzeDraftFlow, detectStrategyDrift } from '@/lib/draft/flow-monitor'
 import type { StrategyDrift } from '@/lib/draft/flow-monitor'
 import { detectPivotOpportunity } from '@/lib/draft/pivot-detector'
 import type { Player } from '@/lib/players/types'
-import type { DraftSession, League, RosterSlots } from '@/lib/supabase/database.types'
+import type { RosterSlots } from '@/lib/supabase/database.types'
 import type { ScoredPlayer } from '@/lib/research/strategy/scoring'
 import type { Strategy as DbStrategy } from '@/lib/supabase/database.types'
 import type { Explanation } from '@/lib/draft/explain'
@@ -81,54 +82,6 @@ import type { SimSpeed } from '@/hooks/use-draft-simulator'
 
 const DEFAULT_ROSTER: RosterSlots = {
   qb: 1, rb: 2, wr: 2, te: 1, flex: 1, k: 1, dst: 1, bench: 6, ir: 0,
-}
-
-// UX-7.3: Mock session + league for sim demo mode (?sim=1 with no ?session=)
-// Persistence calls to /api/draft/sessions/demo will 404 and fail silently.
-const DEMO_SESSION: DraftSession = {
-  id: 'demo',
-  user_id: 'demo-user',
-  league_id: 'demo-league',
-  sheet_url: null,
-  format: 'auction',
-  status: 'live',
-  managers: [
-    { name: 'Rasar', budget: 200 },
-    { name: 'Bruce', budget: 200 },
-    { name: 'Garrett', budget: 200 },
-    { name: 'Kevin', budget: 200 },
-    { name: 'Cross', budget: 200 },
-    { name: 'Moonshine', budget: 200 },
-    { name: 'Reggie', budget: 200 },
-    { name: 'Moe', budget: 200 },
-    { name: 'Robbie', budget: 200 },
-    { name: 'Hendrickson', budget: 200 },
-    { name: 'Simmons', budget: 200 },
-    { name: 'Murphy', budget: 200 },
-  ],
-  picks: [],
-  keepers: [],
-  recommendations: [],
-  created_at: '2026-08-01T00:00:00.000Z',
-  updated_at: '2026-08-01T00:00:00.000Z',
-}
-
-const DEMO_LEAGUE: League = {
-  id: 'demo-league',
-  user_id: 'demo-user',
-  name: 'The Nasties (Demo)',
-  platform: 'espn',
-  format: 'auction',
-  team_count: 12,
-  budget: 200,
-  scoring_format: 'ppr',
-  scoring_settings: null,
-  roster_slots: { qb: 1, rb: 2, wr: 2, te: 1, flex: 1, k: 0, dst: 1, bench: 6, ir: 0 },
-  keeper_enabled: false,
-  keeper_settings: null,
-  is_active: true,
-  created_at: '2026-08-01T00:00:00.000Z',
-  updated_at: '2026-08-01T00:00:00.000Z',
 }
 
 type TrashTalkMode = 'off' | 'family-safe' | 'adult-only'
@@ -155,17 +108,21 @@ export function LiveDraftClient() {
   // On Block: player nominated via BID button in the player pool
   const [onBlockPlayer, setOnBlockPlayer] = useState<Player | null>(null)
 
-  // Data loading
-  const [session, setSession] = useState<DraftSession | null>(null)
-  const [league, setLeague] = useState<League | null>(null)
-  const [players, setPlayers] = useState<Player[]>([])
-  const [strategy, setStrategy] = useState<DbStrategy | null>(null)
-  const [allStrategies, setAllStrategies] = useState<DbStrategy[]>([])
+  // Data loading (extracted: finding 9)
+  const {
+    session,
+    league,
+    players,
+    strategy,
+    setStrategy,
+    allStrategies,
+    setAllStrategies,
+    loading,
+    error,
+  } = useLiveDraftData({ sessionId, simEnabled })
   const [pivotDismissed, setPivotDismissed] = useState(false)
   const [pivotHistory, setPivotHistory] = useState<PivotEntry[]>([])
   const [driftDismissed, setDriftDismissed] = useState(false)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
   // UXV2-6: collapsed "More tools" for the auction room (mount on open so the
   // AI advisor never fires a paid call until Joe explicitly opens the panel).
   const [showMore, setShowMore] = useState(false)
@@ -182,64 +139,6 @@ export function LiveDraftClient() {
 
   // FF-279/FF-282: ref declared early; assigned after useDraftState gives us draftedNames + addManualPick
   const handleAuctioneerPicksRef = useRef<((picks: NormalizedPickEvent[]) => void) | null>(null)
-
-  // Load session + league + players + active strategy
-  useEffect(() => {
-    if (!sessionId) {
-      if (simEnabled) {
-        // UX-7.3: Demo mode — inject mock session + league, still fetch real players
-        setSession(DEMO_SESSION)
-        setLeague(DEMO_LEAGUE)
-        fetch('/api/players')
-          .then(r => r.json())
-          .then(data => { if (data.players) setPlayers(data.players) })
-          .catch(() => {})
-          .finally(() => setLoading(false))
-      } else {
-        setError('No session ID in URL. Go back to Draft Setup.')
-        setLoading(false)
-      }
-      return
-    }
-
-    async function load() {
-      try {
-        const [sessionRes, playersRes, stratRes] = await Promise.all([
-          fetch(`/api/draft/sessions/${sessionId}`),
-          fetch('/api/players'),
-          fetch('/api/strategies'),
-        ])
-
-        const sessionData = await sessionRes.json()
-        if (!sessionRes.ok) throw new Error(sessionData.error || 'Failed to load session')
-
-        setSession(sessionData.session)
-        setLeague(sessionData.league)
-
-        const playersData = await playersRes.json()
-        if (playersRes.ok && playersData.players) {
-          setPlayers(playersData.players)
-        }
-
-        const stratData = await stratRes.json()
-        if (stratRes.ok && stratData.strategies) {
-          const leagueStrats = stratData.strategies.filter(
-            (s: DbStrategy) => s.league_id === sessionData.session.league_id
-          )
-          setAllStrategies(leagueStrats)
-          const active = leagueStrats.find((s: DbStrategy) => s.is_active)
-          if (active) setStrategy(active)
-        }
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load draft data')
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    load()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sessionId])
 
   const rosterSlots = (league?.roster_slots ?? DEFAULT_ROSTER) as RosterSlots
 
@@ -297,6 +196,8 @@ export function LiveDraftClient() {
 
   // FF-279: Update Auctioneer handler ref every render so it always sees the
   // latest draftedNames + addManualPick without rethrashing hook deps.
+  // Intentional every-render ref assignment (mirrors use-sleeper-draft-feed).
+  // eslint-disable-next-line react-hooks/refs
   handleAuctioneerPicksRef.current = (picks: NormalizedPickEvent[]) => {
     for (const pick of picks) {
       // draftedNames keys are lowercase player names (see getDraftedPlayerNames)
@@ -335,6 +236,8 @@ export function LiveDraftClient() {
 
   // FF-312: Sleeper live draft feed (snake mode only)
   const handleSleeperPicksRef = useRef<((picks: NormalizedPickEvent[]) => void) | null>(null)
+  // Intentional every-render ref assignment (mirrors use-sleeper-draft-feed).
+  // eslint-disable-next-line react-hooks/refs
   handleSleeperPicksRef.current = (picks: NormalizedPickEvent[]) => {
     for (const pick of picks) {
       if (!draftedNames.has(pick.playerName.toLowerCase())) {
@@ -651,7 +554,7 @@ export function LiveDraftClient() {
       reason: fromRecommendation ? 'accepted_recommendation' : 'user_swap',
       timestamp: new Date(),
     }])
-  }, [strategy?.name, state?.total_picks])
+  }, [strategy?.name, state?.total_picks, setStrategy, setAllStrategies])
 
   // Stable callback for PlayerPool BID button (FF-257)
   const handleBidPlayer = useCallback((player: Player) => {
