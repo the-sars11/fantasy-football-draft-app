@@ -15,12 +15,9 @@ import {
   Radio,
   ChevronDown,
   ChevronLeft,
-  Sparkles,
-  Target,
   AlertTriangle,
   Clock,
   Gavel,
-  Lock,
   Check,
   Play,
   Pause,
@@ -31,8 +28,6 @@ import {
   FFICard,
   FFIButton,
   FFIBadge,
-  FFIPositionBadge,
-  FFIProgress,
   FFISectionHeader,
 } from '@/components/ui/ffi-primitives'
 import { useDraftState } from '@/hooks/use-draft-state'
@@ -49,24 +44,26 @@ import { DraftFlowAlerts } from '@/components/draft/draft-flow-alerts'
 import { PivotHistory } from '@/components/draft/pivot-history'
 import { AuctionAdvisor } from '@/components/draft/auction-advisor'
 import { SnakeAdvisor } from '@/components/draft/snake-advisor'
-import { PickLowerThird } from '@/components/draft/pick-lower-third'
 import { PositionRunTicker } from '@/components/draft/position-run-ticker'
 import { LiveScoreBug } from '@/components/draft/live-scorebug'
 import { AuctionDraftRoom } from '@/components/draft/live-room/auction-room'
+import { StrategyPicker } from '@/components/draft/strategy-picker'
+import { PickFeed } from '@/components/draft/pick-feed'
+import { MySquadPanel } from '@/components/draft/my-squad-panel'
 import type { PivotEntry } from '@/components/draft/pivot-history'
 import { scorePlayersWithStrategy, buildIntelContextMap } from '@/lib/research/strategy/scoring'
 import { calculateScarcityExtended, explainPlayer } from '@/lib/draft/explain'
 import { analyzeDraftFlow, detectStrategyDrift } from '@/lib/draft/flow-monitor'
 import type { StrategyDrift } from '@/lib/draft/flow-monitor'
 import { detectPivotOpportunity } from '@/lib/draft/pivot-detector'
-import type { Player, Position } from '@/lib/players/types'
+import type { Player } from '@/lib/players/types'
 import type { DraftSession, League, RosterSlots } from '@/lib/supabase/database.types'
 import type { ScoredPlayer } from '@/lib/research/strategy/scoring'
 import type { Strategy as DbStrategy } from '@/lib/supabase/database.types'
 import type { Explanation } from '@/lib/draft/explain'
 import { clearRecommendationCache } from '@/lib/draft/recommend'
 import { calculateMaxBidAdvice } from '@/lib/draft/auction-advisor'
-import { isKeeperPick, displayPickNum, keepersToPicks } from '@/lib/draft/keepers'
+import { keepersToPicks } from '@/lib/draft/keepers'
 import { InjuryWatch } from '@/components/draft/injury-watch'
 import { TrashTalkFeed, SavedTrashTalk } from '@/components/draft/trash-talk'
 import { analyzePickForTrashTalk, analyzeKeeperPicksForTrashTalk, generateTrashTalk } from '@/lib/draft/trash-talk'
@@ -132,248 +129,6 @@ const DEMO_LEAGUE: League = {
   is_active: true,
   created_at: '2026-08-01T00:00:00.000Z',
   updated_at: '2026-08-01T00:00:00.000Z',
-}
-
-// Strategy Picker Dropdown Component
-function StrategyPicker({
-  strategies,
-  activeStrategy,
-  onSelect,
-}: {
-  strategies: DbStrategy[]
-  activeStrategy: DbStrategy | null
-  onSelect: (strategy: DbStrategy) => void
-}) {
-  const [isOpen, setIsOpen] = useState(false)
-
-  if (strategies.length <= 1) return null
-
-  return (
-    <div className="relative">
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="w-full ffi-card-interactive flex items-center justify-between gap-2 px-3 py-2"
-      >
-        <div>
-          <div className="ffi-caption text-[var(--ffi-text-muted)]">ACTIVE STRATEGY</div>
-          <div className="ffi-title-md text-white flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-[var(--ffi-primary)]" />
-            {activeStrategy?.name ?? 'None Selected'}
-          </div>
-        </div>
-        <ChevronDown className={cn(
-          'h-5 w-5 text-[var(--ffi-text-muted)] transition-transform',
-          isOpen && 'rotate-180'
-        )} />
-      </button>
-
-      {isOpen && (
-        <div className="absolute top-full left-0 right-0 z-50 mt-1 ffi-card-elevated max-h-64 overflow-auto">
-          {strategies.map((s) => (
-            <button
-              key={s.id}
-              onClick={() => {
-                onSelect(s)
-                setIsOpen(false)
-              }}
-              className={cn(
-                'w-full text-left px-3 py-2 transition-colors',
-                s.id === activeStrategy?.id
-                  ? 'bg-[var(--ffi-primary)]/10 text-[var(--ffi-primary)]'
-                  : 'hover:bg-[var(--ffi-surface)] text-white'
-              )}
-            >
-              <div className="ffi-body-md font-medium">{s.name}</div>
-              {s.description && (
-                <div className="ffi-body-md text-[var(--ffi-text-muted)] truncate">
-                  {s.description}
-                </div>
-              )}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-  )
-}
-
-// Real-time Pick Feed Component
-function PickFeed({
-  picks,
-  format,
-  myManager,
-}: {
-  picks: Array<{
-    pick_number: number
-    player_name: string
-    manager: string
-    position?: string
-    price?: number
-    is_keeper?: boolean
-  }>
-  format: 'auction' | 'snake'
-  myManager?: string
-}) {
-  const isAuction = format === 'auction'
-  const ordered = [...picks].reverse() // newest first
-  const latestPick = ordered[0] ?? null
-  const latestIsMine = !!(myManager && latestPick && latestPick.manager === myManager)
-  const history = ordered.slice(1, 10) // older picks shown under the hero strip
-
-  return (
-    <FFICard className="overflow-hidden">
-      <div className="flex items-center gap-2 mb-3">
-        <div className="w-2 h-2 rounded-full bg-[var(--value-green)] animate-pulse" />
-        <span className="ffi-label text-[var(--ffi-text-secondary)]">LIVE FEED</span>
-        <span className="ffi-caption text-[var(--ffi-text-muted)] ml-auto">
-          {picks.length} PICKS
-        </span>
-      </div>
-
-      {/* Broadcast lower-third: the most recent pick, large, wiping in */}
-      <PickLowerThird pick={latestPick} format={format} isMyPick={latestIsMine} />
-
-      {history.length > 0 && (
-        <div className="space-y-1 max-h-44 overflow-auto">
-          <AnimatePresence mode="popLayout">
-            {history.map(pick => {
-              const isMyPick = !!(myManager && pick.manager === myManager)
-              const keeper = isKeeperPick(pick)
-              return (
-                <motion.div
-                  key={`${pick.manager}-${pick.pick_number}`}
-                  layout
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ type: 'spring', stiffness: 500, damping: 28 }}
-                  className={cn(
-                    'flex items-center gap-2 py-1.5 px-2 rounded-lg transition-colors',
-                    isMyPick && 'border-l-2 border-[var(--ffi-gold)] bg-[var(--ffi-gold)]/5',
-                  )}
-                >
-                  <span className="ffi-caption text-[var(--ffi-text-muted)] w-6 text-right tabular-nums">
-                    {displayPickNum(pick.pick_number)}
-                  </span>
-                  {pick.position && (
-                    <FFIPositionBadge position={pick.position.toUpperCase() as Position} />
-                  )}
-                  {keeper && <Lock className="h-2.5 w-2.5 shrink-0 text-[#94a3b8]" aria-label="Keeper" />}
-                  <span className={cn(
-                    'ffi-body-md font-medium flex-1 truncate',
-                    keeper ? 'text-[#94a3b8]' :
-                    isMyPick ? 'text-[var(--ffi-gold-bright)]' : 'text-white',
-                  )}>
-                    {pick.player_name}
-                  </span>
-                  <span className="ffi-body-md text-[var(--ffi-text-secondary)] truncate max-w-20">
-                    {pick.manager}
-                  </span>
-                  {!keeper && isAuction && pick.price != null && (
-                    <span className={cn(
-                      'ffi-label font-mono tabular-nums',
-                      isMyPick ? 'text-[var(--ffi-gold)]' : 'text-[var(--ffi-text-secondary)]',
-                    )}>
-                      ${pick.price}
-                    </span>
-                  )}
-                </motion.div>
-              )
-            })}
-          </AnimatePresence>
-        </div>
-      )}
-    </FFICard>
-  )
-}
-
-// My Squad Panel Component
-function MySquadPanel({
-  picks,
-  budget,
-  maxBid,
-  needs,
-  format,
-  rosterSlots,
-}: {
-  picks: Array<{ player_name: string; position?: string; price?: number }>
-  budget: number | null
-  maxBid: number | null
-  needs: Record<string, number>
-  format: 'auction' | 'snake'
-  rosterSlots: RosterSlots
-}) {
-  const isAuction = format === 'auction'
-  const totalSlots = Object.values(rosterSlots).reduce((a, b) => a + b, 0)
-  const filledSlots = picks.length
-
-  return (
-    <FFICard variant="elevated">
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2">
-          <Target className="h-4 w-4 text-[var(--ffi-primary)]" />
-          <span className="ffi-label text-[var(--ffi-text-secondary)]">YOUR SQUAD</span>
-        </div>
-        <span className="ffi-label text-[var(--ffi-text-muted)]">
-          {filledSlots}/{totalSlots}
-        </span>
-      </div>
-
-      {/* Budget bar for auction */}
-      {isAuction && budget != null && (
-        <div className="mb-3">
-          <div className="flex justify-between items-center mb-1">
-            <span className="ffi-body-md text-[var(--ffi-text-secondary)]">Budget</span>
-            <span className="ffi-title-md text-[var(--ffi-primary)] font-mono">${budget}</span>
-          </div>
-          <FFIProgress value={(budget / (budget + 100)) * 100} status="elite" />
-          {maxBid != null && (
-            <span className="ffi-caption text-[var(--ffi-text-muted)]">
-              Max bid: ${maxBid}
-            </span>
-          )}
-        </div>
-      )}
-
-      {/* Position needs */}
-      <div className="mb-3">
-        <span className="ffi-caption text-[var(--ffi-text-muted)]">NEEDS</span>
-        <div className="flex flex-wrap gap-1 mt-1">
-          {Object.entries(needs).map(([pos, count]) => (
-            <FFIBadge key={pos} status="info" className="text-[10px]">
-              {pos} ×{count}
-            </FFIBadge>
-          ))}
-          {Object.keys(needs).length === 0 && (
-            <span className="ffi-body-md text-[var(--value-green)]">Roster complete!</span>
-          )}
-        </div>
-      </div>
-
-      {/* Recent squad picks */}
-      {picks.length > 0 && (
-        <div className="space-y-1 border-t border-white/[0.06] pt-3">
-          {picks.slice(-5).reverse().map((pick, idx) => (
-            <div key={idx} className="flex items-center gap-2 text-sm">
-              {pick.position && (
-                <span className="ffi-caption text-[var(--ffi-text-muted)] w-8">
-                  {pick.position}
-                </span>
-              )}
-              <span className="ffi-body-md text-white flex-1 truncate">
-                {pick.player_name}
-              </span>
-              {isAuction && pick.price != null && (
-                <span className="ffi-label text-[var(--ffi-text-secondary)] font-mono">
-                  ${pick.price}
-                </span>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
-    </FFICard>
-  )
 }
 
 type TrashTalkMode = 'off' | 'family-safe' | 'adult-only'
