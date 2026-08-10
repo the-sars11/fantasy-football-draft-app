@@ -2,6 +2,23 @@
 
 ---
 
+## 2026-08-10 / DR-7 (partial): Supabase + auctioneer verification, stale session cleanup
+
+**Task:** DR-7.1 + DR-7.2 (P2 Draft Readiness) | **Class:** `pipeline` | **Lenses:** QA, Architecture
+
+**Problem:** DR-7.1 and DR-7.2 required confirmation that the live Supabase is seeded with real 2026 data and that the auctioneer proxy contract works against a real running draft. Additionally, two stale June-2026 dev sessions (generic "Me/Manager 2-12" names, zero picks) were blocking DR-5.1's auto-create -- while they existed as resumable, DR-5.1's `if (session) return` guard would silently use them instead of seeding a clean session with real Nasties team names.
+
+**What changed (no source code edited -- all API calls and plan doc updates):**
+
+- DR-7.1 verified: `/api/players?limit=500` returned 491 players; Ja'Marr Chase #1 at $70 (ECR rank 1), Puka Nacua #2 $69, Jahmyr Gibbs #3 $68 -- seed data correct. `/api/leagues` returned "Nasties 2026" (12-team, $200, PPR, is_active=true). Two old Nasties auction sessions from June 2026 (IDs `bcbf5e1f`, `a6d61365`) each had `picks: []` and generic manager names -- no real data loss -- marked `completed` via PATCH /api/draft/sessions/[id]. Resumable count for Nasties: 0, so DR-5.1 auto-create will now fire correctly.
+- DR-7.2 verified: `/api/auctioneer-feed` during today's test draft (`isTest:true`) returned 85 picks across 12 Nasties teams (Rasar/Leems/Reggie/Crandall/Kevin/Bruce/Garrett/Cross/Shultz/Moe/Robbie/Danny). Pick contract correct: `id`, `player.name/position/team/byeWeek/espnId`, `teamId`, `price`, `pickNumber`, `timestamp` all present. No CORS error (server proxy handles by design).
+
+**Verify:** `type-check` 0 errors. `test:run` 96/96 pass. `lint` 39 errors (all pre-existing, 0 new). No source files changed.
+
+**Still pending (need Joe):** DR-7.3 (offline resync rehearsal), DR-7.4 (phone test), DR-7.5 (full end-to-end mock draft confirmation).
+
+---
+
 ## 2026-08-10 / DR-6.3: Remove 3 dead Research-tab components
 
 **Task:** DR-6.3 (follow-up to DR-6.1) | **Class:** `output` | **Lenses:** Design, QA

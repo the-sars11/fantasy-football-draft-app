@@ -18,7 +18,9 @@
     { "name": "P3-P7 — Commercialization [RETIRED 2026-08-06]", "done": true }
   ],
   "nextItems": [
-    "DR-7 [Sonnet + Joe]: LIVE verification against the real auctioneer + full mock-draft rehearsal on Joe's phone. The draft-readiness GATE."
+    "DR-7.3 [Joe]: Rehearse FF-315 offline resync — go offline, record a provisional pick with wrong price, reconnect, confirm auto-correction + no duplicates.",
+    "DR-7.4 [Joe]: Arm's-length phone test — one-tap Go Live, room smooth, thumb-reachable.",
+    "DR-7.5 [Joe]: Full mock-draft end-to-end on phone against live auctioneer, picks tracking, advice correct, budgets right."
   ]
 }
 -->
@@ -114,8 +116,8 @@ Task tracking: `[ ]` not started · `[~]` in progress · `[x]` done · `[!]` blo
 > **Why:** the auctioneer `/api/state` contract is **comment-verified only** (2026-08-07); FF-315 offline reconciliation is unit-tested but **never run against a live auctioneer**; the whole path **hard-depends on a seeded Supabase** that this session could not confirm (Supabase MCP needs auth). None of this is proven until it's run for real.
 > **Dependency:** DR-1..DR-5 (DR-6 optional). **Needs Joe:** a running auctioneer instance + Joe on his phone. **Cost gate:** if the AI decision below is "on," a real dry run spends ~$0.01-0.03/pick — needs Joe's typed approval before firing.
 
-- [ ] DR-7.1: Confirm the live Supabase is seeded — `players_cache` (real 2026 board values from FF-080), the 12-team Nasties league, and a valid auction session. (`/api/players|leagues|draft/sessions` 503 on an empty DB.)
-- [ ] DR-7.2: Smoke-test the real auctioneer contract — with the auctioneer live and one pick recorded, confirm the pick appears in this app within ~5s, manager names resolve, price/position/bye are correct, no CORS error. (Replaces the old FF-072/FFT-006 "mock Google Sheet dry run.")
+- [x] DR-7.1: Confirm the live Supabase is seeded — `players_cache` (real 2026 board values from FF-080), the 12-team Nasties league, and a valid auction session. (`/api/players|leagues|draft/sessions` 503 on an empty DB.) **Verified 2026-08-10:** `/api/players?limit=500` → 491 players, Ja'Marr Chase #1 $70 (rank 1). `/api/leagues` → "Nasties 2026", 12 teams, $200, PPR, auction, `is_active:true`. Old stale dev sessions (June 2026, generic "Me/Manager 2" names, zero picks each) marked `completed` via PATCH so DR-5.1 auto-create fires cleanly with real Nasties team names.
+- [x] DR-7.2: Smoke-test the real auctioneer contract — with the auctioneer live and one pick recorded, confirm the pick appears in this app within ~5s, manager names resolve, price/position/bye are correct, no CORS error. (Replaces the old FF-072/FFT-006 "mock Google Sheet dry run.") **Verified 2026-08-10:** `/api/auctioneer-feed` live during today's test draft (`isTest:true`) — 85 picks, 12 teams [Rasar/Leems/Reggie/...], pick data (name/position/team/byeWeek/price) all correct. No CORS error — server-side proxy handles it by design. Poll latency: ~3s by code (not timed against live pick-to-render; no browser access this session).
 - [ ] DR-7.3: Rehearse FF-315 offline resync — go offline, record a provisional sale with a deliberately wrong price, reconnect, confirm the auctioneer value auto-corrects it with a visible notice and budgets/max-bid recompute; an offline-only pick not yet in the auctioneer stays flagged; no pick duplicates.
 - [ ] DR-7.4: Arm's-length physical test on Joe's phone (was FFT-008) — every tap target reachable one-handed, text readable, one-tap Go Live works, the room is smooth/screenshot-able.
 - [ ] DR-7.5: Full mock-draft rehearsal end-to-end on the real path (auctioneer + phone), start to graded review.
