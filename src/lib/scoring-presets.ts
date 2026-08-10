@@ -90,45 +90,6 @@ export const JOES_ESPN_SCORING: ScoringSettings = {
   fumble_lost: -2,
 }
 
-/** Tyler's Sleeper T&A Keeper League — Half PPR, 6pt passing TDs, yardage bonuses */
-export const TYLERS_SLEEPER_SCORING: ScoringSettings = {
-  // Passing — 1pt per 30 yds, all TDs 6pts
-  pass_yds: 0.0333,
-  pass_td: 6,
-  pass_int: -2,
-  pass_2pt: 2,
-  pass_td_40: 0,
-  pass_td_50: 0,
-  pass_300: 3,
-  pass_400: 5,
-  // Rushing
-  rush_yds: 0.1,
-  rush_td: 6,
-  rush_2pt: 2,
-  rush_td_40: 0,
-  rush_td_50: 0,
-  rush_100: 3,
-  rush_200: 5,
-  // Receiving — Half PPR
-  rec_yds: 0.1,
-  rec: 0.5,
-  rec_td: 6,
-  rec_2pt: 2,
-  rec_td_40: 0,
-  rec_td_50: 0,
-  rec_100: 3,
-  rec_200: 5,
-  // D/ST — safety is 4pts (not 2), no kicker slot
-  dst_sack: 1,
-  dst_int: 2,
-  dst_fr: 2,
-  dst_td: 6,
-  dst_safety: 4,
-  dst_block: 2,
-  // Misc
-  fumble_lost: -2,
-}
-
 export function getScoringPreset(format: string): ScoringSettings {
   switch (format) {
     case 'standard': return { ...STANDARD_SCORING }

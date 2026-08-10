@@ -7,7 +7,6 @@
  */
 
 import type { DraftFormat, Position, RosterSlots } from '@/lib/supabase/database.types'
-import type { SheetRow } from '@/lib/sheets'
 
 // Type kept for DB backward-compat; keeper feature removed 2026-08-09
 export interface KeeperAssignment {
@@ -204,45 +203,6 @@ export function applyPick(state: DraftState, pick: DraftPick): DraftState {
 
 /**
  * Convert sheet rows into DraftPick objects and apply them to state.
- * Deduplicates by stable identity (player_name + manager) so sheet corrections,
- * reorders, and repeated calls are all idempotent. Snake round is derived from
- * ceil(pick_number / teamCount) rather than the advancing state machine turn,
- * which produces wrong values when backfilling.
- */
-export function applySheetRows(state: DraftState, rows: SheetRow[]): DraftState {
-  const seen = new Set(
-    state.picks.map(p => `${p.player_name.toLowerCase().trim()}:${p.manager.toLowerCase().trim()}`)
-  )
-
-  const teamCount = Math.max(1, state.manager_order.length)
-  let current = state
-
-  for (let i = 0; i < rows.length; i++) {
-    const row = rows[i]
-    const key = `${row.player_name.toLowerCase().trim()}:${row.manager.toLowerCase().trim()}`
-    if (seen.has(key)) continue
-
-    const pickNumber = row.pick_number ?? (i + 1)
-    const round = state.format === 'snake'
-      ? Math.ceil(pickNumber / teamCount)
-      : (row.round ?? undefined)
-
-    const pick: DraftPick = {
-      pick_number: pickNumber,
-      player_name: row.player_name,
-      position: row.position,
-      manager: row.manager,
-      price: row.price,
-      round,
-    }
-
-    seen.add(key)
-    current = applyPick(current, pick)
-  }
-
-  return current
-}
-
 /**
  * Remove the pick with the given pick_number and renumber the remainder so pick
  * numbers stay contiguous (1..n). Returns a new array; the input is not mutated.

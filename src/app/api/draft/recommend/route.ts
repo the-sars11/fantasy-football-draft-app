@@ -8,8 +8,28 @@
 
 import { NextResponse } from 'next/server'
 import { askClaudeJson, type ClaudeJsonRequest } from '@/lib/ai/claude'
-import { formatScoringBonuses } from '@/lib/research/analyze'
 import type { ScoringSettings } from '@/lib/supabase/database.types'
+
+function formatScoringBonuses(settings?: ScoringSettings | null): string | null {
+  if (!settings) return null
+  const impacts: string[] = []
+  if (settings.rec > 0) impacts.push(`Reception bonus: ${settings.rec} pts/rec (${settings.rec >= 1 ? 'full' : 'half'} PPR)`)
+  if (settings.pass_td_40 > 0) impacts.push(`40+ yd TD pass bonus: +${settings.pass_td_40} pt`)
+  if (settings.pass_td_50 > 0) impacts.push(`50+ yd TD pass bonus: +${settings.pass_td_50} pts`)
+  if (settings.pass_300 > 0) impacts.push(`300-399 yd passing game bonus: +${settings.pass_300} pts`)
+  if (settings.pass_400 > 0) impacts.push(`400+ yd passing game bonus: +${settings.pass_400} pts`)
+  if (settings.rush_td_40 > 0) impacts.push(`40+ yd TD rush bonus: +${settings.rush_td_40} pt`)
+  if (settings.rush_td_50 > 0) impacts.push(`50+ yd TD rush bonus: +${settings.rush_td_50} pts`)
+  if (settings.rush_100 > 0) impacts.push(`100-199 yd rushing game bonus: +${settings.rush_100} pts`)
+  if (settings.rush_200 > 0) impacts.push(`200+ yd rushing game bonus: +${settings.rush_200} pts`)
+  if (settings.rec_td_40 > 0) impacts.push(`40+ yd TD rec bonus: +${settings.rec_td_40} pt`)
+  if (settings.rec_td_50 > 0) impacts.push(`50+ yd TD rec bonus: +${settings.rec_td_50} pts`)
+  if (settings.rec_100 > 0) impacts.push(`100-199 yd receiving game bonus: +${settings.rec_100} pts`)
+  if (settings.rec_200 > 0) impacts.push(`200+ yd receiving game bonus: +${settings.rec_200} pts`)
+  if (settings.pass_td !== 4) impacts.push(`Passing TD: ${settings.pass_td} pts`)
+  if (settings.pass_int !== -2) impacts.push(`Interception: ${settings.pass_int} pts`)
+  return impacts.length > 0 ? impacts.join('\n') : null
+}
 
 // Cap this function at the Vercel free-tier ceiling so it fails fast into the
 // rule-based fallback instead of hanging the live draft.

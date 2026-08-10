@@ -168,8 +168,6 @@ export function LiveDraftClient() {
     getNeeds,
     getBudget,
     getMaxBidFor,
-    lastPollAt,
-    sheetError,
     saving,
   } = useDraftState({
     session,
@@ -463,7 +461,7 @@ export function LiveDraftClient() {
   // UXV2-6: connection health for the room status pill. Sim has no real feed.
   const online = simEnabled
     ? true
-    : !(sheetError || remoteError || aifError)
+    : !(remoteError || aifError)
 
   // Record bar (who won, at what price).
   const recordBar =

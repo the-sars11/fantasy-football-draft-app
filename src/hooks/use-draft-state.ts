@@ -4,8 +4,7 @@
  * useDraftState — manages live draft state.
  *
  * Combines:
- * - Draft state machine (auction + snake)
- * - Google Sheet polling (optional)
+ * - Draft state machine (auction)
  * - Manual pick entry
  * - Session persistence (saves picks to Supabase)
  */
@@ -14,7 +13,6 @@ import { useState, useCallback, useRef, useEffect } from 'react'
 import {
   createInitialState,
   applyPick,
-  applySheetRows,
   removePickByNumber,
   editPickByNumber,
   reconcileWithAuctioneerPicks,
@@ -30,8 +28,6 @@ import type {
   PickCorrection,
 } from '@/lib/draft/state'
 import type { DraftFormat, RosterSlots, DraftSession } from '@/lib/supabase/database.types'
-import { useDraftPolling } from './use-draft-polling'
-import type { SheetRow } from '@/lib/sheets'
 
 interface UseDraftStateOptions {
   session: DraftSession | null
@@ -55,10 +51,6 @@ interface UseDraftStateResult {
   getNeeds: (manager: string) => Record<string, number>
   getBudget: (manager: string) => number | null
   getMaxBidFor: (manager: string) => number | null
-  isPolling: boolean
-  lastPollAt: Date | null
-  pollNow: () => Promise<void>
-  sheetError: string | null
   saving: boolean
 }
 
@@ -131,29 +123,6 @@ export function useDraftState({
       setSaving(false)
     }
   }, [session])
-
-  // Handle new picks from Google Sheet polling
-  const handleNewSheetPicks = useCallback((_newRows: SheetRow[], allRows: SheetRow[]) => {
-    setState(prev => {
-      if (!prev) return prev
-      const updated = applySheetRows(prev, allRows)
-      // Persist after sheet update
-      persistPicks(updated.picks)
-      return updated
-    })
-  }, [persistPicks])
-
-  // Sheet polling (only if session has a sheet URL)
-  const {
-    isPolling,
-    lastPollAt,
-    error: sheetError,
-    pollNow,
-  } = useDraftPolling({
-    sheetUrl: session?.sheet_url ?? null,
-    enabled: !!session?.sheet_url && state?.status === 'live',
-    onNewPicks: handleNewSheetPicks,
-  })
 
   // Manual pick entry
   const addManualPick = useCallback((pickData: Omit<DraftPick, 'pick_number'>) => {
@@ -292,10 +261,6 @@ export function useDraftState({
     getNeeds,
     getBudget,
     getMaxBidFor,
-    isPolling,
-    lastPollAt,
-    pollNow,
-    sheetError,
     saving,
   }
 }

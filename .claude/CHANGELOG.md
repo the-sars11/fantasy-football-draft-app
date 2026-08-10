@@ -2,6 +2,42 @@
 
 ---
 
+## 2026-08-10 / DR-2: Kill the dead paths
+
+**Task:** DR-2 (P2 Draft Readiness) | **Class:** `shared` | **Lenses:** Architecture, QA
+
+**Problem:** Dead Google Sheets code still shipped in the live path (a `sheet_url` on a session would start a second polling loop), snake/keeper leftovers surfaced in an auction-only tool (`SnakeAnalysisCard` in the Review screen, Tyler preset in scoring-presets), and three orphaned files cluttered the codebase.
+
+**What changed:**
+
+Files deleted:
+- `src/lib/sheets/index.ts` -- Google Sheets client (readSheet, detectColumnMapping, SheetRow)
+- `src/app/api/draft/sheets/route.ts` -- Sheets polling API route
+- `src/hooks/use-draft-polling.ts` -- Sheets polling hook (7-second poll loop)
+- `src/lib/research/analyze.ts` -- Orphaned LLM analysis functions; `formatScoringBonuses` inlined into its only real caller (`recommend/route.ts`)
+- `src/components/settings/sound-settings.tsx` -- Orphaned sound toggle (UI removed earlier)
+- `src/app/(app)/prep/research/` -- Empty dead directory
+
+Source edits (Google Sheets removal):
+- `src/hooks/use-draft-state.ts` -- Removed `useDraftPolling` integration, `handleNewSheetPicks` callback, and `isPolling`/`lastPollAt`/`pollNow`/`sheetError` from the return type; removed `applySheetRows` from imports (function deleted from state.ts)
+- `src/lib/draft/state.ts` -- Removed `applySheetRows` function and `SheetRow` import
+- `src/lib/draft/__tests__/state.test.ts` -- Removed `applySheetRows` describe block (9 tests) + `SheetRow` import
+- `src/app/(app)/draft/setup/client.tsx` -- Removed `sheets` DraftMode, `FileSpreadsheet` import, `sheetUrl` state, Google Sheet URL input block, and `sheet_url` from session POST body
+- `src/lib/draft/auction-feed-merge.ts` -- Removed `'sheets'` from `FeedSource` union type; updated comment
+- `src/lib/draft/__tests__/auction-feed-merge.test.ts` -- Updated test using `'sheets'` source to `'remote'`
+- `src/app/(app)/draft/live/client.tsx` -- Removed `lastPollAt`/`sheetError` from `useDraftState` destructure; removed `sheetError` from `online` computation
+- `src/app/api/draft/recommend/route.ts` -- Removed `@/lib/research/analyze` import; inlined `formatScoringBonuses`
+- `src/app/api/draft/recommend/__tests__/route.test.ts` -- Removed stale `vi.mock('@/lib/research/analyze')` mock
+
+Source edits (snake/keeper removal):
+- `src/app/(app)/draft/review/client.tsx` -- Removed `SnakeAnalysisCard` import and render
+- `src/lib/scoring-presets.ts` -- Removed `TYLERS_SLEEPER_SCORING` export (no callers)
+- `src/lib/research/service.ts` -- Removed keeper-exclusion block (was unreachable in auction-only mode); `keeperSettings` field kept in `PipelineConfig` for back-compat with callers that pass it
+
+**Verify:** `npm run type-check` 0 errors, `npm run test:run` 96/96 pass, `npm run lint` 41 errors (same count as pre-edit baseline -- 0 new), `npm run build` clean. grep confirms no `sheet_url` in live code paths, no `'sheets'` FeedSource, no `SnakeAnalysisCard` render, no `useDraftPolling`. Auctioneer live path untouched (state.ts core, auction-feed-merge logic, remote feed hook all byte-identical).
+
+---
+
 ## 2026-08-10 / DR-1: Truth-up living dev docs to auction-only + auctioneer-feed reality
 
 **Task:** DR-1 (P2 Draft Readiness) | **Class:** `docs` | **Lenses:** Delivery

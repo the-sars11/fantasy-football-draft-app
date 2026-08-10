@@ -4,10 +4,6 @@ vi.mock('@/lib/ai/claude', () => ({
   askClaudeJson: vi.fn(),
 }))
 
-vi.mock('@/lib/research/analyze', () => ({
-  formatScoringBonuses: vi.fn().mockReturnValue(''),
-}))
-
 import { POST } from '../route'
 import { askClaudeJson } from '@/lib/ai/claude'
 

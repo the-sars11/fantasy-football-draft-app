@@ -28,7 +28,6 @@ import {
   PickCard,
   PositionalPowerRankings,
   BudgetAnalysisCard,
-  SnakeAnalysisCard,
   TagAccuracyCard,
 } from '@/components/draft/review-cards'
 import { useDraftReviewData } from '@/hooks/use-draft-review-data'
@@ -363,9 +362,6 @@ export function ReviewClient() {
 
             {/* Budget Analysis */}
             {review.budgetAnalysis && <BudgetAnalysisCard analysis={review.budgetAnalysis} />}
-
-            {/* Snake Analysis */}
-            {review.snakeAnalysis && <SnakeAnalysisCard analysis={review.snakeAnalysis} />}
           </div>
         </FFIFadeInUp>
       )}

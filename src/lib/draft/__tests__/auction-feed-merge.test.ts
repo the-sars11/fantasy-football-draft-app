@@ -101,12 +101,12 @@ describe('createPickMerger', () => {
 
   it('passes through all fields on a new pick', () => {
     const merger = createPickMerger()
-    const event = makeEvent('pick-1', { playerName: 'CMC', manager: 'Bob', price: 55, source: 'sheets' })
+    const event = makeEvent('pick-1', { playerName: 'CMC', manager: 'Bob', price: 55, source: 'remote' })
     const [result] = merger.merge([event])
     expect(result.playerName).toBe('CMC')
     expect(result.manager).toBe('Bob')
     expect(result.price).toBe(55)
-    expect(result.source).toBe('sheets')
+    expect(result.source).toBe('remote')
   })
 
   it('dedups the same auctioneer pick across same-device and remote sources', () => {

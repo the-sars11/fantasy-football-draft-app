@@ -19,11 +19,8 @@
  *   - playerNameToPickId() is the FALLBACK ONLY, for a source that carries no
  *     stable id of its own. It is not used by any current caller.
  *
- * What this merger does NOT handle: Google Sheets picks. Those are polled in
- * use-draft-state.ts, and are kept from double-adding at the caller level via the
- * name-based draftedNames set (see use-draft-feeds.ts), not through this merger.
- * The historical 'sheets' FeedSource value is retained only for back-compat of the
- * union type.
+ * What this merger handles: Auctioneer picks (same-device BroadcastChannel/localStorage
+ * and remote proxy) and Sleeper picks. Each source is namespaced so ids never collide.
  *
  * Usage pattern in a hook:
  *   const mergerRef = useRef(createPickMerger())   // once per session
@@ -36,7 +33,7 @@
 // ---------------------------------------------------------------------------
 
 /** Transport path that delivered the pick event. */
-export type FeedSource = 'broadcast' | 'localstorage' | 'file' | 'sheets' | 'sleeper' | 'remote'
+export type FeedSource = 'broadcast' | 'localstorage' | 'file' | 'sleeper' | 'remote'
 
 /**
  * Normalized pick event emitted by the merged feed.

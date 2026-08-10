@@ -18,7 +18,6 @@
     { "name": "P3-P7 — Commercialization [RETIRED 2026-08-06]", "done": true }
   ],
   "nextItems": [
-    "DR-2 [Sonnet]: Kill the dead paths — remove Google Sheets from the live path + snake/keeper leftovers + orphaned files. Verify the auctioneer live path is byte-unaffected.",
     "DR-3 [Sonnet]: Fix the INVERTED cost-guard — confirm-gate the buttons that actually spend Claude (Generate Strategies, board Refresh); drop the misleading credit warning on the deterministic Run Research.",
     "DR-4 [Sonnet]: Kill misleading/fake data — Player Browser random intel tags, Dry-Run sim's wrong roster shape.",
     "DR-5 [Sonnet]: One-tap Go Live + connection-UX cleanup.",
@@ -77,9 +76,9 @@ Task tracking: `[ ]` not started · `[~]` in progress · `[x]` done · `[!]` blo
 > **Why:** dead Google Sheets code still ships in the live path (a `sheet_url` on a session would start a second polling loop = draft-night foot-gun), and snake/keeper leftovers surface in an auction-only tool (Review renders a `SnakeAnalysisCard`). Orphans (`lib/research/analyze.ts` with zero callers, empty `prep/research/` dir, `sound-settings.tsx`) are pure confusion.
 > **Dependency:** DR-1 (docs describe the target state). **Care:** some snake code is shared by the state machine — audit each symbol's callers before deleting; remove only what is truly dead, gate what isn't.
 
-- [ ] DR-2.1: Remove Google Sheets from the live path — the `sheets` option in `draft/setup/client.tsx` (option + label + URL input), the `sheet_url` polling in `use-draft-state.ts` + `use-draft-polling.ts`, `lib/sheets/index.ts`, `api/draft/sheets/route.ts`, the `'sheets'` `FeedSource` in `auction-feed-merge.ts`, and the legacy Sheets-oriented `ConnectionStatusPill` (the auction room already draws its own StatusBar — remove or repoint).
-- [ ] DR-2.2: Remove snake/keeper leftovers that surface in the auction UI — `SnakeAnalysisCard` import + render in `draft/review/client.tsx`; the Tyler "T&A Keeper League" preset in `scoring-presets.ts`; the unreachable keeper-exclusion block in `research/service.ts`. Leave shared state-machine internals that are still load-bearing; just stop surfacing snake/keeper.
-- [ ] DR-2.3: Delete orphans — `lib/research/analyze.ts` (grep-confirmed zero callers), the empty `src/app/(app)/prep/research/` dir, `components/settings/sound-settings.tsx` (sound toggle already removed).
+- [x] DR-2.1: Remove Google Sheets from the live path — the `sheets` option in `draft/setup/client.tsx` (option + label + URL input), the `sheet_url` polling in `use-draft-state.ts` + `use-draft-polling.ts`, `lib/sheets/index.ts`, `api/draft/sheets/route.ts`, the `'sheets'` `FeedSource` in `auction-feed-merge.ts`. Note: `ConnectionStatusPill` is still actively used by `live/client.tsx` and `draft/page.tsx` (not dead) — kept in place.
+- [x] DR-2.2: Remove snake/keeper leftovers that surface in the auction UI — `SnakeAnalysisCard` import + render in `draft/review/client.tsx`; the Tyler "T&A Keeper League" preset in `scoring-presets.ts`; the unreachable keeper-exclusion block in `research/service.ts` (`keeperSettings` field kept in `PipelineConfig` for back-compat with callers).
+- [x] DR-2.3: Delete orphans — `lib/research/analyze.ts` (`formatScoringBonuses` inlined into `recommend/route.ts`, its only caller), the empty `src/app/(app)/prep/research/` dir, `components/settings/sound-settings.tsx` (sound toggle already removed).
 - **Done when:** `npm run build` + `type-check` + tests are green; a live-DOM check confirms the auctioneer live path renders and merges picks exactly as before; no `sheet_url` code path can fire.
 
 ### DR-3 — Fix the inverted cost-guard `[Sonnet]` · class: pipeline (Security/QA lenses)

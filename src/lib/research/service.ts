@@ -30,7 +30,7 @@ export interface PipelineConfig {
   sources?: ('sleeper' | 'espn' | 'fantasypros')[]
   /** Skip data refresh and use cached players */
   skipRefresh?: boolean
-  /** Keeper settings — players to exclude from pool and costs to deduct (FF-029) */
+  /** Accepted but unused — keeper support removed (auction-only, DR-2) */
   keeperSettings?: KeeperSettings | null
   /** FF-068: Custom scoring settings for bonus-aware LLM analysis */
   scoringSettings?: ScoringSettings | null
@@ -121,35 +121,10 @@ export async function runResearchPipeline(
     throw new Error('No player data available. Pull data first via Player Data refresh.')
   }
 
-  // --- Step 2.5: Exclude keepers from pool and adjust budget (FF-029) ---
-  let adjustedBudget = config.budget
-  const keeperNames: string[] = []
-
-  if (config.keeperSettings?.keepers && config.keeperSettings.keepers.length > 0) {
-    // Build list of keeper names (lowercase for matching)
-    for (const k of config.keeperSettings.keepers) {
-      keeperNames.push(k.player_name.toLowerCase())
-    }
-
-    // Filter out keeper players from the pool
-    const beforeCount = players.length
-    players = players.filter((p) => !keeperNames.includes(p.name.toLowerCase()))
-    const removedCount = beforeCount - players.length
-
-    onProgress?.({ step: 'configure', message: `Excluded ${removedCount} keepers from pool.` })
-
-    // For auction: subtract keeper costs from budget
-    if (config.format === 'auction' && config.budget) {
-      const keeperCost = config.keeperSettings.keepers.reduce((sum, k) => sum + k.cost, 0)
-      adjustedBudget = config.budget - keeperCost
-      onProgress?.({ step: 'configure', message: `Adjusted budget: $${adjustedBudget} (after $${keeperCost} in keepers)` })
-    }
-  }
-
   // --- Step 3: Analyze through active strategy ---
   onProgress?.({ step: 'analyze', message: strategy ? `Scoring through "${strategy.name}"...` : 'Scoring players...' })
 
-  const analysis = analyzeWithStrategy(players, strategy, config.format, adjustedBudget)
+  const analysis = analyzeWithStrategy(players, strategy, config.format, config.budget)
 
   // --- Step 4: Output ---
   onProgress?.({ step: 'complete', message: 'Research complete.' })

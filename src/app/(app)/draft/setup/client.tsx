@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Trash2, Plus, Loader2, FileSpreadsheet, PenLine, Gamepad2, Check, VolumeX, Smile, Flame, Link, FolderOpen } from 'lucide-react'
+import { Trash2, Plus, Loader2, PenLine, Gamepad2, Check, VolumeX, Smile, Flame, Link, FolderOpen } from 'lucide-react'
 import type { DraftFormat } from '@/lib/supabase/database.types'
 import {
   FFICard,
@@ -39,7 +39,7 @@ interface Manager {
   draft_position?: number
 }
 
-type DraftMode = 'sheets' | 'manual' | 'sim'
+type DraftMode = 'manual' | 'sim'
 type TrashTalkMode = 'off' | 'family-safe' | 'adult-only'
 
 export function DraftSetupClient() {
@@ -56,9 +56,6 @@ export function DraftSetupClient() {
     { name: '' },
     { name: '' },
   ])
-
-  // Sheet URL
-  const [sheetUrl, setSheetUrl] = useState('')
 
   // Submission
   const [submitting, setSubmitting] = useState(false)
@@ -171,7 +168,6 @@ export function DraftSetupClient() {
         body: JSON.stringify({
           league_id: selectedLeagueId,
           format: selectedLeague!.format,
-          sheet_url: sheetUrl.trim() || undefined,
           managers: managers.map(m => ({
             name: m.name.trim(),
             budget: m.budget,
@@ -338,9 +334,8 @@ export function DraftSetupClient() {
 
         <div className="space-y-3">
           {([
-            { mode: 'sheets' as DraftMode, Icon: FileSpreadsheet, label: 'Google Sheets', desc: 'Auto-import picks from a shared spreadsheet' },
-            { mode: 'manual' as DraftMode, Icon: PenLine,         label: 'Manual Entry',  desc: 'Enter each pick by hand as it happens' },
-            { mode: 'sim'    as DraftMode, Icon: Gamepad2,        label: 'Offline Sim',   desc: 'Practice run - no real draft' },
+            { mode: 'manual' as DraftMode, Icon: PenLine,  label: 'Manual Entry', desc: 'Enter each pick by hand as it happens' },
+            { mode: 'sim'    as DraftMode, Icon: Gamepad2, label: 'Offline Sim',  desc: 'Practice run - no real draft' },
           ] as const).map(({ mode, Icon, label, desc }) => (
             <button
               key={mode}
@@ -399,7 +394,7 @@ export function DraftSetupClient() {
           </button>
           <FFISectionHeader
             title="Session Details"
-            subtitle={`Mode: ${draftMode === 'sheets' ? 'Google Sheets' : draftMode === 'manual' ? 'Manual Entry' : 'Offline Sim'}`}
+            subtitle={`Mode: ${draftMode === 'manual' ? 'Manual Entry' : 'Offline Sim'}`}
           />
         </div>
 
@@ -452,23 +447,6 @@ export function DraftSetupClient() {
         </FFICard>
 
         {/* League already confirmed in Step 1 — no dropdown here */}
-
-        {/* Mode-specific field */}
-        {draftMode === 'sheets' && (
-          <div>
-            <Label className="ffi-caption text-[var(--ffi-text-secondary)] mb-1 block">
-              Google Sheet URL
-            </Label>
-            <Input
-              placeholder="https://docs.google.com/spreadsheets/d/..."
-              value={sheetUrl}
-              onChange={e => setSheetUrl(e.target.value)}
-            />
-            <p className="ffi-caption text-[var(--ffi-text-secondary)] mt-1">
-              Share the sheet with &quot;Anyone with the link&quot; (view access).
-            </p>
-          </div>
-        )}
 
         {/* Auctioneer Sync (auction format only — FF-279) */}
         {isAuction && (
