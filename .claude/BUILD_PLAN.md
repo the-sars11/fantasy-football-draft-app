@@ -18,7 +18,6 @@
     { "name": "P3-P7 — Commercialization [RETIRED 2026-08-06]", "done": true }
   ],
   "nextItems": [
-    "DR-1 [Sonnet]: Truth-up the living dev docs (NORTH_STAR, CLAUDE, ARCHITECTURE, FEATURES_INDEX, CODE_AREAS, README, TESTING_GUIDE) to the auction-only + auctioneer-feed reality. Docs-only, no code. START HERE.",
     "DR-2 [Sonnet]: Kill the dead paths — remove Google Sheets from the live path + snake/keeper leftovers + orphaned files. Verify the auctioneer live path is byte-unaffected.",
     "DR-3 [Sonnet]: Fix the INVERTED cost-guard — confirm-gate the buttons that actually spend Claude (Generate Strategies, board Refresh); drop the misleading credit warning on the deterministic Run Research.",
     "DR-4 [Sonnet]: Kill misleading/fake data — Player Browser random intel tags, Dry-Run sim's wrong roster shape.",
@@ -66,12 +65,12 @@ Task tracking: `[ ]` not started · `[~]` in progress · `[x]` done · `[!]` blo
 > **Why:** the docs a session reads first still describe Google Sheets as the draft input, snake/keeper/Tyler as active, and retired commercialization as the roadmap. That drift is what caused the last session to navigate from dead items. Fix the docs before building on them.
 > **Dependency:** none — do this first.
 
-- [ ] DR-1.1: `NORTH_STAR.md` — rewrite auction-only. Sole user = Joe / ESPN / Nasties. Input + system of record = the deployed auctioneer feed (FF-314/315), NOT Google Sheets. Remove Tyler as co-primary, remove Sheets, remove snake/keeper, remove Phase 9/10 commercialization, repoint the design line to `DESIGN_SYSTEM.md` v3.1 (GRIDIRON).
-- [ ] DR-1.2: `CLAUDE.md` — fix the Project Overview (drop Tyler/Yahoo), Key Design Decisions #1 (auction-only, not "both formats"), #2 (no Yahoo multi-platform), #6 (auctioneer feed, not "Google Sheets primary draft input"); fix the folder map (`/prep/research` is a dead 404; the live path is the auctioneer proxy). Add the **one-plan rule** (above) verbatim.
-- [ ] DR-1.3: `ARCHITECTURE.md` — redraw the live-draft box: auctioneer `/api/state` → our server proxy `src/app/api/auctioneer-feed/route.ts` → `use-remote-auctioneer-feed` → multi-source merge → state. Remove the Sheets + Snake boxes.
-- [ ] DR-1.4: `FEATURES_INDEX.md` + `CODE_AREAS.md` — refresh to the live-room reality (`src/components/draft/live-room/*`, `what-to-do.ts`, the auctioneer feed hooks); fix drifted line numbers.
-- [ ] DR-1.5: root `README.md` — replace the untouched create-next-app boilerplate with a real project readme (what it is, stack, `npm run dev` on **3003**, auction-only).
-- [ ] DR-1.6: `docs/TESTING_GUIDE.md` — rewrite auction-only (drop Sheets/Yahoo/snake/in-season), or archive it if it won't be maintained. State which.
+- [x] DR-1.1: `NORTH_STAR.md` — rewrite auction-only. Sole user = Joe / ESPN / Nasties. Input + system of record = the deployed auctioneer feed (FF-314/315), NOT Google Sheets. Remove Tyler as co-primary, remove Sheets, remove snake/keeper, remove Phase 9/10 commercialization, repoint the design line to `DESIGN_SYSTEM.md` v3.1 (GRIDIRON).
+- [x] DR-1.2: `CLAUDE.md` — fix the Project Overview (drop Tyler/Yahoo), Key Design Decisions #1 (auction-only, not "both formats"), #2 (no Yahoo multi-platform), #6 (auctioneer feed, not "Google Sheets primary draft input"); fix the folder map (`/prep/research` is a dead 404; the live path is the auctioneer proxy). Add the **one-plan rule** (above) verbatim.
+- [x] DR-1.3: `ARCHITECTURE.md` — redraw the live-draft box: auctioneer `/api/state` → our server proxy `src/app/api/auctioneer-feed/route.ts` → `use-remote-auctioneer-feed` → multi-source merge → state. Remove the Sheets + Snake boxes.
+- [x] DR-1.4: `FEATURES_INDEX.md` + `CODE_AREAS.md` — refresh to the live-room reality (`src/components/draft/live-room/*`, `what-to-do.ts`, the auctioneer feed hooks); fix drifted line numbers.
+- [x] DR-1.5: root `README.md` — replace the untouched create-next-app boilerplate with a real project readme (what it is, stack, `npm run dev` on **3003**, auction-only).
+- [x] DR-1.6: `docs/TESTING_GUIDE.md` — rewrite auction-only (drop Sheets/Yahoo/snake/in-season), or archive it if it won't be maintained. State which. **Decision: rewritten in place (~120 lines, auction-only). Prior Phase 8 content in git history.**
 - **Done when:** grep of the living docs for `google sheet`, `snake`, `keeper`, `Yahoo`, `Tyler`, `localhost:3000` returns only intentional historical/decision-record mentions; every doc reads true to Aug-2026 reality.
 
 ### DR-2 — Kill the dead paths `[Sonnet]` · class: shared

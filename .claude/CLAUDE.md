@@ -1,7 +1,7 @@
 # CLAUDE.md — Fantasy Football Draft Advisor
 
 ## Project Overview
-Fantasy draft prep + live draft advisor app for Joe Rasar (ESPN, auction, full redraft) and Tyler Young (Yahoo, snake draft, keeper league). Two modes: Prep Mode (research + strategy) and Live Draft Mode (real-time adaptive recommendations).
+Personal live-draft advisor for Joe Rasar's Nasties 12-team, $200, PPR, no-kicker ESPN auction draft. Advises Joe (what to do, max bid, budget/pace) and records results. Picks arrive live from the deployed auctioneer app (system of record). Two modes: Prep Mode (research + strategy) and Live Draft Mode (real-time auction advisor).
 
 ## Tech Stack
 | Layer | Tech |
@@ -10,8 +10,7 @@ Fantasy draft prep + live draft advisor app for Joe Rasar (ESPN, auction, full r
 | Styling | Tailwind CSS 4 + shadcn/ui (New York style) |
 | Database | Supabase (PostgreSQL + Auth) |
 | AI | Claude API (@anthropic-ai/sdk) |
-| Data Sources | ESPN API, Yahoo Fantasy API, Sleeper API, FantasyPros |
-| Google Sheets | googleapis (live draft sheet polling) |
+| Data Sources | ESPN API, Sleeper API, FantasyPros |
 | Icons | Lucide React |
 | Testing | Vitest + React Testing Library |
 | Hosting | Vercel (free tier) |
@@ -24,19 +23,19 @@ src/
 │   ├── (app)/
 │   │   ├── prep/              # Draft prep mode
 │   │   │   ├── configure/     # League settings
-│   │   │   ├── research/      # Run analysis
+│   │   │   ├── research/      # DEAD 404 -- analysis runs from /prep hub, not /prep/research
 │   │   │   ├── board/         # Draft board view
 │   │   │   └── runs/          # Saved run history + compare
 │   │   ├── draft/             # Live draft mode
-│   │   │   ├── setup/         # Connect sheet, set managers/keepers
+│   │   │   ├── setup/         # Draft setup (fallback when auctioneer not live)
 │   │   │   ├── live/          # Real-time tracking + advisor
 │   │   │   └── review/        # Post-draft analysis
 │   │   └── settings/          # User preferences
 │   └── api/
+│       ├── auctioneer-feed/   # Proxy to auctioneer /api/state (CORS-dodge)
 │       ├── research/          # Data ingestion + LLM analysis
 │       ├── draft/             # Live draft state + recommendations
-│       ├── players/           # Player data cache
-│       └── sheets/            # Google Sheets polling
+│       └── players/           # Player data cache
 ├── components/
 │   ├── ui/                    # shadcn/ui base components
 │   ├── prep/                  # Prep mode components
@@ -45,21 +44,24 @@ src/
 ├── lib/
 │   ├── supabase/              # DB queries + auth helpers
 │   ├── research/              # Research pipeline
-│   │   ├── sources/           # Data source adapters (ESPN, Yahoo, Sleeper, FantasyPros)
+│   │   ├── sources/           # Data source adapters (ESPN, Sleeper, FantasyPros)
 │   │   ├── normalize.ts       # Multi-source merge into consensus
 │   │   ├── analyze.ts         # LLM analysis layer
 │   │   └── service.ts         # Pipeline orchestrator
 │   ├── draft/                 # Live draft engine
-│   │   ├── state.ts           # Draft state machine (auction + snake)
-│   │   ├── recommend.ts       # Real-time LLM recommendations
+│   │   ├── state.ts           # Draft state machine + offline resync
+│   │   ├── what-to-do.ts      # HOLD/BID/PUSH/PASS advisor (rule-based, $0)
+│   │   ├── auction-advisor.ts # Max bid, budget analysis, scarcity
+│   │   ├── auction-feed-merge.ts  # pickId dedup, multi-source merge
+│   │   ├── recommend.ts       # LLM recommendations (optional, costs Claude)
 │   │   ├── tendencies.ts      # Manager tendency tracking
-│   │   ├── keepers.ts         # Keeper logic
 │   │   └── explain.ts         # Explainability layer
-│   ├── sheets/                # Google Sheets API integration
 │   ├── players/               # Player types + cache
 │   └── utils.ts               # Shared utilities (cn, etc.)
 ├── hooks/
-│   ├── use-draft-state.ts
+│   ├── use-remote-auctioneer-feed.ts  # ~3s poll of server proxy; LIVE/STALE/OFFLINE
+│   ├── use-auctioneer-feed.ts         # Same-device BroadcastChannel
+│   ├── use-draft-state.ts             # Draft state machine + persistence
 │   └── use-research.ts
 └── contexts/
     └── auth-context.ts
@@ -73,7 +75,7 @@ docs/                          # Planning docs
 | Table | Purpose |
 |-------|---------|
 | `users` | Auth + profile (Supabase Auth) |
-| `leagues` | League config (platform, format, size, budget, roster, scoring, keeper rules) |
+| `leagues` | League config (platform, format, size, budget, roster, scoring) |
 | `players_cache` | Normalized player data from all sources, freshness timestamps |
 | `research_runs` | Saved prep runs (league_id, strategy settings, timestamp) |
 | `research_results` | Per-run analysis (rankings, values, targets, avoids, tiers) |
@@ -101,6 +103,10 @@ docs/                          # Planning docs
 
 > On major feature work or architectural decisions, read `NORTH_STAR.md` first.
 
+## One-Plan Rule
+
+There is exactly one plan: `.claude/BUILD_PLAN.md`. New directions go in that file as active work or dated decision records. No standalone plan docs. Design specs live in `DESIGN_SYSTEM.md`. Working state (thin pointer) lives in `.claude/WORKING_STATE.md`. Change audit trail lives in `.claude/CHANGELOG.md`.
+
 ## Commit Format
 ```
 feat: Brief description (50 chars max)
@@ -123,14 +129,14 @@ npm run test:coverage # Coverage report
 ```
 
 ## Key Design Decisions
-1. **Both draft formats** — Auction (Joe/ESPN) and Snake (Tyler/Yahoo). Prep outputs differ per format.
-2. **Multi-platform** — ESPN + Yahoo adapters. League config stores platform.
-3. **Keeper support** — Optional. Mark kept players + costs/rounds, exclude from pool.
-4. **LLM bounded** — Claude analyzes real data, never hallucinates stats. Same as stock-evaluation-engine.
-5. **Explainability first-class** — Every recommendation has a `reasoning` field. "Why?" button everywhere.
-6. **Google Sheets primary draft input** — Polls shared sheet for new picks. Manual entry fallback.
-7. **Incremental LLM calls** — Small focused Claude calls per pick during live draft. Fast + cheap.
-8. **Multi-source consensus** — Average 3+ ranking sources for baseline, LLM adjusts for league context.
+1. **Auction only** -- Joe/ESPN, Nasties 12-team, $200, PPR, no-kicker, full redraft. No snake, no keeper, no Tyler's league.
+2. **ESPN only** -- No Yahoo adapter. The Nasties league is on ESPN.
+3. **No keeper support** -- Nasties is full redraft. Keeper code is dead (removed in DR-2).
+4. **LLM bounded** -- Claude analyzes real data, never hallucinates stats. Same as stock-evaluation-engine.
+5. **Rule-based advisor first** -- What-To-Do, max bid, and budget/pace are 100% rule-based ($0). LLM panels are optional and confirm-gated (DR-3).
+6. **Auctioneer feed is the live draft input** -- Server proxy at `src/app/api/auctioneer-feed/route.ts` polls the deployed auctioneer app. Manual pick entry is the fallback.
+7. **Incremental LLM calls** -- Small focused Claude calls per pick during live draft. Fast + cheap. Confirm-gated (DR-3).
+8. **Multi-source consensus** -- Average 3+ ranking sources for baseline, LLM adjusts for league context.
 
 ---
 

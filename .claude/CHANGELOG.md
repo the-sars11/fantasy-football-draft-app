@@ -2,6 +2,25 @@
 
 ---
 
+## 2026-08-10 / DR-1: Truth-up living dev docs to auction-only + auctioneer-feed reality
+
+**Task:** DR-1 (P2 Draft Readiness) | **Class:** `docs` | **Lenses:** Delivery
+
+**Problem:** Every dev doc a session reads first still described Google Sheets as the draft input, snake/keeper/Tyler as active scope, and retired commercialization as the roadmap. NORTH_STAR.md and ARCHITECTURE.md did not exist. README.md was create-next-app boilerplate. TESTING_GUIDE.md was 440 lines describing Phase 8 snake/Sheets/in-season flows. FEATURES_INDEX.md and CODE_AREAS.md showed Snake Mode and Google Sheets integration sections as first-class features; live-room components and the auctioneer feed hooks were absent.
+
+**What changed (docs only -- no source code):**
+- `NORTH_STAR.md` -- created: auction-only purpose, system of record, live sync path, design system (GRIDIRON v3.1), out-of-scope list, one-plan rule.
+- `ARCHITECTURE.md` -- created: full live-draft data flow diagram, advisor engine, research pipeline, API surface, Supabase schema, "What Is NOT in This App" table.
+- `README.md` -- replaced create-next-app boilerplate with real project readme (purpose, stack, dev commands, key docs table).
+- `docs/TESTING_GUIDE.md` -- rewritten auction-only (~120 lines): auth, Nasties defaults, all prep flows, live draft (auctioneer feed + Go Live + offline resync), post-draft review, mobile arm's-length, known limitations.
+- `.claude/CLAUDE.md` -- targeted fixes: Project Overview (Joe-only, auction-only), Tech Stack (dropped Google Sheets row), Folder Structure (dead /prep/research noted, auctioneer-feed proxy added, lib/draft updated, Yahoo adapter removed from sources comment, keeper rules removed from leagues table), Key Design Decisions (#1 auction-only, #2 ESPN-only, #3 no keeper, #5 rule-based advisor, #6 auctioneer feed), added One-Plan Rule section.
+- `.claude/FEATURES_INDEX.md` -- full rewrite: Snake Mode section removed, Sheets Integration section replaced by Auctioneer Live Feed section, live-room components documented (all 12 files), dead-code register table added, tag cloud cleaned.
+- `.claude/CODE_AREAS.md` -- full rewrite: Sheets section removed, auctioneer-feed proxy added, hooks updated (use-remote-auctioneer-feed, use-auctioneer-feed), live-room components documented, dead-code notes added.
+
+**Verify:** `npm run type-check` 0 errors. `npm run test:run` 103/103 passed. Grep of 7 living docs for `google sheet/snake/keeper/Yahoo/Tyler/localhost:3000` returns only intentional out-of-scope or dead-code mentions. Zero source files changed. No paid endpoints fired.
+
+---
+
 ## 2026-08-10 / Build-plan + dev-doc overhaul (P2 Draft Readiness)
 
 **Task:** Doc overhaul (Joe-directed) | **Class:** `docs` | **Lenses:** Delivery
