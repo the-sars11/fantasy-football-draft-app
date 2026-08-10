@@ -161,6 +161,8 @@ export function LiveDraftClient() {
     state,
     addManualPick,
     undoLastPick,
+    editPick,
+    removePick,
     draftedNames,
     getNeeds,
     getBudget,
@@ -542,6 +544,8 @@ export function LiveDraftClient() {
           myManager={myManager}
           onRecordPick={addManualPick}
           onToggleTarget={onToggleTarget}
+          onEditPick={editPick}
+          onRemovePick={removePick}
         />
 
         {/* More tools — every secondary panel preserved, mounted only when

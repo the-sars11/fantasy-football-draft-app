@@ -1,0 +1,217 @@
+<meta charset="utf-8" />
+<title>Fix a Pick — mockup</title>
+<style>
+  :root {
+    --bg:#060c14; --surface:#09121d; --card:#0d1a27; --cardEl:#132234;
+    --border:rgba(255,255,255,0.07); --border2:rgba(255,255,255,0.04);
+    --t1:#edf4fb; --t2:#7a98b4; --t3:#3d5a73;
+    --volt:#d4ff00; --volt10:rgba(212,255,0,0.10); --volt20:rgba(212,255,0,0.20);
+    --gold:#f5a623; --gold10:rgba(245,166,35,0.10); --gold25:rgba(245,166,35,0.25);
+    --red:#dc2626; --red10:rgba(220,38,38,0.10); --red25:rgba(220,38,38,0.25);
+  }
+  * { box-sizing:border-box; margin:0; padding:0; -webkit-font-smoothing:antialiased; }
+  body {
+    background:#02060b; color:var(--t1);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    padding:32px 20px 60px; display:flex; flex-wrap:wrap; gap:40px; justify-content:center; align-items:flex-start;
+  }
+  .col { width:400px; max-width:100%; }
+  .caption { color:var(--t2); font-size:12px; letter-spacing:2px; text-transform:uppercase; font-weight:700; margin-bottom:12px; text-align:center; }
+  .phone {
+    background:var(--bg); border:1px solid var(--border); border-radius:22px; overflow:hidden;
+    box-shadow:0 20px 60px rgba(0,0,0,0.55);
+  }
+  /* dimmed room behind the sheet */
+  .room-dim { position:relative; height:150px; background:
+    linear-gradient(180deg, rgba(4,8,14,0.0), rgba(4,8,14,0.62)),
+    var(--surface);
+    padding:14px 16px; }
+  .room-dim .rd-line { height:10px; border-radius:5px; background:rgba(255,255,255,0.05); margin-bottom:10px; }
+  .room-dim .rd-line.short { width:55%; }
+  .room-dim .rd-block { height:46px; border-radius:12px; background:rgba(255,255,255,0.035); margin-bottom:10px; }
+  /* record bar with Fix a pick */
+  .recordbar {
+    background:var(--surface); border-top:1px solid var(--border2);
+    padding:10px 12px; display:flex; align-items:center; gap:10px;
+  }
+  .rb-input { flex:1; background:var(--cardEl); border:1px solid var(--border); border-radius:10px;
+    padding:9px 12px; color:var(--t3); font-size:13px; }
+  .rb-price { width:64px; background:var(--cardEl); border:1px solid var(--border); border-radius:10px;
+    padding:9px 10px; color:var(--t2); font-size:13px; font-variant-numeric:tabular-nums; text-align:center; }
+  .rb-record { background:var(--volt); color:#0a0f05; font-weight:800; font-size:12px; letter-spacing:1px;
+    border:none; border-radius:10px; padding:10px 14px; text-transform:uppercase; }
+  .fixrow { display:flex; justify-content:flex-end; padding:6px 12px 10px; background:var(--surface); }
+  .fix-btn {
+    background:transparent; border:none; color:var(--t2); font-size:11px; font-weight:700;
+    letter-spacing:1px; text-transform:uppercase; display:inline-flex; align-items:center; gap:6px; cursor:pointer;
+  }
+  .fix-btn svg { width:13px; height:13px; }
+  .fix-btn .u { text-decoration:underline; text-underline-offset:2px; }
+
+  /* SHEET */
+  .sheet { background:var(--surface); border-top:1px solid var(--border);
+    box-shadow:0 -12px 40px rgba(0,0,0,0.5); }
+  .grabber { width:36px; height:4px; border-radius:99px; background:rgba(255,255,255,0.15); margin:10px auto 4px; }
+  .sheet-head { padding:4px 16px 10px; }
+  .sheet-title { font-size:17px; font-weight:700; color:var(--t1); }
+  .sheet-sub { font-size:11px; color:var(--t3); margin-top:2px; }
+  .list { padding:2px 8px 14px; max-height:none; }
+
+  .pick {
+    width:100%; display:flex; align-items:center; gap:10px; text-align:left;
+    background:transparent; border:none; border-radius:11px; padding:11px 10px; cursor:pointer;
+  }
+  .pick:hover { background:rgba(255,255,255,0.03); }
+  .badge { width:32px; height:23px; border-radius:5px; display:flex; align-items:center; justify-content:center;
+    font-size:10px; font-weight:800; flex-shrink:0; }
+  .qb{background:rgba(22,163,74,0.15);color:#16a34a}
+  .rb{background:rgba(220,38,38,0.15);color:#dc2626}
+  .wr{background:rgba(37,99,235,0.15);color:#2563eb}
+  .te{background:rgba(147,51,234,0.15);color:#9333ea}
+  .def{background:rgba(107,114,128,0.15);color:#9aa7bd}
+  .pick .name { font-size:15px; font-weight:600; color:var(--t1); }
+  .pick .meta { font-size:11px; color:var(--t3); margin-top:2px; }
+  .pick .price { margin-left:auto; font-family:"SF Mono",ui-monospace,Menlo,monospace; font-size:14px; font-weight:700;
+    color:var(--volt); font-variant-numeric:tabular-nums; flex-shrink:0; }
+  .pick .num { font-family:"SF Mono",ui-monospace,Menlo,monospace; font-size:10px; color:var(--t3); width:22px; text-align:right; flex-shrink:0; }
+  .chev { color:var(--t3); flex-shrink:0; }
+  .chev svg { width:16px; height:16px; display:block; }
+  .divide { height:1px; background:var(--border2); margin:0 10px; }
+
+  /* EDIT STATE */
+  .edit-card { margin:2px 8px 14px; background:var(--card); border:1px solid var(--gold25); border-radius:14px; overflow:hidden; }
+  .edit-top { display:flex; align-items:center; gap:10px; padding:12px 12px 10px; border-bottom:1px solid var(--border2); }
+  .edit-top .name { font-size:16px; font-weight:700; }
+  .edit-badge-note { margin-left:auto; font-size:9px; letter-spacing:1.5px; text-transform:uppercase; font-weight:800; color:var(--gold); }
+  .field { padding:11px 12px 0; }
+  .field label { display:block; font-size:9px; letter-spacing:1.5px; text-transform:uppercase; font-weight:800; color:var(--t3); margin-bottom:5px; }
+  .field .control { background:var(--cardEl); border:1px solid var(--border); border-radius:10px; padding:10px 12px;
+    font-size:14px; color:var(--t1); display:flex; align-items:center; justify-content:space-between; }
+  .field .control.money { color:var(--volt); font-family:"SF Mono",ui-monospace,Menlo,monospace; font-variant-numeric:tabular-nums; font-weight:700; }
+  .field .control .caret { color:var(--t3); font-size:11px; }
+  .edit-actions { display:flex; gap:10px; padding:14px 12px 12px; }
+  .btn { border:none; border-radius:10px; padding:11px 0; font-size:12px; font-weight:800; letter-spacing:1px; text-transform:uppercase; cursor:pointer; }
+  .btn-save { flex:1; background:var(--volt); color:#0a0f05; }
+  .btn-cancel { flex:0 0 84px; background:rgba(255,255,255,0.05); color:var(--t2); border:1px solid var(--border); }
+  .btn-remove { flex:0 0 auto; background:var(--red10); color:#ff6b6b; border:1px solid var(--red25); display:inline-flex; align-items:center; gap:6px; padding-left:14px; padding-right:14px; }
+  .btn-remove svg { width:13px; height:13px; }
+  .remove-note { font-size:10px; color:var(--t3); text-align:center; padding:0 12px 14px; margin-top:-4px; }
+</style>
+
+<div class="col">
+  <div class="caption">1 · Record bar — new "Fix a pick"</div>
+  <div class="phone">
+    <div class="room-dim">
+      <div class="rd-line"></div><div class="rd-line short"></div>
+      <div class="rd-block"></div><div class="rd-block"></div>
+    </div>
+    <div class="fixrow">
+      <button class="fix-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z"/></svg>
+        <span class="u">Fix a pick</span>
+      </button>
+    </div>
+    <div class="recordbar">
+      <div class="rb-input">Search a player…</div>
+      <div class="rb-price">$—</div>
+      <button class="rb-record">Record</button>
+    </div>
+  </div>
+</div>
+
+<div class="col">
+  <div class="caption">2 · Sheet — recent sales, all teams</div>
+  <div class="phone">
+    <div class="room-dim" style="height:70px;"></div>
+    <div class="sheet">
+      <div class="grabber"></div>
+      <div class="sheet-head">
+        <div class="sheet-title">Fix a pick</div>
+        <div class="sheet-sub">Tap a sale to edit its price, team, or player — or remove it. Newest first.</div>
+      </div>
+      <div class="list">
+        <button class="pick">
+          <span class="num">84</span>
+          <span class="badge wr">WR</span>
+          <span><div class="name">A.J. Brown</div><div class="meta">PHI · won by Sasquatch</div></span>
+          <span class="price">$41</span>
+          <span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></span>
+        </button>
+        <div class="divide"></div>
+        <button class="pick">
+          <span class="num">83</span>
+          <span class="badge rb">RB</span>
+          <span><div class="name">Breece Hall</div><div class="meta">NYJ · won by The Nasties</div></span>
+          <span class="price">$52</span>
+          <span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></span>
+        </button>
+        <div class="divide"></div>
+        <button class="pick">
+          <span class="num">82</span>
+          <span class="badge qb">QB</span>
+          <span><div class="name">Jalen Hurts</div><div class="meta">PHI · won by Ball Busters</div></span>
+          <span class="price">$28</span>
+          <span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></span>
+        </button>
+        <div class="divide"></div>
+        <button class="pick">
+          <span class="num">81</span>
+          <span class="badge te">TE</span>
+          <span><div class="name">Trey McBride</div><div class="meta">ARI · won by Meat Sweats</div></span>
+          <span class="price">$19</span>
+          <span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></span>
+        </button>
+        <div class="divide"></div>
+        <button class="pick">
+          <span class="num">80</span>
+          <span class="badge def">DEF</span>
+          <span><div class="name">Ravens D/ST</div><div class="meta">BAL · won by Sasquatch</div></span>
+          <span class="price">$3</span>
+          <span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="col">
+  <div class="caption">3 · Tapped a sale — edit / remove</div>
+  <div class="phone">
+    <div class="room-dim" style="height:70px;"></div>
+    <div class="sheet">
+      <div class="grabber"></div>
+      <div class="sheet-head">
+        <div class="sheet-title">Fix a pick</div>
+        <div class="sheet-sub">Correct the sale, then Save. Budgets and roster recompute automatically.</div>
+      </div>
+      <div class="edit-card">
+        <div class="edit-top">
+          <span class="badge rb">RB</span>
+          <span class="name">Breece Hall</span>
+          <span class="edit-badge-note">Pick 83</span>
+        </div>
+        <div class="field">
+          <label>Player</label>
+          <div class="control">Breece Hall <span class="caret">change ›</span></div>
+        </div>
+        <div class="field">
+          <label>Won by</label>
+          <div class="control">The Nasties <span class="caret">▾</span></div>
+        </div>
+        <div class="field">
+          <label>Price</label>
+          <div class="control money">$52 <span class="caret" style="color:var(--t3)">edit</span></div>
+        </div>
+        <div class="edit-actions">
+          <button class="btn btn-cancel">Cancel</button>
+          <button class="btn btn-remove">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            Remove
+          </button>
+          <button class="btn btn-save">Save</button>
+        </div>
+      </div>
+      <div class="remove-note">Removing renumbers the remaining picks and refunds the team's budget.</div>
+    </div>
+  </div>
+</div>
