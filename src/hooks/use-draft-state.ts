@@ -15,6 +15,8 @@ import {
   createInitialState,
   applyPick,
   applySheetRows,
+  removePickByNumber,
+  editPickByNumber,
   getDraftedPlayerNames,
   getPositionNeeds,
   getRemainingBudget,
@@ -36,6 +38,8 @@ interface UseDraftStateResult {
   state: DraftState | null
   addManualPick: (pick: Omit<DraftPick, 'pick_number'>) => void
   undoLastPick: () => void
+  editPick: (pickNumber: number, changes: Partial<Omit<DraftPick, 'pick_number'>>) => void
+  removePick: (pickNumber: number) => void
   draftedNames: Set<string>
   getNeeds: (manager: string) => Record<string, number>
   getBudget: (manager: string) => number | null
@@ -158,36 +162,64 @@ export function useDraftState({
     })
   }, [persistPicks])
 
+  // Rebuild the whole state from a known-good pick list. Undo / edit / remove all
+  // reconstruct from scratch (fresh managers -> re-apply keepers -> replay picks)
+  // so budgets, roster counts, and the snake turn stay perfectly consistent.
+  const rebuildFromPicks = useCallback((prev: DraftState, picks: DraftPick[]): DraftState => {
+    let rebuilt = createInitialState(
+      prev.format,
+      // manager_order preserves draft order (matters for snake turn calc)
+      prev.manager_order.map(name => {
+        const m = prev.managers[name]
+        return { name, budget: m?.budget_total, draft_position: m?.draft_position }
+      }),
+      prev.roster_slots,
+    )
+
+    // Re-apply keepers (FF-029)
+    if (prev.keepers.length > 0) {
+      rebuilt = applyKeepersToState(rebuilt, prev.keepers, prev.format)
+    }
+
+    for (const p of picks) {
+      rebuilt = applyPick(rebuilt, p)
+    }
+
+    return rebuilt
+  }, [])
+
   // Undo last pick
   const undoLastPick = useCallback(() => {
     setState(prev => {
       if (!prev || prev.picks.length === 0) return prev
-
-      // Rebuild state from scratch minus the last pick
-      const allPicks = prev.picks.slice(0, -1)
-      let rebuilt = createInitialState(
-        prev.format,
-        Object.values(prev.managers).map(m => ({
-          name: m.name,
-          budget: m.budget_total,
-          draft_position: m.draft_position,
-        })),
-        prev.roster_slots,
-      )
-
-      // Re-apply keepers (FF-029)
-      if (prev.keepers.length > 0) {
-        rebuilt = applyKeepersToState(rebuilt, prev.keepers, prev.format)
-      }
-
-      for (const p of allPicks) {
-        rebuilt = applyPick(rebuilt, p)
-      }
-
+      const rebuilt = rebuildFromPicks(prev, prev.picks.slice(0, -1))
       persistPicks(rebuilt.picks)
       return rebuilt
     })
-  }, [persistPicks])
+  }, [persistPicks, rebuildFromPicks])
+
+  // Remove an arbitrary pick by pick_number (renumbers the remainder)
+  const removePick = useCallback((pickNumber: number) => {
+    setState(prev => {
+      if (!prev) return prev
+      const next = removePickByNumber(prev.picks, pickNumber)
+      if (next.length === prev.picks.length) return prev // no matching pick
+      const rebuilt = rebuildFromPicks(prev, next)
+      persistPicks(rebuilt.picks)
+      return rebuilt
+    })
+  }, [persistPicks, rebuildFromPicks])
+
+  // Edit an existing pick (correct price / manager / player / position)
+  const editPick = useCallback((pickNumber: number, changes: Partial<Omit<DraftPick, 'pick_number'>>) => {
+    setState(prev => {
+      if (!prev) return prev
+      const next = editPickByNumber(prev.picks, pickNumber, changes)
+      const rebuilt = rebuildFromPicks(prev, next)
+      persistPicks(rebuilt.picks)
+      return rebuilt
+    })
+  }, [persistPicks, rebuildFromPicks])
 
   // Derived queries
   const draftedNames = state ? getDraftedPlayerNames(state) : new Set<string>()
@@ -211,6 +243,8 @@ export function useDraftState({
     state,
     addManualPick,
     undoLastPick,
+    editPick,
+    removePick,
     draftedNames,
     getNeeds,
     getBudget,

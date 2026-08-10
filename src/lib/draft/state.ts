@@ -207,6 +207,32 @@ export function applySheetRows(state: DraftState, rows: SheetRow[]): DraftState 
   return current
 }
 
+/**
+ * Remove the pick with the given pick_number and renumber the remainder so pick
+ * numbers stay contiguous (1..n). Returns a new array; the input is not mutated.
+ * Keepers are not affected (they live in state.keepers, never state.picks).
+ */
+export function removePickByNumber(picks: DraftPick[], pickNumber: number): DraftPick[] {
+  return picks
+    .filter(p => p.pick_number !== pickNumber)
+    .map((p, i) => ({ ...p, pick_number: i + 1 }))
+}
+
+/**
+ * Apply changes to the pick with the given pick_number (e.g. correct a price,
+ * manager, player, or position). pick_number itself is preserved. Returns a new
+ * array; the input is not mutated. No-op if no pick matches.
+ */
+export function editPickByNumber(
+  picks: DraftPick[],
+  pickNumber: number,
+  changes: Partial<Omit<DraftPick, 'pick_number'>>,
+): DraftPick[] {
+  return picks.map(p =>
+    p.pick_number === pickNumber ? { ...p, ...changes } : p,
+  )
+}
+
 // --- Queries ---
 
 /**

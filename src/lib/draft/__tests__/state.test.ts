@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { createInitialState, applyPick, applySheetRows, getMaxBid, type DraftPick, type DraftState } from '../state'
+import { createInitialState, applyPick, applySheetRows, removePickByNumber, editPickByNumber, getMaxBid, getRemainingBudget, type DraftPick, type DraftState } from '../state'
 import { applyKeepersToState, type KeeperAssignment } from '../keepers'
 import type { RosterSlots } from '../../supabase/database.types'
 import type { SheetRow } from '../../sheets'
@@ -239,5 +239,105 @@ describe('snake draft order - 12-team parity', () => {
 
   it('M0 opens round 3 again (pick 25)', () => {
     expect(applyN(24).current_manager).toBe('M0')
+  })
+})
+
+describe('removePickByNumber (finding 12)', () => {
+  const picks: DraftPick[] = [
+    { pick_number: 1, player_name: 'CMC', manager: 'A', price: 50 },
+    { pick_number: 2, player_name: 'Tyreek', manager: 'B', price: 40 },
+    { pick_number: 3, player_name: 'JT', manager: 'A', price: 30 },
+    { pick_number: 4, player_name: 'Kelce', manager: 'B', price: 25 },
+  ]
+
+  it('removes the target pick and renumbers the remainder contiguously', () => {
+    const result = removePickByNumber(picks, 2)
+    expect(result.map(p => p.player_name)).toEqual(['CMC', 'JT', 'Kelce'])
+    expect(result.map(p => p.pick_number)).toEqual([1, 2, 3])
+  })
+
+  it('removing the last pick behaves like undo (drops it, no gap)', () => {
+    const result = removePickByNumber(picks, 4)
+    expect(result.map(p => p.player_name)).toEqual(['CMC', 'Tyreek', 'JT'])
+    expect(result.map(p => p.pick_number)).toEqual([1, 2, 3])
+  })
+
+  it('is a no-op (same length) when no pick matches', () => {
+    const result = removePickByNumber(picks, 99)
+    expect(result).toHaveLength(picks.length)
+    expect(result.map(p => p.player_name)).toEqual(['CMC', 'Tyreek', 'JT', 'Kelce'])
+  })
+
+  it('does not mutate the input array', () => {
+    const copy = picks.map(p => ({ ...p }))
+    removePickByNumber(picks, 2)
+    expect(picks).toEqual(copy)
+  })
+})
+
+describe('editPickByNumber (finding 12)', () => {
+  const picks: DraftPick[] = [
+    { pick_number: 1, player_name: 'CMC', manager: 'A', price: 50 },
+    { pick_number: 2, player_name: 'Tyreek', manager: 'B', price: 40 },
+  ]
+
+  it('applies changes to the matching pick and preserves pick_number', () => {
+    const result = editPickByNumber(picks, 1, { price: 65, manager: 'B' })
+    expect(result[0]).toEqual({ pick_number: 1, player_name: 'CMC', manager: 'B', price: 65 })
+    expect(result[1]).toEqual(picks[1]) // untouched
+  })
+
+  it('is a no-op when no pick matches', () => {
+    const result = editPickByNumber(picks, 99, { price: 1 })
+    expect(result).toEqual(picks)
+  })
+
+  it('does not mutate the input array', () => {
+    const copy = picks.map(p => ({ ...p }))
+    editPickByNumber(picks, 1, { price: 999 })
+    expect(picks).toEqual(copy)
+  })
+})
+
+describe('rebuild after edit/remove recomputes budgets (finding 12)', () => {
+  // Mirrors the hook: rebuild = fresh state -> replay the corrected pick list.
+  function rebuild(format: 'auction', budget: number, picks: DraftPick[]): DraftState {
+    let state = createInitialState(
+      format,
+      [{ name: 'A', budget }, { name: 'B', budget }],
+      { qb: 1, rb: 1, wr: 1, te: 0, flex: 0, k: 0, dst: 0, bench: 0, ir: 0 },
+    )
+    for (const p of picks) state = applyPick(state, p)
+    return state
+  }
+
+  const start: DraftPick[] = [
+    { pick_number: 1, player_name: 'CMC', position: 'RB', manager: 'A', price: 50 },
+    { pick_number: 2, player_name: 'Tyreek', position: 'WR', manager: 'A', price: 40 },
+    { pick_number: 3, player_name: 'JT', position: 'RB', manager: 'A', price: 30 },
+  ]
+
+  it('removing a pick refunds its price on rebuild', () => {
+    // A spent 50+40+30 = 120 of 200 => 80 remaining. Remove the $40 Tyreek => 120 remaining.
+    const before = rebuild('auction', 200, start)
+    expect(getRemainingBudget(before, 'A')).toBe(80)
+
+    const after = rebuild('auction', 200, removePickByNumber(start, 2))
+    expect(getRemainingBudget(after, 'A')).toBe(120)
+    // roster count for WR (Tyreek) drops back to 0
+    expect(after.managers['A'].roster_count['WR']).toBeUndefined()
+  })
+
+  it('editing a price adjusts the budget on rebuild', () => {
+    // Correct CMC from $50 to $75 => A now spent 145 => 55 remaining.
+    const after = rebuild('auction', 200, editPickByNumber(start, 1, { price: 75 }))
+    expect(getRemainingBudget(after, 'A')).toBe(55)
+  })
+
+  it('editing the manager moves the spend to the new manager on rebuild', () => {
+    // Move JT ($30) from A to B. A spent 90 => 110 left; B spent 30 => 170 left.
+    const after = rebuild('auction', 200, editPickByNumber(start, 3, { manager: 'B' }))
+    expect(getRemainingBudget(after, 'A')).toBe(110)
+    expect(getRemainingBudget(after, 'B')).toBe(170)
   })
 })
