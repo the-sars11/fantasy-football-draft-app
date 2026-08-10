@@ -2,6 +2,21 @@
 
 ---
 
+## 2026-08-10 / DR-4: Kill misleading / fake data
+
+**Task:** DR-4 (P2 Draft Readiness) | **Class:** `output` | **Lenses:** QA, Delivery
+
+**Problem:** Two screens showed fiction as fact. Player Browser's "system intel" tags used `getMockSystemTags` with `Math.random() > 0.7` to fabricate a BREAKOUT badge, and hardcoded a fake `sources: ['FantasyPros']` on a SLEEPER badge claiming multi-source verification that never happened. The Dry-Run sim used a generic `DEFAULT_ROSTER` (qb1/rb2/wr2/te1/flex1/k1/dst1/bench6/ir0) instead of the locked Nasties shape (qb1/rb1/wr1/te1/flex3/k0/dst1/bench5/ir1), so practice grades (including a Kicker grade Joe will never actually draft for) wouldn't match draft night.
+
+**What changed:**
+
+- `src/app/(app)/prep/players/client.tsx` -- Removed the `BREAKOUT` (`Math.random()`) and `SLEEPER` (fabricated `sources`) tag generators from `getMockSystemTags` (renamed `getSystemTags`); kept `VALUE`/`AVOID`, which are genuinely deterministic off real `player.adp`/`player.consensusRank`. Removed the now-dead `'breakout'`/`'sleeper'` options from `TagFilter`/`TAG_FILTERS` and the filter `switch`.
+- `src/app/(app)/prep/simulate/client.tsx` -- `DEFAULT_ROSTER` now matches `NASTIES_PRESET.roster` (league-config-form.tsx:22) exactly: `{qb:1, rb:1, wr:1, te:1, flex:3, k:0, dst:1, bench:5, ir:1}` (14 total slots, was 15). Dropped `K` from `STARTER_SLOTS` and both position-grading `positions` arrays (grading loop + `PositionGradeCard`) since Nasties carries zero kicker slots -- grading a position that's never drafted would always read "F / shut out," its own fake signal.
+
+**Verify:** `npm run type-check` 0 errors, `npm run test:run` 96/96 pass, `npm run lint` 41 errors (pre-existing baseline, 0 new -- confirmed none in the two touched files), `npm run build` clean. UI screenshot not available (preview infrastructure port conflict with a concurrent session, same as DR-3; change is logic-only, no styling/layout touched).
+
+---
+
 ## 2026-08-10 / DR-3: Fix the inverted cost-guard
 
 **Task:** DR-3 (P2 Draft Readiness) | **Class:** `pipeline` + `output` | **Lenses:** QA, Security

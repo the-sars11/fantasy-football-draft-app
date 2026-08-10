@@ -27,11 +27,13 @@ import type { Strategy as DbStrategy } from '@/lib/supabase/database.types'
 
 // --- Simulation constants ---
 
-const DEFAULT_ROSTER = { qb: 1, rb: 2, wr: 2, te: 1, flex: 1, k: 1, dst: 1, bench: 6, ir: 0 }
+// Locked Nasties roster shape -- matches NASTIES_PRESET.roster in league-config-form.tsx.
+// No kicker (k: 0); FLEX3 covers extra RB/WR/TE starters.
+const DEFAULT_ROSTER = { qb: 1, rb: 1, wr: 1, te: 1, flex: 3, k: 0, dst: 1, bench: 5, ir: 1 }
 const TOTAL_SLOTS = Object.values(DEFAULT_ROSTER).reduce((s, v) => s + v, 0)
 
 const STARTER_SLOTS: Record<string, number> = {
-  QB: 1, RB: 2, WR: 2, TE: 1, K: 1, DEF: 1,
+  QB: 1, RB: 1, WR: 1, TE: 1, DEF: 1,
 }
 
 // --- Types ---
@@ -207,7 +209,7 @@ function runSimulation(
     price: format === 'auction' ? myPrices[idx] : undefined,
   }))
 
-  const positions = ['QB', 'RB', 'WR', 'TE', 'K', 'DEF'] as const
+  const positions = ['QB', 'RB', 'WR', 'TE', 'DEF'] as const
   const positionGrades: Record<string, PositionGrade> = {}
   const shutoutPositions: string[] = []
 
@@ -497,7 +499,7 @@ function VerdictCard({ result }: { result: SimResult }) {
 }
 
 function PositionGradeCard({ result }: { result: SimResult }) {
-  const positions = ['QB', 'RB', 'WR', 'TE', 'K', 'DEF'] as const
+  const positions = ['QB', 'RB', 'WR', 'TE', 'DEF'] as const
 
   return (
     <FFICard>

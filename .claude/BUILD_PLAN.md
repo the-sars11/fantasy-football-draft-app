@@ -18,7 +18,6 @@
     { "name": "P3-P7 — Commercialization [RETIRED 2026-08-06]", "done": true }
   ],
   "nextItems": [
-    "DR-4 [Sonnet]: Kill misleading/fake data — Player Browser random intel tags, Dry-Run sim's wrong roster shape.",
     "DR-5 [Sonnet]: One-tap Go Live + connection-UX cleanup.",
     "DR-6 [Sonnet]: Design-consistency sweep + decide season/* fate.",
     "DR-7 [Sonnet + Joe]: LIVE verification against the real auctioneer + full mock-draft rehearsal on Joe's phone. The draft-readiness GATE."
@@ -93,8 +92,8 @@ Task tracking: `[ ]` not started · `[~]` in progress · `[x]` done · `[!]` blo
 > **Why:** two places show fiction as fact at the draft. Player Browser "system intel" tags use `getMockSystemTags` with `Math.random()` for BREAKOUT (`prep/players/client.tsx:36-95`, comment says "until intel API is built"). The Dry-Run sim uses a generic `DEFAULT_ROSTER` (qb1/rb2/wr2/te1/flex1/k1/dst1/bench6) instead of the locked Nasties shape (flex3/k0/bench5), so practice grades won't match the real draft.
 > **Dependency:** DR-2.
 
-- [ ] DR-4.1: Player Browser intel tags — remove the `Math.random()`/heuristic mock tags, OR replace them with honest labels derived from real data only (ADP/rank/value already present). No fabricated BREAKOUT/SLEEPER badges. Keep the real user target/avoid tags.
-- [ ] DR-4.2: Dry-Run sim (`prep/simulate/client.tsx`) — use the locked Nasties roster shape (QB1/RB1/WR1/TE1/FLEX3/DEF1/K0/Bench5/IR1), not the generic default, so sim grades match draft night.
+- [x] DR-4.1: Player Browser intel tags — removed the `Math.random()`/fabricated-source mock tags (BREAKOUT, SLEEPER). Kept VALUE/AVOID, which are genuinely derived from real ADP/rank data already present. Removed the dead `'breakout'`/`'sleeper'` filter options. Real user target/avoid tags untouched.
+- [x] DR-4.2: Dry-Run sim (`prep/simulate/client.tsx`) — `DEFAULT_ROSTER` now matches the locked Nasties shape (QB1/RB1/WR1/TE1/FLEX3/DEF1/K0/Bench5/IR1) exactly. Dropped Kicker from position grading (Nasties drafts zero kickers) so the sim never shows a fake "F" grade for a position Joe never rosters.
 - **Done when:** nothing in the prep surface displays a computed-random or placeholder value as if it were analysis; the sim scores against Joe's real roster shape.
 
 ### DR-5 — One-tap Go Live + connection-UX cleanup `[Sonnet]` · class: pipeline

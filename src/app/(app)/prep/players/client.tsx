@@ -21,25 +21,22 @@ import type { SystemTag } from '@/lib/supabase/database.types'
 const POSITIONS: (Position | 'ALL')[] = ['ALL', 'QB', 'RB', 'WR', 'TE', 'K', 'DEF']
 
 // Tag filter options
-type TagFilter = 'all' | 'target' | 'avoid' | 'breakout' | 'sleeper' | 'value' | 'bust' | 'untagged'
+type TagFilter = 'all' | 'target' | 'avoid' | 'value' | 'bust' | 'untagged'
 const TAG_FILTERS: { value: TagFilter; label: string }[] = [
   { value: 'all', label: 'All Tags' },
   { value: 'target', label: 'My Targets' },
   { value: 'avoid', label: 'My Avoids' },
-  { value: 'breakout', label: 'Breakout' },
-  { value: 'sleeper', label: 'Sleeper' },
   { value: 'value', label: 'Value' },
   { value: 'bust', label: 'Bust' },
   { value: 'untagged', label: 'Untagged' },
 ]
 
-// Mock system tags for demo (until intel API is built)
-// These would come from player_intel table in production
-function getMockSystemTags(player: Player): SystemTag[] {
+// System tags derived from real ADP-vs-consensus-rank gaps.
+// Real player_intel/sentiment sourcing is not built yet (DR-4) -- only tags backed
+// by fields already on the player object are shown here. No random/fabricated tags.
+function getSystemTags(player: Player): SystemTag[] {
   const tags: SystemTag[] = []
 
-  // Simple heuristics for demo
-  // In production, these come from tag-detector.ts and sentiment analysis
   const adp = player.adp
   const rank = player.consensusRank
 
@@ -64,30 +61,6 @@ function getMockSystemTags(player: Player): SystemTag[] {
       reasoning: `Being drafted at ${adp} but experts rank ${rank}`,
       score_modifier: -25,
       adp_gap: rank - adp,
-    })
-  }
-
-  // BREAKOUT: Young players with rising ADP
-  if (player.position === 'WR' && rank <= 30 && adp && adp >= 20 && adp <= 50) {
-    if (Math.random() > 0.7) {
-      tags.push({
-        tag: 'BREAKOUT',
-        confidence: 0.8,
-        sources: ['FantasyPros', 'Sleeper', 'ESPN'],
-        reasoning: '3+ sources identify as breakout candidate',
-        score_modifier: 15,
-      })
-    }
-  }
-
-  // SLEEPER: Late round value
-  if (adp && adp >= 80 && rank && rank <= 60) {
-    tags.push({
-      tag: 'SLEEPER',
-      confidence: 0.65,
-      sources: ['FantasyPros'],
-      reasoning: 'Expert rank significantly higher than ADP',
-      score_modifier: 10,
     })
   }
 
@@ -179,17 +152,13 @@ export function PlayerBrowserClient() {
       result = result.filter(p => {
         const hasTarget = isTarget(p.id)
         const hasAvoid = isAvoid(p.id)
-        const systemTags = getMockSystemTags(p)
+        const systemTags = getSystemTags(p)
 
         switch (tagFilter) {
           case 'target':
             return hasTarget
           case 'avoid':
             return hasAvoid
-          case 'breakout':
-            return systemTags.some(t => t.tag === 'BREAKOUT')
-          case 'sleeper':
-            return systemTags.some(t => t.tag === 'SLEEPER')
           case 'value':
             return systemTags.some(t => t.tag === 'VALUE')
           case 'bust':
@@ -543,7 +512,7 @@ export function PlayerBrowserClient() {
               key={player.id}
               rank={idx + 1}
               player={player}
-              systemTags={getMockSystemTags(player)}
+              systemTags={getSystemTags(player)}
               userTags={userTagsMap[player.id]?.tags ?? []}
               isTarget={isTarget(player.id)}
               isAvoid={isAvoid(player.id)}
