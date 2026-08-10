@@ -1,17 +1,31 @@
 /**
- * auction-feed-merge.ts — cross-source pick dedup for the Auctioneer integration feed.
+ * auction-feed-merge.ts - cross-source pick dedup for the Auctioneer integration feed.
  *
- * Pure utility module — no React, no hooks, SSR-safe.
- * Used by FF-282's use-draft-feed.ts to merge picks arriving from multiple paths
- * without emitting the same pick twice:
+ * Pure utility module: no React, no hooks, SSR-safe.
+ * Used by use-draft-feed.ts to merge Auctioneer picks arriving from multiple
+ * transport paths without emitting the same pick twice:
  *
- *   BroadcastChannel (instant) → localStorage poll (3s fallback) → file poll → Sheets poll
+ *   same-device BroadcastChannel (instant) > same-device localStorage/file poll (3s)
+ *   > remote KV proxy (cross-device, 3s)
  *
- * Dedup key is `pickId`:
- *   - Auctioneer picks: stable internal ID produced by the reducer ('pick-1', 'pick-2', ...)
- *   - Sheets picks: synthesized from player name via playerNameToPickId()
+ * SINGLE SOURCE OF TRUTH FOR DEDUP (Finding 8, 2026-08-09):
+ * The one dedup key is `pickId`, and it is always the source-assigned stable
+ * pick id, namespaced so ids from different producers never collide:
+ *   - Auctioneer picks (same-device AND remote): 'auction:<auctioneerPickId>',
+ *     built via auctionPickId(). Both sources read the SAME auctioneer draft, so
+ *     a given player carries the same auctioneer id on both paths - keying by that
+ *     id is what deduplicates a player across sources.
+ *   - Sleeper picks: 'sleeper:<pick_no>' (assigned in use-sleeper-draft-feed.ts).
+ *   - playerNameToPickId() is the FALLBACK ONLY, for a source that carries no
+ *     stable id of its own. It is not used by any current caller.
  *
- * Usage pattern in a hook (FF-282):
+ * What this merger does NOT handle: Google Sheets picks. Those are polled in
+ * use-draft-state.ts, and are kept from double-adding at the caller level via the
+ * name-based draftedNames set (see use-draft-feeds.ts), not through this merger.
+ * The historical 'sheets' FeedSource value is retained only for back-compat of the
+ * union type.
+ *
+ * Usage pattern in a hook:
  *   const mergerRef = useRef(createPickMerger())   // once per session
  *   const newPicks = mergerRef.current.merge(batch) // on every incoming batch
  *   mergerRef.current.reset()                       // on session restart / UNDO cascade
@@ -30,9 +44,12 @@ export type FeedSource = 'broadcast' | 'localstorage' | 'file' | 'sheets' | 'sle
  */
 export interface NormalizedPickEvent {
   /**
-   * Stable cross-source dedup key.
-   * For Auctioneer picks: the internal reducer ID (e.g. 'pick-1').
-   * For Sheets picks: use playerNameToPickId() to synthesize.
+   * Stable cross-source dedup key - the SINGLE source of truth for dedup.
+   * Always a source-assigned stable id, namespaced by producer:
+   *   - Auctioneer: auctionPickId(auctioneerPickId) => 'auction:<id>'
+   *   - Sleeper:    'sleeper:<pick_no>'
+   *   - Fallback:   playerNameToPickId(name) => 'name:<lowercased-trimmed>'
+   *                 (only for a source with no stable id; unused today)
    */
   pickId: string
   playerName: string
@@ -67,14 +84,29 @@ export interface PickMerger {
 // ---------------------------------------------------------------------------
 
 /**
- * Synthesize a stable pickId from a player name for sources (e.g. Sheets) that
- * do not carry an Auctioneer pick ID. Lowercased + trimmed so casing differences
- * across sources do not create phantom duplicates.
+ * Namespace an Auctioneer pick id into the merger's dedup key space.
+ * Both auction sources (same-device + remote KV proxy) read the same auctioneer
+ * draft, so the same player carries the same auctioneer id on both paths - this
+ * is what makes a player dedup across sources.
  *
- * Prefixed with 'sheets:' so synthesized IDs never collide with Auctioneer IDs.
+ * Prefixed with 'auction:' so ids never collide with Sleeper ('sleeper:') or the
+ * name-based fallback ('name:').
+ */
+export function auctionPickId(auctioneerPickId: string): string {
+  return `auction:${auctioneerPickId}`
+}
+
+/**
+ * FALLBACK ONLY. Synthesize a dedup key from a player name for a source that
+ * carries no stable id of its own. Lowercased + trimmed so casing/whitespace
+ * differences do not create phantom duplicates.
+ *
+ * Prefixed with 'name:' so synthesized keys never collide with real source ids
+ * ('auction:' / 'sleeper:'). No current caller uses this - every live source has
+ * a stable id. Retained for a future id-less source and covered by tests.
  */
 export function playerNameToPickId(playerName: string): string {
-  return `sheets:${playerName.toLowerCase().trim()}`
+  return `name:${playerName.toLowerCase().trim()}`
 }
 
 // ---------------------------------------------------------------------------

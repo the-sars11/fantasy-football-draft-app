@@ -52,12 +52,18 @@ export function getGlobalFileHandle(): FileSystemFileHandle | null {
 
 export type AuctioneerConnectionType = 'localstorage' | 'file' | null
 
-/** Normalized pick emitted by the hook — maps directly to addManualPick args. */
+/** Normalized pick emitted by the hook - maps directly to addManualPick args. */
 export interface AuctioneerPick {
   player_name: string
   manager: string   // resolved team name (falls back to teamId if not found)
   price: number
   position?: string
+  /**
+   * Auctioneer's stable internal pick id (e.g. 'pick-1'). Surfaced so the merger
+   * in use-draft-feed.ts can dedup by the real id rather than re-deriving a key
+   * from the player name. See auction-feed-merge.ts (Finding 8).
+   */
+  sourceId: string
 }
 
 // Mirrors the Auctioneer internal types (no import from sibling repo)
@@ -122,6 +128,7 @@ function normalizeAAPick(pick: _AAPick, teamNameMap: Map<string, string>): Aucti
     manager: teamNameMap.get(pick.teamId) ?? pick.teamId,
     price: pick.price,
     position: pick.player.position,
+    sourceId: pick.id,
   }
 }
 

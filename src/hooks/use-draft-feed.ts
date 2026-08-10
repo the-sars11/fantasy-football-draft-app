@@ -12,8 +12,10 @@
  *   same-device BroadcastChannel (instant) > same-device localStorage/file poll (3s)
  *   > remote KV proxy (FF-314, cross-device, 3s)
  * Same-device wins when present; the remote proxy covers the cross-device case
- * (host laptop + Joe's phone on different origins). Dedup is by player-name pickId
- * so a player drafted in the auctioneer is never double-added across sources.
+ * (host laptop + Joe's phone on different origins). Dedup is by the auctioneer's
+ * stable pick id (auctionPickId), the single source of truth defined in
+ * auction-feed-merge.ts (Finding 8). Both sources read the same auctioneer draft,
+ * so a player carries the same id on both paths and is never double-added.
  *
  * Google Sheets polling is handled separately in use-draft-state.ts and is NOT
  * included here to avoid double-polling. Sheets picks are prevented from
@@ -35,7 +37,7 @@ import {
 } from './use-remote-auctioneer-feed'
 import {
   createPickMerger,
-  playerNameToPickId,
+  auctionPickId,
   type NormalizedPickEvent,
   type FeedSource,
 } from '@/lib/draft/auction-feed-merge'
@@ -106,10 +108,10 @@ function connectionTypeToSource(ct: AuctioneerConnectionType): FeedSource {
 
 function toNormalizedEvent(pick: AuctioneerPick, source: FeedSource): NormalizedPickEvent {
   return {
-    // Synthesize pickId from player name — unique per player within a draft session.
-    // playerNameToPickId() ensures cross-source dedup: a player drafted via the
-    // remote proxy won't be double-added from the same-device path (and vice versa).
-    pickId: playerNameToPickId(pick.player_name),
+    // Dedup by the auctioneer's stable pick id (single source of truth). Both the
+    // same-device and remote paths read the same auctioneer draft, so a player
+    // carries the same id on both and is never double-added across sources.
+    pickId: auctionPickId(pick.sourceId),
     playerName: pick.player_name,
     manager: pick.manager,
     price: pick.price,
@@ -120,7 +122,9 @@ function toNormalizedEvent(pick: AuctioneerPick, source: FeedSource): Normalized
 
 function remoteToNormalizedEvent(pick: RemoteAuctioneerPick): NormalizedPickEvent {
   return {
-    pickId: playerNameToPickId(pick.player_name),
+    // Same auctioneer id space as the same-device path (pick.remoteId === pick.id
+    // in the auctioneer), so the merger dedups a player across both sources.
+    pickId: auctionPickId(pick.remoteId),
     playerName: pick.player_name,
     manager: pick.manager,
     price: pick.price,
