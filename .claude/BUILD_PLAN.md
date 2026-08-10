@@ -63,7 +63,7 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 ---
 
 ## P0 — Personal Season Hardening
-> **Goal:** Joe's ESPN auction draft + Tyler's Yahoo snake/keeper draft work flawlessly on Aug 2026 draft day.
+> **Goal:** Joe's ESPN auction draft works flawlessly on Aug 2026 draft day. Tyler's Yahoo snake/keeper league is on PERMANENT HOLD and out of scope for this app.
 > **Rule:** Every sub-tier beyond 0 is contingent on sub-tier 0's verdict.
 
 ### Sub-tier 0: UI Evaluation & Possible Redesign [GATE]
@@ -120,8 +120,8 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 
 ---
 
-### Sub-tier 6: Tyler's Keeper League (Yahoo snake) — ARCHIVED 2026-08-06
-> **ARCHIVED 2026-08-06:** Tyler's Sleeper/Yahoo snake league is out of scope. Focus is Joe's Nasties 12-person ESPN auction. All items below were completed and the code remains in the repo, but this sub-tier is not maintained going forward.
+### Sub-tier 6: Tyler's Keeper League (Yahoo snake) - PERMANENT HOLD
+> **PERMANENT HOLD - out of scope (Tyler's league removed from this app):** Tyler's Sleeper/Yahoo snake/keeper league is NOT part of this app and is on indefinite backlog. Focus is Joe's Nasties 12-person ESPN auction ONLY. All items below were completed before the scope change; the code remains in the repo but must not be treated as active scope. Do NOT do keeper/snake/Yahoo work without Joe explicitly reactivating it.
 
 - [x] FF-069: Tyler's league setup — T&A Keeper League scoring + keeper config entered; `TYLERS_SLEEPER_SCORING` in scoring-presets.ts; preset updated (2 FLEX, no K, 2 IR, 6pt passing TDs, 0.5 PPR, 4pt safety, yardage bonuses); draft order + keeper selections to be entered at draft setup time
 - [x] FF-273: Keeper discount calculator — keeper cost vs. current ADP value = keeper equity, sorted descending
@@ -248,7 +248,7 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 ---
 
 ## P1 — Auctioneer Integration
-> **Scope:** Joe's ESPN auction ONLY. Tyler drafts via the Sleeper app (snake, keeper) — no Auctioneer involvement for Tyler's league. All code paths gated by `format === 'auction'`.
+> **Scope:** Joe's ESPN auction ONLY. Tyler's snake/keeper/Sleeper/Yahoo league is on PERMANENT HOLD - out of scope for this app. All code paths gated by `format === 'auction'`.
 
 - [x] FF-279: FFI reads Auctioneer's JSON export at auction setup — hot-reload on file change via File System Access API or localStorage namespace
 - [x] FF-280: Subscribe to Auctioneer's `ffi-auction-feed` BroadcastChannel — instant pick sync when both run on same device (gated: auction mode only)

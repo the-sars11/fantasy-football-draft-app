@@ -1,5 +1,10 @@
 # Working State — Fantasy Football Draft Advisor
 
+## SCOPE (Permanent)
+This app = Joe's ESPN auction redraft ONLY. Tyler's keeper/snake/Yahoo league is on permanent indefinite hold. Do NOT do keeper/snake/Yahoo work without Joe explicitly reactivating it.
+
+---
+
 ## Current Session
 - **Date:** 2026-08-09
 - **Focus:** Deferred hardening backlog. Finding 8 (single dedup key for the live feed) landed this session. Prior this session: finding 12 (per-pick edit/remove: Stage A logic + Stage B "Fix a pick" UI, both landed) + finding 10 (sheet-poll resilience) + finding 9 (giant-component extraction, full). Earlier: finding 7 (sheet dedup) + finding 13 (connection-pill a11y). UX-V2 + P0-UX both remain fully complete.
@@ -8,7 +13,7 @@
 - **NEXT:** UX-V2 track is complete. Next work is whichever item Joe prioritizes from the remaining BUILD_PLAN backlog (see "What's Broken / Known Issues" + the deferred BACKLOG below).
 - **CAVEAT:** Pixel screenshots blocked (Browser pane not compositing frames); render verified via live DOM against dev server (port 3003). Dev `/api/players` cache has NO consensusTier/consensusAuctionValue, so sim shows UNRANKED / $1 ranges — a dev-data gap, not a logic bug (production data populates these; unit tests prove the logic with realistic fixtures). Pre-existing `npm run lint` has 27 errors in untouched files (react-hooks strict rules in use-user-tags, research/*, supabase/middleware); the 10 new/changed room files are lint-clean. A `playwright` devDependency + scratch files (`_dev_s5.js`, `fp_*.html`, `screenshot.mjs`, `out.txt`) are uncommitted and left out of the room commit for Joe to decide on.
 - **GATED:** FFT-008 needs Joe on phone. Live AI calls need `ANTHROPIC_API_KEY` + typed cost approval.
-- **BACKLOG (deferred, tracked in CODE_REVIEW_2026-06.md):** sleeper-feed pickNoToManagerIdx consistency test (deferred - needs React hook test env); finding 11 (keeper numbering, Tyler's league only). [DONE 2026-08-09: finding 8 (single dedup key = auctioneer pick id), finding 12 (per-pick edit/remove - Stage A logic + Stage B "Fix a pick" UI), finding 10 sheet-poll resilience, finding 9 giant-component extraction (live/review clients), finding 13 connection-pill a11y, finding 7 sheet dedup, finding 5 broader test suite.]
+- **BACKLOG (deferred, tracked in CODE_REVIEW_2026-06.md):** sleeper-feed pickNoToManagerIdx consistency test (deferred - needs React hook test env; snake-mode only, low priority given PERMANENT HOLD on Tyler's league); finding 11 (keeper numbering - PERMANENT HOLD, Tyler's league removed from scope). [DONE 2026-08-09: finding 8 (single dedup key = auctioneer pick id), finding 12 (per-pick edit/remove - Stage A logic + Stage B "Fix a pick" UI), finding 10 sheet-poll resilience, finding 9 giant-component extraction (live/review clients), finding 13 connection-pill a11y, finding 7 sheet dedup, finding 5 broader test suite.]
 
 ## Last Completed (most recent first)
 - **Finding 8: single dedup key (auctioneer pick id) for the live feed** (2026-08-09): Collapsed the live auction feed's two mismatched dedup schemes into one. Each source hook (`useAuctioneerfeed`, `useRemoteAuctioneerFeed`) already deduped internally by the auctioneer's real `pick.id`, then discarded it, and `use-draft-feed.ts` re-derived a name key (`playerNameToPickId` => `sheets:<name>`) for the cross-source merger - two identity schemes on the same picks. The merge module also documented a "Sheets flows through here" path that never runs (Sheets is deduped at the caller via `draftedNames`) and stamped auction picks with a bogus `sheets:` prefix. DECISION (single source of truth): the one dedup key is the source-assigned stable pick id, namespaced so producers never collide - `auction:<auctioneerPickId>` (new `auctionPickId()` helper) for both auction sources, `sleeper:<pick_no>` for Sleeper (already so); `playerNameToPickId()` kept as the documented id-less fallback only (prefix `sheets:` -> `name:`, no live caller). Chosen over formalizing the name-key because the app's other feed (Sleeper) already keys by a real id, both auction sources already carry the real id, and it activates the previously-dead real-id merge path. Changes: `use-auctioneer-feed.ts` `AuctioneerPick` gains `sourceId` (the `pick.id`, populated in the sole constructor `normalizeAAPick`); `use-draft-feed.ts` keys `pickId` via `auctionPickId(sourceId/remoteId)`; `auction-feed-merge.ts` adds `auctionPickId()` + re-documents the contract. Behavior-preserving: same auctioneer draft => same id across same-device+remote, so dedup output matches the old name-key; the caller `draftedNames` name-gate is untouched. Tests 117 -> 122 (3 `auctionPickId` + updated 4 `playerNameToPickId` to `name:` + 2 merger tests for cross-source id dedup and shared-name-different-player). VERIFY: type-check 0 errors, `eslint` on the 4 changed files 0 errors/0 warnings, 122/122 tests, build `Compiled successfully` with `/draft/live` in the route list, zero em/en-dashes in authored code. Committed by explicit path; `.claude/launch.json` untouched. CODE_REVIEW finding 8 marked FIXED; CHANGELOG entry added. No paid endpoints fired.
@@ -142,7 +147,7 @@
 - gh CLI not installed — GitHub repo needs web UI or gh install
 - Port 3003 to avoid conflicts
 - Joe = ESPN / Auction / Full redraft
-- Tyler = Sleeper / Snake / Keeper league (T&A Keeper League)
+- Tyler's league (Sleeper / Snake / Keeper, T&A Keeper League) is on PERMANENT HOLD - out of scope for this app. Do NOT work on it without Joe explicitly reactivating it.
 
 ---
 
