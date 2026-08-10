@@ -56,6 +56,14 @@ function PickRow({
           won by {pick.manager}
         </div>
       </div>
+      {pick.provisional && (
+        <span
+          className="shrink-0 rounded px-1.5 py-0.5 text-[9px] font-extrabold uppercase tracking-[1px]"
+          style={{ background: 'rgba(245,158,11,0.15)', color: '#f59e0b', border: '1px solid rgba(245,158,11,0.3)' }}
+        >
+          UNCONFIRMED
+        </span>
+      )}
       {pick.price !== undefined && (
         <span className="shrink-0 font-mono text-[14px] font-bold" style={{ color: ROOM.volt }}>
           ${pick.price}

@@ -17,12 +17,18 @@ import {
   applySheetRows,
   removePickByNumber,
   editPickByNumber,
+  reconcileWithAuctioneerPicks,
   getDraftedPlayerNames,
   getPositionNeeds,
   getRemainingBudget,
   getMaxBid,
 } from '@/lib/draft/state'
-import type { DraftState, DraftPick } from '@/lib/draft/state'
+import type {
+  DraftState,
+  DraftPick,
+  AuctioneerPickSnapshot,
+  PickCorrection,
+} from '@/lib/draft/state'
 import type { DraftFormat, RosterSlots, DraftSession } from '@/lib/supabase/database.types'
 import { useDraftPolling } from './use-draft-polling'
 import type { SheetRow } from '@/lib/sheets'
@@ -39,6 +45,12 @@ interface UseDraftStateResult {
   undoLastPick: () => void
   editPick: (pickNumber: number, changes: Partial<Omit<DraftPick, 'pick_number'>>) => void
   removePick: (pickNumber: number) => void
+  /**
+   * FF-315: Reconcile provisional picks against the auctioneer's full snapshot on
+   * reconnect. Auctioneer is the system of record — it wins on discrepancies.
+   * Returns the list of picks that were auto-corrected, for the toast banner.
+   */
+  reconcileWithAuctioneer: (auctioneerPicks: AuctioneerPickSnapshot[]) => PickCorrection[]
   draftedNames: Set<string>
   getNeeds: (manager: string) => Record<string, number>
   getBudget: (manager: string) => number | null
@@ -59,6 +71,11 @@ export function useDraftState({
   const [saving, setSaving] = useState(false)
   const onPickAppliedRef = useRef(onPickApplied)
   onPickAppliedRef.current = onPickApplied
+
+  // Keep a ref to the latest state so reconcileWithAuctioneer can read it
+  // synchronously (setState updaters are async in React).
+  const stateRef = useRef(state)
+  stateRef.current = state
 
   // Initialize state from session
   useEffect(() => {
@@ -209,6 +226,43 @@ export function useDraftState({
     })
   }, [persistPicks, rebuildFromPicks])
 
+  // FF-315: Reconcile provisional picks against the auctioneer snapshot on reconnect.
+  // Reads the latest state via stateRef (synchronous) to compute and return corrections
+  // immediately, then applies them inside setState for a consistent state rebuild.
+  const reconcileWithAuctioneer = useCallback(
+    (auctioneerPicks: AuctioneerPickSnapshot[]): PickCorrection[] => {
+      const current = stateRef.current
+      if (!current) return []
+
+      const result = reconcileWithAuctioneerPicks(current.picks, auctioneerPicks)
+
+      // Apply reconciled picks + add any net-new auctioneer picks after the setState batch.
+      setState(prev => {
+        if (!prev) return prev
+        // Re-run inside setState for freshness in concurrent mode.
+        const fresh = reconcileWithAuctioneerPicks(prev.picks, auctioneerPicks)
+        const rebuilt = rebuildFromPicks(prev, fresh.picks)
+        persistPicks(fresh.picks)
+        return rebuilt
+      })
+
+      // Fold in picks the auctioneer has that state doesn't (did not go through onNewPicks
+      // because they arrived while the phone was offline and the merger's seenIds were reset).
+      for (const ap of result.newPicksFromAuctioneer) {
+        addManualPick({
+          player_name: ap.player_name,
+          manager: ap.manager,
+          price: ap.price,
+          position: ap.position,
+        })
+      }
+
+      return result.corrections
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [rebuildFromPicks, addManualPick, persistPicks],
+  )
+
   // Derived queries
   const draftedNames = state ? getDraftedPlayerNames(state) : new Set<string>()
 
@@ -233,6 +287,7 @@ export function useDraftState({
     undoLastPick,
     editPick,
     removePick,
+    reconcileWithAuctioneer,
     draftedNames,
     getNeeds,
     getBudget,

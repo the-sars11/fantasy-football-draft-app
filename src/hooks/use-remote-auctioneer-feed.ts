@@ -129,6 +129,13 @@ export interface UseRemoteAuctioneerFeedResult {
   error: string | null
   /** Force an immediate poll (wired to the chip's Retry). */
   retry: () => void
+  /**
+   * FF-315: The FULL normalized pick list from the last successful live poll —
+   * NOT filtered by seenIds. Used for offline reconciliation on reconnect:
+   * the caller needs all auctioneer picks, not just the delta since last poll.
+   * Null until the first successful poll.
+   */
+  lastSnapshot: RemoteAuctioneerPick[] | null
 }
 
 export function useRemoteAuctioneerFeed({
@@ -142,6 +149,8 @@ export function useRemoteAuctioneerFeed({
   const [pickCount, setPickCount] = useState(0)
   const [hasPolled, setHasPolled] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  // FF-315: full snapshot for offline reconciliation — all picks, not just the delta.
+  const [lastSnapshot, setLastSnapshot] = useState<RemoteAuctioneerPick[] | null>(null)
 
   // Per-session dedup: auctioneer pick ids already emitted.
   const seenIdsRef = useRef(new Set<string>())
@@ -192,11 +201,15 @@ export function useRemoteAuctioneerFeed({
 
         // Live payload — connect + fold new picks through internal dedup.
         const teamNameMap = buildTeamNameMap(state?.config?.teams ?? [])
+        const allNormalized: RemoteAuctioneerPick[] = []
         const fresh: RemoteAuctioneerPick[] = []
         for (const p of picks) {
-          if (!p?.id || seenIdsRef.current.has(p.id)) continue
+          if (!p?.id) continue
+          const normalized = normalizeRemotePick(p, teamNameMap)
+          allNormalized.push(normalized)
+          if (seenIdsRef.current.has(p.id)) continue
           seenIdsRef.current.add(p.id)
-          fresh.push(normalizeRemotePick(p, teamNameMap))
+          fresh.push(normalized)
         }
 
         setConnected(true)
@@ -204,6 +217,8 @@ export function useRemoteAuctioneerFeed({
         setLastSyncAt(new Date())
         setError(null)
         failuresRef.current = 0
+        // FF-315: store the full snapshot for offline reconciliation.
+        setLastSnapshot(allNormalized)
 
         if (fresh.length > 0) {
           setPickCount((prev) => prev + fresh.length)
@@ -236,5 +251,5 @@ export function useRemoteAuctioneerFeed({
     }
   }, [enabled, draftCode, retryNonce])
 
-  return { connected, phase, lastSyncAt, pickCount, hasPolled, error, retry }
+  return { connected, phase, lastSyncAt, pickCount, hasPolled, error, retry, lastSnapshot }
 }

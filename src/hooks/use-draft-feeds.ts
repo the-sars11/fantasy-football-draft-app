@@ -65,22 +65,53 @@ export function useDraftFeeds({
     importedCount: aifImportedCount,
     error: aifError,
     // FF-314: cross-device remote source, surfaced for the connection chip.
+    remoteConnected,
     remoteLastSyncAt,
     remoteError,
     remoteRetry,
+    remoteHasPolled,
+    // FF-315: full snapshot for offline reconciliation.
+    remoteLastSnapshot,
   } = useDraftFeed({
     format: format ?? null,
     connectionType: aifParam,
     onNewPicks: onAuctioneerpicks,
   })
 
+  // FF-315: Detect offline→online transition for offline resync.
+  // `wasConnectedRef` tracks whether the remote auctioneer was ever connected
+  // this session — if it was never connected (manual-only mode) there is nothing
+  // to reconcile against and we skip provisional tagging entirely.
+  const wasConnectedRef = useRef(false)
+  const prevRemoteConnectedRef = useRef(false)
+
+  // Update refs in render path (not in effect) so they are always current.
+  const prevConnected = prevRemoteConnectedRef.current
+  prevRemoteConnectedRef.current = remoteConnected
+  if (remoteConnected) wasConnectedRef.current = true
+
+  const isOfflineFromAuctioneer = wasConnectedRef.current && !remoteConnected
+  const justReconnected = wasConnectedRef.current && !prevConnected && remoteConnected
+
   return {
     aifEnabled,
     aifConnected,
     aifImportedCount,
     aifError,
+    remoteConnected,
     remoteLastSyncAt,
     remoteError,
     remoteRetry,
+    remoteHasPolled,
+    // FF-315 reconnect / offline-mode signals + snapshot for reconciliation.
+    isOfflineFromAuctioneer,
+    justReconnected,
+    /**
+     * FF-315: Full normalized pick list from the last successful remote poll.
+     * Pass to reconcileWithAuctioneer when justReconnected is true.
+     * RemoteAuctioneerPick is structurally a superset of AuctioneerPickSnapshot,
+     * so the caller can pass it directly to reconcileWithAuctioneer.
+     */
+    remoteLastSnapshot,
   }
 }

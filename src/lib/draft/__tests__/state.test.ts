@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { createInitialState, applyPick, applySheetRows, removePickByNumber, editPickByNumber, getMaxBid, getRemainingBudget, type DraftPick, type DraftState } from '../state'
+import { createInitialState, applyPick, applySheetRows, removePickByNumber, editPickByNumber, getMaxBid, getRemainingBudget, reconcileWithAuctioneerPicks, type DraftPick, type DraftState, type AuctioneerPickSnapshot } from '../state'
 import type { RosterSlots } from '../../supabase/database.types'
 import type { SheetRow } from '../../sheets'
 
@@ -262,6 +262,76 @@ describe('editPickByNumber (finding 12)', () => {
     const copy = picks.map(p => ({ ...p }))
     editPickByNumber(picks, 1, { price: 999 })
     expect(picks).toEqual(copy)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// FF-315: reconcileWithAuctioneerPicks
+// ---------------------------------------------------------------------------
+
+describe('reconcileWithAuctioneerPicks (FF-315)', () => {
+  function provPick(playerName: string, manager: string, price: number, position?: string): DraftPick {
+    return { pick_number: 1, player_name: playerName, manager, price, position, provisional: true }
+  }
+  function confPick(playerName: string, manager: string, price: number): DraftPick {
+    return { pick_number: 1, player_name: playerName, manager, price }
+  }
+  function snap(playerName: string, manager: string, price: number): AuctioneerPickSnapshot {
+    return { player_name: playerName, manager, price }
+  }
+
+  it('non-provisional picks are passed through untouched', () => {
+    const picks = [confPick('CMC', 'A', 50)]
+    const { picks: out, corrections, newPicksFromAuctioneer } = reconcileWithAuctioneerPicks(picks, [snap('CMC', 'A', 50)])
+    expect(out).toHaveLength(1)
+    expect(out[0].provisional).toBeUndefined()
+    expect(corrections).toHaveLength(0)
+    expect(newPicksFromAuctioneer).toHaveLength(0)
+  })
+
+  it('provisional pick matching auctioneer exactly: clears provisional, no correction', () => {
+    const picks = [provPick('Tyreek', 'B', 40)]
+    const { picks: out, corrections } = reconcileWithAuctioneerPicks(picks, [snap('Tyreek', 'B', 40)])
+    expect(out[0].provisional).toBeUndefined()
+    expect(corrections).toHaveLength(0)
+  })
+
+  it('provisional pick with wrong price: auctioneer wins, records correction, clears provisional', () => {
+    const picks = [provPick('JT', 'A', 30)]
+    const { picks: out, corrections } = reconcileWithAuctioneerPicks(picks, [snap('JT', 'A', 55)])
+    expect(out[0].price).toBe(55)
+    expect(out[0].provisional).toBeUndefined()
+    expect(corrections).toHaveLength(1)
+    expect(corrections[0]).toMatchObject({ playerName: 'JT', loggedPrice: 30, actualPrice: 55, loggedManager: 'A', actualManager: 'A' })
+  })
+
+  it('provisional pick with wrong manager: auctioneer wins, records correction', () => {
+    const picks = [provPick('Kelce', 'A', 25)]
+    const { picks: out, corrections } = reconcileWithAuctioneerPicks(picks, [snap('Kelce', 'B', 25)])
+    expect(out[0].manager).toBe('B')
+    expect(corrections[0]).toMatchObject({ loggedManager: 'A', actualManager: 'B' })
+  })
+
+  it('provisional pick absent from auctioneer: stays provisional (unconfirmed)', () => {
+    const picks = [provPick('Unknown', 'A', 10)]
+    const { picks: out, corrections, newPicksFromAuctioneer } = reconcileWithAuctioneerPicks(picks, [])
+    expect(out[0].provisional).toBe(true)
+    expect(corrections).toHaveLength(0)
+    expect(newPicksFromAuctioneer).toHaveLength(0)
+  })
+
+  it('auctioneer pick absent from state: surfaces in newPicksFromAuctioneer', () => {
+    const picks = [confPick('CMC', 'A', 50)]
+    const { newPicksFromAuctioneer } = reconcileWithAuctioneerPicks(picks, [snap('CMC', 'A', 50), snap('Tyreek', 'B', 40)])
+    expect(newPicksFromAuctioneer).toHaveLength(1)
+    expect(newPicksFromAuctioneer[0].player_name).toBe('Tyreek')
+  })
+
+  it('match key is case-insensitive and trims whitespace', () => {
+    const picks = [provPick('cmc', 'a', 50)]
+    const { picks: out, corrections } = reconcileWithAuctioneerPicks(picks, [snap('CMC', 'A', 50)])
+    expect(out[0].provisional).toBeUndefined()
+    expect(corrections).toHaveLength(0)
   })
 })
 

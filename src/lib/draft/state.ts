@@ -28,6 +28,34 @@ export interface DraftPick {
   price?: number   // auction
   round?: number   // snake
   is_keeper?: boolean // true if this pick was a pre-draft keeper
+  provisional?: boolean // true = recorded while offline from auctioneer (FF-315)
+}
+
+// ---------------------------------------------------------------------------
+// FF-315: Offline resync types
+// ---------------------------------------------------------------------------
+
+/** Minimal auctioneer pick shape needed for reconciliation. */
+export interface AuctioneerPickSnapshot {
+  player_name: string
+  manager: string
+  price: number
+  position?: string
+}
+
+/** A provisional pick whose price or manager differed from the auctioneer. */
+export interface PickCorrection {
+  playerName: string
+  loggedPrice: number
+  actualPrice: number
+  loggedManager: string
+  actualManager: string
+}
+
+export interface ReconciliationResult {
+  picks: DraftPick[]                          // updated picks array (corrections applied, provisional cleared)
+  corrections: PickCorrection[]               // picks that were auto-corrected (for toast)
+  newPicksFromAuctioneer: AuctioneerPickSnapshot[] // in auctioneer but absent from state (fold in via addManualPick)
 }
 
 export interface ManagerState {
@@ -281,6 +309,88 @@ export function getDraftedPlayerNames(state: DraftState): Set<string> {
     names.add(k.player_name.toLowerCase())
   }
   return names
+}
+
+/**
+ * FF-315: Reconcile provisional picks against the auctioneer's full pick snapshot.
+ *
+ * Called on reconnect after the phone was offline from a connected auctioneer.
+ * The auctioneer is the system of record — it always wins on discrepancies.
+ *
+ * Match key: player_name (case-insensitive, trimmed). Both the app and the
+ * auctioneer pull from the same Sleeper database so names are consistent.
+ *
+ * Returns:
+ *   picks                 — new picks array with corrections applied + `provisional`
+ *                           cleared on confirmed picks (input is NOT mutated)
+ *   corrections           — subset that was auto-corrected (for the toast)
+ *   newPicksFromAuctioneer — auctioneer picks absent from state (fold in via addManualPick)
+ */
+export function reconcileWithAuctioneerPicks(
+  currentPicks: DraftPick[],
+  auctioneerPicks: AuctioneerPickSnapshot[],
+): ReconciliationResult {
+  const corrections: PickCorrection[] = []
+
+  // Build a name→snapshot map for O(1) auctioneer lookups.
+  const auctioneerByName = new Map<string, AuctioneerPickSnapshot>()
+  for (const ap of auctioneerPicks) {
+    auctioneerByName.set(ap.player_name.toLowerCase().trim(), ap)
+  }
+
+  // Names already in state — used to find net-new auctioneer picks.
+  const stateNames = new Set<string>()
+  for (const sp of currentPicks) {
+    stateNames.add(sp.player_name.toLowerCase().trim())
+  }
+
+  // Process each pick in state.
+  const reconciledPicks = currentPicks.map((pick): DraftPick => {
+    if (!pick.provisional) return pick  // non-provisional: untouched
+
+    const key = pick.player_name.toLowerCase().trim()
+    const ap = auctioneerByName.get(key)
+
+    if (!ap) {
+      // Not yet in auctioneer → stays provisional ("unconfirmed")
+      return pick
+    }
+
+    const priceMatch = ap.price === (pick.price ?? 0)
+    const managerMatch = ap.manager.toLowerCase().trim() === pick.manager.toLowerCase().trim()
+
+    if (priceMatch && managerMatch) {
+      // Values match → confirmed, clear provisional flag.
+      return { ...pick, provisional: undefined }
+    }
+
+    // Values differ → auctioneer wins.
+    corrections.push({
+      playerName: pick.player_name,
+      loggedPrice: pick.price ?? 0,
+      actualPrice: ap.price,
+      loggedManager: pick.manager,
+      actualManager: ap.manager,
+    })
+
+    return {
+      ...pick,
+      price: ap.price,
+      manager: ap.manager,
+      position: ap.position ?? pick.position,
+      provisional: undefined,
+    }
+  })
+
+  // Find auctioneer picks not yet in state.
+  const newPicksFromAuctioneer: AuctioneerPickSnapshot[] = []
+  for (const ap of auctioneerPicks) {
+    if (!stateNames.has(ap.player_name.toLowerCase().trim())) {
+      newPicksFromAuctioneer.push(ap)
+    }
+  }
+
+  return { picks: reconciledPicks, corrections, newPicksFromAuctioneer }
 }
 
 /**

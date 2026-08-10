@@ -96,6 +96,12 @@ export interface UseDraftFeedResult {
   remoteError: string | null
   /** Force an immediate remote poll (wire to the chip's Retry). */
   remoteRetry: () => void
+  /**
+   * FF-315: Full normalized pick list from the last successful remote poll —
+   * NOT filtered by seenIds. The caller uses this for offline reconciliation
+   * on reconnect (needs all picks, not just the delta since last poll).
+   */
+  remoteLastSnapshot: RemoteAuctioneerPick[] | null
 }
 
 // ---------------------------------------------------------------------------
@@ -210,5 +216,6 @@ export function useDraftFeed({
     remoteHasPolled: remote.hasPolled,
     remoteError: remote.error,
     remoteRetry: remote.retry,
+    remoteLastSnapshot: remote.lastSnapshot,
   }
 }

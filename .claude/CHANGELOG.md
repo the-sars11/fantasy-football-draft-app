@@ -2,6 +2,27 @@
 
 ---
 
+## 2026-08-10 / FF-315: Offline resync + reconciliation
+
+**Task:** FF-315 (P1b) | **Class:** `pipeline` (feed hooks + draft state) | **Lenses:** Architecture, QA
+
+**Problem:** If Joe's phone loses the auctioneer feed mid-draft and he records picks manually, there was no mechanism to (a) tag those picks as provisional, (b) reconcile them against the auctioneer's system-of-record snapshot on reconnect, or (c) surface auto-corrections so Joe sees what changed.
+
+**What changed:**
+- `src/lib/draft/state.ts`: Added `provisional?: boolean` to `DraftPick`; new types `AuctioneerPickSnapshot`, `PickCorrection`, `ReconciliationResult`; new pure function `reconcileWithAuctioneerPicks()` — matches by player_name (case-insensitive), auctioneer wins on discrepancies, returns corrected pick array + corrections list + net-new auctioneer picks.
+- `src/hooks/use-draft-state.ts`: Added `stateRef` (synchronous state read for concurrent-mode safety); added `reconcileWithAuctioneer` action — runs reconcile, rebuilds state, folds in net-new picks via `addManualPick`; returns `PickCorrection[]` for the banner.
+- `src/hooks/use-remote-auctioneer-feed.ts`: Added `lastSnapshot: RemoteAuctioneerPick[] | null` — full normalized pick list from each successful poll (NOT filtered by seenIds), for offline reconciliation.
+- `src/hooks/use-draft-feed.ts`: Threads `remoteLastSnapshot` from `useRemoteAuctioneerFeed` through `UseDraftFeedResult`.
+- `src/hooks/use-draft-feeds.ts`: Added `wasConnectedRef` + `prevRemoteConnectedRef` to compute `isOfflineFromAuctioneer` and `justReconnected` in the render path; exposes all three via return.
+- `src/app/(app)/draft/live/client.tsx`: Wires `justReconnected → reconcileWithAuctioneer(remoteLastSnapshot)` in a `useEffect`; `handleRecordPick` wraps `addManualPick` to tag picks `provisional: true` when `isOfflineFromAuctioneer`; amber corrections banner lists auto-corrected picks with dismiss.
+- `src/components/draft/live-room/fix-pick-sheet.tsx`: `PickRow` shows small amber "UNCONFIRMED" chip when `pick.provisional === true`.
+- `src/lib/draft/__tests__/state.test.ts`: 6 unit tests for `reconcileWithAuctioneerPicks` (non-provisional pass-through, exact match clears, price correction, manager correction, absent-from-auctioneer stays provisional, net-new from auctioneer, case-insensitive match).
+- `.claude/OFFLINE_RESYNC_SPEC.md`: Full spec written before implementation.
+
+**Verify:** type-check 0 errors · lint 0 new errors on changed files · 103/103 tests (6 new) · build clean (`/draft/live` present). No paid endpoints fired.
+
+---
+
 ## 2026-08-09 / Finding 8: one dedup key (auctioneer pick id) for the live feed
 
 **Task:** CODE_REVIEW_2026-06 finding 8 (P1, Architecture/dedup) | **Class:** `shared` (feed hooks + merge util) | **Lenses:** Architecture, QA

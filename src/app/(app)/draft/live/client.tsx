@@ -68,6 +68,7 @@ import { calculateMaxBidAdvice } from '@/lib/draft/auction-advisor'
 import { InjuryWatch } from '@/components/draft/injury-watch'
 import { TrashTalkFeed, SavedTrashTalk } from '@/components/draft/trash-talk'
 import { type AuctioneerConnectionType } from '@/hooks/use-draft-feed'
+import type { PickCorrection } from '@/lib/draft/state'
 import { useDraftFeeds } from '@/hooks/use-draft-feeds'
 import { useTrashTalkEngine } from '@/hooks/use-trash-talk-engine'
 import { useDraftSimulator } from '@/hooks/use-draft-simulator'
@@ -162,6 +163,7 @@ export function LiveDraftClient() {
     undoLastPick,
     editPick,
     removePick,
+    reconcileWithAuctioneer,
     draftedNames,
     getNeeds,
     getBudget,
@@ -192,12 +194,40 @@ export function LiveDraftClient() {
     remoteLastSyncAt,
     remoteError,
     remoteRetry,
+    // FF-315: offline resync signals.
+    isOfflineFromAuctioneer,
+    justReconnected,
+    remoteLastSnapshot,
   } = useDraftFeeds({
     format: session?.format,
     aifParam,
     draftedNames,
     addManualPick,
   })
+
+  // FF-315: Offline resync — corrections banner state.
+  const [corrections, setCorrections] = useState<PickCorrection[]>([])
+
+  // FF-315: When the phone reconnects to the auctioneer after being offline,
+  // reconcile any provisional picks against the auctioneer's full snapshot.
+  // Auctioneer is the system of record; corrected picks populate the banner.
+  useEffect(() => {
+    if (!justReconnected || !remoteLastSnapshot || remoteLastSnapshot.length === 0) return
+    const corrected = reconcileWithAuctioneer(remoteLastSnapshot)
+    // Responding to an external reconnect signal — one-shot, safe from infinite loops
+    // because justReconnected goes false after this render cycle.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (corrected.length > 0) setCorrections(corrected)
+  }, [justReconnected, remoteLastSnapshot, reconcileWithAuctioneer])
+
+  // FF-315: Tag manual picks as provisional when the auctioneer is offline
+  // (was connected, now isn't). The auctioneer reconciles them on reconnect.
+  const handleRecordPick = useCallback(
+    (pick: Parameters<typeof addManualPick>[0]) => {
+      addManualPick({ ...pick, provisional: isOfflineFromAuctioneer || undefined })
+    },
+    [addManualPick, isOfflineFromAuctioneer],
+  )
 
   // Score players with active strategy and intel context (FF-247)
   const scoredPlayers: ScoredPlayer[] = useMemo(() => {
@@ -445,7 +475,7 @@ export function LiveDraftClient() {
         format={state.format}
         currentManager={myManager}
         currentRound={state.current_round}
-        onSubmit={addManualPick}
+        onSubmit={handleRecordPick}
         onUndo={undoLastPick}
         canUndo={state.picks.length > 0}
         variant="bar"
@@ -503,6 +533,46 @@ export function LiveDraftClient() {
   return (
     <div className="space-y-4">
       {simHud}
+
+      {/* FF-315: Auto-correction banner — shown when provisional picks were corrected on reconnect. */}
+      {corrections.length > 0 && (
+        <div
+          className="mx-auto max-w-md rounded-[14px] px-3.5 py-3"
+          style={{ background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.3)' }}
+        >
+          <div className="flex items-start justify-between gap-2">
+            <div className="min-w-0 flex-1">
+              <div className="text-[11px] font-extrabold uppercase tracking-[1px]" style={{ color: '#f59e0b' }}>
+                Auto-corrected on reconnect
+              </div>
+              <div className="mt-1 space-y-0.5">
+                {corrections.map((c, i) => (
+                  <div key={i} className="truncate text-[11px]" style={{ color: 'rgba(255,255,255,0.6)' }}>
+                    {c.playerName}
+                    {c.loggedManager !== c.actualManager && (
+                      <span> · team {c.loggedManager} → {c.actualManager}</span>
+                    )}
+                    {c.loggedPrice !== c.actualPrice && (
+                      <span> · ${c.loggedPrice} → ${c.actualPrice}</span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+            <button
+              onClick={() => setCorrections([])}
+              className="shrink-0 rounded p-1 transition-colors hover:bg-white/10"
+              style={{ color: 'rgba(255,255,255,0.4)' }}
+              aria-label="Dismiss corrections"
+            >
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                <path d="M18 6 6 18M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
+
       <AuctionDraftRoom
         leagueName={league?.name ?? 'The Nasties'}
         online={online}
@@ -524,7 +594,7 @@ export function LiveDraftClient() {
         recordBar={recordBar}
         managerNames={managerNames}
         myManager={myManager}
-        onRecordPick={addManualPick}
+        onRecordPick={handleRecordPick}
         onToggleTarget={onToggleTarget}
         onEditPick={editPick}
         onRemovePick={removePick}
