@@ -9,15 +9,33 @@
 
 **Next open item:** **DR-7.3..7.5 [Joe required] -- offline resync rehearsal, phone test, full mock-draft end-to-end.**
 
-**What was verified this session (2026-08-10):**
-- DR-7.1 CONFIRMED: players_cache has 491 real 2026 PPR players (Chase #1 $70, rank 1). Nasties 2026 league exists ($200, 12 teams, PPR, is_active=true). Two stale June-2026 dev sessions (generic "Me/Manager 2-12", zero picks each) marked completed -- DR-5.1 auto-create now fires cleanly with real Nasties team names when the auctioneer is detected live.
-- DR-7.2 CONFIRMED: Auctioneer proxy working. Test draft (`isTest:true`) ran today (2026-08-10, ~3pm local, 85 picks, 12 teams Rasar/Leems/Reggie...). Contract matches: pick data has name/position/team/byeWeek/price/teamId all present and correct. No CORS errors -- server-side proxy handles by design.
+**Code is implementation-complete for DR-7.3 (2026-08-10 review):**
+- Provisional flag wired: `handleRecordPick` in `draft/live/client.tsx:218-223` sets `provisional: isOfflineFromAuctioneer || undefined` on every manual pick when offline.
+- Reconciliation on reconnect: `justReconnected` triggers `reconcileWithAuctioneer(remoteLastSnapshot)` in `live/client.tsx:207-214`. Corrections returned populate the amber "Auto-corrected on reconnect" banner (`live/client.tsx:535-572`).
+- Unconfirmed picks (provisional but not yet in auctioneer) stay flagged as `provisional: true` and show "UNCONFIRMED" badge in the Fix-a-Pick sheet (`fix-pick-sheet.tsx:59-66`).
+- Verify suite clean: `type-check` 0 errors, `test:run` 96/96 pass, `lint` 39 pre-existing errors (0 new), `build` clean.
 
-**Live blockers / needs-Joe for DR-7.3-7.5:**
-- DR-7.3: Offline resync rehearsal -- go offline, record a provisional pick with wrong price, reconnect, confirm the auctioneer auto-corrects it + no pick duplicates. Needs active testing.
-- DR-7.4: Arm's-length phone test -- one-tap Go Live, thumb-reachable tap targets, room renders smoothly. Vercel URL: `fantasy-football-draft-app.vercel.app` (project: `fantasy_football_draft_app`). Needs Joe's phone.
-- DR-7.5: Full mock draft end-to-end on phone against live auctioneer, picks tracking, advice correct, budgets right. The auctioneer test draft ran today (85 picks) -- Joe to confirm whether the app was working on his end.
+**DR-7.3 test walkthrough (Joe):**
+1. Open the app on phone; confirm auctioneer is live (status pill shows LIVE).
+2. Disconnect phone from network (Airplane mode or Wi-Fi off).
+3. Status pill should shift to OFFLINE/STALE -- confirm.
+4. Record a pick manually with a **deliberately wrong price** (e.g. Auctioneer sold Chase for $65, enter $99).
+5. Record a second pick that the auctioneer does **NOT** have yet (a fake player name) to test the stay-flagged path.
+6. Reconnect network.
+7. Within ~6s (two poll cycles): look for the amber "Auto-corrected on reconnect" banner -- should show Chase $99 -> $65 correction.
+8. Open Fix-a-Pick sheet: the fake-player pick should show "UNCONFIRMED" badge (still provisional).
+9. Chase pick should have no "UNCONFIRMED" badge (provisional cleared).
+10. Check pick count -- should be no duplicates (total should match picks entered, not doubled).
+11. Confirm Joe's budget updated to reflect the corrected $65, not $99.
+
+**DR-7.4 test (Joe, phone):**
+- Vercel URL: `fantasy-football-draft-app.vercel.app`
+- One-tap Go Live with auctioneer running -- confirm room opens with real team names, no 3-step setup.
+- Confirm all tap targets reachable one-handed; text readable; room renders smooth.
+
+**DR-7.5:** Full mock draft end-to-end on phone against live auctioneer, picks tracking, advice correct, budgets right -- the gold standard for draft-night readiness.
+
+**Live blockers / needs-Joe:**
+- DR-7.3-7.5: physical test, need Joe's phone + auctioneer running.
 - ANTHROPIC_API_KEY absent from `.env.local` and Vercel env -- rule-based advisor works free; AI panels show fallback. Joe's cost decision pending (see BUILD_PLAN "Decisions to make" #1).
-- Pre-existing `npm run lint`: 39 errors (down from 41 baseline -- 2 removed in prior sessions; 0 new this session). Scratch files (`_dev_s5.js`, `fp_*.html`, `screenshot.mjs`, `out.txt`) uncommitted -- Joe to decide.
-
-**Recently landed (pointer; detail in CHANGELOG):** DR-7 partial verification 2026-08-10 -- DR-7.1 and DR-7.2 verified via live API calls (no code changes). Stale dev sessions cleaned. Build suite: 0 type errors, 96 tests pass, 0 new lint errors, build clean.
+- Pre-existing `npm run lint`: 39 errors (down from 41 baseline -- 2 removed in prior sessions; 0 new). Scratch files (`_dev_s5.js`, `fp_*.html`, `screenshot.mjs`, `out.txt`) uncommitted -- Joe to decide.

@@ -2,6 +2,25 @@
 
 ---
 
+## 2026-08-10 / DR-7.3 prep: offline resync code review + verify
+
+**Task:** DR-7.3 pre-test code review (P2 Draft Readiness) | **Class:** `docs` | **Lenses:** QA, Architecture
+
+**Problem:** DR-7.3 (offline resync rehearsal) is the next open item but requires Joe's physical participation (go offline, reconnect, verify corrections). Before Joe tests it, confirm the FF-315 implementation is wired end-to-end so the test will be meaningful and not blocked by a code gap.
+
+**What changed (no source code edited -- code review + WORKING_STATE update):**
+
+- Read and traced the full offline resync path: `handleRecordPick` in `live/client.tsx:218-223` (provisional flag on offline picks); `justReconnected` detection in `use-draft-feeds.ts:88-94` (refs-in-render-path transition detector); `useEffect` in `live/client.tsx:207-214` that calls `reconcileWithAuctioneer(remoteLastSnapshot)` on reconnect; `reconcileWithAuctioneerPicks` in `state.ts:289-354` (pure function: price/manager correction + stay-provisional for auctioneer-absent picks + newPicksFromAuctioneer); corrections banner in `live/client.tsx:535-572` (amber auto-corrected notice); "UNCONFIRMED" badge in `fix-pick-sheet.tsx:59-66` (visible for picks still provisional after reconcile).
+- Confirmed `RemoteAuctioneerPick` is a structural superset of `AuctioneerPickSnapshot` -- direct passthrough to reconcile is type-safe.
+- Confirmed `newPicksFromAuctioneer` folded in via `addManualPick` calls, which (under React 18 auto-batching) batch with the same render cycle as `setConnected`/`setLastSnapshot`, so `stateRef.current` in the reconcile effect includes those picks -- no duplicate risk from the concurrent `onNewPicks` flow.
+- Updated WORKING_STATE.md with a step-by-step DR-7.3 test walkthrough for Joe.
+
+**Verify:** `type-check` 0 errors. `test:run` 96/96 pass. `lint` 39 errors (all pre-existing, 0 new). `build` clean. No source files changed.
+
+**Still pending (need Joe):** DR-7.3 (offline resync rehearsal), DR-7.4 (phone test), DR-7.5 (full end-to-end mock draft).
+
+---
+
 ## 2026-08-10 / DR-7 (partial): Supabase + auctioneer verification, stale session cleanup
 
 **Task:** DR-7.1 + DR-7.2 (P2 Draft Readiness) | **Class:** `pipeline` | **Lenses:** QA, Architecture
