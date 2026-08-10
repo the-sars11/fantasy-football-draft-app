@@ -2,6 +2,29 @@
 
 ---
 
+## 2026-08-09 / Finding 8: one dedup key (auctioneer pick id) for the live feed
+
+**Task:** CODE_REVIEW_2026-06 finding 8 (P1, Architecture/dedup) | **Class:** `shared` (feed hooks + merge util) | **Lenses:** Architecture, QA
+
+**Problem:** two mismatched dedup schemes. Each source hook (`useAuctioneerfeed`, `useRemoteAuctioneerFeed`) already deduped by the auctioneer's real `pick.id`, then threw it away, and `use-draft-feed.ts` re-derived a name key (`playerNameToPickId` => `sheets:<name>`) for the cross-source merger. The merge module also documented a "Sheets flows through here" path that never ran (Sheets is deduped at the caller via `draftedNames`), and stamped auction picks with a bogus `sheets:` prefix.
+
+**Decision (single source of truth):** the one dedup key is the source-assigned stable pick id, namespaced by producer so ids never collide: `auction:<auctioneerPickId>` (new `auctionPickId()` helper) for both auction sources, `sleeper:<pick_no>` for Sleeper (already so). `playerNameToPickId()` is retained as the documented id-less fallback only (prefix corrected `sheets:` -> `name:`); no live caller uses it. Chosen over formalizing the name-key because the app's other feed (Sleeper) already keys by a real id, both auction sources already carry the real id, and it activates the previously-dead real-id merge path.
+
+**What changed:**
+- `src/hooks/use-auctioneer-feed.ts`: `AuctioneerPick` gains `sourceId` (the auctioneer `pick.id`), populated in `normalizeAAPick` (the sole constructor; covers BroadcastChannel + localStorage + file paths).
+- `src/hooks/use-draft-feed.ts`: `toNormalizedEvent` / `remoteToNormalizedEvent` now key `pickId` via `auctionPickId(sourceId)` / `auctionPickId(remoteId)` instead of the player name.
+- `src/lib/draft/auction-feed-merge.ts`: added `auctionPickId()`; re-documented the module + `pickId` contract to state the single key; `playerNameToPickId` reprefixed to `name:` and re-documented as fallback-only.
+
+**Behavior preservation:** in the real deployment each client sees picks from one source; where same-device + remote overlap it is the same auctioneer draft, so a player carries the same id on both paths and dedup output is identical to the old name-key. The caller `draftedNames` name-gate (`use-draft-feeds.ts`) is untouched and still guards against Sheets/manual overlap.
+
+**Tests:** `auction-feed-merge.test.ts` grew 117 -> 122: 3 `auctionPickId` tests (prefix, cross-source identity, no collision with sleeper/name), the 4 `playerNameToPickId` tests updated to `name:`, plus 2 merger tests (same auctioneer id deduped across same-device+remote; two different players with a shared name both kept).
+
+**Scope discipline:** four files committed by explicit path. `.claude/launch.json` left untouched.
+
+**Verify result:** `npm run type-check` 0 errors; `npx eslint` on the 4 changed files 0 errors/0 warnings; `npm run test:run` 122/122; `npm run build` `Compiled successfully` with `/draft/live` in the route list. Zero em/en-dashes in authored code. No paid endpoints fired.
+
+---
+
 ## 2026-08-09 / Finding 12 (Stage B): "Fix a pick" edit/remove UI
 
 **Task:** CODE_REVIEW_2026-06 finding 12 (P1, UX/mechanics) | **Class:** `output` (UI) | **Lenses:** Design, QA
