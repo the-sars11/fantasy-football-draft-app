@@ -2,6 +2,21 @@
 
 ---
 
+## 2026-08-10 / Build-plan + dev-doc overhaul (P2 Draft Readiness)
+
+**Task:** Doc overhaul (Joe-directed) | **Class:** `docs` | **Lenses:** Delivery
+
+**Problem:** The build plan + dev docs had rotted. `BUILD_PLAN.md`'s DASHBOARD_STATUS header contradicted its own body (claimed P0-UX active / UX-V2 not done while the body marked both `[x]`). Open `[ ]` items pointed at dead Google Sheets work (FF-260, FF-081, FFT-006's "mock Google Sheet") after the draft-input model changed to a direct auctioneer connection. A prior session had spawned a standalone orphaned plan (`AUCTIONEER_UI_PORT_PLAN.md`) instead of folding the decision into the one plan. `WORKING_STATE.md` had grown to 51KB of accreted per-session changelog with April-era stale content.
+
+**What changed (docs only — no source code):**
+- `BUILD_PLAN.md` refreshed IN PLACE (not replaced): DASHBOARD_STATUS rewritten to true state; all completed tracks (P0-UX, UX-V2, P0 sub-tiers, P1/P1b, Phases 0-8) compressed into a Completed History section; dead Google Sheets items removed; the **AUCTIONEER_UI_PORT_PLAN** folded in as a REJECTED decision record (app keeps its GRIDIRON identity); added the **one-plan rule** guardrail. Remaining work rewritten as 7 sequential, model-tagged Draft-Readiness sessions (DR-1…DR-7), each citing the audited defect it fixes.
+- `WORKING_STATE.md` thinned 51KB → ~20-line pointer (scope, active phase, next open item, live blockers).
+- `.claude/archive/` created; 11 stale/superseded docs moved there (AUCTIONEER_UI_PORT_PLAN, 6 UX pre-work docs, 4 earlier UI eval/research docs) with an archive README.
+
+**Verify:** `git status` shows 11 deletions at old paths + `.claude/archive/` with the 11 files + README; BUILD_PLAN/WORKING_STATE modified. `launch.json` left untouched (excluded from commit). Zero source files changed. No paid endpoints fired.
+
+---
+
 ## 2026-08-10 / FF-080: Pre-draft 2026 data refresh
 
 **Task:** FF-080 (P2) | **Class:** `pipeline` (data ingestion) | **Lenses:** QA
