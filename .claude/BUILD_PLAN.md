@@ -18,7 +18,6 @@
     { "name": "P3-P7 — Commercialization [RETIRED 2026-08-06]", "done": true }
   ],
   "nextItems": [
-    "DR-5 [Sonnet]: One-tap Go Live + connection-UX cleanup.",
     "DR-6 [Sonnet]: Design-consistency sweep + decide season/* fate.",
     "DR-7 [Sonnet + Joe]: LIVE verification against the real auctioneer + full mock-draft rehearsal on Joe's phone. The draft-readiness GATE."
   ]
@@ -100,9 +99,9 @@ Task tracking: `[ ]` not started · `[~]` in progress · `[x]` done · `[!]` blo
 > **Why:** on a cold start with no pre-existing resumable session, "Auctioneer is LIVE" still routes through the 3-step `/draft/setup` flow before entering the room (`draft/page.tsx`). At the table Joe wants one tap into the cockpit.
 > **Dependency:** DR-2 (Sheets removed from setup), DR-1.
 
-- [ ] DR-5.1: When the auctioneer is detected live, make "Go Live" drop straight into the room — pre-create / auto-resume a valid auction session so there's no setup detour on draft night. Keep the manual-mode fallback.
-- [ ] DR-5.2: Confirm the connection status the room shows (LIVE/STALE/OFFLINE) reflects the remote proxy correctly end-to-end, and the manager team-id → name mapping resolves to the names Joe expects.
-- **Done when:** from the pre-Go-Live screen with the auctioneer live, Joe reaches the working room in one tap; manual fallback still works.
+- [x] DR-5.1: When the auctioneer is detected live, "Go Live" now auto-creates/auto-resumes a valid auction session (seeded with the auctioneer's real team names via new `useRemoteAuctioneerFeed().teams`) instead of routing through `/draft/setup`. Manual-mode fallback untouched.
+- [x] DR-5.2: Fixed `draft/live/client.tsx`'s room status `online` calc — it was `!(remoteError || aifError)`, which read LIVE before the first poll ever landed and stayed LIVE in pure Manual mode with no feed connected at all. Now sources `aifConnected`/`remoteConnected` directly. Manager attribution (DR-5.1's team-name seeding) makes `applyPick`'s exact-string-match against the auctioneer's real names hold end-to-end instead of against generic "Manager 2"-style placeholders.
+- **Done when:** from the pre-Go-Live screen with the auctioneer live, Joe reaches the working room in one tap; manual fallback still works. **Code-verified** (type-check/tests/lint/build clean); **live-path verification against a real running auctioneer is DR-7's job**, not confirmed this session — this session's browser preview was also blocked by an unrelated chat session holding the shared preview infra port.
 
 ### DR-6 — Design-consistency sweep + season/* decision `[Sonnet]` · class: output (Design lens)
 > **Why:** the app is ~85% on the GRIDIRON system. `prep/runs/client.tsx` and `components/prep/strategy-proposals.tsx` still use old shadcn primitives; the 5 unreachable `season/*` screens sit on the pre-GRIDIRON design system with stub TODOs.

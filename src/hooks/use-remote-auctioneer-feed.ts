@@ -59,6 +59,9 @@ interface _RemoteTeam {
   name: string
 }
 
+/** Public shape of an auctioneer team — used to seed a session's manager list. */
+export type RemoteAuctioneerTeam = _RemoteTeam
+
 interface _RemoteDraftState {
   config?: { teams?: _RemoteTeam[]; budget?: number; teamCount?: number }
   picks?: _RemotePick[]
@@ -136,6 +139,14 @@ export interface UseRemoteAuctioneerFeedResult {
    * Null until the first successful poll.
    */
   lastSnapshot: RemoteAuctioneerPick[] | null
+  /**
+   * DR-5: The auctioneer's real team roster (id + name) from the last successful
+   * live poll. Populated as soon as the auctioneer reaches 'drafting' phase, even
+   * before any picks exist. Used to auto-create a session with manager names that
+   * exactly match the auctioneer's — a mismatch means `applyPick` (state.ts) can't
+   * attribute budget/roster to that manager. Null until the first successful poll.
+   */
+  teams: RemoteAuctioneerTeam[] | null
 }
 
 export function useRemoteAuctioneerFeed({
@@ -151,6 +162,8 @@ export function useRemoteAuctioneerFeed({
   const [error, setError] = useState<string | null>(null)
   // FF-315: full snapshot for offline reconciliation — all picks, not just the delta.
   const [lastSnapshot, setLastSnapshot] = useState<RemoteAuctioneerPick[] | null>(null)
+  // DR-5: real team roster from the last live poll, for session auto-creation.
+  const [teams, setTeams] = useState<RemoteAuctioneerTeam[] | null>(null)
 
   // Per-session dedup: auctioneer pick ids already emitted.
   const seenIdsRef = useRef(new Set<string>())
@@ -219,6 +232,8 @@ export function useRemoteAuctioneerFeed({
         failuresRef.current = 0
         // FF-315: store the full snapshot for offline reconciliation.
         setLastSnapshot(allNormalized)
+        // DR-5: store the real team roster for session auto-creation.
+        setTeams(state?.config?.teams ?? null)
 
         if (fresh.length > 0) {
           setPickCount((prev) => prev + fresh.length)
@@ -251,5 +266,5 @@ export function useRemoteAuctioneerFeed({
     }
   }, [enabled, draftCode, retryNonce])
 
-  return { connected, phase, lastSyncAt, pickCount, hasPolled, error, retry, lastSnapshot }
+  return { connected, phase, lastSyncAt, pickCount, hasPolled, error, retry, lastSnapshot, teams }
 }

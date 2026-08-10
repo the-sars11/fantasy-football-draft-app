@@ -2,6 +2,22 @@
 
 ---
 
+## 2026-08-10 / DR-5: One-tap Go Live + connection-UX cleanup
+
+**Task:** DR-5 (P2 Draft Readiness) | **Class:** `pipeline` | **Lenses:** Architecture, QA, Security
+
+**Problem:** On a cold start with no pre-existing resumable session, "Auctioneer is LIVE" still routed through the 3-step `/draft/setup` flow before entering the room (`draft/page.tsx`'s `goLiveHref` fell back to `/draft/setup` whenever `session` was null) -- a detour Joe doesn't want at the table. Separately, the room's connection status (`draft/live/client.tsx`) computed `online = !(remoteError || aifError)`, which read LIVE before the first poll ever landed and stayed LIVE in pure Manual mode where no feed is connected at all -- it measured "no error yet," not "actually connected." And `/draft/setup`'s manual flow seeds generic placeholder manager names ("Me", "Manager 2", ...) which never match the auctioneer's real team names, silently breaking `applyPick`'s (`state.ts`) exact-string-match budget/roster attribution for that manager.
+
+**What changed:**
+
+- `src/hooks/use-remote-auctioneer-feed.ts` -- Added a new `teams: RemoteAuctioneerTeam[] | null` field to the hook's return, populated from `state.config.teams` on every successful live poll (public type `RemoteAuctioneerTeam` exported alongside it). Gives callers the auctioneer's real team roster (id + name) as soon as it reaches `'drafting'` phase, even before any picks exist.
+- `src/app/(app)/draft/page.tsx` -- Added a `useEffect` that, once the auctioneer is detected live (`remote.connected`) and there's no resumable session yet, auto-POSTs `/api/draft/sessions` seeded with `remote.teams` as the manager list (so names match the auctioneer exactly) and sets the returned session -- `goLiveHref` then naturally resolves straight into the room instead of `/draft/setup`. Guarded with an `autoCreateAttempted` ref (fires once), a disabled "Preparing room..." CTA state so a tap can't race the in-flight create, and an `autoCreateError` fallback that keeps manual Go Live -> Setup working if the auto-create POST fails. Also fixed a cosmetic bug where the header `ConnectionStatusPill` flashed OFFLINE before the first poll landed (now gated on `remote.hasPolled`).
+- `src/app/(app)/draft/live/client.tsx` -- Fixed `online` to source `aifConnected`/`remoteConnected` directly from `useDraftFeeds()` (added `remoteConnected` to the destructure) instead of the inverted no-error heuristic. Removed a confirmed-dead `ConnectionStatusPill` import (never rendered in this file) and five destructured values (`aifImportedCount`, `aifError`, `remoteLastSyncAt`, `remoteError`, `remoteRetry`) that had zero other usages in the file -- `aifError`/`remoteError` specifically went dead as a direct result of the `online` fix.
+
+**Verify:** `npm run type-check` 0 errors, `npm run test:run` 96/96 pass, `npm run lint` 41 errors (pre-existing baseline, confirmed 0 in the three touched files via full-output grep), `npm run build` clean (Turbopack Google Fonts fetch failed transiently on first run -- network hiccup, not a code issue -- clean on immediate retry with `/draft`, `/draft/live`, `/draft/setup` all compiling/prerendering). Browser screenshot not available this session -- the shared preview infra port (8894) was held by an unrelated concurrent chat session's dev server, which this session cannot stop. Full live-path proof (auto-create firing against a real auctioneer, LIVE/STALE/OFFLINE against real poll timing) is DR-7's job, not claimed here.
+
+---
+
 ## 2026-08-10 / DR-4: Kill misleading / fake data
 
 **Task:** DR-4 (P2 Draft Readiness) | **Class:** `output` | **Lenses:** QA, Delivery

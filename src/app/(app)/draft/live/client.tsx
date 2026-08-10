@@ -37,7 +37,6 @@ import { useLiveDraftData } from '@/hooks/use-live-draft-data'
 import { useUserTags, useToggleTag } from '@/hooks/use-user-tags'
 import { useHaptic } from '@/hooks/use-haptic'
 import { useSound } from '@/lib/sound/use-sound'
-import { ConnectionStatusPill } from '@/components/draft/connection-status-pill'
 import { ManualPickEntry } from '@/components/draft/manual-pick-entry'
 import { PlayerPool } from '@/components/draft/player-pool'
 import { PositionScarcityTracker } from '@/components/draft/position-scarcity'
@@ -187,11 +186,7 @@ export function LiveDraftClient() {
   const {
     aifEnabled,
     aifConnected,
-    aifImportedCount,
-    aifError,
-    remoteLastSyncAt,
-    remoteError,
-    remoteRetry,
+    remoteConnected,
     // FF-315: offline resync signals.
     isOfflineFromAuctioneer,
     justReconnected,
@@ -459,9 +454,14 @@ export function LiveDraftClient() {
   const myPicks = state.picks.filter(p => p.manager === myManager)
 
   // UXV2-6: connection health for the room status pill. Sim has no real feed.
+  // DR-5.2: reflect an ACTUAL connected feed (same-device or remote), not merely
+  // "no error yet" -- the prior check showed LIVE before the first poll ever
+  // landed, and stayed LIVE in pure Manual mode where no feed is connected at all.
   const online = simEnabled
     ? true
-    : !(remoteError || aifError)
+    : aifEnabled
+      ? aifConnected
+      : remoteConnected
 
   // Record bar (who won, at what price).
   const recordBar =

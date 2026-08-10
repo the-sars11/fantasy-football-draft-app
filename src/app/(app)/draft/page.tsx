@@ -16,7 +16,7 @@
  * Client owns its own header (page.tsx wrappers must NOT add one — double-header bug).
  */
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import {
@@ -70,6 +70,10 @@ export default function DraftPage() {
   const [league, setLeague] = useState<League | null>(null)
   const [session, setSession] = useState<DraftSessionRow | null>(null)
   const [errorExpanded, setErrorExpanded] = useState(false)
+  // DR-5.1: cold-start auto-create — no /draft/setup detour when the auctioneer is live.
+  const [autoCreating, setAutoCreating] = useState(false)
+  const [autoCreateError, setAutoCreateError] = useState<string | null>(null)
+  const autoCreateAttempted = useRef(false)
 
   // FF-314: auto-detect a live auctioneer over the internet (auction-only).
   const remote = useRemoteAuctioneerFeed({ enabled: true })
@@ -117,6 +121,59 @@ export default function DraftPage() {
     load()
   }, [load])
 
+  // DR-5.1: when the auctioneer is detected live with no resumable session,
+  // auto-create one seeded with the auctioneer's real team names -- so
+  // `applyPick` (state.ts) can match manager names exactly and budgets/rosters
+  // track correctly (DR-5.2) -- and Go Live drops straight into the room.
+  useEffect(() => {
+    if (phase !== 'ready' || !league) return
+    if (session) return
+    if (!remote.connected) return
+    if (autoCreateAttempted.current) return
+    const teams = remote.teams
+    if (!teams || teams.length < 2) return
+
+    autoCreateAttempted.current = true
+    let cancelled = false
+    setAutoCreating(true)
+    setAutoCreateError(null)
+
+    ;(async () => {
+      try {
+        const res = await fetch('/api/draft/sessions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            league_id: league.id,
+            format: 'auction',
+            managers: teams.map((t) => ({ name: t.name, budget: league.budget ?? 200 })),
+          }),
+        })
+        const data = await res.json()
+        if (cancelled) return
+        if (res.ok && data.session) {
+          setSession({
+            id: data.session.id,
+            league_id: league.id,
+            format: data.session.format,
+            status: data.session.status,
+            created_at: data.session.created_at,
+          })
+        } else {
+          setAutoCreateError(data.error || 'Could not start the room automatically')
+        }
+      } catch {
+        if (!cancelled) setAutoCreateError('Network error starting the room')
+      } finally {
+        if (!cancelled) setAutoCreating(false)
+      }
+    })()
+
+    return () => {
+      cancelled = true
+    }
+  }, [phase, league, session, remote.connected, remote.teams])
+
   const detected = remote.connected
   const checking = !remote.hasPolled
 
@@ -137,12 +194,14 @@ export default function DraftPage() {
         >
           Draft
         </h1>
-        <ConnectionStatusPill
-          lastPollAt={remote.lastSyncAt}
-          sheetConnected
-          error={remote.error}
-          onRetry={remote.retry}
-        />
+        {remote.hasPolled && (
+          <ConnectionStatusPill
+            lastPollAt={remote.lastSyncAt}
+            sheetConnected
+            error={remote.error}
+            onRetry={remote.retry}
+          />
+        )}
       </div>
 
       {phase === 'loading' ? (
@@ -224,9 +283,13 @@ export default function DraftPage() {
               {checking
                 ? 'Looking for a draft running on the host device.'
                 : detected
-                  ? `Picks are syncing over the internet${
-                      remote.pickCount > 0 ? ` · ${remote.pickCount} in so far` : ''
-                    }. Tap Go Live to enter the room.`
+                  ? autoCreateError
+                    ? `Picks are syncing over the internet${
+                        remote.pickCount > 0 ? ` · ${remote.pickCount} in so far` : ''
+                      }. Couldn't start the room automatically -- tap Go Live to set up manually.`
+                    : `Picks are syncing over the internet${
+                        remote.pickCount > 0 ? ` · ${remote.pickCount} in so far` : ''
+                      }. Tap Go Live to enter the room.`
                   : 'Start the draft on the host device and this will light up automatically. Not up yet? Record picks by hand in Manual mode.'}
             </p>
 
@@ -268,7 +331,17 @@ export default function DraftPage() {
             )}
 
             {/* Primary CTA — thumb zone */}
-            {detected ? (
+            {detected && autoCreating && !session ? (
+              // DR-5.1: auto-creating the room -- don't let a tap detour to Setup mid-flight.
+              <button
+                disabled
+                className="ffi-btn-hero w-full mt-4 text-[14px] uppercase tracking-widest opacity-70"
+                style={{ borderRadius: '12px' }}
+              >
+                <Loader2 className="w-[15px] h-[15px] animate-spin" color="var(--ffi-volt-ink)" />
+                Preparing room…
+              </button>
+            ) : detected ? (
               <Link
                 href={goLiveHref}
                 className="ffi-btn-hero w-full mt-4 text-[14px] uppercase tracking-widest"
