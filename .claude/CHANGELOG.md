@@ -2,6 +2,23 @@
 
 ---
 
+## 2026-08-09 / Finding 12 (Stage B): "Fix a pick" edit/remove UI
+
+**Task:** CODE_REVIEW_2026-06 finding 12 (P1, UX/mechanics) | **Class:** `output` (UI) | **Lenses:** Design, QA
+
+**What changed (UI on top of Stage A's logic):**
+- `src/components/draft/live-room/fix-pick-sheet.tsx` (new): a bottom sheet mirroring the existing `block-picker-sheet` pattern (scrim + slide-up sheet, grabber, ROOM palette). Lists every recorded sale newest-first (position badge, player, "won by {manager}", price). Tapping a sale opens an inline edit card: change player (inline search over the undrafted pool), reassign the winning team (native select of all managers), or edit the price (auction only), plus a Remove action. Only changed fields are sent to `onEditPick`.
+- `src/components/draft/live-room/auction-room.tsx`: added a "Fix a pick" button above the record bar (gated on `state.picks.length > 0`), plus `onEditPick`/`onRemovePick` props and the sheet render.
+- `src/app/(app)/draft/live/client.tsx`: destructured `editPick`/`removePick` from `useDraftState` and passed them through to the auction room. Edits/removes flow into Stage A's rebuild-from-scratch, so budgets, roster, max bid, and snake turn stay consistent.
+
+**Design:** all-teams scope (Joe records every team's sale at an in-person auction), tap-a-pick -> bottom sheet interaction, entry via a record-bar button. 3-state mockup approved before build (`.claude/mockups/fix-a-pick-sheet.html`).
+
+**Scope discipline:** three code files + mockup, committed by explicit path (bdd11c1). `.claude/launch.json` left untouched.
+
+**Verify result:** `npm run type-check` 0 errors; `npx eslint` on the 3 changed files clean; `npm run test:run` 117/117; `npm run build` compiled with `/draft/live` in the route list. Verified live against the running sim (84 picks): the button renders, the sheet lists all teams' sales, the edit card pre-fills correct values, and editing CeeDee Lamb $102->$92 refunded Rasar $54->$64 with max bid and avg-needed recomputing. Zero em/en-dashes in authored code. No paid endpoints fired.
+
+---
+
 ## 2026-08-09 / Finding 12 (Stage A): per-pick edit + arbitrary remove logic
 
 **Task:** CODE_REVIEW_2026-06 finding 12 (P1, UX/mechanics) | **Class:** `shared` (state helpers + hook) | **Lenses:** Architecture, QA
