@@ -8,7 +8,15 @@
 
 import type { DraftFormat, Position, RosterSlots } from '@/lib/supabase/database.types'
 import type { SheetRow } from '@/lib/sheets'
-import type { KeeperAssignment } from './keepers'
+
+// Type kept for DB backward-compat; keeper feature removed 2026-08-09
+export interface KeeperAssignment {
+  player_name: string
+  position?: string
+  manager: string
+  cost?: number
+  round?: number
+}
 
 // --- Types ---
 

@@ -22,7 +22,6 @@ import {
   getRemainingBudget,
   getMaxBid,
 } from '@/lib/draft/state'
-import { applyKeepersToState, type KeeperAssignment } from '@/lib/draft/keepers'
 import type { DraftState, DraftPick } from '@/lib/draft/state'
 import type { DraftFormat, RosterSlots, DraftSession } from '@/lib/supabase/database.types'
 import { useDraftPolling } from './use-draft-polling'
@@ -70,12 +69,6 @@ export function useDraftState({
       session.managers,
       rosterSlots,
     )
-
-    // Apply keepers first (FF-029) — deducts budgets, fills roster slots
-    const keepers = (session.keepers ?? []) as KeeperAssignment[]
-    if (keepers.length > 0) {
-      initial = applyKeepersToState(initial, keepers, session.format)
-    }
 
     // Replay any existing picks from the session
     if (session.picks && session.picks.length > 0) {
@@ -175,11 +168,6 @@ export function useDraftState({
       }),
       prev.roster_slots,
     )
-
-    // Re-apply keepers (FF-029)
-    if (prev.keepers.length > 0) {
-      rebuilt = applyKeepersToState(rebuilt, prev.keepers, prev.format)
-    }
 
     for (const p of picks) {
       rebuilt = applyPick(rebuilt, p)

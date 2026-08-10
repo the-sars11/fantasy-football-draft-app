@@ -6,7 +6,6 @@
  */
 
 import type { DraftPick } from './state'
-import type { KeeperAssignment } from './keepers'
 import type { Player, Position } from '@/lib/players/types'
 
 export type TrashTalkType =
@@ -23,8 +22,6 @@ export type TrashTalkType =
   | 'lone_wolf_qb'
   | 'market_mismatch'
   | 'late_roster_qb_panic'
-  | 'keeper_steal'
-  | 'bad_keeper'
 
 export interface TrashTalkAlert {
   id: string
@@ -715,90 +712,6 @@ function detectLateRosterQbPanic(
     severity: pickCount >= 10 ? 'savage' : pickCount >= 8 ? 'medium' : 'mild',
     timestamp: Date.now(),
   }
-}
-
-/**
- * Analyze all keepers for trash talk value alerts.
- * Call once at draft start. Returns keeper_steal / bad_keeper alerts for notable keepers.
- */
-export function analyzeKeeperPicksForTrashTalk(
-  keepers: KeeperAssignment[],
-  players: Player[],
-  format: 'auction' | 'snake',
-  teamCount: number,
-): TrashTalkAlert[] {
-  const alerts: TrashTalkAlert[] = []
-
-  for (let i = 0; i < keepers.length; i++) {
-    const keeper = keepers[i]
-    const player = players.find(p => p.name.toLowerCase() === keeper.player_name.toLowerCase())
-    if (!player) continue
-
-    if (format === 'snake') {
-      const adpRound = Math.max(1, Math.ceil(player.adp / teamCount))
-      const keeperRound = keeper.cost
-      const surplus = keeperRound - adpRound // positive = steal (paying later round for earlier talent)
-
-      if (surplus >= 3) {
-        alerts.push({
-          id: `keeper_steal-${i}`,
-          type: 'keeper_steal',
-          managerName: keeper.manager,
-          message: `${keeper.manager} kept ${keeper.player_name} at a STEAL`,
-          detail: `Kept at Round ${keeperRound} - ADP is Round ${adpRound}. That's ${surplus} rounds of free value.`,
-          pickNumber: -(i + 1),
-          severity: surplus >= 5 ? 'savage' : 'medium',
-          timestamp: Date.now(),
-          playerName: keeper.player_name,
-        })
-      } else if (surplus <= -2) {
-        const overpayRounds = Math.abs(surplus)
-        alerts.push({
-          id: `bad_keeper-${i}`,
-          type: 'bad_keeper',
-          managerName: keeper.manager,
-          message: `${keeper.manager} is locked into a questionable keeper`,
-          detail: `Keeping ${keeper.player_name} at Round ${keeperRound}, but ADP is Round ${adpRound}. Overpaying by ${overpayRounds} rounds.`,
-          pickNumber: -(i + 1),
-          severity: overpayRounds >= 4 ? 'medium' : 'mild',
-          timestamp: Date.now(),
-          playerName: keeper.player_name,
-        })
-      }
-    } else {
-      const expectedValue = impliedAuctionValue(player, DEFAULT_AUCTION_BUDGET, teamCount)
-      const surplus = expectedValue - keeper.cost // positive = deal (market > cost)
-
-      if (surplus >= 10) {
-        alerts.push({
-          id: `keeper_steal-${i}`,
-          type: 'keeper_steal',
-          managerName: keeper.manager,
-          message: `${keeper.manager} is keeping ${keeper.player_name} at a massive discount`,
-          detail: `Keeper cost $${keeper.cost}, market value ~$${expectedValue}. That's $${surplus} of free money going into the draft.`,
-          pickNumber: -(i + 1),
-          severity: surplus >= 20 ? 'savage' : 'medium',
-          timestamp: Date.now(),
-          playerName: keeper.player_name,
-        })
-      } else if (surplus <= -10) {
-        const overpay = Math.abs(surplus)
-        alerts.push({
-          id: `bad_keeper-${i}`,
-          type: 'bad_keeper',
-          managerName: keeper.manager,
-          message: `${keeper.manager} is keeping ${keeper.player_name} well above market`,
-          detail: `Keeper cost $${keeper.cost}, market value ~$${expectedValue}. Overpaying by $${overpay} before the draft even starts.`,
-          pickNumber: -(i + 1),
-          severity: overpay >= 20 ? 'medium' : 'mild',
-          timestamp: Date.now(),
-          playerName: keeper.player_name,
-        })
-      }
-    }
-  }
-
-  return alerts
 }
 
 /**

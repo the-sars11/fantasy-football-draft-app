@@ -159,10 +159,8 @@ function getTriggerRelevantMomentTypes(
   switch (trigger) {
     case 'overpay':
     case 'budget_buster':
-    case 'bad_keeper':
       return ['overpay', 'bust']
     case 'steal':
-    case 'keeper_steal':
       return ['steal']
     case 'market_mismatch':
       return ['overpay', 'steal', 'bust']

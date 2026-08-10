@@ -1,6 +1,5 @@
 import { describe, it, expect } from 'vitest'
 import { createInitialState, applyPick, applySheetRows, removePickByNumber, editPickByNumber, getMaxBid, getRemainingBudget, type DraftPick, type DraftState } from '../state'
-import { applyKeepersToState, type KeeperAssignment } from '../keepers'
 import type { RosterSlots } from '../../supabase/database.types'
 import type { SheetRow } from '../../sheets'
 
@@ -35,28 +34,6 @@ describe('applyPick draft completion', () => {
     expect(state.status).toBe('completed') // 4 of 4
   })
 
-  it('completes a keeper league once real picks + keepers fill the roster', () => {
-    // Regression: keeper picks live in state.keepers (not state.picks), so completion
-    // used to never trigger because real picks alone could not reach total_roster_spots.
-    let state = createInitialState(
-      'snake',
-      [{ name: 'A', draft_position: 1 }, { name: 'B', draft_position: 2 }],
-      ROSTER,
-    )
-    const keepers: KeeperAssignment[] = [
-      { player_name: 'Kept QB', position: 'QB', manager: 'A', cost: 5 },
-    ]
-    state = applyKeepersToState(state, keepers, 'snake')
-    expect(state.keepers.length).toBe(1)
-
-    state = applyPick(state, pick(1, 'B', 'QB'))
-    state = applyPick(state, pick(2, 'A', 'RB'))
-    expect(state.status).toBe('live') // 2 picks + 1 keeper = 3 of 4
-
-    state = applyPick(state, pick(3, 'B', 'RB'))
-    expect(state.status).toBe('completed') // 3 picks + 1 keeper = 4 of 4
-    expect(state.total_picks).toBe(3)
-  })
 })
 
 describe('applySheetRows', () => {
@@ -189,17 +166,6 @@ describe('getMaxBid (auction only)', () => {
     expect(getMaxBid(state, 'A')).toBe(1)
   })
 
-  it('counts keeper picks in manager.picks when calculating filled slots', () => {
-    // Keeper adds to manager.picks (is_keeper=true) and deducts budget
-    // budget=200, keeper cost=75 => budget_remaining=125, picks.length=1
-    // emptySlots = max(0, 2-1-1) = 0 => maxBid = 125
-    let state = createInitialState('auction', [{ name: 'A', budget: 200 }], TWO_SLOT)
-    const keepers: KeeperAssignment[] = [
-      { player_name: 'CMC', position: 'RB', manager: 'A', cost: 75 },
-    ]
-    state = applyKeepersToState(state, keepers, 'auction')
-    expect(getMaxBid(state, 'A')).toBe(125)
-  })
 })
 
 describe('snake draft order - 12-team parity', () => {

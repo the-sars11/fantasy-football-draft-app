@@ -5,20 +5,18 @@ import { useRouter } from 'next/navigation'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Trash2, Plus, Loader2, FileSpreadsheet, Activity, PenLine, Gamepad2, Check, VolumeX, Smile, Flame, Link, FolderOpen, Lock } from 'lucide-react'
-import type { DraftFormat, Position } from '@/lib/supabase/database.types'
+import { Trash2, Plus, Loader2, FileSpreadsheet, PenLine, Gamepad2, Check, VolumeX, Smile, Flame, Link, FolderOpen } from 'lucide-react'
+import type { DraftFormat } from '@/lib/supabase/database.types'
 import {
   FFICard,
   FFIButton,
   FFISectionHeader,
   FFIBadge,
 } from '@/components/ui/ffi-primitives'
-import type { KeeperEntry } from '@/app/(app)/prep/keepers/client'
 import {
   setGlobalFileHandle,
   type AuctioneerConnectionType,
 } from '@/hooks/use-auctioneer-feed'
-import { extractSleeperDraftId } from '@/hooks/use-sleeper-draft-feed'
 
 interface LeagueSummary {
   id: string
@@ -41,7 +39,7 @@ interface Manager {
   draft_position?: number
 }
 
-type DraftMode = 'sheets' | 'manual' | 'sim' | 'sleeper'
+type DraftMode = 'sheets' | 'manual' | 'sim'
 type TrashTalkMode = 'off' | 'family-safe' | 'adult-only'
 
 export function DraftSetupClient() {
@@ -59,23 +57,16 @@ export function DraftSetupClient() {
     { name: '' },
   ])
 
-  // Keeper entry (legacy — kept for API compat; keepers now come from /prep/keepers localStorage)
-  const [keepers] = useState<Array<{ player_name: string; position: Position; manager: string; cost: number }>>([])
-
   // Sheet URL
   const [sheetUrl, setSheetUrl] = useState('')
-
-  // Sleeper draft ID (snake mode — FF-312)
-  const [sleeperDraftInput, setSleeperDraftInput] = useState('')
 
   // Submission
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   // Step flow state
-  const [step, setStep] = useState<1 | 2 | 3 | 4>(1)
+  const [step, setStep] = useState<1 | 2 | 3>(1)
   const [draftMode, setDraftMode] = useState<DraftMode | null>(null)
-  const [declaredKeepers, setDeclaredKeepers] = useState<KeeperEntry[]>([])
   const [trashTalkMode, setTrashTalkMode] = useState<TrashTalkMode>('family-safe')
 
   // Auctioneer integration (auction format only — FF-279)
@@ -83,7 +74,6 @@ export function DraftSetupClient() {
   const [auctioneerFileName, setAuctioneerFileName] = useState<string | null>(null)
   const [aifError, setAifError] = useState<string | null>(null)
 
-  const isKeeperLeague = selectedLeague?.keeper_enabled ?? false
   const isAuction = selectedLeague?.format === 'auction'
 
   // Populate managers from a league object
@@ -153,7 +143,7 @@ export function DraftSetupClient() {
     setManagers(prev => prev.filter((_, i) => i !== index))
   }
 
-  const handleSubmit = async (keepersOverride?: Array<{ player_name: string; position: string; manager: string; cost: number }>) => {
+  const handleSubmit = async () => {
     setError(null)
 
     if (!selectedLeagueId) {
@@ -173,8 +163,6 @@ export function DraftSetupClient() {
       return
     }
 
-    const keepersToSubmit = keepersOverride ?? keepers
-
     setSubmitting(true)
     try {
       const res = await fetch('/api/draft/sessions', {
@@ -189,14 +177,6 @@ export function DraftSetupClient() {
             budget: m.budget,
             draft_position: m.draft_position,
           })),
-          keepers: keepersToSubmit.length > 0
-            ? keepersToSubmit.map(k => ({
-                player_name: k.player_name.trim(),
-                position: k.position,
-                manager: k.manager,
-                cost: k.cost,
-              }))
-            : undefined,
         }),
       })
 
@@ -207,9 +187,7 @@ export function DraftSetupClient() {
       }
 
       const aifParam = auctioneerConnectionType ? `&aif=${auctioneerConnectionType}` : ''
-      const sleeperDraftId = draftMode === 'sleeper' ? extractSleeperDraftId(sleeperDraftInput) : null
-      const sdiParam = sleeperDraftId ? `&sdi=${sleeperDraftId}` : ''
-      router.push(`/draft/live?session=${data.session.id}&ttm=${trashTalkMode}${aifParam}${sdiParam}`)
+      router.push(`/draft/live?session=${data.session.id}&ttm=${trashTalkMode}${aifParam}`)
     } catch {
       setError('Network error -- could not create session')
     } finally {
@@ -360,12 +338,10 @@ export function DraftSetupClient() {
 
         <div className="space-y-3">
           {([
-            { mode: 'sheets'  as DraftMode, Icon: FileSpreadsheet, label: 'Google Sheets', desc: 'Auto-import picks from a shared spreadsheet', forceShow: true },
-            { mode: 'sleeper' as DraftMode, Icon: Activity,        label: 'Sleeper',        desc: 'Auto-import picks from your Sleeper draft room', forceShow: false },
-            { mode: 'manual'  as DraftMode, Icon: PenLine,         label: 'Manual Entry',  desc: 'Enter each pick by hand as it happens',           forceShow: true },
-            { mode: 'sim'     as DraftMode, Icon: Gamepad2,        label: 'Offline Sim',   desc: 'Practice run - no real draft',                    forceShow: true },
-          ] as const).filter(({ mode, forceShow }) => forceShow || (mode === 'sleeper' && !isAuction))
-          .map(({ mode, Icon, label, desc }) => (
+            { mode: 'sheets' as DraftMode, Icon: FileSpreadsheet, label: 'Google Sheets', desc: 'Auto-import picks from a shared spreadsheet' },
+            { mode: 'manual' as DraftMode, Icon: PenLine,         label: 'Manual Entry',  desc: 'Enter each pick by hand as it happens' },
+            { mode: 'sim'    as DraftMode, Icon: Gamepad2,        label: 'Offline Sim',   desc: 'Practice run - no real draft' },
+          ] as const).map(({ mode, Icon, label, desc }) => (
             <button
               key={mode}
               onClick={() => setDraftMode(mode)}
@@ -423,7 +399,7 @@ export function DraftSetupClient() {
           </button>
           <FFISectionHeader
             title="Session Details"
-            subtitle={`Mode: ${draftMode === 'sheets' ? 'Google Sheets' : draftMode === 'sleeper' ? 'Sleeper' : draftMode === 'manual' ? 'Manual Entry' : 'Offline Sim'}`}
+            subtitle={`Mode: ${draftMode === 'sheets' ? 'Google Sheets' : draftMode === 'manual' ? 'Manual Entry' : 'Offline Sim'}`}
           />
         </div>
 
@@ -490,22 +466,6 @@ export function DraftSetupClient() {
             />
             <p className="ffi-caption text-[var(--ffi-text-secondary)] mt-1">
               Share the sheet with &quot;Anyone with the link&quot; (view access).
-            </p>
-          </div>
-        )}
-
-        {draftMode === 'sleeper' && (
-          <div>
-            <Label className="ffi-caption text-[var(--ffi-text-secondary)] mb-1 block">
-              Sleeper Draft URL or Draft ID
-            </Label>
-            <Input
-              placeholder="https://sleeper.com/draft/nfl/... or draft ID"
-              value={sleeperDraftInput}
-              onChange={e => setSleeperDraftInput(e.target.value)}
-            />
-            <p className="ffi-caption text-[var(--ffi-text-secondary)] mt-1">
-              Paste the URL from your Sleeper draft room. No account needed - picks sync automatically every 5 seconds.
             </p>
           </div>
         )}
@@ -679,112 +639,9 @@ export function DraftSetupClient() {
               const uniqueNames = new Set(managers.map(m => m.name.trim().toLowerCase()))
               if (uniqueNames.size !== managers.length) { setError('Manager names must be unique'); return }
               setError(null)
-
-              // Keeper leagues → Step 4; else submit
-              if (isKeeperLeague) {
-                try {
-                  const raw = localStorage.getItem(`ffi_keepers_${selectedLeagueId}`)
-                  setDeclaredKeepers(raw ? JSON.parse(raw) : [])
-                } catch { setDeclaredKeepers([]) }
-                setStep(4)
-              } else {
-                handleSubmit()
-              }
+              handleSubmit()
             }}
             disabled={submitting || !selectedLeagueId}
-            className="w-full"
-          >
-            {isKeeperLeague ? 'Review Keepers →' : (submitting ? 'Starting...' : 'Start Draft →')}
-          </FFIButton>
-        </div>
-      </div>
-      </>
-    )
-  }
-
-  // === STEP 4: Keeper Review (keeper leagues only) ===
-  if (step === 4) {
-    return (
-      <>
-      <div className="space-y-6 max-w-lg pb-24">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => setStep(3)}
-            className="ffi-caption text-[var(--ffi-text-secondary)] hover:text-white min-h-[44px] flex items-center px-1"
-          >
-            ← Back
-          </button>
-          <FFISectionHeader
-            title="Keeper Review"
-            subtitle="Keepers declared in Prep. Confirm before starting."
-          />
-        </div>
-
-        <FFICard>
-          {declaredKeepers.length === 0 ? (
-            <div className="text-center py-6">
-              <p className="ffi-body-md text-[var(--ffi-text-secondary)]">
-                No keepers declared. Go to Prep → Keepers to add them.
-              </p>
-              <FFIButton
-                variant="secondary"
-                onClick={() => router.push('/prep/keepers')}
-                className="mt-3"
-              >
-                Go to Keepers
-              </FFIButton>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {declaredKeepers.map((keeper, idx) => (
-                <div
-                  key={keeper.id}
-                  className="flex items-center gap-2 py-2 px-3 rounded-lg border border-[var(--ffi-border)]/20 bg-[var(--ffi-surface)]"
-                >
-                  <span className="ffi-caption font-mono text-[#475569] w-4 text-right">
-                    K{idx + 1}
-                  </span>
-                  <span className="text-[9px] font-bold px-1.5 py-0.5 rounded shrink-0 bg-[#8bacff]/10 text-[#8bacff]">
-                    {keeper.position}
-                  </span>
-                  <span className="ffi-body-md text-[#94a3b8] flex-1 truncate">
-                    {keeper.player_name}
-                  </span>
-                  <span className="ffi-caption text-[var(--ffi-text-secondary)] shrink-0">
-                    {keeper.manager}
-                  </span>
-                  <span className="ffi-caption font-mono text-[var(--ffi-text-muted)] shrink-0">
-                    {isAuction ? `$${keeper.cost}` : `Rd ${keeper.cost}`}
-                  </span>
-                  <Lock className="h-3 w-3 ml-1 shrink-0 text-[#9eadb8]" aria-hidden="true" />
-                </div>
-              ))}
-            </div>
-          )}
-        </FFICard>
-
-      </div>
-      <div
-        className="fixed inset-x-0 bottom-0 z-30 ffi-glass-heavy border-t border-[var(--ffi-border)] px-4 py-3"
-        style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
-      >
-        <div className="mx-auto max-w-lg space-y-2">
-          {error && (
-            <div className="rounded-lg border border-[var(--ffi-danger)]/50 bg-[var(--ffi-danger)]/10 px-4 py-3 ffi-body-md text-[var(--ffi-danger)]">
-              {error}
-            </div>
-          )}
-          <FFIButton
-            variant="primary"
-            onClick={() => {
-              handleSubmit(declaredKeepers.map(k => ({
-                player_name: k.player_name,
-                position: k.position,
-                manager: k.manager,
-                cost: k.cost,
-              })))
-            }}
-            disabled={submitting}
             className="w-full"
           >
             {submitting ? 'Starting...' : 'Start Draft →'}

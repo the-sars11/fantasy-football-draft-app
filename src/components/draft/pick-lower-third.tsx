@@ -10,10 +10,8 @@
  */
 
 import { motion } from 'framer-motion'
-import { Lock } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { FFIPositionBadge } from '@/components/ui/ffi-primitives'
-import { isKeeperPick, displayPickNum } from '@/lib/draft/keepers'
 import type { Position } from '@/lib/players/types'
 
 interface LatestPick {
@@ -35,7 +33,6 @@ export function PickLowerThird({
   isMyPick: boolean
 }) {
   const isAuction = format === 'auction'
-  const keeper = pick ? isKeeperPick(pick) : false
 
   return (
     <div className="min-h-[3.25rem] mb-3">
@@ -53,20 +50,15 @@ export function PickLowerThird({
           )}
         >
           <span className="ffi-caption text-[var(--ffi-text-muted)] w-7 text-right tabular-nums shrink-0">
-            {displayPickNum(pick.pick_number)}
+            {pick.pick_number}
           </span>
           {pick.position && (
             <FFIPositionBadge position={pick.position.toUpperCase() as Position} />
           )}
-          {keeper && <Lock className="h-3 w-3 shrink-0 text-[#94a3b8]" aria-label="Keeper" />}
           <span
             className={cn(
               'font-display font-bold tracking-tight text-base leading-none flex-1 truncate',
-              keeper
-                ? 'text-[#94a3b8]'
-                : isMyPick
-                  ? 'text-[var(--ffi-gold-bright)]'
-                  : 'text-white',
+              isMyPick ? 'text-[var(--ffi-gold-bright)]' : 'text-white',
             )}
           >
             {pick.player_name}
@@ -74,7 +66,7 @@ export function PickLowerThird({
           <span className="ffi-caption text-[var(--ffi-text-secondary)] truncate max-w-[6rem] shrink-0">
             {pick.manager}
           </span>
-          {!keeper && isAuction && pick.price != null && (
+          {isAuction && pick.price != null && (
             <span
               className={cn(
                 'font-mono font-bold tabular-nums shrink-0',

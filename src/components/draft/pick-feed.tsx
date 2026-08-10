@@ -8,11 +8,9 @@
  */
 
 import { motion, AnimatePresence } from 'framer-motion'
-import { Lock } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { FFICard, FFIPositionBadge } from '@/components/ui/ffi-primitives'
 import { PickLowerThird } from '@/components/draft/pick-lower-third'
-import { isKeeperPick, displayPickNum } from '@/lib/draft/keepers'
 import type { Position } from '@/lib/players/types'
 
 export function PickFeed({
@@ -55,7 +53,6 @@ export function PickFeed({
           <AnimatePresence mode="popLayout">
             {history.map(pick => {
               const isMyPick = !!(myManager && pick.manager === myManager)
-              const keeper = isKeeperPick(pick)
               return (
                 <motion.div
                   key={`${pick.manager}-${pick.pick_number}`}
@@ -70,15 +67,13 @@ export function PickFeed({
                   )}
                 >
                   <span className="ffi-caption text-[var(--ffi-text-muted)] w-6 text-right tabular-nums">
-                    {displayPickNum(pick.pick_number)}
+                    {pick.pick_number}
                   </span>
                   {pick.position && (
                     <FFIPositionBadge position={pick.position.toUpperCase() as Position} />
                   )}
-                  {keeper && <Lock className="h-2.5 w-2.5 shrink-0 text-[#94a3b8]" aria-label="Keeper" />}
                   <span className={cn(
                     'ffi-body-md font-medium flex-1 truncate',
-                    keeper ? 'text-[#94a3b8]' :
                     isMyPick ? 'text-[var(--ffi-gold-bright)]' : 'text-white',
                   )}>
                     {pick.player_name}
@@ -86,7 +81,7 @@ export function PickFeed({
                   <span className="ffi-body-md text-[var(--ffi-text-secondary)] truncate max-w-20">
                     {pick.manager}
                   </span>
-                  {!keeper && isAuction && pick.price != null && (
+                  {isAuction && pick.price != null && (
                     <span className={cn(
                       'ffi-label font-mono tabular-nums',
                       isMyPick ? 'text-[var(--ffi-gold)]' : 'text-[var(--ffi-text-secondary)]',

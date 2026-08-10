@@ -5,6 +5,8 @@
  *
  * Main live draft dashboard with FFI design system.
  * Features: Real-time feed, strategy picker dropdown, My Squad panel, inline AI recs
+ *
+ * Snake fallback removed 2026-08-09 (scope freeze: auction-only).
  */
 
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
@@ -44,7 +46,6 @@ import { ManagerTendencies } from '@/components/draft/manager-tendencies'
 import { DraftFlowAlerts } from '@/components/draft/draft-flow-alerts'
 import { PivotHistory } from '@/components/draft/pivot-history'
 import { AuctionAdvisor } from '@/components/draft/auction-advisor'
-import { SnakeAdvisor } from '@/components/draft/snake-advisor'
 import { PositionRunTicker } from '@/components/draft/position-run-ticker'
 import { LiveScoreBug } from '@/components/draft/live-scorebug'
 import { AuctionDraftRoom } from '@/components/draft/live-room/auction-room'
@@ -84,16 +85,14 @@ export function LiveDraftClient() {
   const sessionId = searchParams.get('session')
   const trashTalkMode = (searchParams.get('ttm') ?? 'family-safe') as TrashTalkMode
   // FF-279 / FF-314: Auctioneer connection from setup.
-  //   ?aif=localstorage|file → same-device feed (BroadcastChannel / File API).
-  //   ?aif=remote           → cross-device sync via this repo's server proxy.
+  //   ?aif=localstorage|file -> same-device feed (BroadcastChannel / File API).
+  //   ?aif=remote           -> cross-device sync via this repo's server proxy.
   // Only the two same-device values drive useAuctioneerfeed; 'remote' (and anything
   // else) leaves it null. The remote proxy path runs automatically for every auction
   // session inside useDraftFeed, so 'remote' needs no same-device wiring here.
   const rawAif = searchParams.get('aif')
   const aifParam: AuctioneerConnectionType =
     rawAif === 'localstorage' || rawAif === 'file' ? rawAif : null
-  // FF-312: Sleeper draft ID from setup (?sdi=...)
-  const sdiParam = searchParams.get('sdi')
   // UX-7.1: Dev-only sim (?sim=1, NODE_ENV !== 'production' gate)
   const simEnabled = process.env.NODE_ENV !== 'production' && searchParams.get('sim') === '1'
 
@@ -184,7 +183,7 @@ export function LiveDraftClient() {
     handleRemoveSavedAlert,
   } = useTrashTalkEngine({ state, players, trashTalkMode, simEnabled })
 
-  // Live pick feeds (extracted: finding 9): Auctioneer + Sleeper
+  // Live pick feeds (extracted: finding 9): Auctioneer only (Sleeper removed 2026-08-09)
   const {
     aifEnabled,
     aifConnected,
@@ -193,23 +192,17 @@ export function LiveDraftClient() {
     remoteLastSyncAt,
     remoteError,
     remoteRetry,
-    sleeperEnabled,
-    sleeperConnected,
-    sleeperImportedCount,
-    sleeperError,
   } = useDraftFeeds({
     format: session?.format,
     aifParam,
-    sdiParam,
     draftedNames,
     addManualPick,
-    managerOrder: state?.manager_order ?? [],
   })
 
   // Score players with active strategy and intel context (FF-247)
   const scoredPlayers: ScoredPlayer[] = useMemo(() => {
     if (!strategy || players.length === 0) {
-      // No strategy — return neutral scores but still apply user tags
+      // No strategy -- return neutral scores but still apply user tags
       return players.map(p => ({
         player: p,
         strategyScore: 50,
@@ -279,10 +272,10 @@ export function LiveDraftClient() {
     return result.active ? result : null
   }, [strategy, state, draftedNames, myPickedNames, driftDismissed])
 
-  // FF-283: Per-player max-bid advice — recomputes on every pick from any source.
+  // FF-283: Per-player max-bid advice -- recomputes on every pick from any source.
   // deps: state (changes on every pick), scoredPlayers, draftedNames, strategy.
   // All three pick paths (Auctioneer BroadcastChannel/localStorage, Sheets, manual)
-  // flow through setState → invalidates this memo → recomputes for remaining players.
+  // flow through setState -> invalidates this memo -> recomputes for remaining players.
   const maxBidAdviceMap = useMemo((): Map<string, number> => {
     if (!state || state.format !== 'auction') return new Map()
     const managerName = state.manager_order[0]
@@ -316,8 +309,6 @@ export function LiveDraftClient() {
     })
 
   // UX-7.2 / UX-S6: Auto-navigate to Review when any draft completes (sim or real).
-  // Sim guard removed — real drafts with a sessionId now also route to Review on completion.
-  // Sim mode has no ?session= param, so sessionId is null there → the !sessionId guard still blocks.
   useEffect(() => {
     if (state?.status !== 'completed') return
     if (!sessionId) return
@@ -328,19 +319,14 @@ export function LiveDraftClient() {
     setDriftDismissed(true)
   }, [])
 
-  // UX-2.1 (Opus elevation): the on-the-clock spotlight follows the MOMENT, not the whole
-  // session. Snake → it's your turn; Auction → a player is on the block. Reads existing
-  // draft state only — visual-only, no engine change.
-  const myManagerForClock = state?.manager_order[0]
+  // UX-2.1: the on-the-clock spotlight -- auction only, fires when a player is on the block.
   const onTheClock = !!(
     state &&
     state.status !== 'completed' &&
-    (state.format === 'auction'
-      ? onBlockPlayer !== null
-      : state.current_manager === myManagerForClock)
+    state.format === 'auction' &&
+    onBlockPlayer !== null
   )
-  // Sensory layer (opt-in sound + Android haptics). Fires the moment it becomes your turn
-  // and on each new pick. The visuals always stand alone; these are bonuses.
+  // Sensory layer (opt-in sound + Android haptics).
   const haptic = useHaptic()
   const { play } = useSound()
   const prevOnClockRef = useRef(false)
@@ -447,9 +433,9 @@ export function LiveDraftClient() {
   // UXV2-6: connection health for the room status pill. Sim has no real feed.
   const online = simEnabled
     ? true
-    : !(sheetError || remoteError || aifError || sleeperError)
+    : !(sheetError || remoteError || aifError)
 
-  // Record bar (who won, at what price). Shared by both layouts.
+  // Record bar (who won, at what price).
   const recordBar =
     state.status !== 'completed' ? (
       <ManualPickEntry
@@ -457,7 +443,7 @@ export function LiveDraftClient() {
         draftedNames={draftedNames}
         managerNames={managerNames}
         format={state.format}
-        currentManager={isAuction ? myManager : state.current_manager}
+        currentManager={myManager}
         currentRound={state.current_round}
         onSubmit={addManualPick}
         onUndo={undoLastPick}
@@ -468,8 +454,7 @@ export function LiveDraftClient() {
       />
     ) : undefined
 
-  // Dev-only sim HUD (?sim=1). Hoisted so both the auction room and the snake
-  // layout render the identical controls without duplicating the markup.
+  // Dev-only sim HUD (?sim=1).
   const simHud = isSimActive ? (
     <div className="sticky top-0 z-20 flex items-center gap-3 px-3 py-2 rounded-xl border border-amber-400/30 bg-[#0a1b25]/90 backdrop-blur-sm text-xs font-mono">
       <span className="text-amber-400 tracking-widest font-bold uppercase">SIM</span>
@@ -515,343 +500,58 @@ export function LiveDraftClient() {
         : '/draft',
     )
 
-  // UXV2-6: Joe's auction path — the approved v4 decision-first room. Tyler's
-  // snake path falls through to the existing full dashboard below, unchanged.
-  if (isAuction) {
-    return (
-      <div className="space-y-4">
-        {simHud}
-        <AuctionDraftRoom
-          leagueName={league?.name ?? 'The Nasties'}
-          online={online}
-          state={state}
-          scoredPlayers={scoredPlayers}
-          draftedNames={draftedNames}
-          scarcity={scarcity}
-          maxBidMap={maxBidAdviceMap}
-          myBudget={myBudget}
-          myMaxBid={myMaxBid}
-          myPicks={myPicks}
-          rosterSlots={rosterSlots}
-          onBlockPlayer={onBlockPlayer}
-          setOnBlockPlayer={setOnBlockPlayer}
-          isTarget={isTarget}
-          isAvoid={isAvoid}
-          onLeave={goBack}
-          onNavigate={(href) => router.push(href)}
-          recordBar={recordBar}
-          managerNames={managerNames}
-          myManager={myManager}
-          onRecordPick={addManualPick}
-          onToggleTarget={onToggleTarget}
-          onEditPick={editPick}
-          onRemovePick={removePick}
-        />
-
-        {/* More tools — every secondary panel preserved, mounted only when
-            opened so nothing is silently dropped and no paid AI call fires
-            until Joe asks for it. */}
-        <div className="mx-auto max-w-md">
-          <button
-            onClick={() => setShowMore(v => !v)}
-            className="w-full ffi-card-interactive flex items-center justify-between gap-2 px-3 py-2.5"
-            aria-expanded={showMore}
-          >
-            <span className="ffi-label text-[var(--ffi-text-secondary)]">
-              {showMore ? 'Hide tools' : 'More tools'}
-            </span>
-            <ChevronDown
-              className={cn(
-                'h-4 w-4 text-[var(--ffi-text-muted)] transition-transform',
-                showMore && 'rotate-180',
-              )}
-            />
-          </button>
-        </div>
-        {showMore && (
-          <div className="space-y-4">
-            {flow && (
-              <DraftFlowAlerts
-                flow={flow}
-                pivotSuggestion={pivotSuggestion}
-                onAcceptPivot={(s) => handleStrategySwap(s, true)}
-                onDismissPivot={handleDismissPivot}
-                currentStrategy={strategy}
-                players={players}
-                draftedNames={draftedNames}
-                format={state.format}
-                leagueBudget={league?.budget ?? undefined}
-                driftAlert={driftAlert}
-                onDismissDrift={handleDismissDrift}
-              />
-            )}
-            <AuctionAdvisor
-              state={state}
-              managerName={myManager}
-              scoredPlayers={scoredPlayers}
-              draftedNames={draftedNames}
-              strategy={strategy}
-              suppressAI={isSimActive}
-            />
-            <StrategyPicker
-              strategies={allStrategies}
-              activeStrategy={strategy}
-              onSelect={(s) => handleStrategySwap(s, false)}
-            />
-            <PositionScarcityTracker scarcity={scarcity} showSpendRanges />
-            <InjuryWatch players={players} draftedNames={draftedNames} />
-            <ManagerTendencies state={state} myManager={myManager} />
-            <LeagueOverview state={state} myManager={myManager} />
-            {pivotHistory.length > 0 && <PivotHistory entries={pivotHistory} />}
-            <TrashTalkFeed
-              alerts={trashTalkAlerts}
-              onDismiss={handleDismissTrashTalk}
-              onSave={handleSaveTrashTalk}
-            />
-            {savedAlerts.length > 0 && (
-              <SavedTrashTalk alerts={savedAlerts} onRemove={handleRemoveSavedAlert} />
-            )}
-            <PlayerPool
-              scoredPlayers={scoredPlayers}
-              draftedNames={draftedNames}
-              format={state.format}
-              getExplanation={getExplanation}
-              onBidPlayer={handleBidPlayer}
-              maxBid={myMaxBid}
-              maxBidMap={maxBidAdviceMap}
-            />
-          </div>
-        )}
-      </div>
-    )
-  }
-
   return (
-    <div className="space-y-4 pb-32">
-      {/* UX-7.1: Dev-only sim HUD (NODE_ENV !== 'production' + ?sim=1) */}
+    <div className="space-y-4">
       {simHud}
-      {/* Header — UX-2.1 gold spotlight + mode badge. Leave draft top-left (blueprint 9.6). */}
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex items-center gap-3 min-w-0">
-          <button
-            onClick={() =>
-              router.push(
-                state?.status === 'completed' && sessionId
-                  ? `/draft/review?session=${sessionId}`
-                  : '/draft',
-              )
-            }
-            className="shrink-0 inline-flex items-center gap-1 pl-1.5 pr-2.5 py-1.5 rounded-lg text-[12px] font-semibold text-[var(--ffi-text-secondary)] hover:text-white hover:bg-white/[0.06] transition-colors"
-            aria-label="Leave draft"
-          >
-            <ChevronLeft className="h-4 w-4" />
-            Leave
-          </button>
-          <div className="p-2 rounded-xl bg-[var(--ffi-gold)]/15">
-            <Radio className="h-5 w-5 text-[var(--ffi-gold)]" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="ffi-display-md text-white">Live Draft</h1>
-              <span
-                className="text-[10px] font-bold px-2.5 py-0.5 rounded-full font-headline tracking-widest"
-                style={{
-                  background: 'rgba(224,194,122,0.12)',
-                  color: 'var(--ffi-gold-bright)',
-                  border: '1px solid rgba(224,194,122,0.22)',
-                }}
-              >
-                {isAuction ? 'AUCTION' : 'SNAKE'}
-              </span>
-            </div>
-            <p className="ffi-body-md text-[var(--ffi-text-secondary)]">
-              {league?.name} • {managerNames.length} Teams
-            </p>
-          </div>
-        </div>
+      <AuctionDraftRoom
+        leagueName={league?.name ?? 'The Nasties'}
+        online={online}
+        state={state}
+        scoredPlayers={scoredPlayers}
+        draftedNames={draftedNames}
+        scarcity={scarcity}
+        maxBidMap={maxBidAdviceMap}
+        myBudget={myBudget}
+        myMaxBid={myMaxBid}
+        myPicks={myPicks}
+        rosterSlots={rosterSlots}
+        onBlockPlayer={onBlockPlayer}
+        setOnBlockPlayer={setOnBlockPlayer}
+        isTarget={isTarget}
+        isAvoid={isAvoid}
+        onLeave={goBack}
+        onNavigate={(href) => router.push(href)}
+        recordBar={recordBar}
+        managerNames={managerNames}
+        myManager={myManager}
+        onRecordPick={addManualPick}
+        onToggleTarget={onToggleTarget}
+        onEditPick={editPick}
+        onRemovePick={removePick}
+      />
 
-        <div className="flex items-center gap-2 shrink-0">
-          {/* FF-314: for an auction with no Google sheet, the chip reflects the
-              cross-device remote proxy; otherwise it stays on the sheet poll. */}
-          <ConnectionStatusPill
-            lastPollAt={isAuction && !session.sheet_url ? remoteLastSyncAt : lastPollAt}
-            sheetConnected={isAuction && !session.sheet_url ? true : !!session.sheet_url}
-            error={isAuction && !session.sheet_url ? remoteError : sheetError}
-            onRetry={isAuction && !session.sheet_url ? remoteRetry : undefined}
+      {/* More tools -- every secondary panel preserved, mounted only when
+          opened so nothing is silently dropped and no paid AI call fires
+          until Joe asks for it. */}
+      <div className="mx-auto max-w-md">
+        <button
+          onClick={() => setShowMore(v => !v)}
+          className="w-full ffi-card-interactive flex items-center justify-between gap-2 px-3 py-2.5"
+          aria-expanded={showMore}
+        >
+          <span className="ffi-label text-[var(--ffi-text-secondary)]">
+            {showMore ? 'Hide tools' : 'More tools'}
+          </span>
+          <ChevronDown
+            className={cn(
+              'h-4 w-4 text-[var(--ffi-text-muted)] transition-transform',
+              showMore && 'rotate-180',
+            )}
           />
-          {/* FF-279: Auctioneer sync indicator — auction-only */}
-          {aifEnabled && (
-            <FFIBadge
-              status={aifError ? 'danger' : aifConnected ? 'success' : 'info'}
-              title={aifError ?? (aifConnected ? `${aifImportedCount} picks imported from Auctioneer` : 'Waiting for Auctioneer data...')}
-            >
-              AA{' '}
-              {aifConnected ? (
-                <>
-                  <Check className="inline h-3 w-3 align-[-2px]" aria-hidden="true" />
-                  {aifImportedCount > 0 ? ` ${aifImportedCount}` : ''}
-                </>
-              ) : (
-                '...'
-              )}
-            </FFIBadge>
-          )}
-          {/* FF-312: Sleeper sync indicator — snake-only */}
-          {sleeperEnabled && (
-            <FFIBadge
-              status={sleeperError ? 'danger' : sleeperConnected ? 'success' : 'info'}
-              title={sleeperError ?? (sleeperConnected ? `${sleeperImportedCount} picks from Sleeper` : 'Connecting to Sleeper...')}
-            >
-              SL{' '}
-              {sleeperConnected ? (
-                <>
-                  <Check className="inline h-3 w-3 align-[-2px]" aria-hidden="true" />
-                  {sleeperImportedCount > 0 ? ` ${sleeperImportedCount}` : ''}
-                </>
-              ) : (
-                '...'
-              )}
-            </FFIBadge>
-          )}
-          {saving && <Loader2 className="h-4 w-4 animate-spin text-[var(--ffi-primary)]" />}
-          <FFIBadge status={state.status === 'completed' ? 'success' : 'info'}>
-            {state.status === 'completed' ? 'COMPLETE' : `${state.total_picks} PICKS`}
-          </FFIBadge>
-        </div>
+        </button>
       </div>
-
-      {/* Sheet sync errors now surfaced via ConnectionStatusPill (FF-259) */}
-
-      {/* UX-2.1 (Opus elevation): On-the-clock HERO — the primetime spotlight moment.
-          Snake: it's your pick. Auction: a player is on the block. Gold = the moment. */}
-      <AnimatePresence>
-        {onTheClock && (
-          <motion.div
-            key="on-the-clock"
-            initial={{ opacity: 0, y: -10, scale: 0.985 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -10, scale: 0.985 }}
-            transition={{ type: 'spring', stiffness: 380, damping: 28 }}
-            className="ffi-glass-heavy ffi-onclock-banner rounded-2xl px-4 py-3 flex items-center gap-3"
-            role="status"
-            aria-live="polite"
-          >
-            <div
-              className="shrink-0 grid place-items-center h-11 w-11 rounded-xl"
-              style={{ background: 'rgba(253,239,182,0.14)' }}
-            >
-              {isAuction
-                ? <Gavel className="h-5 w-5 text-[var(--ffi-gold-bright)]" />
-                : <Clock className="h-5 w-5 text-[var(--ffi-gold-bright)]" />}
-            </div>
-            <div className="min-w-0 flex-1">
-              <div
-                className="font-headline font-bold tracking-widest text-[13px] leading-none"
-                style={{ color: 'var(--ffi-gold-bright)' }}
-              >
-                {isAuction ? 'ON THE BLOCK' : "YOU'RE ON THE CLOCK"}
-              </div>
-              <div className="mt-1 truncate ffi-body-md text-white">
-                {isAuction ? (
-                  <>
-                    <span className="font-semibold text-[var(--ffi-gold)]">
-                      {onBlockPlayer?.name}
-                    </span>
-                    {onBlockPlayer?.position && (
-                      <span className="text-[var(--ffi-text-secondary)]"> · {onBlockPlayer.position}</span>
-                    )}
-                  </>
-                ) : (
-                  <span className="font-mono text-[var(--ffi-text-secondary)]">
-                    Round {state.current_round ?? '-'} · Pick {state.current_pick_in_round ?? '-'}
-                  </span>
-                )}
-              </div>
-            </div>
-            <span
-              className="shrink-0 h-2.5 w-2.5 rounded-full animate-pulse"
-              style={{ background: 'var(--ffi-gold-bright)', boxShadow: '0 0 10px rgba(253,239,182,0.8)' }}
-              aria-hidden="true"
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Live score-bug + position-run ticker - broadcast glance layer */}
-      <LiveScoreBug state={state} myManager={myManager} />
-      {flow && <PositionRunTicker runs={flow.currentRuns} />}
-
-      {/* Main layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-4">
-        {/* Left column */}
+      {showMore && (
         <div className="space-y-4">
-          {/* Strategy picker dropdown */}
-          <StrategyPicker
-            strategies={allStrategies}
-            activeStrategy={strategy}
-            onSelect={(s) => handleStrategySwap(s, false)}
-          />
-
-          {/* My Squad panel */}
-          <MySquadPanel
-            picks={myPicks}
-            budget={myBudget}
-            maxBid={myMaxBid}
-            needs={myNeeds}
-            format={state.format}
-            rosterSlots={rosterSlots}
-          />
-
-          {/* Real-time pick feed */}
-          <PickFeed picks={state.picks} format={state.format} myManager={myManager} />
-
-          {/* Trash talk feed */}
-          <TrashTalkFeed
-            alerts={trashTalkAlerts}
-            onDismiss={handleDismissTrashTalk}
-            onSave={handleSaveTrashTalk}
-          />
-
-          {/* Saved trash talk (only when items exist) */}
-          {savedAlerts.length > 0 && (
-            <SavedTrashTalk
-              alerts={savedAlerts}
-              onRemove={handleRemoveSavedAlert}
-            />
-          )}
-
-          {/* Auction/Snake advisor with inline AI recs */}
-          {isAuction ? (
-            <AuctionAdvisor
-              state={state}
-              managerName={myManager}
-              scoredPlayers={scoredPlayers}
-              draftedNames={draftedNames}
-              strategy={strategy}
-              suppressAI={isSimActive}
-            />
-          ) : (
-            <SnakeAdvisor
-              state={state}
-              managerName={myManager}
-              scoredPlayers={scoredPlayers}
-              draftedNames={draftedNames}
-              strategy={strategy}
-              suppressAI={isSimActive}
-            />
-          )}
-
-          {/* Desktop only panels */}
-          <div className="hidden lg:block space-y-4">
-            <LeagueOverview state={state} myManager={myManager} />
-            <ManagerTendencies state={state} myManager={myManager} />
-            {pivotHistory.length > 0 && <PivotHistory entries={pivotHistory} />}
-          </div>
-        </div>
-
-        {/* Right column */}
-        <div className="space-y-4">
-          {/* Draft flow alerts + pivot suggestions */}
           {flow && (
             <DraftFlowAlerts
               flow={flow}
@@ -867,20 +567,32 @@ export function LiveDraftClient() {
               onDismissDrift={handleDismissDrift}
             />
           )}
-
-          {/* Position scarcity — showSpendRanges is auction-only (FF-265) */}
-          <PositionScarcityTracker
-            scarcity={scarcity}
-            showSpendRanges={state.format === 'auction'}
-          />
-
-          {/* FF-277: Injury Watch — flagged undrafted players */}
-          <InjuryWatch
-            players={players}
+          <AuctionAdvisor
+            state={state}
+            managerName={myManager}
+            scoredPlayers={scoredPlayers}
             draftedNames={draftedNames}
+            strategy={strategy}
+            suppressAI={isSimActive}
           />
-
-          {/* Available players */}
+          <StrategyPicker
+            strategies={allStrategies}
+            activeStrategy={strategy}
+            onSelect={(s) => handleStrategySwap(s, false)}
+          />
+          <PositionScarcityTracker scarcity={scarcity} showSpendRanges />
+          <InjuryWatch players={players} draftedNames={draftedNames} />
+          <ManagerTendencies state={state} myManager={myManager} />
+          <LeagueOverview state={state} myManager={myManager} />
+          {pivotHistory.length > 0 && <PivotHistory entries={pivotHistory} />}
+          <TrashTalkFeed
+            alerts={trashTalkAlerts}
+            onDismiss={handleDismissTrashTalk}
+            onSave={handleSaveTrashTalk}
+          />
+          {savedAlerts.length > 0 && (
+            <SavedTrashTalk alerts={savedAlerts} onRemove={handleRemoveSavedAlert} />
+          )}
           <PlayerPool
             scoredPlayers={scoredPlayers}
             draftedNames={draftedNames}
@@ -888,42 +600,8 @@ export function LiveDraftClient() {
             getExplanation={getExplanation}
             onBidPlayer={handleBidPlayer}
             maxBid={myMaxBid}
-            maxBidMap={isAuction ? maxBidAdviceMap : undefined}
+            maxBidMap={maxBidAdviceMap}
           />
-        </div>
-      </div>
-
-      {/* Mobile panels */}
-      <div className="lg:hidden space-y-4">
-        <LeagueOverview state={state} myManager={myManager} />
-        <ManagerTendencies state={state} myManager={myManager} />
-        {pivotHistory.length > 0 && <PivotHistory entries={pivotHistory} />}
-      </div>
-
-      {/* FF-257: Pinned quick-entry bar — always visible at viewport bottom */}
-      {state.status !== 'completed' && (
-        <div
-          className="fixed inset-x-0 bottom-0 z-40 ffi-glass-heavy border-t border-[var(--ffi-border)] shadow-2xl"
-          style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
-          role="region"
-          aria-label="Quick pick entry"
-        >
-          <div className="mx-auto max-w-7xl px-3 py-2.5">
-            <ManualPickEntry
-              players={players}
-              draftedNames={draftedNames}
-              managerNames={managerNames}
-              format={state.format}
-              currentManager={isAuction ? myManager : state.current_manager}
-              currentRound={state.current_round}
-              onSubmit={addManualPick}
-              onUndo={undoLastPick}
-              canUndo={state.picks.length > 0}
-              variant="bar"
-              onBlockPlayer={onBlockPlayer}
-              onClearBlock={() => setOnBlockPlayer(null)}
-            />
-          </div>
         </div>
       )}
     </div>

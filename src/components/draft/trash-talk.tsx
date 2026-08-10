@@ -8,7 +8,7 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Bookmark, Flame, AlertTriangle, Skull, Target, Meh, DollarSign, Wallet, Coins, Crown, Shield, BarChart3, Lock } from 'lucide-react'
+import { X, Bookmark, Flame, AlertTriangle, Skull, Target, Meh, DollarSign, Wallet, Coins, Crown, Shield, BarChart3 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import {
   FFICard,
@@ -106,18 +106,6 @@ const trashTalkConfig: Record<TrashTalkType, {
     bgClass: 'bg-[var(--ffi-danger)]/10',
     borderClass: 'border-l-[var(--ffi-danger)]',
     textClass: 'text-[var(--ffi-danger)]',
-  },
-  keeper_steal: {
-    icon: Lock,
-    bgClass: 'bg-[var(--value-green)]/8',
-    borderClass: 'border-l-[var(--value-green)]',
-    textClass: 'text-[var(--value-green)]',
-  },
-  bad_keeper: {
-    icon: Flame,
-    bgClass: 'bg-[var(--ffi-warning)]/10',
-    borderClass: 'border-l-[var(--ffi-warning)]',
-    textClass: 'text-[var(--ffi-warning)]',
   },
 }
 
