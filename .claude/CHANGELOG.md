@@ -2,6 +2,29 @@
 
 ---
 
+## 2026-08-10 / DR-3: Fix the inverted cost-guard
+
+**Task:** DR-3 (P2 Draft Readiness) | **Class:** `pipeline` + `output` | **Lenses:** QA, Security
+
+**Problem:** The cost guard was inverted. "Run Research" had a confirm dialog claiming "runs AI analysis (Claude)... uses your API credits" -- but `runResearchPipeline` is 100% deterministic (ESPN/Sleeper/FantasyPros free APIs + pure scoring math, zero Claude calls). Meanwhile "Generate Strategies" (calls `proposeStrategies` → `askClaudeJson`) had no confirm at all. Bonus find: `/api/research/route.ts` had a spurious `ANTHROPIC_API_KEY` check that 503'd the entire Run Research endpoint when the key is absent -- a draft-night blocker since the pipeline doesn't need the key.
+
+**What changed:**
+
+- `src/components/prep/strategy-proposals.tsx` -- Added `confirming` state; "Generate Strategies" button now sets `confirming:true` instead of firing `generate`; added inline cost-confirm block (cancel/confirm) with honest copy: "Claude will analyze your player pool and generate 4-6 draft strategies. This uses your Anthropic API credits (~$0.01-0.05 per run)."
+- `src/app/(app)/prep/page.tsx` -- Fixed misleading confirm text: "runs AI analysis (Claude)... uses your API credits" → "pulls fresh data from ESPN, Sleeper & FantasyPros... No AI credits used." Fixed sub-text: "Uses AI · runs only when you tap" → "Free data pull · no AI credits."
+- `src/app/api/research/route.ts` -- Removed spurious `ANTHROPIC_API_KEY` guard (lines formerly 78-83); the research pipeline never calls Claude so the check was both wrong and a functional blocker.
+
+**DR-3.3 note:** `lib/research/analyze.ts` confirmed deleted (DR-2.3); no orphaned Claude functions remain.
+
+**Call-path audit (evidence):**
+- `/api/research` → `runResearchPipeline` (service.ts) → fetchAllSleeperData / fetchAllESPNData / fetchAllFantasyProsData + scorePlayersWithStrategy. No `askClaudeJson` import anywhere in service.ts. **Zero Claude spend.**
+- `/api/strategies/propose` → `proposeStrategies` (strategy/research.ts:15 imports `askClaudeJson`). **Real Claude spend -- now confirm-gated.**
+- Board Refresh (`board/client.tsx:handleFullRefresh`) calls `/api/research` -- same deterministic pipeline. No confirm needed; none added. (BUILD_PLAN audit incorrectly flagged this as Claude-spend; code disproves it.)
+
+**Verify:** `npm run type-check` 0 errors, `npm run test:run` 96/96 pass, `npm run lint` 41 errors (pre-existing baseline, 0 new), `npm run build` clean. UI screenshot not available (preview infrastructure blocked by concurrent session; changes are copy edits + type-safe state logic).
+
+---
+
 ## 2026-08-10 / DR-2: Kill the dead paths
 
 **Task:** DR-2 (P2 Draft Readiness) | **Class:** `shared` | **Lenses:** Architecture, QA

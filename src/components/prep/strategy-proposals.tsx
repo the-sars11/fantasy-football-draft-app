@@ -31,8 +31,10 @@ export function StrategyProposals({ leagueId, format, onSave }: StrategyProposal
   const [selectedIdx, setSelectedIdx] = useState<number | null>(null)
   const [playerCount, setPlayerCount] = useState(0)
   const [comparing, setComparing] = useState(false)
+  const [confirming, setConfirming] = useState(false)
 
   const generate = useCallback(async () => {
+    setConfirming(false)
     setLoading(true)
     setError(null)
     setProposals([])
@@ -96,8 +98,8 @@ export function StrategyProposals({ leagueId, format, onSave }: StrategyProposal
             </Button>
           )}
           <Button
-            onClick={generate}
-            disabled={loading}
+            onClick={() => setConfirming(true)}
+            disabled={loading || confirming}
             size="sm"
           >
             {loading ? (
@@ -114,6 +116,31 @@ export function StrategyProposals({ leagueId, format, onSave }: StrategyProposal
           </Button>
         </div>
       </div>
+
+      {/* AI cost confirm */}
+      {confirming && (
+        <div className="rounded-md border p-3.5" style={{ background: 'rgba(139,255,69,0.06)', border: '1px solid rgba(139,255,69,0.20)' }}>
+          <p className="text-[13px] leading-[1.4]" style={{ color: 'var(--ffi-ink)' }}>
+            Claude will analyze your player pool and generate 4-6 draft strategies. This uses your Anthropic API credits (~$0.01-0.05 per run).
+          </p>
+          <div className="flex gap-2 mt-3">
+            <button
+              onClick={() => setConfirming(false)}
+              className="ffi-btn-secondary flex-1 text-[13px] font-bold"
+              style={{ borderRadius: '11px', padding: '0.6rem' }}
+            >
+              Cancel
+            </button>
+            <button
+              onClick={generate}
+              className="ffi-btn-hero flex-1 text-[13px] uppercase tracking-widest"
+              style={{ borderRadius: '11px' }}
+            >
+              Use AI credits
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Loading state */}
       {loading && (

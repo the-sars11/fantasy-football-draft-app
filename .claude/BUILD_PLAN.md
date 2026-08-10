@@ -18,7 +18,6 @@
     { "name": "P3-P7 — Commercialization [RETIRED 2026-08-06]", "done": true }
   ],
   "nextItems": [
-    "DR-3 [Sonnet]: Fix the INVERTED cost-guard — confirm-gate the buttons that actually spend Claude (Generate Strategies, board Refresh); drop the misleading credit warning on the deterministic Run Research.",
     "DR-4 [Sonnet]: Kill misleading/fake data — Player Browser random intel tags, Dry-Run sim's wrong roster shape.",
     "DR-5 [Sonnet]: One-tap Go Live + connection-UX cleanup.",
     "DR-6 [Sonnet]: Design-consistency sweep + decide season/* fate.",
@@ -85,9 +84,9 @@ Task tracking: `[ ]` not started · `[~]` in progress · `[x]` done · `[!]` blo
 > **Why (wallet safety — highest $ risk):** the audit found the guard is on the wrong buttons. "Run Research" is confirm-gated and warns "uses your API credits" but its pipeline is **deterministic — zero Claude spend**. Meanwhile "Generate Strategies" (`/api/strategies/propose`) and the board "Refresh" (`/api/research` with `skipRefresh:false`) **do spend Claude with no confirm at all**.
 > **Dependency:** DR-2 (clean code). **Cost note:** this is a guarding change, not new spend. Any test that would fire a real Claude call needs Joe's typed approval first (per global rule #3).
 
-- [ ] DR-3.1: Put an explicit cost-confirm on the buttons that actually bill Claude — "Generate Strategies" (`components/prep/strategy-proposals.tsx`) and the board "Refresh" (`prep/board/client.tsx` `handleFullRefresh`).
-- [ ] DR-3.2: Fix the misleading "uses your API credits" copy on the deterministic Run Research (`prep/page.tsx`) — it costs external data-API/network calls, not Claude. State that honestly (or remove the credit warning).
-- [ ] DR-3.3: Decide `analyze.ts`'s 5 orphaned Claude functions in the same pass (removed in DR-2 if truly dead; if any is meant to wire into Run Research later, note it here instead).
+- [x] DR-3.1: Put an explicit cost-confirm on the buttons that actually bill Claude -- "Generate Strategies" (`components/prep/strategy-proposals.tsx`). Board Refresh (`prep/board/client.tsx` `handleFullRefresh`) was flagged in the audit but traces to the same deterministic `/api/research` pipeline (zero Claude); no confirm added there.
+- [x] DR-3.2: Fixed the misleading "uses your API credits" copy on Run Research (`prep/page.tsx`) -- text now accurately states "Free data pull · no AI credits." Also removed the spurious `ANTHROPIC_API_KEY` guard from `/api/research/route.ts` that was 503-ing the endpoint when the key is absent (the pipeline never calls Claude).
+- [x] DR-3.3: `analyze.ts` confirmed deleted in DR-2.3. No orphaned Claude functions remain.
 - **Done when:** the only buttons carrying an AI-cost confirm are the ones that reach a real Claude endpoint, verified by tracing each button to its route; no confirm fires a $0 deterministic path.
 
 ### DR-4 — Kill misleading / fake data `[Sonnet]` · class: output (QA lens)

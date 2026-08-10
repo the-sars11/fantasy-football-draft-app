@@ -323,8 +323,8 @@ export default function PrepPage() {
               }}
             >
               <p className="text-[13px] leading-[1.4]" style={{ color: 'var(--ffi-ink)' }}>
-                This runs the AI analysis (Claude) across every source. It can take a minute and
-                uses your API credits.
+                This pulls fresh data from ESPN, Sleeper &amp; FantasyPros, then scores every player
+                for your league settings. Takes 30-60 seconds. No AI credits used.
               </p>
               <div className="flex gap-2 mt-3">
                 <button
@@ -367,7 +367,7 @@ export default function PrepPage() {
             className="text-[10px] text-center mt-2 uppercase tracking-wider"
             style={{ fontFamily: 'var(--font-cond)', color: 'var(--ffi-ink-3)', letterSpacing: '0.16em' }}
           >
-            Uses AI · runs only when you tap
+            Free data pull · no AI credits
           </p>
 
           {runError && (
