@@ -372,7 +372,7 @@ Task tracking: `[ ]` = not started, `[~]` = in progress, `[x]` = complete
 - [x] FF-312: Sleeper live draft integration — `use-sleeper-draft-feed.ts` polls `/draft/{draft_id}/picks` every 5s; snake-order math maps pick_no → manager name; `extractSleeperDraftId()` handles full URLs or raw IDs; 4th mode option in setup (snake-only); `sdi` URL param to live client; SL badge in header; draft-complete polling via `/draft/{draft_id}`
 - [ ] FF-260: Document exact Sheets setup in `WORKING_STATE.md` — column names, format, share permissions confirmed from actual Nasties 2026 sheet _(Blocked: need real draft sheet ~Aug 2026)_
 - [ ] FF-072: Live draft dry run — mock Google Sheet + mock Sleeper draft, run through full auction + snake live draft flow end-to-end `ACTION`
-- [ ] FF-080: Full pre-draft data pull with 2026 season data — verify all sources working `ACTION`
+- [x] FF-080: Full pre-draft data pull with 2026 season data — verify all sources working. Ran `scripts/seed-players-sleeper.ts` (3,059 players upserted; 3,141 total in cache, `last_updated_at` 2026-08-10) + `scripts/populate-fantasypros.ts` (489 players with real 2026 PPR ECR rankings + derived auction values: #1 Ja'Marr Chase $70, #2 Puka Nacua $69, #3 Jahmyr Gibbs $68). Both free APIs responded clean; 491 players now have real board values. VERIFIED: both scripts exit 0, no errors. `ACTION`
 - [ ] FF-081: Draft day checklist — confirm Nasties Google Sheet template + column format, verify app on Joe's phone `ACTION`
 
 ---

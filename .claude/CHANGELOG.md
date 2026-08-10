@@ -2,6 +2,20 @@
 
 ---
 
+## 2026-08-10 / FF-080: Pre-draft 2026 data refresh
+
+**Task:** FF-080 (P2) | **Class:** `pipeline` (data ingestion) | **Lenses:** QA
+
+**Problem:** Player cache was last seeded in June 2026. Preseason roster moves, injuries, and depth-chart changes were not reflected. Board showed UNRANKED/$1 placeholders because FantasyPros ECR values had not been populated.
+
+**What changed (Supabase data only — no source code):**
+- `scripts/seed-players-sleeper.ts` run: 3,059 players upserted from Sleeper API (current active QB/RB/WR/TE/DEF, no kickers). Supabase total: 3,141. `last_updated_at` = 2026-08-10.
+- `scripts/populate-fantasypros.ts` run: 489 players populated with real 2026 PPR ECR rankings + derived auction values ($200/12-team quadratic decay). Top 10: Ja'Marr Chase $70, Puka Nacua $69, Jahmyr Gibbs $68, Bijan Robinson $67, Jaxon Smith-Njigba $65, Amon-Ra St. Brown $64, Christian McCaffrey $63, CeeDee Lamb $62, Justin Jefferson $61, Jonathan Taylor $60.
+
+**Verify:** both scripts exit 0, 3,059/3,059 upserted (Sleeper), 489/489 upserted (FantasyPros), 491 players with real board values confirmed in Supabase. No paid endpoints fired.
+
+---
+
 ## 2026-08-10 / FF-315: Offline resync + reconciliation
 
 **Task:** FF-315 (P1b) | **Class:** `pipeline` (feed hooks + draft state) | **Lenses:** Architecture, QA
