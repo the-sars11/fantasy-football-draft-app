@@ -2,6 +2,23 @@
 
 ---
 
+## 2026-08-09 / Finding 12 (Stage A): per-pick edit + arbitrary remove logic
+
+**Task:** CODE_REVIEW_2026-06 finding 12 (P1, UX/mechanics) | **Class:** `shared` (state helpers + hook) | **Lenses:** Architecture, QA
+
+**What changed (logic only; no UI this stage):**
+- `src/lib/draft/state.ts`: added two pure, immutable helpers. `removePickByNumber(picks, n)` drops the matching pick and renumbers the remainder contiguously (1..n) so the feed has no gaps; `editPickByNumber(picks, n, changes)` applies a partial change while preserving `pick_number`. Both no-op cleanly when no pick matches. Keepers are untouched (they live in `state.keepers`, never `state.picks`).
+- `src/hooks/use-draft-state.ts`: factored the existing `undoLastPick` rebuild into a shared `rebuildFromPicks(prev, picks)` (fresh `createInitialState` from `manager_order` -> re-apply keepers if any -> replay each pick via `applyPick`), then added `editPick` and `removePick` actions on top of it. Rebuild-from-scratch keeps budgets, roster counts, and the snake turn perfectly consistent after any correction. `removePick` returns early if no pick matched (length unchanged). Both persist via the existing `persistPicks`.
+- Rebuild logic stays in the hook (not `state.ts`) to avoid a circular import: `state.ts` imports only `type KeeperAssignment` from `./keepers`, while the rebuild needs `applyKeepersToState` (a value) from that module.
+
+**Tests:** 10 new unit tests in `state.test.ts` (117 total, was 107): remove-middle renumbering, remove-last == undo, no-op paths, no-mutation of inputs, edit-preserves-number, and three rebuild-integration checks proving budget refund on remove, budget adjust on price edit, and spend transfer on manager edit.
+
+**Scope discipline:** three files, committed by explicit path (2e48c84). Stage B (the tap-a-pick edit/remove UI) is deferred - substantial UI, needs a named reference + design sign-off before build.
+
+**Verify result:** `npm run type-check` 0 errors; `npx eslint` on the 3 changed files 0 errors (2 pre-existing unused-import warnings on untouched lines); `npm run test:run` 117/117; `npm run build` compiled with `/draft/live` in the route list. Zero em/en-dashes in authored code. No paid endpoints fired.
+
+---
+
 ## 2026-08-09 / Finding 10: stabilize sheet-poll loop + failure backoff
 
 **Task:** CODE_REVIEW_2026-06 finding 10 (P1, Resilience/UX) | **Class:** `pipeline` (live polling) | **Lenses:** Architecture, QA
