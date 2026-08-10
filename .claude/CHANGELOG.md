@@ -2,6 +2,21 @@
 
 ---
 
+## 2026-08-10 / DR-6.3: Remove 3 dead Research-tab components
+
+**Task:** DR-6.3 (follow-up to DR-6.1) | **Class:** `output` | **Lenses:** Design, QA
+
+**Problem:** DR-6.1's design-consistency sweep flagged `src/components/prep/data-freshness.tsx`, `source-weights-config.tsx`, and `user-rules-editor.tsx` as dead/orphan files (zero imports/usages found anywhere in the codebase) but didn't act on them, deferring the deletion via `spawn_task`.
+
+**What changed:**
+
+- Re-verified all three files were unreferenced: grepped `src/` for each exported symbol (`DataFreshness`, `SourceWeightsConfig`/`useSourceWeights`/`DEFAULT_SOURCE_WEIGHTS`, `UserRulesEditor`) and each filename/import path — every match was the file's own declaration, no importers, no barrel/index re-export.
+- Deleted `src/components/prep/data-freshness.tsx`, `src/components/prep/source-weights-config.tsx`, `src/components/prep/user-rules-editor.tsx`.
+
+**Verify:** `npm run type-check` 0 errors. `npm run build` clean (54 routes, same route count as before deletion — confirms nothing was actually reachable through these files).
+
+---
+
 ## 2026-08-10 / DR-6: GRIDIRON design-consistency sweep + season/* quarantine
 
 **Task:** DR-6 (P2 Draft Readiness) | **Class:** `output` | **Lenses:** Design, Delivery, QA
