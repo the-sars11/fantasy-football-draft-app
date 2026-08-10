@@ -2,7 +2,6 @@
 
 import { useState, useCallback } from 'react'
 import { Sparkles, Loader2, Columns2 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
 import { StrategyProposalCard } from './strategy-proposal-card'
 import { StrategyCompare } from './strategy-compare'
 import type { StrategyProposal } from '@/lib/research/strategy/research'
@@ -77,49 +76,50 @@ export function StrategyProposals({ leagueId, format, onSave }: StrategyProposal
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-3">
         <div>
-          <h2 className="text-lg font-semibold">AI Strategy Proposals</h2>
-          <p className="text-sm text-muted-foreground">
+          <h2 className="ffi-title-lg" style={{ color: 'var(--ffi-ink)' }}>AI Strategy Proposals</h2>
+          <p className="text-[13px]" style={{ color: 'var(--ffi-ink-2)' }}>
             {proposals.length > 0
               ? `${proposals.length} strategies generated from ${playerCount} players`
               : `Claude will analyze your league settings and player data to propose ${format === 'auction' ? 'auction' : 'snake'} strategies`}
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           {proposals.length >= 2 && !comparing && (
-            <Button
-              variant="outline"
-              size="sm"
+            <button
               onClick={() => setComparing(true)}
+              className="ffi-btn-secondary text-[13px]"
+              style={{ padding: '0.5rem 1rem' }}
             >
-              <Columns2 className="h-4 w-4 mr-1.5" />
+              <Columns2 className="h-4 w-4" />
               Compare
-            </Button>
+            </button>
           )}
-          <Button
+          <button
             onClick={() => setConfirming(true)}
             disabled={loading || confirming}
-            size="sm"
+            className="ffi-btn-hero text-[13px] disabled:opacity-50"
+            style={{ padding: '0.5rem 1.25rem' }}
           >
             {loading ? (
               <>
-                <Loader2 className="h-4 w-4 mr-1.5 animate-spin" />
+                <Loader2 className="h-4 w-4 animate-spin" />
                 Analyzing...
               </>
             ) : (
               <>
-                <Sparkles className="h-4 w-4 mr-1.5" />
+                <Sparkles className="h-4 w-4" />
                 {proposals.length > 0 ? 'Regenerate' : 'Generate Strategies'}
               </>
             )}
-          </Button>
+          </button>
         </div>
       </div>
 
       {/* AI cost confirm */}
       {confirming && (
-        <div className="rounded-md border p-3.5" style={{ background: 'rgba(139,255,69,0.06)', border: '1px solid rgba(139,255,69,0.20)' }}>
+        <div className="rounded-md p-3.5" style={{ background: 'rgba(139,255,69,0.06)', border: '1px solid rgba(139,255,69,0.20)' }}>
           <p className="text-[13px] leading-[1.4]" style={{ color: 'var(--ffi-ink)' }}>
             Claude will analyze your player pool and generate 4-6 draft strategies. This uses your Anthropic API credits (~$0.01-0.05 per run).
           </p>
@@ -144,9 +144,9 @@ export function StrategyProposals({ leagueId, format, onSave }: StrategyProposal
 
       {/* Loading state */}
       {loading && (
-        <div className="rounded-md bg-muted/50 border border-border p-8 flex flex-col items-center gap-3">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <div className="text-sm text-muted-foreground text-center">
+        <div className="rounded-md p-8 flex flex-col items-center gap-3" style={{ background: 'var(--ffi-surface-1)', border: '1px solid var(--ffi-hairline)' }}>
+          <Loader2 className="h-8 w-8 animate-spin" style={{ color: 'var(--ffi-blue-bright)' }} />
+          <div className="text-[13px] text-center" style={{ color: 'var(--ffi-ink-2)' }}>
             Claude is analyzing your league settings and player data...
             <br />
             <span className="text-xs">This usually takes 10-20 seconds</span>
@@ -156,7 +156,7 @@ export function StrategyProposals({ leagueId, format, onSave }: StrategyProposal
 
       {/* Error */}
       {error && (
-        <div className="rounded-md bg-red-500/10 border border-red-500/20 p-3 text-sm text-red-600 dark:text-red-400">
+        <div className="rounded-md p-3 text-[13px]" style={{ background: 'rgba(255,110,138,0.12)', border: '1px solid rgba(255,110,138,0.24)', color: 'var(--ffi-danger)' }}>
           {error}
         </div>
       )}
@@ -192,10 +192,10 @@ export function StrategyProposals({ leagueId, format, onSave }: StrategyProposal
 
       {/* Save selected */}
       {selectedIdx !== null && onSave && !comparing && (
-        <div className="sticky bottom-16 sm:bottom-0 z-10 bg-background/80 backdrop-blur-sm border-t p-3 -mx-4 px-4">
-          <Button onClick={handleSave} className="w-full">
+        <div className="sticky bottom-16 sm:bottom-0 z-10 p-3 -mx-4 px-4" style={{ background: 'var(--ffi-bg-1)', borderTop: '1px solid var(--ffi-hairline)' }}>
+          <button onClick={handleSave} className="ffi-btn-hero w-full text-[13px]">
             Save &ldquo;{proposals[selectedIdx].name}&rdquo; as active strategy
-          </Button>
+          </button>
         </div>
       )}
     </div>

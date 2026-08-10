@@ -2,6 +2,22 @@
 
 ---
 
+## 2026-08-10 / DR-6: GRIDIRON design-consistency sweep + season/* quarantine
+
+**Task:** DR-6 (P2 Draft Readiness) | **Class:** `output` | **Lenses:** Design, Delivery, QA
+
+**Problem:** The app was ~85% on the GRIDIRON design system. `prep/runs/client.tsx` and `components/prep/strategy-proposals.tsx` still used old shadcn primitives, and investigation surfaced 7 more reachable Research-tab files off-system too (`strategy-proposal-card.tsx`, `strategy-compare.tsx`, `strategy-value-preview.tsx`, `strategy-list.tsx`, `league-config-form.tsx`, `position-breakdown.tsx`, `strategy-editor.tsx`). Joe was asked via the mandatory scope-expansion halt and chose the full 9-file sweep over the original 2-file plan text. Separately, the 5 `season/*` in-season-companion screens sit on the pre-GRIDIRON design system, are unreachable from nav, and had no marking distinguishing them from live, in-scope screens.
+
+**What changed:**
+
+- **DR-6.1 (scope expanded, Joe-approved):** all 9 files converted from shadcn/ui primitives (`Button`, `Card`/`CardContent`/`CardHeader`/`CardTitle`, `Badge`, `Input`, `Label`, `Select*`, `Slider`, `Table*`) to GRIDIRON `ffi-*` utility classes and inline `var(--ffi-*)` custom-property styles, preserving all existing logic/state/handlers/props exactly (pure styling/markup conversion, not a refactor). Native `<input type="range">` with `accentColor: var(--ffi-blue-bright)` replaces shadcn `<Slider>` throughout `strategy-editor.tsx`. `prep/runs/client.tsx`'s shadcn `<Table>` run list and metrics-comparison table were converted to `ffi-card` row/expandable layouts and a 3-column CSS-grid `CompareStatRow`, not just re-skinned as raw HTML tables — full removal, since Table deletion was mandatory regardless and GRIDIRON's rule bars HTML tables for player lists.
+- **DR-6.2 (decision recorded):** `season/*` (`page.tsx`, `matchups/page.tsx`, `start-sit/page.tsx`, `trade/page.tsx`, `waivers/page.tsx`) confirmed unreachable (zero references in `src/components/layout/` or `app/(app)/layout.tsx` nav). **Decision: quarantine, not delete** — each file's top-of-file docblock now carries a "PARKED / OFF-SYSTEM (DR-6.2, 2026-08-10)" banner stating it's unreachable, pre-GRIDIRON, out of scope for draft night, and held for a future in-season companion phase (P8). In-season companion confirmed out of scope for draft night.
+- Fixed an unused `ChevronDown` lucide-react import in `prep/runs/client.tsx` surfaced by lint during VERIFY.
+
+**Verify:** `npm run type-check` 0 errors, `npm run lint` 41 pre-existing baseline errors unchanged (0 in touched files; 1 warning fixed), `npm run test:run` 96/96 pass, `npm run build` clean (54 routes). Browser-verified 4 of 9 converted screens (`/prep/runs`, `/prep/strategies` partial, `/prep/board` position-breakdown, `/prep/configure` league-config-form) via DOM structure (`read_page`), console errors (`read_console_messages`), and computed CSS values (`javascript_tool`) — confirmed GRIDIRON tokens resolve correctly at runtime (e.g. tier badge computed `rgb(121,166,255)` = exactly `--ffi-blue-bright`; form input `rgb(12,19,34)` = exactly `--ffi-surface-1`) and zero new console errors traceable to the converted files. **Gap, disclosed rather than glossed over:** pixel screenshots were unavailable this session (`computer{action:"screenshot"}` failed with "Browser pane is not displayed, so the page is not compositing frames" — a client-side tool issue, non-recoverable within the session); DOM/console/computed-style checks were used as the verification substitute. `strategy-editor.tsx`, `strategy-proposal-card.tsx`, and `strategy-compare.tsx` were not directly browser-exercised (no UI path found to reach the strategy editor, and "Generate Strategies" was deliberately not clicked since it fires a paid Claude API call requiring separate cost approval) — they passed type-check/lint/build but not live browser interaction. One unrelated, pre-existing console error observed on `/prep/configure` and `/prep/board` (`[useUserTags] Error: TypeError: fetch failed`, 500s from an API route) — not traced to any of the 9 converted files, not fixed this session, flagged for awareness. Three pre-existing dead/orphan files found during the sweep (`data-freshness.tsx`, `source-weights-config.tsx`, `user-rules-editor.tsx`) were flagged via `spawn_task` as a separate follow-up, not touched here.
+
+---
+
 ## 2026-08-10 / DR-5: One-tap Go Live + connection-UX cleanup
 
 **Task:** DR-5 (P2 Draft Readiness) | **Class:** `pipeline` | **Lenses:** Architecture, QA, Security

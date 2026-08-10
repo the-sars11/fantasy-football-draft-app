@@ -18,7 +18,6 @@
     { "name": "P3-P7 — Commercialization [RETIRED 2026-08-06]", "done": true }
   ],
   "nextItems": [
-    "DR-6 [Sonnet]: Design-consistency sweep + decide season/* fate.",
     "DR-7 [Sonnet + Joe]: LIVE verification against the real auctioneer + full mock-draft rehearsal on Joe's phone. The draft-readiness GATE."
   ]
 }
@@ -107,9 +106,9 @@ Task tracking: `[ ]` not started · `[~]` in progress · `[x]` done · `[!]` blo
 > **Why:** the app is ~85% on the GRIDIRON system. `prep/runs/client.tsx` and `components/prep/strategy-proposals.tsx` still use old shadcn primitives; the 5 unreachable `season/*` screens sit on the pre-GRIDIRON design system with stub TODOs.
 > **Dependency:** DR-1..DR-5. **Lowest draft priority — only if time before the draft.**
 
-- [ ] DR-6.1: Bring `prep/runs` and `strategy-proposals` onto the GRIDIRON tokens/components so Research is 100% on-system.
-- [ ] DR-6.2: Decide `season/*` fate — **default: keep parked but delete or clearly quarantine** (they're unreachable and off-system). Confirm the in-season companion is out of scope for draft night. State the decision here.
-- **Done when:** every reachable screen is on GRIDIRON; season/* is either removed or unambiguously marked parked-and-off-system.
+- [x] DR-6.1: Bring `prep/runs` and `strategy-proposals` onto the GRIDIRON tokens/components so Research is 100% on-system. **Scope expanded (Joe-approved, 2026-08-10):** all 9 reachable off-system Research-tab files converted, not just the original 2 — `strategy-proposals.tsx`, `strategy-proposal-card.tsx`, `strategy-compare.tsx`, `strategy-value-preview.tsx`, `strategy-list.tsx`, `league-config-form.tsx`, `position-breakdown.tsx`, `strategy-editor.tsx`, `prep/runs/client.tsx`. All shadcn primitives (Button/Card/Badge/Input/Label/Select/Slider/Table) removed in favor of `ffi-*` classes + `var(--ffi-*)` inline styles; `prep/runs/client.tsx`'s comparison table converted to a CSS-grid row layout (Table removal was mandatory regardless, so went fully off-table for consistency). Verified: `type-check` 0 errors, `lint` 41 pre-existing baseline errors unchanged/0 new, `test:run` 96/96 passed, `build` clean (54 routes). Browser-verified 4 of 9 screens via DOM/console/computed-style (pixel screenshot tool was unavailable this session — see CHANGELOG); computed styles confirmed real GRIDIRON tokens resolve at runtime. 3 pre-existing dead/orphan files found during the sweep (`data-freshness.tsx`, `source-weights-config.tsx`, `user-rules-editor.tsx`) were flagged as a separate follow-up task, not touched here.
+- [x] DR-6.2: **Decision: quarantine, not delete.** `season/*` (5 files: `page.tsx`, `matchups/page.tsx`, `start-sit/page.tsx`, `trade/page.tsx`, `waivers/page.tsx`) confirmed unreachable — zero references in `src/components/layout/` or `app/(app)/layout.tsx` nav. Each file's top-of-file docblock now carries an explicit "PARKED / OFF-SYSTEM (DR-6.2, 2026-08-10)" banner stating it's unreachable, pre-GRIDIRON, out of scope for draft night, and held for a future in-season companion phase (P8). In-season companion is confirmed out of scope for draft night.
+- **Done when:** every reachable screen is on GRIDIRON; season/* is either removed or unambiguously marked parked-and-off-system. **✅ Met.**
 
 ### DR-7 — LIVE verification + mock-draft rehearsal `[Sonnet + Joe]` · class: pipeline (QA/Ops) — **DRAFT-READINESS GATE**
 > **Why:** the auctioneer `/api/state` contract is **comment-verified only** (2026-08-07); FF-315 offline reconciliation is unit-tested but **never run against a live auctioneer**; the whole path **hard-depends on a seeded Supabase** that this session could not confirm (Supabase MCP needs auth). None of this is proven until it's run for real.
@@ -127,7 +126,7 @@ Task tracking: `[ ]` not started · `[~]` in progress · `[x]` done · `[!]` blo
 ## Decisions to make (flagged, non-blocking — resolve during/before DR-7)
 
 1. **AI features at the draft (cost).** Core advice — What-To-Do, budget, max-bid — is 100% rule-based and needs no API key (works today, free). The **AI "Top Targets" / research / strategy-proposal** panels need `ANTHROPIC_API_KEY` (absent from `.env.local`) and cost per call. **Recommended default: keep the rule-based advisor as the draft-night engine (free, reliable); leave the AI panels in safe fallback; only add a key + accept ~$0.01-0.03/pick if Joe wants LLM-generated picks live.** Joe decides in DR-7.
-2. **season/* (in-season companion).** Delete vs keep-parked. **Recommended: quarantine/park, out of scope for draft night** (DR-6.2).
+2. **season/* (in-season companion).** ~~Delete vs keep-parked~~ **Decided (DR-6.2, 2026-08-10): quarantine/park, out of scope for draft night.** Files carry explicit "PARKED / OFF-SYSTEM" banners.
 
 ---
 
@@ -181,7 +180,7 @@ Kept here so the removal is tracked, not silent:
 - **Google Sheets:** `lib/sheets/index.ts`, `api/draft/sheets/route.ts`, `use-draft-polling.ts`, the `sheet_url` branch in `use-draft-state.ts`, the `sheets` option in `draft/setup/client.tsx`, `'sheets'` in `auction-feed-merge.ts`, legacy `connection-status-pill.tsx`.
 - **Snake/keeper surfacing:** `SnakeAnalysisCard` in `draft/review/client.tsx`, Tyler preset in `scoring-presets.ts`, keeper block in `research/service.ts`. (Shared state-machine internals stay if load-bearing.)
 - **Orphans:** `lib/research/analyze.ts` (0 callers), empty `prep/research/` dir, `components/settings/sound-settings.tsx`.
-- **Off-system/parked:** `season/*` (DR-6.2 decides delete vs quarantine).
+- **Off-system/parked:** `season/*` — quarantined, not deleted (DR-6.2, 2026-08-10). Each file's docblock now has a "PARKED / OFF-SYSTEM" banner.
 
 ---
 

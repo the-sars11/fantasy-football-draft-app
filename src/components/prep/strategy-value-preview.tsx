@@ -1,7 +1,6 @@
 'use client'
 
 import { useMemo } from 'react'
-import { Badge } from '@/components/ui/badge'
 import { ArrowUp, ArrowDown, TrendingUp, Minus } from 'lucide-react'
 import { scorePlayersWithStrategy } from '@/lib/research/strategy/scoring'
 import type { ScoredPlayer } from '@/lib/research/strategy/scoring'
@@ -89,8 +88,8 @@ export function StrategyValuePreview({
 
   if (players.length === 0) {
     return (
-      <div className="rounded-md border border-border bg-muted/30 p-3">
-        <p className="text-xs text-muted-foreground text-center">
+      <div className="rounded-md p-3" style={{ background: 'var(--ffi-surface-1)', border: '1px solid var(--ffi-hairline)' }}>
+        <p className="text-xs text-center" style={{ color: 'var(--ffi-ink-2)' }}>
           No player data loaded. Import players to see value shifts.
         </p>
       </div>
@@ -99,8 +98,8 @@ export function StrategyValuePreview({
 
   if (changes.length === 0) {
     return (
-      <div className="rounded-md border border-border bg-muted/30 p-3">
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+      <div className="rounded-md p-3" style={{ background: 'var(--ffi-surface-1)', border: '1px solid var(--ffi-hairline)' }}>
+        <div className="flex items-center gap-2 text-xs" style={{ color: 'var(--ffi-ink-2)' }}>
           <Minus className="h-3.5 w-3.5" />
           No value changes yet - adjust filters above
         </div>
@@ -109,8 +108,8 @@ export function StrategyValuePreview({
   }
 
   return (
-    <div className="rounded-md border border-border bg-muted/30 p-3 space-y-2">
-      <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
+    <div className="rounded-md p-3 space-y-2" style={{ background: 'var(--ffi-surface-1)', border: '1px solid var(--ffi-hairline)' }}>
+      <div className="flex items-center gap-2 text-xs font-medium" style={{ color: 'var(--ffi-ink-2)' }}>
         <TrendingUp className="h-3.5 w-3.5" />
         Top value shifts
       </div>
@@ -127,7 +126,7 @@ function ValueChangeRow({ change, format }: { change: ValueChange; format: Draft
   const isPositive = change.delta > 0
   // For auction: positive delta = value went up (good for targets)
   // For snake: positive delta = score went up (more desirable)
-  const color = isPositive ? 'text-green-500' : 'text-red-500'
+  const color = isPositive ? 'var(--ffi-volt)' : 'var(--ffi-danger)'
   const Icon = isPositive ? ArrowUp : ArrowDown
 
   const deltaLabel = format === 'auction'
@@ -136,15 +135,15 @@ function ValueChangeRow({ change, format }: { change: ValueChange; format: Draft
 
   return (
     <div className="flex items-center gap-2 text-sm">
-      <Icon className={`h-3.5 w-3.5 shrink-0 ${color}`} />
-      <span className="flex-1 min-w-0 truncate">{change.player.name}</span>
-      <Badge variant="outline" className="text-[10px] px-1.5 shrink-0">
+      <Icon className="h-3.5 w-3.5 shrink-0" style={{ color }} />
+      <span className="flex-1 min-w-0 truncate" style={{ color: 'var(--ffi-ink)' }}>{change.player.name}</span>
+      <span className="ffi-badge text-[10px] px-1.5 shrink-0" style={{ background: 'var(--ffi-surface-2)', color: 'var(--ffi-ink-2)' }}>
         {change.player.position}
-      </Badge>
-      <span className="text-xs text-muted-foreground tabular-nums shrink-0">
+      </span>
+      <span className="text-xs tabular-nums shrink-0" style={{ color: 'var(--ffi-ink-2)' }}>
         {change.metric}
       </span>
-      <span className={`text-xs font-medium tabular-nums shrink-0 ${color}`}>
+      <span className="text-xs font-medium tabular-nums shrink-0" style={{ color }}>
         {deltaLabel}
       </span>
     </div>

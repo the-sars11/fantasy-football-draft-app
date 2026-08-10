@@ -2,10 +2,6 @@
 
 import { useActionState, useState, useCallback } from 'react'
 import { createLeague, type LeagueFormState } from '@/app/(app)/prep/configure/actions'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import type { DraftFormat, ScoringSettings } from '@/lib/supabase/database.types'
 import { ChevronDown, ChevronRight } from 'lucide-react'
 import { getScoringPreset, JOES_ESPN_SCORING, SCORING_FIELDS } from '@/lib/scoring-presets'
@@ -72,20 +68,18 @@ export function LeagueConfigForm({ userId }: { userId: string }) {
 
   if (state.success) {
     return (
-      <Card>
-        <CardContent className="py-8 text-center space-y-4">
-          <div className="text-2xl font-bold text-green-500">League Saved</div>
-          <p className="text-muted-foreground">
-            Your league config has been saved.
-          </p>
-          <a
-            href="/settings"
-            className="inline-flex items-center justify-center rounded-lg bg-primary px-4 h-9 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/80"
-          >
-            Back to Setup
-          </a>
-        </CardContent>
-      </Card>
+      <div className="ffi-card-elevated py-8 text-center space-y-4">
+        <div className="ffi-display-md" style={{ color: 'var(--ffi-volt)' }}>League Saved</div>
+        <p style={{ color: 'var(--ffi-ink-2)' }}>
+          Your league config has been saved.
+        </p>
+        <a
+          href="/settings"
+          className="ffi-btn-hero inline-flex text-[13px]"
+        >
+          Back to Setup
+        </a>
+      </div>
     )
   }
 
@@ -95,14 +89,15 @@ export function LeagueConfigForm({ userId }: { userId: string }) {
         <button
           type="button"
           onClick={resetToNasties}
-          className="text-sm text-[#8bacff] hover:underline transition-colors"
+          className="text-sm transition-colors hover:underline"
+          style={{ color: 'var(--ffi-blue-bright)' }}
         >
           Reset to Nasties defaults
         </button>
       </div>
 
       {state.error && (
-        <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+        <div className="rounded-md p-3 text-sm" style={{ background: 'rgba(255,110,138,0.12)', border: '1px solid rgba(255,110,138,0.24)', color: 'var(--ffi-danger)' }}>
           {state.error}
         </div>
       )}
@@ -116,145 +111,140 @@ export function LeagueConfigForm({ userId }: { userId: string }) {
         <input type="hidden" name="keepers" value="[]" />
 
         {/* Basic Info */}
-        <Card>
-          <CardHeader>
-            <CardTitle>League Details</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <label htmlFor="name" className="text-sm font-medium">League Name</label>
-                <Input
-                  id="name"
-                  name="name"
-                  placeholder="The Nasties"
-                  defaultValue="The Nasties"
-                  required
-                  className="ffi-form-input"
-                />
-              </div>
+        <div className="ffi-card">
+          <h3 className="ffi-title-md mb-3" style={{ color: 'var(--ffi-ink)' }}>League Details</h3>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <label htmlFor="name" className="text-sm font-medium" style={{ color: 'var(--ffi-ink-2)' }}>League Name</label>
+              <input
+                id="name"
+                name="name"
+                placeholder="The Nasties"
+                defaultValue="The Nasties"
+                required
+                className="ffi-input ffi-form-input"
+              />
+            </div>
 
-              <div className="space-y-2">
-                <label htmlFor="platform" className="text-sm font-medium">Platform</label>
-                <select
-                  id="platform"
-                  name="platform"
-                  defaultValue="espn"
-                  className="ffi-form-input flex h-9 w-full rounded-md border border-input bg-card px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none"
-                >
-                  <option value="espn">ESPN</option>
-                  <option value="yahoo">Yahoo</option>
-                  <option value="sleeper">Sleeper</option>
-                  <option value="other">Other</option>
-                </select>
-              </div>
+            <div className="space-y-2">
+              <label htmlFor="platform" className="text-sm font-medium" style={{ color: 'var(--ffi-ink-2)' }}>Platform</label>
+              <select
+                id="platform"
+                name="platform"
+                defaultValue="espn"
+                className="ffi-input ffi-form-input text-sm"
+              >
+                <option value="espn">ESPN</option>
+                <option value="yahoo">Yahoo</option>
+                <option value="sleeper">Sleeper</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
 
-              {/* Format is auction-only — no toggle */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Draft Format</label>
-                <div className="flex items-center h-9 px-3 rounded-md border border-input bg-card text-sm text-muted-foreground">
-                  Auction (Nasties)
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <label htmlFor="team_count" className="text-sm font-medium">Teams</label>
-                <Input
-                  id="team_count"
-                  name="team_count"
-                  type="number"
-                  min={4}
-                  max={20}
-                  defaultValue={12}
-                  required
-                  className="ffi-form-input"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label htmlFor="budget" className="text-sm font-medium">Auction Budget ($)</label>
-                <Input
-                  id="budget"
-                  name="budget"
-                  type="number"
-                  min={1}
-                  defaultValue={200}
-                  required
-                  className="ffi-form-input"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label htmlFor="scoring_format_select" className="text-sm font-medium">Scoring Format</label>
-                <select
-                  id="scoring_format_select"
-                  value={scoringFormat}
-                  onChange={(e) => handleScoringFormatChange(e.target.value)}
-                  className="ffi-form-input flex h-9 w-full rounded-md border border-input bg-card px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none"
-                >
-                  <option value="standard">Standard (Non-PPR)</option>
-                  <option value="half_ppr">Half PPR</option>
-                  <option value="ppr">Full PPR</option>
-                  <option value="custom">Custom</option>
-                </select>
+            {/* Format is auction-only — no toggle */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium" style={{ color: 'var(--ffi-ink-2)' }}>Draft Format</label>
+              <div
+                className="flex items-center h-9 px-3 rounded-md text-sm"
+                style={{ border: '1px solid var(--ffi-hairline)', background: 'var(--ffi-surface-1)', color: 'var(--ffi-ink-2)' }}
+              >
+                Auction (Nasties)
               </div>
             </div>
-          </CardContent>
-        </Card>
+
+            <div className="space-y-2">
+              <label htmlFor="team_count" className="text-sm font-medium" style={{ color: 'var(--ffi-ink-2)' }}>Teams</label>
+              <input
+                id="team_count"
+                name="team_count"
+                type="number"
+                min={4}
+                max={20}
+                defaultValue={12}
+                required
+                className="ffi-input ffi-form-input"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label htmlFor="budget" className="text-sm font-medium" style={{ color: 'var(--ffi-ink-2)' }}>Auction Budget ($)</label>
+              <input
+                id="budget"
+                name="budget"
+                type="number"
+                min={1}
+                defaultValue={200}
+                required
+                className="ffi-input ffi-form-input"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label htmlFor="scoring_format_select" className="text-sm font-medium" style={{ color: 'var(--ffi-ink-2)' }}>Scoring Format</label>
+              <select
+                id="scoring_format_select"
+                value={scoringFormat}
+                onChange={(e) => handleScoringFormatChange(e.target.value)}
+                className="ffi-input ffi-form-input text-sm"
+              >
+                <option value="standard">Standard (Non-PPR)</option>
+                <option value="half_ppr">Half PPR</option>
+                <option value="ppr">Full PPR</option>
+                <option value="custom">Custom</option>
+              </select>
+            </div>
+          </div>
+        </div>
 
         {/* Roster Slots — pre-filled with locked Nasties values (QB1/RB1/WR1/TE1/FLEX3/DEF1/K0/Bench5/IR1) */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Roster Slots</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-3 gap-4 sm:grid-cols-5">
-              {[
-                { key: 'qb',    label: 'QB',    default: 1 },
-                { key: 'rb',    label: 'RB',    default: 1 },
-                { key: 'wr',    label: 'WR',    default: 1 },
-                { key: 'te',    label: 'TE',    default: 1 },
-                { key: 'flex',  label: 'FLEX',  default: 3 },
-                { key: 'k',     label: 'K',     default: 0 },
-                { key: 'dst',   label: 'D/ST',  default: 1 },
-                { key: 'bench', label: 'Bench', default: 5 },
-                { key: 'ir',    label: 'IR',    default: 1 },
-              ].map((slot) => (
-                <div key={slot.key} className="space-y-1">
-                  <label htmlFor={`roster_${slot.key}`} className="text-xs font-medium text-muted-foreground">
-                    {slot.label}
-                  </label>
-                  <Input
-                    id={`roster_${slot.key}`}
-                    name={`roster_${slot.key}`}
-                    type="number"
-                    min={0}
-                    max={10}
-                    defaultValue={slot.default}
-                    className="h-8 ffi-form-input"
-                  />
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        <div className="ffi-card">
+          <h3 className="ffi-title-md mb-3" style={{ color: 'var(--ffi-ink)' }}>Roster Slots</h3>
+          <div className="grid grid-cols-3 gap-4 sm:grid-cols-5">
+            {[
+              { key: 'qb',    label: 'QB',    default: 1 },
+              { key: 'rb',    label: 'RB',    default: 1 },
+              { key: 'wr',    label: 'WR',    default: 1 },
+              { key: 'te',    label: 'TE',    default: 1 },
+              { key: 'flex',  label: 'FLEX',  default: 3 },
+              { key: 'k',     label: 'K',     default: 0 },
+              { key: 'dst',   label: 'D/ST',  default: 1 },
+              { key: 'bench', label: 'Bench', default: 5 },
+              { key: 'ir',    label: 'IR',    default: 1 },
+            ].map((slot) => (
+              <div key={slot.key} className="space-y-1">
+                <label htmlFor={`roster_${slot.key}`} className="text-xs font-medium" style={{ color: 'var(--ffi-ink-2)' }}>
+                  {slot.label}
+                </label>
+                <input
+                  id={`roster_${slot.key}`}
+                  name={`roster_${slot.key}`}
+                  type="number"
+                  min={0}
+                  max={10}
+                  defaultValue={slot.default}
+                  className="h-8 ffi-input ffi-form-input"
+                />
+              </div>
+            ))}
+          </div>
+        </div>
 
         {/* Custom Scoring Editor */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              Scoring Settings
-              {scoringFormat === 'custom' && <Badge variant="secondary">Custom</Badge>}
-              {scoringFormat !== 'custom' && (
-                <Badge variant="outline" className="text-xs">
-                  {scoringFormat === 'standard' ? 'Standard' : scoringFormat === 'half_ppr' ? 'Half PPR' : 'Full PPR'}
-                </Badge>
-              )}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
+        <div className="ffi-card">
+          <h3 className="ffi-title-md mb-3 flex items-center gap-2" style={{ color: 'var(--ffi-ink)' }}>
+            Scoring Settings
+            {scoringFormat === 'custom' && (
+              <span className="ffi-badge" style={{ background: 'var(--ffi-surface-1)', color: 'var(--ffi-ink-2)' }}>Custom</span>
+            )}
             {scoringFormat !== 'custom' && (
-              <p className="text-sm text-muted-foreground">
+              <span className="ffi-badge text-xs" style={{ background: 'rgba(77,130,255,0.16)', color: 'var(--ffi-blue-bright)' }}>
+                {scoringFormat === 'standard' ? 'Standard' : scoringFormat === 'half_ppr' ? 'Half PPR' : 'Full PPR'}
+              </span>
+            )}
+          </h3>
+          <div className="space-y-3">
+            {scoringFormat !== 'custom' && (
+              <p className="text-sm" style={{ color: 'var(--ffi-ink-2)' }}>
                 Using preset values. Switch to &quot;Custom&quot; above to edit individual scoring rules.
               </p>
             )}
@@ -264,15 +254,16 @@ export function LeagueConfigForm({ userId }: { userId: string }) {
               const isExpanded = expandedSections[section] ?? (scoringFormat === 'custom')
 
               return (
-                <div key={section} className="border border-border rounded-md overflow-hidden">
+                <div key={section} className="rounded-md overflow-hidden" style={{ border: '1px solid var(--ffi-hairline)' }}>
                   <button
                     type="button"
                     onClick={() => toggleSection(section)}
-                    className="flex w-full items-center justify-between px-3 py-2 text-sm font-medium hover:bg-muted/50 transition-colors"
+                    className="flex w-full items-center justify-between px-3 py-2 text-sm font-medium transition-colors"
+                    style={{ color: 'var(--ffi-ink)' }}
                   >
                     <span className="flex items-center gap-2">
                       {sectionLabel}
-                      <span className="text-xs text-muted-foreground font-normal">
+                      <span className="text-xs font-normal" style={{ color: 'var(--ffi-ink-3)' }}>
                         {fields.map(f => {
                           const val = scoringSettings[f.key]
                           if (val === 0) return null
@@ -285,14 +276,14 @@ export function LeagueConfigForm({ userId }: { userId: string }) {
                   </button>
 
                   {isExpanded && (
-                    <div className="px-3 pb-3 pt-1 border-t border-border">
+                    <div className="px-3 pb-3 pt-1" style={{ borderTop: '1px solid var(--ffi-hairline)' }}>
                       <div className="grid grid-cols-2 gap-x-6 gap-y-2 sm:grid-cols-3 lg:grid-cols-4">
                         {fields.map((field) => (
                           <div key={field.key} className="flex items-center justify-between gap-2">
-                            <label className="text-xs text-muted-foreground whitespace-nowrap truncate flex-1" title={field.label}>
+                            <label className="text-xs whitespace-nowrap truncate flex-1" style={{ color: 'var(--ffi-ink-2)' }} title={field.label}>
                               {field.label}
                             </label>
-                            <Input
+                            <input
                               type="number"
                               step={'step' in field ? field.step : 1}
                               value={scoringSettings[field.key]}
@@ -300,14 +291,14 @@ export function LeagueConfigForm({ userId }: { userId: string }) {
                                 updateScoring(field.key, parseFloat(e.target.value) || 0)
                                 if (scoringFormat !== 'custom') setScoringFormat('custom')
                               }}
-                              className="h-7 w-20 text-right text-xs tabular-nums ffi-form-input"
+                              className="h-7 w-20 text-right text-xs tabular-nums ffi-input ffi-form-input"
                               disabled={scoringFormat !== 'custom'}
                             />
                           </div>
                         ))}
                       </div>
                       {fields.some(f => 'hint' in f) && (
-                        <p className="text-xs text-muted-foreground mt-2">
+                        <p className="text-xs mt-2" style={{ color: 'var(--ffi-ink-3)' }}>
                           {fields.filter(f => 'hint' in f).map(f => ('hint' in f ? f.hint : '')).join(' | ')}
                         </p>
                       )}
@@ -316,12 +307,12 @@ export function LeagueConfigForm({ userId }: { userId: string }) {
                 </div>
               )
             })}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        <Button type="submit" size="lg" disabled={pending} className="w-full sm:w-auto">
+        <button type="submit" disabled={pending} className="ffi-btn-hero w-full sm:w-auto text-[13px] disabled:opacity-50">
           {pending ? 'Saving...' : 'Save League Config'}
-        </Button>
+        </button>
       </form>
     </div>
   )

@@ -1,12 +1,6 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { Card, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Badge } from '@/components/ui/badge'
-import { Slider } from '@/components/ui/slider'
 import {
   ChevronDown,
   ChevronUp,
@@ -25,11 +19,6 @@ import { StrategyValuePreview } from './strategy-value-preview'
 import type { Strategy, StrategyUpdate, StrategyPlayerTarget, StrategyPlayerAvoid, Position as DbPosition } from '@/lib/supabase/database.types'
 import type { DraftFormat, Player } from '@/lib/players/types'
 
-/** Extract first value from slider's onValueChange (number | readonly number[]) */
-function sliderVal(v: number | readonly number[]): number {
-  return typeof v === 'number' ? v : v[0]
-}
-
 interface StrategyEditorProps {
   strategy: Strategy
   format: DraftFormat
@@ -45,9 +34,9 @@ const ALL_POSITIONS: DbPosition[] = ['QB', 'RB', 'WR', 'TE', 'K', 'DST']
 const BUDGET_POSITIONS = ['QB', 'RB', 'WR', 'TE', 'K', 'DST', 'bench'] as const
 
 const RISK_OPTIONS = [
-  { value: 'conservative' as const, label: 'Conservative', color: 'text-blue-500' },
-  { value: 'balanced' as const, label: 'Balanced', color: 'text-yellow-500' },
-  { value: 'aggressive' as const, label: 'Aggressive', color: 'text-red-500' },
+  { value: 'conservative' as const, label: 'Conservative', color: 'var(--ffi-blue-bright)' },
+  { value: 'balanced' as const, label: 'Balanced', color: '#ffb05c' },
+  { value: 'aggressive' as const, label: 'Aggressive', color: 'var(--ffi-danger)' },
 ]
 
 // NFL teams for team avoids
@@ -237,31 +226,33 @@ export function StrategyEditor({ strategy, format, players = [], leagueBudget, o
       {/* Header */}
       <div className="flex items-center justify-between gap-2">
         <div className="min-w-0 flex-1">
-          <Input
+          <input
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="text-lg font-semibold border-none px-0 h-auto focus-visible:ring-0"
+            className="text-lg font-semibold bg-transparent w-full outline-none"
+            style={{ color: 'var(--ffi-ink)' }}
             placeholder="Strategy name"
           />
-          <Input
+          <input
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            className="text-sm text-muted-foreground border-none px-0 h-auto focus-visible:ring-0 mt-0.5"
+            className="text-sm bg-transparent w-full outline-none mt-0.5"
+            style={{ color: 'var(--ffi-ink-2)' }}
             placeholder="Short description"
           />
         </div>
         <div className="flex items-center gap-2 shrink-0">
-          <Button variant="ghost" size="sm" onClick={onCancel}>
+          <button onClick={onCancel} className="ffi-btn-ghost text-[13px]">
             <X className="h-4 w-4" />
-          </Button>
-          <Button size="sm" onClick={handleSave} disabled={saving || !name.trim()}>
-            <Save className="h-4 w-4 mr-1" />
+          </button>
+          <button onClick={handleSave} disabled={saving || !name.trim()} className="ffi-btn-hero text-[13px] disabled:opacity-50">
+            <Save className="h-4 w-4" />
             {saving ? 'Saving...' : 'Save'}
-          </Button>
+          </button>
         </div>
       </div>
 
-      <Badge variant="outline" className="text-xs">{strategy.archetype}</Badge>
+      <span className="ffi-badge text-xs" style={{ background: 'var(--ffi-surface-1)', color: 'var(--ffi-ink-2)' }}>{strategy.archetype}</span>
 
       {/* Risk Tolerance */}
       <SectionToggle
@@ -275,11 +266,12 @@ export function StrategyEditor({ strategy, format, players = [], leagueBudget, o
             <button
               key={opt.value}
               onClick={() => setRiskTolerance(opt.value)}
-              className={`flex-1 px-3 py-2 rounded-md text-sm font-medium border transition-colors ${
+              className="flex-1 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+              style={
                 riskTolerance === opt.value
-                  ? `${opt.color} border-current bg-current/10`
-                  : 'text-muted-foreground border-border hover:border-primary/50'
-              }`}
+                  ? { color: opt.color, border: `1px solid ${opt.color}`, background: 'var(--ffi-surface-1)' }
+                  : { color: 'var(--ffi-ink-2)', border: '1px solid var(--ffi-hairline)' }
+              }
             >
               {opt.label}
             </button>
@@ -298,17 +290,20 @@ export function StrategyEditor({ strategy, format, players = [], leagueBudget, o
           {CORE_POSITIONS.map((pos) => (
             <div key={pos} className="space-y-1">
               <div className="flex items-center justify-between">
-                <Label className="text-sm font-medium">{pos}</Label>
-                <span className="text-xs tabular-nums text-muted-foreground">
+                <label className="text-sm font-medium" style={{ color: 'var(--ffi-ink)' }}>{pos}</label>
+                <span className="text-xs tabular-nums" style={{ color: 'var(--ffi-ink-2)' }}>
                   {positionWeights[pos] ?? 5}/10
                 </span>
               </div>
-              <Slider
-                value={[positionWeights[pos] ?? 5]}
+              <input
+                type="range"
                 min={1}
                 max={10}
                 step={1}
-                onValueChange={(v) => setPositionWeights((prev) => ({ ...prev, [pos]: sliderVal(v) }))}
+                value={positionWeights[pos] ?? 5}
+                onChange={(e) => setPositionWeights((prev) => ({ ...prev, [pos]: parseInt(e.target.value) }))}
+                className="w-full h-2 rounded-full appearance-none cursor-pointer"
+                style={{ background: 'var(--ffi-surface-1)', accentColor: 'var(--ffi-blue-bright)' }}
               />
             </div>
           ))}
@@ -316,16 +311,18 @@ export function StrategyEditor({ strategy, format, players = [], leagueBudget, o
           <div className="flex gap-4">
             {(['K', 'DST'] as DbPosition[]).map((pos) => (
               <div key={pos} className="flex items-center gap-2">
-                <Label className="text-xs">{pos === 'DST' ? 'DEF' : pos}</Label>
-                <Slider
-                  value={[positionWeights[pos] ?? 2]}
+                <label className="text-xs" style={{ color: 'var(--ffi-ink-2)' }}>{pos === 'DST' ? 'DEF' : pos}</label>
+                <input
+                  type="range"
                   min={1}
                   max={5}
                   step={1}
-                  className="w-20"
-                  onValueChange={(v) => setPositionWeights((prev) => ({ ...prev, [pos]: sliderVal(v) }))}
+                  value={positionWeights[pos] ?? 2}
+                  onChange={(e) => setPositionWeights((prev) => ({ ...prev, [pos]: parseInt(e.target.value) }))}
+                  className="w-20 h-2 rounded-full appearance-none cursor-pointer"
+                  style={{ background: 'var(--ffi-surface-1)', accentColor: 'var(--ffi-blue-bright)' }}
                 />
-                <span className="text-xs tabular-nums text-muted-foreground">
+                <span className="text-xs tabular-nums" style={{ color: 'var(--ffi-ink-2)' }}>
                   {positionWeights[pos] ?? 2}
                 </span>
               </div>
@@ -344,33 +341,35 @@ export function StrategyEditor({ strategy, format, players = [], leagueBudget, o
         <div className="space-y-3">
           {playerTargets.map((t) => (
             <div key={t.player_name} className="flex items-center gap-2">
-              <span className="text-sm flex-1 min-w-0 truncate">{t.player_name}</span>
-              <Slider
-                value={[t.weight]}
+              <span className="text-sm flex-1 min-w-0 truncate" style={{ color: 'var(--ffi-ink)' }}>{t.player_name}</span>
+              <input
+                type="range"
                 min={1}
                 max={10}
                 step={1}
-                className="w-24"
-                onValueChange={(v) => setTargetWeight(t.player_name, sliderVal(v))}
+                value={t.weight}
+                onChange={(e) => setTargetWeight(t.player_name, parseInt(e.target.value))}
+                className="w-24 h-2 rounded-full appearance-none cursor-pointer"
+                style={{ background: 'var(--ffi-surface-1)', accentColor: 'var(--ffi-blue-bright)' }}
               />
-              <span className="text-xs tabular-nums w-5 text-center text-muted-foreground">{t.weight}</span>
-              <button onClick={() => removeTarget(t.player_name)} className="text-muted-foreground hover:text-red-500">
+              <span className="text-xs tabular-nums w-5 text-center" style={{ color: 'var(--ffi-ink-2)' }}>{t.weight}</span>
+              <button onClick={() => removeTarget(t.player_name)} style={{ color: 'var(--ffi-ink-2)' }}>
                 <Trash2 className="h-3.5 w-3.5" />
               </button>
             </div>
           ))}
           <div className="flex items-center gap-2">
-            <Input
+            <input
               value={newTargetName}
               onChange={(e) => setNewTargetName(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && addTarget()}
               placeholder="Player name"
-              className="flex-1 h-8 text-sm"
+              className="flex-1 h-8 text-sm ffi-input"
             />
-            <Button variant="outline" size="sm" onClick={addTarget} disabled={!newTargetName.trim()}>
-              <Plus className="h-3.5 w-3.5 mr-1" />
+            <button onClick={addTarget} disabled={!newTargetName.trim()} className="ffi-btn-secondary text-xs disabled:opacity-50" style={{ padding: '0.4rem 0.9rem' }}>
+              <Plus className="h-3.5 w-3.5" />
               Add
-            </Button>
+            </button>
           </div>
         </div>
       </SectionToggle>
@@ -385,34 +384,35 @@ export function StrategyEditor({ strategy, format, players = [], leagueBudget, o
         <div className="space-y-3">
           {playerAvoids.map((a) => (
             <div key={a.player_name} className="flex items-center gap-2">
-              <span className="text-sm flex-1 min-w-0 truncate">{a.player_name}</span>
+              <span className="text-sm flex-1 min-w-0 truncate" style={{ color: 'var(--ffi-ink)' }}>{a.player_name}</span>
               <button
                 onClick={() => toggleAvoidSeverity(a.player_name)}
-                className={`text-xs px-2 py-0.5 rounded border ${
+                className="text-xs px-2 py-0.5 rounded"
+                style={
                   a.severity === 'hard'
-                    ? 'text-red-500 border-red-500/50 bg-red-500/10'
-                    : 'text-yellow-500 border-yellow-500/50 bg-yellow-500/10'
-                }`}
+                    ? { color: 'var(--ffi-danger)', border: '1px solid rgba(255,110,138,0.5)', background: 'rgba(255,110,138,0.1)' }
+                    : { color: '#ffb05c', border: '1px solid rgba(255,176,92,0.5)', background: 'rgba(255,176,92,0.1)' }
+                }
               >
                 {a.severity}
               </button>
-              <button onClick={() => removeAvoid(a.player_name)} className="text-muted-foreground hover:text-red-500">
+              <button onClick={() => removeAvoid(a.player_name)} style={{ color: 'var(--ffi-ink-2)' }}>
                 <Trash2 className="h-3.5 w-3.5" />
               </button>
             </div>
           ))}
           <div className="flex items-center gap-2">
-            <Input
+            <input
               value={newAvoidName}
               onChange={(e) => setNewAvoidName(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && addAvoid()}
               placeholder="Player name"
-              className="flex-1 h-8 text-sm"
+              className="flex-1 h-8 text-sm ffi-input"
             />
-            <Button variant="outline" size="sm" onClick={addAvoid} disabled={!newAvoidName.trim()}>
-              <Plus className="h-3.5 w-3.5 mr-1" />
+            <button onClick={addAvoid} disabled={!newAvoidName.trim()} className="ffi-btn-secondary text-xs disabled:opacity-50" style={{ padding: '0.4rem 0.9rem' }}>
+              <Plus className="h-3.5 w-3.5" />
               Add
-            </Button>
+            </button>
           </div>
         </div>
       </SectionToggle>
@@ -431,11 +431,12 @@ export function StrategyEditor({ strategy, format, players = [], leagueBudget, o
               <button
                 key={team}
                 onClick={() => toggleTeamAvoid(team)}
-                className={`px-2 py-1 rounded text-xs font-medium border transition-colors ${
+                className="px-2 py-1 rounded text-xs font-medium transition-colors"
+                style={
                   active
-                    ? 'text-red-500 border-red-500/50 bg-red-500/10'
-                    : 'text-muted-foreground border-border hover:border-primary/50'
-                }`}
+                    ? { color: 'var(--ffi-danger)', border: '1px solid rgba(255,110,138,0.5)', background: 'rgba(255,110,138,0.1)' }
+                    : { color: 'var(--ffi-ink-2)', border: '1px solid var(--ffi-hairline)' }
+                }
               >
                 {team}
               </button>
@@ -456,34 +457,40 @@ export function StrategyEditor({ strategy, format, players = [], leagueBudget, o
             {BUDGET_POSITIONS.map((pos) => (
               <div key={pos} className="space-y-1">
                 <div className="flex items-center justify-between">
-                  <Label className="text-sm">{pos === 'DST' ? 'DEF' : pos === 'bench' ? 'Bench' : pos}</Label>
-                  <span className="text-xs tabular-nums text-muted-foreground">{budgetAllocation[pos] ?? 0}%</span>
+                  <label className="text-sm" style={{ color: 'var(--ffi-ink)' }}>{pos === 'DST' ? 'DEF' : pos === 'bench' ? 'Bench' : pos}</label>
+                  <span className="text-xs tabular-nums" style={{ color: 'var(--ffi-ink-2)' }}>{budgetAllocation[pos] ?? 0}%</span>
                 </div>
-                <Slider
-                  value={[budgetAllocation[pos] ?? 0]}
+                <input
+                  type="range"
                   min={0}
                   max={60}
                   step={1}
-                  onValueChange={(v) => setBudgetFor(pos, sliderVal(v))}
+                  value={budgetAllocation[pos] ?? 0}
+                  onChange={(e) => setBudgetFor(pos, parseInt(e.target.value))}
+                  className="w-full h-2 rounded-full appearance-none cursor-pointer"
+                  style={{ background: 'var(--ffi-surface-1)', accentColor: 'var(--ffi-blue-bright)' }}
                 />
               </div>
             ))}
-            <div className={`text-xs font-medium ${budgetTotal >= 95 && budgetTotal <= 105 ? 'text-green-500' : 'text-red-500'}`}>
+            <div className="text-xs font-medium" style={{ color: budgetTotal >= 95 && budgetTotal <= 105 ? 'var(--ffi-volt)' : 'var(--ffi-danger)' }}>
               Total: {budgetTotal}% {budgetTotal < 95 ? '(too low)' : budgetTotal > 105 ? '(too high)' : ''}
             </div>
 
             {/* Max bid */}
-            <div className="space-y-1 pt-2 border-t border-border/50">
+            <div className="space-y-1 pt-2" style={{ borderTop: '1px solid var(--ffi-hairline)' }}>
               <div className="flex items-center justify-between">
-                <Label className="text-sm">Max single bid</Label>
-                <span className="text-xs tabular-nums text-muted-foreground">{maxBidPct}%</span>
+                <label className="text-sm" style={{ color: 'var(--ffi-ink)' }}>Max single bid</label>
+                <span className="text-xs tabular-nums" style={{ color: 'var(--ffi-ink-2)' }}>{maxBidPct}%</span>
               </div>
-              <Slider
-                value={[maxBidPct]}
+              <input
+                type="range"
                 min={10}
                 max={70}
                 step={1}
-                onValueChange={(v) => setMaxBidPct(sliderVal(v))}
+                value={maxBidPct}
+                onChange={(e) => setMaxBidPct(parseInt(e.target.value))}
+                className="w-full h-2 rounded-full appearance-none cursor-pointer"
+                style={{ background: 'var(--ffi-surface-1)', accentColor: 'var(--ffi-blue-bright)' }}
               />
             </div>
           </div>
@@ -503,7 +510,7 @@ export function StrategyEditor({ strategy, format, players = [], leagueBudget, o
               const rounds = roundTargets[pos] ?? []
               return (
                 <div key={pos} className="space-y-1.5">
-                  <Label className="text-sm">{pos === 'DST' ? 'DEF' : pos}</Label>
+                  <label className="text-sm" style={{ color: 'var(--ffi-ink)' }}>{pos === 'DST' ? 'DEF' : pos}</label>
                   <div className="flex flex-wrap gap-1.5">
                     {Array.from({ length: 16 }, (_, i) => i + 1).map((round) => {
                       const active = rounds.includes(round)
@@ -511,11 +518,12 @@ export function StrategyEditor({ strategy, format, players = [], leagueBudget, o
                         <button
                           key={round}
                           onClick={() => toggleRound(pos, round)}
-                          className={`w-7 h-7 rounded text-xs font-medium border transition-colors ${
+                          className="w-7 h-7 rounded text-xs font-medium transition-colors"
+                          style={
                             active
-                              ? 'bg-primary text-primary-foreground border-primary'
-                              : 'text-muted-foreground border-border hover:border-primary/50'
-                          }`}
+                              ? { background: 'rgba(77,130,255,0.18)', color: 'var(--ffi-blue-bright)', border: '1px solid rgba(77,130,255,0.4)' }
+                              : { color: 'var(--ffi-ink-2)', border: '1px solid var(--ffi-hairline)' }
+                          }
                         >
                           {round}
                         </button>
@@ -541,21 +549,21 @@ export function StrategyEditor({ strategy, format, players = [], leagueBudget, o
       )}
 
       {/* Bottom save bar — sticky on mobile */}
-      <div className="sticky bottom-16 sm:bottom-0 z-10 bg-background/80 backdrop-blur-sm border-t p-3 -mx-4 px-4">
+      <div className="sticky bottom-16 sm:bottom-0 z-10 p-3 -mx-4 px-4" style={{ background: 'var(--ffi-bg-1)', borderTop: '1px solid var(--ffi-hairline)' }}>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={onCancel} className="shrink-0">
+          <button onClick={onCancel} className="ffi-btn-secondary shrink-0 text-[13px]">
             Cancel
-          </Button>
+          </button>
           {onSaveAsNew && (
-            <Button variant="outline" onClick={handleSaveAsNew} disabled={saving || !name.trim()} className="flex-1">
-              <Copy className="h-4 w-4 mr-1" />
+            <button onClick={handleSaveAsNew} disabled={saving || !name.trim()} className="ffi-btn-secondary flex-1 text-[13px] disabled:opacity-50">
+              <Copy className="h-4 w-4" />
               Save As New
-            </Button>
+            </button>
           )}
-          <Button onClick={handleSave} disabled={saving || !name.trim()} className="flex-1">
-            <Save className="h-4 w-4 mr-1" />
+          <button onClick={handleSave} disabled={saving || !name.trim()} className="ffi-btn-hero flex-1 text-[13px] disabled:opacity-50">
+            <Save className="h-4 w-4" />
             {saving ? 'Saving...' : 'Save'}
-          </Button>
+          </button>
         </div>
       </div>
     </div>
@@ -577,22 +585,22 @@ function SectionToggle({
   children: React.ReactNode
 }) {
   return (
-    <Card size="sm">
+    <div className="ffi-card" style={{ padding: 0 }}>
       <button
         onClick={onToggle}
         className="flex items-center justify-between w-full px-3 py-2.5 text-left"
       >
-        <div className="flex items-center gap-2 text-sm font-medium">
+        <div className="flex items-center gap-2 text-sm font-medium" style={{ color: 'var(--ffi-ink)' }}>
           {icon}
           {title}
         </div>
-        {expanded ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+        {expanded ? <ChevronUp className="h-4 w-4" style={{ color: 'var(--ffi-ink-3)' }} /> : <ChevronDown className="h-4 w-4" style={{ color: 'var(--ffi-ink-3)' }} />}
       </button>
       {expanded && (
-        <CardContent className="pt-0 pb-3">
+        <div className="pb-3 px-3">
           {children}
-        </CardContent>
+        </div>
       )}
-    </Card>
+    </div>
   )
 }

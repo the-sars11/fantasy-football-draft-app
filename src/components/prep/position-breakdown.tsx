@@ -1,8 +1,6 @@
 'use client'
 
 import { useMemo } from 'react'
-import { Card, CardContent } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { Target, Ban } from 'lucide-react'
 import type { ScoredPlayer } from '@/lib/research/strategy/scoring'
 import type { DraftFormat, Position } from '@/lib/players/types'
@@ -14,39 +12,43 @@ interface PositionBreakdownProps {
 
 const POSITIONS: Position[] = ['QB', 'RB', 'WR', 'TE', 'K', 'DEF']
 
-const posColors: Record<string, string> = {
-  QB: 'border-red-500/40 bg-red-500/5',
-  RB: 'border-blue-500/40 bg-blue-500/5',
-  WR: 'border-green-500/40 bg-green-500/5',
-  TE: 'border-orange-500/40 bg-orange-500/5',
-  K: 'border-purple-500/40 bg-purple-500/5',
-  DEF: 'border-yellow-500/40 bg-yellow-500/5',
+const posAccent: Record<string, string> = {
+  QB: 'var(--ffi-pos-qb)',
+  RB: 'var(--ffi-pos-rb)',
+  WR: 'var(--ffi-pos-wr)',
+  TE: 'var(--ffi-pos-te)',
+  K: 'var(--ffi-ink-2)',
+  DEF: 'var(--ffi-ink-2)',
 }
 
-const posTextColors: Record<string, string> = {
-  QB: 'text-red-400',
-  RB: 'text-blue-400',
-  WR: 'text-green-400',
-  TE: 'text-orange-400',
-  K: 'text-purple-400',
-  DEF: 'text-yellow-400',
+const posBorder: Record<string, string> = {
+  QB: 'rgba(255,110,138,0.4)',
+  RB: 'rgba(86,224,160,0.4)',
+  WR: 'rgba(108,168,255,0.4)',
+  TE: 'rgba(255,176,92,0.4)',
+  K: 'var(--ffi-hairline-bright)',
+  DEF: 'var(--ffi-hairline-bright)',
 }
 
-function tierColor(tier: number): string {
-  if (tier <= 1) return 'bg-green-500/20 text-green-400 border-green-500/30'
-  if (tier <= 2) return 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
-  if (tier <= 3) return 'bg-blue-500/20 text-blue-400 border-blue-500/30'
-  if (tier <= 4) return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30'
-  if (tier <= 5) return 'bg-orange-500/20 text-orange-400 border-orange-500/30'
-  return 'bg-muted text-muted-foreground border-border'
+function cardBorderStyle(pos: string): React.CSSProperties {
+  return { border: `1px solid ${posBorder[pos]}`, background: 'var(--ffi-surface-2)' }
 }
 
-function scoreBar(score: number): string {
-  if (score >= 75) return 'bg-green-500'
-  if (score >= 60) return 'bg-emerald-500'
-  if (score >= 40) return 'bg-yellow-500'
-  if (score >= 25) return 'bg-orange-500'
-  return 'bg-red-500'
+function tierStyle(tier: number): React.CSSProperties {
+  if (tier <= 1) return { background: 'rgba(139,255,69,0.16)', color: 'var(--ffi-volt)' }
+  if (tier <= 2) return { background: 'rgba(86,224,160,0.16)', color: '#56e0a0' }
+  if (tier <= 3) return { background: 'rgba(77,130,255,0.16)', color: 'var(--ffi-blue-bright)' }
+  if (tier <= 4) return { background: 'rgba(255,176,92,0.16)', color: '#ffb05c' }
+  if (tier <= 5) return { background: 'rgba(255,154,92,0.16)', color: '#ff9a5c' }
+  return { background: 'var(--ffi-surface-1)', color: 'var(--ffi-ink-2)' }
+}
+
+function scoreBarColor(score: number): string {
+  if (score >= 75) return 'var(--ffi-volt)'
+  if (score >= 60) return '#56e0a0'
+  if (score >= 40) return '#ffb05c'
+  if (score >= 25) return '#ff9a5c'
+  return 'var(--ffi-danger)'
 }
 
 export function PositionBreakdown({ players, format }: PositionBreakdownProps) {
@@ -81,84 +83,84 @@ export function PositionBreakdown({ players, format }: PositionBreakdownProps) {
         }
 
         return (
-          <Card key={pos} className={`border ${posColors[pos]}`}>
-            <CardContent className="pt-4 pb-3 px-3 space-y-3">
-              {/* Position header */}
-              <div className="flex items-center justify-between">
-                <h3 className={`font-bold text-base ${posTextColors[pos]}`}>{pos}</h3>
-                <span className="text-xs text-muted-foreground">{group.length} players</span>
-              </div>
+          <div key={pos} className="rounded-2xl pt-4 pb-3 px-3 space-y-3" style={cardBorderStyle(pos)}>
+            {/* Position header */}
+            <div className="flex items-center justify-between">
+              <h3 className="font-bold text-base" style={{ color: posAccent[pos] }}>{pos}</h3>
+              <span className="text-xs" style={{ color: 'var(--ffi-ink-2)' }}>{group.length} players</span>
+            </div>
 
-              {/* Tiered player rows */}
-              {tiers.map(({ tier, players: tierPlayers }, tierIdx) => (
-                <div key={tierIdx} className="space-y-0.5">
-                  {/* Tier label */}
-                  <div className="flex items-center gap-2 mb-1">
-                    <Badge variant="outline" className={`text-[10px] px-1.5 py-0 ${tierColor(tier)}`}>
-                      Tier {tier || '?'}
-                    </Badge>
-                    <div className="flex-1 border-t border-border/40" />
-                  </div>
-
-                  {/* Players in this tier */}
-                  {tierPlayers.map((sp) => {
-                    const p = sp.player
-                    const value = isAuction
-                      ? sp.adjustedAuctionValue ?? p.consensusAuctionValue
-                      : sp.adjustedRoundValue ?? p.adp
-
-                    return (
-                      <div
-                        key={p.id}
-                        className={`flex items-center gap-2 rounded px-2 py-1.5 text-sm ${
-                          sp.targetStatus === 'avoid'
-                            ? 'opacity-40'
-                            : sp.targetStatus === 'target'
-                              ? 'bg-green-500/5'
-                              : 'hover:bg-muted/30'
-                        }`}
-                      >
-                        {/* Rank */}
-                        <span className="w-6 text-xs text-muted-foreground text-right shrink-0">
-                          {p.consensusRank}
-                        </span>
-
-                        {/* Name + team */}
-                        <div className="flex-1 min-w-0">
-                          <span className="font-medium truncate block">{p.name}</span>
-                          <span className="text-[10px] text-muted-foreground">{p.team} &middot; Bye {p.byeWeek}</span>
-                        </div>
-
-                        {/* Value */}
-                        <span className="text-xs font-mono shrink-0">
-                          {isAuction ? `$${value}` : value > 0 ? `Rd ${typeof value === 'number' ? Math.round(value) : value}` : '-'}
-                        </span>
-
-                        {/* Score bar */}
-                        <div className="w-10 shrink-0 flex items-center gap-1">
-                          <div className="w-6 h-1.5 bg-muted rounded-full overflow-hidden">
-                            <div
-                              className={`h-full rounded-full ${scoreBar(sp.strategyScore)}`}
-                              style={{ width: `${sp.strategyScore}%` }}
-                            />
-                          </div>
-                          <span className="text-[10px] font-mono text-muted-foreground w-4">
-                            {sp.strategyScore}
-                          </span>
-                        </div>
-
-                        {/* Status icon */}
-                        <div className="w-4 shrink-0">
-                          {sp.targetStatus === 'target' && <Target className="h-3 w-3 text-green-400" />}
-                          {sp.targetStatus === 'avoid' && <Ban className="h-3 w-3 text-red-400" />}
-                        </div>
-                      </div>
-                    )
-                  })}
+            {/* Tiered player rows */}
+            {tiers.map(({ tier, players: tierPlayers }, tierIdx) => (
+              <div key={tierIdx} className="space-y-0.5">
+                {/* Tier label */}
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="ffi-badge text-[10px] px-1.5 py-0" style={tierStyle(tier)}>
+                    Tier {tier || '?'}
+                  </span>
+                  <div className="flex-1" style={{ borderTop: '1px solid var(--ffi-hairline)' }} />
                 </div>
-              ))}
-            </CardContent>
-          </Card>
+
+                {/* Players in this tier */}
+                {tierPlayers.map((sp) => {
+                  const p = sp.player
+                  const value = isAuction
+                    ? sp.adjustedAuctionValue ?? p.consensusAuctionValue
+                    : sp.adjustedRoundValue ?? p.adp
+
+                  const rowStyle: React.CSSProperties =
+                    sp.targetStatus === 'avoid'
+                      ? { opacity: 0.4 }
+                      : sp.targetStatus === 'target'
+                        ? { background: 'rgba(139,255,69,0.06)' }
+                        : {}
+
+                  return (
+                    <div
+                      key={p.id}
+                      className="flex items-center gap-2 rounded px-2 py-1.5 text-sm"
+                      style={rowStyle}
+                    >
+                      {/* Rank */}
+                      <span className="w-6 text-xs text-right shrink-0" style={{ color: 'var(--ffi-ink-2)' }}>
+                        {p.consensusRank}
+                      </span>
+
+                      {/* Name + team */}
+                      <div className="flex-1 min-w-0">
+                        <span className="font-medium truncate block" style={{ color: 'var(--ffi-ink)' }}>{p.name}</span>
+                        <span className="text-[10px]" style={{ color: 'var(--ffi-ink-3)' }}>{p.team} &middot; Bye {p.byeWeek}</span>
+                      </div>
+
+                      {/* Value */}
+                      <span className="text-xs font-mono shrink-0" style={{ color: 'var(--ffi-ink)' }}>
+                        {isAuction ? `$${value}` : value > 0 ? `Rd ${typeof value === 'number' ? Math.round(value) : value}` : '-'}
+                      </span>
+
+                      {/* Score bar */}
+                      <div className="w-10 shrink-0 flex items-center gap-1">
+                        <div className="ffi-progress" style={{ width: '1.5rem', height: '0.375rem' }}>
+                          <div
+                            className="h-full rounded-full"
+                            style={{ width: `${sp.strategyScore}%`, background: scoreBarColor(sp.strategyScore) }}
+                          />
+                        </div>
+                        <span className="text-[10px] font-mono w-4" style={{ color: 'var(--ffi-ink-2)' }}>
+                          {sp.strategyScore}
+                        </span>
+                      </div>
+
+                      {/* Status icon */}
+                      <div className="w-4 shrink-0">
+                        {sp.targetStatus === 'target' && <Target className="h-3 w-3" style={{ color: 'var(--ffi-volt)' }} />}
+                        {sp.targetStatus === 'avoid' && <Ban className="h-3 w-3" style={{ color: 'var(--ffi-danger)' }} />}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            ))}
+          </div>
         )
       })}
     </div>

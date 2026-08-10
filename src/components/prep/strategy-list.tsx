@@ -1,9 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { Card, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import {
   ChevronDown,
   ChevronUp,
@@ -37,8 +34,8 @@ export function StrategyList({
 
   if (strategies.length === 0) {
     return (
-      <div className="rounded-md border border-border bg-muted/30 p-6 text-center">
-        <p className="text-sm text-muted-foreground">
+      <div className="rounded-md p-6 text-center" style={{ background: 'var(--ffi-surface-1)', border: '1px solid var(--ffi-hairline)' }}>
+        <p className="text-sm" style={{ color: 'var(--ffi-ink-2)' }}>
           No saved strategies yet. Generate proposals above, then save one to get started.
         </p>
       </div>
@@ -62,49 +59,53 @@ export function StrategyList({
         const isLoading = actionLoading === s.id
 
         return (
-          <Card key={s.id} size="sm" className={s.is_active ? 'ring-1 ring-primary/50' : ''}>
+          <div
+            key={s.id}
+            className="ffi-card"
+            style={{ padding: 0, ...(s.is_active ? { borderColor: 'var(--ffi-blue-bright)' } : {}) }}
+          >
             {/* Row header — always visible */}
             <button
               onClick={() => setExpandedId(isExpanded ? null : s.id)}
               className="flex items-center gap-2 w-full px-3 py-2.5 text-left"
             >
-              {s.is_active && <Star className="h-3.5 w-3.5 text-primary shrink-0 fill-primary" />}
-              <span className="text-sm font-medium flex-1 min-w-0 truncate">{s.name}</span>
-              <Badge variant="outline" className="text-[10px] shrink-0">
+              {s.is_active && <Star className="h-3.5 w-3.5 shrink-0" style={{ color: 'var(--ffi-blue-bright)', fill: 'var(--ffi-blue-bright)' }} />}
+              <span className="text-sm font-medium flex-1 min-w-0 truncate" style={{ color: 'var(--ffi-ink)' }}>{s.name}</span>
+              <span className="ffi-badge text-[10px] shrink-0" style={{ background: 'var(--ffi-surface-1)', color: 'var(--ffi-ink-2)' }}>
                 {s.archetype}
-              </Badge>
-              <Badge variant="secondary" className="text-[10px] shrink-0">
+              </span>
+              <span className="ffi-badge text-[10px] shrink-0" style={{ background: 'var(--ffi-surface-2)', color: 'var(--ffi-ink-2)' }}>
                 {s.source}
-              </Badge>
+              </span>
               {isExpanded ? (
-                <ChevronUp className="h-4 w-4 text-muted-foreground shrink-0" />
+                <ChevronUp className="h-4 w-4 shrink-0" style={{ color: 'var(--ffi-ink-3)' }} />
               ) : (
-                <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0" />
+                <ChevronDown className="h-4 w-4 shrink-0" style={{ color: 'var(--ffi-ink-3)' }} />
               )}
             </button>
 
             {/* Expanded detail */}
             {isExpanded && (
-              <CardContent className="pt-0 pb-3 space-y-3">
+              <div className="pb-3 px-3 space-y-3">
                 {s.description && (
-                  <p className="text-xs text-muted-foreground">{s.description}</p>
+                  <p className="text-xs" style={{ color: 'var(--ffi-ink-2)' }}>{s.description}</p>
                 )}
 
                 {/* Key settings summary */}
                 <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
-                  <div className="text-muted-foreground">Risk</div>
-                  <div className="capitalize">{s.risk_tolerance}</div>
+                  <div style={{ color: 'var(--ffi-ink-3)' }}>Risk</div>
+                  <div className="capitalize" style={{ color: 'var(--ffi-ink)' }}>{s.risk_tolerance}</div>
 
-                  <div className="text-muted-foreground">Targets</div>
-                  <div>{s.player_targets.length} players</div>
+                  <div style={{ color: 'var(--ffi-ink-3)' }}>Targets</div>
+                  <div style={{ color: 'var(--ffi-ink)' }}>{s.player_targets.length} players</div>
 
-                  <div className="text-muted-foreground">Avoids</div>
-                  <div>{s.player_avoids.length} players, {s.team_avoids.length} teams</div>
+                  <div style={{ color: 'var(--ffi-ink-3)' }}>Avoids</div>
+                  <div style={{ color: 'var(--ffi-ink)' }}>{s.player_avoids.length} players, {s.team_avoids.length} teams</div>
 
                   {format === 'auction' && s.budget_allocation && (
                     <>
-                      <div className="text-muted-foreground">Top budget</div>
-                      <div>
+                      <div style={{ color: 'var(--ffi-ink-3)' }}>Top budget</div>
+                      <div style={{ color: 'var(--ffi-ink)' }}>
                         {Object.entries(s.budget_allocation)
                           .filter(([k]) => k !== 'bench')
                           .sort(([, a], [, b]) => (b as number) - (a as number))
@@ -117,8 +118,8 @@ export function StrategyList({
 
                   {format === 'snake' && s.round_targets && (
                     <>
-                      <div className="text-muted-foreground">Round focus</div>
-                      <div>
+                      <div style={{ color: 'var(--ffi-ink-3)' }}>Round focus</div>
+                      <div style={{ color: 'var(--ffi-ink)' }}>
                         {Object.entries(s.round_targets as Record<string, number[]>)
                           .filter(([, rounds]) => rounds.length > 0)
                           .slice(0, 2)
@@ -129,55 +130,54 @@ export function StrategyList({
                 </div>
 
                 {s.ai_reasoning && (
-                  <p className="text-xs text-muted-foreground border-t border-border/50 pt-2 line-clamp-3">
+                  <p className="text-xs pt-2 line-clamp-3" style={{ color: 'var(--ffi-ink-2)', borderTop: '1px solid var(--ffi-hairline)' }}>
                     {s.ai_reasoning}
                   </p>
                 )}
 
                 {/* Action buttons */}
-                <div className="flex flex-wrap gap-2 pt-1">
-                  <Button
-                    variant="outline"
-                    size="sm"
+                <div className="flex flex-wrap gap-2 pt-1 items-center">
+                  <button
                     onClick={() => onEdit(s)}
                     disabled={isLoading}
+                    className="ffi-btn-secondary text-xs disabled:opacity-50"
+                    style={{ padding: '0.4rem 0.9rem' }}
                   >
-                    <Pencil className="h-3.5 w-3.5 mr-1" />
+                    <Pencil className="h-3.5 w-3.5" />
                     Edit
-                  </Button>
+                  </button>
 
-                  <Button
-                    variant="outline"
-                    size="sm"
+                  <button
                     onClick={() => handleAction(s.id, () => onDuplicate(s))}
                     disabled={isLoading}
+                    className="ffi-btn-secondary text-xs disabled:opacity-50"
+                    style={{ padding: '0.4rem 0.9rem' }}
                   >
-                    <Copy className="h-3.5 w-3.5 mr-1" />
+                    <Copy className="h-3.5 w-3.5" />
                     Save As New
-                  </Button>
+                  </button>
 
                   {!s.is_active && (
-                    <Button
-                      variant="outline"
-                      size="sm"
+                    <button
                       onClick={() => handleAction(s.id, () => onSetActive(s.id))}
                       disabled={isLoading}
+                      className="ffi-btn-secondary text-xs disabled:opacity-50"
+                      style={{ padding: '0.4rem 0.9rem' }}
                     >
-                      <Star className="h-3.5 w-3.5 mr-1" />
+                      <Star className="h-3.5 w-3.5" />
                       Set Active
-                    </Button>
+                    </button>
                   )}
 
                   {s.is_active && (
-                    <Badge variant="secondary" className="text-xs self-center">
+                    <span className="ffi-badge text-xs self-center" style={{ background: 'rgba(77,130,255,0.16)', color: 'var(--ffi-blue-bright)' }}>
                       Active
-                    </Badge>
+                    </span>
                   )}
 
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-red-500 hover:text-red-600 hover:bg-red-500/10 ml-auto"
+                  <button
+                    className="ffi-btn-ghost text-xs ml-auto disabled:opacity-50"
+                    style={{ color: 'var(--ffi-danger)' }}
                     onClick={() => {
                       if (confirm(`Delete "${s.name}"?`)) {
                         handleAction(s.id, () => onDelete(s.id))
@@ -186,11 +186,11 @@ export function StrategyList({
                     disabled={isLoading}
                   >
                     <Trash2 className="h-3.5 w-3.5" />
-                  </Button>
+                  </button>
                 </div>
-              </CardContent>
+              </div>
             )}
-          </Card>
+          </div>
         )
       })}
     </div>

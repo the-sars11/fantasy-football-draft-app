@@ -1,9 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { Card, CardContent } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import { X, TrendingUp, TrendingDown, Target, ShieldAlert } from 'lucide-react'
 import type { StrategyProposal } from '@/lib/research/strategy/research'
 
@@ -15,9 +12,9 @@ interface StrategyCompareProps {
 }
 
 const RISK_COLORS = {
-  conservative: 'text-blue-500',
-  balanced: 'text-yellow-500',
-  aggressive: 'text-red-500',
+  conservative: 'var(--ffi-blue-bright)',
+  balanced: '#ffb05c',
+  aggressive: 'var(--ffi-danger)',
 } as const
 
 const POS_KEYS = ['QB', 'RB', 'WR', 'TE'] as const
@@ -42,29 +39,30 @@ export function StrategyCompare({ proposals, format, onClose, onSelect }: Strate
     <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold">Compare Strategies</h3>
-        <Button variant="ghost" size="sm" onClick={onClose}>
-          <X className="h-4 w-4 mr-1" />
+        <h3 className="ffi-title-lg" style={{ color: 'var(--ffi-ink)' }}>Compare Strategies</h3>
+        <button onClick={onClose} className="ffi-btn-ghost text-[13px]">
+          <X className="h-4 w-4" />
           Close
-        </Button>
+        </button>
       </div>
 
       {/* Strategy selector pills */}
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2 items-center">
         {proposals.map((p, idx) => (
           <button
             key={idx}
             onClick={() => toggle(idx)}
-            className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+            className="px-3 py-1.5 rounded-full text-xs font-medium transition-colors"
+            style={
               selected.includes(idx)
-                ? 'bg-primary text-primary-foreground border-primary'
-                : 'bg-muted text-muted-foreground border-border hover:border-primary/50'
-            }`}
+                ? { background: 'rgba(77,130,255,0.18)', color: 'var(--ffi-blue-bright)', border: '1px solid rgba(77,130,255,0.4)' }
+                : { background: 'var(--ffi-surface-1)', color: 'var(--ffi-ink-2)', border: '1px solid var(--ffi-hairline)' }
+            }
           >
             {p.name}
           </button>
         ))}
-        <span className="self-center text-xs text-muted-foreground">Select 2-3 to compare</span>
+        <span className="self-center text-xs" style={{ color: 'var(--ffi-ink-3)' }}>Select 2-3 to compare</span>
       </div>
 
       {/* Comparison grid — scrollable on mobile */}
@@ -74,19 +72,17 @@ export function StrategyCompare({ proposals, format, onClose, onSelect }: Strate
           <div className="grid gap-3" style={{ gridTemplateColumns: `160px repeat(${compared.length}, 1fr)` }}>
             <div />
             {compared.map((p, i) => (
-              <Card key={i} size="sm" className="text-center">
-                <CardContent className="py-2 px-3">
-                  <div className="font-semibold text-sm">{p.name}</div>
-                  <div className="text-xs text-muted-foreground">{p.archetype}</div>
-                </CardContent>
-              </Card>
+              <div key={i} className="ffi-card text-center" style={{ padding: '0.5rem 0.75rem' }}>
+                <div className="font-semibold text-sm" style={{ color: 'var(--ffi-ink)' }}>{p.name}</div>
+                <div className="text-xs" style={{ color: 'var(--ffi-ink-2)' }}>{p.archetype}</div>
+              </div>
             ))}
           </div>
 
           {/* Risk tolerance */}
           <CompareRow label="Risk" compared={compared}>
             {(p) => (
-              <span className={`text-sm font-medium capitalize ${RISK_COLORS[p.risk_tolerance]}`}>
+              <span className="text-sm font-medium capitalize" style={{ color: RISK_COLORS[p.risk_tolerance] }}>
                 {p.risk_tolerance}
               </span>
             )}
@@ -95,29 +91,30 @@ export function StrategyCompare({ proposals, format, onClose, onSelect }: Strate
           {/* Confidence */}
           <CompareRow label="Confidence" compared={compared}>
             {(p) => (
-              <Badge variant="secondary" className="text-xs">
+              <span className="ffi-badge" style={{ background: 'var(--ffi-surface-1)', color: 'var(--ffi-ink-2)' }}>
                 {p.confidence}
-              </Badge>
+              </span>
             )}
           </CompareRow>
 
           {/* Floor / Ceiling */}
           <CompareRow label="Floor / Ceiling" compared={compared}>
             {(p) => (
-              <div className="flex items-center gap-2 text-xs">
-                <TrendingDown className="h-3 w-3 text-muted-foreground" />
+              <div className="flex items-center gap-2 text-xs" style={{ color: 'var(--ffi-ink-2)' }}>
+                <TrendingDown className="h-3 w-3" />
                 <span>{p.projected_floor}</span>
-                <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden relative">
+                <div className="ffi-progress flex-1 relative" style={{ height: '0.375rem' }}>
                   <div
-                    className="absolute h-full bg-primary/40 rounded-full"
+                    className="absolute h-full rounded-full"
                     style={{
                       left: `${p.projected_floor}%`,
                       width: `${p.projected_ceiling - p.projected_floor}%`,
+                      background: 'rgba(77,130,255,0.4)',
                     }}
                   />
                 </div>
                 <span>{p.projected_ceiling}</span>
-                <TrendingUp className="h-3 w-3 text-muted-foreground" />
+                <TrendingUp className="h-3 w-3" />
               </div>
             )}
           </CompareRow>
@@ -130,15 +127,19 @@ export function StrategyCompare({ proposals, format, onClose, onSelect }: Strate
                 const isMax = compared.every(
                   (other) => ((other.position_weights[pos] as number) ?? 5) <= weight
                 )
+                const highlight = isMax && compared.length > 1
                 return (
                   <div className="flex items-center gap-2">
-                    <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
+                    <div className="ffi-progress flex-1" style={{ height: '0.375rem' }}>
                       <div
-                        className={`h-full rounded-full ${isMax && compared.length > 1 ? 'bg-primary' : 'bg-primary/50'}`}
-                        style={{ width: `${weight * 10}%` }}
+                        className="h-full rounded-full"
+                        style={{ width: `${weight * 10}%`, background: highlight ? 'var(--ffi-blue-bright)' : 'rgba(77,130,255,0.4)' }}
                       />
                     </div>
-                    <span className={`text-xs tabular-nums ${isMax && compared.length > 1 ? 'font-semibold' : 'text-muted-foreground'}`}>
+                    <span
+                      className="text-xs tabular-nums"
+                      style={{ color: highlight ? 'var(--ffi-ink)' : 'var(--ffi-ink-2)', fontWeight: highlight ? 600 : 400 }}
+                    >
                       {weight}
                     </span>
                   </div>
@@ -152,7 +153,7 @@ export function StrategyCompare({ proposals, format, onClose, onSelect }: Strate
             <>
               <CompareRow label="Max Bid %" compared={compared}>
                 {(p) => (
-                  <span className="text-sm tabular-nums">{p.max_bid_percentage ?? '-'}%</span>
+                  <span className="text-sm tabular-nums" style={{ color: 'var(--ffi-ink)' }}>{p.max_bid_percentage ?? '-'}%</span>
                 )}
               </CompareRow>
               {POS_KEYS.map((pos) => (
@@ -163,7 +164,10 @@ export function StrategyCompare({ proposals, format, onClose, onSelect }: Strate
                       (other) => (other.budget_allocation?.[pos] ?? 0) <= pct
                     )
                     return (
-                      <span className={`text-xs tabular-nums ${isMax && compared.length > 1 ? 'font-semibold' : 'text-muted-foreground'}`}>
+                      <span
+                        className="text-xs tabular-nums"
+                        style={{ color: isMax && compared.length > 1 ? 'var(--ffi-ink)' : 'var(--ffi-ink-2)', fontWeight: isMax && compared.length > 1 ? 600 : 400 }}
+                      >
                         {pct}%
                       </span>
                     )
@@ -179,7 +183,7 @@ export function StrategyCompare({ proposals, format, onClose, onSelect }: Strate
                 {(p) => {
                   const rounds = p.round_targets?.[pos] as number[] | undefined
                   return (
-                    <span className="text-xs tabular-nums text-muted-foreground">
+                    <span className="text-xs tabular-nums" style={{ color: 'var(--ffi-ink-2)' }}>
                       {rounds?.length ? rounds.join(', ') : '-'}
                     </span>
                   )
@@ -190,7 +194,7 @@ export function StrategyCompare({ proposals, format, onClose, onSelect }: Strate
 
           {/* Key targets — highlight shared vs unique */}
           <div className="mt-4">
-            <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground mb-2 flex items-center gap-1">
+            <div className="ffi-label mb-2 flex items-center gap-1" style={{ color: 'var(--ffi-ink-3)' }}>
               <Target className="h-3 w-3" />
               Key Targets
             </div>
@@ -201,13 +205,13 @@ export function StrategyCompare({ proposals, format, onClose, onSelect }: Strate
                   {p.key_targets.map((name) => {
                     const shared = compared.filter((o) => o.key_targets.includes(name)).length > 1
                     return (
-                      <Badge
+                      <span
                         key={name}
-                        variant={shared ? 'default' : 'secondary'}
-                        className="text-xs"
+                        className="ffi-badge"
+                        style={shared ? { background: 'rgba(139,255,69,0.16)', color: 'var(--ffi-volt)' } : { background: 'var(--ffi-surface-1)', color: 'var(--ffi-ink-2)' }}
                       >
                         {name}
-                      </Badge>
+                      </span>
                     )
                   })}
                 </div>
@@ -217,7 +221,7 @@ export function StrategyCompare({ proposals, format, onClose, onSelect }: Strate
 
           {/* Key avoids */}
           <div className="mt-3">
-            <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground mb-2 flex items-center gap-1">
+            <div className="ffi-label mb-2 flex items-center gap-1" style={{ color: 'var(--ffi-ink-3)' }}>
               <ShieldAlert className="h-3 w-3" />
               Key Avoids
             </div>
@@ -226,12 +230,12 @@ export function StrategyCompare({ proposals, format, onClose, onSelect }: Strate
               {compared.map((p, i) => (
                 <div key={i} className="flex flex-wrap gap-1">
                   {p.key_avoids.map((name) => (
-                    <Badge key={name} variant="outline" className="text-xs text-red-500 border-red-500/30">
+                    <span key={name} className="ffi-badge" style={{ background: 'rgba(255,110,138,0.12)', color: 'var(--ffi-danger)' }}>
                       {name}
-                    </Badge>
+                    </span>
                   ))}
                   {p.key_avoids.length === 0 && (
-                    <span className="text-xs text-muted-foreground">None</span>
+                    <span className="text-xs" style={{ color: 'var(--ffi-ink-3)' }}>None</span>
                   )}
                 </div>
               ))}
@@ -243,9 +247,9 @@ export function StrategyCompare({ proposals, format, onClose, onSelect }: Strate
             <div className="grid gap-3 mt-4" style={{ gridTemplateColumns: `160px repeat(${compared.length}, 1fr)` }}>
               <div />
               {compared.map((p, i) => (
-                <Button key={i} variant="outline" size="sm" onClick={() => onSelect(p)} className="w-full">
+                <button key={i} onClick={() => onSelect(p)} className="ffi-btn-secondary w-full text-[13px]">
                   Use this
-                </Button>
+                </button>
               ))}
             </div>
           )}
@@ -267,10 +271,10 @@ function CompareRow({
 }) {
   return (
     <div
-      className="grid gap-3 items-center py-2 border-b border-border/50"
-      style={{ gridTemplateColumns: `160px repeat(${compared.length}, 1fr)` }}
+      className="grid gap-3 items-center py-2"
+      style={{ gridTemplateColumns: `160px repeat(${compared.length}, 1fr)`, borderBottom: '1px solid var(--ffi-hairline)' }}
     >
-      <div className="text-xs font-medium text-muted-foreground">{label}</div>
+      <div className="text-xs font-medium" style={{ color: 'var(--ffi-ink-2)' }}>{label}</div>
       {compared.map((p, i) => (
         <div key={i}>{children(p)}</div>
       ))}

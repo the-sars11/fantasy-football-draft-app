@@ -3,6 +3,10 @@
 /**
  * Waiver Wire AI Page
  *
+ * PARKED / OFF-SYSTEM (DR-6.2, 2026-08-10): unreachable from nav, pre-GRIDIRON
+ * design, out of scope for draft night. Kept for a future in-season companion
+ * phase (P8). Not maintained or design-reviewed until that phase is scheduled.
+ *
  * Full-featured waiver wire analysis with:
  * - Top pickup recommendations
  * - FAAB bid suggestions
