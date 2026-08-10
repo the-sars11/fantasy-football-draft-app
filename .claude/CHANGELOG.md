@@ -2,6 +2,21 @@
 
 ---
 
+## 2026-08-09 / Finding 10: stabilize sheet-poll loop + failure backoff
+
+**Task:** CODE_REVIEW_2026-06 finding 10 (P1, Resilience/UX) | **Class:** `pipeline` (live polling) | **Lenses:** Architecture, QA
+
+**What changed (`src/hooks/use-draft-polling.ts` only; public API unchanged):**
+- Two confirmed defects: (1) the poll effect depended on `pollOnce`, which itself depended on `detectedMapping` + `onNewPicks` + `onError`, so the interval tore down and recreated right after the first mapping-detection AND whenever the consumer's `onNewPicks` identity changed (its useCallback chains through `persistPicks` -> `[session]`); (2) on error it kept polling `/api/draft/sheets` at the fixed 7s cadence with no backoff.
+- Fix mirrors the `use-sleeper-draft-feed.ts` template: `onNewPicks`, `onError`, `initialMapping`, `detectedMapping`, and `sheetUrl` are now held in refs updated by per-render effects, making `pollOnce` a stable `[]`-dep callback. The scheduling effect's deps are `[enabled, sheetUrl, intervalMs, pollOnce]`, so the loop only restarts on the legitimate triggers (enable/disable, genuine sheet change), never on callback/mapping churn.
+- Fixed `setInterval` replaced with a self-scheduling `setTimeout` (`tick`) that applies exponential backoff on consecutive failures (`intervalMs * 2^failures`, capped at `MAX_BACKOFF_MS` = 60s) and resets to `intervalMs` on the next success. Backoff counter resets whenever the loop (re)starts.
+
+**Scope discipline:** one file, committed by explicit path. The stable-callback change is behavior-preserving; backoff is the intended new resilience per the review. Consumer `use-draft-state.ts` needed no edit (API identical).
+
+**Verify result:** `npm run type-check` 0 errors; `npx eslint src/hooks/use-draft-polling.ts` exit 0; `npm run test:run` 107/107; `npm run build` compiled successfully with `/draft/live` in the route list. Zero em/en-dashes in authored code. No paid endpoints fired.
+
+---
+
 ## 2026-08-09 / Finding 9: giant-component extraction (full, 6 verified stages)
 
 **Task:** CODE_REVIEW_2026-06 finding 9 (P1, Architecture) | **Class:** `shared` (component/hook refactor) | **Lenses:** Architecture, QA
