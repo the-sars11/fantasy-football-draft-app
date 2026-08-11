@@ -3,69 +3,36 @@
 /**
  * Player Browser Client (FF-235)
  *
- * Browse all players with intel tags, sentiment data, and user tags.
- * Provides filtering by position, ADP range, and tag types.
+ * Browse all players with real, data-driven auction intel. Values are the VORP
+ * model for Joe's exact league (12-tm / $200 / PPR / no-K), tags come from
+ * computePlayerTags(). No ADP anywhere -- this is an auction, ADP is a
+ * snake-draft stat. Filtering by position, tag type, and search.
  */
 
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import Link from 'next/link'
-import { Search, SlidersHorizontal, X, Target, AlertTriangle, Info, Play } from 'lucide-react'
+import { Search, SlidersHorizontal, X, AlertTriangle, Info, Play } from 'lucide-react'
 import { FFIInput, FFIButton, FFIEmptyState } from '@/components/ui/ffi-primitives'
 import { FFIPlayerIntelCard } from '@/components/prep/ffi-player-intel-card'
 import { useUserTags, useToggleTag, useSystemTagActions } from '@/hooks/use-user-tags'
 import { cacheToPlayers } from '@/lib/players/convert'
+import { computePlayerTags } from '@/lib/players/tags'
 import type { Player, Position } from '@/lib/players/types'
-import type { SystemTag } from '@/lib/supabase/database.types'
 
 // Position filter options
 const POSITIONS: (Position | 'ALL')[] = ['ALL', 'QB', 'RB', 'WR', 'TE', 'K', 'DEF']
 
-// Tag filter options
-type TagFilter = 'all' | 'target' | 'avoid' | 'value' | 'bust' | 'untagged'
+// Tag filter options -- match the real tags from computePlayerTags().
+type TagFilter = 'all' | 'target' | 'avoid' | 'value' | 'fade' | 'sleeper' | 'untagged'
 const TAG_FILTERS: { value: TagFilter; label: string }[] = [
   { value: 'all', label: 'All Tags' },
   { value: 'target', label: 'My Targets' },
   { value: 'avoid', label: 'My Avoids' },
   { value: 'value', label: 'Value' },
-  { value: 'bust', label: 'Bust' },
+  { value: 'fade', label: 'Fade' },
+  { value: 'sleeper', label: 'Sleeper' },
   { value: 'untagged', label: 'Untagged' },
 ]
-
-// System tags derived from real ADP-vs-consensus-rank gaps.
-// Real player_intel/sentiment sourcing is not built yet (DR-4) -- only tags backed
-// by fields already on the player object are shown here. No random/fabricated tags.
-function getSystemTags(player: Player): SystemTag[] {
-  const tags: SystemTag[] = []
-
-  const adp = player.adp
-  const rank = player.consensusRank
-
-  // VALUE: ADP much higher than rank (undervalued)
-  if (adp && rank && adp > rank + 15) {
-    tags.push({
-      tag: 'VALUE',
-      confidence: 0.7,
-      sources: ['FantasyPros', 'Sleeper'],
-      reasoning: `ADP ${adp} but ranked ${rank} by experts`,
-      score_modifier: 12,
-      adp_gap: adp - rank,
-    })
-  }
-
-  // AVOID: ADP much lower than rank (overvalued)
-  if (adp && rank && adp < rank - 20) {
-    tags.push({
-      tag: 'AVOID',
-      confidence: 0.6,
-      sources: ['ESPN'],
-      reasoning: `Being drafted at ${adp} but experts rank ${rank}`,
-      score_modifier: -25,
-      adp_gap: rank - adp,
-    })
-  }
-
-  return tags
-}
 
 export function PlayerBrowserClient() {
   // --- State ---
@@ -77,7 +44,6 @@ export function PlayerBrowserClient() {
   const [searchQuery, setSearchQuery] = useState('')
   const [positionFilter, setPositionFilter] = useState<Position | 'ALL'>('ALL')
   const [tagFilter, setTagFilter] = useState<TagFilter>('all')
-  const [adpRange, setAdpRange] = useState<[number, number]>([1, 300])
   const [showFilters, setShowFilters] = useState(false)
 
   // Expanded card state
@@ -132,12 +98,6 @@ export function PlayerBrowserClient() {
       result = result.filter(p => p.position === positionFilter)
     }
 
-    // ADP range filter
-    result = result.filter(p => {
-      const adp = p.adp || 999
-      return adp >= adpRange[0] && adp <= adpRange[1]
-    })
-
     // Search filter
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase()
@@ -147,12 +107,12 @@ export function PlayerBrowserClient() {
       )
     }
 
-    // Tag filter
+    // Tag filter -- against the real computed tags.
     if (tagFilter !== 'all') {
       result = result.filter(p => {
         const hasTarget = isTarget(p.id)
         const hasAvoid = isAvoid(p.id)
-        const systemTags = getSystemTags(p)
+        const tags = computePlayerTags(p)
 
         switch (tagFilter) {
           case 'target':
@@ -160,31 +120,35 @@ export function PlayerBrowserClient() {
           case 'avoid':
             return hasAvoid
           case 'value':
-            return systemTags.some(t => t.tag === 'VALUE')
-          case 'bust':
-            return systemTags.some(t => t.tag === 'BUST')
+            return tags.some(t => t.id === 'value')
+          case 'fade':
+            return tags.some(t => t.id === 'fade')
+          case 'sleeper':
+            return tags.some(t => t.id === 'sleeper')
           case 'untagged':
-            return !hasTarget && !hasAvoid && systemTags.length === 0
+            return !hasTarget && !hasAvoid && tags.length === 0
           default:
             return true
         }
       })
     }
 
-    // Sort by ADP (or rank if no ADP)
+    // Sort by real auction value for Joe's league (VORP $), best first. Ties
+    // fall back to expert consensus rank.
     result = [...result].sort((a, b) => {
-      const adpA = a.adp || 999
-      const adpB = b.adp || 999
-      return adpA - adpB
+      if (b.consensusAuctionValue !== a.consensusAuctionValue) {
+        return b.consensusAuctionValue - a.consensusAuctionValue
+      }
+      return a.consensusRank - b.consensusRank
     })
 
     return result
-  }, [players, positionFilter, adpRange, searchQuery, tagFilter, isTarget, isAvoid])
+  }, [players, positionFilter, searchQuery, tagFilter, isTarget, isAvoid])
 
   // FF-250: Reset pagination when filters change
   useEffect(() => {
     setDisplayCount(50)
-  }, [positionFilter, adpRange, searchQuery, tagFilter])
+  }, [positionFilter, searchQuery, tagFilter])
 
   // FF-250: Players to display (paginated)
   const displayedPlayers = useMemo(() => {
@@ -387,7 +351,7 @@ export function PlayerBrowserClient() {
                 let activeStyle: React.CSSProperties
                 if (filter.value === 'target') {
                   activeStyle = { background: 'rgba(139,255,69,0.18)', color: 'var(--ffi-volt)', boxShadow: '0 0 8px var(--ffi-volt-glow)' }
-                } else if (filter.value === 'avoid' || filter.value === 'bust') {
+                } else if (filter.value === 'avoid' || filter.value === 'fade') {
                   activeStyle = { background: 'rgba(255,110,138,0.18)', color: '#FF6E8A' }
                 } else {
                   activeStyle = { background: 'rgba(121,166,255,0.18)', color: 'var(--ffi-blue-bright)' }
@@ -405,84 +369,6 @@ export function PlayerBrowserClient() {
               })}
             </div>
           </div>
-
-          {/* ADP Range - stacked on mobile */}
-          <div>
-            <label className="block text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: 'var(--ffi-ink-3)' }}>
-              ADP Range: {adpRange[0]} - {adpRange[1]}
-            </label>
-            {/* Desktop: side by side */}
-            <div className="hidden sm:flex items-center gap-3">
-              <input
-                type="range"
-                min={1}
-                max={300}
-                value={adpRange[0]}
-                onChange={(e) => setAdpRange([Math.min(parseInt(e.target.value), adpRange[1] - 10), adpRange[1]])}
-                className="flex-1 h-2 rounded-full appearance-none cursor-pointer"
-                style={{ background: 'var(--ffi-surface-1)', accentColor: 'var(--ffi-blue-bright)' }}
-              />
-              <span className="text-sm w-12 text-center" style={{ color: 'var(--ffi-ink-2)' }}>{adpRange[0]}</span>
-              <span style={{ color: 'var(--ffi-ink-3)' }}>-</span>
-              <input
-                type="range"
-                min={1}
-                max={300}
-                value={adpRange[1]}
-                onChange={(e) => setAdpRange([adpRange[0], Math.max(parseInt(e.target.value), adpRange[0] + 10)])}
-                className="flex-1 h-2 rounded-full appearance-none cursor-pointer"
-                style={{ background: 'var(--ffi-surface-1)', accentColor: 'var(--ffi-blue-bright)' }}
-              />
-              <span className="text-sm w-12 text-center" style={{ color: 'var(--ffi-ink-2)' }}>{adpRange[1]}</span>
-            </div>
-            {/* Mobile: stacked with larger touch targets */}
-            <div className="sm:hidden space-y-3">
-              <div className="flex items-center gap-3">
-                <span className="text-xs w-8" style={{ color: 'var(--ffi-ink-3)' }}>Min</span>
-                <input
-                  type="range"
-                  min={1}
-                  max={300}
-                  value={adpRange[0]}
-                  onChange={(e) => setAdpRange([Math.min(parseInt(e.target.value), adpRange[1] - 10), adpRange[1]])}
-                  className="flex-1 h-3 rounded-full appearance-none cursor-pointer"
-                  style={{ background: 'var(--ffi-surface-1)', accentColor: 'var(--ffi-blue-bright)' }}
-                />
-                <span className="text-sm w-10 text-right" style={{ color: 'var(--ffi-ink-2)' }}>{adpRange[0]}</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <span className="text-xs w-8" style={{ color: 'var(--ffi-ink-3)' }}>Max</span>
-                <input
-                  type="range"
-                  min={1}
-                  max={300}
-                  value={adpRange[1]}
-                  onChange={(e) => setAdpRange([adpRange[0], Math.max(parseInt(e.target.value), adpRange[0] + 10)])}
-                  className="flex-1 h-3 rounded-full appearance-none cursor-pointer"
-                  style={{ background: 'var(--ffi-surface-1)', accentColor: 'var(--ffi-blue-bright)' }}
-                />
-                <span className="text-sm w-10 text-right" style={{ color: 'var(--ffi-ink-2)' }}>{adpRange[1]}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Quick actions for filtered results */}
-      {tagFilter === 'untagged' && filteredPlayers.length > 0 && (
-        <div className="flex items-center gap-2 text-sm mt-3" style={{ color: 'var(--ffi-ink-2)' }}>
-          <span>Quick tag:</span>
-          <button
-            onClick={() => {
-              // Mark first 5 as targets (demo)
-              filteredPlayers.slice(0, 5).forEach(p => handleToggleTarget(p.id))
-            }}
-            className="px-2 py-1 rounded text-xs font-bold transition-colors"
-            style={{ background: 'rgba(139,255,69,0.1)', color: 'var(--ffi-volt)' }}
-          >
-            <Target className="inline h-3 w-3 mr-1" />
-            Top 5 as Targets
-          </button>
         </div>
       )}
 
@@ -498,7 +384,6 @@ export function PlayerBrowserClient() {
                 setSearchQuery('')
                 setPositionFilter('ALL')
                 setTagFilter('all')
-                setAdpRange([1, 300])
               }}>
                 Clear filters
               </FFIButton>
@@ -512,8 +397,7 @@ export function PlayerBrowserClient() {
               key={player.id}
               rank={idx + 1}
               player={player}
-              systemTags={getSystemTags(player)}
-              userTags={userTagsMap[player.id]?.tags ?? []}
+              tags={computePlayerTags(player)}
               isTarget={isTarget(player.id)}
               isAvoid={isAvoid(player.id)}
               isExpanded={expandedPlayerId === player.id}

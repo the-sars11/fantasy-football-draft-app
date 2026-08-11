@@ -2,6 +2,30 @@
 
 ---
 
+## 2026-08-11 / Real VORP auction values + real tags + ADP ripped out
+
+**Task:** Wire real, roster-aware auction values and data-driven tags into the UI; remove ADP everywhere Joe sees it | **Class:** `output` (UI) + `shared` | **Lenses:** Design, QA, Architecture
+
+**Problem:** The player cards showed a number labeled "ADP" that was actually ECR rank mislabeled (ADP is a snake-draft stat, meaningless in Joe's auction), a `consensusAuctionValue` that was a generic averaged fantasypros number, and "tags" that never fired (the old `getSystemTags` compared `adp` to `consensusRank`, both derived from the same ECR rank, so always equal). None of it applied to Joe's exact league.
+
+**What changed:**
+
+- **Real VORP model already in the DB** (from `scripts/populate-auction-values.ts`, prior session): ESPN full-PPR projected points -> roster-aware VORP for Joe's 12-tm / $200 / PPR / no-K league, budget-balanced so the top 156 prices sum to exactly $2,400. Stored per player as `auction_values.vorp_12_200_ppr` + `source_data.{proj_points,vorp,pos_rank_points,replacement_points,espn_auction_value}`.
+- **`src/lib/players/convert.ts`**: `cacheToPlayer()` now prefers `vorp_12_200_ppr` as `consensusAuctionValue`; exposes `projectedPoints`, `vorp`, `positionRankByPoints`, `replacementPoints`, `marketAuctionValue` (ESPN market anchor), `ecrPositionRank`.
+- **`src/lib/players/tags.ts`** (new): `computePlayerTags()` -> ELITE (tier 1), VALUE / FADE (projection vs expert positional rank, gap >= 10), VOLATILE (ECR std >= 20, in pool), SLEEPER (skill player past overall 84 still above replacement). Every input traces to real data.
+- **`ffi-player-intel-card.tsx`** (rewrite): consumes real `PlayerTag[]`; shows "Your value $X" (VORP) + "market ~$Y" anchor + "374 PTS · RB1" meta; expanded view has a value breakdown grid (Your value / Market / Proj Pts) + Draft Intel with tag reasoning. No ADP.
+- **`prep/players/client.tsx`**: sort is now by VORP value (best first), not ADP; tag filters are value/fade/sleeper from `computePlayerTags`; removed ADP state, ADP range filter, ADP slider panel, and demo "Top 5 as Targets" code.
+- **`draft-board-table.tsx`**: value subline is "mkt ~$Y" not "ADP N.N"; stats grid shows PTS (projected points) instead of ADP.
+- **`ffi-player-card.tsx`** (live draft) + **`player-pool.tsx`**: removed the snake-only ADP fallback and the FF-278 ADP-divergence `↕` indicator + its `getAdpDivergence` helper and `adpDivergence` prop.
+
+**Verify (live, port 3003 via HMR):** `read_page` on `/prep/players` shows the real board sorted by value: Gibbs $97 / mkt ~$64 / 374 PTS · RB1 / ELITE; Puka $86 / mkt ~$57 / WR1 / ELITE; Josh Jacobs $48 / mkt ~$27 / VALUE. Expanded Gibbs card renders the value grid (Your value $97 / Market ~$64 / Proj Pts 374) + Draft Intel "FantasyPros Tier 1 - an anchor player". No "ADP" string anywhere in the rendered DOM. `type-check` 0 errors. `test:run` 96/96 pass. `lint` 0 errors/0 warnings across all 7 touched files (repo baseline of pre-existing errors unchanged). `build` clean.
+
+**Known data caveat (not a UI bug):** ~6 of 424 players (e.g. Jonathan Taylor, Ashton Jeanty) didn't name-match ESPN in the populate run, so they show a VORP $ value but no PTS/pos-rank sub-line or market anchor. Fixing those name matches is a data-layer follow-up, not part of this wiring pass.
+
+**Screenshot note:** the Browser pane would not composite frames in this headless session, so a pixel screenshot could not be captured; the `read_page` accessibility tree above is the live rendered-DOM proof. Joe can view it at `http://localhost:3003/prep/players`.
+
+---
+
 ## 2026-08-10 / DR-7.3 prep: offline resync code review + verify
 
 **Task:** DR-7.3 pre-test code review (P2 Draft Readiness) | **Class:** `docs` | **Lenses:** QA, Architecture

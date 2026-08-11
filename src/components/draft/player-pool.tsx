@@ -14,7 +14,7 @@
  * - Expandable AI tactical insights
  */
 
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo } from 'react'
 import { Search, AlignJustify, LayoutList } from 'lucide-react'
 import type { Player, Position } from '@/lib/players/types'
 import type { ScoredPlayer } from '@/lib/research/strategy/scoring'
@@ -24,19 +24,6 @@ import { FFIPlayerCard } from './ffi-player-card'
 import { FFIPositionFilters, FFISortTabs } from './ffi-position-filters'
 
 const positions: readonly (Position | 'ALL')[] = ['ALL', 'QB', 'RB', 'WR', 'TE', 'K', 'DEF'] as const
-
-/**
- * FF-278: Compute ADP divergence for a player.
- * In the live draft, player.adp is actually Record<string, number> from the raw API
- * (typed as number but runtime is object). When it IS an object, compute max-min.
- */
-function getAdpDivergence(player: { adp: number }): number {
-  const adpRaw = (player as unknown as { adp: Record<string, number> | number }).adp
-  if (typeof adpRaw !== 'object' || adpRaw === null) return 0
-  const vals = Object.values(adpRaw).filter((v): v is number => typeof v === 'number' && v > 0)
-  if (vals.length < 2) return 0
-  return Math.max(...vals) - Math.min(...vals)
-}
 
 interface PlayerPoolProps {
   scoredPlayers: ScoredPlayer[]
@@ -191,7 +178,6 @@ export function PlayerPool({
               getExplanation={getExplanation}
               onBid={onBidPlayer}
               maxBid={maxBidMap ? (maxBidMap.get(sp.player.name.toLowerCase()) ?? null) : maxBid}
-              adpDivergence={getAdpDivergence(sp.player)}
               compact={compact}
             />
           ))

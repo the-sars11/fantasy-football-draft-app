@@ -25,10 +25,19 @@ export function cacheToPlayer(cached: CachedPlayer): Player {
     ? adpValues.reduce((s, v) => s + v, 0) / adpValues.length
     : 999
 
-  const auctionValues = Object.values(cached.auction_values || {})
-  const avgAuction = auctionValues.length > 0
-    ? auctionValues.reduce((s, v) => s + v, 0) / auctionValues.length
-    : 0
+  // Real VORP value for Joe's exact league is THE auction value when present
+  // (populate-auction-values.ts). Fall back to the legacy averaged value only
+  // for rows that predate the VORP run so nothing shows $0.
+  const av = (cached.auction_values || {}) as Record<string, number>
+  const vorpValue = typeof av['vorp_12_200_ppr'] === 'number' ? av['vorp_12_200_ppr'] : undefined
+  const legacyAuctionVals = Object.entries(av)
+    .filter(([k]) => k !== 'vorp_12_200_ppr')
+    .map(([, v]) => v)
+  const avgAuction = vorpValue !== undefined
+    ? vorpValue
+    : legacyAuctionVals.length > 0
+      ? legacyAuctionVals.reduce((s, v) => s + v, 0) / legacyAuctionVals.length
+      : 0
 
   // Real enriched fields from populate-fantasypros.ts (source_data). Present
   // for ranked players; undefined for legacy Sleeper-only rows -> fall back.
@@ -41,6 +50,17 @@ export function cacheToPlayer(cached: CachedPlayer): Player {
   const rMax = sdNum(sd, 'rank_max')
   const rStd = sdNum(sd, 'rank_std')
   const filename = typeof sd['fp_filename'] === 'string' ? (sd['fp_filename'] as string) : undefined
+
+  // Real VORP model fields (populate-auction-values.ts).
+  const projPoints = sdNum(sd, 'proj_points')
+  const vorp = sdNum(sd, 'vorp')
+  const posRankPoints = sdNum(sd, 'pos_rank_points')
+  const replacementPoints = sdNum(sd, 'replacement_points')
+  const marketValue = sdNum(sd, 'espn_auction_value')
+  // ECR positional rank stored as e.g. "RB5" / "WR12"; pull the number.
+  const posRankStr = typeof sd['pos_rank'] === 'string' ? (sd['pos_rank'] as string) : ''
+  const ecrPosRankMatch = posRankStr.match(/(\d+)/)
+  const ecrPositionRank = ecrPosRankMatch ? parseInt(ecrPosRankMatch[1], 10) : undefined
 
   const valueRange =
     vLow !== undefined && vBase !== undefined && vHigh !== undefined
@@ -63,9 +83,16 @@ export function cacheToPlayer(cached: CachedPlayer): Player {
     expertTier: realTier,
     rankSpread: rMin !== undefined && rMax !== undefined ? { min: rMin, max: rMax, std: rStd } : undefined,
     headshotFilename: filename,
+    // Real VORP model (Joe's 12-tm/$200/PPR/no-K league).
+    projectedPoints: projPoints,
+    vorp,
+    positionRankByPoints: posRankPoints,
+    replacementPoints,
+    marketAuctionValue: marketValue,
+    ecrPositionRank,
     sourceData: [],
     projections: {
-      points: cached.projections?.points ?? 0,
+      points: cached.projections?.points ?? projPoints ?? 0,
       passingYards: cached.projections?.passing_yards,
       passingTDs: cached.projections?.passing_tds,
       rushingYards: cached.projections?.rushing_yards,

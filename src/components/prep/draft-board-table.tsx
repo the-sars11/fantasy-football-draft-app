@@ -146,7 +146,7 @@ function PlayerCard({
           </div>
         </div>
 
-        {/* Value + ADP */}
+        {/* Value + market anchor (no ADP -- this is an auction) */}
         <div className="text-right flex-shrink-0">
           <div
             className="font-bold text-[20px] leading-none"
@@ -154,12 +154,14 @@ function PlayerCard({
           >
             {isAuction ? `$${value}` : `Rd ${value}`}
           </div>
-          <div
-            className="text-[10px] mt-[3px]"
-            style={{ fontFamily: 'var(--font-mono)', color: 'var(--ffi-ink-3)' }}
-          >
-            ADP {p.adp > 0 ? p.adp.toFixed(1) : '-'}
-          </div>
+          {isAuction && p.marketAuctionValue != null && p.marketAuctionValue > 0 && (
+            <div
+              className="text-[10px] mt-[3px]"
+              style={{ fontFamily: 'var(--font-mono)', color: 'var(--ffi-ink-3)' }}
+            >
+              mkt ~${Math.round(p.marketAuctionValue)}
+            </div>
+          )}
         </div>
 
         {/* Chevron */}
@@ -352,7 +354,7 @@ function PlayerCard({
           <div className="grid grid-cols-4 gap-[12px] mt-[14px]">
             {[
               { k: 'ECR',   v: String(p.consensusRank), color: 'var(--ffi-blue-bright)' },
-              { k: 'ADP',   v: p.adp > 0 ? p.adp.toFixed(1) : '-', color: 'var(--ffi-blue-bright)' },
+              { k: 'PTS',   v: p.projectedPoints != null ? String(Math.round(p.projectedPoints)) : '-', color: 'var(--ffi-blue-bright)' },
               {
                 k: isAuction ? 'RANGE' : 'ECR',
                 v: isAuction && valueRange ? `$${valueRange.low}-${valueRange.high}` : String(p.consensusRank),

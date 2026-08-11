@@ -39,6 +39,17 @@ export interface Player {
   rankSpread?: { min: number; max: number; std?: number }
   headshotFilename?: string
 
+  // Real projection-based, roster-aware auction model (VORP) for Joe's exact
+  // 12-team / $200 / full-PPR / no-kicker league. When present, THIS is the
+  // auction value (consensusAuctionValue). Every number traces to ESPN's 2026
+  // full-PPR projected stat line + VORP under his roster + $2,400 budget.
+  projectedPoints?: number // ESPN 2026 full-PPR season projection (pts)
+  vorp?: number // points above replacement for his roster
+  positionRankByPoints?: number // 1 = best at position by projected points
+  replacementPoints?: number // replacement-level points for the position
+  marketAuctionValue?: number // ESPN market $ — cross-check / real bid anchor
+  ecrPositionRank?: number // FantasyPros expert-consensus positional rank (e.g. RB5 -> 5)
+
   // Per-source data
   sourceData: SourcePlayerData[]
 

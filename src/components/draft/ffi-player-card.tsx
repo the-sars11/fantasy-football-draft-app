@@ -39,8 +39,6 @@ interface FFIPlayerCardProps {
   intel?: PlayerIntelDisplay // Optional intel context for tag display
   onBid?: (player: Player) => void
   maxBid?: number | null
-  /** FF-278: cross-source ADP divergence (max − min across sources). Show indicator when > 10. */
-  adpDivergence?: number
   /** UX-3: compact density mode — tighter padding for data-dense views */
   compact?: boolean
 }
@@ -150,7 +148,6 @@ export function FFIPlayerCard({
   intel,
   onBid,
   maxBid,
-  adpDivergence,
   compact = false,
 }: FFIPlayerCardProps) {
   const player = scoredPlayer.player
@@ -323,21 +320,13 @@ export function FFIPlayerCard({
             <div className={`font-mono tabular-nums font-bold ${compact ? 'text-lg' : 'text-2xl'} ${isHighlighted ? 'text-[var(--value-green)]' : 'text-[#deedf9]'}`}>
               {isAuction ? `$${auctionValue}` : `Rd ${roundValue}`}
             </div>
-            <div className="font-mono text-[10px] tabular-nums text-[#9eadb8] flex items-center justify-end gap-1.5">
-              {isAuction
-                ? `$${valueRangeLow}-$${valueRangeHigh} RANGE`
-                : `ADP ${player.adp > 0 ? player.adp.toFixed(1) : '-'}`
-              }
-              {/* FF-278: ADP divergence indicator */}
-              {adpDivergence != null && adpDivergence > 10 && (
-                <span
-                  className="text-[#f97316] font-bold tracking-tight"
-                  title={`ADP diverges ${adpDivergence.toFixed(0)} spots across sources`}
-                >
-                  ↕{adpDivergence.toFixed(0)}
-                </span>
-              )}
-            </div>
+            {isAuction && (
+              <div className="font-mono text-[10px] tabular-nums text-[#9eadb8] flex items-center justify-end gap-1.5">
+                {player.marketAuctionValue != null && player.marketAuctionValue > 0
+                  ? `mkt ~$${Math.round(player.marketAuctionValue)}`
+                  : `$${valueRangeLow}-$${valueRangeHigh} RANGE`}
+              </div>
+            )}
             {isAuction && maxBid != null && (
               <div className="mt-1.5 space-y-0.5">
                 <div className="font-headline text-sm font-bold text-[#deedf9]">
