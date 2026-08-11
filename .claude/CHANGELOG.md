@@ -2,6 +2,26 @@
 
 ---
 
+## 2026-08-11 / P3 VAL-0 — real 16-year Nasties ledger imported + calibrated (foundation)
+
+**Task:** P3 League-Calibrated Valuation, VAL-0 (correct + import the real ledger) | **Class:** `pipeline` | **Lenses:** Architecture, QA
+
+**Problem:** The shipped board values (FF-080: FantasyPros ECR → distribution curve) are NATIONAL data — zero of Joe's league history. They produced a $97 Gibbs / $86 Puka top end that is $12-17 above the Nasties' 16-year all-time high (#1 has NEVER exceeded $85). Joe's ask: three numbers per player (ceiling / room-reality / the play) built on the REAL ledger, not national curves. New phase P3 approved 2026-08-11.
+
+**What changed (data + tooling only — no app runtime code yet):**
+
+- **Position corruption in the ledger diagnosed + repaired (VAL-0.1):** `bundle.json`'s position field is only reliable for the 5 dedicated single-starter slots; every flex/bench pick is mislabeled "RB." This produced a false "63% RB" reading. Repaired to `history-corrected.json` (normalized-name → real position, via the auctioneer's local-only `correct-history-positions.mjs`). Verified: 961 names, 98.8% of 2,292 picks resolved; the 5 WRs mislabeled RB on Joe's own 2025 roster (Pittman/Higgins/M.Harrison/Flowers/Worthy) now correctly WR.
+- **Ledger brought in-repo (VAL-0.2):** copied `bundle.json` + `history-corrected.json` into `src/data/league-history/` so the app is self-contained (the sibling auctioneer repo does NOT deploy with this app). New tracked `scripts/derive-league-calibration.ts` reads only in-repo data. Removed 4 exploratory scratch scripts (superseded).
+- **Build plan:** added P3 phase (VAL-0…VAL-3) under the one-plan rule; VAL-0 marked done.
+
+**True calibration (corrected ledger, 2022-2025 era) — reverses the earlier corrupted read:**
+- Positional inflation: **WR 45% (1.18x national) RUNS HOT** · **RB 39% (0.84x) RUNS COOL = value pocket** · TE 8% (1.17x) hot · QB 8% (0.96x) · DEF 1% (0.92x). The Nasties is a WR-first room; RB is where value hides.
+- Expected-price curves: RB1 $76…RB16 $22 · WR1 $79…WR16 $23 · QB1 $36…QB12 $3 · TE1 $49…TE12 $2 · DEF1 $6.
+
+**Verify ($0, local):** `npx tsx scripts/derive-league-calibration.ts` prints the curves + inflation above from in-repo data with no sibling-repo path. Position spot-check: Pittman/Higgins/M.Harrison/Flowers/Worthy → WR; Gibbs → RB; Lamb → WR. No app UI changed this pass — the re-priced board proof is VAL-1.3.
+
+---
+
 ## 2026-08-11 / Real VORP auction values + real tags + ADP ripped out
 
 **Task:** Wire real, roster-aware auction values and data-driven tags into the UI; remove ADP everywhere Joe sees it | **Class:** `output` (UI) + `shared` | **Lenses:** Design, QA, Architecture

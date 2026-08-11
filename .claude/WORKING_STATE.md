@@ -5,9 +5,16 @@
 
 **App:** personal live-draft advisor for Joe's "Nasties" 12-team, $200, PPR, no-kicker **ESPN auction** draft. Advises Joe; never bids. Picks arrive live over the network from the deployed **auctioneer** app (system of record). No Google Sheets, no snake/keeper (Tyler's league = permanent hold).
 
-**Active phase:** P2 -- Draft Readiness (finish + verify for real draft night).
+**Active phase:** P3 -- League-Calibrated Valuation & Exploit Engine (build first, then DR-7 rehearsal on the corrected engine). Approved by Joe 2026-08-11.
 
-**Next open item:** **DR-7.3..7.5 [Joe required] -- offline resync rehearsal, phone test, full mock-draft end-to-end.**
+**Next open item:** **VAL-1 -- calibrated per-player values: ceiling (VORP worth) + expected room price (per-position rank curves), then a re-priced board as proof.**
+
+**VAL-0 done (2026-08-11):** real 16-year Nasties ledger corrected + imported in-repo.
+- Position corruption fixed: `src/data/league-history/history-corrected.json` (961 names, 98.8% of picks). The 5 WRs mislabeled RB on Joe's 2025 roster now correct.
+- Ledger self-contained: `src/data/league-history/bundle.json` + `history-corrected.json`; `scripts/derive-league-calibration.ts` reproduces curves from in-repo data.
+- TRUE calibration (reverses the earlier corrupted read): WR 45% 1.18x HOT · RB 39% 0.84x COOL (value pocket) · TE 8% 1.17x HOT · QB/DEF ~national. Curves: RB1 $76…RB16 $22, WR1 $79…WR16 $23, QB1 $36, TE1 $49, DEF1 $6.
+
+**Still pending on P2 (deferred behind P3, still needed before draft night):** DR-7.3/7.4/7.5 [Joe required] -- offline resync rehearsal, phone test, full mock-draft end-to-end.
 
 **Code is implementation-complete for DR-7.3 (2026-08-10 review):**
 - Provisional flag wired: `handleRecordPick` in `draft/live/client.tsx:218-223` sets `provisional: isOfflineFromAuctioneer || undefined` on every manual pick when offline.
