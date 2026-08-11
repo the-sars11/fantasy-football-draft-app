@@ -26,6 +26,19 @@ export interface Player {
   consensusTier: number
   adp: number
 
+  // Honest modeled auction-value band from real expert-rank disagreement.
+  // low = bearish case (worst expert rank), high = bullish (best rank),
+  // base = consensus. Modeled from ECR — NOT a live auction-market price.
+  valueRange?: { low: number; base: number; high: number }
+
+  // Real FantasyPros expert-consensus tier (1 = elite). Distinct from the
+  // legacy consensusTier which was faked as rank/12 before real tiers landed.
+  expertTier?: number
+
+  // Real expert-rank spread (best/worst rank across all experts) + FP handle.
+  rankSpread?: { min: number; max: number; std?: number }
+  headshotFilename?: string
+
   // Per-source data
   sourceData: SourcePlayerData[]
 

@@ -12,6 +12,12 @@ function dbPosToAppPos(pos: string): Position {
   return pos as Position
 }
 
+/** Narrow a source_data number field. */
+function sdNum(sd: Record<string, unknown>, key: string): number | undefined {
+  const v = sd[key]
+  return typeof v === 'number' && Number.isFinite(v) ? v : undefined
+}
+
 /** Convert a CachedPlayer (DB shape) to a Player (app shape) */
 export function cacheToPlayer(cached: CachedPlayer): Player {
   const adpValues = Object.values(cached.adp || {})
@@ -24,6 +30,23 @@ export function cacheToPlayer(cached: CachedPlayer): Player {
     ? auctionValues.reduce((s, v) => s + v, 0) / auctionValues.length
     : 0
 
+  // Real enriched fields from populate-fantasypros.ts (source_data). Present
+  // for ranked players; undefined for legacy Sleeper-only rows -> fall back.
+  const sd = (cached.source_data || {}) as Record<string, unknown>
+  const realTier = sdNum(sd, 'tier')
+  const vLow = sdNum(sd, 'value_low')
+  const vBase = sdNum(sd, 'value_base')
+  const vHigh = sdNum(sd, 'value_high')
+  const rMin = sdNum(sd, 'rank_min')
+  const rMax = sdNum(sd, 'rank_max')
+  const rStd = sdNum(sd, 'rank_std')
+  const filename = typeof sd['fp_filename'] === 'string' ? (sd['fp_filename'] as string) : undefined
+
+  const valueRange =
+    vLow !== undefined && vBase !== undefined && vHigh !== undefined
+      ? { low: vLow, base: vBase, high: vHigh }
+      : undefined
+
   return {
     id: cached.id,
     name: cached.name,
@@ -33,8 +56,13 @@ export function cacheToPlayer(cached: CachedPlayer): Player {
     injuryStatus: cached.injury_status ?? undefined,
     consensusRank: Math.round(avgAdp), // approximate from ADP
     consensusAuctionValue: Math.round(avgAuction),
-    consensusTier: Math.ceil(avgAdp / 12),
+    // Real FantasyPros tier when present; legacy rank/12 estimate otherwise.
+    consensusTier: realTier ?? Math.ceil(avgAdp / 12),
     adp: avgAdp,
+    valueRange,
+    expertTier: realTier,
+    rankSpread: rMin !== undefined && rMax !== undefined ? { min: rMin, max: rMax, std: rStd } : undefined,
+    headshotFilename: filename,
     sourceData: [],
     projections: {
       points: cached.projections?.points ?? 0,

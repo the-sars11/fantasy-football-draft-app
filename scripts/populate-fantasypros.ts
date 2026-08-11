@@ -58,11 +58,18 @@ const AUCTION_BUDGET = 200
 const AUCTION_TEAMS = 12
 
 interface FPRankingPlayer {
+  player_id?: string | number
   player_name: string
   player_team_id: string
   player_position_id: string
   player_bye_week: string
+  player_filename?: string
+  player_owned_avg?: string | number
   rank_ecr: string | number
+  rank_min?: string | number
+  rank_max?: string | number
+  rank_ave?: string | number
+  rank_std?: string | number
   pos_rank: string
   tier: string | number
   player_sleeper_id?: string
@@ -71,9 +78,14 @@ interface FPRankingPlayer {
 }
 
 /**
- * Derived auction value from ECR rank. Mirrors impliedAuctionValue() in
+ * Modeled auction value from ECR rank. Mirrors impliedAuctionValue() in
  * src/lib/draft/trash-talk.ts so the board and live advisor never disagree.
  * $70 max (budget * 0.35) at rank 1, quadratic decay to $1 by ~rank 120.
+ *
+ * NOTE: This is a MODEL off the consensus rank, not a live auction-market
+ * price. FantasyPros' real auction-$ endpoint is gone (403). We surface it
+ * honestly as a range (see auctionValueRange) built from real expert-rank
+ * disagreement, never as a single fake-precise "market value".
  */
 function auctionValueFromRank(rank: number): number {
   if (!rank || rank <= 0) return 1
@@ -81,6 +93,27 @@ function auctionValueFromRank(rank: number): number {
   const maxRank = AUCTION_TEAMS * 10
   const decay = Math.max(0, 1 - (rank - 1) / maxRank)
   return Math.max(1, Math.round(maxValue * decay * decay))
+}
+
+/**
+ * A real value RANGE from real expert disagreement. The best expert rank
+ * (rank_min) is the bullish case -> higher $; the worst expert rank
+ * (rank_max) is the bearish case -> lower $; the consensus rank is the base.
+ * This replaces the single fake-precise number with an honest band.
+ */
+function auctionValueRange(
+  rankEcr: number,
+  rankMin: number | null,
+  rankMax: number | null
+): { low: number; base: number; high: number } {
+  const base = auctionValueFromRank(rankEcr)
+  const high = auctionValueFromRank(rankMin ?? rankEcr) // best rank -> most $
+  const low = auctionValueFromRank(rankMax ?? rankEcr) // worst rank -> least $
+  return {
+    low: Math.min(low, base),
+    base,
+    high: Math.max(high, base),
+  }
 }
 
 async function fetchEcr(url: string): Promise<FPRankingPlayer[]> {
@@ -137,8 +170,12 @@ async function main() {
       const rank = num(p.rank_ecr)
       if (!rank) return null
       const name = p.player_name.trim()
-      const auctionValue = auctionValueFromRank(rank)
+      const rankMin = num(p.rank_min)
+      const rankMax = num(p.rank_max)
+      const range = auctionValueRange(rank, rankMin, rankMax)
       const halfRank = halfRankByName.get(name) ?? null
+      const tier = num(p.tier)
+      const fpId = p.player_id != null ? String(p.player_id) : null
 
       return {
         name,
@@ -147,16 +184,29 @@ async function main() {
         bye_week: num(p.player_bye_week),
         // adp: ONLY the PPR rank -> converter averages -> consensusRank = PPR ECR.
         adp: { fantasypros_ppr: rank },
-        // auction_values: derived for $200/12 PPR.
-        auction_values: { fantasypros_ppr_12_200: auctionValue },
+        // auction_values: modeled base for $200/12 PPR (single, back-compat).
+        auction_values: { fantasypros_ppr_12_200: range.base },
         projections: {},
         source_data: {
           sources: ['fantasypros'],
           consensus_rank: rank,
           ecr_rank_ppr: rank,
           ecr_rank_half_ppr: halfRank,
+          // Real expert disagreement -> honest value range.
+          rank_min: rankMin,
+          rank_max: rankMax,
+          rank_ave: p.rank_ave != null ? parseFloat(String(p.rank_ave)) : null,
+          rank_std: p.rank_std != null ? parseFloat(String(p.rank_std)) : null,
+          value_low: range.low,
+          value_base: range.base,
+          value_high: range.high,
+          // Real FantasyPros tier (was previously faked as rank/12).
+          tier,
           pos_rank: p.pos_rank ?? null,
-          tier: num(p.tier),
+          owned_avg: p.player_owned_avg != null ? parseFloat(String(p.player_owned_avg)) : null,
+          // Handles for headshots + cross-referencing.
+          fp_player_id: fpId,
+          fp_filename: p.player_filename ?? null,
           sleeper_id: p.player_sleeper_id ?? null,
           yahoo_id: p.player_yahoo_id ?? null,
           espn_id: p.player_espn_id ?? null,
