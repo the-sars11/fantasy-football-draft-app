@@ -27,14 +27,9 @@ import {
   RotateCw,
   Settings2,
   Loader2,
-  DollarSign,
-  Users,
-  ListChecks,
 } from 'lucide-react'
 import { ConnectionStatusPill } from '@/components/draft/connection-status-pill'
 import { useRemoteAuctioneerFeed } from '@/hooks/use-remote-auctioneer-feed'
-
-const NASTIES = 'The Nasties'
 
 interface League {
   id: string
@@ -54,15 +49,6 @@ interface DraftSessionRow {
 }
 
 type Phase = 'loading' | 'no-league' | 'ready' | 'error'
-
-function scoringLabel(raw: string | null): string {
-  if (!raw) return 'PPR'
-  const v = raw.toLowerCase()
-  if (v === 'ppr') return 'Full PPR'
-  if (v === 'half_ppr' || v === 'half-ppr') return 'Half PPR'
-  if (v === 'standard') return 'Standard'
-  return raw
-}
 
 export default function DraftPage() {
   const router = useRouter()
@@ -192,7 +178,7 @@ export default function DraftPage() {
           className="font-extrabold text-[26px] leading-none"
           style={{ fontFamily: 'var(--font-cond)', color: 'var(--ffi-ink)' }}
         >
-          Draft
+          Live Draft
         </h1>
         {remote.hasPolled && (
           <ConnectionStatusPill
@@ -378,71 +364,9 @@ export default function DraftPage() {
               Start in Manual mode
             </Link>
           </div>
-
-          {/* ── Pre-flight line: league / managers, link to Setup ─ */}
-          {league && (
-            <div
-              className="mt-3 rounded-[13px] p-3.5"
-              style={{ background: 'var(--ffi-surface-1)', border: '1px solid var(--ffi-hairline)' }}
-            >
-              <div className="flex items-center justify-between">
-                <p
-                  className="font-bold text-[10px] uppercase"
-                  style={{
-                    fontFamily: 'var(--font-cond)',
-                    letterSpacing: '0.2em',
-                    color: 'var(--ffi-ink-3)',
-                  }}
-                >
-                  Pre-flight
-                </p>
-                <Link
-                  href="/prep/configure"
-                  className="inline-flex items-center gap-1 text-[11px] font-semibold"
-                  style={{ color: 'var(--ffi-blue-bright)' }}
-                >
-                  <Settings2 className="w-3.5 h-3.5" strokeWidth={2} />
-                  Edit in Setup
-                </Link>
-              </div>
-              <p
-                className="font-extrabold text-[15px] mt-1.5"
-                style={{ fontFamily: 'var(--font-cond)', color: 'var(--ffi-ink)' }}
-              >
-                {league.name || NASTIES}
-              </p>
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 mt-2">
-                <PreflightStat
-                  icon={<Users className="w-3.5 h-3.5" color="var(--ffi-blue-bright)" strokeWidth={2} />}
-                  value={`${league.team_count} managers`}
-                />
-                {league.budget != null && (
-                  <PreflightStat
-                    icon={<DollarSign className="w-3.5 h-3.5" color="var(--ffi-volt)" strokeWidth={2} />}
-                    value={`$${league.budget} budget`}
-                  />
-                )}
-                <PreflightStat
-                  icon={<ListChecks className="w-3.5 h-3.5" color="var(--ffi-warning)" strokeWidth={2} />}
-                  value={scoringLabel(league.scoring_format)}
-                />
-              </div>
-            </div>
-          )}
         </>
       )}
     </div>
-  )
-}
-
-function PreflightStat({ icon, value }: { icon: React.ReactNode; value: string }) {
-  return (
-    <span className="inline-flex items-center gap-1.5 text-[12px]" style={{ color: 'var(--ffi-ink-2)' }}>
-      {icon}
-      <span className="tabular-nums" style={{ fontFamily: 'var(--font-mono)' }}>
-        {value}
-      </span>
-    </span>
   )
 }
 

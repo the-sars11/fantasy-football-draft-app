@@ -73,7 +73,7 @@ export function ReviewClient() {
           className="font-extrabold text-[26px] leading-none"
           style={{ fontFamily: 'var(--font-cond)', color: 'var(--ffi-ink)' }}
         >
-          Review
+          Post Draft
         </h1>
         {sessionDateLabel && (
           <span

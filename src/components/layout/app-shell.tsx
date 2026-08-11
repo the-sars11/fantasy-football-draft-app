@@ -36,8 +36,8 @@ interface NavItem {
 // .claude/UX_OVERHAUL_2026-08.md.
 const navItems: NavItem[] = [
   { label: 'Research', href: '/prep', icon: Search },
-  { label: 'Draft', href: '/draft', icon: Zap },
-  { label: 'Review', href: '/draft/review', icon: Trophy },
+  { label: 'Live Draft', href: '/draft', icon: Zap },
+  { label: 'Post Draft', href: '/draft/review', icon: Trophy },
   { label: 'Setup', href: '/settings', icon: Settings },
 ]
 

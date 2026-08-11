@@ -10,8 +10,8 @@ import { cn } from '@/lib/utils'
 // app-shell.tsx (UX-S2). Order = swipe order.
 const sections = [
   { href: '/prep', label: 'Research' },
-  { href: '/draft', label: 'Draft' },
-  { href: '/draft/review', label: 'Review' },
+  { href: '/draft', label: 'Live Draft' },
+  { href: '/draft/review', label: 'Post Draft' },
   { href: '/settings', label: 'Setup' },
 ]
 

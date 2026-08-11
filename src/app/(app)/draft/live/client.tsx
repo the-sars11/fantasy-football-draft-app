@@ -73,8 +73,11 @@ import { useTrashTalkEngine } from '@/hooks/use-trash-talk-engine'
 import { useDraftSimulator } from '@/hooks/use-draft-simulator'
 import type { SimSpeed } from '@/hooks/use-draft-simulator'
 
+// Nasties locked shape: QB1/RB1/WR1/TE1/FLEX3/DEF1/K0/Bench5/IR1 (14 total,
+// 13 draftable). Never the generic ESPN 2RB/2WR/1FLEX/K1/bench6 default —
+// see FANTASY_FOOTBALL_MASTER.md.
 const DEFAULT_ROSTER: RosterSlots = {
-  qb: 1, rb: 2, wr: 2, te: 1, flex: 1, k: 1, dst: 1, bench: 6, ir: 0,
+  qb: 1, rb: 1, wr: 1, te: 1, flex: 3, k: 0, dst: 1, bench: 5, ir: 1,
 }
 
 type TrashTalkMode = 'off' | 'family-safe' | 'adult-only'
