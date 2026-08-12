@@ -1,6 +1,6 @@
 <!-- DASHBOARD_STATUS
 {
-  "currentPhase": "ROAD TO DRAFT — ordered build sessions S1→S6 (S1 config/nav trust · S2 live sync · S3=P3 valuation engine · S4 research depth · S5 strategies · S6=DR-7 rehearsal)",
+  "currentPhase": "ROAD TO DRAFT — ordered build sessions S1→S8 (S1 config/nav trust · S2 live sync · S3=P3 valuation engine · S4 research depth · S5 strategies · S6 bug hunt+tests · S7 Claude-driven Chrome usability test · S8=DR-7 rehearsal)",
   "status": "active",
   "milestones": [
     { "name": "Phase 0-2 — Data pipeline + strategy engine", "done": true },
@@ -24,7 +24,10 @@
     "S3 [Opus] = P3: valuation engine ceiling/reality/play (VAL-1/2/3) on the corrected 16yr ledger. VAL-0 done. Closes FB-12/FB-15.",
     "S4 [Opus+Sonnet]: research depth — value RANGE not point (FB-10), real sourced tags (FB-9), bye/images/proj/rec (FB-13), source transparency (FB-14), dynamic-on-pull (FB-11), verify ADP gone (FB-8).",
     "S5 [Opus+Sonnet]: strategies real — wired/auto-run/save/suggest-from-targets (FB-16), player-pull end-to-end (FB-17).",
-    "S6 [Sonnet+Joe] = DR-7.3/7.4/7.5: offline-resync rehearsal, phone test, full mock draft — the draft-night gate, run LAST on the finished app."
+    "S6 [Sonnet/Opus]: bug hunt + test hardening — /bug-hunt full across the app + expand automated coverage on the S1-S5 paths.",
+    "S7 [Claude drives Chrome]: my own usability test — walk every flow at mobile arm's-length, catalog + fix friction/dead-ends BEFORE Joe's phone rehearsal.",
+    "S8 [Sonnet+Joe] = DR-7.3/7.4/7.5: offline-resync rehearsal, phone test, full mock draft — the draft-night gate, run LAST on the hardened app.",
+    "Per-session gate (S1-S5): type-check + test:run + lint(0 new) + build + /bug-hunt free on changed modules + a loaded-preview screenshot before any session is called done."
   ]
 }
 -->
@@ -93,12 +96,26 @@ Task tracking: `[ ]` not started · `[~]` in progress · `[x]` done · `[!]` blo
 > **Closes:** FB-16 (is it wired / auto-run on new data / save a strategy / suggest from targets+avoids), FB-17 (player-pull end-to-end actually feeds the whole chain).
 > **Done-when:** strategies generate on fresh data (or are clearly gated + explained), are saveable, can be AI-suggested from your target/avoid list; a player pull demonstrably drives values → tags → strategy end-to-end.
 
-### S6 — Draft-night rehearsal — THE GATE `[Sonnet + Joe]` · class: pipeline
-> **Why last:** you can only rehearse the finished app. This is the "ready for draft night" sign-off.
-> **This session = DR-7.3 → DR-7.4 → DR-7.5** (detail in the DR-7 section).
-> **Done-when:** full mock draft on your phone against the live auctioneer — picks tracking, calibrated advice correct, budgets right, offline-resync proven, no surprises.
+### S6 — Bug hunt + test hardening (whole app) `[Sonnet · Opus for logic bugs]` · class: bugfix/pipeline
+> **Why here:** S1-S5 each pass their own per-session gate, but that only catches regressions in what changed. This is the dedicated *whole-app* sweep before any human clicks through it.
+> **Reads first:** `.claude/REVIEW_LENSES.md`, the S1-S5 CHANGELOG entries, `src/**/*.test.ts`.
+> **Scope:** (a) run `/bug-hunt full` (tests + build) across the whole project, triage findings by severity, fix the real ones; (b) **expand automated coverage** on the new S1-S5 code paths — config→12-teams, join/sync, calibrated values, tag/range model, strategy chain — so the logic that matters is actually tested, not just present.
+> **Done-when:** `/bug-hunt full` clean (or every finding triaged with a written reason to defer); `npm run test:run` green with new tests covering the S1-S5 paths; `type-check` + `lint` (0 new) + `build` clean. Findings + fixes logged in CHANGELOG.
 
-> **Cut line (needs the draft date):** S1 → S2 → S3 → S6 is the **minimum** for a working, trustworthy, genuinely-helpful draft night. S4 and S5 are high-value depth that can compress if the date is tight. Tell me the draft date and I'll mark the hard must-have line.
+### S7 — Usability test — I drive it in Chrome `[Claude driving + Sonnet to fix]` · class: output/bugfix
+> **Why here:** your phone rehearsal (S8) must **not** be the first time a human clicks through this. I walk the whole app myself first and fix the friction, so S8 is a confirmation, not a discovery.
+> **How:** load the deployed app (or dev preview) in a Chrome session at **mobile viewport, arm's-length**, and walk **every** real flow end-to-end as a first-time user: Research → pull players → read a player card → tags/range/sources → set targets/avoids → strategies → enter the Live Draft room → join the auctioneer → record/track picks → budget/pace → Post Draft. At each step catalog: dead-ends, "how do I get back," confusing labels, slow/janky, anything that reads as broken or cheap. Screenshot every issue.
+> **Reads first:** the S1-S6 done-whens (so I test against what we claimed), `DESIGN_SYSTEM.md`.
+> **Done-when:** a written usability-findings list (each with a screenshot), every P1/P2 issue fixed and re-shot, and a final clean walkthrough screenshot set proving the flows hold together. This is my sign-off that it's *ready for your hands* — not that it's "perfect."
+
+### S8 — Draft-night rehearsal — THE GATE `[Sonnet + Joe]` · class: pipeline
+> **Why last:** you can only rehearse the finished, hardened app. This is the "ready for draft night" sign-off — the one only you can give.
+> **This session = DR-7.3 → DR-7.4 → DR-7.5** (detail in the DR-7 section).
+> **Done-when:** full mock draft on your phone against the live auctioneer — picks tracking, calibrated advice correct, budgets right, offline-resync proven, no surprises. Any issues found here become a short S8-fix list (expected — that's what a rehearsal is for).
+
+> **Per-session gate (baked into S1-S5, non-negotiable):** no build session is called done until `npm run type-check` + `npm run test:run` + `npm run lint` (0 new) + `npm run build` all pass, **plus `/bug-hunt free` on the changed modules**, **plus a screenshot from a preview I actually loaded**. S6-S8 are the dedicated *whole-app* hardening passes stacked on top of that per-session discipline.
+
+> **Cut line (needs the draft date):** S1 → S2 → S3 → S6 → S7 → S8 is the **minimum** for a working, trustworthy, genuinely-helpful draft night (the hardening passes S6-S8 are NOT optional — they are how "working" gets proven). S4 and S5 are high-value depth that can compress if the date is tight. Tell me the draft date and I'll mark the hard must-have line.
 
 ---
 

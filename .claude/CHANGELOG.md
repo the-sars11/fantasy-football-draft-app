@@ -2,6 +2,22 @@
 
 ---
 
+## 2026-08-11 / ROAD TO DRAFT — added dedicated bug-hunt + test + usability-test hardening passes (planning)
+
+**Task:** Joe: "update the build plan to include bug hunts, testing, and then I want you to do your own usability test inside chrome sessions as well." | **Class:** `docs` | **Lenses:** Delivery
+
+**What changed (plan docs only — no app code):**
+- **BUILD_PLAN.md ROAD TO DRAFT:** the rehearsal gate moved from S6 to **S8**; inserted two new whole-app hardening passes ahead of it:
+  - **S6 — Bug hunt + test hardening** `[Sonnet · Opus for logic]`: `/bug-hunt full` across the project + expand automated coverage on the S1-S5 code paths (12-teams config, join/sync, calibrated values, tag/range model, strategy chain).
+  - **S7 — Usability test, Claude drives Chrome** `[Claude driving + Sonnet to fix]`: I walk every flow at mobile arm's-length in a Chrome session, catalog friction/dead-ends/breaks with screenshots, and fix them **before** Joe's phone rehearsal — so S8 is confirmation, not discovery.
+- **Per-session gate made explicit:** every build session S1-S5 must pass type-check + test:run + lint(0 new) + build **plus `/bug-hunt free` on changed modules plus a loaded-preview screenshot** before it's called done. S6-S8 stack whole-app hardening on top.
+- **Cut line updated:** S1→S2→S3→S6→S7→S8 is now the minimum viable path (hardening passes are NOT optional); S4/S5 remain compressible depth.
+- Dashboard header + WORKING_STATE re-sequenced S1→S8.
+
+**Verify:** plan-only change, no runtime touched. No type-check/test run required for docs.
+
+---
+
 ## 2026-08-11 / ROAD TO DRAFT — all morning feedback captured, priority-ordered, model-bound (planning)
 
 **Task:** Capture Joe's entire 2026-08-11 morning feedback onto the plan in priority build order, well-scoped, model-bound, in context-aware build sessions | **Class:** `docs` | **Lenses:** Delivery
