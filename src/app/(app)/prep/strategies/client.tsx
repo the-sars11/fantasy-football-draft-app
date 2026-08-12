@@ -334,6 +334,10 @@ export function StrategiesPageClient() {
 
   const activeStrategy = savedStrategies.find((s) => s.is_active) ?? null
 
+  // Extract target/avoid names from the active strategy to inform new proposals
+  const activeTargetNames = (activeStrategy?.player_targets ?? []).map((t) => t.player_name)
+  const activeAvoidNames = (activeStrategy?.player_avoids ?? []).map((a) => a.player_name)
+
   return (
     <div className="pb-2">
       <StrategiesHeader leagueName={selectedLeague?.name} />
@@ -368,7 +372,7 @@ export function StrategiesPageClient() {
         </div>
       )}
 
-      {/* Build a new strategy (AI — explicit tap) */}
+      {/* Build a new strategy - calibrated rule-based or AI */}
       {selectedLeague && (
         <div className="mt-6">
           <QuietLabel>Build a new strategy</QuietLabel>
@@ -377,6 +381,8 @@ export function StrategiesPageClient() {
               leagueId={selectedLeague.id}
               format={selectedLeague.format}
               onSave={handleSaveProposal}
+              targetNames={activeTargetNames}
+              avoidNames={activeAvoidNames}
             />
           </div>
         </div>

@@ -1,4 +1,51 @@
-# Changelog — FFIntelligence
+# Changelog -- FFIntelligence
+
+---
+
+## 2026-08-12 / S4 -- strategies made real ($0 rule-based fallback, targets/avoids wired, FB-16/FB-17 closed)
+
+**Task:** ROAD TO DRAFT S4 `[Sonnet wiring; no AI spend -- ANTHROPIC_API_KEY absent]` -- close FB-16 (strategies wired, saveable, suggest-from-targets) and FB-17 (player pull feeds the whole chain end-to-end). | **Class:** pipeline | **Lenses:** Architecture, QA
+
+**Problem:** The strategies screen existed but was broken in Joe's environment -- no ANTHROPIC_API_KEY meant the route returned 503 for every "Generate Strategies" click. Even if it had worked, the proposals ignored the user's target/avoid list, and the chain from player pull to strategy proposal was untested (could have been generating invented players rather than pulling from the DB pool).
+
+**Root cause:** The `proposeStrategies()` path hard-wired to Claude; no fallback. The `StrategyProposals` component didn't accept or pass targetNames/avoidNames. The propose route ignored them entirely. No test exercised the chain.
+
+**What changed:**
+
+- **`src/lib/research/strategy/research.ts` -- $0 rule-based engine:**
+  - Added `proposeStrategiesRuleBased(input)` -- generates 4 Nasties-calibrated auction archetypes (hero-rb-auction, wr-heavy-auction, stars-and-scrubs, balanced-auction) from the player pool + 16-yr ledger curves. User targets go first (up to 3); avoids excluded from key_targets, included in key_avoids; each archetype ranks pool by position weight (WR HOT 1.18x, RB COOL 0.84x). Returns `{ proposals, inserts }` -- same shape as the AI path. Snake format guard: returns empty if `league.format !== 'auction'`.
+  - Modified `buildAuctionPrompt()` to accept `targetNames`/`avoidNames` and append a targets section to the prompt (AI path).
+  - Modified `proposeStrategies()` to pass targets/avoids to the prompt builder.
+  - Modified `proposalToInsert()` to accept a `source` param (`'ai' | 'preset'`, defaults `'ai'`).
+  - Added 5 calibration constants: `CALIBRATED_ARCHETYPES`, `ARCHETYPE_PHILOSOPHY`, `ARCHETYPE_REASONING`, `ARCHETYPE_CEILING`, `ARCHETYPE_FLOOR`.
+
+- **`src/app/api/strategies/propose/route.ts` -- dispatch logic:**
+  - Body now accepts `{ leagueId, targetNames?, avoidNames? }`.
+  - Replaced the hard 503 with `const hasApiKey = !!process.env.ANTHROPIC_API_KEY`.
+  - Dispatches to `proposeStrategies` (AI) or `proposeStrategiesRuleBased` ($0) based on key presence.
+  - Response now includes `source: 'ai' | 'rule-based'` for the UI badge.
+
+- **`src/components/prep/strategy-proposals.tsx` -- UI:**
+  - Added `targetNames?: string[]` and `avoidNames?: string[]` props.
+  - Fixed `useCallback` deps: added `targetNames` and `avoidNames` (was only `[leagueId]`, causing stale closures when user updated their target list).
+  - Added `proposalSource` state; shows "Calibrated" (volt-green) badge for rule-based, "AI" (blue) badge for AI path.
+  - Subheader shows target count when targets are applied.
+  - Fixed loading text: was "Claude is analyzing... 10-20 seconds" even for the instant rule-based path; now "Generating strategies from your player pool..." (generic, accurate for both).
+
+- **`src/app/(app)/prep/strategies/client.tsx` -- wiring:**
+  - Extracts `activeTargetNames` and `activeAvoidNames` from `activeStrategy.player_targets` / `player_avoids`.
+  - Passes them to `StrategyProposals` so the active strategy's target list informs proposal generation.
+
+- **`src/lib/research/strategy/__tests__/research-ruleBased.test.ts` -- new (9 tests):**
+  - Core output: 4 proposals, all required fields, inserts have `source='preset'`, all key_targets reference real pool players.
+  - User targets: user targets appear in key_targets, avoids excluded, avoids appear in key_avoids.
+  - FB-17 chain proof: proposals derive from the exact player pool; swapping the pool (different player names) produces different targets -- not invented.
+
+**Bugs found + fixed during /bug-hunt free:**
+- BUG-002 (LOW): `proposeStrategiesRuleBased` generated auction proposals for snake-format leagues. Fixed with format guard (`if league.format !== 'auction' return { proposals: [], inserts: [] }`).
+- BUG-003 (LOW): Loading text said "Claude is analyzing... 10-20 seconds" for the instant rule-based path. Fixed to generic "Generating strategies from your player pool..."
+
+**Verify gate:** type-check clean, 162/162 tests (was 153, +9 new), lint 162 problems (same count as pre-session -- 0 new from my files), build clean, strategies screen renders at `localhost:3011/prep/strategies` (DOM tree + page text verified: "Strategy Proposals", "Generates auction strategies from your player pool", "Generate Strategies" button).
 
 ---
 

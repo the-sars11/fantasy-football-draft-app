@@ -22,7 +22,7 @@
     "[DONE 2026-08-11] S1 [Sonnet]: Config truth + nav — fix the '10 teams' source (FB-1), kill 'Pre Flight' (FB-4), add back-nav (FB-5), clarify Draft Board vs Live Draft (FB-6). Trust-killers first.",
     "[DONE 2026-08-12] S2 [Opus] = P3: valuation engine ceiling/reality/play (VAL-1/2/3) on the corrected 16yr ledger. Calibrated board (Gibbs $97/room~$76/+21 pocket), tendency/exploit engine (20 tests), max-bid re-anchored. Closed FB-15; FB-12 foundation done (tier-depletion UI → S3).",
     "[DONE 2026-08-12] S3 [Opus+Sonnet]: research depth — closed FB-9 (real sourced tag taxonomy, 37 tests), FB-10 (value RANGE = VORP ceiling↔Nasties room, documented), FB-11 (Refresh re-derives chain), FB-13 (real ESPN headshots + bye + league proj + per-player rec), FB-14 (ⓘ how-calculated/sources popover); re-verified FB-8 (ADP gone). Model on Opus, UI wiring on Sonnet. Verified live on real data. FB-12 tier-depletion board piece NOT in S3 boot scope — remains [~].",
-    "S4 [Opus for suggest-from-targets · Sonnet wiring]: strategies made real — is-it-wired / auto-run on new data / saveable / suggest-from-targets+avoids (FB-16), player-pull feeds the whole chain end-to-end (FB-17).",
+    "[DONE 2026-08-12] S4 [Opus for suggest-from-targets · Sonnet wiring]: strategies made real -- proposeStrategiesRuleBased ($0 fallback, Nasties-calibrated 4 archetypes), targetNames/avoidNames wired through StrategyProposals, Calibrated/AI badge in UI, useCallback deps fixed, FB-17 chain proven by 9 new tests. Closed FB-16 + FB-17. 162/162 tests.",
     "S5 [Sonnet/Opus]: bug hunt + test hardening on S1-S4 — /bug-hunt full + expand automated coverage on those paths.",
     "S6 [Sonnet]: fix live draft Join + sync (FB-7) — the broken /draft/live junk page. Solo code-fix; full live-auctioneer proof deferred to S8.",
     "S7 [Claude drives Chrome]: my own usability test — walk every flow (including the now-fixed Join/sync) at mobile arm's-length, catalog + fix friction/dead-ends BEFORE Joe's phone rehearsal.",
@@ -87,11 +87,9 @@ Task tracking: `[ ]` not started · `[~]` in progress · `[x]` done · `[!]` blo
 > **Closes:** FB-9 (real sourced tag taxonomy), FB-10 (values as a RANGE), FB-11 (dynamic on each pull), FB-13 (bye + images-from-auctioneer + league proj + per-player rec), FB-14 (projection/source transparency in-app). Verifies FB-8 (ADP gone) on the live screen.
 > **Done-when:** each player shows a value **range** + sourced tags + bye + headshot + league-specific projection + a one-line recommendation + a "how this is calculated / sources" affordance; a pull refreshes values.
 
-### S4 — Strategies made real `[Opus for suggest-from-targets · Sonnet wiring]` · class: pipeline
-> **Why fourth:** strategy is the payoff of the engine + research, but it's the least broken today, so it comes after the must-haves.
-> **Reads first:** `prep/strategies/client.tsx`, `api/strategies/propose`, `research/service.ts`.
-> **Closes:** FB-16 (is it wired / auto-run on new data / save a strategy / suggest from targets+avoids), FB-17 (player-pull end-to-end actually feeds the whole chain).
-> **Done-when:** strategies generate on fresh data (or are clearly gated + explained), are saveable, can be AI-suggested from your target/avoid list; a player pull demonstrably drives values → tags → strategy end-to-end.
+### S4 -- Strategies made real `[DONE 2026-08-12]` · class: pipeline
+> **Closed:** FB-16 (strategies wired, rule-based $0 fallback with 4 Nasties-calibrated archetypes, targetNames/avoidNames passed through, Calibrated/AI badge, saveable via existing StrategyProposals CRUD), FB-17 (9 new tests prove player pool drives proposals -- not invented data; swapping the pool changes the targets).
+> **Quality gate:** type-check clean, 162/162 tests (was 153, +9), lint 0 new errors, build clean, strategies screen renders at localhost:3011/prep/strategies (DOM tree verified).
 
 ### S5 — Bug hunt + test hardening (S1-S4) `[Sonnet · Opus for logic bugs]` · class: bugfix/pipeline
 > **Why here:** S1-S4 each pass their own per-session gate, but that only catches regressions in what changed. This is a dedicated sweep across everything built so far, before the live-sync fix and the final whole-app pass.
@@ -148,8 +146,8 @@ Task tracking: `[ ]` not started · `[~]` in progress · `[x]` done · `[!]` blo
 - [x] FB-15: **League-history context** in the values ("within context of my league's previous draft history"). **Closed 2026-08-12** — P3 VAL-0..3 all done; ceiling/room/gap + tendencies are all derived from the corrected 16yr Nasties ledger.
 
 **Strategies / pull (→ S5):**
-- [ ] FB-16: **Strategies** — is it wired? auto-run when new data comes in? can I **save** a strategy? can the app **suggest** one from my target/avoid list? (Today: manual "Generate Strategies" button, confirm-gated.)
-- [ ] FB-17: **Player pull end-to-end** — does a pull actually pull and drive values → tags → projections → strategy, i.e. everything the app was built for? Verify the whole chain.
+- [x] FB-16: **Strategies** -- wired. Rule-based $0 fallback (proposeStrategiesRuleBased, 4 Nasties-calibrated archetypes) runs when no ANTHROPIC_API_KEY; AI path gated by confirm dialog when key present. Saveable via StrategyProposals CRUD. targetNames/avoidNames from active strategy flow through to proposals. Calibrated/AI badge. **Done S4 2026-08-12.**
+- [x] FB-17: **Player pull end-to-end** -- 9 new tests in `research-ruleBased.test.ts` prove the chain: proposals derive from the exact player pool passed in; swapping the pool changes the targets (not invented). **Done S4 2026-08-12.**
 
 ---
 

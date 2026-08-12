@@ -12,7 +12,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient as createServerClient } from '@/lib/supabase/server'
 import { DEV_MODE } from '@/lib/supabase/dev-mode'
 import { createClient } from '@supabase/supabase-js'
-import { proposeStrategies } from '@/lib/research/strategy/research'
+import { proposeStrategies, proposeStrategiesRuleBased } from '@/lib/research/strategy/research'
 import type { League as DbLeague } from '@/lib/supabase/database.types'
 import type { League, RosterSlots } from '@/lib/players/types'
 import type { ConsensusPlayer } from '@/lib/research/normalize'
@@ -127,15 +127,17 @@ function cacheRowToConsensusPlayer(row: Record<string, unknown>): ConsensusPlaye
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { leagueId } = body as { leagueId?: string }
+    const { leagueId, targetNames, avoidNames } = body as {
+      leagueId?: string
+      targetNames?: string[]
+      avoidNames?: string[]
+    }
 
     if (!leagueId) {
       return NextResponse.json({ error: 'leagueId is required' }, { status: 400 })
     }
 
-    if (!process.env.ANTHROPIC_API_KEY) {
-      return NextResponse.json({ error: 'ANTHROPIC_API_KEY not configured' }, { status: 503 })
-    }
+    const hasApiKey = !!process.env.ANTHROPIC_API_KEY
 
     const supabase = await getClient()
     if (!supabase) {
@@ -183,12 +185,16 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Run strategy research engine
-    const result = await proposeStrategies({ league, players, keeperNames })
+    // Run strategy research engine (AI if key present, rule-based fallback otherwise)
+    const sharedInput = { league, players, keeperNames, targetNames, avoidNames }
+    const result = hasApiKey
+      ? await proposeStrategies(sharedInput)
+      : proposeStrategiesRuleBased(sharedInput)
 
     return NextResponse.json({
       proposals: result.proposals,
       inserts: result.inserts,
+      source: hasApiKey ? 'ai' : 'rule-based',
       meta: {
         leagueId: league.id,
         format: league.format,

@@ -13,7 +13,8 @@ import type { League, DraftFormat, RosterSlots, ScoringFormat } from '@/lib/play
 import type { ConsensusPlayer } from '@/lib/research/normalize'
 import type { StrategyInsert, Position as DbPosition } from '@/lib/supabase/database.types'
 import { askClaudeJson } from '@/lib/ai/claude'
-import { AUCTION_ARCHETYPES, SNAKE_ARCHETYPES } from './presets'
+import { AUCTION_ARCHETYPES, SNAKE_ARCHETYPES, AUCTION_PRESETS } from './presets'
+import type { AuctionArchetype } from './presets'
 
 // --- Types ---
 
@@ -46,6 +47,10 @@ export interface StrategyResearchInput {
   league: League
   players: ConsensusPlayer[]
   keeperNames?: string[]
+  /** Player names from the user's active strategy targets to incorporate into proposals */
+  targetNames?: string[]
+  /** Player names from the user's active strategy avoids to incorporate into proposals */
+  avoidNames?: string[]
 }
 
 export interface StrategyResearchResult {
@@ -132,9 +137,16 @@ function formatScoringLabel(scoring: ScoringFormat): string {
 function buildAuctionPrompt(
   league: League,
   summaries: PositionSummary[],
-  keeperNames: string[]
+  keeperNames: string[],
+  targetNames: string[] = [],
+  avoidNames: string[] = []
 ): string {
   const archetypeList = AUCTION_ARCHETYPES.join(', ')
+
+  const targetsSection =
+    targetNames.length > 0 || avoidNames.length > 0
+      ? `\n## User Targets and Avoids\n${targetNames.length > 0 ? `Targets (prioritize in key_targets where the strategy supports them): ${targetNames.join(', ')}\n` : ''}${avoidNames.length > 0 ? `Avoids (include in key_avoids where appropriate): ${avoidNames.join(', ')}\n` : ''}`
+      : ''
 
   return `## League Settings
 - Format: AUCTION (budget: $${league.budget})
@@ -174,7 +186,7 @@ IMPORTANT:
 - Reference specific players from the data above - do not invent players
 - Cite actual auction values and tier breaks in your reasoning
 - Vary the strategies - include conservative, balanced, and aggressive options
-- Tailor to this league's specific settings (${league.size}-team, ${formatScoringLabel(league.scoringFormat)}, ${formatRosterSlots(league.rosterSlots)})`
+- Tailor to this league's specific settings (${league.size}-team, ${formatScoringLabel(league.scoringFormat)}, ${formatRosterSlots(league.rosterSlots)})${targetsSection}`
 }
 
 function buildSnakePrompt(
@@ -243,7 +255,7 @@ Respond with a JSON object: { "strategies": [ ... ] }`
 export async function proposeStrategies(
   input: StrategyResearchInput
 ): Promise<StrategyResearchResult> {
-  const { league, players, keeperNames = [] } = input
+  const { league, players, keeperNames = [], targetNames = [], avoidNames = [] } = input
 
   // Filter out keepers from pool
   const availablePlayers = keeperNames.length > 0
@@ -253,7 +265,7 @@ export async function proposeStrategies(
   const summaries = summarizePlayers(availablePlayers, league.format)
 
   const prompt = league.format === 'auction'
-    ? buildAuctionPrompt(league, summaries, keeperNames)
+    ? buildAuctionPrompt(league, summaries, keeperNames, targetNames, avoidNames)
     : buildSnakePrompt(league, summaries, keeperNames)
 
   const response = await askClaudeJson<ClaudeStrategyResponse>({
@@ -275,7 +287,8 @@ export async function proposeStrategies(
 function proposalToInsert(
   proposal: StrategyProposal,
   leagueId: string,
-  format: DraftFormat
+  format: DraftFormat,
+  source: 'ai' | 'preset' = 'ai'
 ): StrategyInsert {
   // Map position weights from app positions (DEF) to DB positions (DST)
   const positionWeights: Record<string, number> = {}
@@ -288,7 +301,7 @@ function proposalToInsert(
     name: proposal.name,
     description: proposal.description,
     archetype: proposal.archetype,
-    source: 'ai',
+    source,
     is_active: false,
     position_weights: positionWeights as Record<DbPosition, number>,
     player_targets: [],
@@ -329,4 +342,138 @@ function proposalToInsert(
   }
 
   return base
+}
+
+// --- Rule-based strategy fallback ($0, no Claude API required) ---
+// Calibrated to 16-year Nasties ledger: RB COOL 0.84x (value pocket), WR HOT 1.18x, TE HOT 1.17x.
+// Used when ANTHROPIC_API_KEY is absent. Produces 4 auction strategies with Nasties-specific reasoning.
+
+const CALIBRATED_ARCHETYPES: AuctionArchetype[] = [
+  'hero-rb-auction',
+  'wr-heavy-auction',
+  'stars-and-scrubs',
+  'balanced-auction',
+]
+
+const ARCHETYPE_PHILOSOPHY: Record<string, string> = {
+  'hero-rb-auction':
+    'In 16 Nasties drafts RB runs COOL (0.84x room share vs national) - the market undervalues RBs. Pay up for 1 elite RB while the field chases overpriced WRs.',
+  'wr-heavy-auction':
+    'WR runs HOT (1.18x) in Nasties but PPR demands pass-catchers. Control your WR spend - buy 2 real WRs at calibrated prices instead of overpaying for a WR1 the room will bid past ceiling.',
+  'stars-and-scrubs':
+    'Lock 2-3 studs at calibrated prices, fill the roster with $1-5 dart throws. In a 12-team pool, late-round upside is real and RB1 ceiling ($97) lands well above what the room bids.',
+  'balanced-auction':
+    'Spread budget evenly across positions for a protected floor. No single injury derails the season and you stay competitive at every slot in a 12-team field.',
+}
+
+const ARCHETYPE_REASONING: Record<string, string> = {
+  'hero-rb-auction':
+    'The Nasties ledger shows RB1 clearing at room price ~$76 vs VORP ceiling of $97 - a consistent $21 pocket. Paying up for 1 elite RB gets calibrated value while the field runs WR HOT (1.18x) and exhausts budget. Fill WR2/WR3 at mid-market where room prices are still rational.',
+  'wr-heavy-auction':
+    'WR is the most liquid position in Nasties (1.18x room share), so WR1s spike fast. Locking WR budget early secures elite pass-catchers before the room bids past ceiling. Avoid TE overspend - the Shultz effect pushes TE1 to 1.17x HOT every year.',
+  'stars-and-scrubs':
+    'With $200 and 12 teams, locking 2 true studs and filling the rest with $1-5 players is the highest-ceiling path. The RB COOL pocket means elite RBs are under-bid relative to their VORP every year - this strategy exploits that directly.',
+  'balanced-auction':
+    'Balanced allocation floors out at 60-70 projected ceiling in a PPR league. No positional scarcity risk, no single-player dependency. Best when you want to draft reactively against the field rather than commit to an identity in advance.',
+}
+
+const ARCHETYPE_CEILING: Record<string, number> = {
+  'hero-rb-auction': 82,
+  'wr-heavy-auction': 78,
+  'stars-and-scrubs': 87,
+  'balanced-auction': 72,
+}
+
+const ARCHETYPE_FLOOR: Record<string, number> = {
+  'hero-rb-auction': 52,
+  'wr-heavy-auction': 50,
+  'stars-and-scrubs': 45,
+  'balanced-auction': 60,
+}
+
+/**
+ * $0 rule-based strategy proposals - no Claude required.
+ * Uses Nasties calibration (RB COOL / WR HOT / TE HOT) + preset archetypes.
+ * Incorporates user's targetNames/avoidNames from their active strategy.
+ */
+export function proposeStrategiesRuleBased(
+  input: StrategyResearchInput
+): StrategyResearchResult {
+  const { league, players, targetNames = [], avoidNames = [] } = input
+
+  // Only calibrated for auction format; snake proposals require the AI path
+  if (league.format !== 'auction') {
+    return { proposals: [], inserts: [] }
+  }
+
+  // Sort by consensus rank ascending (best players first)
+  const ranked = [...players].sort((a, b) => a.consensusRank - b.consensusRank)
+  const avoidLower = avoidNames.map((n) => n.toLowerCase())
+
+  const proposals: StrategyProposal[] = CALIBRATED_ARCHETYPES.map((key) => {
+    const preset = AUCTION_PRESETS[key]
+
+    // Position priority order by descending weight (QB/RB/WR/TE only - K/DEF are filler)
+    const corePositions = ['QB', 'RB', 'WR', 'TE'] as const
+    const posOrder = [...corePositions].sort(
+      (a, b) => (preset.position_weights[b] ?? 0) - (preset.position_weights[a] ?? 0)
+    )
+
+    // key_targets: user targets first (up to 3), then fill from top players by position priority
+    const targets: string[] = []
+    for (const name of targetNames) {
+      if (targets.length >= 3) break
+      const found = ranked.find((p) => p.name.toLowerCase() === name.toLowerCase())
+      if (found && !avoidLower.includes(name.toLowerCase())) {
+        targets.push(found.name)
+      }
+    }
+    for (const pos of posOrder) {
+      if (targets.length >= 4) break
+      const top = ranked.find(
+        (p) =>
+          p.position === pos &&
+          !targets.includes(p.name) &&
+          !avoidLower.includes(p.name.toLowerCase())
+      )
+      if (top) targets.push(top.name)
+    }
+
+    // key_avoids: user avoids (up to 2), then add a Nasties-calibrated avoid
+    const avoids: string[] = []
+    for (const name of avoidNames.slice(0, 2)) {
+      const found = ranked.find((p) => p.name.toLowerCase() === name.toLowerCase())
+      avoids.push(found ? found.name : name)
+    }
+    // For non-WR-heavy strategies: the WR1 is often bid past ceiling (1.18x HOT)
+    if (key !== 'wr-heavy-auction' && avoids.length < 3) {
+      const topWR = ranked.find(
+        (p) =>
+          p.position === 'WR' &&
+          !avoids.includes(p.name) &&
+          !targets.includes(p.name)
+      )
+      if (topWR) avoids.push(topWR.name)
+    }
+
+    return {
+      name: preset.name,
+      archetype: key,
+      description: preset.description,
+      philosophy: ARCHETYPE_PHILOSOPHY[key],
+      risk_tolerance: preset.risk_tolerance,
+      position_weights: preset.position_weights,
+      key_targets: targets,
+      key_avoids: avoids,
+      reasoning: ARCHETYPE_REASONING[key],
+      projected_ceiling: ARCHETYPE_CEILING[key],
+      projected_floor: ARCHETYPE_FLOOR[key],
+      confidence: 'medium',
+      budget_allocation: preset.budget_allocation,
+      max_bid_percentage: preset.max_bid_percentage,
+    }
+  })
+
+  const inserts = proposals.map((p) => proposalToInsert(p, league.id, league.format, 'preset'))
+  return { proposals, inserts }
 }
