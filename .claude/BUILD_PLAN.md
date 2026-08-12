@@ -1,6 +1,6 @@
 <!-- DASHBOARD_STATUS
 {
-  "currentPhase": "REBUILD — the app was marked 'done' but prices players in a silo and breaks on a dead model. Reset to truth 2026-08-12. New North Star: build the best full 15-man roster for $200, not price players one at a time. Ordered rebuild sessions R1→R15, model-bound, one-sitting each, testing + bug hunts baked in. NO date gating — built well, done right.",
+  "currentPhase": "REBUILD — the app was marked 'done' but prices players in a silo and breaks on a dead model. Reset to truth 2026-08-12. New North Star: build the best full 15-man roster for $200, not price players one at a time. Ordered rebuild sessions R1→R15 (17 with the R7a/R7b + R10a/R10b splits), model-bound, one-sitting each, testing + bug hunts baked in. NO date gating — built well, done right.",
   "status": "active",
   "milestones": [
     { "name": "Data pipeline — Sleeper/FantasyPros seed + Supabase cache (real, verified via API)", "done": true },
@@ -20,10 +20,12 @@
     "R4 [Opus]: Team-construction SOLVER (pure lib) — best full-roster allocation for $200 given budget/slots/board; per-nomination max-bid that still lets you finish the roster. The North Star, as a tested library.",
     "R5 [Opus]: Wire the solver into the LIVE max-bid — 'THE PLAY' becomes roster-aware, not silo.",
     "R6 [Opus]: Wire the solver into STRATEGY target prices — each strategy's targets sum to a completable $200 roster.",
-    "R7 [Sonnet+Opus]: Research/Players rework — graded target/avoid scale, id-anchored persistence, expanded filters, per-player strategy-fit line.",
+    "R7a [Sonnet]: Persistence rework + graded tag scale — migrate user_tags to player_id anchor (+ backfill), wire the weight/severity scale into the tagging UI. (Schema session, isolated from UI.)",
+    "R7b [Sonnet+Opus]: Player filters + strategy-fit line — expanded filters (position/FLEX/tier/pocket/bye/tag), solver-driven per-player fit line. Depends on R4 + R7a.",
     "R8 [Sonnet]: Cheat Sheet resolution + FLEX view — stop duplicating Players; add a real roster-construction board + a FLEX list.",
     "R9 [Opus]: Strategy engine rebuild — auto-generate options from the pool + solver; live adaptive guidance.",
-    "R10 [Opus]: Simulation rebuild — Monte Carlo, auction-priced roster-aware opponents, season-points-vs-league grade, projected record, representative teams, saved runs.",
+    "R10a [Opus]: Simulation engine — Monte Carlo + auction-priced roster-aware opponents (via the solver), returns per-run rosters + a distribution. Pure + tested, no UI. (Isolated like R4.)",
+    "R10b [Opus]: Sim grading + output — season-points-vs-league grade, projected record, 4-5 representative teams, saved runs (persist/reload/compare). Depends on R10a.",
     "R11 [Sonnet]: Live draft — offline cache + team-aware live guidance in the room.",
     "R12 [Sonnet]: Shell/UX/perf — page-switch load time, mobile-first verification across every screen.",
     "R13 [Sonnet+Opus]: Dedicated bug hunt + test hardening — /bug-hunt full, real coverage on the new engines (the old 205 tested the wrong things).",
@@ -108,13 +110,13 @@ Every item below was confirmed against code. `RV-#` = review finding. Severity i
 | RV-8 | MED | Value RANGE on the board is a fake flat ±15%, not the real VORP↔room band. | `draft-board-table.tsx:78,392-400` | R2 |
 | RV-9 | MED | No FLEX list — you can't see the RB/WR/TE flex pool as one ranked board. | prep board/players | R8 |
 | RV-10 | MED | Cheat Sheet largely duplicates the Players screen — two screens, one job. | `prep/board/*` vs `prep/players/*` | R8 |
-| RV-11 | MED | Simulation is a single deterministic draft, ADP opponents, not persisted, generic grading. | `prep/simulate/client.tsx:92-229` | R10 |
+| RV-11 | MED | Simulation is a single deterministic draft, ADP opponents, not persisted, generic grading. | `prep/simulate/client.tsx:92-229` | R10a/R10b |
 | RV-12 | MED | Nav active-state mis-highlights (Setup destinations live under /draft & /prep; longest-prefix logic picks wrong). | `layout/app-shell.tsx:37-52` | R1 |
 | RV-13 | MED | Dead light/dark toggle — no `.light` token block exists, so the toggle does nothing. | `globals.css` (`:root`+`.dark` only) | R1 |
 | RV-14 | MED | FantasyPros tier data is loaded but its only consumer is the single ELITE flag — wasted signal. | `players/tags.ts:72` | R2 |
-| RV-15 | MED | Graded tag scale exists in types (weight 1-10, severity soft/hard) but the tagging UI is binary. | `research/strategy/types.ts:151-166` | R7 |
+| RV-15 | MED | Graded tag scale exists in types (weight 1-10, severity soft/hard) but the tagging UI is binary. | `research/strategy/types.ts:151-166` | R7a |
 | RV-16 | MED | `/draft/live` can `return null` (blank dead screen); `myManager` can throw. | `draft/live/client.tsx:462,466` | R1 |
-| RV-17 | MED | Target/avoid persistence is name-anchored (UUID FK on a name) — fragile to any name variance. | `user_tags` migration | R7 |
+| RV-17 | MED | Target/avoid persistence is name-anchored (UUID FK on a name) — fragile to any name variance. | `user_tags` migration | R7a |
 | RV-18 | LOW | BREAKOUT/BUST/VALUE detector exists but is wired to nothing. | `lib/intel/tag-detector.ts` | R3 |
 | RV-19 | LOW | "Demo Draft" routes to `/draft/live?sim=1` → hits the RV-16 dead screen (collateral). Genuinely useful once RV-16 is fixed. | `settings/page.tsx:116,147` | R1 |
 
@@ -178,6 +180,7 @@ Work top to bottom. Each session is scoped to finish cleanly in one focused sitt
 ### R4 — Team-construction SOLVER (the North Star, as a tested library) `[Opus]` · class: pipeline
 > **Why:** this is the missing engine — the whole point of the app. Build it pure and tested before wiring it anywhere.
 > **Reads first:** `src/lib/draft/auction-advisor.ts`, `src/lib/draft/league-calibration.ts`, `src/lib/players/convert.ts`, the roster/slot types, NORTH_STAR.md.
+> **PROPOSE checkpoint (do this FIRST, before any implementation — keeps R4 a single sitting):** decide and get Joe's nod on (a) the **algorithm** — greedy marginal-value fill vs. a bounded knapsack with FLEX contention (recommend: greedy marginal-value with a FLEX-reassignment pass — fast, explainable, good enough for 13 slots; escalate to bounded knapsack only if greedy demonstrably mis-allocates in tests), and (b) the **exact function signature** of `rosterSolver(state)`. Only once the approach is agreed do you write code. This turns R4 from a design-and-build (two sittings) into an implement-and-test (one sitting).
 > **Builds:** `src/lib/draft/roster-solver.ts` — a pure module (no React, no Supabase). Given `{ budgetRemaining, slotsRemaining (incl. FLEX), boardValues, replacementLevels }` it computes the **optimal remaining allocation** and, for any nominated player, the **maximum affordable bid that still leaves a completable best-rest-of-roster** (respecting the $1-min-per-remaining-slot floor, positional scarcity, FLEX contention, and the stars-and-scrubs ↔ balanced tradeoff).
 > **Done-when:** the solver returns an allocation + per-nomination roster-constrained max-bid; comprehensive unit tests cover the edge cases — 1 slot left, all budget on one stud, forced $1 scrubs, FLEX steals a slot from RB/WR/TE, empty board. No UI in this session. This is the session everything else depends on — do not rush it.
 
@@ -194,11 +197,18 @@ Work top to bottom. Each session is scoped to finish cleanly in one focused sitt
 > **Work:** each strategy assigns a **target $ per target player** via the solver so the full roster fits $200; swapping archetype re-allocates the money.
 > **Done-when:** every strategy's target prices sum to a completable $200 roster; tests prove the sum + the re-allocation on archetype change. Screenshot.
 
-### R7 — Research / Players rework `[Sonnet · Opus for the fit logic]` · class: output/pipeline
-> **Reads first:** `prep/players/client.tsx`, the `user_tags` migration, `research/strategy/types.ts`, `roster-solver.ts`, `players/tags.ts`.
-> **Closes:** RV-15, RV-17.
-> **Work:** graded target/avoid scale wired to the UI (weight 1-10 / severity soft-hard, already in types); **id-anchored persistence** (anchor tags on `player_id`, not name — fixes RV-17); expanded filters (position incl. FLEX, tier, value-pocket, bye, tag); a per-player **strategy-fit line** ("Fits your stars-and-scrubs plan; you can afford him at $X and still fill RB").
-> **Done-when:** graded tagging persists across a name variance (regression test); filters work; every player shows a fit line. Screenshot + persistence test.
+### R7a — Persistence rework + graded tag scale `[Sonnet]` · class: schema/pipeline
+> **Why split:** this half carries a **DB schema migration** (a different change-class with its own Ops/Security lenses and a data backfill). Bundling a migration with UI work is how a session ends with a half-applied schema. Do the migration cleanly on its own.
+> **Reads first:** the `user_tags` migration, `supabase/migrations/*`, `research/strategy/types.ts`, `players/tags.ts`, `prep/players/client.tsx` (tagging UI only).
+> **Closes:** RV-17, RV-15.
+> **Work:** **id-anchored persistence** — migrate `user_tags` to anchor on `player_id` (stable) instead of name, with a backfill that maps existing name-anchored rows to ids and a documented fallback for any unmatched; wire the **graded target/avoid scale** (weight 1-10 / severity soft-hard, already in `types.ts`) into the tagging UI.
+> **Done-when:** the migration applies + backfills on a real DB copy; graded tagging persists across a name variance (regression test); no orphaned rows. Migration output + persistence test + screenshot.
+
+### R7b — Player filters + strategy-fit line `[Sonnet · Opus for the fit logic]` · class: output
+> **Depends on:** R4 (solver, for the fit line), R7a (graded tags, for tag filters).
+> **Reads first:** `prep/players/client.tsx`, `roster-solver.ts`, `players/tags.ts`.
+> **Work:** expanded filters (position incl. FLEX, tier, value-pocket, bye, tag/grade); a per-player **strategy-fit line** driven by the solver ("Fits your stars-and-scrubs plan; you can afford him at $X and still fill RB").
+> **Done-when:** every filter works and composes; every player shows a fit line that reflects the current strategy + budget + roster state. Screenshot + tests on the fit logic.
 
 ### R8 — Cheat Sheet resolution + FLEX view `[Sonnet]` · class: output
 > **Recommendation (decide up front):** **make the Cheat Sheet a real roster-construction planning board** — targets dropped into slots, live $200 fit via the solver — so it stops duplicating Players and earns its place. If that's too big for one sitting, collapse the Cheat Sheet into Players and add a FLEX filter there. Recommend the construction board; that's the North Star made visible.
@@ -211,12 +221,18 @@ Work top to bottom. Each session is scoped to finish cleanly in one focused sitt
 > **Work:** auto-generate strategy options from the real pool + solver (not 4 hardcoded archetypes); **live adaptive guidance** that updates as the draft moves ("you missed the RB run — pivot to WR value + hero-RB").
 > **Done-when:** strategies come from the pool + solver; live guidance adapts to draft state; tests. Screenshot.
 
-### R10 — Simulation rebuild: Monte Carlo `[Opus]` · class: pipeline
-> **Why:** the current sim is a toy. A real sim is how Joe pressure-tests a strategy before the draft.
-> **Reads first:** `prep/simulate/client.tsx`, `roster-solver.ts`, `league-calibration.ts`.
-> **Closes:** RV-11.
-> **Work:** Monte Carlo over N runs; opponents that **bid by auction** up to their own roster-completion max (competition-aware, not ADP); grade on **projected season points vs. the league**; output a projected **win-loss record**, 4–5 representative resulting teams, and **saved runs** (persist to `research_runs`).
-> **Done-when:** N-run sim with realistic auction opponents produces a distribution + projected record + representative teams, and runs persist + reload. Tests on the sim math. Screenshot.
+### R10a — Simulation engine: Monte Carlo + auction opponents `[Opus]` · class: pipeline
+> **Why split:** the sim engine (the risky logic — a Monte-Carlo loop plus an opponent-bidding model) deserves the same isolation as R4. Build it pure and tested before any grading/UI/persistence hangs off it.
+> **Reads first:** `prep/simulate/client.tsx` (current logic to replace), `roster-solver.ts`, `league-calibration.ts`.
+> **Closes:** RV-11 (engine half).
+> **Builds:** a pure sim module — Monte Carlo over N runs where **opponents bid by auction** up to their own roster-completion max via the solver (competition-aware, not ADP), returning per-run resulting rosters + a distribution.
+> **Done-when:** the engine runs N drafts with realistic auction opponents and returns a stable distribution; unit tests cover the opponent-bidding math + determinism-under-seed. No UI/persistence yet.
+
+### R10b — Sim grading, record, representative teams + saved runs `[Opus]` · class: output/pipeline
+> **Depends on:** R10a.
+> **Reads first:** R10a output, `prep/simulate/client.tsx`, `research_runs` schema.
+> **Work:** grade each run on **projected season points vs. the league**; output a projected **win-loss record**, 4–5 representative resulting teams, and **saved runs** (persist to `research_runs`, reload + compare).
+> **Done-when:** the sim produces a projected record + representative teams from the R10a distribution, and runs persist + reload + compare. Tests on the grading math. Screenshot.
 
 ### R11 — Live draft: offline cache + team-aware guidance `[Sonnet]` · class: pipeline
 > **Depends on:** R5 (team-aware max-bid).
@@ -250,7 +266,7 @@ Work top to bottom. Each session is scoped to finish cleanly in one focused sitt
 ## Testing strategy + bug-hunt cadence
 
 - **Per-session gate** (above) fires on every R1–R13 session — the first line of defense, catches regressions in what changed.
-- **Coverage must follow the engine, not the file count.** The old suite hit 205 tests while the core engine was absent. R4/R5/R6/R10 each ship with unit tests on the *math that wins the draft* (allocation, max-bid ≤ ceiling, target-price sums, sim distributions). A green suite that doesn't exercise team construction is not coverage.
+- **Coverage must follow the engine, not the file count.** The old suite hit 205 tests while the core engine was absent. R4/R5/R6/R10a each ship with unit tests on the *math that wins the draft* (allocation, max-bid ≤ ceiling, target-price sums, sim distributions). A green suite that doesn't exercise team construction is not coverage.
 - **Two dedicated whole-app passes:** R13 (`/bug-hunt full` + coverage expansion on the new engines) and R14 (human-flow usability). Neither is optional.
 - **Claude client is mocked in tests** — so a dead model id or a broken live path will NOT show up in `test:run`. R1 adds a startup self-check for the model id; live AI verification is a Joe-approved manual paid check, never a claim from a green suite.
 - **Bug Hunt Schedule:**
