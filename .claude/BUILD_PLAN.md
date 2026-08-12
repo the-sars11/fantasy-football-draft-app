@@ -21,8 +21,8 @@
   "nextItems": [
     "[DONE 2026-08-11] S1 [Sonnet]: Config truth + nav — fix the '10 teams' source (FB-1), kill 'Pre Flight' (FB-4), add back-nav (FB-5), clarify Draft Board vs Live Draft (FB-6). Trust-killers first.",
     "[DONE 2026-08-12] S2 [Opus] = P3: valuation engine ceiling/reality/play (VAL-1/2/3) on the corrected 16yr ledger. Calibrated board (Gibbs $97/room~$76/+21 pocket), tendency/exploit engine (20 tests), max-bid re-anchored. Closed FB-15; FB-12 foundation done (tier-depletion UI → S3).",
-    "S3 [Opus+Sonnet]: research depth — value RANGE not point (FB-10), real sourced tags (FB-9), bye/images/proj/rec (FB-13), source transparency (FB-14), dynamic-on-pull (FB-11), verify ADP gone (FB-8).",
-    "S4 [Opus+Sonnet]: strategies real — wired/auto-run/save/suggest-from-targets (FB-16), player-pull end-to-end (FB-17).",
+    "[DONE 2026-08-12] S3 [Opus+Sonnet]: research depth — closed FB-9 (real sourced tag taxonomy, 37 tests), FB-10 (value RANGE = VORP ceiling↔Nasties room, documented), FB-11 (Refresh re-derives chain), FB-13 (real ESPN headshots + bye + league proj + per-player rec), FB-14 (ⓘ how-calculated/sources popover); re-verified FB-8 (ADP gone). Model on Opus, UI wiring on Sonnet. Verified live on real data. FB-12 tier-depletion board piece NOT in S3 boot scope — remains [~].",
+    "S4 [Opus for suggest-from-targets · Sonnet wiring]: strategies made real — is-it-wired / auto-run on new data / saveable / suggest-from-targets+avoids (FB-16), player-pull feeds the whole chain end-to-end (FB-17).",
     "S5 [Sonnet/Opus]: bug hunt + test hardening on S1-S4 — /bug-hunt full + expand automated coverage on those paths.",
     "S6 [Sonnet]: fix live draft Join + sync (FB-7) — the broken /draft/live junk page. Solo code-fix; full live-auctioneer proof deferred to S8.",
     "S7 [Claude drives Chrome]: my own usability test — walk every flow (including the now-fixed Join/sync) at mobile arm's-length, catalog + fix friction/dead-ends BEFORE Joe's phone rehearsal.",
@@ -81,7 +81,7 @@ Task tracking: `[ ]` not started · `[~]` in progress · `[x]` done · `[!]` blo
 > **Done-when:** re-priced board proof (ceiling/room/gap); tendency engine emits real exploit signals; live max-bid re-anchored off the national number onto calibrated values + live state.
 > **Closed 2026-08-12:** type-check clean · 116/116 tests (incl. 20 new tendency tests) · lint 0 new (44 pre-existing baseline) · build green · `/bug-hunt free` on changed modules (1 LOW found + fixed, BUG-001) · board render proven on real players_cache via DOM + computed-CSS (Gibbs $97 ceiling / room ~$76 / +$21 POCKET, 18 volt chips at rgb(139,255,69)). Pixel screenshot blocked by an undisplayed browser pane (environment, not code) — worked around with get_page_text + javascript_tool computed-color proof.
 
-### S3 — Research surface depth `[Opus for the value-range + tag model · Sonnet for UI]` · class: output/pipeline
+### S3 — Research surface depth `[Opus for the value-range + tag model · Sonnet for UI]` · class: output/pipeline · **[DONE 2026-08-12]**
 > **Why third:** the Research/Players surface is where you decide targets. It needs to be rich and transparent, and it sits on S2's engine.
 > **Reads first:** `prep/players/client.tsx`, `players/tags.ts`, `players/convert.ts`, the auctioneer image store.
 > **Closes:** FB-9 (real sourced tag taxonomy), FB-10 (values as a RANGE), FB-11 (dynamic on each pull), FB-13 (bye + images-from-auctioneer + league proj + per-player rec), FB-14 (projection/source transparency in-app). Verifies FB-8 (ADP gone) on the live screen.
@@ -138,13 +138,13 @@ Task tracking: `[ ]` not started · `[~]` in progress · `[x]` done · `[!]` blo
 - [ ] FB-7: "Auctioneer is Live," but **Join the draft → broken junk page, not syncing** (`/draft/live?session=…&aif=remote`). Verify + fix the join→room→sync path. Note: DR-7.2 (the raw feed-contract smoke test) is already verified 2026-08-10 — this item is specifically about the Join UI page itself, a distinct bug.
 
 **Research / Players (→ S3, except values→S2):**
-- [x] FB-8: **Remove ADP** (snake stat, meaningless in auction; was ECR rank mislabeled). Coded done (CHANGELOG 2026-08-11) — re-verify on the live screen in S4.
-- [~] FB-9: **Real player tags** (Avoid / Breakout / etc.) sourced from the research, not `Math.random()`. Partial — VALUE/AVOID kept, fabricated BREAKOUT/SLEEPER removed (DR-4.1); the real sourced tag set is **not** rebuilt. Define the taxonomy + data source.
-- [ ] FB-10: Show a value **RANGE**, not a single point.
-- [ ] FB-11: Values **update dynamically on each pull**.
+- [x] FB-8: **Remove ADP** (snake stat, meaningless in auction; was ECR rank mislabeled). Coded done (CHANGELOG 2026-08-11) — **re-verified live in S3 2026-08-12**: no ADP on the Players screen; the live auction card shows dollars only (round/ADP is snake-gated behind `!isAuction`).
+- [x] FB-9: **Real player tags** sourced from real data, not `Math.random()`. **Done S3 2026-08-12:** rebuilt `players/tags.ts` — ELITE (FantasyPros tier 1), +$ POCKET / -$ TAX (league dollar gap, ±$4 to match the board), VOLATILE (expert-rank std ≥20 in-pool), INJURY (real FantasyPros status), SLEEPER (late skill player clearing VORP replacement). Every tag carries a `source` string; 37 unit tests incl. a provenance test asserting every emitted tag has a real-data source.
+- [x] FB-10: Show a value **RANGE**, not a single point. **Done S3 2026-08-12:** `players/value-range.ts` — the band is the two REAL sourced dollars (VORP ceiling ↔ 16-yr Nasties room price), base = midpoint; falls back to national FantasyPros range, then a degenerate point only when neither exists. Documented + unit-tested.
+- [x] FB-11: Values **update dynamically on each pull**. **Done S3 2026-08-12:** Refresh button on the Players screen re-runs `fetchPlayers` → `/api/players` (200) → `cacheToPlayers` re-derives ceiling/room/gap → the card re-computes range/tags/rec live. Chain verified end-to-end.
 - [~] FB-12: **In-draft dynamic repricing** — as Tier-1 WRs go and only 2 Tier-2 remain, adjust their market value up. **VAL-3 foundation done 2026-08-12:** max-bid now anchors on calibrated ceiling/room + live budget/slots/scarcity/pace state (not the national number). Remaining S3 piece: surface explicit tier-depletion repricing on the board as tiers empty.
-- [~] FB-13: **Richer player data** — bye week, **images (already stored in the auctioneer app)**, league-specific point projections, a per-player recommendation for Joe. Partial (proj/market shown; images/bye/rec not).
-- [ ] FB-14: **Projection + source transparency** — surface *what the projections are based on, what math, which sources, how recommendations are made* in-app (not just in a doc).
+- [x] FB-13: **Richer player data** — bye week, images, league-specific projections, per-player recommendation. **Done S3 2026-08-12:** real ESPN headshots via `players/headshot.ts` (name→espnId map built from the auctioneer's 2026 pool → ESPN CDN, local silhouette fallback, onError swap); bye + league proj (PTS) + position rank on every card; one-line recommendation via `players/recommendation.ts` (Anchor/Target/Pass/Flier/Fair, injury-aware). Unit-tested; verified live with real photos.
+- [x] FB-14: **Projection + source transparency** — **Done S3 2026-08-12:** every card has an ⓘ "How this value is calculated" popover showing the range provenance (VORP worth ↔ Nasties room), each tag's `source` string, the projection basis, and a footer ("Calibrated on N Nasties seasons · sources: ESPN projections · FantasyPros ECR · Nasties auction ledger"). Verified live in-app.
 - [x] FB-15: **League-history context** in the values ("within context of my league's previous draft history"). **Closed 2026-08-12** — P3 VAL-0..3 all done; ceiling/room/gap + tendencies are all derived from the corrected 16yr Nasties ledger.
 
 **Strategies / pull (→ S5):**

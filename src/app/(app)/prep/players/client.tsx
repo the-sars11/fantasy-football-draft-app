@@ -11,7 +11,7 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import Link from 'next/link'
-import { Search, SlidersHorizontal, X, AlertTriangle, Info, Play, ChevronLeft } from 'lucide-react'
+import { Search, SlidersHorizontal, X, AlertTriangle, Info, Play, ChevronLeft, RefreshCw } from 'lucide-react'
 import { FFIInput, FFIButton, FFIEmptyState } from '@/components/ui/ffi-primitives'
 import { FFIPlayerIntelCard } from '@/components/prep/ffi-player-intel-card'
 import { useUserTags, useToggleTag, useSystemTagActions } from '@/hooks/use-user-tags'
@@ -23,13 +23,13 @@ import type { Player, Position } from '@/lib/players/types'
 const POSITIONS: (Position | 'ALL')[] = ['ALL', 'QB', 'RB', 'WR', 'TE', 'K', 'DEF']
 
 // Tag filter options -- match the real tags from computePlayerTags().
-type TagFilter = 'all' | 'target' | 'avoid' | 'value' | 'fade' | 'sleeper' | 'untagged'
+type TagFilter = 'all' | 'target' | 'avoid' | 'pocket' | 'tax' | 'sleeper' | 'untagged'
 const TAG_FILTERS: { value: TagFilter; label: string }[] = [
   { value: 'all', label: 'All Tags' },
   { value: 'target', label: 'My Targets' },
   { value: 'avoid', label: 'My Avoids' },
-  { value: 'value', label: 'Value' },
-  { value: 'fade', label: 'Fade' },
+  { value: 'pocket', label: 'Value Pocket' },
+  { value: 'tax', label: 'Room Tax' },
   { value: 'sleeper', label: 'Sleeper' },
   { value: 'untagged', label: 'Untagged' },
 ]
@@ -119,10 +119,10 @@ export function PlayerBrowserClient() {
             return hasTarget
           case 'avoid':
             return hasAvoid
-          case 'value':
-            return tags.some(t => t.id === 'value')
-          case 'fade':
-            return tags.some(t => t.id === 'fade')
+          case 'pocket':
+            return tags.some(t => t.id === 'pocket')
+          case 'tax':
+            return tags.some(t => t.id === 'tax')
           case 'sleeper':
             return tags.some(t => t.id === 'sleeper')
           case 'untagged':
@@ -289,6 +289,18 @@ export function PlayerBrowserClient() {
             )}
           </div>
 
+          {/* Refresh -- re-pulls the pool; values/tags/ranges re-derive live (FB-11) */}
+          <button
+            onClick={() => fetchPlayers()}
+            disabled={loading}
+            className="p-2 rounded-lg transition-all shrink-0 disabled:opacity-50"
+            style={{ background: 'var(--ffi-surface-2)', color: 'var(--ffi-ink-2)' }}
+            aria-label="Refresh player values"
+            title="Refresh values from the latest pull"
+          >
+            <RefreshCw className={`h-5 w-5 ${loading ? 'animate-spin' : ''}`} />
+          </button>
+
           {/* Filter toggle */}
           <button
             onClick={() => setShowFilters(!showFilters)}
@@ -351,7 +363,7 @@ export function PlayerBrowserClient() {
                 let activeStyle: React.CSSProperties
                 if (filter.value === 'target') {
                   activeStyle = { background: 'rgba(139,255,69,0.18)', color: 'var(--ffi-volt)', boxShadow: '0 0 8px var(--ffi-volt-glow)' }
-                } else if (filter.value === 'avoid' || filter.value === 'fade') {
+                } else if (filter.value === 'avoid' || filter.value === 'tax') {
                   activeStyle = { background: 'rgba(255,110,138,0.18)', color: '#FF6E8A' }
                 } else {
                   activeStyle = { background: 'rgba(121,166,255,0.18)', color: 'var(--ffi-blue-bright)' }

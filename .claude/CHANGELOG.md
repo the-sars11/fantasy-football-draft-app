@@ -2,6 +2,33 @@
 
 ---
 
+## 2026-08-12 / S3 — research surface depth (value RANGE, sourced tags, headshots, recommendation, transparency)
+
+**Task:** ROAD TO DRAFT S3 `[Opus for the value-range + tag model · Sonnet for UI wiring]` — make the Research/Players surface rich and transparent on top of S2's engine. Closes FB-9, FB-10, FB-11, FB-13, FB-14; re-verifies FB-8. | **Class:** output/pipeline | **Lenses:** Delivery, Design, QA, Architecture
+
+**Problem:** the player card showed a single national-ish value with rank-based VALUE/FADE tags (some from a prior fabricated set), no headshot, no bye/recommendation, and no way to see *why* a number was what it was. Nothing traced to a documented, league-calibrated source.
+
+**What changed (model layer — Opus):**
+- **FB-10 value RANGE (`players/value-range.ts`, new):** documented, pure, unit-tested. The band is the two REAL sourced dollars — `low/high = min/max(ceilingValue, expectedRoomPrice)`, `base = round(midpoint)` — where ceiling = roster-aware VORP worth (ESPN 2026 full-PPR) and room = the 16-yr Nasties price for that positional rank. Falls back to the national FantasyPros `valueRange`, then a degenerate point value only when neither exists. Not an invented ±% spread.
+- **FB-9 real sourced tags (`players/tags.ts`, rewritten):** replaced rank-based VALUE/FADE with dollar-based **POCKET/TAX** (aligned to the board's ±$4 gap threshold). Full set: ELITE (FantasyPros tier 1), +$POCKET / -$TAX (league `valueGap`), VOLATILE (expert-rank std ≥20 within the top-120 pool), INJURY (real non-healthy FantasyPros status), SLEEPER (skill player past rank 84 clearing VORP replacement). Every tag now carries a `source` string for the transparency popover.
+- **FB-13 recommendation (`players/recommendation.ts`, new):** one deterministic line per player — Anchor / Target / Pass / Flier / Fair — derived from the range + tags, with an injury-aware caution appended.
+- **FB-13 headshots (`players/headshot.ts`, new):** name → espnId (284-entry map built from the sibling auctioneer's 2026 pool, since `players_cache` has null `espn_id`) → ESPN CDN URL; local `/player-silhouette.svg` fallback. `normalizeName` kept byte-identical to `scripts/build-headshot-map.mjs`.
+- **Tests:** 4 new suites (value-range, tags, headshot, recommendation) = 37 tests, incl. a provenance test asserting every emitted tag has a non-empty real-data source.
+
+**What changed (UI wiring — Sonnet):**
+- **`components/prep/ffi-player-intel-card.tsx` (rewritten):** 56px headshot (onError silhouette swap, loop-guarded) · value-RANGE hero + range bar + `base $X · mkt ~$Y` sub-line · dollar-tag badges keyed by the new `PlayerTagId` union (dynamic `tag.label`) · recommendation strip (volt/red by intent) · **FB-14** ⓘ "How this value is calculated" popover (per-card `useState`) showing range provenance, each tag's `source`, projection basis, and a `Calibrated on N Nasties seasons · sources: …` footer from `CALIBRATION_ERA`/`CALIBRATION_DRAFTS_USED`.
+- **`app/(app)/prep/players/client.tsx`:** added a **Refresh** button (FB-11) re-running `fetchPlayers`; renamed the tag filters `value/fade` → `pocket/tax` to match the new taxonomy.
+
+**FB-8 re-verify:** no ADP anywhere on the Players screen; the live auction card (`ffi-player-card.tsx`) shows dollars only — its `roundValue` (ADP-derived) is rendered solely in the `!isAuction` (snake) branch, which Joe's auction never hits.
+
+**Not in scope:** FB-12 tier-depletion board repricing was **not** in the S3 boot Closes list — left `[~]`.
+
+**Verify:** `type-check` 0 errors · `test:run` 153/153 pass (37 new) · `lint` 0 new errors (the 6 changed files lint clean; 51 pre-existing project baseline) · `build` compiled clean · static `/bug-hunt free` on the changed modules found no real bugs. **Live proof on real data** (real Chrome screenshot + in-app Browser-pane DOM against the running dev server): 493-player pool, real ESPN headshots, `$76-97` range hero, `base $87 · mkt ~$64`, `+$13 POCKET`/`ELITE` badges, `BYE 6 · 374 PTS · RB1`, recommendation strips, the ⓘ popover rendering full sourcing (`Worth $97 … ↔ Room $76 … base is the midpoint`), and the Refresh button (verified `/api/players` → 200). Range fallbacks confirmed live: Jonathan Taylor renders a single point (`$60 / Fair value ~$60`); Justin Jefferson shows `$-4 TAX / Let him go`.
+
+**Files:** `src/lib/players/value-range.ts` (new), `src/lib/players/tags.ts` (rewritten), `src/lib/players/headshot.ts` (new), `src/lib/players/recommendation.ts` (new), `src/lib/players/__tests__/{value-range,tags,headshot,recommendation}.test.ts` (new, 37 tests), `public/player-silhouette.svg` (new), `src/components/prep/ffi-player-intel-card.tsx` (rewritten), `src/app/(app)/prep/players/client.tsx`, `.claude/BUILD_PLAN.md` (incl. the DASHBOARD_STATUS comment block), `.claude/WORKING_STATE.md`, `.claude/CHANGELOG.md`.
+
+---
+
 ## 2026-08-12 / S2 = P3 — league-calibrated valuation & exploit engine (VAL-1/2/3)
 
 **Task:** ROAD TO DRAFT S2 `[Opus]` = P3 — ceiling/reality/play pricing on the corrected 16yr Nasties ledger: VAL-1 (calibrated ceiling + expected room price), VAL-2 (tendency/exploit engine), VAL-3 (re-anchor the live max-bid). Closes VAL-1/2/3, FB-15; FB-12 foundation. | **Class:** pipeline | **Lenses:** Architecture, QA, Security
