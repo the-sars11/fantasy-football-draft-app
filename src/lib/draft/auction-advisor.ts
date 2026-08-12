@@ -25,6 +25,18 @@ export interface MaxBidFactor {
   detail: string
 }
 
+/**
+ * League-calibrated valuation for a player (VAL-3). When supplied, the max-bid
+ * anchor is re-based off Joe's real Nasties ledger instead of `consensusValue *
+ * 1.3`. Inflation is a DIRECTIONAL tilt only — it is already baked into
+ * `expectedRoomPrice`, so it is never re-multiplied into the raw anchor.
+ */
+export interface CalibratedBidInputs {
+  ceiling: number // genuine worth in Nasties scoring ($ VORP)
+  expectedRoomPrice: number // what the room actually pays for this positional rank
+  inflationTag?: 'HOT' | 'COOL' | 'NEUTRAL' // room vs national on this position
+}
+
 export function calculateMaxBidAdvice(
   state: DraftState,
   managerName: string,
@@ -35,6 +47,7 @@ export function calculateMaxBidAdvice(
   scoredPlayers: ScoredPlayer[],
   draftedNames: Set<string>,
   strategy: DbStrategy | null,
+  calibrated?: CalibratedBidInputs,
 ): MaxBidResult {
   const mgr = state.managers[managerName]
   if (!mgr || mgr.budget_remaining == null) {
@@ -45,8 +58,40 @@ export function calculateMaxBidAdvice(
   const emptySlots = Math.max(0, totalSlots - mgr.picks.length - 1)
   const absoluteMax = Math.max(1, mgr.budget_remaining - emptySlots)
 
-  let recommendedMax = Math.min(absoluteMax, Math.round(consensusValue * 1.3))
   const factors: MaxBidFactor[] = []
+
+  // Base anchor. When calibrated inputs are present, sit the anchor between what
+  // the player is WORTH (ceiling) and what the room actually PAYS (room price),
+  // then tilt directionally by inflation. Otherwise fall back to the legacy
+  // consensus-based anchor so every existing caller/test still behaves.
+  let recommendedMax: number
+  if (
+    calibrated &&
+    Number.isFinite(calibrated.ceiling) &&
+    Number.isFinite(calibrated.expectedRoomPrice)
+  ) {
+    const { ceiling, expectedRoomPrice, inflationTag } = calibrated
+    const midpoint = (ceiling + expectedRoomPrice) / 2
+    let anchor = midpoint
+    if (inflationTag === 'HOT') {
+      // Room reliably overpays here — never chase past genuine worth.
+      anchor = Math.min(midpoint, ceiling)
+    } else if (inflationTag === 'COOL') {
+      // Value pocket — worth a small premium over the midpoint to secure it,
+      // still capped at genuine worth.
+      anchor = Math.min(ceiling, midpoint * 1.08)
+    }
+    recommendedMax = Math.min(absoluteMax, Math.max(1, Math.round(anchor)))
+    factors.push({
+      label: 'League-calibrated',
+      impact: 'neutral',
+      detail: `Worth $${Math.round(ceiling)}, room pays ~$${Math.round(expectedRoomPrice)}${
+        inflationTag && inflationTag !== 'NEUTRAL' ? ` (${inflationTag})` : ''
+      }`,
+    })
+  } else {
+    recommendedMax = Math.min(absoluteMax, Math.round(consensusValue * 1.3))
+  }
 
   // Factor: Strategy alignment
   if (strategyScore >= 75) {

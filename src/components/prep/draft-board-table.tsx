@@ -78,6 +78,29 @@ function PlayerCard({
     ? { low: Math.floor(value * 0.85), high: Math.ceil(value * 1.15) }
     : undefined
 
+  // League-calibrated three-number view (VAL-1): ceiling (worth) / room
+  // (reality) / gap (the play). Falls back to the strategy value when a player
+  // has no calibrated fields (legacy/unranked rows).
+  const ceiling = p.ceilingValue ?? value
+  const room = p.expectedRoomPrice
+  const gap = p.valueGap
+  const gapChip =
+    gap == null || Math.abs(gap) < 4
+      ? null
+      : gap > 0
+        ? {
+            label: `+$${gap} pocket`,
+            color: 'var(--ffi-volt)',
+            bg: 'rgba(139,255,69,0.12)',
+            border: 'rgba(139,255,69,0.24)',
+          }
+        : {
+            label: `$${gap} hot`,
+            color: '#FF6E8A',
+            bg: 'rgba(255,110,138,0.10)',
+            border: 'rgba(255,110,138,0.22)',
+          }
+
   const isElite = rank <= 24
   const score = sp.strategyScore
   const scoreTier = score >= 75 ? 'volt' : score >= 55 ? 'mid' : 'low'
@@ -146,20 +169,35 @@ function PlayerCard({
           </div>
         </div>
 
-        {/* Value + market anchor (no ADP -- this is an auction) */}
+        {/* Calibrated value: ceiling (worth) / room (reality) / gap (the play).
+            League-calibrated on Joe's 16-yr Nasties ledger, not national data. */}
         <div className="text-right flex-shrink-0">
           <div
             className="font-bold text-[20px] leading-none"
             style={{ fontFamily: 'var(--font-mono)', color: 'var(--ffi-blue)', letterSpacing: '-0.01em' }}
           >
-            {isAuction ? `$${value}` : `Rd ${value}`}
+            {isAuction ? `$${ceiling}` : `Rd ${value}`}
           </div>
-          {isAuction && p.marketAuctionValue != null && p.marketAuctionValue > 0 && (
+          {isAuction && room != null && (
             <div
               className="text-[10px] mt-[3px]"
               style={{ fontFamily: 'var(--font-mono)', color: 'var(--ffi-ink-3)' }}
             >
-              mkt ~${Math.round(p.marketAuctionValue)}
+              room ~${room}
+            </div>
+          )}
+          {isAuction && gapChip && (
+            <div
+              className="inline-block mt-[4px] font-bold text-[9px] uppercase rounded-[5px] px-[5px] py-[2px] leading-none"
+              style={{
+                fontFamily: 'var(--font-cond)',
+                letterSpacing: '0.06em',
+                background: gapChip.bg,
+                color: gapChip.color,
+                border: `1px solid ${gapChip.border}`,
+              }}
+            >
+              {gapChip.label}
             </div>
           )}
         </div>

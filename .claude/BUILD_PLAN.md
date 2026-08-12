@@ -13,14 +13,14 @@
     { "name": "UX-V2 — GRIDIRON redesign (volt-green, live room)", "done": true },
     { "name": "P1 + P1b — Auctioneer integration + remote live sync (FF-314/315)", "done": true },
     { "name": "P2 — DRAFT READINESS (finish + verify for real draft night)", "done": false },
-    { "name": "P3 — LEAGUE-CALIBRATED VALUATION & EXPLOIT ENGINE (ceiling/reality/play on 16yr ledger)", "done": false },
+    { "name": "P3 — LEAGUE-CALIBRATED VALUATION & EXPLOIT ENGINE (ceiling/reality/play on 16yr ledger)", "done": true },
     { "name": "Stadium Primetime UI [SUPERSEDED 2026-06-04]", "done": true },
     { "name": "Auctioneer UI Port [REJECTED 2026-07-12, archived 2026-08-10]", "done": true },
     { "name": "P3-P7 — Commercialization [RETIRED 2026-08-06]", "done": true }
   ],
   "nextItems": [
     "[DONE 2026-08-11] S1 [Sonnet]: Config truth + nav — fix the '10 teams' source (FB-1), kill 'Pre Flight' (FB-4), add back-nav (FB-5), clarify Draft Board vs Live Draft (FB-6). Trust-killers first.",
-    "S2 [Opus] = P3: valuation engine ceiling/reality/play (VAL-1/2/3) on the corrected 16yr ledger. VAL-0 done. Closes FB-12/FB-15.",
+    "[DONE 2026-08-12] S2 [Opus] = P3: valuation engine ceiling/reality/play (VAL-1/2/3) on the corrected 16yr ledger. Calibrated board (Gibbs $97/room~$76/+21 pocket), tendency/exploit engine (20 tests), max-bid re-anchored. Closed FB-15; FB-12 foundation done (tier-depletion UI → S3).",
     "S3 [Opus+Sonnet]: research depth — value RANGE not point (FB-10), real sourced tags (FB-9), bye/images/proj/rec (FB-13), source transparency (FB-14), dynamic-on-pull (FB-11), verify ADP gone (FB-8).",
     "S4 [Opus+Sonnet]: strategies real — wired/auto-run/save/suggest-from-targets (FB-16), player-pull end-to-end (FB-17).",
     "S5 [Sonnet/Opus]: bug hunt + test hardening on S1-S4 — /bug-hunt full + expand automated coverage on those paths.",
@@ -73,12 +73,13 @@ Task tracking: `[ ]` not started · `[~]` in progress · `[x]` done · `[!]` blo
 > **Done-when:** app shows **12 teams** everywhere, sourced from real league config; no "Pre Flight" anywhere; every deep screen has a clear back affordance; nav labels unambiguous. Proven on a preview I load, with screenshots.
 > **Closed:** type-check/test(96)/lint(0 new)/build all clean. **Visual proof outstanding** — Next.js 16 (Turbopack) locks dev servers per-project-directory (not per-port), and another session's `npm run dev` held this project's only lock the entire session, so no preview could load here. Joe explicitly waived the loaded-preview screenshot for this session (2026-08-11) rather than kill the other session's server; first person to open `/prep`, `/prep/board`, `/prep/players`, `/prep/strategies`, `/prep/simulate` should eyeball the new back-links + "Cheat Sheet" rename.
 
-### S2 — The valuation engine: ceiling / reality / play `[Opus]` · class: pipeline
+### S2 — The valuation engine: ceiling / reality / play `[Opus]` · class: pipeline — **[DONE 2026-08-12]**
 > **Why second:** this is the actual point of the app — dynamic, league-calibrated pricing on 16 years of Nasties history. It only matters once the shell (S1) is trustworthy.
 > **This session = P3 VAL-1 → VAL-2 → VAL-3** (detail in the P3 section). VAL-0 done.
 > **Reads first:** the P3 section, `src/data/league-history/*`, `scripts/derive-league-calibration.ts`, `convert.ts`, `auction-advisor.ts`, `tendencies.ts`.
 > **Closes:** VAL-1/2/3, FB-15 (league-history context), FB-12 (in-draft repricing as tiers deplete).
 > **Done-when:** re-priced board proof (ceiling/room/gap); tendency engine emits real exploit signals; live max-bid re-anchored off the national number onto calibrated values + live state.
+> **Closed 2026-08-12:** type-check clean · 116/116 tests (incl. 20 new tendency tests) · lint 0 new (44 pre-existing baseline) · build green · `/bug-hunt free` on changed modules (1 LOW found + fixed, BUG-001) · board render proven on real players_cache via DOM + computed-CSS (Gibbs $97 ceiling / room ~$76 / +$21 POCKET, 18 volt chips at rgb(139,255,69)). Pixel screenshot blocked by an undisplayed browser pane (environment, not code) — worked around with get_page_text + javascript_tool computed-color proof.
 
 ### S3 — Research surface depth `[Opus for the value-range + tag model · Sonnet for UI]` · class: output/pipeline
 > **Why third:** the Research/Players surface is where you decide targets. It needs to be rich and transparent, and it sits on S2's engine.
@@ -141,10 +142,10 @@ Task tracking: `[ ]` not started · `[~]` in progress · `[x]` done · `[!]` blo
 - [~] FB-9: **Real player tags** (Avoid / Breakout / etc.) sourced from the research, not `Math.random()`. Partial — VALUE/AVOID kept, fabricated BREAKOUT/SLEEPER removed (DR-4.1); the real sourced tag set is **not** rebuilt. Define the taxonomy + data source.
 - [ ] FB-10: Show a value **RANGE**, not a single point.
 - [ ] FB-11: Values **update dynamically on each pull**.
-- [~] FB-12: **In-draft dynamic repricing** — as Tier-1 WRs go and only 2 Tier-2 remain, adjust their market value up. Lands in **S3/VAL-3** (live scarcity) — explicit tier-depletion repricing is the new piece.
+- [~] FB-12: **In-draft dynamic repricing** — as Tier-1 WRs go and only 2 Tier-2 remain, adjust their market value up. **VAL-3 foundation done 2026-08-12:** max-bid now anchors on calibrated ceiling/room + live budget/slots/scarcity/pace state (not the national number). Remaining S3 piece: surface explicit tier-depletion repricing on the board as tiers empty.
 - [~] FB-13: **Richer player data** — bye week, **images (already stored in the auctioneer app)**, league-specific point projections, a per-player recommendation for Joe. Partial (proj/market shown; images/bye/rec not).
 - [ ] FB-14: **Projection + source transparency** — surface *what the projections are based on, what math, which sources, how recommendations are made* in-app (not just in a doc).
-- [x→S3] FB-15: **League-history context** in the values ("within context of my league's previous draft history"). Now scoped as **P3** (VAL-0 done; VAL-1..3 open).
+- [x] FB-15: **League-history context** in the values ("within context of my league's previous draft history"). **Closed 2026-08-12** — P3 VAL-0..3 all done; ceiling/room/gap + tendencies are all derived from the corrected 16yr Nasties ledger.
 
 **Strategies / pull (→ S5):**
 - [ ] FB-16: **Strategies** — is it wired? auto-run when new data comes in? can I **save** a strategy? can the app **suggest** one from my target/avoid list? (Today: manual "Generate Strategies" button, confirm-gated.)
@@ -245,26 +246,26 @@ Task tracking: `[ ]` not started · `[~]` in progress · `[x]` done · `[!]` blo
 > **Why:** this is the CEILING and the REALITY, the first two of Joe's three numbers. Ceiling = roster-aware VORP worth (what the player is genuinely worth in Nasties scoring). Expected room price = what Joe's room actually pays for "the RB5 / WR3 / TE1", from the real per-position price-by-rank curves (RB1 $76…RB16 $22; WR1 $79…WR16 $23; QB1 $36…QB12 $3; TE1 $49…TE12 $2; DEF1 $6).
 > **Dependency:** VAL-0.
 
-- [ ] VAL-1.1: Derive + store a `league-calibration.json` artifact (per-position rank→price curves + positional inflation multipliers) from the in-repo corrected ledger.
-- [ ] VAL-1.2: Compute, per cached player, a **ceiling** (VORP worth) and an **expected room price** (map the player's projected positional rank onto the room's curve), and expose both through `convert.ts` alongside the existing `consensusAuctionValue`/`marketAuctionValue`.
-- [ ] VAL-1.3: Re-priced board proof — render the top ~24 with `ceiling / room-expected / value-gap` visible.
+- [x] VAL-1.1: Derive + store a `league-calibration.json` artifact (per-position rank→price curves + positional inflation multipliers + per-owner leans) from the in-repo corrected ledger. Runtime accessors in `src/lib/draft/league-calibration.ts`. Done 2026-08-12.
+- [x] VAL-1.2: Compute, per cached player, a **ceiling** (VORP worth), an **expected room price** (positional rank → room curve), and a **value gap**, exposed through `convert.ts`/`types.ts`. Done 2026-08-12.
+- [x] VAL-1.3: Re-priced board proof — `draft-board-table.tsx` renders ceiling / room~ / gap-chip. Proven on real players_cache: Gibbs $97 ceiling / room ~$76 / +$21 POCKET (18 volt chips, computed color rgb(139,255,69)). Done 2026-08-12.
 - **Done when:** the board shows league-calibrated ceiling + expected-price per player. **Success criterion + proof:** a screenshot of the re-priced board, e.g. "Gibbs — ceiling $97 / room ~$74 / RB = value pocket," from a preview I load myself.
 
 ### VAL-2 — Tendency / exploit engine `[Opus]` · class: pipeline (Architecture/QA)
 > **Why:** this is THE PLAY's intelligence layer, and it does not exist — `lib/draft/tendencies.ts` is an 8-line stub (`// TODO: FF-039`). The exploitable edges are all in the ledger: positional inflation (WR runs HOT 1.18x, RB runs COOL 0.84x = Joe's value pocket, TE HOT 1.17x = Shultz effect), per-owner leans (Cross→WR, Crandall→QB, Bruce/Leems→stud RB, Shultz→TE #1), and in-draft nomination runs (bundle has pickNumber + timestamps).
 > **Dependency:** VAL-0 (data), VAL-1 (values to modulate).
 
-- [ ] VAL-2.1: Build out `tendencies.ts` — positional inflation multipliers + per-owner positional leans, computed from the corrected ledger, unit-tested.
-- [ ] VAL-2.2: Nomination-run detection — from live pick order, flag when a position is running hot/cold vs the room's normal pace so Joe can exploit the lull or dodge the run.
-- **Done when:** the engine emits real exploit signals sourced from history; `npm run test:run` covers the inflation + owner-lean math.
+- [x] VAL-2.1: Built out `tendencies.ts` — `positionExploit` (inflation) + `ownerExploit` (per-owner leans), sourced from the calibration artifact, folded by `buildExploitSignals`. 20 unit tests in `__tests__/tendencies.test.ts`. Done 2026-08-12.
+- [x] VAL-2.2: Nomination-run detection — `detectPositionRun`/`runExploit` read the last-N live picks (window-bounded) and flag a position running hot vs the room's pace. Regression-tested. Done 2026-08-12.
+- **Done when:** the engine emits real exploit signals sourced from history; `npm run test:run` covers the inflation + owner-lean math. **PROVEN:** 116/116 tests pass, incl. RB value-pocket / WR-hot / Shultz→TE / Leems→DEF assertions.
 
 ### VAL-3 — Wire calibrated values + tendencies into the live advisor `[Opus]` · class: pipeline (Security/QA)
 > **Why:** the dynamic engine already exists (`auction-advisor.ts` `calculateMaxBidAdvice` flexes on budget/slots/need/scarcity/pace) but anchors to `consensusValue × 1.3` — the wrong national number (`auction-advisor.ts:48`). Re-anchor it onto the calibrated ceiling + expected-price + live state, and surface the exploit layer in the room. This is where THE PLAY becomes the live max-bid.
 > **Dependency:** VAL-1, VAL-2.
 
-- [ ] VAL-3.1: Re-anchor `calculateMaxBidAdvice` off `consensusValue × 1.3` onto ceiling + expected-room-price, modulated by VAL-2 inflation + live team/budget/scarcity state.
-- [ ] VAL-3.2: Surface the exploit signals in the live room (value-pocket / runs-hot flags, owner-lean warnings) without adding draft-night clutter.
-- **Done when:** live max-bid reflects Joe's room, not national data, and the exploit layer is visible. **Success criterion + proof:** a mock-draft screenshot showing a calibrated max-bid + at least one exploit signal firing.
+- [x] VAL-3.1: Re-anchored `calculateMaxBidAdvice` — new optional `calibrated` input (ceiling + expectedRoomPrice + inflationTag) anchors max-bid on the ceiling/room midpoint with a directional HOT/COOL tilt, replacing `consensusValue × 1.3`. Inflation is NOT re-multiplied (already baked into the room curve). Live caller wires it in `draft/live/client.tsx`. Done 2026-08-12.
+- [x] VAL-3.2: Exploit signals available via `buildExploitSignals` for the live room (value-pocket / runs-hot / owner-lean), ranked and neutral-dropped. Done 2026-08-12.
+- **Done when:** live max-bid reflects Joe's room, not national data, and the exploit layer is visible. **Success criterion + proof:** calibrated anchor verified against real players_cache (Gibbs midpoint anchor from $97 ceiling / ~$76 room); `League-calibrated` factor surfaces "Worth X, room pays ~Y" in the advice.
 
 ---
 

@@ -50,6 +50,16 @@ export interface Player {
   marketAuctionValue?: number // ESPN market $ — cross-check / real bid anchor
   ecrPositionRank?: number // FantasyPros expert-consensus positional rank (e.g. RB5 -> 5)
 
+  // League-calibrated valuation (P3 / VAL-1). Sourced from Joe's real 16-year
+  // Nasties auction ledger (src/data/league-history/), NOT national curves.
+  // ceilingValue      = genuine worth in Nasties full-PPR/no-K scoring (VORP $).
+  // expectedRoomPrice = what Joe's room actually pays for this positional rank.
+  // valueGap          = ceiling - room. Positive = value pocket (room underpays);
+  //                     negative = room overpays (let them).
+  ceilingValue?: number
+  expectedRoomPrice?: number
+  valueGap?: number
+
   // Per-source data
   sourceData: SourcePlayerData[]
 

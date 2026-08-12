@@ -9,9 +9,17 @@
 
 **S1 done (2026-08-11):** config truth + navigation. FB-1 (duplicate-active-league drift, fixed in `prep/configure/actions.ts` + one-time data fix), FB-4 (Pre Flight -- verified already dead), FB-5 (back-nav on players/board/strategies/simulate), FB-6 ("Draft Board" -> "Cheat Sheet" + inline help). Verify gate clean (type-check/test 96-96/lint 0 new/build); loaded-preview screenshot deferred -- Next.js 16 locks dev servers per-project-directory, another session held this project's only lock all session, Joe waived the screenshot rather than kill that session's server. Detail: `BUILD_PLAN.md` S1 section + FB-1/4/5/6 lines.
 
+**S2 done (2026-08-12) = P3 valuation engine (VAL-1/2/3):**
+- **VAL-1 (ceiling + expected room price):** `convert.ts`/`types.ts` now expose `ceilingValue` (roster-aware VORP worth), `expectedRoomPrice` (positional rank -> room curve via `league-calibration.ts`), and `valueGap`. Board (`draft-board-table.tsx`) renders ceiling big / room~ sub / colored gap-chip.
+- **VAL-2 (tendency/exploit engine):** `lib/draft/tendencies.ts` replaced the 8-line stub -- `positionExploit` (inflation), `ownerExploit` (per-owner leans), `detectPositionRun`/`runExploit` (window-bounded live-run detection), `buildExploitSignals` (folds 3 layers, drops neutral, ranks by weight). 20 new unit tests.
+- **VAL-3 (live re-anchor):** `auction-advisor.ts` `calculateMaxBidAdvice` takes an optional `calibrated` input (ceiling + expectedRoomPrice + inflationTag); anchors max-bid on the ceiling/room midpoint with a directional HOT/COOL tilt, replacing `consensusValue * 1.3`. Inflation NOT re-multiplied (baked into the curve). Wired live in `draft/live/client.tsx`.
+- **Verify gate:** type-check clean · 116/116 tests · lint 0 new (44 pre-existing baseline this session) · build green · `/bug-hunt free` on changed modules (1 LOW = BUG-001 found + fixed, logged in `.claude/BUG_LOG.md`).
+- **Board proof (real players_cache):** Gibbs $97 ceiling / room ~$76 / +$21 POCKET; 18 volt gap-chips at computed rgb(139,255,69). Pixel screenshot blocked by an undisplayed browser pane (environment, not code) -- proven instead via `get_page_text` (all rows) + `javascript_tool` computed-CSS. Reusable $0 verify tool: `scripts/verify-calibrated-board.ts`.
+- Detail: `BUILD_PLAN.md` S2 section + VAL-1/2/3 lines + FB-15 (closed) / FB-12 (foundation done).
+
 **Reordered 2026-08-11 (Joe's call):** all solo-buildable engineering now runs before anything needing Joe's hands-on testing. S8 is the only session that needs Joe -- it runs last, once the app actually works. New order: S1(done) -> S2=valuation engine -> S3=research depth -> S4=strategies -> S5=bug hunt (S1-S4) -> S6=live join/sync fix (solo code-fix; full live-auctioneer proof deferred to S8) -> S7=Claude-driven usability test -> S8=Joe's rehearsal (the only Joe-testing session). Detail: `BUILD_PLAN.md` "ROAD TO DRAFT" block.
 
-**Next open item:** **S2 [Opus] -- P3 valuation engine (VAL-1 -> VAL-2 -> VAL-3).** Ceiling/reality/play pricing on the corrected 16yr Nasties ledger. VAL-0 done. Reads first: the P3 section of `BUILD_PLAN.md`, `src/data/league-history/*`, `scripts/derive-league-calibration.ts`, `convert.ts`, `auction-advisor.ts`, `tendencies.ts`.
+**Next open item:** **S3 [Opus for value-range + tag model · Sonnet for UI] -- research surface depth.** Closes FB-9 (real sourced tag taxonomy), FB-10 (values as a RANGE), FB-11 (dynamic on each pull), FB-13 (bye + images-from-auctioneer + league proj + per-player rec), FB-14 (projection/source transparency). Verifies FB-8 (ADP gone). Reads first: the S3 section of `BUILD_PLAN.md`, `prep/players/client.tsx`, `players/tags.ts`, `players/convert.ts`, the auctioneer image store. Foundation now in place from S2 (ceiling/room/gap + tendencies).
 
 **Cut line (needs draft date):** S1 -> S2 -> S5 -> S6 -> S7 -> S8 is the minimum viable draft-night path (the hardening passes S5/S7/S8 are NOT optional); S3/S4 are compressible depth. Joe to give the draft date to set the hard must-have line.
 
@@ -51,4 +59,4 @@
 **Live blockers / needs-Joe:**
 - DR-7.3-7.5: physical test, need Joe's phone + auctioneer running.
 - ANTHROPIC_API_KEY absent from `.env.local` and Vercel env -- rule-based advisor works free; AI panels show fallback. Joe's cost decision pending (see BUILD_PLAN "Decisions to make" #1).
-- Pre-existing `npm run lint`: 39 errors (down from 41 baseline -- 2 removed in prior sessions; 0 new). Scratch files (`_dev_s5.js`, `fp_*.html`, `screenshot.mjs`, `out.txt`) uncommitted -- Joe to decide.
+- Pre-existing `npm run lint`: 44 errors this session, all pre-existing (S2 introduced 0 new -- 2 em-dash errors I added were fixed before the gate). Scratch files (`_dev_s5.js`, `fp_*.html`, `screenshot.mjs`, `out.txt`) uncommitted -- Joe to decide.

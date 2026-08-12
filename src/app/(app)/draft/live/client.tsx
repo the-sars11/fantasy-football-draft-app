@@ -64,6 +64,7 @@ import type { Strategy as DbStrategy } from '@/lib/supabase/database.types'
 import type { Explanation } from '@/lib/draft/explain'
 import { clearRecommendationCache } from '@/lib/draft/recommend'
 import { calculateMaxBidAdvice } from '@/lib/draft/auction-advisor'
+import { positionalInflation } from '@/lib/draft/league-calibration'
 import { InjuryWatch } from '@/components/draft/injury-watch'
 import { TrashTalkFeed, SavedTrashTalk } from '@/components/draft/trash-talk'
 import { type AuctioneerConnectionType } from '@/hooks/use-draft-feed'
@@ -308,6 +309,17 @@ export function LiveDraftClient() {
     const map = new Map<string, number>()
     for (const sp of scoredPlayers) {
       if (draftedNames.has(sp.player.name.toLowerCase())) continue
+      // VAL-3: re-anchor the max bid off Joe's calibrated ledger when the player
+      // carries ceiling + expected-room-price. Inflation tag is a directional
+      // tilt only (already baked into the room curve).
+      const calibrated =
+        sp.player.ceilingValue != null && sp.player.expectedRoomPrice != null
+          ? {
+              ceiling: sp.player.ceilingValue,
+              expectedRoomPrice: sp.player.expectedRoomPrice,
+              inflationTag: positionalInflation(sp.player.position)?.tag,
+            }
+          : undefined
       const result = calculateMaxBidAdvice(
         state,
         managerName,
@@ -318,6 +330,7 @@ export function LiveDraftClient() {
         scoredPlayers,
         draftedNames,
         strategy,
+        calibrated,
       )
       map.set(sp.player.name.toLowerCase(), result.maxBid)
     }

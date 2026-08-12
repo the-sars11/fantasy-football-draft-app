@@ -5,6 +5,7 @@
 
 import type { Player, Position } from './types'
 import type { CachedPlayer } from '@/lib/research/cache'
+import { expectedRoomPrice } from '@/lib/draft/league-calibration'
 
 /** Map DB position (DST) to app position (DEF) */
 function dbPosToAppPos(pos: string): Position {
@@ -67,11 +68,29 @@ export function cacheToPlayer(cached: CachedPlayer): Player {
       ? { low: vLow, base: vBase, high: vHigh }
       : undefined
 
+  // --- League-calibrated valuation (VAL-1.2) ---
+  // CEILING: genuine worth in Nasties scoring = the roster-aware VORP $ when
+  // present, else the averaged auction value. This is the "he CAN be $97" number.
+  const appPos = dbPosToAppPos(cached.position)
+  const ceilingValue = vorpValue !== undefined ? vorpValue : Math.round(avgAuction)
+  // REALITY: map the player's projected positional rank onto Joe's room's real
+  // price-by-rank curve. Prefer the VORP points rank; fall back to expert (ECR)
+  // positional rank so ranked-but-no-VORP rows still price.
+  const roomRank = posRankPoints ?? ecrPositionRank
+  const expectedRoom =
+    roomRank !== undefined ? expectedRoomPrice(appPos, roomRank) : undefined
+  // Only a real, positive worth can produce a meaningful gap. A ranked-but-
+  // unpriced row (ceiling 0) would otherwise paint a false "over" chip.
+  const valueGap =
+    expectedRoom !== undefined && ceilingValue > 0
+      ? Math.round(ceilingValue - expectedRoom)
+      : undefined
+
   return {
     id: cached.id,
     name: cached.name,
     team: cached.team ?? '',
-    position: dbPosToAppPos(cached.position),
+    position: appPos,
     byeWeek: cached.bye_week ?? 0,
     injuryStatus: cached.injury_status ?? undefined,
     consensusRank: Math.round(avgAdp), // approximate from ADP
@@ -90,6 +109,10 @@ export function cacheToPlayer(cached: CachedPlayer): Player {
     replacementPoints,
     marketAuctionValue: marketValue,
     ecrPositionRank,
+    // League-calibrated valuation (VAL-1.2) — Nasties ledger, not national.
+    ceilingValue,
+    expectedRoomPrice: expectedRoom,
+    valueGap,
     sourceData: [],
     projections: {
       points: cached.projections?.points ?? projPoints ?? 0,

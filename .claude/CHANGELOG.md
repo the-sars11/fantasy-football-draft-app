@@ -2,6 +2,25 @@
 
 ---
 
+## 2026-08-12 / S2 = P3 — league-calibrated valuation & exploit engine (VAL-1/2/3)
+
+**Task:** ROAD TO DRAFT S2 `[Opus]` = P3 — ceiling/reality/play pricing on the corrected 16yr Nasties ledger: VAL-1 (calibrated ceiling + expected room price), VAL-2 (tendency/exploit engine), VAL-3 (re-anchor the live max-bid). Closes VAL-1/2/3, FB-15; FB-12 foundation. | **Class:** pipeline | **Lenses:** Architecture, QA, Security
+
+**Problem:** the app's whole point — dynamic pricing calibrated to Joe's actual room — did not exist at runtime. The board showed national/consensus numbers, `tendencies.ts` was an 8-line `// TODO` stub, and `auction-advisor.ts` anchored max-bid on `consensusValue × 1.3` (the wrong national number).
+
+**What changed:**
+- **VAL-1 (ceiling + expected room price):** `league-calibration.ts` exposes runtime accessors over the committed `league-calibration.json` artifact (per-position rank→price curves, positional inflation, per-owner leans). `convert.ts`/`types.ts` now compute and expose, per cached player, `ceilingValue` (roster-aware VORP worth, `vorp_12_200_ppr`), `expectedRoomPrice` (the player's positional rank mapped onto the room's real price-by-rank curve), and `valueGap` (ceiling − room). `draft-board-table.tsx` renders ceiling (big) / room~ (sub) / a colored gap-chip (volt "pocket" / pink "hot").
+- **VAL-2 (tendency/exploit engine):** replaced the `tendencies.ts` stub with `positionExploit` (inflation: RB COOL 0.84x value pocket, WR HOT 1.18x, TE HOT 1.17x), `ownerExploit` (per-owner leans: Shultz→TE, Leems→DEF, Cross→WR, etc.), `detectPositionRun`/`runExploit` (window-bounded live-run detection off the last-N picks), and `buildExploitSignals` (folds the 3 layers, drops neutral when an actionable signal exists, ranks by weight). Added `toCalibratedPositionSafe` to `league-calibration.ts` and made the position mapper null-safe.
+- **VAL-3 (live re-anchor):** `calculateMaxBidAdvice` gains an optional `calibrated` input (`{ ceiling, expectedRoomPrice, inflationTag }`); when present it anchors the recommended max on the ceiling/room midpoint with a directional HOT (cap at midpoint) / COOL (allow ceiling, ×1.08 headroom) tilt, replacing the `consensusValue × 1.3` national anchor, and pushes a "League-calibrated — Worth X, room pays ~Y" factor. Inflation is NOT re-multiplied (already baked into the curve — directional tilt only). Wired live in `draft/live/client.tsx`'s `maxBidAdviceMap` when a player has both calibrated fields.
+
+**Bug found + fixed (`/bug-hunt free`, logged in `.claude/BUG_LOG.md`):** BUG-001 (LOW) — `ceilingValue` is never nullish (falls back to `Math.round(avgAuction)` = 0 for a legacy unpriced row), so the old `ceilingValue !== undefined` gap guard always fired and painted a false "$-X hot" chip on a $0-worth ranked row. Fixed the guard to `ceilingValue > 0` in `convert.ts` so unpriced rows get `valueGap = undefined` (no chip).
+
+**Verify:** `type-check` 0 errors · `test:run` 116/116 pass (20 new tendency tests: RB value-pocket / WR-hot / Shultz→TE / Leems→DEF / window-bounded run detection / buildExploitSignals ranking + neutral-drop) · `lint` 0 new (44 pre-existing baseline; 2 em-dash errors I introduced were fixed before the gate) · `build` compiled clean. **Board proof (real players_cache via service-role read):** Gibbs $97 ceiling / room ~$76 / +$21 VALUE POCKET, 177 priced players; 18 volt gap-chips render at computed `rgb(139,255,69)`. Pixel screenshot was blocked by an undisplayed browser pane (environment, not code) — proven instead via `get_page_text` (all rows) + `javascript_tool` computed-CSS color. Calibrated anchor confirmed to NOT double-count inflation.
+
+**Files:** `src/lib/draft/tendencies.ts` (new), `src/lib/draft/__tests__/tendencies.test.ts` (new, 20 tests), `src/lib/draft/league-calibration.ts`, `src/lib/draft/auction-advisor.ts`, `src/lib/players/convert.ts`, `src/components/prep/draft-board-table.tsx`, `src/app/(app)/draft/live/client.tsx`, `scripts/derive-league-calibration.ts`, `scripts/verify-calibrated-board.ts` (new, $0 read-only verify tool), `.claude/BUG_LOG.md` (new), `BUILD_PLAN.md`, `WORKING_STATE.md`.
+
+---
+
 ## 2026-08-11 / ROAD TO DRAFT — reordered so Joe never tests an unfinished app (planning)
 
 **Task:** Joe: "put that towards the bottom of the build plan, I'm not doing a test until the app works" (in response to S2 being proposed next — live join/sync, tagged `[Sonnet+Joe]`, needing his auctioneer running to verify) | **Class:** `docs` | **Lenses:** Delivery
