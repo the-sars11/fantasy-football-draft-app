@@ -1,5 +1,58 @@
 # Bug Hunt Log
 
+## Review: 2026-08-12 — full screen-by-screen audit vs. code (feedback-driven, read-only)
+
+**Project:** fantasy_football_draft_app
+**Type:** TypeScript / Next.js (App Router) + Vitest
+**Auditor:** Claude Code (5 parallel Explore agents + targeted grep, every finding confirmed against source)
+**Mode:** read-only investigation — NO code changed this session. Findings feed the rebuild plan (`BUILD_PLAN.md` R1–R15). Fixes are scheduled, not applied here.
+**Trigger:** Joe's screen-by-screen feedback ("what we have right now is FUCKING TRASH"). The prior plan marked S1–S5 "done"; this audit tested that claim against the code and it did not hold.
+
+### Summary
+
+| Severity | Count | IDs |
+|----------|-------|-----|
+| CRITICAL | 2 | RV-1 (no team-construction), RV-2 (dead model 404) |
+| HIGH | 5 | RV-3, RV-4, RV-5, RV-6, RV-7 |
+| MEDIUM | 9 | RV-8..RV-17 (excl. counted) |
+| LOW | 2 | RV-18, RV-19 |
+
+Full register with locations + assigned session lives in `BUILD_PLAN.md` → "Confirmed bug / gap register." Highlights:
+
+#### CRITICAL
+
+- **RV-1 — No team-construction engine.** Max-bid multiplier stacking is capped by the wallet (`absoluteMax`), not by roster-completion. The app cannot build the best full roster for $200 — its entire purpose. `src/lib/draft/auction-advisor.ts:98,127,147`. → R4/R5.
+- **RV-2 — Dead Claude model id.** `src/lib/ai/claude.ts:28-29`: `default`/`best` = `claude-sonnet-4-20250514` (retired 404). Strategy/research AI paths 500. Tests mock the client, so the green suite never caught it. → R1.
+
+#### HIGH
+
+- **RV-3** — rule-based fallback key-gated, not error-gated → 500 on AI failure instead of $0 fallback. `strategies/propose/route.ts:158-160`. → R1.
+- **RV-4** — max-bid can exceed the player's ceiling (overpay past worth). `auction-advisor.ts:98,127,147`. → R3.
+- **RV-5** — "Anchor — pay up to $97" shows the theoretical ceiling as a pay-to price. `players/recommendation.ts:43`. → R3.
+- **RV-6** — ADP still drives the Cheat Sheet (sort pill + Movers strip) despite FB-8 marked done. `prep/board/client.tsx:35,447-511`. → R1.
+- **RV-7** — board "ECR" is `Math.round(avgAdp)` (ADP mislabeled); real `ecrPositionRank` unused. `convert.ts:96` (real at `:61-64/111`). → R2.
+
+#### MEDIUM
+
+- **RV-8** fake ±15% value range (`draft-board-table.tsx:78`) → R2 · **RV-9** no FLEX list → R8 · **RV-10** Cheat Sheet duplicates Players → R8 · **RV-11** deterministic toy sim, ADP opponents, not persisted (`prep/simulate/client.tsx:92-229`) → R10 · **RV-12** nav active-state mis-highlight (`app-shell.tsx:37-52`) → R1 · **RV-13** dead light/dark toggle, no `.light` tokens (`globals.css`) → R1 · **RV-14** tier data feeds only the ELITE flag (`tags.ts:72`) → R2 · **RV-15** graded tag scale exists in types but UI is binary (`research/strategy/types.ts:151-166`) → R7 · **RV-16** `/draft/live` can `return null`; `myManager` throw risk (`draft/live/client.tsx:462,466`) → R1 · **RV-17** name-anchored tag persistence (`user_tags`) → R7.
+
+#### LOW
+
+- **RV-18** breakout/bust/value detector wired to nothing (`lib/intel/tag-detector.ts`) → R3.
+- **RV-19** "Demo Draft" routes to `/draft/live?sim=1` → hits the RV-16 dead screen (collateral; useful once RV-16 fixed). `settings/page.tsx:116,147` → R1.
+
+### Cleared (NOT bugs — misreads corrected during the audit)
+
+- Mobile nav **exists** (earlier "no mobile nav" was the desktop sidebar / the intentionally nav-less live screen).
+- Persistence + reconnect **work**; the real gap is a local offline cache for a mid-draft drop (→ R11).
+- "Demo Draft" is a legitimate dev-only sim launcher (`NODE_ENV` guarded), not fake data.
+
+### Note on prior "done" claims
+
+The prior 205-test suite is real and green — but it tests the code that exists, and the core (team construction) does not exist, so the number never measured the thing that matters. The suite also mocks the Claude client, so RV-2 (dead model) was invisible to it. **A green suite is not a working app.** R13 adds coverage on the new engines (solver, team-aware max-bid, strategy prices, Monte-Carlo sim).
+
+---
+
 ## Hunt: 2026-08-12 — free mode — Scope: VAL-1/2/3 changed modules
 
 **Project:** fantasy_football_draft_app

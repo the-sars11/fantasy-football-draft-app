@@ -2,6 +2,25 @@
 
 ---
 
+## 2026-08-12 / PLAN REBUILD -- reality reset + BUILD_PLAN rewritten (docs-only, no code changed)
+
+**Task:** Feedback-driven full review of the app against its own code, then a complete BUILD_PLAN rewrite. Joe's mandate: "This is feedback only, DO NOT build anything... i need the whole build plan updated including archiving old/completed stuff. The entire build plan needs to be revised with new well defined build sessions, well scoped for specific models that cleanly finish before context expires, there needs to be testing, there needs to be bug hunts. This needs to be disciplined." | **Class:** docs | **Lenses:** Delivery, QA
+
+**Problem:** The prior plan marked sessions S1–S5 "done" (205 tests, valuation "done," strategies "done"). A screen-by-screen review against the code found that self-assessment false in the ways that matter: the app prices players in a **silo** with no team-construction (its entire purpose), strategy/research **500 on a dead Claude model id**, ADP is still on the **Cheat Sheet** despite FB-8 marked done, board "ECR" is ADP relabeled, the value range is a fake ±15%, `/draft/live` can blank out, and the simulation is a deterministic toy. The 205-test suite is green but tests code that exists — it never measured the missing core, and it mocks the Claude client so it never caught the dead model.
+
+**What changed (docs only — zero application code touched):**
+
+- **`.claude/BUILD_PLAN.md` (REWRITTEN):** New North Star — *build the best full 15-man roster for $200, not price players one at a time.* Added a "Reality Correction / Trust Reset" table (each false "done" claim with file:line evidence), a "What is actually built" floor, and a 19-item confirmed bug/gap register (RV-1..RV-19) with locations + assigned sessions. Replaced the S1–S8/P2/P3 structure with 15 ordered, model-bound rebuild sessions R1→R15 (trust triage → data truth → valuation correctness → team-construction solver → wire into live max-bid + strategy prices → research/players → cheat-sheet+FLEX → strategy engine → Monte-Carlo sim → live offline+guidance → shell/perf → bug-hunt+tests → Claude usability → Joe's rehearsal gate), each one-sitting scoped with reads-first / closes / done-when + a per-session gate. Testing strategy + bug-hunt cadence made explicit.
+- **`.claude/archive/BUILD_PLAN_pre-rebuild_2026-08-12.md` (NEW):** the full prior plan (52,753 bytes) preserved verbatim. Nothing deleted.
+- **`.claude/WORKING_STATE.md` (REWRITTEN):** trimmed back to a thin pointer; points at the rebuild plan + reality reset; next open item = R1.
+- **`.claude/BUG_LOG.md` (APPENDED):** dated read-only review entry with the RV-1..RV-19 register, the cleared misreads, and the note on why the green suite didn't catch any of it.
+
+**Root cause of the drift:** "done" was declared on presence-of-code and a passing test count, not on the app doing its job. The rebuild plan re-anchors every "done-when" on observable behavior (roster-aware max-bid, labels equal their source fields, no 500s, a rendered live screen) + a screenshot from a loaded preview.
+
+**Verify:** docs-only change; no `type-check`/`test`/`build` run (no code touched). Evidence is the file:line register in `BUILD_PLAN.md` and `BUG_LOG.md`, each confirmed against source during the review.
+
+---
+
 ## 2026-08-12 / S5 -- bug hunt + test hardening on S1-S4 (BUG-004 fixed, 162->205 tests)
 
 **Task:** ROAD TO DRAFT S5 `[Sonnet]` -- `/bug-hunt full` across whole project; expand automated coverage on S1-S4 priority paths. | **Class:** bugfix/pipeline | **Lenses:** QA, Architecture
