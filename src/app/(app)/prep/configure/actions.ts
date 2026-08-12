@@ -103,6 +103,7 @@ export async function createLeague(
     roster_slots,
     keeper_enabled,
     keeper_settings,
+    is_active: true,
   }
 
   const { data, error } = await supabase
@@ -114,6 +115,17 @@ export async function createLeague(
   if (error) {
     return { error: error.message }
   }
+
+  // Single-league app (FB-1): /api/leagues resolves leagues[0] by is_active
+  // then updated_at, so a stray second "active" league (e.g. re-saving the
+  // config form creates a new row instead of updating the old one) silently
+  // wins the tiebreak and the app reads a stale league's stale session. At
+  // most one league is ever active per user.
+  await supabase
+    .from('leagues')
+    .update({ is_active: false })
+    .eq('user_id', user.id)
+    .neq('id', data.id)
 
   return { success: true, leagueId: data.id }
 }

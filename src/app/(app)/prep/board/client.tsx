@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import Link from 'next/link'
-import { Loader2, AlertCircle, RefreshCw, CheckCircle2, TrendingDown, Star, ArrowDown, ArrowUp, Play } from 'lucide-react'
+import { Loader2, AlertCircle, RefreshCw, CheckCircle2, TrendingDown, Star, ArrowDown, ArrowUp, Play, ChevronLeft } from 'lucide-react'
 import { DraftBoardTable } from '@/components/prep/draft-board-table'
 import { PositionBreakdown } from '@/components/prep/position-breakdown'
 import {
@@ -700,32 +700,47 @@ export function DraftBoardClient() {
   )
 }
 
-// ── Sticky screen header: "Draft Board" + fixed league chip (single-league app) ──
+// ── Sticky screen header: "Cheat Sheet" + fixed league chip (single-league app) ──
+// FB-6: renamed from "Draft Board" -- collided with the "Live Draft" nav tab and
+// read as if this screen WAS the live auction room. This is the pre-draft
+// rankings reference; the auction itself happens under Live Draft.
 function BoardHeader({ leagueName }: { leagueName?: string }) {
   return (
-    <div className="flex items-center justify-between mb-4">
-      <h1
-        className="font-extrabold text-[26px] leading-none"
-        style={{ fontFamily: 'var(--font-cond)', color: 'var(--ffi-ink)' }}
+    <div className="mb-4">
+      <Link
+        href="/prep"
+        className="inline-flex items-center gap-1 ffi-caption text-[var(--ffi-text-secondary)] hover:text-white transition-colors mb-2"
       >
-        Draft Board
-      </h1>
-      <span
-        className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-bold uppercase"
-        style={{
-          fontFamily: 'var(--font-cond)',
-          background: 'rgba(121,166,255,0.10)',
-          border: '1px solid rgba(121,166,255,0.20)',
-          color: 'var(--ffi-blue-bright)',
-          letterSpacing: '0.14em',
-        }}
-      >
+        <ChevronLeft className="h-3 w-3" aria-hidden="true" />
+        Research
+      </Link>
+      <div className="flex items-center justify-between">
+        <h1
+          className="font-extrabold text-[26px] leading-none"
+          style={{ fontFamily: 'var(--font-cond)', color: 'var(--ffi-ink)' }}
+        >
+          Cheat Sheet
+        </h1>
         <span
-          className="w-1.5 h-1.5 rounded-full"
-          style={{ background: 'var(--ffi-volt)', boxShadow: '0 0 6px var(--ffi-volt-glow)' }}
-        />
-        {leagueName ?? 'The Nasties'}
-      </span>
+          className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-bold uppercase"
+          style={{
+            fontFamily: 'var(--font-cond)',
+            background: 'rgba(121,166,255,0.10)',
+            border: '1px solid rgba(121,166,255,0.20)',
+            color: 'var(--ffi-blue-bright)',
+            letterSpacing: '0.14em',
+          }}
+        >
+          <span
+            className="w-1.5 h-1.5 rounded-full"
+            style={{ background: 'var(--ffi-volt)', boxShadow: '0 0 6px var(--ffi-volt-glow)' }}
+          />
+          {leagueName ?? 'The Nasties'}
+        </span>
+      </div>
+      <p className="ffi-caption mt-1.5" style={{ color: 'var(--ffi-text-secondary)' }}>
+        Your pre-draft rankings - the auction itself happens under Live Draft
+      </p>
     </div>
   )
 }

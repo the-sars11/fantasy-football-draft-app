@@ -7,7 +7,9 @@
 
 **Active phase:** ROAD TO DRAFT -- ordered build sessions **S1 -> S8** (see BUILD_PLAN "ROAD TO DRAFT" block). Captures ALL of Joe's 2026-08-11 morning feedback (FB-1..FB-17) + P3 valuation + hardening (S6 bug hunt+tests, S7 Claude-driven Chrome usability test, S8 = DR-7 rehearsal) into one priority-ordered, model-bound sequence. Authored 2026-08-11. Per-session gate (S1-S5): type-check + test:run + lint(0 new) + build + `/bug-hunt free` on changed modules + a loaded-preview screenshot before any session is called done.
 
-**Next open item:** **S1 [Sonnet] -- Config truth + navigation.** Fix the "10 teams" source (FB-1, no hardcoded 10 in src -> trace the stale session/league record), remove "Pre Flight" (FB-4, `draft/page.tsx:9`), add back-nav from deep screens (FB-5), clarify Draft Board vs Live Draft (FB-6). Then S2 (live Join/sync), then S3 = P3 valuation engine (VAL-1..3).
+**S1 done (2026-08-11):** config truth + navigation. FB-1 (duplicate-active-league drift, fixed in `prep/configure/actions.ts` + one-time data fix), FB-4 (Pre Flight -- verified already dead), FB-5 (back-nav on players/board/strategies/simulate), FB-6 ("Draft Board" -> "Cheat Sheet" + inline help). Verify gate clean (type-check/test 96-96/lint 0 new/build); loaded-preview screenshot deferred -- Next.js 16 locks dev servers per-project-directory, another session held this project's only lock all session, Joe waived the screenshot rather than kill that session's server. Detail: `BUILD_PLAN.md` S1 section + FB-1/4/5/6 lines.
+
+**Next open item:** **S2 [Sonnet + Joe] -- Live draft join + sync actually works.** Fix the broken `/draft/live?session=...&aif=remote` junk page (FB-7); folds in DR-7.2 (live contract smoke-test). Reads first: `draft/live/client.tsx`, `use-remote-auctioneer-feed.ts`, `api/auctioneer-feed/route.ts`, `state.ts`. Then S3 = P3 valuation engine (VAL-1..3).
 
 **Cut line (needs draft date):** S1 -> S2 -> S3 -> S6 -> S7 -> S8 is the minimum viable draft-night path (the hardening passes S6-S8 are NOT optional); S4/S5 are compressible depth. Joe to give the draft date to set the hard must-have line.
 

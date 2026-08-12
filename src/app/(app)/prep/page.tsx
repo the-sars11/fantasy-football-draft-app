@@ -392,8 +392,8 @@ export default function PrepPage() {
           href="/prep/board"
           icon={<BarChart3 className="w-[18px] h-[18px]" strokeWidth={1.8} color="var(--ffi-blue-bright)" />}
           iconBg="rgba(121,166,255,0.10)"
-          label="Draft Board"
-          sub="Your ranked, position-colored cheat sheet"
+          label="Cheat Sheet"
+          sub="Your ranked, position-colored board - for reference during the live draft"
         />
         <JumpRow
           href="/prep/strategies"

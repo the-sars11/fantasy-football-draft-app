@@ -9,7 +9,7 @@ import type { StrategyProposal } from '@/lib/research/strategy/research'
 import type { Strategy, StrategyUpdate } from '@/lib/supabase/database.types'
 import type { DraftFormat, Player } from '@/lib/players/types'
 import { cacheToPlayers } from '@/lib/players/convert'
-import { AlertTriangle, Sparkles, SlidersHorizontal, PlayCircle, ChevronRight, Pencil } from 'lucide-react'
+import { AlertTriangle, Sparkles, SlidersHorizontal, PlayCircle, ChevronRight, ChevronLeft, Pencil } from 'lucide-react'
 
 interface LeagueSummary {
   id: string
@@ -405,20 +405,29 @@ export function StrategiesPageClient() {
 // --- Screen header (matches 9.1 / 9.2 / 9.3 pattern) ---
 function StrategiesHeader({ leagueName }: { leagueName?: string }) {
   return (
-    <div className="flex items-center gap-2.5 mb-4">
-      <h1
-        className="text-[26px] font-bold leading-none"
-        style={{ fontFamily: 'var(--font-cond)', color: 'var(--ffi-ink)', letterSpacing: '-0.01em' }}
+    <div className="mb-4">
+      <Link
+        href="/prep"
+        className="inline-flex items-center gap-1 ffi-caption text-[var(--ffi-text-secondary)] hover:text-white transition-colors mb-2"
       >
-        Strategies
-      </h1>
-      <span
-        className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold"
-        style={{ background: 'rgba(121,166,255,0.14)', color: 'var(--ffi-blue-bright)' }}
-      >
-        <span className="h-1.5 w-1.5 rounded-full" style={{ background: 'var(--ffi-volt)' }} />
-        {leagueName ?? 'The Nasties'}
-      </span>
+        <ChevronLeft className="h-3 w-3" aria-hidden="true" />
+        Research
+      </Link>
+      <div className="flex items-center gap-2.5">
+        <h1
+          className="text-[26px] font-bold leading-none"
+          style={{ fontFamily: 'var(--font-cond)', color: 'var(--ffi-ink)', letterSpacing: '-0.01em' }}
+        >
+          Strategies
+        </h1>
+        <span
+          className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold"
+          style={{ background: 'rgba(121,166,255,0.14)', color: 'var(--ffi-blue-bright)' }}
+        >
+          <span className="h-1.5 w-1.5 rounded-full" style={{ background: 'var(--ffi-volt)' }} />
+          {leagueName ?? 'The Nasties'}
+        </span>
+      </div>
     </div>
   )
 }

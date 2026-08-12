@@ -97,6 +97,7 @@ export interface LeagueInsert {
   roster_slots?: RosterSlots
   keeper_enabled?: boolean
   keeper_settings?: KeeperSettings | null
+  is_active?: boolean
 }
 
 export interface PlayerCache {

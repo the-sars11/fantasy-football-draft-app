@@ -19,7 +19,7 @@
     { "name": "P3-P7 — Commercialization [RETIRED 2026-08-06]", "done": true }
   ],
   "nextItems": [
-    "S1 [Sonnet]: Config truth + nav — fix the '10 teams' source (FB-1), kill 'Pre Flight' (FB-4), add back-nav (FB-5), clarify Draft Board vs Live Draft (FB-6). Trust-killers first.",
+    "[DONE 2026-08-11] S1 [Sonnet]: Config truth + nav — fix the '10 teams' source (FB-1), kill 'Pre Flight' (FB-4), add back-nav (FB-5), clarify Draft Board vs Live Draft (FB-6). Trust-killers first.",
     "S2 [Sonnet+Joe]: Live draft Join + sync actually works (FB-7) — the broken /draft/live junk page. Folds DR-7.2. This IS draft night.",
     "S3 [Opus] = P3: valuation engine ceiling/reality/play (VAL-1/2/3) on the corrected 16yr ledger. VAL-0 done. Closes FB-12/FB-15.",
     "S4 [Opus+Sonnet]: research depth — value RANGE not point (FB-10), real sourced tags (FB-9), bye/images/proj/rec (FB-13), source transparency (FB-14), dynamic-on-pull (FB-11), verify ADP gone (FB-8).",
@@ -65,11 +65,12 @@ Task tracking: `[ ]` not started · `[~]` in progress · `[x]` done · `[!]` blo
 
 > **Legend:** each session lists the **FB-#/VAL-#/DR-#** items it closes. Status of every individual item lives in its detail section below.
 
-### S1 — Stop the bleeding: config truth + navigation `[Sonnet]` · class: shared/output
+### S1 — Stop the bleeding: config truth + navigation `[Sonnet]` · class: shared/output — **[DONE 2026-08-11]**
 > **Why first:** these are the trust-killers. A board that says "10 teams," a phantom "Pre Flight," and no way to go back make the whole app read as broken — no engine matters until the frame is trustworthy.
 > **Reads first:** `src/components/layout/app-shell.tsx`, `src/app/(app)/draft/page.tsx`, the league/session config path, `src/app/(app)/prep/players/*`.
 > **Closes:** FB-1 (10-teams), FB-4 (kill Pre Flight), FB-5 (back-nav), FB-6 (Draft Board vs Live Draft clarity). FB-2/FB-3 (tab renames) already done.
 > **Done-when:** app shows **12 teams** everywhere, sourced from real league config; no "Pre Flight" anywhere; every deep screen has a clear back affordance; nav labels unambiguous. Proven on a preview I load, with screenshots.
+> **Closed:** type-check/test(96)/lint(0 new)/build all clean. **Visual proof outstanding** — Next.js 16 (Turbopack) locks dev servers per-project-directory (not per-port), and another session's `npm run dev` held this project's only lock the entire session, so no preview could load here. Joe explicitly waived the loaded-preview screenshot for this session (2026-08-11) rather than kill the other session's server; first person to open `/prep`, `/prep/board`, `/prep/players`, `/prep/strategies`, `/prep/simulate` should eyeball the new back-links + "Cheat Sheet" rename.
 
 ### S2 — Live draft join + sync actually works `[Sonnet + Joe]` · class: pipeline
 > **Why second:** this IS draft night. "Auctioneer is Live" → **Join → broken junk page, not syncing** means the app fails at the one moment it exists for. Nothing else ships until Join works.
@@ -124,12 +125,12 @@ Task tracking: `[ ]` not started · `[~]` in progress · `[x]` done · `[!]` blo
 > Every item from Joe's 2026-08-11 morning feedback, so nothing lives only in chat again. Each maps to a session above. Status verified against code where noted.
 
 **Config / navigation (→ S1):**
-- [ ] FB-1: "10 teams" shown everywhere; league is **12**. No hardcoded `10` in `src` — trace to the stale session/league record it's reading and fix the source. *(Furious, repeated — highest trust impact.)*
+- [x] FB-1: "10 teams" shown everywhere; league is **12**. Done 2026-08-11 — root cause was **two simultaneously `is_active: true` leagues** for the same user ("Nasties 2026" real, "The Nasties" a stale 2026-03-21 duplicate); `/api/leagues` tiebreaks same-`is_active` rows by `updated_at desc`, and the stale one had been touched more recently so it won `leagues[0]`. Fixed the code path in `src/app/(app)/prep/configure/actions.ts` (`createLeague` now deactivates every other league for that `user_id` after insert, so re-saving the config form can never create a second active league) and one-time-corrected the data (`is_active=false` on the stale duplicate `5629af5b-...`). Left the stale duplicate's orphaned session untouched (its `league_id` no longer resolves, so it will never surface as resumable).
 - [x] FB-2: Rename **Review → Post Draft**. Done — `app-shell.tsx:40`, `swipe-carousel.tsx:14`.
 - [x] FB-3: Rename **Draft → Live Draft**. Done — `app-shell.tsx:39`, `swipe-carousel.tsx:13`.
-- [ ] FB-4: Remove the **"Pre Flight"** thing. Still referenced/rendered — `draft/page.tsx:9`.
-- [ ] FB-5: **No way to go back** from deep screens (Players etc.) — add a clear back affordance; the "trash UX / can't get back" complaint.
-- [ ] FB-6: Clarify **"Draft Board" vs "Live Draft"** — what each is (labels + inline help). Currently ambiguous (`prep/page.tsx:395` "Draft Board" vs the Live Draft room).
+- [x] FB-4: Remove the **"Pre Flight"** thing. Verified 2026-08-11 — already removed by an earlier same-day commit (`bed6940`, predates this catalog's own authoring commit `fe9cfc2`); only a stale code *comment* remained at `draft/page.tsx:9`, no rendered UI. Catalog status was stale, not the code.
+- [x] FB-5: **No way to go back** from deep screens (Players etc.). Done 2026-08-11 — added the existing back-link pattern (already used in `prep/configure/page.tsx` and `prep/runs/page.tsx`: `ChevronLeft` + label, linking to the actual parent screen) to `prep/players/client.tsx`, `prep/board/client.tsx`, `prep/strategies/client.tsx` (all → **Research** / `/prep`, where their jump-rows on the hub actually link from) and `prep/simulate/page.tsx` (→ **Strategies** / `/prep/strategies`, its real entry point).
+- [x] FB-6: Clarify **"Draft Board" vs "Live Draft"**. Done 2026-08-11 — renamed the pre-draft rankings screen from "Draft Board" to **"Cheat Sheet"** (both the `/prep` hub jump-row label and the screen's own `<h1>`, `prep/page.tsx:395` + `prep/board/client.tsx`) since "Draft Board" read as if it *was* the live auction; added one line of inline help under the header: "Your pre-draft rankings - the auction itself happens under Live Draft."
 
 **Live draft sync (→ S2):**
 - [ ] FB-7: "Auctioneer is Live," but **Join the draft → broken junk page, not syncing** (`/draft/live?session=…&aif=remote`). Verify + fix the join→room→sync path.
@@ -283,6 +284,9 @@ Task tracking: `[ ]` not started · `[~]` in progress · `[x]` done · `[!]` blo
 ## Completed Work (History)
 
 > Full detail lives in `CHANGELOG.md` + git; these are the compact records. Original FF-XXX / UX IDs intact.
+
+**S1 — Config truth + navigation** `[x]` (2026-08-11)
+- FB-1: fixed duplicate-active-league drift at the source (`prep/configure/actions.ts`) + one-time data correction. FB-4: verified already-dead. FB-5: back-nav added to players/board/strategies/simulate. FB-6: "Draft Board" → "Cheat Sheet" + inline help distinguishing it from Live Draft. Verify gate clean (type-check/test 96·96/lint 0 new/build); loaded-preview screenshot deferred — see S1 detail note above (Next.js per-project dev-server lock, Joe waived it this session).
 
 **P1 + P1b — Auctioneer integration + remote live sync** `[x]`
 - FF-279..283: read auctioneer JSON/BroadcastChannel on same device; `auction-feed-merge.ts` pickId dedup; multi-source priority merge in `use-draft-feed.ts`; dynamic max-bid recompute per pick.

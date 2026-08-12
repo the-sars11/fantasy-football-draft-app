@@ -2,6 +2,24 @@
 
 ---
 
+## 2026-08-11 / S1 — config truth + navigation (FB-1, FB-4, FB-5, FB-6)
+
+**Task:** ROAD TO DRAFT S1 `[Sonnet]` — fix "10 teams" (FB-1), kill "Pre Flight" (FB-4), add back-nav from deep screens (FB-5), clarify Draft Board vs Live Draft (FB-6) | **Class:** shared/output | **Lenses:** Correctness, Delivery
+
+**What changed:**
+- **FB-1 (stale "10 teams"):** root cause was duplicate-active-league drift, not a hardcoded value — no literal `10` exists in `src`. `prep/configure/actions.ts`'s `createLeague` action now sets `is_active: true` on insert and demotes every other league row for that user to `is_active: false` in the same call, so re-saving the config form can never leave two "active" leagues where `/api/leagues`'s `leagues[0]` tiebreak (`is_active desc, updated_at desc`) silently picks the stale one. Required adding `is_active?: boolean` to `LeagueInsert` in `database.types.ts` (type-check was failing without it).
+- **FB-4 ("Pre Flight"):** verified already removed from `draft/page.tsx` — no code change needed.
+- **FB-5 (no back-nav on deep screens):** added the existing GRIDIRON back-link pattern (`ChevronLeft` + label, `inline-flex items-center gap-1 ffi-caption`) to `prep/players/client.tsx`, `prep/board/client.tsx`, `prep/strategies/client.tsx` (all -> `/prep` "Research") and `prep/simulate/page.tsx` (-> `/prep/strategies` "Strategies", its actual entry point — it previously had no back-nav at all). `prep/configure` and `prep/runs` already had it (-> `/settings`).
+- **FB-6 ("Draft Board" vs "Live Draft" ambiguity):** renamed "Draft Board" -> "Cheat Sheet" in `prep/board/client.tsx`'s header and the `prep/page.tsx` jump-row label/sub-copy, plus one line of inline help ("Your pre-draft rankings - the auction itself happens under Live Draft") so the screen no longer reads as the live auction room.
+
+**Verify:** `type-check` 0 errors · `test:run` 96/96 pass · `lint` 0 new errors (45 pre-existing, unrelated files — up from a recorded baseline of 39 due to a `react-hooks/refs` rule now firing on `nav-context.tsx`/`use-draft-feeds.ts`, neither touched this session) · `build` clean, all `/prep/*` routes present.
+
+**Outstanding — loaded-preview screenshot deferred:** Next.js 16 (Turbopack) locks dev servers **per project directory, not per port** — another chat session held this project's only dev-server lock (PID 8040, port 3003) for the entire session, so no alt-port config could load a preview here regardless of port number. Presented Joe three options (kill the other session's process / ask that session first / skip visual proof and document it); **Joe chose to skip it** rather than disrupt the other session. First person to open `/prep`, `/prep/board`, `/prep/players`, `/prep/strategies`, `/prep/simulate` should eyeball the new back-links + "Cheat Sheet" rename.
+
+**Files:** `prep/configure/actions.ts`, `database.types.ts`, `prep/players/client.tsx`, `prep/board/client.tsx`, `prep/strategies/client.tsx`, `prep/simulate/page.tsx`, `prep/page.tsx`, `BUILD_PLAN.md`, `WORKING_STATE.md`.
+
+---
+
 ## 2026-08-11 / ROAD TO DRAFT — added dedicated bug-hunt + test + usability-test hardening passes (planning)
 
 **Task:** Joe: "update the build plan to include bug hunts, testing, and then I want you to do your own usability test inside chrome sessions as well." | **Class:** `docs` | **Lenses:** Delivery

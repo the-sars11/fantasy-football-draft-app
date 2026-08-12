@@ -11,7 +11,7 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import Link from 'next/link'
-import { Search, SlidersHorizontal, X, AlertTriangle, Info, Play } from 'lucide-react'
+import { Search, SlidersHorizontal, X, AlertTriangle, Info, Play, ChevronLeft } from 'lucide-react'
 import { FFIInput, FFIButton, FFIEmptyState } from '@/components/ui/ffi-primitives'
 import { FFIPlayerIntelCard } from '@/components/prep/ffi-player-intel-card'
 import { useUserTags, useToggleTag, useSystemTagActions } from '@/hooks/use-user-tags'
@@ -437,23 +437,32 @@ export function PlayerBrowserClient() {
 // --- Screen header (matches 9.1 / 9.3 pattern) ---
 function PlayersHeader({ count }: { count: number | null }) {
   return (
-    <div className="flex items-center justify-between mb-4">
-      <div className="flex items-center gap-2.5">
-        <h1
-          className="text-[26px] font-bold leading-none"
-          style={{ fontFamily: 'var(--font-cond)', color: 'var(--ffi-ink)', letterSpacing: '-0.01em' }}
-        >
-          Players
-        </h1>
-        {count !== null && (
-          <span
-            className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-widest"
-            style={{ background: 'rgba(121,166,255,0.14)', color: 'var(--ffi-blue-bright)' }}
+    <div className="mb-4">
+      <Link
+        href="/prep"
+        className="inline-flex items-center gap-1 ffi-caption text-[var(--ffi-text-secondary)] hover:text-white transition-colors mb-2"
+      >
+        <ChevronLeft className="h-3 w-3" aria-hidden="true" />
+        Research
+      </Link>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2.5">
+          <h1
+            className="text-[26px] font-bold leading-none"
+            style={{ fontFamily: 'var(--font-cond)', color: 'var(--ffi-ink)', letterSpacing: '-0.01em' }}
           >
-            <span className="tabular-nums" style={{ fontFamily: 'var(--font-mono)' }}>{count}</span>
-            in pool
-          </span>
-        )}
+            Players
+          </h1>
+          {count !== null && (
+            <span
+              className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-widest"
+              style={{ background: 'rgba(121,166,255,0.14)', color: 'var(--ffi-blue-bright)' }}
+            >
+              <span className="tabular-nums" style={{ fontFamily: 'var(--font-mono)' }}>{count}</span>
+              in pool
+            </span>
+          )}
+        </div>
       </div>
     </div>
   )
