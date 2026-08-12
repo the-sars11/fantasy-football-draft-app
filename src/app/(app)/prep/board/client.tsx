@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import Link from 'next/link'
-import { Loader2, AlertCircle, RefreshCw, CheckCircle2, TrendingDown, Star, ArrowDown, ArrowUp, Play, ChevronLeft } from 'lucide-react'
+import { Loader2, AlertCircle, RefreshCw, CheckCircle2, Star, ArrowDown, ArrowUp, Play, ChevronLeft } from 'lucide-react'
 import { DraftBoardTable } from '@/components/prep/draft-board-table'
 import { PositionBreakdown } from '@/components/prep/position-breakdown'
 import {
@@ -25,14 +25,13 @@ interface LeagueSummary {
 }
 
 const POSITIONS: (Position | 'ALL')[] = ['ALL', 'QB', 'RB', 'WR', 'TE', 'K', 'DEF']
-type SortField = 'rank' | 'score' | 'value' | 'adp' | 'name'
+type SortField = 'rank' | 'score' | 'value' | 'name'
 type TargetFilter = 'all' | 'target' | 'avoid' | 'neutral'
 
 const SORT_OPTIONS: { field: SortField; label: string }[] = [
   { field: 'score', label: 'Score' },
   { field: 'value', label: 'Value' },
   { field: 'rank',  label: 'Rank' },
-  { field: 'adp',   label: 'ADP' },
 ]
 
 const POS_PILL_COLORS: Record<string, { text: string; border: string }> = {
@@ -68,8 +67,6 @@ export function DraftBoardClient() {
   const [players, setPlayers] = useState<Player[]>([])
   const [activeStrategy, setActiveStrategy] = useState<Strategy | null>(null)
   const [dataLoading, setDataLoading] = useState(false)
-  const [adpDivergenceMap, setAdpDivergenceMap] = useState<Map<string, number>>(new Map())
-  const hasComputedMovers = useRef(false)
 
   // Filters
   const [positionFilter, setPositionFilter] = useState<Position | 'ALL'>('ALL')
@@ -137,19 +134,6 @@ export function DraftBoardClient() {
         if (!cancelled && playersRes.ok) {
           const pData = await playersRes.json()
           setPlayers(cacheToPlayers(pData.players || []))
-          if (!hasComputedMovers.current) {
-            const divMap = new Map<string, number>()
-            for (const raw of pData.players || []) {
-              const vals = Object.values(raw.adp ?? {}).filter(
-                (v): v is number => typeof v === 'number' && v > 0,
-              )
-              if (vals.length >= 2) {
-                divMap.set(raw.id as string, Math.max(...vals) - Math.min(...vals))
-              }
-            }
-            setAdpDivergenceMap(divMap)
-            hasComputedMovers.current = true
-          }
         }
 
         if (!cancelled && strategiesRes.ok) {
@@ -189,16 +173,6 @@ export function DraftBoardClient() {
       if (playersRes.ok) {
         const pData = await playersRes.json()
         setPlayers(cacheToPlayers(pData.players || []))
-        const divMap = new Map<string, number>()
-        for (const raw of pData.players || []) {
-          const vals = Object.values(raw.adp ?? {}).filter(
-            (v): v is number => typeof v === 'number' && v > 0,
-          )
-          if (vals.length >= 2) {
-            divMap.set(raw.id as string, Math.max(...vals) - Math.min(...vals))
-          }
-        }
-        setAdpDivergenceMap(divMap)
       }
       if (strategiesRes.ok) {
         const sData = await strategiesRes.json()
@@ -250,15 +224,6 @@ export function DraftBoardClient() {
     )
   }, [players, activeStrategy, selectedLeague, intelContextMap, isTarget, isAvoid])
 
-  // ADP Movers
-  const topMovers = useMemo(() => {
-    if (adpDivergenceMap.size === 0) return []
-    return players
-      .filter((p) => (adpDivergenceMap.get(p.id) ?? 0) > 10)
-      .sort((a, b) => (adpDivergenceMap.get(b.id) ?? 0) - (adpDivergenceMap.get(a.id) ?? 0))
-      .slice(0, 6)
-  }, [players, adpDivergenceMap])
-
   // Filter + sort
   const filteredPlayers = useMemo(() => {
     let result = scoredPlayers
@@ -274,7 +239,6 @@ export function DraftBoardClient() {
             ? (b.adjustedAuctionValue ?? b.player.consensusAuctionValue) - (a.adjustedAuctionValue ?? a.player.consensusAuctionValue)
             : (a.adjustedRoundValue ?? a.player.adp) - (b.adjustedRoundValue ?? b.player.adp)
           break
-        case 'adp':  cmp = a.player.adp - b.player.adp; break
         case 'name': cmp = a.player.name.localeCompare(b.player.name); break
       }
       return sortAsc ? -cmp : cmp
@@ -444,72 +408,6 @@ export function DraftBoardClient() {
         <BoardEmpty />
       ) : (
         <>
-          {/* ── ADP MOVERS STRIP ── */}
-          {topMovers.length > 0 && (
-            <div className="mb-4">
-              <div
-                className="flex items-center gap-2 mb-2"
-                style={{ fontFamily: 'var(--font-cond)' }}
-              >
-                <span
-                  className="font-bold text-[9px] uppercase tracking-[0.30em]"
-                  style={{ color: 'var(--ffi-ink-3)' }}
-                >
-                  ADP Movers
-                </span>
-                <span
-                  className="font-bold text-[9px] rounded-full px-[7px] py-[2px]"
-                  style={{
-                    fontFamily: 'var(--font-mono)',
-                    background: 'rgba(255,176,92,0.12)',
-                    border: '1px solid rgba(255,176,92,0.22)',
-                    color: 'var(--ffi-warning)',
-                    letterSpacing: '0.02em',
-                  }}
-                >
-                  Cross-source divergence &gt;10
-                </span>
-              </div>
-              <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
-                {topMovers.map((p) => {
-                  const div = adpDivergenceMap.get(p.id) ?? 0
-                  const posColors = { QB: '#FF6E8A', RB: '#56E0A0', WR: '#6CA8FF', TE: '#FFB05C', K: '#A78BFA', DEF: '#637396' } as Record<string, string>
-                  return (
-                    <div
-                      key={p.id}
-                      className="flex-shrink-0 flex items-center gap-2 rounded-[11px] px-3 py-[9px]"
-                      style={{ background: 'var(--ffi-surface-2)', border: '1px solid var(--ffi-hairline)' }}
-                    >
-                      <span
-                        className="font-bold text-[10px] px-[6px] py-[3px] rounded-[6px] flex-shrink-0"
-                        style={{
-                          fontFamily: 'var(--font-cond)',
-                          background: 'rgba(150,180,255,0.10)',
-                          color: posColors[p.position] ?? 'var(--ffi-ink-2)',
-                        }}
-                      >
-                        {p.position}
-                      </span>
-                      <span
-                        className="font-bold text-[13px] whitespace-nowrap"
-                        style={{ fontFamily: 'var(--font-cond)', color: 'var(--ffi-ink)' }}
-                      >
-                        {p.name}
-                      </span>
-                      <span
-                        className="flex items-center gap-1 font-bold text-[11px]"
-                        style={{ fontFamily: 'var(--font-mono)', color: 'var(--ffi-warning)' }}
-                      >
-                        <TrendingDown className="h-[11px] w-[11px]" />
-                        {div.toFixed(0)}
-                      </span>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-          )}
-
           {/* ── TABS ── */}
           <div
             className="flex gap-1 mb-0 rounded-[12px] p-1"

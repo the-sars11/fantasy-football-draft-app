@@ -23,7 +23,9 @@ The prior plan (S1–S8 / P2 DR / P3 VAL) marked the app "done" while it (a) pri
 
 ## Next open item
 
-**R1 [Sonnet] — Trust triage.** Fix: dead model id (`ai/claude.ts:28-29`), error-gate the AI fallback (`strategies/propose/route.ts:158-160`), ADP off the Cheat Sheet (`prep/board/client.tsx:35,447-511`), nav active-state (`app-shell.tsx:37-52`), kill the dead theme toggle (`globals.css` — recommend remove), make `/draft/live` render instead of `null` (`draft/live/client.tsx:462,466`) so Demo Draft reaches a real room. Done-when: app stops lying (no ADP, right tab highlights) and stops throwing (no 500 on strategies with key absent, no blank live screen). Screenshots each. See `BUILD_PLAN.md` R1.
+**R1 [Sonnet] — Trust triage — DONE 2026-08-12.** Closed RV-2, RV-3, RV-6, RV-12, RV-13, RV-16, RV-19. Full verify gate + loaded-preview check passed (type-check clean, tests green with new coverage, lint 0 new errors, build clean, bug-hunt free 0 critical/0 high/1 medium, live screenshots of Cheat Sheet/nav/settings/draft-live). See `CHANGELOG.md` for the verify table and `BUILD_PLAN.md` R1.
+
+**R2 [Sonnet] — Data truth: labels stop lying.** Fix: board "ECR" cell = real `ecrPositionRank` (not `round(avgAdp)`) (`players/convert.ts:96`, real field `:61-64/111`), "PTS" = real projection field, RANGE = the real calibrated VORP↔room band instead of the fake flat ±15% (`prep/draft-board-table.tsx:78,392-400`), surface tier data beyond the single ELITE flag (`players/tags.ts`). Closes RV-7, RV-8, RV-14. Done-when: every board cell equals its real source field, with tests asserting cell = source (no derived-from-ADP stand-ins). Screenshot of the corrected board. See `BUILD_PLAN.md` R2.
 
 ---
 

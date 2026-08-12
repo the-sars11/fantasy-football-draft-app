@@ -227,3 +227,46 @@ All S1-S4 code paths and supporting infrastructure:
 | `npm run test:run` | **205/205 passed** |
 | `npm run lint` | 161 problems (51 errors, 110 warnings) -- 1 FEWER than 162 baseline; 0 new |
 | `npm run build` | CLEAN |
+
+## Hunt: 2026-08-12 -- free mode -- Scope: R1 trust-triage changed modules
+
+**Project:** fantasy_football_draft_app
+**Type:** TypeScript / Next.js (App Router) + Vitest
+**Auditor:** Claude Code (static read-only pass, no commands beyond the R1 verify gate already run)
+**Mode:** FREE -- static analysis of the 7 files touched by R1 (dead model id, error-gated AI fallback, ADP removal, nav active-state, dead theme toggle, `/draft/live` null-render fix) plus the 3 new test files.
+
+### Summary
+
+| Severity | Count |
+|----------|-------|
+| CRITICAL | 0 |
+| HIGH | 0 |
+| MEDIUM | 1 |
+| LOW | 0 |
+
+| Category | Count |
+|----------|-------|
+| UX | 1 |
+
+### Findings
+
+#### MEDIUM
+
+##### BUG-005: Error-gated AI fallback silently returns 0 proposals for a snake-format league
+- **File:** `src/app/api/strategies/propose/route.ts:162-172` calling `src/lib/research/strategy/research.ts:404-407`
+- **Category:** UX / Silent failure
+- **Effort:** S
+- **Description:** `proposeStrategiesRuleBased` has always been calibrated for auction only -- `if (league.format !== 'auction') return { proposals: [], inserts: [] }` (`research.ts:405-406`). Before RV-3, this path only fired when `ANTHROPIC_API_KEY` was absent. RV-3 widened the fallback to fire on ANY AI failure (dead model, timeout, rate limit) for a key-present league too. A snake-format league now silently gets `{ proposals: [], source: 'rule-based', proposalCount: 0 }` on an AI hiccup, with no signal to the caller about *why* it's empty (as opposed to "AI just found nothing").
+- **Evidence:** `research.ts:404-407` (`// Only calibrated for auction format; snake proposals require the AI path`).
+- **Fix:** Not applied -- out of R1's declared scope (R1 is trust triage on auction-only surfaces per CLAUDE.md Key Design Decision #1: "Auction only -- Nasties 12-team ... No snake"). If snake ever comes back in scope, either extend `proposeStrategiesRuleBased` to snake or have the route return a distinct `source: 'unavailable'` with a reason string instead of an empty `'rule-based'` result.
+- **Impact:** None today -- the only live league (The Nasties) is auction format, so this path is currently unreachable in practice. Flagged so it isn't rediscovered as a mystery "empty proposals" report if snake support is ever added.
+
+### Recommended Fix Order
+
+1. No action required for R1. BUG-005 queued as a note for whenever snake-format support (if ever) re-enters scope -- not blocking.
+
+### Notes
+
+- No CRITICAL or HIGH findings in the R1 diff itself -- the six fixes (RV-2, RV-3, RV-6, RV-12, RV-13, RV-16, RV-19) each match their BUILD_PLAN.md "Done when" criteria with no new unused imports, no new lint errors, and full type-check/build/test coverage (see R1 verify table in this session's CHANGELOG entry).
+- `getActiveHref` in `app-shell.tsx` was un-exported before this session; exporting it for testability is a net positive and matches the same pattern used for `dbLeagueToAppLeague` in BUG-004 above.
+- `draft/live/client.tsx` still carries several pre-existing unused-import warnings (`motion`, `AnimatePresence`, `Radio`, `ChevronLeft`, `Clock`, `Gavel`, `Check`, `FFIBadge`, `PositionRunTicker`, `LiveScoreBug`, `PickFeed`, `MySquadPanel`, plus `saving`, `isAuction`, `myNeeds`) -- all pre-existing, none introduced this session, not in R1's declared scope.

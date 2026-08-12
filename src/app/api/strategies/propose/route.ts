@@ -153,16 +153,28 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Run strategy research engine (AI if key present, rule-based fallback otherwise)
+    // Run strategy research engine. RV-3: the fallback is error-gated, not just
+    // key-gated — any AI failure (dead model id, timeout, rate limit) falls back
+    // to the $0 rule-based path instead of 500ing the strategy request.
     const sharedInput = { league, players, keeperNames, targetNames, avoidNames }
-    const result = hasApiKey
-      ? await proposeStrategies(sharedInput)
-      : proposeStrategiesRuleBased(sharedInput)
+    let result
+    let source: 'ai' | 'rule-based' = 'rule-based'
+    if (hasApiKey) {
+      try {
+        result = await proposeStrategies(sharedInput)
+        source = 'ai'
+      } catch (aiError) {
+        console.error('[API /strategies/propose] AI path failed, falling back to rule-based', aiError)
+        result = proposeStrategiesRuleBased(sharedInput)
+      }
+    } else {
+      result = proposeStrategiesRuleBased(sharedInput)
+    }
 
     return NextResponse.json({
       proposals: result.proposals,
       inserts: result.inserts,
-      source: hasApiKey ? 'ai' : 'rule-based',
+      source,
       meta: {
         leagueId: league.id,
         format: league.format,

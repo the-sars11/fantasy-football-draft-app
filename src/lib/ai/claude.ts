@@ -24,10 +24,34 @@ function getClient(): Anthropic {
 export type ModelTier = 'fast' | 'default' | 'best'
 
 const MODEL_MAP: Record<ModelTier, string> = {
-  fast: 'claude-haiku-4-5-20251001',      // Fastest, cheapest — good for live draft recommendations
-  default: 'claude-sonnet-4-20250514',     // Balanced — research analysis, strategy proposals
-  best: 'claude-sonnet-4-20250514',        // Best quality — same as default for now
+  fast: 'claude-haiku-4-5-20251001',   // Fastest, cheapest — good for live draft recommendations
+  default: 'claude-sonnet-5',          // Balanced — research analysis, strategy proposals
+  best: 'claude-opus-5',               // Best quality — top-tier reasoning for research runs
 }
+
+/**
+ * Model ids Anthropic has retired. A tier pointed at one of these 404s on every
+ * call — RV-2 (2026-08-12): default/best silently pointed at a retired
+ * claude-sonnet-4-20250514 for an unknown period. This assertion runs at
+ * module load so a future retirement fails loudly on the next deploy instead
+ * of surfacing as a live 500 during a draft.
+ */
+export const RETIRED_MODEL_IDS = new Set([
+  'claude-sonnet-4-20250514',
+  'claude-3-opus-20240229',
+  'claude-3-sonnet-20240229',
+  'claude-3-haiku-20240307',
+])
+
+export function assertNoRetiredModelIds(map: Record<ModelTier, string>): void {
+  for (const [tier, id] of Object.entries(map)) {
+    if (RETIRED_MODEL_IDS.has(id)) {
+      throw new Error(`claude.ts MODEL_MAP.${tier} points at a retired Claude model id: ${id}`)
+    }
+  }
+}
+
+assertNoRetiredModelIds(MODEL_MAP)
 
 export interface ClaudeJsonRequest {
   system: string

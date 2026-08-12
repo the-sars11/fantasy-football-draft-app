@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { ChevronRight, Beaker } from 'lucide-react'
 import { getUser } from '@/lib/supabase/server'
 import { createClient } from '@/lib/supabase/server'
-import { ThemeRow, SignOutRow } from './client'
+import { SignOutRow } from './client'
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
@@ -134,11 +134,6 @@ export default async function SettingsPage() {
         <InfoRow label="Name" value={userName} />
         <InfoRow label="Email" value={userEmail} />
         <SignOutRow />
-      </SettingsGroup>
-
-      <SectionLabel>Appearance</SectionLabel>
-      <SettingsGroup>
-        <ThemeRow />
       </SettingsGroup>
 
       <div className="pt-6 pb-2">

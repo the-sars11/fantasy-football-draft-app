@@ -17,7 +17,6 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
-import { ThemeToggle, ThemeToggleMobile } from '@/components/theme-toggle'
 import { signOut } from '@/app/(auth)/actions'
 import { NavProvider } from '@/lib/nav-context'
 import { PageTransition } from '@/components/layout/page-transition'
@@ -41,9 +40,18 @@ const navItems: NavItem[] = [
   { label: 'Setup', href: '/settings', icon: Settings },
 ]
 
+// RV-12: these pages are conceptually Setup but live under other tabs' URL
+// trees (/prep, /draft), so the plain longest-prefix match below would light
+// up Research or Live Draft instead. Check this override before falling
+// through to prefix matching.
+const SETUP_OVERRIDE_PREFIXES = ['/prep/configure', '/draft/setup']
+
 // Longest-prefix match so nested routes resolve to the right tab —
 // e.g. /draft/review lights up Review, not Draft.
-function getActiveHref(pathname: string): string | undefined {
+export function getActiveHref(pathname: string): string | undefined {
+  if (SETUP_OVERRIDE_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + '/'))) {
+    return '/settings'
+  }
   return [...navItems]
     .sort((a, b) => b.href.length - a.href.length)
     .find(
@@ -158,8 +166,6 @@ export function AppShell({
             )}
           </div>
 
-          <ThemeToggle collapsed={collapsed} />
-
           <button
             onClick={() => setCollapsed(!collapsed)}
             className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-[var(--ffi-text-secondary)] hover:bg-[var(--ffi-surface)]/50 hover:text-white transition-all duration-200"
@@ -210,7 +216,6 @@ export function AppShell({
         </div>
         <div className="flex items-center gap-2">
           <ProfileAvatar initials={initials} size="sm" />
-          <ThemeToggleMobile />
         </div>
       </header>
       )}

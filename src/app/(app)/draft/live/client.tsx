@@ -459,10 +459,60 @@ export function LiveDraftClient() {
     )
   }
 
-  if (!state || !session) return null
+  // RV-16/RV-19: this screen used to silently render null (a blank page, no
+  // affordance out) whenever state/session hadn't hydrated yet -- e.g. loading
+  // finished but a session lookup came back empty. Give it a real fallback
+  // instead, matching the loading/error patterns above.
+  if (!state || !session) {
+    return (
+      <div className="space-y-4">
+        <FFISectionHeader title="Live Draft" subtitle="Real-time draft assistant" />
+        <FFICard variant="elevated" className="border-l-4 border-l-[var(--ffi-warning)]">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="h-5 w-5 text-[var(--ffi-warning)] shrink-0 mt-0.5" />
+            <div>
+              <p className="ffi-title-md text-white">No Draft Session Yet</p>
+              <p className="ffi-body-md text-[var(--ffi-text-secondary)]">
+                Set up a draft session before entering the live room.
+              </p>
+            </div>
+          </div>
+          <FFIButton variant="secondary" onClick={() => router.push('/draft/setup')} className="mt-4">
+            Go to Draft Setup
+          </FFIButton>
+        </FFICard>
+      </div>
+    )
+  }
 
   const isAuction = state.format === 'auction'
   const managerNames = state.manager_order
+
+  // manager_order can theoretically come back empty from a malformed/partial
+  // session; myManager below assumes a first entry, so guard it explicitly
+  // rather than letting downstream code throw on undefined.
+  if (managerNames.length === 0) {
+    return (
+      <div className="space-y-4">
+        <FFISectionHeader title="Live Draft" subtitle="Real-time draft assistant" />
+        <FFICard variant="elevated" className="border-l-4 border-l-[var(--ffi-danger)]">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="h-5 w-5 text-[var(--ffi-danger)] shrink-0 mt-0.5" />
+            <div>
+              <p className="ffi-title-md text-[var(--ffi-danger)]">No Managers Configured</p>
+              <p className="ffi-body-md text-[var(--ffi-text-secondary)]">
+                This draft session has no manager order. Return to Draft Setup and confirm managers before going live.
+              </p>
+            </div>
+          </div>
+          <FFIButton variant="secondary" onClick={() => router.push('/draft/setup')} className="mt-4">
+            Go to Draft Setup
+          </FFIButton>
+        </FFICard>
+      </div>
+    )
+  }
+
   const myManager = managerNames[0]
   const myBudget = getBudget(myManager)
   const myMaxBid = getMaxBidFor(myManager)

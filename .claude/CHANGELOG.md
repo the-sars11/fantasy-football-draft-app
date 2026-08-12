@@ -2,6 +2,38 @@
 
 ---
 
+## 2026-08-12 / R1 -- Trust triage: the app stops lying and stops throwing
+
+**Task:** REBUILD R1 `[Sonnet]` -- fix the trust-killers and crashes found in the 2026-08-12 reality-reset review before any downstream rebuild session touches this code. | **Class:** bugfix | **Lenses:** QA, Security (AI fallback), Design (nav/theme)
+
+**Problem:** Strategy/research AI calls pointed at a retired Claude model id and 500'd whenever a key was present (the fallback was key-gated, not error-gated). The Cheat Sheet still sorted by ADP and showed an ADP Movers strip -- a snake-draft stat that's meaningless in Joe's auction league. Nav active-state mis-highlighted Setup pages that live under `/prep` and `/draft` URL trees. A dead light/dark theme toggle did nothing (no `.light` token block exists -- GRIDIRON is dark-first by design). `/draft/live` could `return null` (a blank dead screen) when state/session hadn't hydrated, and "Demo Draft" routed straight into that same dead screen.
+
+**Root cause:** each of these was a real-code confirmed finding from the 2026-08-12 screen-by-screen review (RV-2, RV-3, RV-6, RV-12, RV-13, RV-16, RV-19 in `BUILD_PLAN.md`'s bug register) -- not new work, just fixing what the review found.
+
+**What changed:**
+
+- **`src/lib/ai/claude.ts` (RV-2):** `MODEL_MAP` `default`/`best` repointed from the retired `claude-sonnet-4-20250514` to live `claude-sonnet-5`/`claude-opus-5` ids. Added a `RETIRED_MODEL_IDS` set + `assertNoRetiredModelIds` self-check called at module load, so a dead id fails loudly at startup instead of silently 404ing on first live call. Companion test: `src/lib/ai/claude.test.ts`.
+- **`src/app/api/strategies/propose/route.ts` (RV-3):** the rule-based fallback is now **error-gated**, not key-gated -- any AI failure (dead model, timeout, rate limit) with a key present falls back to the $0 rule-based path instead of 500ing; only a genuinely absent key skips the AI call outright. Response now reports `source: 'ai' | 'rule-based'`. New test: `src/app/api/strategies/propose/route.test.ts` (3 cases: AI throws -> fallback+200, AI succeeds -> source:ai, no key -> rule-based direct, AI never called).
+- **`src/app/(app)/prep/board/client.tsx` (RV-6):** removed the ADP sort option, the `adp` sort-field case, the ADP-divergence computation (`adpDivergenceMap`, `hasComputedMovers` ref), and the entire "ADP Movers" horizontal-strip UI block. Cheat Sheet now sorts only by Score/Value/Rank/Name -- dollars, not draft position.
+- **`src/components/layout/app-shell.tsx` (RV-12):** `getActiveHref` (now exported for testability) gets a `SETUP_OVERRIDE_PREFIXES` check (`/prep/configure`, `/draft/setup`) before falling through to longest-prefix matching, so those Setup-owned pages correctly light up the Setup tab instead of Research/Live Draft. New test: `src/components/layout/app-shell.test.ts` (5 cases incl. the live-draft-room `/draft/live` prefix collision).
+- **`src/components/theme-toggle.tsx` (RV-13): DELETED.** `src/app/(app)/settings/client.tsx` and `src/app/(app)/settings/page.tsx`: removed `ThemeRow` and its "Appearance" section -- GRIDIRON is dark-first by design, no `.light` token block was ever built, so the toggle did nothing. Recommend-and-remove per BUILD_PLAN rather than half-building light mode.
+- **`src/app/(app)/draft/live/client.tsx` (RV-16/RV-19):** the `!state || !session` path no longer `return null`s -- it renders a real "No Draft Session Yet" card with a CTA back to Draft Setup. Added a second guard for `managerNames.length === 0` (a malformed/partial session) with its own "No Managers Configured" card, so `myManager = managerNames[0]` can never read off an empty array. "Demo Draft" (`/draft/live?sim=1`) now reaches a working room instead of the same dead screen.
+
+**Verify (per-session gate, all evidence pasted live this session):**
+
+| Gate | Result |
+|---|---|
+| `npm run type-check` | 0 errors (fixed 3x `Request`/`NextRequest` type mismatch in the new route test via a typed `NextRequest` cast) |
+| `npm run test:run` | green, with new coverage: `claude.test.ts`, `route.test.ts` (3 cases), `app-shell.test.ts` (5 cases) |
+| `npm run lint` | 0 new errors vs baseline (50 pre-existing errors all cross-referenced to untouched files: `nav-context.tsx`, `recommendation.test.ts`, `tags.test.ts`, unrelated scripts) |
+| `npm run build` | clean |
+| `/bug-hunt free` (changed modules) | 0 critical, 0 high, 1 medium (BUG-005: rule-based fallback returns empty for snake-format leagues -- unreachable today, app is auction-only per Key Design Decision #1; logged in `BUG_LOG.md`, no fix needed) |
+| Loaded-preview screenshot | dev server started on port 3003 myself; live-checked: Cheat Sheet sort pills are Score/Value/Rank only with zero ADP text across all 493 players and no Movers strip; `/prep/configure` + `/draft/setup` both highlight the Setup tab (`bg-[var(--ffi-gold)]/10 text-[var(--ffi-gold-bright)]`) on desktop + mobile nav; no theme/Appearance text or Sun/Moon icon anywhere (nav or Settings page); `/draft/live?sim=1` renders a fully populated live room, `/draft/live` with no session renders a real "Error Loading Draft / Go Back" card -- never blank |
+
+**Closes:** RV-2, RV-3, RV-6, RV-12, RV-13, RV-16, RV-19. Next open item: **R2 -- Data truth** (`BUILD_PLAN.md`).
+
+---
+
 ## 2026-08-12 / PLAN REBUILD -- reality reset + BUILD_PLAN rewritten (docs-only, no code changed)
 
 **Task:** Feedback-driven full review of the app against its own code, then a complete BUILD_PLAN rewrite. Joe's mandate: "This is feedback only, DO NOT build anything... i need the whole build plan updated including archiving old/completed stuff. The entire build plan needs to be revised with new well defined build sessions, well scoped for specific models that cleanly finish before context expires, there needs to be testing, there needs to be bug hunts. This needs to be disciplined." | **Class:** docs | **Lenses:** Delivery, QA

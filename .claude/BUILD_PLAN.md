@@ -101,24 +101,24 @@ Every item below was confirmed against code. `RV-#` = review finding. Severity i
 | ID | Sev | Finding | Location | Session |
 |----|-----|---------|----------|---------|
 | RV-1 | **CRITICAL** | **No team-construction.** Max-bid capped by wallet, not by roster-completion. The app can't build a team for $200 — the whole point. | `auction-advisor.ts:98,127,147` | R4→R5 |
-| RV-2 | **CRITICAL** | Dead Claude model id → strategy/research AI paths 404/500. | `ai/claude.ts:28-29` | R1 |
-| RV-3 | **HIGH** | Rule-based fallback is key-gated, not error-gated → 500 on AI failure instead of graceful $0 fallback. | `strategies/propose/route.ts:158-160` | R1 |
+| RV-2 | **CRITICAL** | ~~Dead Claude model id → strategy/research AI paths 404/500.~~ **[x] FIXED R1** | `ai/claude.ts:28-29` | R1 |
+| RV-3 | **HIGH** | ~~Rule-based fallback is key-gated, not error-gated → 500 on AI failure instead of graceful $0 fallback.~~ **[x] FIXED R1** | `strategies/propose/route.ts:158-160` | R1 |
 | RV-4 | **HIGH** | Max-bid can exceed the player's ceiling (recommends overpaying past worth). | `auction-advisor.ts:98,127,147` | R3 |
 | RV-5 | **HIGH** | "Anchor — pay up to $97" shows the theoretical **ceiling** as a pay-to price → tells Joe to overpay. | `players/recommendation.ts:43` | R3 |
-| RV-6 | **HIGH** | ADP still drives the Cheat Sheet (sort pill + Movers strip) — meaningless in auction, Joe called it out. | `prep/board/client.tsx:35,447-511` | R1 |
+| RV-6 | **HIGH** | ~~ADP still drives the Cheat Sheet (sort pill + Movers strip) — meaningless in auction, Joe called it out.~~ **[x] FIXED R1** | `prep/board/client.tsx:35,447-511` | R1 |
 | RV-7 | **HIGH** | Board "ECR" is `round(avgAdp)` (ADP mislabeled); real `ecrPositionRank` unused. "PTS" similarly suspect. | `convert.ts:96` (real at `:61-64/111`) | R2 |
 | RV-8 | MED | Value RANGE on the board is a fake flat ±15%, not the real VORP↔room band. | `draft-board-table.tsx:78,392-400` | R2 |
 | RV-9 | MED | No FLEX list — you can't see the RB/WR/TE flex pool as one ranked board. | prep board/players | R8 |
 | RV-10 | MED | Cheat Sheet largely duplicates the Players screen — two screens, one job. | `prep/board/*` vs `prep/players/*` | R8 |
 | RV-11 | MED | Simulation is a single deterministic draft, ADP opponents, not persisted, generic grading. | `prep/simulate/client.tsx:92-229` | R10a/R10b |
-| RV-12 | MED | Nav active-state mis-highlights (Setup destinations live under /draft & /prep; longest-prefix logic picks wrong). | `layout/app-shell.tsx:37-52` | R1 |
-| RV-13 | MED | Dead light/dark toggle — no `.light` token block exists, so the toggle does nothing. | `globals.css` (`:root`+`.dark` only) | R1 |
+| RV-12 | MED | ~~Nav active-state mis-highlights (Setup destinations live under /draft & /prep; longest-prefix logic picks wrong).~~ **[x] FIXED R1** | `layout/app-shell.tsx:37-52` | R1 |
+| RV-13 | MED | ~~Dead light/dark toggle — no `.light` token block exists, so the toggle does nothing.~~ **[x] FIXED R1 (toggle removed)** | `globals.css` (`:root`+`.dark` only) | R1 |
 | RV-14 | MED | FantasyPros tier data is loaded but its only consumer is the single ELITE flag — wasted signal. | `players/tags.ts:72` | R2 |
 | RV-15 | MED | Graded tag scale exists in types (weight 1-10, severity soft/hard) but the tagging UI is binary. | `research/strategy/types.ts:151-166` | R7a |
-| RV-16 | MED | `/draft/live` can `return null` (blank dead screen); `myManager` can throw. | `draft/live/client.tsx:462,466` | R1 |
+| RV-16 | MED | ~~`/draft/live` can `return null` (blank dead screen); `myManager` can throw.~~ **[x] FIXED R1** | `draft/live/client.tsx:462,466` | R1 |
 | RV-17 | MED | Target/avoid persistence is name-anchored (UUID FK on a name) — fragile to any name variance. | `user_tags` migration | R7a |
 | RV-18 | LOW | BREAKOUT/BUST/VALUE detector exists but is wired to nothing. | `lib/intel/tag-detector.ts` | R3 |
-| RV-19 | LOW | "Demo Draft" routes to `/draft/live?sim=1` → hits the RV-16 dead screen (collateral). Genuinely useful once RV-16 is fixed. | `settings/page.tsx:116,147` | R1 |
+| RV-19 | LOW | ~~"Demo Draft" routes to `/draft/live?sim=1` → hits the RV-16 dead screen (collateral). Genuinely useful once RV-16 is fixed.~~ **[x] FIXED R1** | `settings/page.tsx:116,147` | R1 |
 
 ---
 
@@ -150,7 +150,7 @@ Every item below was confirmed against code. `RV-#` = review finding. Severity i
 
 Work top to bottom. Each session is scoped to finish cleanly in one focused sitting on the stated model, with its own gate. Dependencies are stated; the order respects them.
 
-### R1 — Trust triage: the app stops lying and stops throwing `[Sonnet]` · class: bugfix
+### R1 — Trust triage: the app stops lying and stops throwing `[Sonnet]` · class: bugfix `[x]` DONE 2026-08-12
 > **Why first:** these are the trust-killers and the crashes. Nothing downstream matters while strategies 500, the Cheat Sheet shows a snake stat, the theme toggle is dead, and the live screen can blank out.
 > **Reads first:** `src/lib/ai/claude.ts`, `src/app/api/strategies/propose/route.ts`, `src/lib/research/strategy/research.ts`, `src/app/(app)/prep/board/client.tsx`, `src/components/layout/app-shell.tsx`, `src/app/globals.css`, `src/app/(app)/draft/live/client.tsx`, `src/app/(app)/settings/page.tsx`.
 > **Closes:** RV-2, RV-3, RV-6, RV-12, RV-13, RV-16, RV-19.
