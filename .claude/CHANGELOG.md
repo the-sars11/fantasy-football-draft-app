@@ -2,6 +2,22 @@
 
 ---
 
+## 2026-08-11 / ROAD TO DRAFT — all morning feedback captured, priority-ordered, model-bound (planning)
+
+**Task:** Capture Joe's entire 2026-08-11 morning feedback onto the plan in priority build order, well-scoped, model-bound, in context-aware build sessions | **Class:** `docs` | **Lenses:** Delivery
+
+**Problem:** Joe gave ~17 items of feedback across 3 screenshots the morning of 2026-08-11 (recovered from the session transcript after a compaction). Almost none of it was on the build plan — it "lived only in chat," which by his own rule means it didn't exist. He demanded it all be tracked, sequenced, scoped, and model-bound so the app gets built and working before his draft.
+
+**What changed (plan docs only — no app code):**
+- **BUILD_PLAN.md:** added the **🏈 ROAD TO DRAFT** block — the authoritative execution order as six context-aware, model-bound build sessions **S1→S6**: S1 config truth + nav `[Sonnet]`, S2 live Join/sync `[Sonnet+Joe]`, S3 = P3 valuation engine `[Opus]`, S4 research depth `[Opus+Sonnet]`, S5 strategies `[Opus+Sonnet]`, S6 = DR-7 rehearsal `[Sonnet+Joe]`. Each has why/reads-first/closes/done-when.
+- **FB catalog:** added the full **FB-1…FB-17** morning-feedback catalog with honest per-item status, each mapped to a session. Verified against code: FB-2/FB-3 (tab renames) done (`app-shell.tsx:39-40`); FB-1 has no hardcoded `10` in `src` (source-trace needed); FB-4 "Pre Flight" still present (`draft/page.tsx:9`); FB-8 ADP removal coded (re-verify on screen).
+- **Dashboard header + WORKING_STATE:** `currentPhase`/`nextItems` re-sequenced to S1→S6 (trust-fixes now precede the valuation engine, since a board that says "10 teams" and won't Join makes the engine worthless).
+- **Cut line flagged:** S1→S2→S3→S6 = minimum viable draft night; S4/S5 compressible. Draft date still needed to set the hard must-have line.
+
+**Verify:** plan-only change, no runtime touched. FB statuses spot-checked via grep against `src` (see per-item notes in the FB catalog). No type-check/test run required for docs.
+
+---
+
 ## 2026-08-11 / P3 VAL-0 — real 16-year Nasties ledger imported + calibrated (foundation)
 
 **Task:** P3 League-Calibrated Valuation, VAL-0 (correct + import the real ledger) | **Class:** `pipeline` | **Lenses:** Architecture, QA

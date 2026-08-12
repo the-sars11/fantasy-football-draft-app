@@ -5,9 +5,11 @@
 
 **App:** personal live-draft advisor for Joe's "Nasties" 12-team, $200, PPR, no-kicker **ESPN auction** draft. Advises Joe; never bids. Picks arrive live over the network from the deployed **auctioneer** app (system of record). No Google Sheets, no snake/keeper (Tyler's league = permanent hold).
 
-**Active phase:** P3 -- League-Calibrated Valuation & Exploit Engine (build first, then DR-7 rehearsal on the corrected engine). Approved by Joe 2026-08-11.
+**Active phase:** ROAD TO DRAFT -- ordered build sessions **S1 -> S6** (see BUILD_PLAN "ROAD TO DRAFT" block). Captures ALL of Joe's 2026-08-11 morning feedback (FB-1..FB-17) + P3 valuation + DR-7 rehearsal into one priority-ordered, model-bound sequence. Authored 2026-08-11.
 
-**Next open item:** **VAL-1 -- calibrated per-player values: ceiling (VORP worth) + expected room price (per-position rank curves), then a re-priced board as proof.**
+**Next open item:** **S1 [Sonnet] -- Config truth + navigation.** Fix the "10 teams" source (FB-1, no hardcoded 10 in src -> trace the stale session/league record), remove "Pre Flight" (FB-4, `draft/page.tsx:9`), add back-nav from deep screens (FB-5), clarify Draft Board vs Live Draft (FB-6). Then S2 (live Join/sync), then S3 = P3 valuation engine (VAL-1..3).
+
+**Cut line (needs draft date):** S1 -> S2 -> S3 -> S6 is the minimum viable draft-night path; S4/S5 are compressible depth. Joe to give the draft date to set the hard must-have line.
 
 **VAL-0 done (2026-08-11):** real 16-year Nasties ledger corrected + imported in-repo.
 - Position corruption fixed: `src/data/league-history/history-corrected.json` (961 names, 98.8% of picks). The 5 WRs mislabeled RB on Joe's 2025 roster now correct.

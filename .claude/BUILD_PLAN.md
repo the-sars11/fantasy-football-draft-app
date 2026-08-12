@@ -1,6 +1,6 @@
 <!-- DASHBOARD_STATUS
 {
-  "currentPhase": "P3 — League-Calibrated Valuation & Exploit Engine (build first, then DR-7 rehearsal)",
+  "currentPhase": "ROAD TO DRAFT — ordered build sessions S1→S6 (S1 config/nav trust · S2 live sync · S3=P3 valuation engine · S4 research depth · S5 strategies · S6=DR-7 rehearsal)",
   "status": "active",
   "milestones": [
     { "name": "Phase 0-2 — Data pipeline + strategy engine", "done": true },
@@ -19,11 +19,12 @@
     { "name": "P3-P7 — Commercialization [RETIRED 2026-08-06]", "done": true }
   ],
   "nextItems": [
-    "VAL-0 [done, commit]: Corrected 16yr ledger (history-corrected.json, 961 names/98.8%) imported into draft-app repo + committed.",
-    "VAL-1: Calibrated per-player values — ceiling (VORP worth) + expected room price (per-position rank curves). Proof: re-priced board.",
-    "VAL-2: Tendency/exploit engine — positional inflation (WR 1.18x hot / RB 0.84x cool / TE 1.17x hot), owner leans, nomination-run detection.",
-    "VAL-3: Wire calibrated values + tendencies into live advisor — re-anchor calculateMaxBidAdvice off consensusValue*1.3.",
-    "DR-7.3/7.4/7.5 [Joe]: offline-resync rehearsal, phone test, full mock draft — run AFTER P3 lands on the corrected engine."
+    "S1 [Sonnet]: Config truth + nav — fix the '10 teams' source (FB-1), kill 'Pre Flight' (FB-4), add back-nav (FB-5), clarify Draft Board vs Live Draft (FB-6). Trust-killers first.",
+    "S2 [Sonnet+Joe]: Live draft Join + sync actually works (FB-7) — the broken /draft/live junk page. Folds DR-7.2. This IS draft night.",
+    "S3 [Opus] = P3: valuation engine ceiling/reality/play (VAL-1/2/3) on the corrected 16yr ledger. VAL-0 done. Closes FB-12/FB-15.",
+    "S4 [Opus+Sonnet]: research depth — value RANGE not point (FB-10), real sourced tags (FB-9), bye/images/proj/rec (FB-13), source transparency (FB-14), dynamic-on-pull (FB-11), verify ADP gone (FB-8).",
+    "S5 [Opus+Sonnet]: strategies real — wired/auto-run/save/suggest-from-targets (FB-16), player-pull end-to-end (FB-17).",
+    "S6 [Sonnet+Joe] = DR-7.3/7.4/7.5: offline-resync rehearsal, phone test, full mock draft — the draft-night gate, run LAST on the finished app."
   ]
 }
 -->
@@ -52,6 +53,83 @@ Task tracking: `[ ]` not started · `[~]` in progress · `[x]` done · `[!]` blo
 5. VERIFY: success criterion met + `npm run type-check` + `npm run test:run` + `npm run lint` (0 new) + build clean.
 6. Paste the proof. Mark [x]. Update WORKING_STATE (pointer) + CHANGELOG (entry). Commit by explicit path + push.
 ```
+
+---
+
+## 🏈 ROAD TO DRAFT — the ordered build sequence (2026-08-11)
+
+**This is the authoritative execution order.** Everything below (P2 DR-7, P3 VAL, and the FB-* morning-feedback catalog) is real detail; this block says *what order we build in and in which session*. Each **S#** is one **context-aware build session** — scoped to fit a single focused sitting, model-bound, with what to read first and a hard "done-when." Work them top to bottom. Draft date sets the cut line (see note at end).
+
+> **Legend:** each session lists the **FB-#/VAL-#/DR-#** items it closes. Status of every individual item lives in its detail section below.
+
+### S1 — Stop the bleeding: config truth + navigation `[Sonnet]` · class: shared/output
+> **Why first:** these are the trust-killers. A board that says "10 teams," a phantom "Pre Flight," and no way to go back make the whole app read as broken — no engine matters until the frame is trustworthy.
+> **Reads first:** `src/components/layout/app-shell.tsx`, `src/app/(app)/draft/page.tsx`, the league/session config path, `src/app/(app)/prep/players/*`.
+> **Closes:** FB-1 (10-teams), FB-4 (kill Pre Flight), FB-5 (back-nav), FB-6 (Draft Board vs Live Draft clarity). FB-2/FB-3 (tab renames) already done.
+> **Done-when:** app shows **12 teams** everywhere, sourced from real league config; no "Pre Flight" anywhere; every deep screen has a clear back affordance; nav labels unambiguous. Proven on a preview I load, with screenshots.
+
+### S2 — Live draft join + sync actually works `[Sonnet + Joe]` · class: pipeline
+> **Why second:** this IS draft night. "Auctioneer is Live" → **Join → broken junk page, not syncing** means the app fails at the one moment it exists for. Nothing else ships until Join works.
+> **Reads first:** `draft/live/client.tsx`, `use-remote-auctioneer-feed.ts`, `api/auctioneer-feed/route.ts`, `state.ts`.
+> **Closes:** FB-7 (broken join/sync). Folds in **DR-7.2** (live contract smoke-test).
+> **Done-when:** from "Auctioneer is Live," Join enters a working room showing **real team names + live picks syncing within ~3-6s**, no broken page, no CORS. Full proof needs the live auctioneer running (Joe).
+
+### S3 — The valuation engine: ceiling / reality / play `[Opus]` · class: pipeline
+> **Why third:** this is the actual point of the app — dynamic, league-calibrated pricing on 16 years of Nasties history. It only matters once the shell (S1) and the live feed (S2) are trustworthy.
+> **This session = P3 VAL-1 → VAL-2 → VAL-3** (detail in the P3 section). VAL-0 done.
+> **Reads first:** the P3 section, `src/data/league-history/*`, `scripts/derive-league-calibration.ts`, `convert.ts`, `auction-advisor.ts`, `tendencies.ts`.
+> **Closes:** VAL-1/2/3, FB-15 (league-history context), FB-12 (in-draft repricing as tiers deplete).
+> **Done-when:** re-priced board proof (ceiling/room/gap); tendency engine emits real exploit signals; live max-bid re-anchored off the national number onto calibrated values + live state.
+
+### S4 — Research surface depth `[Opus for the value-range + tag model · Sonnet for UI]` · class: output/pipeline
+> **Why fourth:** the Research/Players surface is where you decide targets. It needs to be rich and transparent, and it sits on S3's engine.
+> **Reads first:** `prep/players/client.tsx`, `players/tags.ts`, `players/convert.ts`, the auctioneer image store.
+> **Closes:** FB-9 (real sourced tag taxonomy), FB-10 (values as a RANGE), FB-11 (dynamic on each pull), FB-13 (bye + images-from-auctioneer + league proj + per-player rec), FB-14 (projection/source transparency in-app). Verifies FB-8 (ADP gone) on the live screen.
+> **Done-when:** each player shows a value **range** + sourced tags + bye + headshot + league-specific projection + a one-line recommendation + a "how this is calculated / sources" affordance; a pull refreshes values.
+
+### S5 — Strategies made real `[Opus for suggest-from-targets · Sonnet wiring]` · class: pipeline
+> **Why fifth:** strategy is the payoff of the engine + research, but it's the least broken today, so it comes after the must-haves.
+> **Reads first:** `prep/strategies/client.tsx`, `api/strategies/propose`, `research/service.ts`.
+> **Closes:** FB-16 (is it wired / auto-run on new data / save a strategy / suggest from targets+avoids), FB-17 (player-pull end-to-end actually feeds the whole chain).
+> **Done-when:** strategies generate on fresh data (or are clearly gated + explained), are saveable, can be AI-suggested from your target/avoid list; a player pull demonstrably drives values → tags → strategy end-to-end.
+
+### S6 — Draft-night rehearsal — THE GATE `[Sonnet + Joe]` · class: pipeline
+> **Why last:** you can only rehearse the finished app. This is the "ready for draft night" sign-off.
+> **This session = DR-7.3 → DR-7.4 → DR-7.5** (detail in the DR-7 section).
+> **Done-when:** full mock draft on your phone against the live auctioneer — picks tracking, calibrated advice correct, budgets right, offline-resync proven, no surprises.
+
+> **Cut line (needs the draft date):** S1 → S2 → S3 → S6 is the **minimum** for a working, trustworthy, genuinely-helpful draft night. S4 and S5 are high-value depth that can compress if the date is tight. Tell me the draft date and I'll mark the hard must-have line.
+
+---
+
+## FB — Morning feedback catalog (2026-08-11, screenshots 1-3) — individual item tracking
+
+> Every item from Joe's 2026-08-11 morning feedback, so nothing lives only in chat again. Each maps to a session above. Status verified against code where noted.
+
+**Config / navigation (→ S1):**
+- [ ] FB-1: "10 teams" shown everywhere; league is **12**. No hardcoded `10` in `src` — trace to the stale session/league record it's reading and fix the source. *(Furious, repeated — highest trust impact.)*
+- [x] FB-2: Rename **Review → Post Draft**. Done — `app-shell.tsx:40`, `swipe-carousel.tsx:14`.
+- [x] FB-3: Rename **Draft → Live Draft**. Done — `app-shell.tsx:39`, `swipe-carousel.tsx:13`.
+- [ ] FB-4: Remove the **"Pre Flight"** thing. Still referenced/rendered — `draft/page.tsx:9`.
+- [ ] FB-5: **No way to go back** from deep screens (Players etc.) — add a clear back affordance; the "trash UX / can't get back" complaint.
+- [ ] FB-6: Clarify **"Draft Board" vs "Live Draft"** — what each is (labels + inline help). Currently ambiguous (`prep/page.tsx:395` "Draft Board" vs the Live Draft room).
+
+**Live draft sync (→ S2):**
+- [ ] FB-7: "Auctioneer is Live," but **Join the draft → broken junk page, not syncing** (`/draft/live?session=…&aif=remote`). Verify + fix the join→room→sync path.
+
+**Research / Players (→ S4, except values→S3):**
+- [x] FB-8: **Remove ADP** (snake stat, meaningless in auction; was ECR rank mislabeled). Coded done (CHANGELOG 2026-08-11) — re-verify on the live screen in S4.
+- [~] FB-9: **Real player tags** (Avoid / Breakout / etc.) sourced from the research, not `Math.random()`. Partial — VALUE/AVOID kept, fabricated BREAKOUT/SLEEPER removed (DR-4.1); the real sourced tag set is **not** rebuilt. Define the taxonomy + data source.
+- [ ] FB-10: Show a value **RANGE**, not a single point.
+- [ ] FB-11: Values **update dynamically on each pull**.
+- [~] FB-12: **In-draft dynamic repricing** — as Tier-1 WRs go and only 2 Tier-2 remain, adjust their market value up. Lands in **S3/VAL-3** (live scarcity) — explicit tier-depletion repricing is the new piece.
+- [~] FB-13: **Richer player data** — bye week, **images (already stored in the auctioneer app)**, league-specific point projections, a per-player recommendation for Joe. Partial (proj/market shown; images/bye/rec not).
+- [ ] FB-14: **Projection + source transparency** — surface *what the projections are based on, what math, which sources, how recommendations are made* in-app (not just in a doc).
+- [x→S3] FB-15: **League-history context** in the values ("within context of my league's previous draft history"). Now scoped as **P3** (VAL-0 done; VAL-1..3 open).
+
+**Strategies / pull (→ S5):**
+- [ ] FB-16: **Strategies** — is it wired? auto-run when new data comes in? can I **save** a strategy? can the app **suggest** one from my target/avoid list? (Today: manual "Generate Strategies" button, confirm-gated.)
+- [ ] FB-17: **Player pull end-to-end** — does a pull actually pull and drive values → tags → projections → strategy, i.e. everything the app was built for? Verify the whole chain.
 
 ---
 
