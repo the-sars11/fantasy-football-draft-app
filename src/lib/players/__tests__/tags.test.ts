@@ -100,3 +100,50 @@ describe('computePlayerTags — provenance', () => {
     }
   })
 })
+
+describe('computePlayerTags - VOLATILE boundaries', () => {
+  it('fires at exactly rank 120 (the pool boundary is inclusive)', () => {
+    expect(ids(player({ rankSpread: { min: 10, max: 90, std: 20 }, consensusRank: 120 }))).toContain('volatile')
+  })
+
+  it('does not fire at rank 121 (just outside the pool)', () => {
+    expect(ids(player({ rankSpread: { min: 10, max: 90, std: 20 }, consensusRank: 121 }))).not.toContain('volatile')
+  })
+
+  it('does not fire at std exactly 19 (below the threshold)', () => {
+    expect(ids(player({ rankSpread: { min: 10, max: 90, std: 19 }, consensusRank: 40 }))).not.toContain('volatile')
+  })
+})
+
+describe('computePlayerTags - SLEEPER boundaries', () => {
+  it('does not fire when vorp is exactly 0 (must be > 0)', () => {
+    expect(ids(player({ position: 'WR', consensusRank: 100, vorp: 0 }))).not.toContain('sleeper')
+  })
+
+  it('does not fire at consensusRank exactly 84 (must be > 84)', () => {
+    expect(ids(player({ position: 'RB', consensusRank: 84, vorp: 5 }))).not.toContain('sleeper')
+  })
+
+  it('fires at consensusRank 85 with positive vorp', () => {
+    expect(ids(player({ position: 'TE', consensusRank: 85, vorp: 1 }))).toContain('sleeper')
+  })
+})
+
+describe('computePlayerTags - multiple tags on one player', () => {
+  it('emits ELITE + POCKET together when both signals present', () => {
+    const t = ids(player({ expertTier: 1, valueGap: 8, ceilingValue: 50, expectedRoomPrice: 42 }))
+    expect(t).toContain('elite')
+    expect(t).toContain('pocket')
+  })
+
+  it('emits INJURY + SLEEPER together for a late hurt skill player', () => {
+    const t = ids(player({ position: 'WR', consensusRank: 100, vorp: 3, injuryStatus: 'Questionable' }))
+    expect(t).toContain('sleeper')
+    expect(t).toContain('injury')
+  })
+
+  it('emits no tags for a plain average player with no signals', () => {
+    const t = ids(player({ expertTier: 2, valueGap: 1, consensusRank: 40 }))
+    expect(t).toHaveLength(0)
+  })
+})

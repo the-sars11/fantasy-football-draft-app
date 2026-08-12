@@ -73,4 +73,23 @@ describe('computeValueRange', () => {
     expect(r.low).toBe(r.high)
     expect(r.source).toBe('point')
   })
+
+  // BUG-001 regression (fixed S2): ceilingValue=0 is a "ranked-but-unpriced"
+  // row (ceiling falls back to Math.round(avgAuction)=0). It must NOT produce
+  // a 'league' band because 0 is not a real worth signal -- the guard is "> 0",
+  // not "!== undefined". Without the fix the old "!== undefined" check returned
+  // a false $-X "hot" chip on a $0-worth row.
+  it('does NOT produce a league band when ceilingValue is 0 (BUG-001 regression)', () => {
+    const r = computeValueRange(
+      player({ ceilingValue: 0, expectedRoomPrice: 30 }),
+    )
+    expect(r.source).not.toBe('league')
+  })
+
+  it('falls back to national when ceilingValue is 0 but a national range exists', () => {
+    const r = computeValueRange(
+      player({ ceilingValue: 0, expectedRoomPrice: 30, valueRange: { low: 5, base: 10, high: 15 } }),
+    )
+    expect(r.source).toBe('national')
+  })
 })

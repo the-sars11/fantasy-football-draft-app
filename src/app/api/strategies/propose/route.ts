@@ -13,8 +13,8 @@ import { createClient as createServerClient } from '@/lib/supabase/server'
 import { DEV_MODE } from '@/lib/supabase/dev-mode'
 import { createClient } from '@supabase/supabase-js'
 import { proposeStrategies, proposeStrategiesRuleBased } from '@/lib/research/strategy/research'
+import { dbLeagueToAppLeague } from '@/lib/research/strategy/league-mapper'
 import type { League as DbLeague } from '@/lib/supabase/database.types'
-import type { League, RosterSlots } from '@/lib/players/types'
 import type { ConsensusPlayer } from '@/lib/research/normalize'
 import type { Position } from '@/lib/players/types'
 
@@ -25,38 +25,6 @@ async function getClient() {
     if (url && serviceKey) return createClient(url, serviceKey)
   }
   return createServerClient()
-}
-
-/** Map DB league row to app-level League type */
-function dbLeagueToAppLeague(row: DbLeague): League {
-  return {
-    id: row.id,
-    userId: row.user_id,
-    name: row.name,
-    platform: row.platform as League['platform'],
-    format: row.format,
-    size: row.team_count,
-    budget: row.budget ?? undefined,
-    scoringFormat: row.scoring_format === 'half_ppr' ? 'half-ppr' : row.scoring_format as League['scoringFormat'],
-    rosterSlots: {
-      qb: row.roster_slots.qb,
-      rb: row.roster_slots.rb,
-      wr: row.roster_slots.wr,
-      te: row.roster_slots.te,
-      flex: row.roster_slots.flex,
-      superflex: 0,
-      k: row.roster_slots.k,
-      def: row.roster_slots.dst,
-      bench: row.roster_slots.bench,
-    },
-    keeperSettings: row.keeper_enabled && row.keeper_settings
-      ? {
-          enabled: true,
-          maxKeepers: row.keeper_settings.max_keepers,
-          keeperCostType: row.keeper_settings.cost_type === 'auction_price' ? 'auction-price' : 'round',
-        }
-      : undefined,
-  }
 }
 
 /** Map players_cache rows to ConsensusPlayer format */

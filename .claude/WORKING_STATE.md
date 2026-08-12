@@ -36,7 +36,13 @@
 - **Bug hunt S4:** 2 LOW bugs found+fixed -- BUG-002 (format guard for snake leagues), BUG-003 (loading text said "Claude analyzing" for the instant rule-based path).
 - **Verify gate:** type-check clean, 162/162 tests (+9 from S4), lint 0 new, build clean, strategies screen renders at `localhost:3011/prep/strategies` (DOM tree + page text verified).
 
-**Next open item:** **S5 [Sonnet, Opus only if real architectural bug] -- bug hunt + test hardening on S1-S4.** Reads first: `.claude/REVIEW_LENSES.md`, S1-S4 CHANGELOG entries, `src/**/*.test.ts`. Scope: (a) run `/bug-hunt full` (tests + build) across the whole project, triage all findings, fix the real ones; (b) expand automated coverage on S1-S4 code paths (config→12-teams, calibrated values, tag/range model, strategy chain). Done-when: `/bug-hunt full` clean or every finding triaged with a written reason to defer; `npm run test:run` green with new tests covering S1-S4 paths; type-check + lint (0 new) + build clean; findings + fixes logged in CHANGELOG.
+**S5 done (2026-08-12) = bug hunt + test hardening (S1-S4):**
+- **Static analysis (Part A):** 0 CRITICAL, 0 HIGH bugs. 1 LOW (BUG-004): `dbLeagueToAppLeague` was private inside route.ts (untestable). Fixed: extracted to `src/lib/research/strategy/league-mapper.ts` (pure function, type-only imports). Route.ts updated to import from there; unused-import warning eliminated (net lint 161 vs 162 baseline).
+- **New tests (Part B):** +43 tests (162 -> 205/205). Two new files: `league-mapper.test.ts` (11 tests: 12-team/auction/budget config, dst->def mapping, half_ppr->half-ppr, null budget, keeper guard) and `auction-advisor.test.ts` (16 tests: NEUTRAL midpoint, COOL 8% premium, HOT-TAX cap-at-worth, absoluteMax ceiling, legacy fallback, missing-manager guard). Extensions: `value-range.test.ts` (+2, BUG-001 regression), `tags.test.ts` (+9, VOLATILE/SLEEPER boundaries + multi-tag), `headshot.test.ts` (+8, normalizeName III/IV/Sr./apostrophe/whitespace/idempotent + null-fallback pattern).
+- **Verify gate:** type-check 0 errors, 205/205 tests, lint 161 (0 new, 1 fewer than baseline), build clean.
+- Detail: `BUILD_PLAN.md` S5 section + `BUG_LOG.md` S5 hunt entry + CHANGELOG 2026-08-12 S5.
+
+**Next open item:** **S6 [Sonnet] -- live draft join + sync actually works (FB-7).** The broken Join page (`/draft/live?session=...&aif=remote`) is a solo code-fix. Reads first: `draft/live/client.tsx`, `use-remote-auctioneer-feed.ts`, `api/auctioneer-feed/route.ts`, `state.ts`. Done-when: from "Auctioneer is Live," Join enters a working room showing real team names, no broken page, no CORS -- verified as far as solo local testing can confirm. Full live-auctioneer proof deferred to S8.
 
 **Cut line (needs draft date):** S1 -> S2 -> S5 -> S6 -> S7 -> S8 is the minimum viable draft-night path (the hardening passes S5/S7/S8 are NOT optional); S3/S4 are compressible depth. Joe to give the draft date to set the hard must-have line.
 

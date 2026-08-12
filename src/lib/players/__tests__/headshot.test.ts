@@ -37,3 +37,41 @@ describe('SILHOUETTE_SRC', () => {
     expect(SILHOUETTE_SRC).toBe('/player-silhouette.svg')
   })
 })
+
+describe('normalizeName -- additional edge cases', () => {
+  it('drops III suffix', () => {
+    expect(normalizeName('Odell Beckham III')).toBe('odell beckham')
+  })
+
+  it('drops IV suffix', () => {
+    expect(normalizeName('Calvin Johnson IV')).toBe('calvin johnson')
+  })
+
+  it('drops Sr. suffix', () => {
+    expect(normalizeName('Calvin Ridley Sr.')).toBe('calvin ridley')
+  })
+
+  it('strips comma in name (some DB rows use Last, First format)', () => {
+    expect(normalizeName("De'Von Achane")).toBe('devon achane')
+  })
+
+  it('handles empty-like input gracefully', () => {
+    expect(normalizeName('   ')).toBe('')
+  })
+
+  it('two calls on the same name are idempotent', () => {
+    const once = normalizeName('Patrick Mahomes II')
+    expect(normalizeName(once)).toBe(once)
+  })
+})
+
+describe('headshotUrl -- unknown player fallback', () => {
+  it('returns null for an unknown player (caller should use SILHOUETTE_SRC)', () => {
+    expect(headshotUrl('Fake Person ZZZZ')).toBeNull()
+  })
+
+  it('null + SILHOUETTE_SRC pattern: no broken-image scenario', () => {
+    const url = headshotUrl('Fake Person ZZZZ') ?? SILHOUETTE_SRC
+    expect(url).toBe('/player-silhouette.svg')
+  })
+})

@@ -2,6 +2,36 @@
 
 ---
 
+## 2026-08-12 / S5 -- bug hunt + test hardening on S1-S4 (BUG-004 fixed, 162->205 tests)
+
+**Task:** ROAD TO DRAFT S5 `[Sonnet]` -- `/bug-hunt full` across whole project; expand automated coverage on S1-S4 priority paths. | **Class:** bugfix/pipeline | **Lenses:** QA, Architecture
+
+**Problem:** S1-S4 each passed their own per-session gate (type-check + tests + lint + build), but that only caught same-session regressions. Several critical S1-S4 logic paths -- calibrated max-bid anchor, tag/range boundary conditions, normalizeName edge cases, and the 12-team/auction/budget config mapping -- had no automated tests. A silent regression in any of these would be invisible until draft night.
+
+**Root cause (BUG-004):** `dbLeagueToAppLeague` was a private function inside `route.ts`, which imports Next.js server-only code and Supabase clients. Writing a unit test for it required mocking the entire server environment. The function is actually pure (no side effects, only type imports needed), so the fix was extraction.
+
+**What changed:**
+
+- **`src/lib/research/strategy/league-mapper.ts` (NEW):** Extracted `dbLeagueToAppLeague` as a standalone exported pure function. Maps: `team_count->size`, `roster_slots.dst->rosterSlots.def`, `budget: null->undefined`, `half_ppr->'half-ppr'`, `superflex` hardcoded 0. Only imports from `@/lib/players/types` and `@/lib/supabase/database.types` (no server code).
+- **`src/app/api/strategies/propose/route.ts` (MODIFIED):** Replaced the inline `dbLeagueToAppLeague` body with `import { dbLeagueToAppLeague } from '@/lib/research/strategy/league-mapper'`. Eliminated 1 unused-import lint warning (net lint 161 vs 162 baseline).
+- **`src/lib/research/strategy/__tests__/league-mapper.test.ts` (NEW -- 11 tests):** Nasties 12-team/auction/200/ppr fixture; covers size, format, budget pass-through, budget null->undefined, dst->def rename, superflex=0, k=0, half_ppr->half-ppr, ppr pass-through, keeper guard (false + null both -> undefined).
+- **`src/lib/draft/__tests__/auction-advisor.test.ts` (NEW -- 16 tests):** Calibrated max-bid anchor (VAL-3) -- NEUTRAL midpoint (ceiling=97/room=76 -> 87), COOL 8% premium (->93 > NEUTRAL's 87, capped at ceiling), HOT-TAX cap-at-worth (ceiling=20/room=30 -> 20 < NEUTRAL's 25), HOT pocket no-effect (HOT == NEUTRAL when ceiling > room), absoluteMax ceiling (budget=15 -> maxBid<=2, budget=1 -> maxBid=1), legacy fallback (consensusValue*1.3 -> 78), calibrated != legacy, missing-manager guard (maxBid=1 + "No budget data").
+- **`src/lib/players/__tests__/value-range.test.ts` (+2 tests):** BUG-001 regression: `ceilingValue=0` + room=30 must NOT produce source='league' (the old `!== undefined` guard fired on $0 rows; the `> 0` fix is now regression-locked). `ceilingValue=0` with national fallback.
+- **`src/lib/players/__tests__/tags.test.ts` (+9 tests):** VOLATILE: rank=120 inclusive (fires), rank=121 out, std=19 below threshold. SLEEPER: vorp=0 does not fire, rank=84 does not fire, rank=85+vorp=1 fires. Multi-tag: ELITE+POCKET together, INJURY+SLEEPER together, plain average player -> 0 tags.
+- **`src/lib/players/__tests__/headshot.test.ts` (+8 tests):** normalizeName: III/IV/Sr. suffixes dropped, apostrophe stripped (De'Von Achane -> 'devon achane'), whitespace-only -> '', idempotency. headshotUrl: unknown player -> null (two assertions), null ?? SILHOUETTE_SRC -> '/player-silhouette.svg'.
+
+**Verify gate:**
+
+| Check | Result |
+|-------|--------|
+| `npm run type-check` | CLEAN (0 errors) |
+| `npm run test:run` | **205/205 passed** (+43; was 162) |
+| `npm run lint` | 161 problems (51 errors, 110 warnings) -- 1 fewer than 162 baseline; 0 new |
+| `npm run build` | CLEAN |
+| Static analysis | 0 CRITICAL, 0 HIGH; 1 LOW (BUG-004, fixed) |
+
+---
+
 ## 2026-08-12 / S4 -- strategies made real ($0 rule-based fallback, targets/avoids wired, FB-16/FB-17 closed)
 
 **Task:** ROAD TO DRAFT S4 `[Sonnet wiring; no AI spend -- ANTHROPIC_API_KEY absent]` -- close FB-16 (strategies wired, saveable, suggest-from-targets) and FB-17 (player pull feeds the whole chain end-to-end). | **Class:** pipeline | **Lenses:** Architecture, QA
