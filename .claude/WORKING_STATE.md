@@ -9,9 +9,11 @@
 
 **S1 done (2026-08-11):** config truth + navigation. FB-1 (duplicate-active-league drift, fixed in `prep/configure/actions.ts` + one-time data fix), FB-4 (Pre Flight -- verified already dead), FB-5 (back-nav on players/board/strategies/simulate), FB-6 ("Draft Board" -> "Cheat Sheet" + inline help). Verify gate clean (type-check/test 96-96/lint 0 new/build); loaded-preview screenshot deferred -- Next.js 16 locks dev servers per-project-directory, another session held this project's only lock all session, Joe waived the screenshot rather than kill that session's server. Detail: `BUILD_PLAN.md` S1 section + FB-1/4/5/6 lines.
 
-**Next open item:** **S2 [Sonnet + Joe] -- Live draft join + sync actually works.** Fix the broken `/draft/live?session=...&aif=remote` junk page (FB-7); folds in DR-7.2 (live contract smoke-test). Reads first: `draft/live/client.tsx`, `use-remote-auctioneer-feed.ts`, `api/auctioneer-feed/route.ts`, `state.ts`. Then S3 = P3 valuation engine (VAL-1..3).
+**Reordered 2026-08-11 (Joe's call):** all solo-buildable engineering now runs before anything needing Joe's hands-on testing. S8 is the only session that needs Joe -- it runs last, once the app actually works. New order: S1(done) -> S2=valuation engine -> S3=research depth -> S4=strategies -> S5=bug hunt (S1-S4) -> S6=live join/sync fix (solo code-fix; full live-auctioneer proof deferred to S8) -> S7=Claude-driven usability test -> S8=Joe's rehearsal (the only Joe-testing session). Detail: `BUILD_PLAN.md` "ROAD TO DRAFT" block.
 
-**Cut line (needs draft date):** S1 -> S2 -> S3 -> S6 -> S7 -> S8 is the minimum viable draft-night path (the hardening passes S6-S8 are NOT optional); S4/S5 are compressible depth. Joe to give the draft date to set the hard must-have line.
+**Next open item:** **S2 [Opus] -- P3 valuation engine (VAL-1 -> VAL-2 -> VAL-3).** Ceiling/reality/play pricing on the corrected 16yr Nasties ledger. VAL-0 done. Reads first: the P3 section of `BUILD_PLAN.md`, `src/data/league-history/*`, `scripts/derive-league-calibration.ts`, `convert.ts`, `auction-advisor.ts`, `tendencies.ts`.
+
+**Cut line (needs draft date):** S1 -> S2 -> S5 -> S6 -> S7 -> S8 is the minimum viable draft-night path (the hardening passes S5/S7/S8 are NOT optional); S3/S4 are compressible depth. Joe to give the draft date to set the hard must-have line.
 
 **VAL-0 done (2026-08-11):** real 16-year Nasties ledger corrected + imported in-repo.
 - Position corruption fixed: `src/data/league-history/history-corrected.json` (961 names, 98.8% of picks). The 5 WRs mislabeled RB on Joe's 2025 roster now correct.

@@ -1,6 +1,6 @@
 <!-- DASHBOARD_STATUS
 {
-  "currentPhase": "ROAD TO DRAFT — ordered build sessions S1→S8 (S1 config/nav trust · S2 live sync · S3=P3 valuation engine · S4 research depth · S5 strategies · S6 bug hunt+tests · S7 Claude-driven Chrome usability test · S8=DR-7 rehearsal)",
+  "currentPhase": "ROAD TO DRAFT — ordered build sessions S1→S8 (S1 config/nav trust · S2=P3 valuation engine · S3 research depth · S4 strategies · S5 bug hunt+tests · S6 live sync fix · S7 Claude-driven Chrome usability test · S8=DR-7 rehearsal). Reordered 2026-08-11 (Joe): all solo-buildable engineering work runs before anything needing Joe's hands-on testing — S8 is the only session that needs Joe, and it runs last.",
   "status": "active",
   "milestones": [
     { "name": "Phase 0-2 — Data pipeline + strategy engine", "done": true },
@@ -20,14 +20,14 @@
   ],
   "nextItems": [
     "[DONE 2026-08-11] S1 [Sonnet]: Config truth + nav — fix the '10 teams' source (FB-1), kill 'Pre Flight' (FB-4), add back-nav (FB-5), clarify Draft Board vs Live Draft (FB-6). Trust-killers first.",
-    "S2 [Sonnet+Joe]: Live draft Join + sync actually works (FB-7) — the broken /draft/live junk page. Folds DR-7.2. This IS draft night.",
-    "S3 [Opus] = P3: valuation engine ceiling/reality/play (VAL-1/2/3) on the corrected 16yr ledger. VAL-0 done. Closes FB-12/FB-15.",
-    "S4 [Opus+Sonnet]: research depth — value RANGE not point (FB-10), real sourced tags (FB-9), bye/images/proj/rec (FB-13), source transparency (FB-14), dynamic-on-pull (FB-11), verify ADP gone (FB-8).",
-    "S5 [Opus+Sonnet]: strategies real — wired/auto-run/save/suggest-from-targets (FB-16), player-pull end-to-end (FB-17).",
-    "S6 [Sonnet/Opus]: bug hunt + test hardening — /bug-hunt full across the app + expand automated coverage on the S1-S5 paths.",
-    "S7 [Claude drives Chrome]: my own usability test — walk every flow at mobile arm's-length, catalog + fix friction/dead-ends BEFORE Joe's phone rehearsal.",
-    "S8 [Sonnet+Joe] = DR-7.3/7.4/7.5: offline-resync rehearsal, phone test, full mock draft — the draft-night gate, run LAST on the hardened app.",
-    "Per-session gate (S1-S5): type-check + test:run + lint(0 new) + build + /bug-hunt free on changed modules + a loaded-preview screenshot before any session is called done."
+    "S2 [Opus] = P3: valuation engine ceiling/reality/play (VAL-1/2/3) on the corrected 16yr ledger. VAL-0 done. Closes FB-12/FB-15.",
+    "S3 [Opus+Sonnet]: research depth — value RANGE not point (FB-10), real sourced tags (FB-9), bye/images/proj/rec (FB-13), source transparency (FB-14), dynamic-on-pull (FB-11), verify ADP gone (FB-8).",
+    "S4 [Opus+Sonnet]: strategies real — wired/auto-run/save/suggest-from-targets (FB-16), player-pull end-to-end (FB-17).",
+    "S5 [Sonnet/Opus]: bug hunt + test hardening on S1-S4 — /bug-hunt full + expand automated coverage on those paths.",
+    "S6 [Sonnet]: fix live draft Join + sync (FB-7) — the broken /draft/live junk page. Solo code-fix; full live-auctioneer proof deferred to S8.",
+    "S7 [Claude drives Chrome]: my own usability test — walk every flow (including the now-fixed Join/sync) at mobile arm's-length, catalog + fix friction/dead-ends BEFORE Joe's phone rehearsal.",
+    "S8 [Sonnet+Joe] = DR-7.3/7.4/7.5: offline-resync rehearsal, phone test, full mock draft — the ONLY session that needs Joe's hands-on testing, run LAST on the hardened app.",
+    "Per-session gate (S1-S6): type-check + test:run + lint(0 new) + build + /bug-hunt free on changed modules + a loaded-preview screenshot before any session is called done."
   ]
 }
 -->
@@ -64,6 +64,7 @@ Task tracking: `[ ]` not started · `[~]` in progress · `[x]` done · `[!]` blo
 **This is the authoritative execution order.** Everything below (P2 DR-7, P3 VAL, and the FB-* morning-feedback catalog) is real detail; this block says *what order we build in and in which session*. Each **S#** is one **context-aware build session** — scoped to fit a single focused sitting, model-bound, with what to read first and a hard "done-when." Work them top to bottom. Draft date sets the cut line (see note at end).
 
 > **Legend:** each session lists the **FB-#/VAL-#/DR-#** items it closes. Status of every individual item lives in its detail section below.
+> **Reordered 2026-08-11 (Joe's call):** all solo-buildable engineering (S2-S7) now runs before anything that needs Joe's hands-on testing. **S8 is the only session that needs Joe** — it runs dead last, once the app actually works. The live-sync fix (formerly S2) moved to **S6**: the actual bug (broken Join page) is a solo code-fix, so it doesn't need to block the engine/research/strategy work; only the *full proof against a real running auctioneer* needs Joe, and that's folded into S8.
 
 ### S1 — Stop the bleeding: config truth + navigation `[Sonnet]` · class: shared/output — **[DONE 2026-08-11]**
 > **Why first:** these are the trust-killers. A board that says "10 teams," a phantom "Pre Flight," and no way to go back make the whole app read as broken — no engine matters until the frame is trustworthy.
@@ -72,36 +73,36 @@ Task tracking: `[ ]` not started · `[~]` in progress · `[x]` done · `[!]` blo
 > **Done-when:** app shows **12 teams** everywhere, sourced from real league config; no "Pre Flight" anywhere; every deep screen has a clear back affordance; nav labels unambiguous. Proven on a preview I load, with screenshots.
 > **Closed:** type-check/test(96)/lint(0 new)/build all clean. **Visual proof outstanding** — Next.js 16 (Turbopack) locks dev servers per-project-directory (not per-port), and another session's `npm run dev` held this project's only lock the entire session, so no preview could load here. Joe explicitly waived the loaded-preview screenshot for this session (2026-08-11) rather than kill the other session's server; first person to open `/prep`, `/prep/board`, `/prep/players`, `/prep/strategies`, `/prep/simulate` should eyeball the new back-links + "Cheat Sheet" rename.
 
-### S2 — Live draft join + sync actually works `[Sonnet + Joe]` · class: pipeline
-> **Why second:** this IS draft night. "Auctioneer is Live" → **Join → broken junk page, not syncing** means the app fails at the one moment it exists for. Nothing else ships until Join works.
-> **Reads first:** `draft/live/client.tsx`, `use-remote-auctioneer-feed.ts`, `api/auctioneer-feed/route.ts`, `state.ts`.
-> **Closes:** FB-7 (broken join/sync). Folds in **DR-7.2** (live contract smoke-test).
-> **Done-when:** from "Auctioneer is Live," Join enters a working room showing **real team names + live picks syncing within ~3-6s**, no broken page, no CORS. Full proof needs the live auctioneer running (Joe).
-
-### S3 — The valuation engine: ceiling / reality / play `[Opus]` · class: pipeline
-> **Why third:** this is the actual point of the app — dynamic, league-calibrated pricing on 16 years of Nasties history. It only matters once the shell (S1) and the live feed (S2) are trustworthy.
+### S2 — The valuation engine: ceiling / reality / play `[Opus]` · class: pipeline
+> **Why second:** this is the actual point of the app — dynamic, league-calibrated pricing on 16 years of Nasties history. It only matters once the shell (S1) is trustworthy.
 > **This session = P3 VAL-1 → VAL-2 → VAL-3** (detail in the P3 section). VAL-0 done.
 > **Reads first:** the P3 section, `src/data/league-history/*`, `scripts/derive-league-calibration.ts`, `convert.ts`, `auction-advisor.ts`, `tendencies.ts`.
 > **Closes:** VAL-1/2/3, FB-15 (league-history context), FB-12 (in-draft repricing as tiers deplete).
 > **Done-when:** re-priced board proof (ceiling/room/gap); tendency engine emits real exploit signals; live max-bid re-anchored off the national number onto calibrated values + live state.
 
-### S4 — Research surface depth `[Opus for the value-range + tag model · Sonnet for UI]` · class: output/pipeline
-> **Why fourth:** the Research/Players surface is where you decide targets. It needs to be rich and transparent, and it sits on S3's engine.
+### S3 — Research surface depth `[Opus for the value-range + tag model · Sonnet for UI]` · class: output/pipeline
+> **Why third:** the Research/Players surface is where you decide targets. It needs to be rich and transparent, and it sits on S2's engine.
 > **Reads first:** `prep/players/client.tsx`, `players/tags.ts`, `players/convert.ts`, the auctioneer image store.
 > **Closes:** FB-9 (real sourced tag taxonomy), FB-10 (values as a RANGE), FB-11 (dynamic on each pull), FB-13 (bye + images-from-auctioneer + league proj + per-player rec), FB-14 (projection/source transparency in-app). Verifies FB-8 (ADP gone) on the live screen.
 > **Done-when:** each player shows a value **range** + sourced tags + bye + headshot + league-specific projection + a one-line recommendation + a "how this is calculated / sources" affordance; a pull refreshes values.
 
-### S5 — Strategies made real `[Opus for suggest-from-targets · Sonnet wiring]` · class: pipeline
-> **Why fifth:** strategy is the payoff of the engine + research, but it's the least broken today, so it comes after the must-haves.
+### S4 — Strategies made real `[Opus for suggest-from-targets · Sonnet wiring]` · class: pipeline
+> **Why fourth:** strategy is the payoff of the engine + research, but it's the least broken today, so it comes after the must-haves.
 > **Reads first:** `prep/strategies/client.tsx`, `api/strategies/propose`, `research/service.ts`.
 > **Closes:** FB-16 (is it wired / auto-run on new data / save a strategy / suggest from targets+avoids), FB-17 (player-pull end-to-end actually feeds the whole chain).
 > **Done-when:** strategies generate on fresh data (or are clearly gated + explained), are saveable, can be AI-suggested from your target/avoid list; a player pull demonstrably drives values → tags → strategy end-to-end.
 
-### S6 — Bug hunt + test hardening (whole app) `[Sonnet · Opus for logic bugs]` · class: bugfix/pipeline
-> **Why here:** S1-S5 each pass their own per-session gate, but that only catches regressions in what changed. This is the dedicated *whole-app* sweep before any human clicks through it.
-> **Reads first:** `.claude/REVIEW_LENSES.md`, the S1-S5 CHANGELOG entries, `src/**/*.test.ts`.
-> **Scope:** (a) run `/bug-hunt full` (tests + build) across the whole project, triage findings by severity, fix the real ones; (b) **expand automated coverage** on the new S1-S5 code paths — config→12-teams, join/sync, calibrated values, tag/range model, strategy chain — so the logic that matters is actually tested, not just present.
-> **Done-when:** `/bug-hunt full` clean (or every finding triaged with a written reason to defer); `npm run test:run` green with new tests covering the S1-S5 paths; `type-check` + `lint` (0 new) + `build` clean. Findings + fixes logged in CHANGELOG.
+### S5 — Bug hunt + test hardening (S1-S4) `[Sonnet · Opus for logic bugs]` · class: bugfix/pipeline
+> **Why here:** S1-S4 each pass their own per-session gate, but that only catches regressions in what changed. This is a dedicated sweep across everything built so far, before the live-sync fix and the final whole-app pass.
+> **Reads first:** `.claude/REVIEW_LENSES.md`, the S1-S4 CHANGELOG entries, `src/**/*.test.ts`.
+> **Scope:** (a) run `/bug-hunt full` (tests + build) across the whole project, triage findings by severity, fix the real ones; (b) **expand automated coverage** on the new S1-S4 code paths — config→12-teams, calibrated values, tag/range model, strategy chain — so the logic that matters is actually tested, not just present.
+> **Done-when:** `/bug-hunt full` clean (or every finding triaged with a written reason to defer); `npm run test:run` green with new tests covering the S1-S4 paths; `type-check` + `lint` (0 new) + `build` clean. Findings + fixes logged in CHANGELOG.
+
+### S6 — Live draft join + sync actually works `[Sonnet]` · class: pipeline
+> **Why here, not earlier:** "Auctioneer is Live" → **Join → broken junk page, not syncing** is a real bug (FB-7), but fixing it is a solo code job — it doesn't need to gate the engine/research/strategy work, and it doesn't need Joe in the room. It DOES need to be fixed before S7 (usability test walks the Join flow) and S8 (rehearsal runs on it for real).
+> **Reads first:** `draft/live/client.tsx`, `use-remote-auctioneer-feed.ts`, `api/auctioneer-feed/route.ts`, `state.ts`.
+> **Closes:** FB-7 (broken join/sync page).
+> **Done-when:** from "Auctioneer is Live," Join enters a working room showing real team names, no broken page, no CORS — verified as far as solo local testing can confirm. **Full proof of live picks syncing within ~3-6s against a real running auctioneer is Joe's job at S8**, not this session's — do not claim that part done here.
 
 ### S7 — Usability test — I drive it in Chrome `[Claude driving + Sonnet to fix]` · class: output/bugfix
 > **Why here:** your phone rehearsal (S8) must **not** be the first time a human clicks through this. I walk the whole app myself first and fix the friction, so S8 is a confirmation, not a discovery.
@@ -110,13 +111,13 @@ Task tracking: `[ ]` not started · `[~]` in progress · `[x]` done · `[!]` blo
 > **Done-when:** a written usability-findings list (each with a screenshot), every P1/P2 issue fixed and re-shot, and a final clean walkthrough screenshot set proving the flows hold together. This is my sign-off that it's *ready for your hands* — not that it's "perfect."
 
 ### S8 — Draft-night rehearsal — THE GATE `[Sonnet + Joe]` · class: pipeline
-> **Why last:** you can only rehearse the finished, hardened app. This is the "ready for draft night" sign-off — the one only you can give.
-> **This session = DR-7.3 → DR-7.4 → DR-7.5** (detail in the DR-7 section).
-> **Done-when:** full mock draft on your phone against the live auctioneer — picks tracking, calibrated advice correct, budgets right, offline-resync proven, no surprises. Any issues found here become a short S8-fix list (expected — that's what a rehearsal is for).
+> **Why last:** you can only rehearse the finished, hardened app, and this is the **only session that needs your hands-on testing.** Nothing before this asks you to test anything. This is the "ready for draft night" sign-off — the one only you can give.
+> **This session = DR-7.3 → DR-7.4 → DR-7.5**, plus the live-auctioneer proof deferred from S6 (detail in the DR-7 section).
+> **Done-when:** full mock draft on your phone against the live auctioneer — join/sync proven live, picks tracking, calibrated advice correct, budgets right, offline-resync proven, no surprises. Any issues found here become a short S8-fix list (expected — that's what a rehearsal is for).
 
-> **Per-session gate (baked into S1-S5, non-negotiable):** no build session is called done until `npm run type-check` + `npm run test:run` + `npm run lint` (0 new) + `npm run build` all pass, **plus `/bug-hunt free` on the changed modules**, **plus a screenshot from a preview I actually loaded**. S6-S8 are the dedicated *whole-app* hardening passes stacked on top of that per-session discipline.
+> **Per-session gate (baked into S1-S6, non-negotiable):** no build session is called done until `npm run type-check` + `npm run test:run` + `npm run lint` (0 new) + `npm run build` all pass, **plus `/bug-hunt free` on the changed modules**, **plus a screenshot from a preview I actually loaded**. S5/S7 are the dedicated *whole-app* hardening passes stacked on top of that per-session discipline; S8 is the final human gate.
 
-> **Cut line (needs the draft date):** S1 → S2 → S3 → S6 → S7 → S8 is the **minimum** for a working, trustworthy, genuinely-helpful draft night (the hardening passes S6-S8 are NOT optional — they are how "working" gets proven). S4 and S5 are high-value depth that can compress if the date is tight. Tell me the draft date and I'll mark the hard must-have line.
+> **Cut line (needs the draft date):** S1 → S2 → S5 → S6 → S7 → S8 is the **minimum** for a working, trustworthy, genuinely-helpful draft night (the hardening passes S5/S7/S8 are NOT optional — they are how "working" gets proven). S3 and S4 are high-value depth that can compress if the date is tight. Tell me the draft date and I'll mark the hard must-have line.
 
 ---
 
@@ -132,10 +133,10 @@ Task tracking: `[ ]` not started · `[~]` in progress · `[x]` done · `[!]` blo
 - [x] FB-5: **No way to go back** from deep screens (Players etc.). Done 2026-08-11 — added the existing back-link pattern (already used in `prep/configure/page.tsx` and `prep/runs/page.tsx`: `ChevronLeft` + label, linking to the actual parent screen) to `prep/players/client.tsx`, `prep/board/client.tsx`, `prep/strategies/client.tsx` (all → **Research** / `/prep`, where their jump-rows on the hub actually link from) and `prep/simulate/page.tsx` (→ **Strategies** / `/prep/strategies`, its real entry point).
 - [x] FB-6: Clarify **"Draft Board" vs "Live Draft"**. Done 2026-08-11 — renamed the pre-draft rankings screen from "Draft Board" to **"Cheat Sheet"** (both the `/prep` hub jump-row label and the screen's own `<h1>`, `prep/page.tsx:395` + `prep/board/client.tsx`) since "Draft Board" read as if it *was* the live auction; added one line of inline help under the header: "Your pre-draft rankings - the auction itself happens under Live Draft."
 
-**Live draft sync (→ S2):**
-- [ ] FB-7: "Auctioneer is Live," but **Join the draft → broken junk page, not syncing** (`/draft/live?session=…&aif=remote`). Verify + fix the join→room→sync path.
+**Live draft sync (→ S6):**
+- [ ] FB-7: "Auctioneer is Live," but **Join the draft → broken junk page, not syncing** (`/draft/live?session=…&aif=remote`). Verify + fix the join→room→sync path. Note: DR-7.2 (the raw feed-contract smoke test) is already verified 2026-08-10 — this item is specifically about the Join UI page itself, a distinct bug.
 
-**Research / Players (→ S4, except values→S3):**
+**Research / Players (→ S3, except values→S2):**
 - [x] FB-8: **Remove ADP** (snake stat, meaningless in auction; was ECR rank mislabeled). Coded done (CHANGELOG 2026-08-11) — re-verify on the live screen in S4.
 - [~] FB-9: **Real player tags** (Avoid / Breakout / etc.) sourced from the research, not `Math.random()`. Partial — VALUE/AVOID kept, fabricated BREAKOUT/SLEEPER removed (DR-4.1); the real sourced tag set is **not** rebuilt. Define the taxonomy + data source.
 - [ ] FB-10: Show a value **RANGE**, not a single point.

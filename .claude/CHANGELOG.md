@@ -2,6 +2,22 @@
 
 ---
 
+## 2026-08-11 / ROAD TO DRAFT — reordered so Joe never tests an unfinished app (planning)
+
+**Task:** Joe: "put that towards the bottom of the build plan, I'm not doing a test until the app works" (in response to S2 being proposed next — live join/sync, tagged `[Sonnet+Joe]`, needing his auctioneer running to verify) | **Class:** `docs` | **Lenses:** Delivery
+
+**Problem:** the session sequence put a Joe-required verification step (S2, live join/sync) second, right after S1 — meaning Joe would be pulled in to test a barely-started app long before the valuation engine, research depth, or strategies existed. That's backwards: solo-buildable work should run first, and anything needing Joe's hands-on time should be last, once there's something worth testing.
+
+**What changed (plan docs only — no app code):**
+- **BUILD_PLAN.md ROAD TO DRAFT re-sequenced:** S1(done, config/nav) → **S2** = P3 valuation engine `[Opus]` (was S3) → **S3** = research depth `[Opus+Sonnet]` (was S4) → **S4** = strategies `[Opus+Sonnet]` (was S5) → **S5** = bug hunt on S1-S4 `[Sonnet/Opus]` (was S6) → **S6** = live join/sync fix `[Sonnet]`, retagged solo — the actual bug (broken Join page) is a code fix, not a Joe-testing task; only the *full proof against a real running auctioneer* still needs Joe, and that's explicitly deferred to S8 → S7 = Claude-driven Chrome usability test (unchanged position) → **S8** = Joe's rehearsal `[Sonnet+Joe]`, still last, still the **only** session that needs Joe's hands-on testing.
+- Fixed a stale cross-reference caught while re-sequencing: S2(old)'s "Folds in DR-7.2" was wrong — DR-7.2 (the raw auctioneer feed-contract smoke test) was already verified 2026-08-10; FB-7 (the broken `/draft/live` Join page) is a distinct, still-open bug. Corrected the FB-7 catalog note to say so.
+- Cut line updated: **S1 → S2 → S5 → S6 → S7 → S8** is now the minimum viable draft-night path; S3/S4 (research depth, strategies) remain compressible depth.
+- `WORKING_STATE.md` "Next open item" repointed to the new S2 (valuation engine), with the reorder logged as a thin pointer back here.
+
+**Verify:** plan-only change, no runtime touched. No type-check/test run required for docs.
+
+---
+
 ## 2026-08-11 / S1 — config truth + navigation (FB-1, FB-4, FB-5, FB-6)
 
 **Task:** ROAD TO DRAFT S1 `[Sonnet]` — fix "10 teams" (FB-1), kill "Pre Flight" (FB-4), add back-nav from deep screens (FB-5), clarify Draft Board vs Live Draft (FB-6) | **Class:** shared/output | **Lenses:** Correctness, Delivery
