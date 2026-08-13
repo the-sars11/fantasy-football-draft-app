@@ -83,6 +83,9 @@ interface FFIPlayerIntelCardProps {
   dismissedSystemTags?: string[]
   onDismissSystemTag?: (tag: string) => void
   onUndismissSystemTag?: (tag: string) => void
+  tagWeight?: number
+  tagSeverity?: string
+  onUpdateGrade?: (weight?: number, severity?: string) => void
 }
 
 // --- Component ---
@@ -101,6 +104,9 @@ export function FFIPlayerIntelCard({
   dismissedSystemTags = [],
   onDismissSystemTag,
   onUndismissSystemTag,
+  tagWeight = 5,
+  tagSeverity = 'soft',
+  onUpdateGrade,
 }: FFIPlayerIntelCardProps) {
   const [showCalc, setShowCalc] = useState(false)
   const rankDisplay = rank.toString().padStart(2, '0')
@@ -479,6 +485,72 @@ export function FFIPlayerIntelCard({
                   {isAvoid ? <><X className="h-3.5 w-3.5" />AVOIDING</> : <><Ban className="h-3.5 w-3.5" />Mark to Avoid</>}
                 </button>
               </div>
+
+              {/* Grade controls — only shown when a tag is active */}
+              {isTarget && (
+                <div className="flex items-center gap-3 mt-3 pt-3 border-t border-[#8bacff]/10">
+                  <span className="font-body text-[10px] font-bold uppercase tracking-widest text-[#697782] w-16 shrink-0">
+                    Priority
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        onUpdateGrade?.(Math.max(1, tagWeight - 1), undefined)
+                      }}
+                      disabled={isTagLoading || tagWeight <= 1}
+                      className="w-7 h-7 rounded-lg flex items-center justify-center text-sm font-bold transition-all bg-[#2ff801]/10 text-[#2ff801] hover:bg-[#2ff801]/20 disabled:opacity-30 disabled:cursor-not-allowed"
+                      aria-label="Decrease priority"
+                    >
+                      −
+                    </button>
+                    <span className="font-headline text-lg font-bold text-[#2ff801] w-6 text-center tabular-nums">
+                      {tagWeight}
+                    </span>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        onUpdateGrade?.(Math.min(10, tagWeight + 1), undefined)
+                      }}
+                      disabled={isTagLoading || tagWeight >= 10}
+                      className="w-7 h-7 rounded-lg flex items-center justify-center text-sm font-bold transition-all bg-[#2ff801]/10 text-[#2ff801] hover:bg-[#2ff801]/20 disabled:opacity-30 disabled:cursor-not-allowed"
+                      aria-label="Increase priority"
+                    >
+                      +
+                    </button>
+                    <span className="font-body text-[10px] text-[#697782]">/ 10</span>
+                  </div>
+                </div>
+              )}
+
+              {isAvoid && (
+                <div className="flex items-center gap-3 mt-3 pt-3 border-t border-[#8bacff]/10">
+                  <span className="font-body text-[10px] font-bold uppercase tracking-widest text-[#697782] w-16 shrink-0">
+                    Severity
+                  </span>
+                  <div className="flex gap-1.5">
+                    {(['soft', 'hard'] as const).map((s) => (
+                      <button
+                        key={s}
+                        onClick={(e) => { e.stopPropagation(); onUpdateGrade?.(undefined, s) }}
+                        disabled={isTagLoading}
+                        className={`
+                          px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all
+                          ${tagSeverity === s
+                            ? s === 'hard'
+                              ? 'bg-[#ff716c]/40 text-[#ff716c] shadow-[0_0_8px_rgba(255,113,108,0.3)]'
+                              : 'bg-[#ff716c]/20 text-[#ff716c]'
+                            : 'bg-[#8bacff]/8 text-[#697782] hover:text-[#9eadb8]'
+                          }
+                          disabled:opacity-50 disabled:cursor-not-allowed
+                        `}
+                      >
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}

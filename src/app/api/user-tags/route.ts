@@ -111,6 +111,8 @@ export async function POST(req: NextRequest) {
       note,
       overrideSystemTags = false,
       dismissedSystemTags = [],
+      weight,
+      severity,
     } = body as {
       playerCacheId?: string
       leagueId?: string | null
@@ -118,6 +120,8 @@ export async function POST(req: NextRequest) {
       note?: string
       overrideSystemTags?: boolean
       dismissedSystemTags?: string[]
+      weight?: number
+      severity?: string
     }
 
     if (!playerCacheId) {
@@ -132,6 +136,12 @@ export async function POST(req: NextRequest) {
     // Normalize tags (lowercase, remove duplicates)
     const normalizedTags = [...new Set(tags.map((t) => t.toLowerCase()))]
 
+    // Clamp weight to 1-10; validate severity.
+    const safeWeight = weight !== undefined
+      ? Math.max(1, Math.min(10, Math.round(weight)))
+      : undefined
+    const safeSeverity = severity === 'hard' ? 'hard' : severity === 'soft' ? 'soft' : undefined
+
     const insert: UserTagsInsert = {
       player_cache_id: playerCacheId,
       league_id: leagueId,
@@ -139,6 +149,8 @@ export async function POST(req: NextRequest) {
       note: note || null,
       override_system_tags: overrideSystemTags,
       dismissed_system_tags: dismissedSystemTags,
+      ...(safeWeight !== undefined && { tag_weight: safeWeight }),
+      ...(safeSeverity !== undefined && { tag_severity: safeSeverity }),
     }
 
     // Use upsert to handle create-or-update in one operation
@@ -392,12 +404,14 @@ export async function DELETE(req: NextRequest) {
 export async function PATCH(req: NextRequest) {
   try {
     const body = await req.json()
-    const { playerCacheId, leagueId = null, toggleTag, action, tag: systemTag } = body as {
+    const { playerCacheId, leagueId = null, toggleTag, action, tag: systemTag, weight, severity } = body as {
       playerCacheId?: string
       leagueId?: string | null
       toggleTag?: string
-      action?: 'dismissSystemTag' | 'undismissSystemTag'
+      action?: 'dismissSystemTag' | 'undismissSystemTag' | 'updateGrade'
       tag?: string
+      weight?: number
+      severity?: string
     }
 
     // --- System tag dismiss / undismiss ---
@@ -461,6 +475,70 @@ export async function PATCH(req: NextRequest) {
           return NextResponse.json({ error: error.message }, { status: 500 })
         }
         return NextResponse.json({ userTag: data, action, tag: normalizedTag, created: true })
+      }
+    }
+
+    // --- Grade update (weight / severity without toggling the tag) ---
+    if (action === 'updateGrade') {
+      if (!playerCacheId) {
+        return NextResponse.json({ error: 'playerCacheId is required' }, { status: 400 })
+      }
+
+      const safeWeight = weight !== undefined
+        ? Math.max(1, Math.min(10, Math.round(weight)))
+        : undefined
+      const safeSeverity = severity === 'hard' ? 'hard' : severity === 'soft' ? 'soft' : undefined
+
+      if (safeWeight === undefined && safeSeverity === undefined) {
+        return NextResponse.json({ error: 'weight or severity is required for updateGrade' }, { status: 400 })
+      }
+
+      const supabase = await getClient()
+      if (!supabase) {
+        return NextResponse.json({ error: 'Database not available' }, { status: 503 })
+      }
+
+      // Look up existing record
+      let gradeQuery = supabase.from('user_tags').select('*').eq('player_cache_id', playerCacheId)
+      if (leagueId === null) {
+        gradeQuery = gradeQuery.is('league_id', null)
+      } else {
+        gradeQuery = gradeQuery.eq('league_id', leagueId)
+      }
+      const { data: gradeExisting, error: gradeLookupError } = await gradeQuery.maybeSingle()
+
+      if (gradeLookupError) {
+        return NextResponse.json({ error: gradeLookupError.message }, { status: 500 })
+      }
+
+      const gradeUpdate: Record<string, unknown> = { updated_at: new Date().toISOString() }
+      if (safeWeight !== undefined) gradeUpdate.tag_weight = safeWeight
+      if (safeSeverity !== undefined) gradeUpdate.tag_severity = safeSeverity
+
+      if (gradeExisting) {
+        const { data, error } = await supabase
+          .from('user_tags')
+          .update(gradeUpdate)
+          .eq('id', gradeExisting.id)
+          .select()
+          .single()
+        if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+        return NextResponse.json({ userTag: data, updated: true })
+      } else {
+        // No record yet — create one with the grade (no tags yet)
+        const { data, error } = await supabase
+          .from('user_tags')
+          .insert({
+            player_cache_id: playerCacheId,
+            league_id: leagueId,
+            tags: [],
+            ...(safeWeight !== undefined && { tag_weight: safeWeight }),
+            ...(safeSeverity !== undefined && { tag_severity: safeSeverity }),
+          })
+          .select()
+          .single()
+        if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+        return NextResponse.json({ userTag: data, created: true })
       }
     }
 

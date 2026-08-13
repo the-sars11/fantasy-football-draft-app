@@ -22,6 +22,8 @@ interface UserTagsMap {
     overrideSystemTags: boolean
     dismissedSystemTags: string[]
     leagueId: string | null
+    tagWeight: number
+    tagSeverity: string
   }
 }
 
@@ -695,4 +697,49 @@ export function usePlayerTags(
     toggleTag,
     dismiss,
   }
+}
+
+/**
+ * Hook for updating the grade (weight / severity) on a user tag without
+ * toggling the tag itself. Calls PATCH /api/user-tags with action='updateGrade'.
+ */
+export function useUpdateGrade(leagueId?: string | null): {
+  updateGrade: (playerCacheId: string, weight?: number, severity?: string) => Promise<{ success: boolean; error?: string }>
+  isLoading: boolean
+  error: string | null
+} {
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const updateGrade = useCallback(async (
+    playerCacheId: string,
+    weight?: number,
+    severity?: string,
+  ): Promise<{ success: boolean; error?: string }> => {
+    setIsLoading(true)
+    setError(null)
+    try {
+      const res = await fetch('/api/user-tags', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          playerCacheId,
+          leagueId: leagueId ?? null,
+          action: 'updateGrade',
+          weight,
+          severity,
+        }),
+      })
+      if (!res.ok) { const d = await res.json(); throw new Error(d.error) }
+      return { success: true }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Unknown error'
+      setError(message)
+      return { success: false, error: message }
+    } finally {
+      setIsLoading(false)
+    }
+  }, [leagueId])
+
+  return { updateGrade, isLoading, error }
 }

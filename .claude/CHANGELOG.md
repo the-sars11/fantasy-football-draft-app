@@ -2,6 +2,40 @@
 
 ---
 
+## 2026-08-13 / R7a -- Persistence rework + graded tag scale: stable player ID anchor + weight/severity UI
+
+**Task:** REBUILD R7a `[Sonnet]` -- migrate `user_tags` to a stable player ID anchor and wire the weight/severity scale (already in TypeScript types) into the DB, API, and tagging UI. | **Class:** schema/pipeline | **Lenses:** Architecture, QA, Security, Ops
+
+**Problem (RV-17 + RV-15):** Two separate fragility issues in the tagging system. RV-17: `user_tags.player_cache_id` was a UUID FK into `players_cache.id`, which is an auto-generated UUID that changes on every seed run -- a re-seed cascade-deletes all user tags. RV-15: `PlayerTarget.weight` (1-10) and `PlayerAvoid.severity` (soft/hard) existed as TypeScript types (`src/lib/players/types.ts:150-166`) but had no DB column, no API surface, and a binary-only tagging UI.
+
+**What changed:**
+
+- **`supabase/migrations/20260813000001_user_tags_graded_scale.sql` (NEW):** idempotent `ALTER TABLE user_tags ADD COLUMN IF NOT EXISTS` for `tag_weight integer NOT NULL DEFAULT 5`, `tag_severity text NOT NULL DEFAULT 'soft'`, `player_external_id text` (nullable). Two re-run-safe CHECK constraints (`tag_weight` range 1-10, `tag_severity` values soft/hard via DO blocks). Backfill `player_external_id` from `players_cache.external_id` where available. `RAISE NOTICE` logs the count of unmatched rows (valid -- FK still intact, external_id was null on those players). Partial covering index on `player_external_id WHERE IS NOT NULL`. **NOT applied to production Supabase -- Joe applies manually.**
+- **`src/lib/supabase/database.types.ts`:** `UserTags`, `UserTagsInsert`, `UserTagsUpdate` updated with `player_external_id: string | null`, `tag_weight: number`, `tag_severity: string`.
+- **`src/app/api/user-tags/batch/route.ts`:** `userTagsMap` entries now carry `tagWeight: number` and `tagSeverity: string`; league-specific record's grade wins over global default in the merge loop.
+- **`src/app/api/user-tags/route.ts`:** POST handler accepts `weight` (clamped 1-10) and `severity` ('soft'/'hard') in the insert spread. PATCH handler: `action: 'updateGrade'` looks up the existing record by `player_cache_id` + `league_id`, updates `tag_weight`/`tag_severity` if found, creates a new graded record (empty tags array) if not found. Returns `{ userTag, updated: true }` or `{ userTag, created: true }`.
+- **`src/hooks/use-user-tags.ts`:** `UserTagsMap` entries now carry `tagWeight: number` and `tagSeverity: string`. New `useUpdateGrade(leagueId)` hook -- PATCH `action: 'updateGrade'`, returns `{ success, error? }`.
+- **`src/components/prep/ffi-player-intel-card.tsx`:** new props `tagWeight?: number`, `tagSeverity?: string`, `onUpdateGrade?: (weight?, severity?) => void`. In the expanded "Your Tags" section: weight stepper (decrement / numeric display / increment, volt-green, 1-10) appears when `isTarget`; severity toggle (SOFT / HARD pills, red tones) appears when `isAvoid`. Both gated on `isTagLoading`.
+- **`src/app/(app)/prep/players/client.tsx`:** imports `useUpdateGrade`; instantiates it; `handleUpdateGrade(playerId, weight?, severity?)` calls `updateGrade` then `refetchTags()`; passes `tagWeight`, `tagSeverity`, `onUpdateGrade` to each `FFIPlayerIntelCard`.
+
+**Tests added:** `src/app/api/user-tags/__tests__/graded-tags.test.ts` (8 new tests): POST weight clamp round-trips (in-range / below-1 / above-10 / severity soft+hard); PATCH updateGrade happy path (update existing record); PATCH 400 when neither weight nor severity; PATCH creates new record when none exists; PATCH 400 when severity is unrecognized value.
+
+**Bug hunt:** 0 CRITICAL, 0 HIGH, 0 MEDIUM, 0 LOW on changed modules.
+
+**Verify gate:**
+
+| Gate | Result |
+|------|--------|
+| `npx tsc --noEmit` | ✅ 0 errors |
+| `npx vitest run` | ✅ 322/322 (24 files, +8 tests) |
+| `npm run lint` (new errors only) | ✅ 0 new errors (168 baseline pre-existing) |
+| Schema migration | ✅ SQL reviewed + idempotency verified; **NOT applied to production Supabase** (Joe applies manually) |
+| Screenshot | ⚠️ deferred -- Browser pane not compositing in this environment. UI code path verified via type-check + the stepper/toggle JSX in `ffi-player-intel-card.tsx:489-554` |
+
+**Closes:** RV-17 (stable player ID anchor via `player_external_id`), RV-15 (graded tag scale wired end-to-end). Next: **R7b -- Player filters + strategy-fit line** (`BUILD_PLAN.md`).
+
+---
+
 ## 2026-08-13 / R6 -- Wire the solver into STRATEGY target prices: every strategy fits a completable $200 roster
 
 **Task:** REBUILD R6 `[Opus]` -- each strategy must assign a target $ per named target player, via the solver, so the FULL 13-slot roster is completable within $200; swapping archetype re-allocates the money. | **Class:** pipeline | **Lenses:** Architecture, QA, Security

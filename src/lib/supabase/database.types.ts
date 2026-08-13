@@ -317,8 +317,14 @@ export interface UserTags {
   id: string
   user_id: string
   player_cache_id: string
+  /** Stable Sleeper/ESPN player ID — survives players_cache re-seeds (R7a). */
+  player_external_id: string | null
   league_id: string | null
   tags: UserTagType[]
+  /** 1-10 urgency weight for 'target' tags. 1 = low interest, 10 = must-have. */
+  tag_weight: number
+  /** 'soft' = pass unless room price is right; 'hard' = never bid regardless of value. */
+  tag_severity: string
   note: string | null
   override_system_tags: boolean
   dismissed_system_tags: string[]
@@ -328,8 +334,11 @@ export interface UserTags {
 
 export interface UserTagsInsert {
   player_cache_id: string
+  player_external_id?: string | null
   league_id?: string | null
   tags?: UserTagType[]
+  tag_weight?: number
+  tag_severity?: string
   note?: string | null
   override_system_tags?: boolean
   dismissed_system_tags?: string[]
@@ -337,6 +346,8 @@ export interface UserTagsInsert {
 
 export interface UserTagsUpdate {
   tags?: UserTagType[]
+  tag_weight?: number
+  tag_severity?: string
   note?: string | null
   override_system_tags?: boolean
   dismissed_system_tags?: string[]

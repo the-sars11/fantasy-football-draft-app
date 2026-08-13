@@ -14,7 +14,7 @@ import Link from 'next/link'
 import { Search, SlidersHorizontal, X, AlertTriangle, Info, Play, ChevronLeft, RefreshCw } from 'lucide-react'
 import { FFIInput, FFIButton, FFIEmptyState } from '@/components/ui/ffi-primitives'
 import { FFIPlayerIntelCard } from '@/components/prep/ffi-player-intel-card'
-import { useUserTags, useToggleTag, useSystemTagActions } from '@/hooks/use-user-tags'
+import { useUserTags, useToggleTag, useSystemTagActions, useUpdateGrade } from '@/hooks/use-user-tags'
 import { cacheToPlayers } from '@/lib/players/convert'
 import { computePlayerTags } from '@/lib/players/tags'
 import type { Player, Position } from '@/lib/players/types'
@@ -68,6 +68,7 @@ export function PlayerBrowserClient() {
 
   const { toggle: toggleTag, isLoading: toggleLoading } = useToggleTag()
   const { dismissSystemTag, undismissSystemTag } = useSystemTagActions()
+  const { updateGrade } = useUpdateGrade()
 
   // --- Fetch players ---
   const fetchPlayers = useCallback(async () => {
@@ -186,6 +187,11 @@ export function PlayerBrowserClient() {
     const result = await undismissSystemTag(playerId, tag)
     if (result.success) refetchTags()
   }, [undismissSystemTag, refetchTags])
+
+  const handleUpdateGrade = useCallback(async (playerId: string, weight?: number, severity?: string) => {
+    const result = await updateGrade(playerId, weight, severity)
+    if (result.success) refetchTags()
+  }, [updateGrade, refetchTags])
 
   // --- Render ---
   if (loading) {
@@ -420,6 +426,9 @@ export function PlayerBrowserClient() {
               dismissedSystemTags={userTagsMap[player.id]?.dismissedSystemTags ?? []}
               onDismissSystemTag={(tag) => handleDismissSystemTag(player.id, tag)}
               onUndismissSystemTag={(tag) => handleUndismissSystemTag(player.id, tag)}
+              tagWeight={userTagsMap[player.id]?.tagWeight ?? 5}
+              tagSeverity={userTagsMap[player.id]?.tagSeverity ?? 'soft'}
+              onUpdateGrade={(w, s) => handleUpdateGrade(player.id, w, s)}
             />
           ))}
 

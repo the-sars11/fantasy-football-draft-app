@@ -106,6 +106,8 @@ export async function POST(req: NextRequest) {
       overrideSystemTags: boolean
       dismissedSystemTags: string[]
       leagueId: string | null
+      tagWeight: number
+      tagSeverity: string
       // For merged results, track all source records
       sourceRecords?: Array<{
         id: string
@@ -126,6 +128,8 @@ export async function POST(req: NextRequest) {
           overrideSystemTags: record.override_system_tags,
           dismissedSystemTags: record.dismissed_system_tags,
           leagueId: record.league_id,
+          tagWeight: (record.tag_weight as number | null) ?? 5,
+          tagSeverity: (record.tag_severity as string | null) ?? 'soft',
         }
       } else {
         // Merge with existing - prefer league-specific over global
@@ -161,11 +165,16 @@ export async function POST(req: NextRequest) {
           existing.overrideSystemTags = true
         }
 
-        // Prefer league-specific note over global
+        // Prefer league-specific note + grade over global
         if (record.league_id && record.note) {
           existing.note = record.note
           existing.id = record.id
           existing.leagueId = record.league_id
+        }
+        if (record.league_id) {
+          // League-specific grade wins over global default
+          existing.tagWeight = (record.tag_weight as number | null) ?? existing.tagWeight
+          existing.tagSeverity = (record.tag_severity as string | null) ?? existing.tagSeverity
         }
       }
     }
