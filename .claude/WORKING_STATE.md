@@ -25,7 +25,9 @@ The prior plan (S1–S8 / P2 DR / P3 VAL) marked the app "done" while it (a) pri
 
 **R1 [Sonnet] — Trust triage — DONE 2026-08-12.** Closed RV-2, RV-3, RV-6, RV-12, RV-13, RV-16, RV-19. Full verify gate + loaded-preview check passed (type-check clean, tests green with new coverage, lint 0 new errors, build clean, bug-hunt free 0 critical/0 high/1 medium, live screenshots of Cheat Sheet/nav/settings/draft-live). See `CHANGELOG.md` for the verify table and `BUILD_PLAN.md` R1.
 
-**R2 [Sonnet] — Data truth: labels stop lying.** Fix: board "ECR" cell = real `ecrPositionRank` (not `round(avgAdp)`) (`players/convert.ts:96`, real field `:61-64/111`), "PTS" = real projection field, RANGE = the real calibrated VORP↔room band instead of the fake flat ±15% (`prep/draft-board-table.tsx:78,392-400`), surface tier data beyond the single ELITE flag (`players/tags.ts`). Closes RV-7, RV-8, RV-14. Done-when: every board cell equals its real source field, with tests asserting cell = source (no derived-from-ADP stand-ins). Screenshot of the corrected board. See `BUILD_PLAN.md` R2.
+**R2 [Sonnet] — Data truth — DONE 2026-08-12.** Closed RV-7, RV-8, RV-14. ECR stat = real `ecrPositionRank` (e.g. "WR1"), RANGE stat = calibrated VORP↔room band (e.g. "$64-$71" for Ja'Marr Chase), tier badge (T1/T2/T3+) now visible in main row. New `convert.test.ts` (7 tests) asserts real source→field mappings. Full gate passed (type-check 0 errors, 223/223 tests green, lint 0 new errors, build clean, bug-hunt free 0 critical/0 high/1 medium pre-existing, screenshot confirming WR1 ECR + $64-$71 RANGE + T1 badge). See `CHANGELOG.md` and `BUILD_PLAN.md` R2.
+
+**R3 [Opus] — Valuation correctness: never recommend overpaying.** Cap max-bid at the ceiling (never above worth); fix "pay up to $X" line to show pay-to price, not the theoretical ceiling; make POCKET/TAX legible; wire or delete the breakout/bust/value detector. Closes RV-4, RV-5, RV-18. **Reads first:** `src/lib/draft/auction-advisor.ts`, `src/lib/players/recommendation.ts`, `src/lib/players/tags.ts`, `src/lib/intel/tag-detector.ts`, `src/lib/players/value-range.ts`. See `BUILD_PLAN.md` R3.
 
 ---
 

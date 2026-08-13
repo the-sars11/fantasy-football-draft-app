@@ -2,6 +2,42 @@
 
 ---
 
+## 2026-08-12 / R2 -- Data truth: board labels now tell the truth
+
+**Task:** REBUILD R2 `[Sonnet]` -- make the Cheat Sheet stat cells show their real source fields, not ADP proxies or fabricated bands. | **Class:** bugfix | **Lenses:** QA, Delivery (UI)
+
+**Problem:** Three verified findings from the 2026-08-12 reality reset:
+- **RV-7:** The "ECR" cell showed `round(avgAdp)` (ADP-derived overall rank) instead of the real FantasyPros expert-consensus positional rank stored in `ecrPositionRank`. Ja'Marr Chase showed ADP-rank ~5, not WR1.
+- **RV-8:** The "RANGE" cell showed a flat ±15% band fabricated locally (`value * 0.85` / `value * 1.15`) instead of calling `computeValueRange()` in `value-range.ts`, which uses real calibrated `ceilingValue` + `expectedRoomPrice` league data. Result was a made-up spread with no grounding.
+- **RV-14:** `expertTier` (FantasyPros tier 1-4) was only consumed to produce an ELITE flag (T1 only). T2 (starter quality), T3, T4 (depth) were silently discarded -- useful signal thrown away.
+
+**Root cause:** `convert.ts` computed all three real fields correctly (`ecrPositionRank` at lines 62-64/111, `expertTier`, `projectedPoints`). `value-range.ts:computeValueRange()` was already correct. The board just wasn't calling them -- it was reading `consensusRank` (ADP-derived) for ECR and computing a local ±15% band instead of calling the real function.
+
+**What changed:**
+
+- **`src/components/prep/draft-board-table.tsx` (RV-7, RV-8, RV-14):**
+  - Added import: `import { computeValueRange } from '@/lib/players/value-range'`
+  - Replaced fake range: `{ low: Math.floor(value * 0.85), high: Math.ceil(value * 1.15) }` --> `calibratedRange = computeValueRange(p)` (real league-calibrated band)
+  - ECR stat cell: was `String(p.consensusRank)` (ADP), now `p.ecrPositionRank != null ? \`${p.position}${p.ecrPositionRank}\` : '-'` (e.g. "WR1")
+  - RANGE stat cell: now shows `calibratedRange.low-calibratedRange.high` (e.g. "$64-$71") for auction; snake format unchanged
+  - Tier badge added after PositionChip in main row: T1 = volt-green, T2 = blue-bright, T3+ = ink-3 subdued; only renders when `expertTier != null`
+- **`src/lib/players/__tests__/convert.test.ts` (new -- 7 tests):** asserts `pos_rank "RB12"` -> `ecrPositionRank=12`, `pos_rank "WR3"` -> `3`, absent -> `undefined`; `proj_points 285.4` -> `projectedPoints=285.4`, absent -> `undefined`; `consensusRank = round(avgAdp)` (not ecrPositionRank); `vorp_12_200_ppr` preferred over legacy auction values.
+
+**Verify (per-session gate, all evidence pasted live this session):**
+
+| Gate | Result |
+|---|---|
+| `npm run type-check` | 0 errors |
+| `npm run test:run` | 223/223 green (includes new `convert.test.ts` 7 tests) |
+| `npm run lint` | 161 warnings, 0 new errors vs R1 baseline |
+| `npm run build` | clean |
+| `/bug-hunt free` (changed modules) | 0 critical, 0 high, 1 medium pre-existing (duplicate React key 'ECR' in stats grid for snake format -- unreachable in production, Nasties is auction-only; logged BUG_LOG.md, deferred R8) |
+| Loaded-preview screenshot | navigated to port 3003 (existing dev server, same files); Ja'Marr Chase expanded card: **ECR: WR1** (was ADP ~5), **RANGE: $64-$71** (was fake ±15% band), **T1 badge** visible in main row after WR chip |
+
+**Closes:** RV-7, RV-8, RV-14. Next open item: **R3 -- Valuation correctness** (`BUILD_PLAN.md`).
+
+---
+
 ## 2026-08-12 / R1 -- Trust triage: the app stops lying and stops throwing
 
 **Task:** REBUILD R1 `[Sonnet]` -- fix the trust-killers and crashes found in the 2026-08-12 reality-reset review before any downstream rebuild session touches this code. | **Class:** bugfix | **Lenses:** QA, Security (AI fallback), Design (nav/theme)

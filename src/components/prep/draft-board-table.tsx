@@ -6,6 +6,7 @@ import { Target, Ban, ChevronDown, Sparkles, Check, Loader2 } from 'lucide-react
 import { cn } from '@/lib/utils'
 import type { ScoredPlayer } from '@/lib/research/strategy/scoring'
 import type { DraftFormat } from '@/lib/players/types'
+import { computeValueRange } from '@/lib/players/value-range'
 
 interface DraftBoardTableProps {
   players: ScoredPlayer[]
@@ -74,9 +75,7 @@ function PlayerCard({
   const value = isAuction
     ? (sp.adjustedAuctionValue ?? p.consensusAuctionValue)
     : (sp.adjustedRoundValue ?? Math.ceil(p.adp / 12))
-  const valueRange = isAuction
-    ? { low: Math.floor(value * 0.85), high: Math.ceil(value * 1.15) }
-    : undefined
+  const calibratedRange = isAuction ? computeValueRange(p) : undefined
 
   // League-calibrated three-number view (VAL-1): ceiling (worth) / room
   // (reality) / gap (the play). Falls back to the strategy value when a player
@@ -137,6 +136,36 @@ function PlayerCard({
         </span>
 
         <PositionChip position={p.position} />
+
+        {/* Tier badge — real FantasyPros expert-consensus tier (T1=elite anchor, T2=starter quality, T3-4=depth) */}
+        {p.expertTier != null && (
+          <span
+            className="font-bold text-[10px] px-[6px] py-[3px] rounded-[6px] flex-shrink-0 leading-none"
+            style={{
+              fontFamily: 'var(--font-cond)',
+              letterSpacing: '0.04em',
+              background: p.expertTier === 1
+                ? 'rgba(139,255,69,0.12)'
+                : p.expertTier === 2
+                  ? 'rgba(77,130,255,0.12)'
+                  : 'rgba(150,180,255,0.06)',
+              color: p.expertTier === 1
+                ? 'var(--ffi-volt)'
+                : p.expertTier === 2
+                  ? 'var(--ffi-blue-bright)'
+                  : 'var(--ffi-ink-3)',
+              border: `1px solid ${
+                p.expertTier === 1
+                  ? 'rgba(139,255,69,0.24)'
+                  : p.expertTier === 2
+                    ? 'rgba(77,130,255,0.22)'
+                    : 'rgba(150,180,255,0.10)'
+              }`,
+            }}
+          >
+            T{p.expertTier}
+          </span>
+        )}
 
         {/* Name + meta + score bar */}
         <div className="flex-1 min-w-0">
@@ -391,11 +420,15 @@ function PlayerCard({
           {/* Stats grid */}
           <div className="grid grid-cols-4 gap-[12px] mt-[14px]">
             {[
-              { k: 'ECR',   v: String(p.consensusRank), color: 'var(--ffi-blue-bright)' },
+              { k: 'ECR',   v: p.ecrPositionRank != null ? `${p.position}${p.ecrPositionRank}` : '-', color: 'var(--ffi-blue-bright)' },
               { k: 'PTS',   v: p.projectedPoints != null ? String(Math.round(p.projectedPoints)) : '-', color: 'var(--ffi-blue-bright)' },
               {
                 k: isAuction ? 'RANGE' : 'ECR',
-                v: isAuction && valueRange ? `$${valueRange.low}-${valueRange.high}` : String(p.consensusRank),
+                v: isAuction && calibratedRange
+                  ? calibratedRange.low === calibratedRange.high
+                    ? `$${calibratedRange.low}`
+                    : `$${calibratedRange.low}-$${calibratedRange.high}`
+                  : p.ecrPositionRank != null ? `${p.position}${p.ecrPositionRank}` : String(p.consensusRank),
                 color: 'var(--ffi-blue-bright)',
               },
               { k: 'BYE',   v: String(p.byeWeek), color: 'var(--ffi-ink-2)' },

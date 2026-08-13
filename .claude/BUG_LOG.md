@@ -270,3 +270,44 @@ All S1-S4 code paths and supporting infrastructure:
 - No CRITICAL or HIGH findings in the R1 diff itself -- the six fixes (RV-2, RV-3, RV-6, RV-12, RV-13, RV-16, RV-19) each match their BUILD_PLAN.md "Done when" criteria with no new unused imports, no new lint errors, and full type-check/build/test coverage (see R1 verify table in this session's CHANGELOG entry).
 - `getActiveHref` in `app-shell.tsx` was un-exported before this session; exporting it for testability is a net positive and matches the same pattern used for `dbLeagueToAppLeague` in BUG-004 above.
 - `draft/live/client.tsx` still carries several pre-existing unused-import warnings (`motion`, `AnimatePresence`, `Radio`, `ChevronLeft`, `Clock`, `Gavel`, `Check`, `FFIBadge`, `PositionRunTicker`, `LiveScoreBug`, `PickFeed`, `MySquadPanel`, plus `saving`, `isAuction`, `myNeeds`) -- all pre-existing, none introduced this session, not in R1's declared scope.
+
+---
+
+## Hunt: 2026-08-12 -- free mode -- Scope: R2 data-truth changed modules
+
+**Project:** fantasy_football_draft_app
+**Type:** TypeScript / Next.js (App Router) + Vitest
+**Auditor:** Claude Code (static read-only pass, no commands beyond the R2 verify gate already run)
+**Mode:** FREE -- static analysis of the 2 files changed in R2 (draft-board-table.tsx + new convert.test.ts).
+
+### Summary
+
+| Severity | Count |
+|----------|-------|
+| CRITICAL | 0 |
+| HIGH | 0 |
+| MEDIUM | 1 (pre-existing, not introduced by R2) |
+| LOW | 0 |
+
+### Findings
+
+#### MEDIUM
+
+##### BUG-006: Duplicate React key `'ECR'` in stats grid for snake-format sessions
+- **File:** `src/components/prep/draft-board-table.tsx:436`
+- **Category:** UX / React correctness
+- **Effort:** S
+- **Description:** The 4-stat grid uses `key={k}` where `k` is the stat label. For auction format the labels are `ECR / PTS / RANGE / BYE` — all unique. For snake format the third label becomes `'ECR'` (`k: isAuction ? 'RANGE' : 'ECR'`), giving two cells with `key='ECR'`. React will silently pick one during reconciliation, producing undefined behavior on re-renders. Pre-existed R2 (the original code had the same key collision, both cells showed `consensusRank`). This session did not introduce the collision.
+- **Evidence:** `k: isAuction ? 'RANGE' : 'ECR'` at line 426; `key={k}` at line 436. For snake format: cell 1 `k='ECR'`, cell 3 `k='ECR'`.
+- **Fix:** Change cell 1 label to `'POS'` (positional rank) and keep cell 3 as `'ECR'` (overall), or assign index-based keys; scheduled naturally in R8 (Cheat Sheet redesign removes this screen's snake-format path). No action in R2 — Nasties is auction-only, so the duplicate key is unreachable in production today.
+- **Impact:** None in production (Nasties = auction only). Theoretical React reconciliation issue if snake format is ever activated.
+
+### Recommended Fix Order
+
+1. No action required for R2. BUG-006 is pre-existing, unreachable in production (auction-only league), and scheduled for natural resolution in R8.
+
+### Notes
+
+- No bugs introduced by the R2 changes themselves. The three fixes (ECR stat cell, RANGE stat cell, tier badge) are all correct: no leftover `valueRange` references, no stale imports, no missing null checks.
+- `computeValueRange` is called only when `isAuction === true` (guarded by `calibratedRange = isAuction ? computeValueRange(p) : undefined`) — no unnecessary computation for snake format.
+- All 7 new convert.test.ts assertions target real source-field → Player-field mappings at the data layer (not UI layer) and pass the full gate (223/223 green, 0 new lint errors, type-check clean, build clean).

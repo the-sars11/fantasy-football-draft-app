@@ -106,14 +106,14 @@ Every item below was confirmed against code. `RV-#` = review finding. Severity i
 | RV-4 | **HIGH** | Max-bid can exceed the player's ceiling (recommends overpaying past worth). | `auction-advisor.ts:98,127,147` | R3 |
 | RV-5 | **HIGH** | "Anchor — pay up to $97" shows the theoretical **ceiling** as a pay-to price → tells Joe to overpay. | `players/recommendation.ts:43` | R3 |
 | RV-6 | **HIGH** | ~~ADP still drives the Cheat Sheet (sort pill + Movers strip) — meaningless in auction, Joe called it out.~~ **[x] FIXED R1** | `prep/board/client.tsx:35,447-511` | R1 |
-| RV-7 | **HIGH** | Board "ECR" is `round(avgAdp)` (ADP mislabeled); real `ecrPositionRank` unused. "PTS" similarly suspect. | `convert.ts:96` (real at `:61-64/111`) | R2 |
-| RV-8 | MED | Value RANGE on the board is a fake flat ±15%, not the real VORP↔room band. | `draft-board-table.tsx:78,392-400` | R2 |
+| RV-7 | **HIGH** | ~~Board "ECR" is `round(avgAdp)` (ADP mislabeled); real `ecrPositionRank` unused. "PTS" similarly suspect.~~ **[x] FIXED R2** | `convert.ts:96` (real at `:61-64/111`) | R2 |
+| RV-8 | MED | ~~Value RANGE on the board is a fake flat ±15%, not the real VORP↔room band.~~ **[x] FIXED R2** | `draft-board-table.tsx:78,392-400` | R2 |
 | RV-9 | MED | No FLEX list — you can't see the RB/WR/TE flex pool as one ranked board. | prep board/players | R8 |
 | RV-10 | MED | Cheat Sheet largely duplicates the Players screen — two screens, one job. | `prep/board/*` vs `prep/players/*` | R8 |
 | RV-11 | MED | Simulation is a single deterministic draft, ADP opponents, not persisted, generic grading. | `prep/simulate/client.tsx:92-229` | R10a/R10b |
 | RV-12 | MED | ~~Nav active-state mis-highlights (Setup destinations live under /draft & /prep; longest-prefix logic picks wrong).~~ **[x] FIXED R1** | `layout/app-shell.tsx:37-52` | R1 |
 | RV-13 | MED | ~~Dead light/dark toggle — no `.light` token block exists, so the toggle does nothing.~~ **[x] FIXED R1 (toggle removed)** | `globals.css` (`:root`+`.dark` only) | R1 |
-| RV-14 | MED | FantasyPros tier data is loaded but its only consumer is the single ELITE flag — wasted signal. | `players/tags.ts:72` | R2 |
+| RV-14 | MED | ~~FantasyPros tier data is loaded but its only consumer is the single ELITE flag — wasted signal.~~ **[x] FIXED R2** (tier badge in card header) | `players/tags.ts:72` | R2 |
 | RV-15 | MED | Graded tag scale exists in types (weight 1-10, severity soft/hard) but the tagging UI is binary. | `research/strategy/types.ts:151-166` | R7a |
 | RV-16 | MED | ~~`/draft/live` can `return null` (blank dead screen); `myManager` can throw.~~ **[x] FIXED R1** | `draft/live/client.tsx:462,466` | R1 |
 | RV-17 | MED | Target/avoid persistence is name-anchored (UUID FK on a name) — fragile to any name variance. | `user_tags` migration | R7a |
@@ -163,7 +163,7 @@ Work top to bottom. Each session is scoped to finish cleanly in one focused sitt
 > - RV-16/RV-19: make `/draft/live` render a real screen instead of `null`; guard `myManager`. Confirm "Demo Draft" reaches a working room. **If the null is entangled with the join/sync architecture, stop and fold the deep fix into R11** — triage only makes it render, not rebuild sync.
 > **Done-when:** strategy generation returns proposals with the key absent (rule-based) and does not 500 with the key present (live path verification is a Joe-approved paid check); no ADP anywhere on the Cheat Sheet; correct tab highlights from every screen; no dead theme toggle; `/draft/live` + Demo Draft render real screens. Screenshots of each.
 
-### R2 — Data truth: labels stop lying `[Sonnet]` · class: bugfix/output
+### R2 — Data truth: labels stop lying `[Sonnet]` · class: bugfix/output `[x]` DONE 2026-08-12
 > **Why:** a board that labels ADP as "ECR" and paints a fake ±15% range is worse than no data — it looks authoritative and is wrong.
 > **Reads first:** `src/lib/players/convert.ts`, `src/components/prep/draft-board-table.tsx`, `src/lib/players/value-range.ts`, `src/lib/players/tags.ts`.
 > **Closes:** RV-7, RV-8, RV-14.
