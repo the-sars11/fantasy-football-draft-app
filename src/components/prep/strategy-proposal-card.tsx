@@ -26,6 +26,12 @@ const CONFIDENCE_STYLES = {
 export function StrategyProposalCard({ proposal, format, onSelect, isSelected }: StrategyProposalCardProps) {
   const [expanded, setExpanded] = useState(false)
 
+  // R6: solver-fit target prices. Each slot is filled at >= $1; the non-target
+  // slots reserve $1 each (reserve dollars == slot count) and the named targets
+  // are priced within what's left so the full roster fits budget.
+  const pricing = proposal.target_pricing
+  const priceOf = new Map((pricing?.prices ?? []).map((p) => [p.name, p.price]))
+
   return (
     <div
       className="ffi-card"
@@ -84,11 +90,17 @@ export function StrategyProposalCard({ proposal, format, onSelect, isSelected }:
               Targets
             </div>
             <div className="flex flex-wrap gap-1">
-              {proposal.key_targets.map((name) => (
-                <span key={name} className="ffi-badge" style={{ background: 'var(--ffi-surface-1)', color: 'var(--ffi-ink-2)' }}>
-                  {name}
-                </span>
-              ))}
+              {proposal.key_targets.map((name) => {
+                const price = priceOf.get(name)
+                return (
+                  <span key={name} className="ffi-badge" style={{ background: 'var(--ffi-surface-1)', color: 'var(--ffi-ink-2)' }}>
+                    {name}
+                    {price != null && (
+                      <span style={{ marginLeft: 4, color: 'var(--ffi-volt)', fontWeight: 700 }}>${price}</span>
+                    )}
+                  </span>
+                )
+              })}
             </div>
           </div>
           {proposal.key_avoids.length > 0 && (
@@ -107,6 +119,29 @@ export function StrategyProposalCard({ proposal, format, onSelect, isSelected }:
             </div>
           )}
         </div>
+
+        {/* R6: solver-fit target prices sum to a completable roster */}
+        {pricing && pricing.prices.length > 0 && (
+          <div
+            className="rounded-md px-2.5 py-1.5 text-xs"
+            style={{
+              background: pricing.fits ? 'rgba(139,255,69,0.08)' : 'rgba(255,110,138,0.10)',
+              border: `1px solid ${pricing.fits ? 'rgba(139,255,69,0.20)' : 'rgba(255,110,138,0.24)'}`,
+              color: pricing.fits ? 'var(--ffi-ink-2)' : 'var(--ffi-danger)',
+            }}
+          >
+            {pricing.fits ? (
+              <>
+                <span style={{ color: 'var(--ffi-volt)', fontWeight: 700 }}>${pricing.targetTotal}</span>
+                {' on targets + '}
+                <span style={{ fontWeight: 700 }}>${pricing.reserve}</span>
+                {` to fill your other ${pricing.reserve} slots = $${pricing.total} of $${pricing.budget}. Completes a full roster.`}
+              </>
+            ) : (
+              `These targets need $${pricing.total} of your $${pricing.budget} budget. Trim one to fit a full roster.`
+            )}
+          </div>
+        )}
 
         {/* Expandable details */}
         <button

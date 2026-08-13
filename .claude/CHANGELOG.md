@@ -2,6 +2,38 @@
 
 ---
 
+## 2026-08-13 / R6 -- Wire the solver into STRATEGY target prices: every strategy fits a completable $200 roster
+
+**Task:** REBUILD R6 `[Opus]` -- each strategy must assign a target $ per named target player, via the solver, so the FULL 13-slot roster is completable within $200; swapping archetype re-allocates the money. | **Class:** pipeline | **Lenses:** Architecture, QA, Security
+
+**Problem (RV-9-adjacent, strategy half of RV-1):** strategy proposals listed `key_targets` as bare names with no prices. Nothing checked that a strategy's named targets could actually coexist inside $200 alongside a completable rest-of-roster. A "Stars and Scrubs" plan could name four studs whose combined cost stranded the roster -- the same silo failure R4/R5 fixed for live bidding, unaddressed on the prep/strategy side.
+
+**What changed:**
+
+- **`src/lib/research/strategy/target-pricing.ts` (NEW, pure $0):** `assignTargetPrices(input)` resolves each `key_target` by lowercased name (dedupe, skip unknown/kickers), assigns it a roster slot (dedicated -> FLEX -> bench via `assignSlot`), then reuses the **R4 solver's `solveAllocation` on an EMPTY board** so every remaining non-target slot falls to its $1 replacement -> `reserve = count of non-target slots` (the guaranteed-completable $1-per-slot floor). The freed `pool = budget - reserve` is distributed across targets weighted by base auction value × archetype `positionEmphasis` (clamp `pct/15` to 0.7x-1.8x), capped by `max_bid_percentage`, floored at $1, proportionally scaled if over-reaching, then a `while`-loop hard-trims $1 from the largest until `targetTotal ≤ pool`. Returns `{budget, prices[], targetTotal, reserve, total, fits}` with the structural invariant **`sum(prices) + reserve ≤ budget`**. `toSlotsRemaining` maps app `def` -> solver `dst`; `budgetKeyFor` maps `DEF` -> `DST` for the allocation lookup.
+- **`src/lib/research/strategy/research.ts`:** added `target_pricing?: TargetPricing` to `StrategyProposal`; new `priceProposals(proposals, league, players)` helper (auction-only, `budget = league.budget ?? 200`) attaches solver-fit prices; wired into `proposeStrategies` (Claude path, uses keeper-filtered `availablePlayers`) and the preset path (rule-based). Snake proposals pass through unchanged.
+- **`src/lib/research/strategy/index.ts`:** exports `assignTargetPrices` + `TargetPricing`/`TargetPrice`/`AssignTargetPricesInput` types.
+- **`src/components/prep/strategy-proposal-card.tsx`:** each target badge shows its `$price` in volt; a summary box reads "$X on targets + $Y to fill your other Y slots = $total of $budget. Completes a full roster." (green when `fits`, danger + "Trim one to fit a full roster." when not).
+
+**Tests added:** `target-pricing.test.ts` (11 unit tests: sum invariant + reserve = 13 − numTargets + $1 floor + all-13-slot accounting + stud-only invariant; archetype re-allocation shifts money RB-tilt vs WR-tilt + different-targets-different-reserve; resolution rules skip unknown/kicker, dedupe, max-bid cap, empty-fits). `strategy-proposal-card.test.tsx` (3 render tests: the completable-roster summary reaches the DOM, a $price badge on each target, on-screen re-allocation when the archetype budget emphasis changes).
+
+**Bug hunt (`/bug-hunt free`, changed modules):** 0 CRITICAL, 0 HIGH, 0 MEDIUM, 1 LOW -- **BUG-R6-01** (cosmetic): `StrategyProposalCard` keys `priceOf` by the pool's canonical `player.name` but looks it up with the raw `key_target` string; a case/whitespace mismatch would drop a badge's `$` while the summary total stays correct. Logged in `BUG_LOG.md` for fix when next touching that file. No functional bug found; math verified by the 11 invariant tests.
+
+**Verify gate:**
+
+| Gate | Result |
+|------|--------|
+| `npx tsc --noEmit` | ✅ 0 errors |
+| `npx vitest run` | ✅ 314/314 (23 files) |
+| `npm run lint` | ✅ 161 problems (baseline), 0 new |
+| `npm run build` | ✅ Compiled successfully |
+| `/bug-hunt free` (changed modules) | ✅ 0 crit/high/med, 1 low cosmetic (BUG-R6-01, logged) |
+| Screenshot | ⚠️ **raster deferred** -- Browser pane not compositing in this environment. Render path proven two ways: 3 DOM render tests (summary + on-screen re-allocation), AND the real `StrategyProposalCard` served through the live dev server (port 3003) + compiled Tailwind/globals CSS, verified via `get_page_text` and delivered to Joe as a rendered HTML file: RB-heavy `Bijan(RB) $73 / CeeDee(WR) $73 / Josh(QB) $26 / Trey(TE) $19` re-allocating under WR-heavy to `$47 / $78 / $27 / $39`, both summing to **$191 targets + $9 reserve = $200 of $200. Completes a full roster.** |
+
+**Closes:** strategy half of the "targets don't fit $200 together" gap. Next open item: **R7a -- Persistence rework + graded tag scale** (`BUILD_PLAN.md`).
+
+---
+
 ## 2026-08-12 / R5 -- Wire the solver into the LIVE max-bid: THE PLAY becomes roster-aware
 
 **Task:** REBUILD R5 `[Opus]` -- make the displayed live max-bid reflect roster-completion math, not just wallet math, and explain the constraint in plain words on the card. | **Class:** pipeline | **Lenses:** Architecture, QA, Security

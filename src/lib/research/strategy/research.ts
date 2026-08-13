@@ -15,6 +15,7 @@ import type { StrategyInsert, Position as DbPosition } from '@/lib/supabase/data
 import { askClaudeJson } from '@/lib/ai/claude'
 import { AUCTION_ARCHETYPES, SNAKE_ARCHETYPES, AUCTION_PRESETS } from './presets'
 import type { AuctionArchetype } from './presets'
+import { assignTargetPrices, type TargetPricing } from './target-pricing'
 
 // --- Types ---
 
@@ -37,6 +38,10 @@ export interface StrategyProposal {
   // Snake-only
   round_targets?: Record<string, number[]>
   position_round_priority?: Record<string, string[]>
+  // Auction-only (R6): solver-fit target $ per key_target so the full roster
+  // fits budget. Every roster slot is filled at >= $1; the non-target slots
+  // reserve $1 each and the targets are priced within what's left.
+  target_pricing?: TargetPricing
 }
 
 interface ClaudeStrategyResponse {
@@ -250,6 +255,34 @@ RULES:
 
 Respond with a JSON object: { "strategies": [ ... ] }`
 
+// --- R6: solver-fit target prices ---
+
+/**
+ * Attach solver-fit target prices to each AUCTION proposal so its named targets
+ * sum to a completable $200 roster. Snake proposals are returned unchanged
+ * (target prices are an auction concept). Pure and $0 — no Claude.
+ */
+function priceProposals(
+  proposals: StrategyProposal[],
+  league: League,
+  players: ConsensusPlayer[]
+): StrategyProposal[] {
+  if (league.format !== 'auction') return proposals
+
+  const budget = league.budget ?? 200
+  return proposals.map((p) => ({
+    ...p,
+    target_pricing: assignTargetPrices({
+      targetNames: p.key_targets,
+      budgetAllocation: p.budget_allocation,
+      maxBidPercentage: p.max_bid_percentage,
+      players,
+      rosterSlots: league.rosterSlots,
+      budget,
+    }),
+  }))
+}
+
 // --- Main research function ---
 
 export async function proposeStrategies(
@@ -274,7 +307,8 @@ export async function proposeStrategies(
     maxTokens: 6000,
   })
 
-  const proposals = response.strategies
+  // Attach solver-fit target prices (R6) — auction proposals only, $0.
+  const proposals = priceProposals(response.strategies, league, availablePlayers)
 
   // Convert proposals to DB-ready inserts
   const inserts = proposals.map((p) => proposalToInsert(p, league.id, league.format))
@@ -410,7 +444,7 @@ export function proposeStrategiesRuleBased(
   const ranked = [...players].sort((a, b) => a.consensusRank - b.consensusRank)
   const avoidLower = avoidNames.map((n) => n.toLowerCase())
 
-  const proposals: StrategyProposal[] = CALIBRATED_ARCHETYPES.map((key) => {
+  const rawProposals: StrategyProposal[] = CALIBRATED_ARCHETYPES.map((key) => {
     const preset = AUCTION_PRESETS[key]
 
     // Position priority order by descending weight (QB/RB/WR/TE only - K/DEF are filler)
@@ -473,6 +507,10 @@ export function proposeStrategiesRuleBased(
       max_bid_percentage: preset.max_bid_percentage,
     }
   })
+
+  // Attach solver-fit target prices (R6) so each strategy's targets sum to a
+  // completable $200 roster; swapping archetype re-allocates the money.
+  const proposals = priceProposals(rawProposals, league, players)
 
   const inserts = proposals.map((p) => proposalToInsert(p, league.id, league.format, 'preset'))
   return { proposals, inserts }

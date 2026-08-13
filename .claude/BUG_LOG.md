@@ -476,3 +476,39 @@ All S1-S4 code paths and supporting infrastructure:
 - No bugs introduced by the R2 changes themselves. The three fixes (ECR stat cell, RANGE stat cell, tier badge) are all correct: no leftover `valueRange` references, no stale imports, no missing null checks.
 - `computeValueRange` is called only when `isAuction === true` (guarded by `calibratedRange = isAuction ? computeValueRange(p) : undefined`) — no unnecessary computation for snake format.
 - All 7 new convert.test.ts assertions target real source-field → Player-field mappings at the data layer (not UI layer) and pass the full gate (223/223 green, 0 new lint errors, type-check clean, build clean).
+
+---
+
+## Hunt: 2026-08-13 — free mode — Scope: R6 changed modules
+
+**Project:** fantasy_football_draft_app (TypeScript / Next.js, Vitest, ESLint + tsc)
+**Auditor:** Claude Code
+**Files:** `src/lib/research/strategy/target-pricing.ts` (new), `research.ts`, `index.ts`, `src/components/prep/strategy-proposal-card.tsx`
+
+### Summary
+
+| Severity | Count |
+|----------|-------|
+| CRITICAL | 0 |
+| HIGH | 0 |
+| MEDIUM | 0 |
+| LOW | 1 |
+
+### Findings
+
+#### LOW
+
+##### BUG-R6-01: Price-badge lookup keys by raw target name, price map keys by canonical name
+- **File:** `src/components/prep/strategy-proposal-card.tsx:33,94`
+- **Category:** Data Quality (display)
+- **Effort:** S
+- **Description:** `priceOf` is built from `pricing.prices` whose `.name` is the pool's canonical `player.name`; the badge then looks it up with the raw `key_targets` string (`priceOf.get(name)`). If a `key_target` differs in casing/whitespace from the pool's canonical name, the `$price` badge silently renders without its dollar amount.
+- **Why it is only LOW:** `assignTargetPrices` resolves targets case-insensitively, so the price IS computed and the summary box total (`targetTotal`/`reserve`/`total`) stays correct — only the per-badge `$` can drop. In practice `key_targets` are populated from the same pool, so casing matches. No incorrect number is ever shown; at worst a badge omits its price.
+- **Fix (when next touching this file):** key `priceOf` by `name.toLowerCase()` and look up with `priceOf.get(name.toLowerCase())`, mirroring the solver's own case-insensitive resolution.
+- **Impact if unfixed:** cosmetic — an occasional target badge shows the name with no `$` even though the target was priced.
+
+### Notes
+
+- Core invariant (`sum(target prices) + reserve <= budget`, reserve = one `$1` per non-target slot) is enforced structurally: empty-board `solveAllocation` returns exactly the remaining-slot count, and a `while`-loop hard-trims `$1` from the largest price until the pool fits. Proven by 11 new tests in `target-pricing.test.ts` (sum invariant, stud-only invariant, archetype re-allocation, resolution rules) — all green in the 311/311 suite.
+- Null-safety verified: `League.rosterSlots` is a required field (`players/types.ts:112`), already dereferenced unconditionally elsewhere in `research.ts`; `budget?` is optional and defaulted (`?? 200`); `positionEmphasis` tolerates undefined/null `budgetAllocation` via optional chaining + `??`.
+- Division in the scale-down step is guarded by `sumDesired > 0`; the `$1`-floor `while`-loop breaks rather than looping forever when a strategy genuinely over-reaches (`fits` then reports false).
