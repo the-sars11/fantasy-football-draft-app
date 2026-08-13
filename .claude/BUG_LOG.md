@@ -1,5 +1,46 @@
 # Bug Hunt Log
 
+## Hunt: 2026-08-13 -- free mode -- Scope: R8 changed modules (board/client.tsx, players/client.tsx)
+
+**Project:** fantasy_football_draft_app
+**Type:** TypeScript / Next.js (App Router) + Vitest
+**Auditor:** Claude Code (static read-only pass)
+**Mode:** FREE -- static analysis of 2 files changed in R8.
+
+### Summary
+
+| Severity | Count |
+|----------|-------|
+| CRITICAL | 0 |
+| HIGH | 0 |
+| MEDIUM | 0 |
+| LOW | 1 (pre-existing, not introduced by R8) |
+
+### Findings
+
+#### LOW
+
+##### BUG-R8-01: K in POSITIONS filter on no-kicker Cheat Sheet
+- **File:** `src/app/(app)/prep/board/client.tsx:27`
+- **Category:** UX
+- **Effort:** S
+- **Description:** `POSITIONS` includes `'K'` but the Nasties is a no-kicker league. Selecting the K pill returns an empty list with no explanation. Not introduced by R8 (pre-existing).
+- **Evidence:** `const POSITIONS: (Position | 'ALL')[] = ['ALL', 'QB', 'RB', 'WR', 'TE', 'K', 'DEF']` — K produces zero results.
+- **Fix:** Remove K from POSITIONS array.
+- **Impact:** Cosmetic confusion; no functional breakage.
+
+### Items verified clean (no bugs found)
+
+- **BUG-R7b-01 fix:** three-memo split correct — `boardPlayers` (deps `[players]`), `solverResultMap` (deps `[boardPlayers]`), `fitLineMap` (deps `[boardPlayers, solverResultMap, isTarget, isAvoid]`). Tag toggles only re-run `fitLineMap`; 500 solver calls stay stable.
+- **fitLineMap iteration safety:** iterates `boardPlayers` and looks up `solverResultMap.get(bp.id)` — same source array, all IDs present. `if (result)` guard is defensive and correct.
+- **K players fitLine:** K excluded from `boardPlayers`, returns `undefined` from `fitLineMap.get()`. `FFIPlayerIntelCard.fitLine` prop is optional — no crash.
+- **flexPlayers sort:** called on `.filter()` return (new array) — no mutation of `scoredPlayers`.
+- **adjustedAuctionValue optional:** `a.adjustedAuctionValue ?? a.player.consensusAuctionValue` — correctly falls back when no active strategy.
+- **DraftBoardTable props:** `onToggleTarget`, `onToggleAvoid`, `isTagLoading` all match the component interface at `draft-board-table.tsx:13-16`.
+- **Gate results:** type-check 0, 344/344 tests, lint 0 new, build clean.
+
+---
+
 ## Hunt: 2026-08-12 -- free mode -- Scope: R5 roster-solver wiring changed modules
 
 **Project:** fantasy_football_draft_app

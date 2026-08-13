@@ -2,6 +2,28 @@
 
 ---
 
+## 2026-08-13 / R8 -- Cheat Sheet resolution + FLEX view
+
+**Task:** REBUILD R8 `[Sonnet]` — Cheat Sheet purpose clarified, FLEX tab added, BUG-R7b-01 fixed. | **Class:** output | **Lenses:** QA, Design
+
+**Problem (RV-9, RV-10):** No FLEX ranked list anywhere. Cheat Sheet and Players had overlapping purpose with no clear differentiation.
+
+**Root cause:** R7b added FLEX filter to Players but not to the Cheat Sheet. fitLineMap in players/client.tsx ran all 500 solver calls whenever a tag changed (isTarget/isAvoid in deps), causing unnecessary CPU spikes on every target/avoid toggle.
+
+**Fix:**
+- **BUG-R7b-01 (`prep/players/client.tsx`):** split single `fitLineMap` useMemo (deps `[players, isTarget, isAvoid]`) into three: `boardPlayers` (deps `[players]`), `solverResultMap` (deps `[boardPlayers]` — runs 500 solver calls), `fitLineMap` (deps `[boardPlayers, solverResultMap, isTarget, isAvoid]` — cheap label only). Tag toggles now only re-run the cheap label selection.
+- **FLEX tab (`prep/board/client.tsx`):** added third tab "FLEX" (volt-green active state) to the Cheat Sheet showing RB+WR+TE combined, sorted by `adjustedAuctionValue ?? consensusAuctionValue` DESC with consensusRank tiebreak. Reuses existing `DraftBoardTable` component. `flexPlayers` useMemo deps on `[scoredPlayers]` only.
+- **Screen differentiation (RV-10):** Cheat Sheet = strategy-scored reference board + position breakdown + FLEX view; Players = individual player deep-dive with solver fit lines and detail cards. Not collapsed — purpose separation is clearer.
+- **Construction board idea rejected:** a slot-fill planner in prep mode doesn't serve a real need (players aren't being drafted yet, solver fit lines already answer "what can I pay"). Documented as REJECTED direction.
+
+**Tests added:** 5 new unit tests (`src/app/(app)/prep/board/__tests__/flex-tab.test.ts`) asserting FLEX filter (QB/DEF excluded, RB/WR/TE included), sort by value DESC, adjustedAuctionValue preference, rank tiebreak.
+
+**Gate:** type-check 0, 349/349 tests (344 baseline + 5 new), lint 0 new errors, build clean, bug-hunt free (0 CRITICAL/HIGH/MED, 1 LOW pre-existing K pill in board POSITIONS array). Browser pane not compositing — render path proven by type-check + build + 5 unit tests.
+
+**Closes:** RV-9 (FLEX ranked list), RV-10 (screen duplication resolved by differentiation).
+
+---
+
 ## 2026-08-13 / R7b -- Player filters + strategy-fit line
 
 **Task:** REBUILD R7b `[Sonnet · Opus]` — expanded player browser filters + solver-driven per-player strategy-fit line. | **Class:** output | **Lenses:** QA, Design

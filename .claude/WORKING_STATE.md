@@ -39,7 +39,9 @@ The prior plan (S1–S8 / P2 DR / P3 VAL) marked the app "done" while it (a) pri
 
 **R7b [Sonnet+Opus] — Player filters + strategy-fit line — DONE 2026-08-13.** FLEX filter (RB+WR+TE), tier (T1/T2/T3+), bye week, grade (7+/9+, target-mode), severity (soft/hard, avoid-mode). New pure module `prep-fit-line.ts`; `fitLineMap` useMemo runs solver per-player on a full $200/13-slot board; ◆ strip on every card. 22 new tests (17 unit + 5 RTL). Gate: type-check 0, 344/344, lint 161 (0 new), build clean. Bug-hunt: 1 MEDIUM (BUG-R7b-01: solver + label mixed in one memo — queued for R8), 2 LOW. See `CHANGELOG.md`, `BUILD_PLAN.md` R7b.
 
-**R8 [Sonnet] — Cheat Sheet resolution + FLEX view (NEXT).** Cheat Sheet currently duplicates Players; make it a real roster-construction planning board (targets in slots, $200 fit via solver) or collapse it into Players. FLEX filter already exists (R7b) on Players. Reads first: `prep/board/client.tsx`, `prep/players/client.tsx`, `roster-solver.ts`. Closes RV-9, RV-10. Also fix BUG-R7b-01 (split fitLineMap into solver-map + label-map) while in `client.tsx`. See `BUILD_PLAN.md` R8.
+**R8 [Sonnet] — Cheat Sheet resolution + FLEX view — DONE 2026-08-13.** Fixed BUG-R7b-01 (`players/client.tsx` — split single fitLineMap useMemo into `boardPlayers`/`solverResultMap`/`fitLineMap` so 500 solver calls don't re-run on tag toggles). Added FLEX tab (third tab, volt-green active state) to Cheat Sheet — RB/WR/TE combined by value DESC, reuses DraftBoardTable. Screens are differentiated: Cheat Sheet = strategy-ranked + position breakdown + FLEX; Players = individual intel + fit lines + detail. Closed RV-9 + RV-10. 349/349 tests (+5 new flex-tab unit tests). See `BUILD_PLAN.md` R8.
+
+**R9 [Opus] — Strategy engine rebuild (NEXT).** See `BUILD_PLAN.md` R9.
 
 ---
 

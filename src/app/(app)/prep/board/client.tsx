@@ -73,7 +73,7 @@ export function DraftBoardClient() {
   const [targetFilter, setTargetFilter] = useState<TargetFilter>('all')
   const [sortField, setSortField] = useState<SortField>('score')
   const [sortAsc, setSortAsc] = useState(false)
-  const [activeTab, setActiveTab] = useState<'board' | 'position'>('board')
+  const [activeTab, setActiveTab] = useState<'board' | 'position' | 'flex'>('board')
 
   // Refresh
   const [refreshing, setRefreshing] = useState(false)
@@ -245,6 +245,18 @@ export function DraftBoardClient() {
     })
   }, [scoredPlayers, positionFilter, targetFilter, sortField, sortAsc, selectedLeague])
 
+  // FLEX tab: RB+WR+TE combined, sorted by value DESC (closes RV-9)
+  const flexPlayers = useMemo(() => {
+    return scoredPlayers
+      .filter((sp) => sp.player.position === 'RB' || sp.player.position === 'WR' || sp.player.position === 'TE')
+      .sort((a, b) => {
+        const aVal = a.adjustedAuctionValue ?? a.player.consensusAuctionValue
+        const bVal = b.adjustedAuctionValue ?? b.player.consensusAuctionValue
+        if (bVal !== aVal) return bVal - aVal
+        return a.player.consensusRank - b.player.consensusRank
+      })
+  }, [scoredPlayers])
+
   const handleSort = (field: SortField) => {
     if (sortField === field) setSortAsc(!sortAsc)
     else { setSortField(field); setSortAsc(false) }
@@ -413,7 +425,7 @@ export function DraftBoardClient() {
             className="flex gap-1 mb-0 rounded-[12px] p-1"
             style={{ background: 'var(--ffi-surface-1)', border: '1px solid var(--ffi-hairline)' }}
           >
-            {(['board', 'position'] as const).map((tab) => (
+            {(['board', 'flex', 'position'] as const).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -423,16 +435,18 @@ export function DraftBoardClient() {
                   letterSpacing: '0.12em',
                   ...(activeTab === tab
                     ? {
-                        background: 'var(--ffi-blue)',
-                        color: '#fff',
-                        boxShadow: '0 4px 14px -4px rgba(77,130,255,0.5)',
+                        background: tab === 'flex' ? 'var(--ffi-volt)' : 'var(--ffi-blue)',
+                        color: tab === 'flex' ? 'var(--ffi-volt-ink)' : '#fff',
+                        boxShadow: tab === 'flex'
+                          ? '0 4px 14px -4px var(--ffi-volt-glow)'
+                          : '0 4px 14px -4px rgba(77,130,255,0.5)',
                       }
                     : {
                         color: 'var(--ffi-ink-3)',
                       }),
                 }}
               >
-                {tab === 'board' ? 'All Players' : 'By Position'}
+                {tab === 'board' ? 'All Players' : tab === 'flex' ? 'FLEX' : 'By Position'}
               </button>
             ))}
           </div>
@@ -589,6 +603,39 @@ export function DraftBoardClient() {
               <PositionBreakdown
                 players={scoredPlayers}
                 format={selectedLeague?.format ?? 'auction'}
+              />
+            </div>
+          )}
+
+          {activeTab === 'flex' && (
+            <div className="mt-3">
+              {/* FLEX label */}
+              <div className="flex items-center gap-2 mb-3">
+                <span
+                  className="font-bold text-[10px] uppercase"
+                  style={{ fontFamily: 'var(--font-cond)', letterSpacing: '0.20em', color: 'var(--ffi-ink-3)' }}
+                >
+                  RB / WR / TE - combined by value
+                </span>
+                <span
+                  className="font-bold text-[10px] tabular-nums"
+                  style={{ fontFamily: 'var(--font-mono)', color: 'var(--ffi-ink-3)' }}
+                >
+                  {flexPlayers.length} players
+                </span>
+              </div>
+              <DraftBoardTable
+                players={flexPlayers}
+                format={selectedLeague?.format ?? 'auction'}
+                onToggleTarget={async (playerId) => {
+                  const result = await toggleTag(playerId, 'target')
+                  if (result.success) refetchTags()
+                }}
+                onToggleAvoid={async (playerId) => {
+                  const result = await toggleTag(playerId, 'avoid')
+                  if (result.success) refetchTags()
+                }}
+                isTagLoading={toggleLoading || tagsLoading}
               />
             </div>
           )}

@@ -18,7 +18,7 @@ import { useUserTags, useToggleTag, useSystemTagActions, useUpdateGrade } from '
 import { cacheToPlayers } from '@/lib/players/convert'
 import { computePlayerTags } from '@/lib/players/tags'
 import { computeRosterConstrainedMaxBid } from '@/lib/draft/roster-solver'
-import type { BoardPlayer, SlotsRemaining, ReplacementCosts, SolverInput } from '@/lib/draft/roster-solver'
+import type { BoardPlayer, SlotsRemaining, ReplacementCosts, SolverInput, RosterConstrainedMaxBid } from '@/lib/draft/roster-solver'
 import { buildPrepFitLine } from '@/lib/players/prep-fit-line'
 import type { Player, Position } from '@/lib/players/types'
 
@@ -237,12 +237,12 @@ export function PlayerBrowserClient() {
     return [...weeks].sort((a, b) => a - b)
   }, [players])
 
-  // R7b: per-player solver-driven fit lines — computed once per player-load on a
-  // full $200 / all-13-slots board so every card shows a real team-construction max-bid.
-  const fitLineMap = useMemo(() => {
-    if (players.length === 0) return new Map<string, string>()
+  // BUG-R7b-01 fix: split into three memos so the 500 solver calls only re-run
+  // when the player pool changes, not on every tag toggle.
 
-    const boardPlayers: BoardPlayer[] = players
+  // Phase 1: map players → BoardPlayer[] (deps: players only)
+  const boardPlayers = useMemo((): BoardPlayer[] => {
+    return players
       .filter(p => p.position !== 'K')
       .map(p => ({
         id: p.id,
@@ -251,7 +251,11 @@ export function PlayerBrowserClient() {
         expectedCost: Math.max(1, Math.round(p.expectedRoomPrice ?? p.consensusAuctionValue ?? 1)),
         ceiling: Math.max(1, Math.round(p.ceilingValue ?? p.consensusAuctionValue ?? 1)),
       }))
+  }, [players])
 
+  // Phase 2: run the 500 solver calls (deps: boardPlayers only — expensive)
+  const solverResultMap = useMemo((): Map<string, RosterConstrainedMaxBid> => {
+    if (boardPlayers.length === 0) return new Map()
     const solverInput: SolverInput = {
       budgetRemaining: 200,
       slotsRemaining: NASTIES_FULL_SLOTS,
@@ -259,14 +263,24 @@ export function PlayerBrowserClient() {
       replacementCosts: PREP_REPLACEMENT,
       minPerSlot: 1,
     }
-
-    const map = new Map<string, string>()
+    const map = new Map<string, RosterConstrainedMaxBid>()
     for (const bp of boardPlayers) {
-      const result = computeRosterConstrainedMaxBid(bp, solverInput)
-      map.set(bp.id, buildPrepFitLine(bp.position, result, isTarget(bp.id), isAvoid(bp.id)))
+      map.set(bp.id, computeRosterConstrainedMaxBid(bp, solverInput))
     }
     return map
-  }, [players, isTarget, isAvoid])
+  }, [boardPlayers])
+
+  // Phase 3: cheap label selection (deps: solverResultMap + tags — no solver calls)
+  const fitLineMap = useMemo((): Map<string, string> => {
+    const map = new Map<string, string>()
+    for (const bp of boardPlayers) {
+      const result = solverResultMap.get(bp.id)
+      if (result) {
+        map.set(bp.id, buildPrepFitLine(bp.position, result, isTarget(bp.id), isAvoid(bp.id)))
+      }
+    }
+    return map
+  }, [boardPlayers, solverResultMap, isTarget, isAvoid])
 
   // FF-250: Players to display (paginated)
   const displayedPlayers = useMemo(() => {
