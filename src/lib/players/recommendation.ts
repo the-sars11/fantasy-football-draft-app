@@ -40,7 +40,7 @@ export function computeRecommendation(p: Player): PlayerRecommendation {
 
   if (has('elite')) {
     intent = 'anchor'
-    line = `Anchor - pay up to $${range.high} to lock a Tier 1 player.`
+    line = `Anchor - pay up to $${range.base} to lock a Tier 1 player.`
   } else if (has('pocket')) {
     intent = 'target'
     line = `Target - worth ~$${p.ceilingValue}, room pays ~$${p.expectedRoomPrice}. Win him at or under $${range.base}.`

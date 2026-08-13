@@ -93,7 +93,7 @@ export function computePlayerTags(p: Player): PlayerTag[] {
     } else if (gap <= -DOLLAR_GAP) {
       tags.push({
         id: 'tax',
-        label: `$${gap} TAX`,
+        label: `-$${Math.abs(gap)} TAX`,
         tone: 'bad',
         hint: `Room historically pays ~$${p.expectedRoomPrice} but he's only worth ~$${p.ceilingValue} here - reputation premium, let him go`,
         source: 'VORP ceiling vs 16-yr Nasties room price',

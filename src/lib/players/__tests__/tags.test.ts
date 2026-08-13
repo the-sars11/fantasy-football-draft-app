@@ -43,6 +43,11 @@ describe('computePlayerTags — POCKET / TAX (league dollar gap)', () => {
   it('no TAX at -$3', () => {
     expect(ids(player({ valueGap: -3 }))).not.toContain('tax')
   })
+  it('TAX label is human-readable: dollar sign before the number, not before the minus', () => {
+    const tags = computePlayerTags(player({ valueGap: -8, ceilingValue: 20, expectedRoomPrice: 28 }))
+    const tax = tags.find((t) => t.id === 'tax')
+    expect(tax?.label).toBe('-$8 TAX')
+  })
   it('never both pocket and tax', () => {
     const t = ids(player({ valueGap: 10 }))
     expect(t.includes('pocket') && t.includes('tax')).toBe(false)

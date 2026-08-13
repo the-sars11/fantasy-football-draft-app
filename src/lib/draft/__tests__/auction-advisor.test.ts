@@ -163,10 +163,14 @@ describe('calculateMaxBidAdvice -- calibrated HOT (tax scenario)', () => {
     expect(result.maxBid).toBe(20)
   })
 
-  it('HOT maxBid < NEUTRAL maxBid when room historically overpays', () => {
+  it('when room exceeds ceiling, both HOT and NEUTRAL are capped at genuine worth', () => {
+    // ceiling=20, room=30 -> midpoint=25 which itself exceeds ceiling.
+    // valueCeiling=20 clamps both paths to worth: NEUTRAL (was 25, now 20) and
+    // HOT (anchor already 20 via min(midpoint,ceiling)) both land at 20.
     const neutral = bid({ ceiling: 20, expectedRoomPrice: 30 })
     const hot = bid({ ceiling: 20, expectedRoomPrice: 30, inflationTag: 'HOT' })
-    expect(hot.maxBid).toBeLessThan(neutral.maxBid)
+    expect(neutral.maxBid).toBeLessThanOrEqual(20)
+    expect(hot.maxBid).toBeLessThanOrEqual(20)
   })
 
   it('HOT has no effect in a value pocket (ceiling > room) -- NEUTRAL and HOT agree', () => {
@@ -211,6 +215,44 @@ describe('calculateMaxBidAdvice -- legacy fallback (no calibrated input)', () =>
     const calibrated = bid({ ceiling: 97, expectedRoomPrice: 76 })
     // legacy=78, calibrated=87 for this player -- they must differ
     expect(calibrated.maxBid).not.toBe(legacy.maxBid)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// RV-4: maxBid must never exceed calibrated ceiling regardless of factor boosts
+// ceiling=50, room=40 -> anchor (NEUTRAL) = round((50+40)/2) = 45
+// strategy boost (1.15×): 45*1.15 = 51.75 -> would have been 52, must be <=50
+// scarcity boost (1.2×):  45*1.2  = 54    -> would have been 54, must be <=50
+// both combined:           45*1.15*1.2 ~ 62 -> must be <=50
+// ---------------------------------------------------------------------------
+describe('calculateMaxBidAdvice -- maxBid never exceeds calibrated ceiling (RV-4)', () => {
+  const CAL_50: CalibratedBidInputs = { ceiling: 50, expectedRoomPrice: 40 }
+
+  it('strategy-score boost (1.15×) cannot push maxBid past ceiling', () => {
+    const state = makeState(150)
+    const result = calculateMaxBidAdvice(
+      state, 'Joe', 'Test', 'RB', 35, 80, makeAlts(5), new Set(), null, CAL_50,
+    )
+    expect(result.maxBid).toBeLessThanOrEqual(50)
+    expect(result.maxBid).toBeGreaterThanOrEqual(1)
+  })
+
+  it('scarcity boost (1.2×) cannot push maxBid past ceiling', () => {
+    const state = makeState(150)
+    const result = calculateMaxBidAdvice(
+      state, 'Joe', 'Test', 'RB', 35, 50, makeAlts(1), new Set(), null, CAL_50,
+    )
+    expect(result.maxBid).toBeLessThanOrEqual(50)
+    expect(result.maxBid).toBeGreaterThanOrEqual(1)
+  })
+
+  it('all boosts combined cannot push maxBid past ceiling', () => {
+    const state = makeState(150)
+    const result = calculateMaxBidAdvice(
+      state, 'Joe', 'Test', 'RB', 35, 80, makeAlts(1), new Set(), null, CAL_50,
+    )
+    expect(result.maxBid).toBeLessThanOrEqual(50)
+    expect(result.maxBid).toBeGreaterThanOrEqual(1)
   })
 })
 

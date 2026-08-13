@@ -1,5 +1,43 @@
 # Bug Hunt Log
 
+## Hunt: 2026-08-12 -- free mode -- Scope: R3 valuation-correctness changed modules
+
+**Project:** fantasy_football_draft_app
+**Type:** TypeScript / Next.js (App Router) + Vitest
+**Auditor:** Claude Code (static read-only pass, no commands beyond the R3 verify gate already run)
+**Mode:** FREE -- static analysis of the 7 files touched/added by R3 (auction-advisor.ts, recommendation.ts, tags.ts, value-range.ts, and their test files).
+
+### Summary
+
+| Severity | Count |
+|----------|-------|
+| CRITICAL | 0 |
+| HIGH | 0 |
+| MEDIUM | 0 |
+| LOW | 0 |
+
+### Findings
+
+None. The three source changes are correct across all edge cases:
+- `valueCeiling = Infinity` on the legacy (no-calibrated) path keeps prior test coverage unaffected.
+- `Math.max(1, Math.round(calibrated.ceiling))` safely handles 0 and negative ceiling values (both resolve to 1, the minimum bid).
+- `NaN` ceiling input is excluded by the `Number.isFinite()` guard, which falls through to `Infinity` (no ceiling cap), consistent with the intent.
+- TAX label `-$${Math.abs(gap)} TAX` correctly handles all negative gap magnitudes.
+- `range.base` (midpoint) for the ELITE anchor line is the same value the live auction-advisor computes for NEUTRAL inflation -- the two surfaces now agree.
+
+### RV-18 resolution (tag-detector.ts)
+
+`src/lib/intel/tag-detector.ts` does not exist and has no references anywhere in `src/`. The file was either deleted in a prior session or was never created at the file level (the original RV-18 finding may have noted the plan to build it, not a live file). Either way: nothing to wire, nothing to delete at that path. **RV-18 is resolved.**
+
+Residual stale code: `src/components/draft/ffi-player-card.tsx` defines `BadgeType` entries `'breakout'` and `'bust'` and their associated `BADGE_CONFIG` styling, which reference the now-defunct detector. These badge types appear dead (no code path ever instantiates them with real detector data since the detector doesn't exist), but `ffi-player-card.tsx` is the live-draft-room card -- touching it carries R11-scope risk. **Deferred to R11/R13** for cleanup alongside the full live-room pass. Not a production correctness issue (dead code paths don't execute).
+
+### Notes
+
+- The updated HOT describe block test `when room exceeds ceiling, both HOT and NEUTRAL are capped at genuine worth` correctly reflects the post-RV-4 behavior. When `room > ceiling`, the `valueCeiling` clamp dominates and both HOT and NEUTRAL land at the ceiling. HOT and NEUTRAL still produce different initial anchors (and would differ if decreasing factors such as "position filled" are subsequently applied), but the simpler test case (no factor boosts/decreases) now shows them equal -- which is the correct behavior.
+- Type-check, full test suite (227/227), lint (161 = baseline, 0 new), and production build all green on the R3 changed modules.
+
+---
+
 ## Review: 2026-08-12 — full screen-by-screen audit vs. code (feedback-driven, read-only)
 
 **Project:** fantasy_football_draft_app

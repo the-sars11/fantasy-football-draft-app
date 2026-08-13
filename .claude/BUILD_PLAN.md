@@ -103,8 +103,8 @@ Every item below was confirmed against code. `RV-#` = review finding. Severity i
 | RV-1 | **CRITICAL** | **No team-construction.** Max-bid capped by wallet, not by roster-completion. The app can't build a team for $200 — the whole point. | `auction-advisor.ts:98,127,147` | R4→R5 |
 | RV-2 | **CRITICAL** | ~~Dead Claude model id → strategy/research AI paths 404/500.~~ **[x] FIXED R1** | `ai/claude.ts:28-29` | R1 |
 | RV-3 | **HIGH** | ~~Rule-based fallback is key-gated, not error-gated → 500 on AI failure instead of graceful $0 fallback.~~ **[x] FIXED R1** | `strategies/propose/route.ts:158-160` | R1 |
-| RV-4 | **HIGH** | Max-bid can exceed the player's ceiling (recommends overpaying past worth). | `auction-advisor.ts:98,127,147` | R3 |
-| RV-5 | **HIGH** | "Anchor — pay up to $97" shows the theoretical **ceiling** as a pay-to price → tells Joe to overpay. | `players/recommendation.ts:43` | R3 |
+| RV-4 | **HIGH** | ~~Max-bid can exceed the player's ceiling (recommends overpaying past worth).~~ **[x] FIXED R3** | `auction-advisor.ts:98,127,147` | R3 |
+| RV-5 | **HIGH** | ~~"Anchor — pay up to $97" shows the theoretical **ceiling** as a pay-to price → tells Joe to overpay.~~ **[x] FIXED R3** | `players/recommendation.ts:43` | R3 |
 | RV-6 | **HIGH** | ~~ADP still drives the Cheat Sheet (sort pill + Movers strip) — meaningless in auction, Joe called it out.~~ **[x] FIXED R1** | `prep/board/client.tsx:35,447-511` | R1 |
 | RV-7 | **HIGH** | ~~Board "ECR" is `round(avgAdp)` (ADP mislabeled); real `ecrPositionRank` unused. "PTS" similarly suspect.~~ **[x] FIXED R2** | `convert.ts:96` (real at `:61-64/111`) | R2 |
 | RV-8 | MED | ~~Value RANGE on the board is a fake flat ±15%, not the real VORP↔room band.~~ **[x] FIXED R2** | `draft-board-table.tsx:78,392-400` | R2 |
@@ -117,7 +117,7 @@ Every item below was confirmed against code. `RV-#` = review finding. Severity i
 | RV-15 | MED | Graded tag scale exists in types (weight 1-10, severity soft/hard) but the tagging UI is binary. | `research/strategy/types.ts:151-166` | R7a |
 | RV-16 | MED | ~~`/draft/live` can `return null` (blank dead screen); `myManager` can throw.~~ **[x] FIXED R1** | `draft/live/client.tsx:462,466` | R1 |
 | RV-17 | MED | Target/avoid persistence is name-anchored (UUID FK on a name) — fragile to any name variance. | `user_tags` migration | R7a |
-| RV-18 | LOW | BREAKOUT/BUST/VALUE detector exists but is wired to nothing. | `lib/intel/tag-detector.ts` | R3 |
+| RV-18 | LOW | ~~BREAKOUT/BUST/VALUE detector exists but is wired to nothing.~~ **[x] RESOLVED R3** — `lib/intel/tag-detector.ts` does not exist; was a stale reference. Dead badge cleanup in `ffi-player-card.tsx` deferred to R11/R13. | `lib/intel/tag-detector.ts` | R3 |
 | RV-19 | LOW | ~~"Demo Draft" routes to `/draft/live?sim=1` → hits the RV-16 dead screen (collateral). Genuinely useful once RV-16 is fixed.~~ **[x] FIXED R1** | `settings/page.tsx:116,147` | R1 |
 
 ---
@@ -170,7 +170,7 @@ Work top to bottom. Each session is scoped to finish cleanly in one focused sitt
 > **Work:** ECR cell = real `ecrPositionRank`; PTS = real projection; RANGE = the real calibrated VORP↔room band (kill the ±15%); surface tier data beyond the single ELITE flag (tier badges / tier grouping).
 > **Done-when:** every board cell equals its real source field; tests assert cell = source (no derived-from-ADP stand-ins). Screenshot of the corrected board.
 
-### R3 — Valuation correctness: never recommend overpaying `[Opus]` · class: pipeline
+### R3 — Valuation correctness: never recommend overpaying `[Opus]` · class: pipeline `[x]` DONE 2026-08-12
 > **Why:** before the team engine constrains bids further, the single-player math must at least never tell Joe to pay *more than a player is worth*.
 > **Reads first:** `src/lib/draft/auction-advisor.ts`, `src/lib/players/recommendation.ts`, `src/lib/players/tags.ts`, `src/lib/intel/tag-detector.ts`, `src/lib/players/value-range.ts`.
 > **Closes:** RV-4, RV-5, RV-18.

@@ -58,6 +58,13 @@ export function calculateMaxBidAdvice(
   const emptySlots = Math.max(0, totalSlots - mgr.picks.length - 1)
   const absoluteMax = Math.max(1, mgr.budget_remaining - emptySlots)
 
+  // When calibrated worth is present, no factor boost may push the bid past
+  // genuine worth, regardless of how much budget remains. Infinity keeps the
+  // legacy (no-calibrated) path unconstrained.
+  const valueCeiling = (calibrated && Number.isFinite(calibrated.ceiling))
+    ? Math.max(1, Math.round(calibrated.ceiling))
+    : Infinity
+
   const factors: MaxBidFactor[] = []
 
   // Base anchor. When calibrated inputs are present, sit the anchor between what
@@ -95,7 +102,7 @@ export function calculateMaxBidAdvice(
 
   // Factor: Strategy alignment
   if (strategyScore >= 75) {
-    recommendedMax = Math.min(absoluteMax, Math.round(recommendedMax * 1.15))
+    recommendedMax = Math.min(absoluteMax, valueCeiling, Math.round(recommendedMax * 1.15))
     factors.push({
       label: 'Strategy target',
       impact: 'increases',
@@ -124,7 +131,7 @@ export function calculateMaxBidAdvice(
       detail: `Need ${need} more ${pos}${need > 1 ? 's' : ''}`,
     })
     if (need >= 2) {
-      recommendedMax = Math.min(absoluteMax, Math.round(recommendedMax * 1.1))
+      recommendedMax = Math.min(absoluteMax, valueCeiling, Math.round(recommendedMax * 1.1))
     }
   } else {
     recommendedMax = Math.round(recommendedMax * 0.7)
@@ -144,7 +151,7 @@ export function calculateMaxBidAdvice(
   )
 
   if (alternatives.length <= 2) {
-    recommendedMax = Math.min(absoluteMax, Math.round(recommendedMax * 1.2))
+    recommendedMax = Math.min(absoluteMax, valueCeiling, Math.round(recommendedMax * 1.2))
     factors.push({
       label: 'Scarcity',
       impact: 'increases',
@@ -179,7 +186,7 @@ export function calculateMaxBidAdvice(
     }
   }
 
-  recommendedMax = Math.max(1, Math.min(absoluteMax, Math.round(recommendedMax)))
+  recommendedMax = Math.max(1, Math.min(absoluteMax, valueCeiling, Math.round(recommendedMax)))
 
   const reasoning = recommendedMax >= consensusValue * 1.2
     ? `Worth stretching - high strategy fit + limited alternatives`

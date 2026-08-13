@@ -2,6 +2,60 @@
 
 ---
 
+## 2026-08-12 / R3 -- Valuation correctness: the app never recommends overpaying
+
+**Task:** REBUILD R3 `[Opus]` -- ensure no code path returns a max-bid above the player's genuine worth; fix the "pay up to" line to show a real pay-to price; make TAX legible; resolve the stale breakout/bust detector badge. | **Class:** pipeline | **Lenses:** QA, Architecture
+
+**Problem:** Three verified findings from the 2026-08-12 reality reset:
+- **RV-4:** `calculateMaxBidAdvice` applied strategy (1.15x), position-need (1.1x), and scarcity (1.2x) boosts in sequence *before* capping against `absoluteMax`. With `calibrated.ceiling=50` and `room=40`, combined boosts could push `maxBid` to 62 -- 24% above genuine player worth. The bug was that `absoluteMax` (wallet ceiling) was the only cap, with no cap on actual player worth.
+- **RV-5:** The ELITE recommendation line read `Anchor - pay up to $97 to lock a Tier 1 player.` where `$97` was `range.high` (the theoretical ceiling). Joe should not pay up to the ceiling; he should pay up to the fair midpoint (what the room typically pays). For Gibbs (ceiling=$97, room=$76), the correct pay-to was `$87`, not `$97`.
+- **RV-18:** `lib/intel/tag-detector.ts` referenced in the bug register does not exist -- the file was never created or was deleted in a prior session. No references anywhere in `src/`. Stale register entry, not a real wired-to-nothing file.
+
+**Root cause (RV-4):** Three boost sites in `calculateMaxBidAdvice` (lines 98, 127, 147 of `auction-advisor.ts`) called `Math.min(absoluteMax, ...)` but not `Math.min(absoluteMax, valueCeiling, ...)`. The `valueCeiling` concept did not exist before this session.
+
+**Root cause (RV-5):** `recommendation.ts:43` read `range.high` (the theoretical ceiling) instead of `range.base` (the midpoint the live auction-advisor uses as its NEUTRAL anchor). The ceiling is a max-you-should-ever-pay number, not the recommended pay-to.
+
+**What changed:**
+
+- **`src/lib/draft/auction-advisor.ts` (RV-4):**
+  - Added `valueCeiling` after the `absoluteMax` computation: `= calibrated ? Math.max(1, Math.round(calibrated.ceiling)) : Infinity`
+  - Three boost sites changed from `Math.min(absoluteMax, Math.round(x))` to `Math.min(absoluteMax, valueCeiling, Math.round(x))`
+  - Final clamp: `Math.max(1, Math.min(absoluteMax, valueCeiling, Math.round(recommendedMax)))`
+  - Legacy path (no `calibrated`): `valueCeiling = Infinity`, so all 16 pre-existing legacy tests pass unchanged.
+  - Key invariant now enforced: when `calibrated` is present, `maxBid <= calibrated.ceiling` regardless of any boost.
+
+- **`src/lib/players/recommendation.ts` (RV-5):**
+  - Line 43 changed from `range.high` to `range.base` in the ELITE anchor line.
+  - For Gibbs (ceiling=$97, room=$76): was "pay up to $97" → now "pay up to $87" (midpoint = round((97+76)/2)).
+
+- **`src/lib/players/tags.ts` (POCKET/TAX legibility):**
+  - TAX label changed from `` `${gap} TAX` `` to `` `-${Math.abs(gap)} TAX` `` -- `gap` is negative when TAX fires, so the old label rendered as `$-4 TAX` (confusing); now renders as `-$4 TAX` (human-readable).
+
+- **`src/lib/draft/__tests__/auction-advisor.test.ts`:**
+  - Added 3 new RV-4 tests (describe block: "maxBid never exceeds calibrated ceiling"): strategy-score boost (1.15x), scarcity boost (1.2x), all boosts combined -- each asserts `maxBid <= 50` for `ceiling=50`.
+  - Updated pre-existing HOT/NEUTRAL test: old test expected `HOT < NEUTRAL` (which was the wrong behavior -- NEUTRAL was being allowed to overpay past ceiling). New test asserts both are capped at `ceiling` when `room > ceiling`.
+
+- **`src/lib/players/__tests__/recommendation.test.ts`:**
+  - Updated ELITE test: was `toContain('$90')` (range.high); now `toContain('$85')` (range.base = round((90+80)/2)).
+
+- **`src/lib/players/__tests__/tags.test.ts`:**
+  - Added TAX label test: `gap=-8` → `'-$8 TAX'` (was `'$-8 TAX'`).
+
+**Verify (per-session gate, all evidence pasted live this session):**
+
+| Gate | Result |
+|---|---|
+| `npm run type-check` | 0 errors |
+| `npm run test:run` | 227/227 green (4 new tests: 3 RV-4 ceiling invariant + 1 TAX label) |
+| `npm run lint` | 161 warnings, 0 new errors vs R2 baseline |
+| `npm run build` | clean |
+| `/bug-hunt free` (changed modules) | 0 critical, 0 high, 0 medium, 0 low |
+| Loaded-preview logic | Server started on port 3031 (killed stale PID 28788); `/api/players` responded with 493 players. Browser pane not compositing (throttled background tab) blocked screenshot. Logic verified in-browser via JS: `ceiling=97, room=76 → base=87` (ELITE line = "pay up to $87", not $97); `gap=-8 → label='-$8 TAX'` (not '$-8 TAX'). Test suite is the primary proof. |
+
+**Closes:** RV-4, RV-5, RV-18. Next open item: **R4 -- Team-construction SOLVER** (`BUILD_PLAN.md`).
+
+---
+
 ## 2026-08-12 / R2 -- Data truth: board labels now tell the truth
 
 **Task:** REBUILD R2 `[Sonnet]` -- make the Cheat Sheet stat cells show their real source fields, not ADP proxies or fabricated bands. | **Class:** bugfix | **Lenses:** QA, Delivery (UI)

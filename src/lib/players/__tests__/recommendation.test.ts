@@ -20,11 +20,11 @@ function player(overrides: Partial<Player>): Player {
 }
 
 describe('computeRecommendation', () => {
-  it('ELITE → anchor, pay to the top of the band', () => {
+  it('ELITE → anchor, pay to the fair midpoint (not the ceiling)', () => {
     const r = computeRecommendation(player({ expertTier: 1, ceilingValue: 90, expectedRoomPrice: 80 }))
     expect(r.intent).toBe('anchor')
     expect(r.line).toMatch(/Anchor/)
-    expect(r.line).toContain('$90') // range.high
+    expect(r.line).toContain('$85') // range.base = round((90+80)/2) = 85
   })
 
   it('POCKET → target, win at/under the midpoint', () => {

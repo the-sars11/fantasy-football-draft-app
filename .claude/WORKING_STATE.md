@@ -27,7 +27,9 @@ The prior plan (S1–S8 / P2 DR / P3 VAL) marked the app "done" while it (a) pri
 
 **R2 [Sonnet] — Data truth — DONE 2026-08-12.** Closed RV-7, RV-8, RV-14. ECR stat = real `ecrPositionRank` (e.g. "WR1"), RANGE stat = calibrated VORP↔room band (e.g. "$64-$71" for Ja'Marr Chase), tier badge (T1/T2/T3+) now visible in main row. New `convert.test.ts` (7 tests) asserts real source→field mappings. Full gate passed (type-check 0 errors, 223/223 tests green, lint 0 new errors, build clean, bug-hunt free 0 critical/0 high/1 medium pre-existing, screenshot confirming WR1 ECR + $64-$71 RANGE + T1 badge). See `CHANGELOG.md` and `BUILD_PLAN.md` R2.
 
-**R3 [Opus] — Valuation correctness: never recommend overpaying.** Cap max-bid at the ceiling (never above worth); fix "pay up to $X" line to show pay-to price, not the theoretical ceiling; make POCKET/TAX legible; wire or delete the breakout/bust/value detector. Closes RV-4, RV-5, RV-18. **Reads first:** `src/lib/draft/auction-advisor.ts`, `src/lib/players/recommendation.ts`, `src/lib/players/tags.ts`, `src/lib/intel/tag-detector.ts`, `src/lib/players/value-range.ts`. See `BUILD_PLAN.md` R3.
+**R3 [Opus] — Valuation correctness — DONE 2026-08-12.** Closed RV-4, RV-5, RV-18. `valueCeiling` guard in `calculateMaxBidAdvice` ensures max-bid never exceeds `calibrated.ceiling` regardless of strategy/scarcity/position boosts; ELITE anchor changed from `range.high` (ceiling) to `range.base` (fair midpoint); TAX label fixed from `$-4 TAX` to `-$4 TAX`; `lib/intel/tag-detector.ts` confirmed not to exist (RV-18 stale reference resolved). 227/227 tests green. See `CHANGELOG.md` and `BUILD_PLAN.md` R3.
+
+**R4 [Opus] — Team-construction SOLVER (the North Star, as a tested library).** Build `src/lib/draft/roster-solver.ts` — a pure, $0 module. Given `{ budgetRemaining, slotsRemaining, boardValues, replacementLevels }` returns the optimal remaining allocation + per-nomination roster-constrained max-bid. PROPOSE checkpoint required first: agree on algorithm (greedy marginal-value vs. bounded knapsack) and exact function signature before writing code. See `BUILD_PLAN.md` R4.
 
 ---
 
