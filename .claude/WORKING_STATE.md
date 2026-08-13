@@ -29,7 +29,9 @@ The prior plan (S1–S8 / P2 DR / P3 VAL) marked the app "done" while it (a) pri
 
 **R3 [Opus] — Valuation correctness — DONE 2026-08-12.** Closed RV-4, RV-5, RV-18. `valueCeiling` guard in `calculateMaxBidAdvice` ensures max-bid never exceeds `calibrated.ceiling` regardless of strategy/scarcity/position boosts; ELITE anchor changed from `range.high` (ceiling) to `range.base` (fair midpoint); TAX label fixed from `$-4 TAX` to `-$4 TAX`; `lib/intel/tag-detector.ts` confirmed not to exist (RV-18 stale reference resolved). 227/227 tests green. See `CHANGELOG.md` and `BUILD_PLAN.md` R3.
 
-**R4 [Opus] — Team-construction SOLVER (the North Star, as a tested library).** Build `src/lib/draft/roster-solver.ts` — a pure, $0 module. Given `{ budgetRemaining, slotsRemaining, boardValues, replacementLevels }` returns the optimal remaining allocation + per-nomination roster-constrained max-bid. PROPOSE checkpoint required first: agree on algorithm (greedy marginal-value vs. bounded knapsack) and exact function signature before writing code. See `BUILD_PLAN.md` R4.
+**R4 [Opus] — Team-construction SOLVER — DONE 2026-08-12.** Built `src/lib/draft/roster-solver.ts` (pure $0 module, 320 lines) + `src/lib/draft/__tests__/roster-solver.test.ts` (504 lines, 47 tests). Greedy best-fill: dedicated starters in scarcity order (QB→TE→RB→WR→DST), then FLEX from combined RB/WR/TE pool by ceiling DESC, then bench at $1. `solveAllocation` + `computeRosterConstrainedMaxBid` (maxBid = budget − best-rest-of-roster). 274/274 tests green. Bug hunt: 0 CRITICAL, 0 HIGH, 1 MEDIUM (BUG-007: slot-no-op when bench=0 — fix before R5), 3 LOW. See `BUILD_PLAN.md` R4 and `BUG_LOG.md`.
+
+**R5 [Opus] — Wire the solver into the LIVE max-bid.** Live max-bid = min(worth ceiling, roster-completion-constrained max); surface the constraint in plain words. Closes RV-1 (live half). Reads first: R4 output (`roster-solver.ts`), `auction-advisor.ts`, `draft/live/client.tsx`, `what-to-do.ts`. Fix BUG-007 in roster-solver.ts as part of this session (before wiring). See `BUILD_PLAN.md` R5.
 
 ---
 

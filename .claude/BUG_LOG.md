@@ -311,6 +311,90 @@ All S1-S4 code paths and supporting infrastructure:
 
 ---
 
+## Hunt: 2026-08-12 -- free mode -- Scope: R4 team-construction solver (new modules)
+
+**Project:** fantasy_football_draft_app
+**Type:** TypeScript / Next.js (App Router) + Vitest
+**Auditor:** Claude Code (static read-only pass, no commands beyond the R4 verify gate already run)
+**Mode:** FREE -- static analysis of the 2 files created by R4: `src/lib/draft/roster-solver.ts` (320 lines) and `src/lib/draft/__tests__/roster-solver.test.ts` (504 lines). No downstream consumers exist yet (R5 wires it into the live bid advisor).
+
+### Summary
+
+| Severity | Count |
+|----------|-------|
+| CRITICAL | 0 |
+| HIGH | 0 |
+| MEDIUM | 1 |
+| LOW | 3 |
+
+| Category | Count |
+|----------|-------|
+| Logic / Edge case | 1 |
+| Data Quality | 1 |
+| Test Coverage | 2 |
+
+### Findings
+
+#### MEDIUM
+
+##### BUG-007: `resolvePlayerSlot` silent slot-no-op when bench=0 and player has no valid slot
+- **File:** `src/lib/draft/roster-solver.ts:242`
+- **Category:** Logic / Edge case
+- **Effort:** S
+- **Description:** When a nominated player has no dedicated slot, no FLEX slot, and `bench = 0`, the bench-fallback line `Math.max(0, (slots.bench ?? 0) - 1)` clamps to 0 — identical to the input. The function returns the input slots unchanged, meaning the nominated player's slot is silently discarded. `computeRosterConstrainedMaxBid` then runs `solveAllocation` with unmodified `slotsRemaining`, computes `completionCost` as if the player was never assigned, and returns `maxBid = budgetRemaining - completionCost` with `feasible = true`. If the slot genuinely doesn't exist, the max-bid is artificially high.
+- **Evidence:** The infeasible test at `roster-solver.test.ts:380-393` exercises exactly this path (WR nominated, bench=0, no wr/flex slots) — but the budget ($20) is small enough that `rawMaxBid = 20 - 60 = -40` forces `feasible: false` anyway. No test exercises the slot-leak with sufficient budget to expose the wrong `maxBid`.
+  ```typescript
+  // roster-solver.ts:242
+  return { ...slots, bench: Math.max(0, (slots.bench ?? 0) - 1) }
+  // When bench=0: Math.max(0, -1) = 0 → same as input → slot not consumed
+  ```
+- **Fix:** Before the bench clamp, check if `slots.bench <= 0` and return an out-of-slots sentinel (e.g., keep slots unchanged AND surface it). Caller `computeRosterConstrainedMaxBid` should detect the no-slot case and return `{ maxBid: 1, feasible: false, explanation: 'No slot available for [position]' }`. R5 will wire this into the UI, so fix before or alongside R5.
+- **Impact:** R4 is a library — no UI yet. When R5 wires `computeRosterConstrainedMaxBid` into the live bid display, a player nominated after the roster is full (or with no slot of the right type) would show an inflated max-bid instead of "no slot available." Low probability in real usage (UI should prevent nominating when slots full), but a correctness gap.
+
+#### LOW
+
+##### BUG-008: `solveAllocation` feasibility flag uses pre-rounded `completionCost`
+- **File:** `src/lib/draft/roster-solver.ts:215`
+- **Category:** Data Quality
+- **Effort:** S
+- **Description:** `feasible: completionCost <= budgetRemaining` fires on the raw accumulated float; the returned `completionCost` is `Math.round(completionCost)`. If `expectedCost` values ever have decimals (e.g., 42.5), the feasibility signal and the returned cost can differ by up to $0.49. Example: raw cost 99.6 with budget 100 → `feasible: true`, returned `completionCost: 100` → caller computes `rawMaxBid = 100 - 100 = 0`, `maxBid = 1`, `feasible: false` — the two feasibility signals disagree. In practice, all auction bids are whole dollars, so `expectedCost` values are integers and this is purely theoretical.
+- **Evidence:** `roster-solver.ts:214-218` — feasibility check before rounding.
+- **Fix:** Move the feasibility check to after rounding: `const roundedCost = Math.round(completionCost); return { feasible: roundedCost <= budgetRemaining, completionCost: roundedCost, ... }`.
+- **Impact:** None in current app (integer-dollar inputs). Defensive fix before non-integer inputs could reach the solver.
+
+##### BUG-009: `explanation` field is zero-tested across all 47 test cases
+- **File:** `src/lib/draft/__tests__/roster-solver.test.ts` (coverage gap)
+- **Category:** Test Coverage
+- **Effort:** S
+- **Description:** Every `computeRosterConstrainedMaxBid` call checks `maxBid`, `feasible`, and `completionCost`, but no test ever asserts `result.explanation`. The `buildExplanation` function (26 lines) — including the "Roster complete" short-circuit path and the "Need X + Y (~$N) → max $M" assembly — is unverified. When R5 displays `explanation` in the live bid UI, a regression in the string format (wrong slot labels, missing prefix, off-by-one in cost display) would be invisible to the test suite.
+- **Fix:** Add 2-3 targeted assertions in an existing describe block, e.g.: (1) `explanation` contains the slot labels when slots remain; (2) `explanation` is `"Roster complete - max $N"` when `assignments.length === 0`; (3) cost estimate in explanation matches `completionCost`.
+- **Impact:** Test gap only — no production impact until R5. Flag for R5 or R13 (full test pass).
+
+##### BUG-010: Incorrect comment on `te2` in FLEX contention test
+- **File:** `src/lib/draft/__tests__/roster-solver.test.ts:485`
+- **Category:** Test Coverage / Clarity
+- **Effort:** XS
+- **Description:** The board fixture comment reads `p('te2', 'TE', 25, 20), // next TE → FLEX` — but te2 does NOT go to FLEX. rb1 (ceiling=30) outbids te2 (ceiling=25) for the one FLEX slot. The test assertion is correct (`expect(flexAssignment?.player?.id).toBe('rb1')`), but the comment tells a future reader the opposite. A reader expecting te2 to be in FLEX would be confused by the assertion.
+- **Fix:** Change comment to `// next TE → loses FLEX to rb1 (ceiling 30 > 25)`.
+- **Impact:** Cosmetic only. No test correctness impact.
+
+### Recommended Fix Order
+
+1. **BUG-007** (before R5) — slot-no-op when bench=0. Correctness gap that will surface in the live UI the moment R5 wires `computeRosterConstrainedMaxBid` in.
+2. **BUG-008** (R13 or alongside BUG-007) — rounding order in `solveAllocation`. One-line defensive fix.
+3. **BUG-009** (R5 or R13) — add `explanation` assertions. Without them, the explanation field is untested dead code from the suite's perspective.
+4. **BUG-010** (next touch of the test file) — fix the te2 comment. XS cosmetic.
+
+### Notes
+
+- No CRITICAL or HIGH findings in the R4 deliverable. The core greedy algorithm (dedicated → FLEX → bench, scarcity order, ceiling-DESC selection, FLEX pool post-Phase-1) is correct across all 47 test cases.
+- FLEX eligibility guard (QB/DEF excluded, `FLEX_ELIGIBLE = Set(['RB','WR','TE'])`) is correctly enforced and tested.
+- `dst` / `DEF` naming convention (DB schema uses `dst`, position enum uses `DEF`) is correctly mapped in both directions via `POSITION_TO_DEDICATED` and `DEDICATED_TO_POSITION`.
+- The module has zero downstream consumers yet — R5 wires it. BUG-007 is the only fix that must land before or with R5.
+- Gate: type-check 0 errors, 274/274 tests green (47 new), lint 0 new errors vs 161-warning baseline, build clean.
+
+---
+
 ## Hunt: 2026-08-12 -- free mode -- Scope: R2 data-truth changed modules
 
 **Project:** fantasy_football_draft_app

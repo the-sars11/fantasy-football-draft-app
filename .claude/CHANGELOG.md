@@ -2014,6 +2014,47 @@ All fixes are already scheduled as FF-257–259, FF-274. FF-255/256 (full redesi
 
 ---
 
+## R4 — Team-construction SOLVER (2026-08-12) `[FEATURE]`
+
+**Session:** R4 [Opus] · class: pipeline · closes: RV-1 (library half)
+
+**Problem:** The app had no team-construction engine. Max-bid was capped by the wallet (`absoluteMax = budget_remaining - emptySlots`), not by roster completion. Joe could be advised to overbid a single player and then have no budget to finish the team. The North Star ("build the best full 15-man roster for $200") was structurally unreachable.
+
+**Root cause:** `auction-advisor.ts` never modeled "what does the best possible rest-of-roster cost?" — it only ensured each remaining slot had at least $1. Roster completion as a constraint did not exist in any code path.
+
+**What changed:**
+
+- `src/lib/draft/roster-solver.ts` — NEW. Pure module, no React, no Supabase, no I/O. 320 lines.
+  - `solveAllocation(input: SolverInput): SolverResult` — greedy best-fill: dedicated starters in scarcity order (QB→TE→RB→WR→DST by ceiling DESC), then FLEX from the combined RB/WR/TE pool (ceiling DESC, post-Phase-1 exclusion), then bench at $1 replacement cost. Returns `{ feasible, completionCost, assignments }`.
+  - `computeRosterConstrainedMaxBid(nominatedPlayer, input): RosterConstrainedMaxBid` — removes nominated player from pool, decrements their slot, runs `solveAllocation`, returns `maxBid = budget - completionCost` (floored at $1) with explanation ("Need QB + 2×FLEX + 4×BENCH (~$47) → max $53").
+  - Key invariant (guaranteed by design): `maxBid + completionCost <= budgetRemaining` when feasible.
+
+- `src/lib/draft/__tests__/roster-solver.test.ts` — NEW. 504 lines, 47 test cases.
+  - Covers: full Nasties 13-slot fill, FLEX pool excludes QB/DEF, board dry at position (replacement fallback), empty board, feasibility flag, no-slots-remaining, dedicated fill, FLEX fill, bench fill, last slot, forced $1 scrubs, empty board, infeasible state, maxBid+completionCost invariant (4 parametric), maxBid≥$1 invariant, nominated player exclusion, dedicated-before-FLEX contention.
+
+**Key design decisions:**
+
+- Greedy over bounded knapsack: O(slots × pool), microsecond runtime, explainable to a user. For 13 slots + ~100 RBs + 3 FLEX slots this is 300 comparisons. Escalate to knapsack only if tests reveal systematic misallocation (none found).
+- DEDICATED_ORDER = `['qb', 'te', 'rb', 'wr', 'dst']` (QB/TE first = scarcest pools, filled before the FLEX pool is assembled).
+- FLEX eligibility: `Set(['RB', 'WR', 'TE'])` — QB and DEF cannot go to FLEX.
+- Bench slots always use replacement cost ($1); bench filler quality is irrelevant to draft strategy.
+- `dst` key (not `def`) for defense — matches DB schema `RosterSlots.dst`.
+
+**Bug hunt:** 0 CRITICAL, 0 HIGH, 1 MEDIUM (BUG-007: `resolvePlayerSlot` silent slot-no-op when bench=0 and player has no valid slot — fix before R5 wiring), 3 LOW (feasibility pre-rounding edge, explanation field untested, te2 comment wrong). See `.claude/BUG_LOG.md`.
+
+**Verify table:**
+
+| Check | Result |
+|-------|--------|
+| `npm run type-check` | ✅ 0 errors |
+| `npm run test:run` | ✅ 274/274 passed (+47 new) |
+| `npm run lint` | ✅ 161 warnings (baseline), 0 new errors from R4 files |
+| `npm run build` | ✅ Clean, 54 pages generated |
+| `/bug-hunt free` on changed modules | ✅ 0 CRITICAL, 0 HIGH |
+| Unit test output as proof (no UI in R4) | ✅ 274/274 |
+
+---
+
 ## Entry Types
 
 - `[FEATURE]` - New functionality
