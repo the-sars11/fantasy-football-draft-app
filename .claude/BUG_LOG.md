@@ -1,5 +1,48 @@
 # Bug Hunt Log
 
+## Hunt: 2026-08-12 -- free mode -- Scope: R5 roster-solver wiring changed modules
+
+**Project:** fantasy_football_draft_app
+**Type:** TypeScript / Next.js (App Router) + Vitest
+**Auditor:** Claude Code (static read-only pass; type-check/test/lint/build already run green in the R5 VERIFY gate)
+**Mode:** FREE -- static analysis of the 6 files touched/added by R5: roster-solver.ts, solver-bridge.ts (new), what-to-do.ts, on-the-block-card.tsx, auction-room.tsx, draft/live/client.tsx (+ 2 test files).
+
+### Summary
+
+| Severity | Count |
+|----------|-------|
+| CRITICAL | 0 |
+| HIGH | 0 |
+| MEDIUM | 1 |
+| LOW | 0 |
+
+| Category | Count |
+|----------|-------|
+| Logic | 1 |
+
+### Findings
+
+#### MEDIUM
+
+##### BUG-R5-01: budget-aware fill never advances to a cheaper affordable player; over-drops to $1 fillers
+- **File:** `src/lib/draft/roster-solver.ts:200-215` (Phase 1 dedicated) and `:230-245` (Phase 2 FLEX)
+- **Category:** Logic
+- **Effort:** S (~5 lines + one regression test)
+- **Description:** When the highest-ceiling candidate for a slot is unaffordable under the R5 guard, the loop drops that slot straight to a $1 replacement filler instead of trying the next-cheaper affordable player of the same eligibility. In the FLEX phase the unaffordable candidate is never marked `used`, so `flexPool.find(p => !used.has(p.id))` returns the *same* unaffordable player on every FLEX iteration -- every FLEX slot collapses to a $1 filler even when affordable mid-tier RB/WR/TE are on the board. The dedicated phase has the same latent shape (masked in Nasties because there is exactly one QB/RB/WR/TE/DST slot, so there is no second iteration to expose it).
+- **Evidence:** Scenario -- `flex:3`, tight budget, board flexPool sorted ceiling DESC = [stud $25 exp, mid $3 exp, cheap $2 exp]. Guard fails on the $25 stud, passes on the $3 mid. Current code fills all three FLEX slots with $1 fillers ($3 total) and never buys the affordable $3 mid. Correct "best affordable rest" would spend $3 + $2 + filler.
+- **Direction of error:** completionCost is *understated* -> `maxBid = budget - completionCost` is *overstated*. The displayed cap reads too GENEROUS in tight-budget/multi-FLEX spots (opposite direction from the already-documented "elite studs read conservative" calibration flag). Budget-SAFE: the roster is still completable at $1/slot, so it never advises a bid Joe literally cannot cover -- it just under-reserves for a good bench/FLEX.
+- **Fix:** Select the first *affordable* unused eligible player (`flexPool.find(p => !used.has(p.id) && affordable(p.expectedCost))`), else filler -- applied consistently to both the dedicated and FLEX phases. Add a regression test with a 3-FLEX pool where the top player is unaffordable but cheaper ones are affordable.
+- **Impact if unfixed:** In tight mid/late-draft states the roster-completion cap can advise a few dollars more than the true best-affordable completion supports. Not a crash, not a budget blowout; a calibration imperfection in the exact scenario RV-1 exists to protect. Same family as the honest-calibration flag already carried into R6/R9.
+- **Verified-not-broken:** All 296 tests stay green because every existing tight-budget test uses a single-player-per-position board (no cheaper alternative to advance to), so the fix would return identical results there.
+
+### Notes
+
+- Client-side fold (`client.tsx:363-365`) verified correct: `maxBidAdviceMap` and `rosterAdviceMap` both key on `name.toLowerCase()`; `Math.min(silo, roster)` is the intended RV-1 cap; memo deps complete; `getBudget` is a stable `useCallback`.
+- BUG-007 short-circuit (`roster-solver.ts:356`) verified: no-slot players return `maxBid:1, feasible:false` and fold to a $1 cap on the board, which is correct.
+- `describeRosterConstraint` copy verified dash-free (test asserts `not.toMatch(/[--]/)`).
+
+---
+
 ## Hunt: 2026-08-12 -- free mode -- Scope: R3 valuation-correctness changed modules
 
 **Project:** fantasy_football_draft_app

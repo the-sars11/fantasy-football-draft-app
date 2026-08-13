@@ -182,6 +182,17 @@ export function OnTheBlockCard({
           <div className="text-[12.5px] leading-relaxed" style={{ color: ROOM.t1 }}>
             {advice.rationale}
           </div>
+          {advice.rosterNote && (
+            <div
+              className="mt-2 flex items-start gap-1.5 border-t pt-2 text-[11.5px] leading-snug"
+              style={{ borderColor: 'rgba(255,255,255,0.08)', color: ROOM.t2 }}
+            >
+              <span className="mt-px shrink-0 font-mono text-[10px] uppercase tracking-wide" style={{ color: ROOM.t3 }}>
+                Roster
+              </span>
+              <span>{advice.rosterNote}</span>
+            </div>
+          )}
         </div>
       </div>
     </div>

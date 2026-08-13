@@ -64,6 +64,7 @@ import type { Strategy as DbStrategy } from '@/lib/supabase/database.types'
 import type { Explanation } from '@/lib/draft/explain'
 import { clearRecommendationCache } from '@/lib/draft/recommend'
 import { calculateMaxBidAdvice } from '@/lib/draft/auction-advisor'
+import { buildSolverInput, computeRosterMaxBidMap, type RosterMaxBidEntry } from '@/lib/draft/solver-bridge'
 import { positionalInflation } from '@/lib/draft/league-calibration'
 import { InjuryWatch } from '@/components/draft/injury-watch'
 import { TrashTalkFeed, SavedTrashTalk } from '@/components/draft/trash-talk'
@@ -299,10 +300,34 @@ export function LiveDraftClient() {
     return result.active ? result : null
   }, [strategy, state, draftedNames, myPickedNames, driftDismissed])
 
-  // FF-283: Per-player max-bid advice -- recomputes on every pick from any source.
-  // deps: state (changes on every pick), scoredPlayers, draftedNames, strategy.
-  // All three pick paths (Auctioneer BroadcastChannel/localStorage, Sheets, manual)
-  // flow through setState -> invalidates this memo -> recomputes for remaining players.
+  // R5 (RV-1): the roster-completion solver input, rebuilt on every pick. Maps
+  // Joe's live budget + remaining slots (FLEX contention modeled) + the undrafted
+  // board into the pure R4 solver. $0 math, no network.
+  const solverInput = useMemo(() => {
+    if (!state || state.format !== 'auction') return null
+    const myMgr = state.manager_order[0]
+    const budget = getBudget(myMgr) ?? league?.budget ?? 200
+    const myPicksLocal = state.picks.filter(p => p.manager === myMgr)
+    return buildSolverInput({
+      budgetRemaining: budget,
+      rosterConfig: rosterSlots,
+      myPicks: myPicksLocal,
+      players,
+      draftedNames,
+    })
+  }, [state, getBudget, league?.budget, rosterSlots, players, draftedNames])
+
+  // R5: roster-constrained max bid + plain-English constraint per undrafted player.
+  const rosterAdviceMap = useMemo((): Map<string, RosterMaxBidEntry> => {
+    if (!solverInput) return new Map()
+    return computeRosterMaxBidMap(solverInput)
+  }, [solverInput])
+
+  // FF-283 / R5: Per-player max-bid advice -- recomputes on every pick from any
+  // source. The displayed max is now min(worth ceiling, roster-completion max):
+  // the silo advisor caps at genuine worth, the solver caps at what still lets Joe
+  // finish his roster (RV-1). deps: state, scoredPlayers, draftedNames, strategy,
+  // rosterAdviceMap. All pick paths flow through setState -> memo invalidates.
   const maxBidAdviceMap = useMemo((): Map<string, number> => {
     if (!state || state.format !== 'auction') return new Map()
     const managerName = state.manager_order[0]
@@ -332,10 +357,15 @@ export function LiveDraftClient() {
         strategy,
         calibrated,
       )
-      map.set(sp.player.name.toLowerCase(), result.maxBid)
+      const key = sp.player.name.toLowerCase()
+      // RV-1: fold in the roster-completion cap. min() so neither overpaying past
+      // worth (silo) nor breaking roster completion (solver) is ever advised.
+      const roster = rosterAdviceMap.get(key)
+      const finalMax = roster ? Math.min(result.maxBid, roster.maxBid) : result.maxBid
+      map.set(key, finalMax)
     }
     return map
-  }, [state, scoredPlayers, draftedNames, strategy])
+  }, [state, scoredPlayers, draftedNames, strategy, rosterAdviceMap])
 
   // UX-7.1: Dev-only sim engine
   const { isSimActive, isRunning: simRunning, speed: simSpeed, setSpeed: setSimSpeed, start: simStart, pause: simPause, reset: simReset } =
@@ -645,6 +675,7 @@ export function LiveDraftClient() {
         draftedNames={draftedNames}
         scarcity={scarcity}
         maxBidMap={maxBidAdviceMap}
+        rosterAdviceMap={rosterAdviceMap}
         myBudget={myBudget}
         myMaxBid={myMaxBid}
         myPicks={myPicks}

@@ -2,6 +2,41 @@
 
 ---
 
+## 2026-08-12 / R5 -- Wire the solver into the LIVE max-bid: THE PLAY becomes roster-aware
+
+**Task:** REBUILD R5 `[Opus]` -- make the displayed live max-bid reflect roster-completion math, not just wallet math, and explain the constraint in plain words on the card. | **Class:** pipeline | **Lenses:** Architecture, QA, Security
+
+**Problem (RV-1, live half):** After R4 built the roster-solver as a tested library, nothing consumed it live. The on-block "THE PLAY" max-bid was still a silo number -- capped only by what the wallet could afford, not by whether spending that much still leaves a completable best-rest-of-roster for $200. Joe could be advised to bid an amount that wins the player but strands his roster.
+
+**What changed:**
+
+- **`src/lib/draft/solver-bridge.ts` (NEW):** the live<->solver adapter (pure, $0). `buildSlotsRemaining` / `buildBoardPlayers` / `buildSolverInput` translate live draft state (my filled picks, budget, remaining board) into the solver's input shape; `computeRosterMaxBidMap` runs `computeRosterConstrainedMaxBid` per still-undrafted player and returns a `Map<lowercased-name, RosterMaxBidEntry {maxBid, note}>`; `describeRosterConstraint` renders the plain-English line ("More than $X and you cannot fill QB, 2 FLEX and N bench" -- no dashes, per house copy rule).
+- **`src/app/(app)/draft/live/client.tsx`:** added a `solverInput` memo (rebuilt every pick) and a `rosterAdviceMap` memo; folded the roster cap into the displayed number at lines 363-364 -- `const roster = rosterAdviceMap.get(key); const finalMax = roster ? Math.min(result.maxBid, roster.maxBid) : result.maxBid`. `min()` so neither overpaying past worth (silo) nor breaking roster completion (solver) is ever advised.
+- **`src/lib/draft/what-to-do.ts`:** added `rosterNote?: string | null` to `WhatToDoInput` and `rosterNote: string | null` to `WhatToDoAdvice`; the base advice carries it through so every move (HOLD/BID/PUSH/PASS) surfaces the constraint.
+- **`src/components/draft/live-room/auction-room.tsx`:** threads `rosterNote: rosterAdviceMap.get(onBlockPlayer.name.toLowerCase())?.note ?? null` into the advice.
+- **`src/components/draft/live-room/on-the-block-card.tsx`:** renders the note as a labeled block ("Roster" tag + text, border-top divider) under the rationale inside the "What to do" card, only when present.
+
+**Bugs fixed this session (in `src/lib/draft/roster-solver.ts`):**
+- **BUG-007 (MEDIUM, carried from R4):** `resolvePlayerSlot` returned null when a nominated player had no valid open slot (e.g. bench=0), and the caller silently continued. Now short-circuits to `{ maxBid: 1, feasible: false, explanation: 'No slot available for <POS>' }` (roster-solver.ts:348-357).
+- **BUG-R5-01 (MEDIUM, found by the R5 bug-hunt):** budget-aware fill over-dropped to $1 scrubs -- when the best player for a slot was unaffordable it jumped straight to a $1 replacement instead of trying the next *affordable* real player, making the completion cost too low and the displayed cap too high in tight FLEX spots. Fixed with `takeAffordableFromBucket` (dedicated slots, roster-solver.ts:191) and an affordable-find on the FLEX pool (roster-solver.ts:233). 2 regression tests added.
+
+**Tests added:** `solver-bridge.test.ts` (14 tests on the adapter + map), 2 BUG-R5-01 regression tests in `roster-solver.test.ts`, and `on-the-block-card.test.tsx` -- the repo's first React Testing Library test -- asserting the roster note renders verbatim in the DOM when present and is absent when null.
+
+**Verify gate:**
+
+| Gate | Result |
+|------|--------|
+| `npx tsc --noEmit` | ✅ 0 errors |
+| `npx vitest run` | ✅ 300/300 (21 files) |
+| `npm run lint` | ✅ 161 problems (baseline), 0 new |
+| `npm run build` | ✅ Compiled successfully, 54/54 static pages |
+| `/bug-hunt free` (changed modules) | ✅ found + fixed BUG-R5-01; no other new findings |
+| Live screenshot | ⚠️ **deferred (not captured)** -- Browser pane not compositing in this environment + `?sim=1` demo board has no player valuations and no working nomination. Render path proven instead by the DOM render test. Joe approved shipping on that basis (**Option A**). |
+
+**Closes:** RV-1 (live half; RV-1 now fully closed -- R4 library + R5 live wire). Next open item: **R6 -- Wire the solver into STRATEGY target prices** (`BUILD_PLAN.md`).
+
+---
+
 ## 2026-08-12 / R3 -- Valuation correctness: the app never recommends overpaying
 
 **Task:** REBUILD R3 `[Opus]` -- ensure no code path returns a max-bid above the player's genuine worth; fix the "pay up to" line to show a real pay-to price; make TAX legible; resolve the stale breakout/bust detector badge. | **Class:** pipeline | **Lenses:** QA, Architecture

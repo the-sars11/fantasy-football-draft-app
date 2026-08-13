@@ -100,7 +100,7 @@ Every item below was confirmed against code. `RV-#` = review finding. Severity i
 
 | ID | Sev | Finding | Location | Session |
 |----|-----|---------|----------|---------|
-| RV-1 | **CRITICAL** | **No team-construction.** Max-bid capped by wallet, not by roster-completion. The app can't build a team for $200 — the whole point. | `auction-advisor.ts:98,127,147` | R4→R5 |
+| RV-1 | **CRITICAL** | ~~**No team-construction.** Max-bid capped by wallet, not by roster-completion. The app can't build a team for $200 — the whole point.~~ **[x] FIXED R4 (library) + R5 (live wire)** — solver builds the best $200 roster; live max-bid = `min(worth ceiling, roster-completion max)` and explains the constraint in plain words on the card. | `roster-solver.ts`, `solver-bridge.ts`, `client.tsx:363` | R4→R5 |
 | RV-2 | **CRITICAL** | ~~Dead Claude model id → strategy/research AI paths 404/500.~~ **[x] FIXED R1** | `ai/claude.ts:28-29` | R1 |
 | RV-3 | **HIGH** | ~~Rule-based fallback is key-gated, not error-gated → 500 on AI failure instead of graceful $0 fallback.~~ **[x] FIXED R1** | `strategies/propose/route.ts:158-160` | R1 |
 | RV-4 | **HIGH** | ~~Max-bid can exceed the player's ceiling (recommends overpaying past worth).~~ **[x] FIXED R3** | `auction-advisor.ts:98,127,147` | R3 |
@@ -184,12 +184,13 @@ Work top to bottom. Each session is scoped to finish cleanly in one focused sitt
 > **Builds:** `src/lib/draft/roster-solver.ts` — a pure module (no React, no Supabase). Given `{ budgetRemaining, slotsRemaining (incl. FLEX), boardValues, replacementLevels }` it computes the **optimal remaining allocation** and, for any nominated player, the **maximum affordable bid that still leaves a completable best-rest-of-roster** (respecting the $1-min-per-remaining-slot floor, positional scarcity, FLEX contention, and the stars-and-scrubs ↔ balanced tradeoff).
 > **Done-when:** the solver returns an allocation + per-nomination roster-constrained max-bid; comprehensive unit tests cover the edge cases — 1 slot left, all budget on one stud, forced $1 scrubs, FLEX steals a slot from RB/WR/TE, empty board. No UI in this session. This is the session everything else depends on — do not rush it.
 
-### R5 — Wire the solver into the LIVE max-bid `[Opus]` · class: pipeline
+### R5 — Wire the solver into the LIVE max-bid `[Opus]` · class: pipeline `[x]` DONE 2026-08-12
 > **Why:** turns RV-1 from a library into the live "THE PLAY" number.
 > **Reads first:** R4 output, `auction-advisor.ts`, `draft/live/client.tsx`, `what-to-do.ts`.
 > **Closes:** RV-1 (live half).
-> **Work:** live max-bid = `min(worth ceiling, roster-completion-constrained max)`; surface the constraint in plain words ("Pay up to $X — more and you can't fill RB + 2 WR + bench").
+> **Work:** live max-bid = `min(worth ceiling, roster-completion-constrained max)`; surface the constraint in plain words ("More than $X and you cannot fill QB, 2 FLEX and N bench").
 > **Done-when:** live max-bid reflects roster-completion math and explains itself; unit + integration tests on the wiring. Screenshot of the live room advice.
+> **Shipped:** new `solver-bridge.ts` (`computeRosterMaxBidMap` → per-nomination `{maxBid, note}`); client folds `min(worth ceiling, roster max)` at `client.tsx:363-364`; `what-to-do.ts` carries a plain-English `rosterNote`, surfaced verbatim on the on-block card. Fixed BUG-007 (slot no-op) + BUG-R5-01 (budget-aware fill over-dropped to $1), both with regression tests. Gate: type-check 0, 300/300 tests, lint 161 (0 new), build clean 54/54, bug-hunt free. **Live screenshot deferred (env: Browser pane not compositing + valuation-less sim board) — render path proven instead by a DOM render test (`on-the-block-card.test.tsx`) asserting the note renders verbatim.** Joe approved shipping on that basis (Option A).
 
 ### R6 — Wire the solver into STRATEGY target prices `[Opus]` · class: pipeline
 > **Why:** a strategy is only real if its targets actually fit $200 together.

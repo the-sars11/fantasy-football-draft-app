@@ -48,6 +48,12 @@ export interface WhatToDoInput {
   isTarget: boolean
   /** True when Joe tagged this player AVOID. */
   isAvoid: boolean
+  /**
+   * R5 (RV-1): plain-English roster-completion constraint for this player, e.g.
+   * "More than $24 and you cannot fill QB, 2 FLEX and 4 bench." Null when no
+   * solver result is available. Surfaced verbatim on the on-block card.
+   */
+  rosterNote?: string | null
 }
 
 export interface WhatToDoAdvice {
@@ -69,6 +75,11 @@ export interface WhatToDoAdvice {
   tierLabel: string
   /** e.g. "2 T1 WRs left". Empty string when scarcity is unknown. */
   scarcityNote: string
+  /**
+   * R5 (RV-1): the roster-completion constraint line, e.g. "More than $24 and you
+   * cannot fill QB, 2 FLEX and 4 bench." Null when no solver result applies.
+   */
+  rosterNote: string | null
 }
 
 const MOVE_COLORS: Record<WhatToDoMove, WhatToDoColor> = {
@@ -188,6 +199,7 @@ function isLastOfScarceTier(
  */
 export function computeWhatToDo(input: WhatToDoInput): WhatToDoAdvice {
   const { player, scored, myMaxBid, budgetMaxBid, scarcity, isTarget, isAvoid } = input
+  const rosterNote = input.rosterNote ?? null
 
   const market = player.consensusAuctionValue ?? 0
   const marketEst = market > 0 ? round(market) : null
@@ -209,6 +221,7 @@ export function computeWhatToDo(input: WhatToDoInput): WhatToDoAdvice {
     isAvoid,
     tierLabel,
     scarcityNote,
+    rosterNote,
   }
 
   // --- PASS: explicitly avoided, or you cannot afford even a $1-competitive bid.

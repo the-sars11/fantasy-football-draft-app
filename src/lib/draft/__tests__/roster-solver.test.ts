@@ -196,12 +196,102 @@ describe('solveAllocation -feasibility flag', () => {
   it('is feasible when budget >= completionCost', () => {
     const result = solveAllocation(makeInput(50, slots, board))
     expect(result.feasible).toBe(true)
+    // Budget covers the $45 QB -real player is used.
+    expect(result.assignments[0].player?.id).toBe('qb1')
+    expect(result.completionCost).toBe(45)
   })
 
-  it('is NOT feasible when budget < completionCost', () => {
-    const result = solveAllocation(makeInput(30, slots, board))
-    expect(result.completionCost).toBe(45)
+  it('is genuinely infeasible only when budget < slot count (can\'t even field $1 scrubs)', () => {
+    // 5 slots, $3 budget: even $1 fillers cost $5 > $3.
+    const fiveSlots: SlotsRemaining = { ...EMPTY_SLOTS, qb: 1, rb: 1, wr: 1, te: 1, bench: 1 }
+    const result = solveAllocation(makeInput(3, fiveSlots, []))
+    expect(result.completionCost).toBe(5)
     expect(result.feasible).toBe(false)
+  })
+})
+
+// ─── R5 budget-aware fill: unaffordable studs drop to $1 fillers ───────────────
+
+describe('solveAllocation -R5 budget-aware fill', () => {
+  it('drops an unaffordable starter to a $1 filler instead of overspending', () => {
+    // One QB slot, only a $45 QB on the board, but just $30 to spend.
+    // The $45 player is unaffordable → the slot falls to a $1 replacement.
+    const slots: SlotsRemaining = { ...EMPTY_SLOTS, qb: 1 }
+    const board: BoardPlayer[] = [p('qb1', 'QB', 50, 45)]
+    const result = solveAllocation(makeInput(30, slots, board))
+
+    expect(result.assignments[0].player).toBeNull()
+    expect(result.assignments[0].assignedCost).toBe(1)
+    expect(result.completionCost).toBe(1)
+    expect(result.feasible).toBe(true)
+  })
+
+  it('reserves $1 per remaining slot: buys the stud only if the rest still fills', () => {
+    // RB slot + 4 bench, $12 budget. A $10 RB is affordable ($12-$10=$2 >= 4×$1?
+    // no -> 2 < 4), so it must drop to a $1 filler to keep the bench fillable.
+    const slots: SlotsRemaining = { ...EMPTY_SLOTS, rb: 1, bench: 4 }
+    const board: BoardPlayer[] = [p('rb1', 'RB', 40, 10)]
+    const result = solveAllocation(makeInput(12, slots, board))
+
+    const rbSlot = result.assignments.find(a => a.slotType === 'RB')
+    expect(rbSlot?.player).toBeNull()
+    expect(rbSlot?.assignedCost).toBe(1)
+    // 1 (rb filler) + 4 (bench) = 5, all within budget.
+    expect(result.completionCost).toBe(5)
+    expect(result.feasible).toBe(true)
+  })
+
+  it('buys the stud when the budget comfortably covers the rest', () => {
+    // Same $10 RB but $100 budget -> easily affordable with room for 4 bench.
+    const slots: SlotsRemaining = { ...EMPTY_SLOTS, rb: 1, bench: 4 }
+    const board: BoardPlayer[] = [p('rb1', 'RB', 40, 10)]
+    const result = solveAllocation(makeInput(100, slots, board))
+
+    const rbSlot = result.assignments.find(a => a.slotType === 'RB')
+    expect(rbSlot?.player?.id).toBe('rb1')
+    expect(rbSlot?.assignedCost).toBe(10)
+    expect(result.completionCost).toBe(14) // 10 + 4 bench
+  })
+
+  // BUG-R5-01 regression: an unaffordable top player must not collapse the slot
+  // to a $1 filler when a cheaper AFFORDABLE player of the same eligibility is
+  // still on the board. The fill advances to the best affordable, not a scrub.
+  it('advances to a cheaper affordable DEDICATED player instead of a $1 filler (BUG-R5-01)', () => {
+    // 1 RB slot + 2 bench, $9 budget. The $40 stud is unaffordable; the $5 RB is
+    // affordable (9 - 5 = 4 >= 2 bench) and must fill the slot instead of a scrub.
+    const slots: SlotsRemaining = { ...EMPTY_SLOTS, rb: 1, bench: 2 }
+    const board: BoardPlayer[] = [
+      p('rbStud', 'RB', 90, 40),
+      p('rbCheap', 'RB', 40, 5),
+    ]
+    const result = solveAllocation(makeInput(9, slots, board))
+
+    const rbSlot = result.assignments.find(a => a.slotType === 'RB')
+    expect(rbSlot?.player?.id).toBe('rbCheap') // not the unaffordable stud, not a filler
+    expect(rbSlot?.assignedCost).toBe(5)
+    expect(result.completionCost).toBe(7) // 5 (rb) + 2 bench
+  })
+
+  it('advances through the FLEX pool instead of dropping every slot to $1 (BUG-R5-01)', () => {
+    // 3 FLEX, $10 budget. The $25 stud is unaffordable, but a $3 and a $2 flex are
+    // affordable and must be bought before the last slot falls to a $1 filler.
+    // Old bug: the unaffordable stud was re-picked every iteration -> 3 scrubs.
+    const slots: SlotsRemaining = { ...EMPTY_SLOTS, flex: 3 }
+    const board: BoardPlayer[] = [
+      p('stud', 'RB', 90, 25),
+      p('mid', 'WR', 50, 3),
+      p('cheap', 'TE', 40, 2),
+    ]
+    const result = solveAllocation(makeInput(10, slots, board))
+
+    const flexIds = result.assignments
+      .filter(a => a.slotType === 'FLEX')
+      .map(a => a.player?.id)
+    expect(flexIds).toContain('mid') // affordable mid bought, not skipped
+    expect(flexIds).toContain('cheap') // affordable cheap bought
+    expect(flexIds).not.toContain('stud') // unaffordable stud left on the board
+    // mid($3) + cheap($2) + one $1 filler = 6, not three $1 fillers = 3.
+    expect(result.completionCost).toBe(6)
   })
 })
 
@@ -499,5 +589,48 @@ describe('solveAllocation -dedicated slots consumed before FLEX pool forms', () 
 
   it('completionCost = te1($35) + rb1($25) = $60', () => {
     expect(result.completionCost).toBe(60)
+  })
+})
+
+// ─── BUG-007: no slot available for the nominated player ─────────────────────
+
+describe('computeRosterConstrainedMaxBid -BUG-007 no slot available', () => {
+  // Only a QB slot is open and bench is full (0). A nominated WR has nowhere to
+  // go: no dedicated WR slot, no FLEX, no bench. Previously resolvePlayerSlot did
+  // Math.max(0, 0-1)=0 -a silent no-op that let the solver run on unmodified
+  // slots and hand back a bogus max-bid. It must now report infeasible instead.
+  const slots: SlotsRemaining = { ...EMPTY_SLOTS, qb: 1, bench: 0 }
+  const nominated = p('wr1', 'WR', 40, 30)
+  const result = computeRosterConstrainedMaxBid(
+    nominated,
+    makeInput(100, slots, [nominated], DEFAULT_REPLACEMENT),
+  )
+
+  it('is not feasible', () => {
+    expect(result.feasible).toBe(false)
+  })
+
+  it('maxBid floors to $1', () => {
+    expect(result.maxBid).toBe(1)
+  })
+
+  it('explains that no slot is available for the position', () => {
+    expect(result.explanation).toBe('No slot available for WR')
+  })
+
+  it('does not fabricate a rest-of-roster', () => {
+    expect(result.bestRestOfRoster).toHaveLength(0)
+    expect(result.completionCost).toBe(0)
+  })
+
+  it('positive control: with a bench slot open the same WR is placeable', () => {
+    const benchOpen: SlotsRemaining = { ...EMPTY_SLOTS, qb: 1, bench: 1 }
+    const ok = computeRosterConstrainedMaxBid(
+      nominated,
+      makeInput(100, benchOpen, [nominated], DEFAULT_REPLACEMENT),
+    )
+    // WR takes the bench slot; only the QB slot remains at $1 replacement.
+    expect(ok.feasible).toBe(true)
+    expect(ok.explanation).not.toBe('No slot available for WR')
   })
 })

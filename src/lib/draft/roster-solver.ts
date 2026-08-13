@@ -141,6 +141,17 @@ const FLEX_ELIGIBLE = new Set<BoardPlayer['position']>(['RB', 'WR', 'TE'])
  */
 export function solveAllocation(input: SolverInput): SolverResult {
   const { slotsRemaining, availablePlayers, replacementCosts, budgetRemaining } = input
+  const minPerSlot = input.minPerSlot ?? 1
+
+  // Total remaining slots to fill — drives the affordability guard below.
+  const totalSlots =
+    (slotsRemaining.qb ?? 0) +
+    (slotsRemaining.rb ?? 0) +
+    (slotsRemaining.wr ?? 0) +
+    (slotsRemaining.te ?? 0) +
+    (slotsRemaining.flex ?? 0) +
+    (slotsRemaining.dst ?? 0) +
+    (slotsRemaining.bench ?? 0)
 
   // Build per-position buckets sorted by ceiling DESC (best players first).
   const buckets = new Map<BoardPlayer['position'], BoardPlayer[]>()
@@ -157,9 +168,29 @@ export function solveAllocation(input: SolverInput): SolverResult {
   const assignments: SlotAssignment[] = []
   let completionCost = 0
 
-  function takeFromBucket(pos: BoardPlayer['position']): BoardPlayer | null {
+  // R5 budget-aware fill: the rest-of-roster must itself be affordable. Money
+  // spent so far and slots filled so far are tracked so each new slot can only
+  // claim a real (priced) player when doing so still leaves at least
+  // `minPerSlot` for every slot not yet filled. When it can't, the slot drops
+  // to replacement cost ($1) — a scrub — instead of an unaffordable stud. This
+  // is what stops the solver from reserving an all-studs rest-of-roster that
+  // blows the budget and collapses every max-bid to $1.
+  let budgetLeft = budgetRemaining
+  let filled = 0
+
+  /** Can we pay `cost` for this slot and still keep `minPerSlot` for the rest? */
+  function affordable(cost: number): boolean {
+    const slotsAfterThis = totalSlots - filled - 1
+    return budgetLeft - cost >= minPerSlot * slotsAfterThis
+  }
+
+  // Take the best (highest-ceiling) player at this position that we can still
+  // AFFORD under the guard. If the top player is unaffordable we advance to the
+  // next cheaper one rather than skipping straight to a $1 filler — buckets are
+  // ceiling DESC, so the first affordable hit is the best affordable player.
+  function takeAffordableFromBucket(pos: BoardPlayer['position']): BoardPlayer | null {
     const bucket = buckets.get(pos) ?? []
-    const player = bucket.find(p => !used.has(p.id)) ?? null
+    const player = bucket.find(p => !used.has(p.id) && affordable(p.expectedCost)) ?? null
     if (player) used.add(player.id)
     return player
   }
@@ -171,10 +202,14 @@ export function solveAllocation(input: SolverInput): SolverResult {
     const slotType = DEDICATED_TO_LABEL[slot]
 
     for (let i = 0; i < count; i++) {
-      const player = takeFromBucket(pos)
-      const cost = player?.expectedCost ?? replacementCosts[slot]
+      // Best affordable player at this position, else a $1 replacement filler.
+      const candidate = takeAffordableFromBucket(pos)
+      const player = candidate
+      const cost = candidate?.expectedCost ?? replacementCosts[slot]
       assignments.push({ slotType, player, assignedCost: cost })
       completionCost += cost
+      budgetLeft -= cost
+      filled++
     }
   }
 
@@ -192,11 +227,17 @@ export function solveAllocation(input: SolverInput): SolverResult {
   const flexCount = slotsRemaining.flex ?? 0
 
   for (let i = 0; i < flexCount; i++) {
-    const player = flexPool.find(p => !used.has(p.id)) ?? null
-    if (player) used.add(player.id)
-    const cost = player?.expectedCost ?? minFlexReplacement
+    // Best affordable player left in the shared RB/WR/TE pool. Advancing past an
+    // unaffordable stud (instead of dropping to a filler) is what stops all FLEX
+    // slots from collapsing to $1 scrubs while cheaper flex players sit unused.
+    const candidate = flexPool.find(p => !used.has(p.id) && affordable(p.expectedCost)) ?? null
+    const player = candidate
+    const cost = candidate?.expectedCost ?? minFlexReplacement
+    if (candidate) used.add(candidate.id)
     assignments.push({ slotType: 'FLEX', player, assignedCost: cost })
     completionCost += cost
+    budgetLeft -= cost
+    filled++
   }
 
   // Phase 3: Bench slots — always use replacement cost ($1 each).
@@ -209,6 +250,8 @@ export function solveAllocation(input: SolverInput): SolverResult {
       assignedCost: replacementCosts.bench,
     })
     completionCost += replacementCosts.bench
+    budgetLeft -= replacementCosts.bench
+    filled++
   }
 
   return {
@@ -223,12 +266,14 @@ export function solveAllocation(input: SolverInput): SolverResult {
 /**
  * Determine which remaining slot the nominated player fills, in priority order:
  * dedicated position slot → FLEX (RB/WR/TE only) → bench.
- * Returns the updated SlotsRemaining with that slot decremented by 1.
+ * Returns the updated SlotsRemaining with that slot decremented by 1, or `null`
+ * when there is no slot the player can fill (BUG-007: a full roster with bench=0
+ * must not silently no-op — the player genuinely has nowhere to go).
  */
 function resolvePlayerSlot(
   player: BoardPlayer,
   slots: SlotsRemaining,
-): SlotsRemaining {
+): SlotsRemaining | null {
   const dedicatedKey = POSITION_TO_DEDICATED[player.position]
 
   if ((slots[dedicatedKey] ?? 0) > 0) {
@@ -239,7 +284,11 @@ function resolvePlayerSlot(
     return { ...slots, flex: slots.flex - 1 }
   }
 
-  return { ...slots, bench: Math.max(0, (slots.bench ?? 0) - 1) }
+  if ((slots.bench ?? 0) > 0) {
+    return { ...slots, bench: slots.bench - 1 }
+  }
+
+  return null
 }
 
 // ─── Explanation builder ──────────────────────────────────────────────────────
@@ -297,6 +346,18 @@ export function computeRosterConstrainedMaxBid(
 
   // Decrement the slot the nominated player fills.
   const reducedSlots = resolvePlayerSlot(nominatedPlayer, input.slotsRemaining)
+
+  // BUG-007: no slot available for this player (roster full at their position,
+  // no FLEX, no bench). Don't run the solver against unmodified slots — say so.
+  if (reducedSlots === null) {
+    return {
+      maxBid: 1,
+      feasible: false,
+      completionCost: 0,
+      explanation: `No slot available for ${nominatedPlayer.position}`,
+      bestRestOfRoster: [],
+    }
+  }
 
   // Solve for the best possible rest-of-roster.
   const result = solveAllocation({

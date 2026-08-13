@@ -18,6 +18,7 @@ import type { PositionScarcityExtended } from '@/lib/draft/explain'
 import type { DraftState, DraftPick } from '@/lib/draft/state'
 import type { RosterSlots } from '@/lib/supabase/database.types'
 import { computeWhatToDo } from '@/lib/draft/what-to-do'
+import type { RosterMaxBidEntry } from '@/lib/draft/solver-bridge'
 import { ROOM } from './theme'
 import { StatusBar } from './status-bar'
 import { OnTheBlockCard } from './on-the-block-card'
@@ -55,6 +56,8 @@ export interface AuctionRoomProps {
   draftedNames: Set<string>
   scarcity: PositionScarcityExtended[]
   maxBidMap: Map<string, number>
+  /** R5 (RV-1): roster-completion max bid + plain-English note, keyed by lower name. */
+  rosterAdviceMap: Map<string, RosterMaxBidEntry>
   myBudget: number | null
   myMaxBid: number | null
   myPicks: Array<{ player_name: string; position?: string; price?: number }>
@@ -89,6 +92,7 @@ export function AuctionDraftRoom({
   draftedNames,
   scarcity,
   maxBidMap,
+  rosterAdviceMap,
   myBudget,
   myMaxBid,
   myPicks,
@@ -146,8 +150,10 @@ export function AuctionDraftRoom({
       alternatives,
       isTarget: isTarget(onBlockPlayer.id),
       isAvoid: isAvoid(onBlockPlayer.id),
+      // RV-1: the roster-completion constraint line for the on-block card.
+      rosterNote: rosterAdviceMap.get(onBlockPlayer.name.toLowerCase())?.note ?? null,
     })
-  }, [onBlockPlayer, available, scoredPlayers, maxBidMap, myMaxBid, scarcityByPos, isTarget, isAvoid])
+  }, [onBlockPlayer, available, scoredPlayers, maxBidMap, rosterAdviceMap, myMaxBid, scarcityByPos, isTarget, isAvoid])
 
   // --- Awareness ("what's next") --------------------------------------------
   const awarenessItems = useMemo<AwarenessItem[]>(() => {
