@@ -17,10 +17,14 @@ import { FFIPlayerIntelCard } from '@/components/prep/ffi-player-intel-card'
 import { useUserTags, useToggleTag, useSystemTagActions, useUpdateGrade } from '@/hooks/use-user-tags'
 import { cacheToPlayers } from '@/lib/players/convert'
 import { computePlayerTags } from '@/lib/players/tags'
+import { computeRosterConstrainedMaxBid } from '@/lib/draft/roster-solver'
+import type { BoardPlayer, SlotsRemaining, ReplacementCosts, SolverInput } from '@/lib/draft/roster-solver'
+import { buildPrepFitLine } from '@/lib/players/prep-fit-line'
 import type { Player, Position } from '@/lib/players/types'
 
-// Position filter options
-const POSITIONS: (Position | 'ALL')[] = ['ALL', 'QB', 'RB', 'WR', 'TE', 'K', 'DEF']
+// Position filter options — FLEX is a virtual position (RB+WR+TE combined); K omitted (no-kicker league)
+type PositionFilter = Position | 'ALL' | 'FLEX'
+const POSITIONS: PositionFilter[] = ['ALL', 'QB', 'RB', 'WR', 'TE', 'FLEX', 'DEF']
 
 // Tag filter options -- match the real tags from computePlayerTags().
 type TagFilter = 'all' | 'target' | 'avoid' | 'pocket' | 'tax' | 'sleeper' | 'untagged'
@@ -34,6 +38,39 @@ const TAG_FILTERS: { value: TagFilter; label: string }[] = [
   { value: 'untagged', label: 'Untagged' },
 ]
 
+// Tier filter — FantasyPros expert tier (real data from R2)
+type TierFilter = 'all' | 't1' | 't2' | 't3'
+const TIER_FILTERS: { value: TierFilter; label: string }[] = [
+  { value: 'all', label: 'All Tiers' },
+  { value: 't1', label: 'T1' },
+  { value: 't2', label: 'T2' },
+  { value: 't3', label: 'T3+' },
+]
+
+// Grade filter — target priority weight (R7a weight 1-10); only shown when tagFilter='target'
+type GradeFilter = 'all' | 'high' | 'elite'
+const GRADE_FILTERS: { value: GradeFilter; label: string }[] = [
+  { value: 'all', label: 'Any Priority' },
+  { value: 'high', label: '7+ High' },
+  { value: 'elite', label: '9+ Elite' },
+]
+
+// Severity filter — avoid severity (R7a soft/hard); only shown when tagFilter='avoid'
+type SeverityFilter = 'all' | 'soft' | 'hard'
+const SEVERITY_FILTERS: { value: SeverityFilter; label: string }[] = [
+  { value: 'all', label: 'Any' },
+  { value: 'soft', label: 'Soft' },
+  { value: 'hard', label: 'Hard' },
+]
+
+// Nasties 13-slot full roster for prep-mode solver (R7b)
+const NASTIES_FULL_SLOTS: SlotsRemaining = {
+  qb: 1, rb: 1, wr: 1, te: 1, flex: 3, dst: 1, bench: 5,
+}
+const PREP_REPLACEMENT: ReplacementCosts = {
+  qb: 1, rb: 1, wr: 1, te: 1, dst: 1, bench: 1,
+}
+
 export function PlayerBrowserClient() {
   // --- State ---
   const [players, setPlayers] = useState<Player[]>([])
@@ -42,9 +79,13 @@ export function PlayerBrowserClient() {
 
   // Filters
   const [searchQuery, setSearchQuery] = useState('')
-  const [positionFilter, setPositionFilter] = useState<Position | 'ALL'>('ALL')
+  const [positionFilter, setPositionFilter] = useState<PositionFilter>('ALL')
   const [tagFilter, setTagFilter] = useState<TagFilter>('all')
   const [showFilters, setShowFilters] = useState(false)
+  const [tierFilter, setTierFilter] = useState<TierFilter>('all')
+  const [byeFilter, setByeFilter] = useState<number | null>(null)
+  const [gradeFilter, setGradeFilter] = useState<GradeFilter>('all')
+  const [severityFilter, setSeverityFilter] = useState<SeverityFilter>('all')
 
   // Expanded card state
   const [expandedPlayerId, setExpandedPlayerId] = useState<string | null>(null)
@@ -94,9 +135,13 @@ export function PlayerBrowserClient() {
   const filteredPlayers = useMemo(() => {
     let result = players
 
-    // Position filter
+    // Position filter — FLEX shows the combined RB/WR/TE flex-eligible pool
     if (positionFilter !== 'ALL') {
-      result = result.filter(p => p.position === positionFilter)
+      if (positionFilter === 'FLEX') {
+        result = result.filter(p => p.position === 'RB' || p.position === 'WR' || p.position === 'TE')
+      } else {
+        result = result.filter(p => p.position === positionFilter)
+      }
     }
 
     // Search filter
@@ -134,6 +179,34 @@ export function PlayerBrowserClient() {
       })
     }
 
+    // Tier filter — FantasyPros expert tier
+    if (tierFilter !== 'all') {
+      result = result.filter(p => {
+        if (tierFilter === 't1') return p.expertTier === 1
+        if (tierFilter === 't2') return p.expertTier === 2
+        return (p.expertTier ?? 99) >= 3
+      })
+    }
+
+    // Bye week filter
+    if (byeFilter !== null) {
+      result = result.filter(p => p.byeWeek === byeFilter)
+    }
+
+    // Grade filter — only active when browsing targets; reads the R7a weight
+    if (tagFilter === 'target' && gradeFilter !== 'all') {
+      result = result.filter(p => {
+        const weight = userTagsMap[p.id]?.tagWeight ?? 5
+        if (gradeFilter === 'high') return weight >= 7
+        return weight >= 9 // 'elite'
+      })
+    }
+
+    // Severity filter — only active when browsing avoids; reads the R7a severity
+    if (tagFilter === 'avoid' && severityFilter !== 'all') {
+      result = result.filter(p => userTagsMap[p.id]?.tagSeverity === severityFilter)
+    }
+
     // Sort by real auction value for Joe's league (VORP $), best first. Ties
     // fall back to expert consensus rank.
     result = [...result].sort((a, b) => {
@@ -144,12 +217,56 @@ export function PlayerBrowserClient() {
     })
 
     return result
-  }, [players, positionFilter, searchQuery, tagFilter, isTarget, isAvoid])
+  }, [players, positionFilter, searchQuery, tagFilter, isTarget, isAvoid, tierFilter, byeFilter, gradeFilter, severityFilter, userTagsMap])
 
-  // FF-250: Reset pagination when filters change
+  // FF-250: Reset pagination when any filter changes
   useEffect(() => {
     setDisplayCount(50)
-  }, [positionFilter, searchQuery, tagFilter])
+  }, [positionFilter, searchQuery, tagFilter, tierFilter, byeFilter, gradeFilter, severityFilter])
+
+  // Reset grade/severity when tagFilter changes (they're contextual to target/avoid mode)
+  useEffect(() => {
+    setGradeFilter('all')
+    setSeverityFilter('all')
+  }, [tagFilter])
+
+  // R7b: derive available bye weeks from the loaded player pool
+  const availableByeWeeks = useMemo(() => {
+    const weeks = new Set<number>()
+    players.forEach(p => { if (p.byeWeek > 0) weeks.add(p.byeWeek) })
+    return [...weeks].sort((a, b) => a - b)
+  }, [players])
+
+  // R7b: per-player solver-driven fit lines — computed once per player-load on a
+  // full $200 / all-13-slots board so every card shows a real team-construction max-bid.
+  const fitLineMap = useMemo(() => {
+    if (players.length === 0) return new Map<string, string>()
+
+    const boardPlayers: BoardPlayer[] = players
+      .filter(p => p.position !== 'K')
+      .map(p => ({
+        id: p.id,
+        name: p.name,
+        position: p.position as BoardPlayer['position'],
+        expectedCost: Math.max(1, Math.round(p.expectedRoomPrice ?? p.consensusAuctionValue ?? 1)),
+        ceiling: Math.max(1, Math.round(p.ceilingValue ?? p.consensusAuctionValue ?? 1)),
+      }))
+
+    const solverInput: SolverInput = {
+      budgetRemaining: 200,
+      slotsRemaining: NASTIES_FULL_SLOTS,
+      availablePlayers: boardPlayers,
+      replacementCosts: PREP_REPLACEMENT,
+      minPerSlot: 1,
+    }
+
+    const map = new Map<string, string>()
+    for (const bp of boardPlayers) {
+      const result = computeRosterConstrainedMaxBid(bp, solverInput)
+      map.set(bp.id, buildPrepFitLine(bp.position, result, isTarget(bp.id), isAvoid(bp.id)))
+    }
+    return map
+  }, [players, isTarget, isAvoid])
 
   // FF-250: Players to display (paginated)
   const displayedPlayers = useMemo(() => {
@@ -386,7 +503,112 @@ export function PlayerBrowserClient() {
                 )
               })}
             </div>
+
+            {/* Grade filter — visible only when browsing targets */}
+            {tagFilter === 'target' && (
+              <div className="flex gap-1.5 mt-2 flex-wrap">
+                <span className="text-[9px] font-bold uppercase tracking-widest self-center pr-1" style={{ color: 'var(--ffi-ink-3)' }}>Priority:</span>
+                {GRADE_FILTERS.map((f) => {
+                  const active = gradeFilter === f.value
+                  return (
+                    <button
+                      key={f.value}
+                      onClick={() => setGradeFilter(f.value)}
+                      className="px-2.5 py-1 rounded-full text-[10px] font-bold transition-all"
+                      style={active
+                        ? { background: 'rgba(139,255,69,0.18)', color: 'var(--ffi-volt)' }
+                        : { background: 'var(--ffi-surface-1)', color: 'var(--ffi-ink-2)' }
+                      }
+                    >
+                      {f.label}
+                    </button>
+                  )
+                })}
+              </div>
+            )}
+
+            {/* Severity filter — visible only when browsing avoids */}
+            {tagFilter === 'avoid' && (
+              <div className="flex gap-1.5 mt-2 flex-wrap">
+                <span className="text-[9px] font-bold uppercase tracking-widest self-center pr-1" style={{ color: 'var(--ffi-ink-3)' }}>Severity:</span>
+                {SEVERITY_FILTERS.map((f) => {
+                  const active = severityFilter === f.value
+                  return (
+                    <button
+                      key={f.value}
+                      onClick={() => setSeverityFilter(f.value)}
+                      className="px-2.5 py-1 rounded-full text-[10px] font-bold transition-all"
+                      style={active
+                        ? { background: 'rgba(255,110,138,0.18)', color: '#FF6E8A' }
+                        : { background: 'var(--ffi-surface-1)', color: 'var(--ffi-ink-2)' }
+                      }
+                    >
+                      {f.label}
+                    </button>
+                  )
+                })}
+              </div>
+            )}
           </div>
+
+          {/* Tier filter */}
+          <div>
+            <label className="block text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: 'var(--ffi-ink-3)' }}>
+              Expert Tier
+            </label>
+            <div className="flex gap-2 flex-wrap">
+              {TIER_FILTERS.map((f) => {
+                const active = tierFilter === f.value
+                return (
+                  <button
+                    key={f.value}
+                    onClick={() => setTierFilter(f.value)}
+                    className="px-3 py-1.5 rounded-full text-xs font-bold transition-all"
+                    style={active
+                      ? { background: 'rgba(121,166,255,0.18)', color: 'var(--ffi-blue-bright)' }
+                      : { background: 'var(--ffi-surface-1)', color: 'var(--ffi-ink-2)' }
+                    }
+                  >
+                    {f.label}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* Bye week filter — pills populated from the actual player pool */}
+          {availableByeWeeks.length > 0 && (
+            <div>
+              <label className="block text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: 'var(--ffi-ink-3)' }}>
+                Bye Week
+              </label>
+              <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1 -mb-1 sm:flex-wrap">
+                <button
+                  onClick={() => setByeFilter(null)}
+                  className="px-3 py-1.5 rounded-full text-xs font-bold transition-all shrink-0"
+                  style={byeFilter === null
+                    ? { background: 'rgba(121,166,255,0.18)', color: 'var(--ffi-blue-bright)' }
+                    : { background: 'var(--ffi-surface-1)', color: 'var(--ffi-ink-2)' }
+                  }
+                >
+                  Any
+                </button>
+                {availableByeWeeks.map((week) => (
+                  <button
+                    key={week}
+                    onClick={() => setByeFilter(week === byeFilter ? null : week)}
+                    className="px-3 py-1.5 rounded-full text-xs font-bold transition-all shrink-0"
+                    style={byeFilter === week
+                      ? { background: 'rgba(121,166,255,0.18)', color: 'var(--ffi-blue-bright)' }
+                      : { background: 'var(--ffi-surface-1)', color: 'var(--ffi-ink-2)' }
+                    }
+                  >
+                    Wk {week}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -402,6 +624,10 @@ export function PlayerBrowserClient() {
                 setSearchQuery('')
                 setPositionFilter('ALL')
                 setTagFilter('all')
+                setTierFilter('all')
+                setByeFilter(null)
+                setGradeFilter('all')
+                setSeverityFilter('all')
               }}>
                 Clear filters
               </FFIButton>
@@ -429,6 +655,7 @@ export function PlayerBrowserClient() {
               tagWeight={userTagsMap[player.id]?.tagWeight ?? 5}
               tagSeverity={userTagsMap[player.id]?.tagSeverity ?? 'soft'}
               onUpdateGrade={(w, s) => handleUpdateGrade(player.id, w, s)}
+              fitLine={fitLineMap.get(player.id)}
             />
           ))}
 

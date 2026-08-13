@@ -37,7 +37,9 @@ The prior plan (S1–S8 / P2 DR / P3 VAL) marked the app "done" while it (a) pri
 
 **R7a [Sonnet] — Persistence rework + graded tag scale — DONE 2026-08-13.** Closed RV-17 (stable `player_external_id` anchor) + RV-15 (graded tagging UI: weight stepper 1-10 for targets, severity toggle soft/hard for avoids). Migration `20260813000001_user_tags_graded_scale.sql` ready — NOT yet applied to production Supabase (Joe applies manually). 322/322 tests green (+8 new in `graded-tags.test.ts`). See `CHANGELOG.md` and `BUILD_PLAN.md` R7a.
 
-**R7b [Sonnet+Opus] — Player filters + strategy-fit line (NEXT).** Depends on R4 + R7a. Expanded filters (position/FLEX/tier/pocket/bye/tag/grade); solver-driven per-player fit line ("Fits your stars-and-scrubs plan; you can afford him at $X and still fill RB"). Reads first: `prep/players/client.tsx`, `roster-solver.ts`, `players/tags.ts`. See `BUILD_PLAN.md` R7b.
+**R7b [Sonnet+Opus] — Player filters + strategy-fit line — DONE 2026-08-13.** FLEX filter (RB+WR+TE), tier (T1/T2/T3+), bye week, grade (7+/9+, target-mode), severity (soft/hard, avoid-mode). New pure module `prep-fit-line.ts`; `fitLineMap` useMemo runs solver per-player on a full $200/13-slot board; ◆ strip on every card. 22 new tests (17 unit + 5 RTL). Gate: type-check 0, 344/344, lint 161 (0 new), build clean. Bug-hunt: 1 MEDIUM (BUG-R7b-01: solver + label mixed in one memo — queued for R8), 2 LOW. See `CHANGELOG.md`, `BUILD_PLAN.md` R7b.
+
+**R8 [Sonnet] — Cheat Sheet resolution + FLEX view (NEXT).** Cheat Sheet currently duplicates Players; make it a real roster-construction planning board (targets in slots, $200 fit via solver) or collapse it into Players. FLEX filter already exists (R7b) on Players. Reads first: `prep/board/client.tsx`, `prep/players/client.tsx`, `roster-solver.ts`. Closes RV-9, RV-10. Also fix BUG-R7b-01 (split fitLineMap into solver-map + label-map) while in `client.tsx`. See `BUILD_PLAN.md` R8.
 
 ---
 

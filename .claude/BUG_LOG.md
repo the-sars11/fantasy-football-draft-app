@@ -512,3 +512,80 @@ All S1-S4 code paths and supporting infrastructure:
 - Core invariant (`sum(target prices) + reserve <= budget`, reserve = one `$1` per non-target slot) is enforced structurally: empty-board `solveAllocation` returns exactly the remaining-slot count, and a `while`-loop hard-trims `$1` from the largest price until the pool fits. Proven by 11 new tests in `target-pricing.test.ts` (sum invariant, stud-only invariant, archetype re-allocation, resolution rules) — all green in the 311/311 suite.
 - Null-safety verified: `League.rosterSlots` is a required field (`players/types.ts:112`), already dereferenced unconditionally elsewhere in `research.ts`; `budget?` is optional and defaulted (`?? 200`); `positionEmphasis` tolerates undefined/null `budgetAllocation` via optional chaining + `??`.
 - Division in the scale-down step is guarded by `sumDesired > 0`; the `$1`-floor `while`-loop breaks rather than looping forever when a strategy genuinely over-reaches (`fits` then reports false).
+
+---
+
+## Hunt: 2026-08-13 — free mode — Scope: R7b changed modules
+
+**Project:** fantasy_football_draft_app (TypeScript / Next.js, Vitest, ESLint + tsc)
+**Auditor:** Claude Code (static read-only pass; type-check/test/lint/build already run green in the R7b VERIFY gate)
+**Mode:** FREE — static analysis of 3 files changed/created by R7b: `client.tsx` (player browser, expanded filters + fitLineMap), `ffi-player-intel-card.tsx` (fitLine prop + strip), `prep-fit-line.ts` (new pure module).
+
+### Summary
+
+| Severity | Count |
+|----------|-------|
+| CRITICAL | 0 |
+| HIGH | 0 |
+| MEDIUM | 1 |
+| LOW | 2 |
+
+| Category | Count |
+|----------|-------|
+| Performance | 1 |
+| Logic / Edge case | 1 |
+| UX | 1 |
+
+### Findings
+
+#### MEDIUM
+
+##### BUG-R7b-01: `fitLineMap` mixes solver (expensive) with label-selection (cheap) in one useMemo — tag toggle re-runs all 500 solver calls unnecessarily
+
+- **File:** `src/app/(app)/prep/players/client.tsx:242-269`
+- **Category:** Performance
+- **Effort:** S (split into two useMemos)
+- **Description:** The `fitLineMap` useMemo builds `boardPlayers`, runs `computeRosterConstrainedMaxBid` for every player, and calls `buildPrepFitLine` (which selects the "Your target" / "Flagged to avoid" / generic prefix) — all in a single memo with deps `[players, isTarget, isAvoid]`. The solver computation depends only on `players`; the label prefix depends only on `isTarget`/`isAvoid`. Because `isTarget` and `isAvoid` are `useCallback` functions that chain through `hasTag(useCallback([userTagsMap]))`, they receive new function references any time `userTagsMap` state is replaced — which happens on every tag fetch (initial load AND after every toggle+refetch). Result: toggling one player's target tag triggers all 500 solver runs to re-execute just to change ONE player's prefix from "Can bid up to" to "Your target".
+- **Evidence:** `use-user-tags.ts:138-160` — `hasTag` is `useCallback([userTagsMap])`; `isTarget`/`isAvoid` are `useCallback([hasTag])`. Any tag mutation calls `refetchTags()` → `setUserTagsMap(...)` → new `userTagsMap` reference → new `hasTag` ref → new `isTarget`/`isAvoid` refs → `fitLineMap` useMemo cache-miss → 500 `computeRosterConstrainedMaxBid` calls. Solver is fast (~3-5ms total at 500 players), so no user-visible freeze today, but wasted work that grows O(N) with the pool.
+- **Fix:** Split into two useMemos:
+  1. `solverResultMap: Map<string, RosterConstrainedMaxBid>` — deps `[players]` only. Runs the 500 solver calls. Never reruns on tag changes.
+  2. `fitLineMap: Map<string, string>` — deps `[solverResultMap, isTarget, isAvoid]`. Iterates the solver result map and calls `buildPrepFitLine` for each. Cheap (~0ms) and reruns on tag changes correctly.
+  Also memoize `boardPlayers` separately (deps: `[players]`) to avoid rebuilding the array twice.
+- **Impact if unfixed:** Minor — solver is fast enough that Joe won't notice. But the pattern will degrade if the pool grows to 1000+ players, and the solver is the wrong thing to pay for a label change.
+
+#### LOW
+
+##### BUG-R7b-02: `buildPrepFitLine` infeasibility guard doesn't handle `!feasible && bestRestOfRoster.length > 0`
+
+- **File:** `src/lib/players/prep-fit-line.ts:54`
+- **Category:** Logic / Edge case
+- **Effort:** XS (one comment or an explicit branch)
+- **Description:** The function guards against the no-slot case (`!result.feasible && result.bestRestOfRoster.length === 0`) and returns `"No open slot for {position} on a full roster"`. The path `!result.feasible && result.bestRestOfRoster.length > 0` (slot exists but budget exhausted) is unguarded and falls through to the normal display branches. In that case `result.maxBid` could be $1 (from `Math.max(minPerSlot, rawMaxBid)`), producing "Can bid up to $1 on a full $200 board" — technically accurate but potentially confusing without context.
+- **Evidence:** `computeRosterConstrainedMaxBid` (roster-solver.ts:369-374): when `rawMaxBid < minPerSlot`, `feasible = false` but `bestRestOfRoster = result.assignments` (non-empty). In prep mode with a fresh $200 board and 500 players, this is effectively unreachable (the rest-of-roster will always fit within budget). But the logic gap exists.
+- **Fix:** Add a comment or explicit branch: `if (!result.feasible && result.bestRestOfRoster.length > 0) { return \`Budget too tight — max $${result.maxBid} on a full board\` }` to make the semantics explicit and avoid the confusing generic output.
+- **Impact if unfixed:** None in practice (full $200 board never exhausted at prep time). The existing test suite already verifies the no-slot path; this path is untested because it's unreachable with normal inputs.
+
+##### BUG-R7b-03: Pagination reset useEffect missing `isTarget`/`isAvoid`/`userTagsMap` from deps
+
+- **File:** `src/app/(app)/prep/players/client.tsx:223-225`
+- **Category:** UX
+- **Effort:** XS
+- **Description:** The pagination reset `useEffect` (which sets `displayCount` back to 50 on any filter change) lists 7 deps: `[positionFilter, searchQuery, tagFilter, tierFilter, byeFilter, gradeFilter, severityFilter]`. The `filteredPlayers` useMemo has 3 additional deps: `isTarget`, `isAvoid`, `userTagsMap`. When `tagFilter='target'` and Joe toggles a player's target tag, `filteredPlayers` updates (the toggled player appears or disappears from the filtered list), but `displayCount` doesn't reset to 50. If Joe was viewing 100+ players via Load More, the load-more count and remaining-count badge may be stale until the next user filter interaction.
+- **Evidence:** `client.tsx:220` — filteredPlayers deps include `isTarget, isAvoid, userTagsMap`; `client.tsx:224-225` — reset effect deps do not.
+- **Fix:** Add `isTarget, isAvoid, userTagsMap` to the pagination reset effect deps. Alternatively (cleaner): derive `displayCount` reset from `filteredPlayers.length` change via a separate useMemo comparison, not from listing individual filter deps.
+- **Impact if unfixed:** Minor UX — if Joe toggles a target while on the 'target' filter with Load More active (showing 100+), the newly-added player appears in the correct sorted position but displayCount may show an inflated "remaining" count in the Load More button. No data corruption.
+
+### Recommended Fix Order
+
+1. **BUG-R7b-01** (R8 or next `client.tsx` touch) — split fitLineMap into solver-map + label-map. S effort, clean architectural win.
+2. **BUG-R7b-03** (R8 or next `client.tsx` touch) — add missing deps to pagination reset. XS.
+3. **BUG-R7b-02** (next `prep-fit-line.ts` touch) — add explicit comment or branch for the `!feasible && bestRestOfRoster.length > 0` path. XS, unreachable today.
+
+### Notes
+
+- **DEF/DST mapping verified correct.** `POSITION_TO_DEDICATED` (roster-solver.ts:104-110) maps `DEF → 'dst'`. `Player.position` for defenses is `'DEF'`; `BoardPlayer['position']` is `'QB' | 'RB' | 'WR' | 'TE' | 'DEF'` — same values after filtering K. The `as BoardPlayer['position']` cast at `client.tsx:250` is safe.
+- **No unused imports.** All imports in all three files are used.
+- **No `any` types.** Strict TypeScript throughout the three files.
+- **No empty catch blocks.** The one catch block in `client.tsx:123` properly extracts and sets the error message.
+- **fitLine strip render verified correct.** The `{fitLine && (...)}` conditional at `ffi-player-intel-card.tsx:304` correctly suppresses the strip when fitLine is undefined.
+- **Gate results at time of hunt:** type-check 0 errors, 344/344 tests passing (322 baseline + 22 new), lint 161 (0 new), build clean.

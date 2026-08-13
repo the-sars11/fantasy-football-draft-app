@@ -2,6 +2,58 @@
 
 ---
 
+## 2026-08-13 / R7b -- Player filters + strategy-fit line
+
+**Task:** REBUILD R7b `[Sonnet · Opus]` — expanded player browser filters + solver-driven per-player strategy-fit line. | **Class:** output | **Lenses:** QA, Design
+
+**Problem (RV-9 partial, R7b scope):** The player browser had only position + tag + search filters. No tier filter, no bye-week filter, no grade/severity sub-filters for target/avoid modes. No answer to "what's the most I can spend on THIS player without blowing team construction?"
+
+**Root cause:** Filters were only wired in S3/FB sessions which preceded the roster-solver (R4). The fit line requires the solver (`computeRosterConstrainedMaxBid`) which didn't exist until R4.
+
+**Fix:**
+- **Position filter extended:** removed K (no-kicker league), added virtual FLEX (RB+WR+TE combined). New `PositionFilter` type.
+- **New filters (4):** tier (T1/T2/T3+, from `expertTier`), bye week (populated from live player pool via `availableByeWeeks` useMemo), grade (7+/9+ weight, only in target mode, reads `userTagsMap[p.id].tagWeight`), severity (soft/hard, only in avoid mode, reads `userTagsMap[p.id].tagSeverity`).
+- **Grade/severity auto-reset** on `tagFilter` change (so switching from 'target' to 'avoid' doesn't leave stale grade filter active).
+- **Pagination reset** updated to include all 7 filter deps.
+- **New module `src/lib/players/prep-fit-line.ts`** (pure, $0): `buildSlotSummary(assignments)` → "QB and 2 FLEX"; `buildPrepFitLine(position, result, isTarget, isAvoid)` → "Your target -- can bid up to $67, still needs QB and 2 FLEX" / "Flagged to avoid -- can afford at $42 on a full board if reconsidering" / "Can bid up to $55 on a full $200 board, still needs QB". `isTarget` checked before `isAvoid`.
+- **`fitLineMap` useMemo** in `client.tsx`: builds `boardPlayers` (all non-K players), constructs `SolverInput` with `NASTIES_FULL_SLOTS` ($200, all 13 slots), runs `computeRosterConstrainedMaxBid` per player, maps `player.id → fit line string`. Deps: `[players, isTarget, isAvoid]`.
+- **`FFIPlayerIntelCard`**: new `fitLine?: string` prop; renders a ◆-prefixed strip after the recommendation strip when present (border-t, subtle blue gradient background, `--ffi-ink-3` color).
+- **No strategy API calls**: fit line uses `isTarget`/`isAvoid` from `useUserTags` as the strategy-intent signal ($0, no extra fetches).
+
+**Tests added (22 new):**
+- `src/lib/players/__tests__/prep-fit-line.test.ts` (17 unit): `buildSlotSummary` — empty, bench-only, single slot, two-slot join, Oxford join, FLEX count, bench-ignored, ordering; `buildPrepFitLine` — infeasible/no-slot, target line with maxBid, target includes separator, target priority over avoid, avoid line exact match, avoid no slot note, generic bid line, last-slot no note, no em/en-dashes (`/[–—]/`).
+- `src/components/prep/__tests__/ffi-player-intel-card-fitline.test.tsx` (5 RTL): fitLine renders verbatim, target prefix, avoid prefix, no strip when fitLine absent, solver produces positive maxBid from $200 full board (real solver, no mocks).
+
+**Browser verification deferred:** Browser pane not compositing (same env issue as R5/R6). Render path proven via RTL DOM tests (matching established precedent).
+
+**Verify gate:**
+
+| Check | Result |
+|-------|--------|
+| `npm run type-check` | 0 errors |
+| `npm run test:run` | **344/344 passed** (322 baseline + 22 new) |
+| `npm run lint` | 161 problems (0 new vs. baseline) |
+| `npm run build` | Clean — `/prep/players` route builds successfully |
+| `/bug-hunt free` | 0 CRITICAL · 0 HIGH · 1 MEDIUM (BUG-R7b-01) · 2 LOW |
+
+**Bug hunt findings (see `BUG_LOG.md`):**
+- BUG-R7b-01 (MEDIUM): `fitLineMap` mixes solver computation (deps: `[players]`) with label selection (deps: `[isTarget, isAvoid]`) in one useMemo — a tag toggle re-runs all 500 solver calls unnecessarily. Fix queued for R8 (split into two useMemos).
+- BUG-R7b-02 (LOW): `!feasible && bestRestOfRoster.length > 0` falls through silently in `buildPrepFitLine` — unreachable with full $200 board.
+- BUG-R7b-03 (LOW): pagination reset effect missing `isTarget`/`isAvoid`/`userTagsMap` deps — minor UX inconsistency when tags change while Load More is active.
+
+**Files changed:**
+- `src/lib/players/prep-fit-line.ts` (NEW)
+- `src/lib/players/__tests__/prep-fit-line.test.ts` (NEW)
+- `src/components/prep/__tests__/ffi-player-intel-card-fitline.test.tsx` (NEW)
+- `src/components/prep/ffi-player-intel-card.tsx` (MODIFIED — `fitLine` prop + ◆ strip)
+- `src/app/(app)/prep/players/client.tsx` (MODIFIED — FLEX filter, 4 new filters, solver fit-map, `fitLine` passed to cards)
+- `.claude/BUILD_PLAN.md` (R7b marked done)
+- `.claude/WORKING_STATE.md` (advanced to R8)
+- `.claude/CHANGELOG.md` (this entry)
+- `.claude/BUG_LOG.md` (R7b hunt appended)
+
+---
+
 ## 2026-08-13 / R7a -- Persistence rework + graded tag scale: stable player ID anchor + weight/severity UI
 
 **Task:** REBUILD R7a `[Sonnet]` -- migrate `user_tags` to a stable player ID anchor and wire the weight/severity scale (already in TypeScript types) into the DB, API, and tagging UI. | **Class:** schema/pipeline | **Lenses:** Architecture, QA, Security, Ops

@@ -86,6 +86,8 @@ interface FFIPlayerIntelCardProps {
   tagWeight?: number
   tagSeverity?: string
   onUpdateGrade?: (weight?: number, severity?: string) => void
+  /** R7b: solver-driven strategy-fit line, e.g. "Your target -- can bid up to $67, needs QB and 2 FLEX" */
+  fitLine?: string
 }
 
 // --- Component ---
@@ -107,6 +109,7 @@ export function FFIPlayerIntelCard({
   tagWeight = 5,
   tagSeverity = 'soft',
   onUpdateGrade,
+  fitLine,
 }: FFIPlayerIntelCardProps) {
   const [showCalc, setShowCalc] = useState(false)
   const rankDisplay = rank.toString().padStart(2, '0')
@@ -296,6 +299,19 @@ export function FFIPlayerIntelCard({
           <span className={`text-sm ${rec.intent === 'pass' ? 'text-[#ff716c]' : 'text-[#2ff801]'}`}>▸</span>
           <span className="font-body text-[12px] sm:text-[13px] text-[#deedf9] leading-snug">{rec.line}</span>
         </div>
+
+        {/* R7b: Solver-driven strategy-fit line */}
+        {fitLine && (
+          <div
+            className="flex items-center gap-2 px-4 sm:px-5 py-2 border-t border-[#8bacff]/8"
+            style={{ background: 'linear-gradient(90deg, rgba(139,172,255,0.04), transparent)' }}
+          >
+            <span className="text-[#8bacff]/50 text-[10px] shrink-0">◆</span>
+            <span className="font-body text-[10px] sm:text-[11px] leading-snug" style={{ color: 'var(--ffi-ink-3)' }}>
+              {fitLine}
+            </span>
+          </div>
+        )}
 
         {/* How-this-is-calculated popover (FB-14) */}
         {showCalc && (
