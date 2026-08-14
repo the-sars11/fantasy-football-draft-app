@@ -5,6 +5,10 @@ vi.mock('@/lib/research/strategy/research', () => ({
   proposeStrategiesRuleBased: vi.fn(),
 }))
 
+vi.mock('@/lib/research/strategy/generate', () => ({
+  generateStrategiesFromPool: vi.fn(),
+}))
+
 vi.mock('@/lib/supabase/server', () => ({
   createClient: vi.fn(),
 }))
@@ -12,6 +16,7 @@ vi.mock('@/lib/supabase/server', () => ({
 import type { NextRequest } from 'next/server'
 import { POST } from './route'
 import { proposeStrategies, proposeStrategiesRuleBased } from '@/lib/research/strategy/research'
+import { generateStrategiesFromPool } from '@/lib/research/strategy/generate'
 import { createClient } from '@/lib/supabase/server'
 
 const LEAGUE_ROW = {
@@ -74,6 +79,10 @@ describe('POST /api/strategies/propose - RV-3 error-gated fallback', () => {
     process.env.ANTHROPIC_API_KEY = 'test-key'
     vi.mocked(createClient).mockResolvedValue(makeFakeSupabase() as never)
     vi.mocked(proposeStrategiesRuleBased).mockReturnValue({ proposals: [], inserts: [] })
+    // Default: the $0 generator produces nothing, so the route falls through to
+    // the rule-based presets. Individual tests override this to exercise the
+    // generated path.
+    vi.mocked(generateStrategiesFromPool).mockReturnValue({ proposals: [], inserts: [] })
   })
 
   afterEach(() => {
@@ -102,14 +111,35 @@ describe('POST /api/strategies/propose - RV-3 error-gated fallback', () => {
     expect(json.source).toBe('ai')
   })
 
-  it('uses rule-based directly (no AI call) when the API key is absent', async () => {
+  it('tries the $0 generator first (no AI call) when the API key is absent', async () => {
     delete process.env.ANTHROPIC_API_KEY
 
     const res = await POST(makeRequest({ leagueId: 'league-1' }))
 
     expect(res.status).toBe(200)
     const json = await res.json()
+    // Generator returned empty (beforeEach default), so it falls through to rule-based.
     expect(json.source).toBe('rule-based')
+    expect(generateStrategiesFromPool).toHaveBeenCalled()
+    expect(proposeStrategies).not.toHaveBeenCalled()
+  })
+
+  it('reports source:generated when the pool+solver generator produces proposals', async () => {
+    delete process.env.ANTHROPIC_API_KEY
+    const generated = {
+      proposals: [{ name: 'Board-Fit Stars and Scrubs' }] as never,
+      inserts: [{ name: 'Board-Fit Stars and Scrubs' }] as never,
+    }
+    vi.mocked(generateStrategiesFromPool).mockReturnValue(generated)
+
+    const res = await POST(makeRequest({ leagueId: 'league-1' }))
+
+    expect(res.status).toBe(200)
+    const json = await res.json()
+    expect(json.source).toBe('generated')
+    expect(json.proposals).toHaveLength(1)
+    // The generator supplanted the rule-based presets on the $0 path.
+    expect(proposeStrategiesRuleBased).not.toHaveBeenCalled()
     expect(proposeStrategies).not.toHaveBeenCalled()
   })
 })

@@ -12,7 +12,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient as createServerClient } from '@/lib/supabase/server'
 import { DEV_MODE } from '@/lib/supabase/dev-mode'
 import { createClient } from '@supabase/supabase-js'
-import { proposeStrategies, proposeStrategiesRuleBased } from '@/lib/research/strategy/research'
+import {
+  proposeStrategies,
+  proposeStrategiesRuleBased,
+  type StrategyResearchResult,
+} from '@/lib/research/strategy/research'
+import { generateStrategiesFromPool } from '@/lib/research/strategy/generate'
 import { dbLeagueToAppLeague } from '@/lib/research/strategy/league-mapper'
 import type { League as DbLeague } from '@/lib/supabase/database.types'
 import type { ConsensusPlayer } from '@/lib/research/normalize'
@@ -153,22 +158,38 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Run strategy research engine. RV-3: the fallback is error-gated, not just
-    // key-gated — any AI failure (dead model id, timeout, rate limit) falls back
-    // to the $0 rule-based path instead of 500ing the strategy request.
+    // Run strategy research engine.
+    //
+    // R9: the primary $0 path is the pool+solver generator. It reads the real
+    // priced board and emits the anchor strategies the board actually supports
+    // at $200, instead of four hardcoded archetypes. When the board is too thin
+    // to generate anything (empty pool, snake format), it falls back to the
+    // rule-based presets.
+    //
+    // RV-3: the AI path (when a key is present) stays error-gated — any AI
+    // failure (dead model id, timeout, rate limit) drops to the same $0 path
+    // instead of 500ing the strategy request.
     const sharedInput = { league, players, keeperNames, targetNames, avoidNames }
-    let result
-    let source: 'ai' | 'rule-based' = 'rule-based'
+
+    /** $0 path: pool+solver generator first, rule-based presets as fallback. */
+    const zeroCost = (): { result: StrategyResearchResult; source: 'generated' | 'rule-based' } => {
+      const generated = generateStrategiesFromPool(sharedInput)
+      if (generated.proposals.length > 0) return { result: generated, source: 'generated' }
+      return { result: proposeStrategiesRuleBased(sharedInput), source: 'rule-based' }
+    }
+
+    let result: StrategyResearchResult
+    let source: 'ai' | 'generated' | 'rule-based'
     if (hasApiKey) {
       try {
         result = await proposeStrategies(sharedInput)
         source = 'ai'
       } catch (aiError) {
-        console.error('[API /strategies/propose] AI path failed, falling back to rule-based', aiError)
-        result = proposeStrategiesRuleBased(sharedInput)
+        console.error('[API /strategies/propose] AI path failed, falling back to $0 generator', aiError)
+        ;({ result, source } = zeroCost())
       }
     } else {
-      result = proposeStrategiesRuleBased(sharedInput)
+      ;({ result, source } = zeroCost())
     }
 
     return NextResponse.json({

@@ -2,6 +2,26 @@
 
 ---
 
+## 2026-08-13 / R9 -- Strategy engine rebuild (pool + solver + live adaptive guidance)
+
+**Task:** REBUILD R9 `[Opus]` — auto-generate strategy options from the real pool + solver (not 4 hardcoded archetypes); build a live adaptive-guidance engine that re-fits as the draft moves; tests. | **Class:** pipeline | **Lenses:** Architecture, QA, Security
+
+**Problem:** The old strategy engine (`research.ts`) picked from a fixed list of 4-6 archetypes FIRST, then hung players/prices off them. The strategy never reflected what the $200 board actually supported, and there was no live re-calc as the board drained.
+
+**Fix:**
+- **New `src/lib/research/strategy/generate.ts` ("Solver-enumerated anchor strategies"):** (1) prices the real pool off the league-calibration room curve (`ceiling` = genuine worth, `expectedCost` = `expectedRoomPrice(pos, posRank)`); (2) detects per-position value cliffs — the **BOARD GATE**: a position only supports an anchor strategy if a genuinely elite player sits above the pack, so no elite RB on the board → no hero-RB option is ever offered; (3) fills anchor slots under 4 budget-shape **policies** (ceiling-max → stars-and-scrubs, value-per-pocket → value hunter, scarcity-weighted → hero/robust-RB where the real cliff is, spread → balanced), each respecting the solver's **$1-per-slot completion invariant** applied inline so every plan fits budget; (4) classifies the SOLVED shape into an archetype (read off the roster the policy built, not chosen up front); (5) dedupes converged shapes; (6) attaches R6 solver-fit target prices. `generateStrategiesFromPool` is the prep entry point (auction-only; snake returns empty).
+- **New `src/lib/draft/adaptive-guidance.ts` (live re-fit):** `computeAdaptiveGuidance(state, managerName, players)` re-runs the SAME anchor generator off LIVE state — prices the undrafted board, takes Joe's remaining slots (`buildSlotsRemaining`) and budget, regenerates. As the RB anchor tier drains, hero-RB stops being generable and the recommendation pivots to where anchors still exist. `detectPositionRuns` measures each position's top-tier drain vs. Joe's open needs (info/warm/hot severity); `synthesizePivot` produces the plain-English "you are behind the RB run..." line. Reuses `analyzeBudgetStrategy` (pace) and the R4 solver bridge. Pure + $0. No em/en dashes in surfaced copy.
+- **Route wiring (`src/app/api/strategies/propose/route.ts`):** `generateStrategiesFromPool` is now the primary **$0** path (`source: 'generated'`); rule-based presets fall back when the generator produces nothing (empty pool / snake); the AI path (key present) stays error-gated and drops to the same $0 generator on failure. `source` union widened to `'ai' | 'generated' | 'rule-based'`. Exported `proposalToInsert` from `research.ts` for reuse.
+- **Incidental (pre-existing type error, fixed under "fix the type error too"):** `flex-tab.test.ts` fixture was missing required `Player` fields — added `consensusTier`/`sourceData`/`projections` and changed `injuryStatus: null` → `undefined`.
+
+**Tests added (+23 net):** `generate.test.ts` (12: board gate incl. empty/zero-budget/no-RB/too-tight-budget, completability + normalized allocation, anchor-count scaling, pool-driven targets, archetype dedupe, emergent shape change, `priceBoard` K-drop + posRank, `generateStrategiesFromPool` snake-empty / auction + target-pricing / keeper removal); `adaptive-guidance.test.ts` (10: snake-not-applicable, unknown-manager-empty, fresh-auction recommends + budget/needs, own-spend budget, run detection below/above threshold + HOT severity, re-fit drops drafted RBs + shape moves, pivot says "behind" + no dashes, `priceLiveBoard` excludes drafted); route (+1: `source:'generated'` path).
+
+**Gate:** type-check **0 errors**; **372/372** tests green (349 baseline + 23); lint **51 total, 0 new** (fixed my own 6 en/em-dash errors in the new test titles); build **✓ 54/54 static pages**; static review of changed modules clean. **Known-benign:** in the prep route path defenses arrive as position `'DST'` while `priceBoard` filters on `'DEF'`, so DST is never anchored — correct for the Nasties ($1 fill), the `dst` slot is still counted in the completion reserve and the roster still completes.
+
+**No new UI screen in R9 → no screenshot.** Part 1 (generated strategies) renders through the R6-proven `StrategyProposalCard`; Part 2 (adaptive guidance) is engine-only and gets surfaced in the live room in **R11**.
+
+---
+
 ## 2026-08-13 / R8 -- Cheat Sheet resolution + FLEX view
 
 **Task:** REBUILD R8 `[Sonnet]` — Cheat Sheet purpose clarified, FLEX tab added, BUG-R7b-01 fixed. | **Class:** output | **Lenses:** QA, Design

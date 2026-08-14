@@ -318,7 +318,7 @@ export async function proposeStrategies(
 
 // --- Convert proposal to DB insert ---
 
-function proposalToInsert(
+export function proposalToInsert(
   proposal: StrategyProposal,
   leagueId: string,
   format: DraftFormat,

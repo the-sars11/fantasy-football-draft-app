@@ -27,12 +27,15 @@ function makePlayer(
     byeWeek: 7,
     consensusRank,
     consensusAuctionValue,
+    consensusTier: 2,
     adp: consensusRank,
     ceilingValue: consensusAuctionValue + 5,
     expectedRoomPrice: consensusAuctionValue - 2,
     projectedPoints: 200,
     expertTier: 2,
-    injuryStatus: null,
+    injuryStatus: undefined,
+    sourceData: [],
+    projections: { points: 200 },
   }
   return {
     player,
