@@ -2,6 +2,29 @@
 
 ---
 
+## 2026-08-13 / R10a -- Simulation engine: Monte Carlo + auction-priced roster-aware opponents
+
+**Task:** REBUILD R10a `[Opus]` — build a pure Monte-Carlo auction sim where opponents bid up to their own roster-completion max via the R4 solver (competition-aware, not ADP), returning per-run rosters + a distribution. Pure + tested, no UI/persistence. | **Class:** pipeline | **Lenses:** Architecture, QA, Security
+
+**Problem:** The old sim (`prep/simulate/client.tsx:92-229`, RV-11) ran a single deterministic draft where opponents "bid" by walking ADP — no budget awareness, no roster construction, no competition, not reproducible, not tested. It could not answer the North Star question ("what full $200 roster do I actually end up with, against realistic opponents?").
+
+**Fix — new `src/lib/draft/sim-engine.ts` (pure $0 module):**
+- **`mulberry32(seed)`** — seeded PRNG (floats [0,1)), so an entire draft is reproducible from one integer. Run `i` of a Monte-Carlo batch uses `seed + i`; seeds are recorded on each `SimRun`.
+- **`runAuctionSim(input, seed)`** — one full English auction. Each iteration: nominate from the top of the remaining board (ceiling DESC, small RNG jitter over the top few); every manager with a legal slot computes willingness = `max(1, min(noisy valuation, computeRosterConstrainedMaxBid(...)))` — the R4 solver's budget − best-rest-of-roster reserve, so no seat ever bids into an uncompletable roster; the lot **clears at second-price + 1, capped at the winner's own willingness** (uncontested → $1); winner's slot is filled (dedicated → FLEX → bench) and the player is removed. Loops until every seat is full or the board is dry.
+- **`runMonteCarlo(input)`** — runs N seeded auctions and aggregates the me-seat outcome into a `SimDistribution` (min / max / mean / median / p10 / p90 / stdev over total ceiling and spend, plus mean position counts). Defaults: runs 24, seed 1, noisePct 0.15, myManagerIndex 0.
+- Helpers `percentile` / `statsOf`; typed surface `SimEngineInput` / `SimRun` / `SimManagerRoster` / `SimDistribution` / `SimEngineResult`. No React/Supabase imports — pure and side-effect-free.
+- **Cleanup during A6 bug-hunt:** removed a vestigial `nominator` round-robin counter (assigned + incremented but never read — nomination is global top-ceiling). It consumed no RNG draw, so removal is behavior-identical; re-verified 20/20 green after.
+
+**Closes:** RV-11 (engine half). Grading / projected record / representative teams / saved-run persistence + the sim UI remain R10b.
+
+**Tests added (+20):** `src/lib/draft/__tests__/sim-engine.test.ts` — PRNG (determinism, different-seed divergence, [0,1) range); opponent-bidding math (second-price clearing = $50 parity, uncontested = $1, never overspend budget, never exceed roster capacity, never double-draft a player, every clear ≥ $1, $1-per-open-slot completion-reserve invariant `budgetLeft ≥ capacity − players`); determinism-under-seed (byte-identical same seed, diverges different seed, `runMonteCarlo` fully reproducible, sequential seeds `[40..44]`); distribution stats (percentile interpolation + empty/singleton); full 12-team Nasties smoke (fills every seat to cap, 12 rosters/run, coherent me-seat position counts).
+
+**Gate:** A1 done-when proven clause-by-clause (N realistic auctions ✓, stable seed-reproducible distribution ✓, opponent-math tests ✓, determinism tests ✓, no UI/persistence ✓); A2 type-check **0 errors**; A3 **392/392** tests green (372 baseline + 20); A4 lint **51 total, 0 new** (my 2 files 0 errors / 0 warnings); A5 build **✓ Compiled in 3.6s, 54/54 static pages**; A6 bug-hunt free: 0 crit / 0 high / 0 med, 1 LOW deferred (BUG-R10a-01, perf — solver called per-bidder-per-lot; exact-safe top-K board trim deferred to R10b where the UI sets N); A7 **no UI ships in R10a** (pure engine — surfaces in the sim UI in R10b), honest no-screenshot; A8 serves the North Star (simulates full $200 rosters via the solver, auction-only, no snake path); A9 **$0**, no paid calls.
+
+**Closes:** RV-11 engine half.
+
+---
+
 ## 2026-08-13 / PROCESS -- Model-gated session discipline + A1-A10 definition of done
 
 **Task:** Joe: "too many loosely-defined build sessions, no real definition of done, and all-Opus is inefficient." Port the ProperMuse Deliverables-Overhaul session process onto the FF app. | **Class:** docs (Delivery lens)

@@ -1,5 +1,43 @@
 # Bug Hunt Log
 
+## Hunt: 2026-08-13 -- free mode -- Scope: R10a changed modules (sim-engine.ts, sim-engine.test.ts)
+
+**Project:** fantasy_football_draft_app
+**Type:** TypeScript / Next.js (App Router) + Vitest
+**Auditor:** Claude Code (static read-only pass)
+**Mode:** FREE -- static analysis of the 2 files created in R10a.
+
+### Summary
+
+| Severity | Count |
+|----------|-------|
+| CRITICAL | 0 |
+| HIGH | 0 |
+| MEDIUM | 0 |
+| LOW | 1 (deferred to R10b) |
+
+### Findings
+
+#### LOW
+
+##### BUG-R10a-01: Solver invoked per-bidder-per-lot may be slow on the full board
+- **File:** `src/lib/draft/sim-engine.ts` (bidding loop in `runAuctionSim`)
+- **Category:** Performance
+- **Effort:** S
+- **Description:** Every lot asks every legal manager to run `computeRosterConstrainedMaxBid`, which runs the greedy solver. For the deep test board (190 players) at 8-24 runs this is fine (tests pass in well under a second), but the real prep board is ~450 players; 12 seats × ~450 lots × N runs of a full solve could get slow when R10b lets the UI crank N up.
+- **Evidence:** `runAuctionSim` calls the solver inside the per-manager willingness loop, inside the per-lot loop, inside the per-run loop of `runMonteCarlo`.
+- **Fix (exact-safe):** pre-trim the priced board to the top-K per position (K = total slots across all managers) before simulating — players below every seat's Kth need are never affordable-and-wanted, so trimming does not change outcomes, only cost. Defer to R10b because R10a's Done-when does not include perf and the UI (which sets N) does not exist yet.
+- **Impact:** None at R10a scale (all 20 tests green, sub-second). A latency risk only once the real board + a user-chosen large N are wired in R10b.
+
+### Items verified clean (no bugs found)
+
+- **Completion guarantee:** bench accepts any position, so while any manager holds an open bench slot no lot goes unsold; board (190 in tests) > total slots (168) so the loop exits only when all seats are full — smoke test confirms every seat reaches cap.
+- **Solver purity under repeated calls:** `computeRosterConstrainedMaxBid` reads `slotsRemaining` via spread and does not mutate the shared `manager.slots`, so calling it once per bidder per lot is side-effect-free — no cross-manager contamination.
+- **Determinism:** a single `rng` per run, drawn in a fixed order (nomination jitter, then per-qualifying-manager valuation in ascending manager index) → byte-identical runs under the same seed (asserted).
+- **Dead code removed:** the vestigial `nominator` round-robin counter (assigned + incremented, never read) was deleted; it consumed no RNG draw, so behavior is identical and 20/20 stayed green.
+
+---
+
 ## Hunt: 2026-08-13 -- free mode -- Scope: R8 changed modules (board/client.tsx, players/client.tsx)
 
 **Project:** fantasy_football_draft_app
