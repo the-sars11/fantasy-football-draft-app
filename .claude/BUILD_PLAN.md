@@ -46,6 +46,98 @@ Task tracking: `[ ]` not started · `[~]` in progress · `[x]` done · `[!]` blo
 
 ---
 
+## ▶ HOW TO RUN A SESSION (read this first, every session)
+
+**Installed 2026-08-13** after too many loosely-defined, all-Opus sessions with no real definition of "done." This block turns every R# session into a tightly-scoped, model-gated, one-sitting unit whose completion is *proven*, not asserted. Do exactly ONE step per session. Do not improvise; do not fold in the next step.
+
+### The hard model-gate (step 3 of the launch prompt — a real STOP, not a suggestion)
+
+Each R# names its required model. **Opus** and **Sonnet** are not interchangeable: Opus for the sessions that design or reason through engine/logic/architecture, Sonnet for the mechanical/UI/wiring sessions (cheaper, and correct for that work).
+
+| Model | Sessions |
+|-------|----------|
+| **Opus** (required) | R3, R4, R5, R6, R9, R10a, R10b — plus the Opus half of R7b (fit logic) and R13 (logic bugs) |
+| **Sonnet** | R1, R2, R7a, R8, R11, R12, R14, R15 |
+
+**Gate:** at session start, state which model this session is running on. If it does **not** match the step's tag, **STOP, do no work, and tell Joe to relaunch on the correct model.** Claude cannot switch its own model mid-session — forcing the relaunch is Joe's job, so make him do it. Running an Opus step on Sonnet (or burning Opus on a Sonnet step) is exactly the waste this process exists to kill.
+
+### The A1–A10 Acceptance Checklist — THE definition of done
+
+A step is **not done** because a file exists, the code committed, or it runs. A step is done when **every applicable item below is proven with pasted evidence, in-chat, in the same message that claims completion.** Skip an item only by stating why it does not apply.
+
+```
+A1.  Step's own "Done-when" met, CLAUSE BY CLAUSE — each clause proven separately
+     (output / screenshot / test), not "mostly."
+A2.  type-check clean — `npm run type-check` -> 0 errors. Paste the tail.
+A3.  Tests green AND coverage followed the engine — `npm run test:run` all green, and the
+     new draft-deciding logic has NEW tests (a green pre-existing suite is not coverage).
+     Paste the count + name the new tests.
+A4.  Lint 0 new — changed-module `eslint` exit 0; paste the full-project error delta
+     (was N, now N).
+A5.  Build clean — `npm run build` compiles, static pages generated. Paste the success line.
+A6.  Bug-hunt free on changed modules — `/bug-hunt free` -> 0 unresolved CRITICAL/HIGH;
+     every MED/LOW fixed or logged in BUG_LOG with a defer reason + target session.
+A7.  Visual proof OR honest no-UI declaration — if a human sees the change, paste a
+     screenshot from a preview I loaded myself with the interaction working. If no UI
+     ships, say so and name where it surfaces later. Never fake or hand-wave a screenshot.
+A8.  No lies, no silos, no overpay — serves the North Star (best $200 roster), breaks no
+     Locked Decision, no label shows a value it isn't, no path recommends paying past worth.
+A9.  Cost gate honored — no paid Claude / 3rd-party call fired without Joe's typed approval.
+     Confirm $0, or name the approval.
+A10. Records + commit — BUILD_PLAN step marked with a "Shipped:" proof note, WORKING_STATE
+     pointer updated, CHANGELOG entry added, BUG_LOG updated if a hunt ran; committed by
+     EXPLICIT PATH (never `git add -A`), pushed to main, SHA + range pasted.
+```
+
+### The launch prompt (paste this to start a session; it reprints itself at the end)
+
+Every session ends by regenerating this prompt verbatim with a `NEXT SESSION:` line added at the top, so the next session is always a copy-paste away.
+
+```
+Work the Fantasy Football Draft Advisor rebuild plan. Follow this exactly; do not improvise.
+
+1. READ FIRST. Open C:\Users\jrasa\AI Projects\fantasy_football_draft_app\.claude\BUILD_PLAN.md.
+   Read the "▶ HOW TO RUN A SESSION" block (model-gate + A1–A10 + this prompt), "⭐ THE NORTH
+   STAR," "🏗️ THE REBUILD" step table, and the "Superseded / rejected directions" locks. Then
+   open .claude/WORKING_STATE.md and read "Next open item." Cite file:line for every claim about
+   code — if you did not open the file THIS session, you do not know it; go read it.
+
+2. PICK THE STEP. In THE REBUILD, find the FIRST R# whose "Done-when" is not yet proven. That is
+   this session's step. Do exactly ONE step. Do not fold in the next one. Spot adjacent work? Note
+   it in the plan as a future step; do not do it.
+
+3. MODEL CHECK (hard gate). The step names its required model (see the model-gate table: Opus for
+   R3,R4,R5,R6,R9,R10a,R10b + Opus-halves of R7b/R13; Sonnet for R1,R2,R7a,R8,R11,R12,R14,R15).
+   Tell me which model this session is running on. If it does NOT match, STOP immediately, do no
+   work, and tell me to relaunch on the correct model. Claude cannot switch its own model — this
+   is my job, so make me do it.
+
+4. ANCHOR. Confirm the step still serves the North Star (best full $200 roster, never a silo) and
+   breaks no Locked Decision (auction-only, ESPN-only, no keeper/snake, no Tyler's league, GRIDIRON
+   dark-first, Google Sheets out). If it conflicts, STOP and tell me before touching anything.
+
+5. WORK IT until context is nearly out (leave headroom to do step 6 cleanly — do NOT run out
+   mid-write). "Done" = the artifact passes the A1–A10 Acceptance Checklist item-by-item, with the
+   proof pasted in-chat — NEVER "a file exists / it committed / it runs." If you are a Sonnet
+   session and hit a decision your step's spec did not cover, STOP and kick it to an Opus re-plan.
+   Never improvise a decision. Paid Claude/3rd-party calls need my typed approval first.
+
+6. CLEAN EXIT (always, before stopping, even if the step is only partly done):
+   a. Mark the R# in THE REBUILD with a "Shipped:" proof note; update WORKING_STATE "Next open
+      item"; add a CHANGELOG entry; update BUG_LOG if a hunt ran.
+   b. Commit by EXPLICIT PATH only (never git add -A). Push to main. Use git push --no-verify ONLY
+      if the push is blocked solely by pre-existing env-failing tests in files I did not touch this
+      session — otherwise fix it. git commit --no-verify is always blocked.
+   c. Print the proof of commit+push (SHA + range).
+
+7. REGENERATE. Determine the NEXT open step after this session's work and its required model. Then
+   print — in a fenced code block — a fresh copy of THIS ENTIRE PROMPT, with one line added at the
+   very top: "NEXT SESSION: launch <Opus|Sonnet> — step <R#> (<one-line name>)." Print it verbatim
+   so I can paste it straight into a new session.
+```
+
+---
+
 ## ⭐ THE NORTH STAR (reframed 2026-08-12)
 
 > **The job is to build the single best possible full 15-man roster for $200 — not to price players one at a time.**
@@ -130,16 +222,18 @@ Every item below was confirmed against code. `RV-#` = review finding. Severity i
 
 ## Dev Cycle (per session)
 
+> **The authoritative session procedure and definition of done is `▶ HOW TO RUN A SESSION` at the top of this file** (the launch prompt + the hard model-gate + the A1–A10 Acceptance Checklist). The steps below are the PROPOSE/PATCH/VERIFY detail that fills in step 5 ("WORK IT") of that prompt — they do not replace it. The A1–A10 checklist is the single definition of done; the per-session gate below is A2–A7 of it.
+
 ```
 1. Read this plan's session block (R#) + the files it says to read first. Read NORTH_STAR.md for engine/architecture work.
-2. Check the model tag. On a weaker model than the tag → HALT and tell Joe.
+2. Model-gate (see HOW TO RUN A SESSION): state this session's model; if it ≠ the step's tag, STOP and make Joe relaunch.
 3. PROPOSE: classify the change, name the Review Lenses, declare scope (files touched + what will NOT change), state a concrete success criterion.
 4. PATCH: implement inside the declared scope. Don't exceed it without re-proposing.
-5. VERIFY: prove the success criterion with output/screenshot, then run the per-session gate below.
+5. VERIFY: prove the success criterion with output/screenshot, then clear the A1–A10 Acceptance Checklist item-by-item.
 6. Paste the proof. Mark [x]. Update WORKING_STATE (pointer) + CHANGELOG (entry) + BUG_LOG (if a hunt ran). Commit by explicit path + push.
 ```
 
-**Per-session gate (R1–R13, non-negotiable):** no session is "done" until ALL pass:
+**Per-session gate (R1–R13, non-negotiable)** — this is A2–A7 of the Acceptance Checklist; no session is "done" until ALL pass:
 `npm run type-check` · `npm run test:run` · `npm run lint` (0 new) · `npm run build` · `/bug-hunt free` on the changed modules · **a screenshot from a preview I loaded myself.** R13/R14 are the whole-app hardening passes stacked on top; R15 is the human gate.
 
 **Cost gate:** the rule-based advisor, valuation, solver, and simulation are all **$0** (local math + free ESPN/Sleeper reads). The only paid paths are the **AI strategy/research/top-targets panels** (Claude). Fixing the model id is free; **verifying any live AI path costs money and needs Joe's typed approval first** (global rule #3, ~$0.01–0.03/call). Do not fire a real Claude call to "test" without it.

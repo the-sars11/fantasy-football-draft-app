@@ -2,6 +2,27 @@
 
 ---
 
+## 2026-08-13 / PROCESS -- Model-gated session discipline + A1-A10 definition of done
+
+**Task:** Joe: "too many loosely-defined build sessions, no real definition of done, and all-Opus is inefficient." Port the ProperMuse Deliverables-Overhaul session process onto the FF app. | **Class:** docs (Delivery lens)
+
+**Problem:** The plan had per-session model tags and per-step "Done-when" lines, but (1) the model-halt was a soft buried line, so Opus steps could run on Sonnet (or vice-versa) and waste a session; (2) "done" had no single hard definition — the CLAUDE.md Definition of Done was file-existence-y ("committed / tests pass / marked [x]"), which is exactly how a broken app got marked done before; (3) there was no self-contained, paste-and-go session launch prompt, so each session was framed ad hoc.
+
+**Fix (all in `.claude/BUILD_PLAN.md`, per the one-plan rule — no standalone doc):** added a top section `▶ HOW TO RUN A SESSION` with three pieces:
+- **Hard model-gate** — a model-to-session table (Opus: R3,R4,R5,R6,R9,R10a,R10b + Opus-halves of R7b/R13; Sonnet: R1,R2,R7a,R8,R11,R12,R14,R15) and a real STOP: state the session's model at start; if it != the step's tag, do no work and make Joe relaunch. Replaces the soft line at the old Dev Cycle step 2.
+- **A1-A10 Acceptance Checklist** — the single definition of done. "Done" = the artifact passes A1-A10 item-by-item with proof pasted in-chat, never "a file exists / it committed / it runs." A1 done-when-clause-by-clause, A2 type-check, A3 tests + NEW engine coverage, A4 lint 0 new, A5 build, A6 bug-hunt, A7 screenshot-or-honest-no-UI, A8 no lies/silos/overpay, A9 cost gate, A10 records + explicit-path commit + SHA.
+- **Self-regenerating launch prompt** — the FF twin of the ProperMuse prompt (READ FIRST -> PICK ONE STEP -> MODEL CHECK hard-gate -> ANCHOR -> WORK to A1-A10 -> CLEAN EXIT -> REGENERATE with a `NEXT SESSION:` line), fully FF-pathed. Reprints itself at session end.
+
+Also reconciled the existing "Dev Cycle (per session)" section to point at the new A1-A10 as authoritative (the per-session gate is now labeled A2-A7 of it) so there are not two competing definitions of done. Deviation from ProperMuse: the `--no-verify` escape is phrased generically (FF has no known env-failing test; the suite is 372/372 green) instead of naming a specific test.
+
+**Tests added:** none (docs-only change; no code touched).
+
+**Gate:** N/A code gates (docs-only) — no type-check/test/lint/build/bug-hunt run because no code changed. Verified by re-reading the inserted section: single `▶ HOW TO RUN A SESSION` at line 49, its three sub-blocks intact, North Star still follows at line 141, no broken fences, no duplication.
+
+**Closes:** Joe's "no real definition of done / all-Opus inefficiency" process gap.
+
+---
+
 ## 2026-08-13 / R9 -- Strategy engine rebuild (pool + solver + live adaptive guidance)
 
 **Task:** REBUILD R9 `[Opus]` — auto-generate strategy options from the real pool + solver (not 4 hardcoded archetypes); build a live adaptive-guidance engine that re-fits as the draft moves; tests. | **Class:** pipeline | **Lenses:** Architecture, QA, Security
