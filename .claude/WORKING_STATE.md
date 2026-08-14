@@ -23,6 +23,24 @@ The prior plan (S1–S8 / P2 DR / P3 VAL) marked the app "done" while it (a) pri
 
 ## Next open item
 
+### 🎯 TOP PRIORITY — pivoted 2026-08-13: align the VISION + whole-app definition of done BEFORE any more R# work
+
+**Why:** ten R# sessions ran with no agreed picture of what the finished app looks/feels/works like, and no whole-app definition of done — only a per-step bug list. Root cause found: **two contradicting north stars.** `NORTH_STAR.md` (root, 2026-08-10) is current but thin (functional only, no experience, no "done"). `.claude/NORTH_STAR.md` (2026-04-14) is **4 months stale and describes a DIFFERENT product** — two users (Joe+Tyler), snake+auction, "Tactical Hologram" (dead), $29/$99 pricing, Phase 9-10 commercialization, B2B/white-label, in-season companion. All now "out of scope forever." That stale doc must be retired/reconciled.
+
+**Joe's locked constraints for the vision work (2026-08-13):**
+- Prep + sim + live are **EQUALLY important** (not live-only).
+- The vision must be **built on the existing root NORTH_STAR + BUILD_PLAN + current code** — reconciled, NOT invented fresh.
+- Look/feel/UX is its **own proper multi-session VISUAL effort** (real reference apps, mockups, screen-by-screen, iterated). Do NOT try to snap UI/UX density/feel in a single Q&A — Joe (rightly) shut that down. He can't judge a vision abstractly: *"I don't know unless I understand what they'll look like."*
+
+**Agreed 3-step path (Joe said yes to the path):**
+1. **GROUND (do this next):** read the current code + actual screens + `DESIGN_SYSTEM.md`; reconcile the two north stars; bring Joe an **honest map of what exists TODAY** — the real screens and what each does, ideally loaded + screenshotted so he sees the actual app, not a description. (Note: Browser pane has failed to composite in R5/R6 — if screenshots fail, say so, don't fake.)
+2. **LOCK the functional vision + whole-app definition of done in writing** — built only on north star + build plan + current code; prep/sim/live all first-class; NO look/feel decisions here. Then retire the stale `.claude/NORTH_STAR.md` and point BUILD_PLAN at one canonical vision doc. Get Joe's redline/sign-off.
+3. **DESIGN the look/feel** as its own proper visual effort (references + mockups + iteration). Not one session.
+
+**R10a status:** Joe reports he ran R10a (Monte-Carlo sim engine) in a **separate session** — NOT verified in this session. Verify it landed before R10b. It's a pure engine and stands regardless of the vision work.
+
+---
+
 **R1 [Sonnet] — Trust triage — DONE 2026-08-12.** Closed RV-2, RV-3, RV-6, RV-12, RV-13, RV-16, RV-19. Full verify gate + loaded-preview check passed (type-check clean, tests green with new coverage, lint 0 new errors, build clean, bug-hunt free 0 critical/0 high/1 medium, live screenshots of Cheat Sheet/nav/settings/draft-live). See `CHANGELOG.md` for the verify table and `BUILD_PLAN.md` R1.
 
 **R2 [Sonnet] — Data truth — DONE 2026-08-12.** Closed RV-7, RV-8, RV-14. ECR stat = real `ecrPositionRank` (e.g. "WR1"), RANGE stat = calibrated VORP↔room band (e.g. "$64-$71" for Ja'Marr Chase), tier badge (T1/T2/T3+) now visible in main row. New `convert.test.ts` (7 tests) asserts real source→field mappings. Full gate passed (type-check 0 errors, 223/223 tests green, lint 0 new errors, build clean, bug-hunt free 0 critical/0 high/1 medium pre-existing, screenshot confirming WR1 ECR + $64-$71 RANGE + T1 badge). See `CHANGELOG.md` and `BUILD_PLAN.md` R2.
