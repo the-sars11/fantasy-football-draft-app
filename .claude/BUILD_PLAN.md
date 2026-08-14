@@ -142,6 +142,8 @@ Work the Fantasy Football Draft Advisor rebuild plan. Follow this exactly; do no
 
 > **The job is to build the single best possible full 15-man roster for $200 — not to price players one at a time.**
 
+> **📎 Canonical whole-app vision + definition of done: `.claude/VISION.md` (LOCKED 2026-08-14).** This section is the ENGINE principle; VISION.md is what the finished app looks/feels/works/does across the three EQUAL pillars (Prep / Sim / Live) and the 7-point whole-app "done." Every R# below builds toward it. Two calls the vision locks: **Sim becomes a first-class nav pillar** (today buried under Prep), and **the two built-but-orphaned engines get wired** — `sim-engine.ts` → R10b, `adaptive-guidance.ts` → R11.
+
 Every number the app shows must serve that one goal. "Gibbs is worth $97, room pays ~$76, +$21 pocket" is a *silo* fact — it is true and it is nearly useless on its own, because it never answers the only question that wins the draft:
 
 > *Given I have $X left, these slots still open (QB/RB/WR/TE/FLEX×3/DEF/Bench×5), and this board in front of me — what is the most I can pay for THIS player and still finish with the best possible rest-of-roster?*

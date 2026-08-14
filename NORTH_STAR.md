@@ -1,6 +1,8 @@
 # Fantasy Football Draft Advisor -- North Star
 
-**Last updated:** 2026-08-10
+**Last updated:** 2026-08-14
+
+> **📎 Canonical whole-app vision + definition of done: `.claude/VISION.md` (LOCKED 2026-08-14).** This file covers who it's for and the sync architecture; VISION.md covers what the finished app looks/feels/works/does across the three EQUAL pillars (Prep / Sim / Live) and the 7-point whole-app definition of done. The stale `.claude/NORTH_STAR.md` is retired.
 
 ## Who This Is For
 

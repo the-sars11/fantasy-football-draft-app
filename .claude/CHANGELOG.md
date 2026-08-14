@@ -2,6 +2,18 @@
 
 ---
 
+## 2026-08-14 / VISION -- Locked the whole-app vision + definition of done
+
+**Task:** Align on the FINAL vision — what the app looks/feels/works/does — and the whole-app definition of done, before any more R# work. Root cause of ten R# sessions run with no fixed target: two contradicting North Stars. | **Class:** docs | **Lenses:** Delivery
+
+**What:** Wrote `.claude/VISION.md` — the single canonical target the rebuild builds toward. Grounded strictly in the root `NORTH_STAR.md` (best $200 roster), `BUILD_PLAN.md` (R1–R15), and the current code; nothing invented. Defines the app identity, the three EQUAL first-class pillars (Prep / Sim / Live) each with what-it-does + how-it-works + what-done-feels-like, and a 7-point WHOLE-APP definition of done (all engines wired end-to-end, Sim a first-class nav pillar, no lies/no overpay, mobile one-thumb GRIDIRON, R13/R14 hardening, R15 live rehearsal gate). Joe redlined and **LOCKED** it 2026-08-14.
+
+**Two non-obvious calls the vision locks** (both fall out of "all three pillars equal"): Sim becomes a first-class nav pillar (today buried under Prep); the two built-but-orphaned engines get wired — `sim-engine.ts` → R10b, `adaptive-guidance.ts` → R11.
+
+**Reconciliation:** retired the stale `.claude/NORTH_STAR.md` (4-mo old, different product) with a RETIRED banner; pointed the root `NORTH_STAR.md` + `BUILD_PLAN.md` at VISION.md. Look/feel (references + mockups) is deliberately NOT decided here — that's the separate Step 3 visual effort. Docs-only; no code, no tests, $0.
+
+---
+
 ## 2026-08-13 / R10a -- Simulation engine: Monte Carlo + auction-priced roster-aware opponents
 
 **Task:** REBUILD R10a `[Opus]` — build a pure Monte-Carlo auction sim where opponents bid up to their own roster-completion max via the R4 solver (competition-aware, not ADP), returning per-run rosters + a distribution. Pure + tested, no UI/persistence. | **Class:** pipeline | **Lenses:** Architecture, QA, Security

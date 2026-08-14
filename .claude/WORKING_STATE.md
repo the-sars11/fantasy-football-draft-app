@@ -23,7 +23,15 @@ The prior plan (S1–S8 / P2 DR / P3 VAL) marked the app "done" while it (a) pri
 
 ## Next open item
 
-### 🎯 TOP PRIORITY — pivoted 2026-08-13: align the VISION + whole-app definition of done BEFORE any more R# work
+### ✅ VISION LOCKED 2026-08-14 — canonical target is `.claude/VISION.md`
+
+**Status:** The whole-app vision + definition of done is written, redlined, and **LOCKED by Joe (2026-08-14)** in `.claude/VISION.md`. Prep / Sim / Live are three EQUAL first-class pillars; the whole-app definition of done is the 7 points there. Stale `.claude/NORTH_STAR.md` retired (RETIRED banner); root `NORTH_STAR.md` + `BUILD_PLAN.md` now point at VISION.md. **Two calls the vision locked:** Sim becomes a first-class nav pillar; the orphaned engines get wired (`sim-engine.ts` → R10b, `adaptive-guidance.ts` → R11).
+
+**Next — Joe picks the thread:** (a) **Step 3 — DESIGN the look/feel** as its own proper visual effort (real reference apps + mockups + iteration, screen by screen — NOT one session); and/or (b) **resume the R# build** — next open R# is **R10b** (sim grading + output + saved runs, `[Opus]`).
+
+---
+
+#### Historical — how the vision gap was found (2026-08-13)
 
 **Why:** ten R# sessions ran with no agreed picture of what the finished app looks/feels/works like, and no whole-app definition of done — only a per-step bug list. Root cause found: **two contradicting north stars.** `NORTH_STAR.md` (root, 2026-08-10) is current but thin (functional only, no experience, no "done"). `.claude/NORTH_STAR.md` (2026-04-14) is **4 months stale and describes a DIFFERENT product** — two users (Joe+Tyler), snake+auction, "Tactical Hologram" (dead), $29/$99 pricing, Phase 9-10 commercialization, B2B/white-label, in-season companion. All now "out of scope forever." That stale doc must be retired/reconciled.
 

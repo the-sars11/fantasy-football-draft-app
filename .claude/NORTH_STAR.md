@@ -1,3 +1,11 @@
+# ⛔ RETIRED 2026-08-14 — DO NOT USE
+
+**This document is stale (last real update 2026-04-14) and describes a DIFFERENT product** — two users (Joe + Tyler), snake + auction, "Tactical Hologram" design (dead), $29/$99 pricing tiers, commercialization, in-season companion — all now out of scope forever. It is preserved for history only.
+
+**The canonical vision + whole-app definition of done is `.claude/VISION.md` (LOCKED 2026-08-14).** The engine principle (best full $200 roster) lives in the root `NORTH_STAR.md` + `BUILD_PLAN.md`. Nothing below this banner is authoritative.
+
+---
+
 # Product North Star — FFIntelligence (Fantasy Football Draft Advisor)
 
 **Last Updated:** 2026-04-14
