@@ -23,6 +23,14 @@ The prior plan (S1–S8 / P2 DR / P3 VAL) marked the app "done" while it (a) pri
 
 ## Next open item
 
+### 🎨 D0 session 2 (NEXT) — 4-theme exploration (design, Joe-gated, NO code)
+
+**Where D0 stands:** D0 session 1 (2026-08-14) built the "Ink & Ember" Research foundation mockup. **Joe approved the LAYOUT/FEEL** ("high quality and nice") but **rejected the colors, fonts, and icons** — the direction read "regal/business," which both my amber-on-ink and the Stitch navy+gold+serif variant (`UI/stitch_multi_theme_layout_variations/`) share. Mockup files `research-foundation-v1.html` + `.png` were **discarded**. Full decision record + next-session scope live in `BUILD_PLAN.md` → "🎨 THE LOOK" → **D0 session 2**.
+
+**Next session does (see BUILD_PLAN D0 session 2 for the full spec):** review `sim-results-v1.html` (approved density) + `UI/stitch_multi_theme_layout_variations/` (liked layout, rejected skin); **retain the approved Research hub skeleton**; render **4 sports-app color schemes** (NOT regal/business, NOT cheesy neon), **multiple font options**, and **multiple icon sets**, to start locking objects/look & feel. Render real headless-Chrome PNGs — **the Browser pane does not composite in this env.** Gate: Joe picks palette + type + icons. This blocks D1+.
+
+---
+
 ### ✅ VISION LOCKED 2026-08-14 — canonical target is `.claude/VISION.md`
 
 **Status:** The whole-app vision + definition of done is written, redlined, and **LOCKED by Joe (2026-08-14)** in `.claude/VISION.md`. Prep / Sim / Live are three EQUAL first-class pillars; the whole-app definition of done is the 7 points there. Stale `.claude/NORTH_STAR.md` retired (RETIRED banner); root `NORTH_STAR.md` + `BUILD_PLAN.md` now point at VISION.md. **Two calls the vision locked:** Sim becomes a first-class nav pillar; the orphaned engines get wired (`sim-engine.ts` → R10b, `adaptive-guidance.ts` → R11).

@@ -394,9 +394,23 @@ GRIDIRON v3 (`DESIGN_SYSTEM.md`, LOCKED 2026-06-04) is not landing in execution.
 Name a real reference app before building (Linear, EA FC — never generic dark-glass/gradient slop). Show a mockup, get Joe's explicit **yes** on the look BEFORE code. A persistent bottom nav with genuinely nice icons is a Joe hard-requirement.
 
 ### D0 — Identity direction + foundation mockup + SIGN-OFF GATE `[design · Joe-gated]` · no code
-> **The three scope decisions are LOCKED (above): full new identity, Sim-inside-Research, visual-first.** D0's job is the *look*.
-> **Work:** name the **fresh reference app(s)** (Joe's bar: a real named app — Linear, EA FC, etc. — never generic dark-glass/gradient slop); propose the new palette + type; produce a **static foundation mockup on the Research screen** (Joe's chosen starting point — "we'll use this one to start our complete redesign") showing the new nav (four tabs, Sim reached from Research), icons, cards, buttons, and color/type. Iterate to Joe's yes.
-> **Done-when:** Joe types **yes** on a static mockup of the new identity on the Research screen. NO production code. **This gate blocks D1+.**
+> **The three scope decisions are LOCKED (above): full new identity, Sim-inside-Research, visual-first.** D0's job is the *look*. **D0 is a GATE and is NOT passed yet** — it stays open until Joe picks a palette + type + icon direction on the Research screen. Blocks D1+.
+
+> #### D0 session 1 (2026-08-14) — LAYOUT approved, SKIN rejected. Decision record:
+> Built `research-foundation-v1.html` ("Ink & Ember": warm-ink ground + flat amber accent, Archivo display / Inter body / IBM Plex Mono, hand-drawn nav icons). Rendered real headless-Chrome PNGs at phone width (**the Browser pane does not composite in this env — R5/R6/D0 all confirm it; render real PNGs via `chrome.exe --headless=new --screenshot`, never fake a screenshot**).
+> - ✅ **Joe LIKES the LAYOUT + FEEL** — "feels high quality and nice." The hub structure is a KEEPER: app bar + wordmark, big screen title, fresh-status line, **demoted "Full research pull"** slim row, four **destination cards** (Players / Cheat Sheet / Strategies / **Sims as a first-class peer** with Monte-Carlo tag + distribution spark), persistent 4-tab bottom nav. Retain this skeleton.
+> - ❌ **Joe REJECTS the colors, the fonts, AND the icons.** Root cause: the direction read **"regal / business,"** not sports. Both my **amber-on-ink** AND the Stitch **navy + metallic-gold (#D4AF37) + Merriweather serif** treatment (`UI/stitch_multi_theme_layout_variations/`) are the SAME regal-business failure. **`research-foundation-v1.html` + `.png` DISCARDED** (deleted this session, at Joe's instruction).
+> - **New steering (Joe, 2026-08-14):** go **sports-app**, NOT regal/business, and NOT **cheesy neon** either (no volt-green RGB gamer slop — that was GRIDIRON v3's failure). Land between those two ditches.
+
+> #### D0 session 2 (NEXT) — 4-theme exploration to start locking objects + look/feel `[design · Joe-gated]` · no code
+> **Review first (in order):** (1) `.claude/mockups/sim-results-v1.html` — the ONE approved density/structure bar; (2) `UI/stitch_multi_theme_layout_variations/screen.png` + `code.html` — the layout Joe likes shown in the REJECTED regal skin (use for layout, avoid its navy+gold+serif); (3) the discarded `research-foundation-v1` decision record above (layout keeper, skin rejected).
+> **Retain:** the Research hub **layout/feel/skeleton** above (Joe approved it). Only the *skin* changes.
+> **Produce (render real headless PNGs, mobile arm's-length):**
+> 1. **4 distinct COLOR SCHEMES** on the same Research layout — each a real **sports-app** energy, NOT regal/business (no navy+metallic-gold, no country-club serif), NOT cheesy neon (no gamer-RGB volt-green). Name a real sports reference for each theme (e.g. broadcast/streaming apps, team-sport apps — Joe's bar: a real named app, never generic slop).
+> 2. **Multiple FONT options** — display + body + numeric specimens, shown so Joe can compare (kill Anton, Merriweather serif, and the amber-era Archivo unless it re-earns its place).
+> 3. **Multiple ICON option sets** — nav + destination icons (kill the `Zap` bolt; the amber-era compass/broadcast/trophy/sliders set is a starting point, not locked).
+> **Deliverable:** a comparison the eye can scan — e.g. the 4 themes side by side + a font specimen board + an icon set board — to **start locking objects/look & feel** (palette, type, icons).
+> **Done-when:** Joe picks a palette direction + type + icon set (or narrows to a 1–2 to iterate). NO production code. **This is the gate that blocks D1+.**
 
 ### D1 — Design-system foundation (code) `[Sonnet]` · class: shared/output
 > **Depends on:** D0 sign-off.
