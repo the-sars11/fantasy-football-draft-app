@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sim Results v1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Saira:wght@300;400;500;600;700&family=Saira+Condensed:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg0:#05080f; --bg1:#080d18; --s1:#0c1322; --s2:#111a2e; --s3:#16223a; --s4:#1b2a44;
+    --hair:rgba(150,180,255,.1); --hair2:rgba(180,205,255,.18);
+    --volt:#8bff45; --volt-bright:#b6ff7a; --volt-deep:#5fe21f; --volt-ink:#0a1f02; --volt-glow:rgba(139,255,69,.32);
+    --blue:#4d82ff; --blue-bright:#79a6ff; --blue-glow:rgba(77,130,255,.28);
+    --ink:#eaf1ff; --ink2:#9fb0ce; --ink3:#637396;
+    --qb:#ff6e8a; --rb:#56e0a0; --wr:#6ca8ff; --te:#ffb05c; --def:#9fb0ce;
+    --warn:#ffb05c; --danger:#ff6e8a;
+    --font-body:'Saira',system-ui,sans-serif;
+    --font-cond:'Saira Condensed',system-ui,sans-serif;
+    --font-display:'Anton',system-ui,sans-serif;
+    --font-mono:'JetBrains Mono',monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  body{
+    font-family:var(--font-body); color:var(--ink);
+    background:
+      radial-gradient(60% 42% at 22% -6%, rgba(77,130,255,.16) 0%, transparent 58%),
+      radial-gradient(46% 40% at 92% 6%, rgba(139,255,69,.06) 0%, transparent 55%),
+      radial-gradient(60% 50% at 50% 116%, rgba(120,80,255,.12) 0%, transparent 60%),
+      linear-gradient(180deg,#070c16 0%,#05090f 50%,#04060d 100%);
+    background-attachment:fixed;
+    -webkit-font-smoothing:antialiased; font-variant-numeric:tabular-nums;
+  }
+  .wrap{max-width:430px;margin:0 auto;position:relative}
+  /* labels + type */
+  .label{font-family:var(--font-cond);font-weight:700;font-size:.68rem;text-transform:uppercase;letter-spacing:.16em;color:var(--ink3)}
+  .cap{font-family:var(--font-cond);font-weight:700;font-size:.6rem;text-transform:uppercase;letter-spacing:.2em;color:var(--ink3)}
+  .mono{font-family:var(--font-mono);font-variant-numeric:tabular-nums}
+  .display{font-family:var(--font-display);letter-spacing:.01em;line-height:.95}
+  .cond{font-family:var(--font-cond)}
+
+  /* top app bar */
+  .appbar{display:flex;align-items:center;justify-content:space-between;padding:16px 18px 10px;position:sticky;top:0;z-index:40;
+    background:linear-gradient(180deg,rgba(6,10,20,.96) 60%,rgba(6,10,20,0));backdrop-filter:none}
+  .wordmark{display:flex;align-items:center;gap:9px;font-family:var(--font-cond);font-weight:800;font-size:1.18rem;letter-spacing:.01em}
+  .wordmark .ff{color:var(--ink)} .wordmark .intel{color:var(--blue-bright)}
+  .logo{width:26px;height:26px;border-radius:50%;background:
+      radial-gradient(circle at 35% 30%,#2b3d63,#0c1322);border:1px solid var(--hair2);
+      display:flex;align-items:center;justify-content:center;font-family:var(--font-cond);font-weight:800;font-size:.5rem;color:var(--blue-bright)}
+  .avatar{width:34px;height:34px;border-radius:50%;background:var(--s2);border:1px solid var(--hair);
+    display:flex;align-items:center;justify-content:center;font-family:var(--font-cond);font-weight:700;font-size:.72rem;color:var(--ink2)}
+
+  /* section head */
+  .ctx{padding:6px 18px 0}
+  .crumb{display:inline-flex;align-items:center;gap:5px;color:var(--ink3);font-family:var(--font-cond);font-weight:700;font-size:.7rem;letter-spacing:.14em;text-transform:uppercase}
+  .h1{font-family:var(--font-display);font-size:2.35rem;line-height:.92;margin-top:6px;letter-spacing:.01em}
+  .h1 .accent{color:var(--ink)}
+  .runline{display:flex;align-items:center;gap:8px;margin-top:12px;flex-wrap:wrap}
+  .stratchip{display:inline-flex;align-items:center;gap:8px;background:var(--s2);border:1px solid var(--hair);border-radius:999px;padding:7px 12px 7px 10px}
+  .stratchip .dot{width:8px;height:8px;border-radius:50%;background:var(--volt);box-shadow:0 0 10px var(--volt-glow)}
+  .stratchip .nm{font-family:var(--font-cond);font-weight:700;font-size:.82rem;color:var(--ink)}
+  .stratchip .chg{font-family:var(--font-cond);font-weight:700;font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--blue-bright);padding-left:6px;border-left:1px solid var(--hair)}
+  .rerun{margin-left:auto;display:inline-flex;align-items:center;gap:6px;font-family:var(--font-cond);font-weight:700;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink2);background:transparent;border:1px solid var(--hair);border-radius:999px;padding:8px 13px}
+  .subnote{margin-top:9px;color:var(--ink3);font-size:.74rem;line-height:1.45}
+  .subnote b{color:var(--ink2);font-weight:600}
+
+  /* cards */
+  .card{background:var(--s2);border:1px solid var(--hair);border-radius:18px;box-shadow:0 8px 32px rgba(0,0,0,.36),0 0 15px rgba(77,130,255,.06)}
+  section{padding:16px 18px 0}
+  .sechead{display:flex;align-items:baseline;justify-content:space-between;margin:0 2px 10px}
+
+  /* verdict hero */
+  .hero{position:relative;overflow:hidden;border-radius:20px;border:1px solid var(--hair2);
+    background:
+      radial-gradient(120% 90% at 0% 0%, rgba(77,130,255,.22), transparent 55%),
+      radial-gradient(120% 120% at 100% 0%, rgba(139,255,69,.10), transparent 50%),
+      linear-gradient(160deg,var(--s3),var(--s2) 70%);
+    box-shadow:0 22px 50px -22px rgba(0,0,0,.8);padding:18px}
+  .hero-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+  .finish{display:flex;flex-direction:column}
+  .finish .rec{font-family:var(--font-display);font-size:3.5rem;line-height:.86;color:var(--ink)}
+  .finish .rec .dash{color:var(--ink3);margin:0 2px}
+  .finish .seed{font-family:var(--font-cond);font-weight:700;font-size:.82rem;letter-spacing:.06em;color:var(--volt);text-transform:uppercase;margin-top:6px}
+  .grade{display:flex;flex-direction:column;align-items:center;gap:4px}
+  .grade .g{font-family:var(--font-display);font-size:2.9rem;line-height:1;color:var(--blue-bright);text-shadow:0 0 26px rgba(121,166,255,.45)}
+  .grade .glabel{font-family:var(--font-cond);font-weight:700;font-size:.55rem;letter-spacing:.2em;text-transform:uppercase;color:var(--ink3)}
+  .hero-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;margin-top:16px;background:var(--hair);border:1px solid var(--hair);border-radius:12px;overflow:hidden}
+  .hstat{background:rgba(8,13,24,.55);padding:11px 8px;text-align:center}
+  .hstat .v{font-family:var(--font-mono);font-weight:700;font-size:1.12rem;color:var(--ink)}
+  .hstat .v.volt{color:var(--volt)}
+  .hstat .k{font-family:var(--font-cond);font-weight:700;font-size:.56rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);margin-top:3px}
+  .read{margin-top:14px;font-size:.82rem;line-height:1.5;color:var(--ink2)}
+  .read b{color:var(--ink);font-weight:600}
+  .read .risk{color:var(--warn);font-weight:600}
+
+  /* distribution */
+  .dist{padding:16px}
+  .axis{position:relative;height:96px;margin:6px 4px 0;border-radius:10px;
+    background:linear-gradient(180deg,rgba(8,13,24,.5),rgba(8,13,24,.2));border:1px solid var(--hair)}
+  .field{position:absolute;top:0;bottom:0;border-radius:10px 0 0 10px}
+  /* league field faint */
+  .leagueband{position:absolute;top:14px;bottom:14px;left:8%;right:6%;border-radius:8px;
+    background:repeating-linear-gradient(90deg,rgba(159,176,206,.12) 0 2px,transparent 2px 9px)}
+  .lmedian{position:absolute;top:8px;bottom:8px;width:2px;background:var(--blue-bright);left:41%;box-shadow:0 0 10px rgba(121,166,255,.5)}
+  .lmedian .tag{position:absolute;top:-2px;left:6px;font-family:var(--font-cond);font-weight:700;font-size:.54rem;letter-spacing:.1em;text-transform:uppercase;color:var(--blue-bright);white-space:nowrap}
+  /* your volt band */
+  .youband{position:absolute;top:26px;bottom:26px;left:52%;right:14%;border-radius:8px;
+    background:linear-gradient(90deg,rgba(139,255,69,.18),rgba(139,255,69,.30));border:1px solid rgba(139,255,69,.5);
+    box-shadow:0 0 22px rgba(139,255,69,.22)}
+  .youp50{position:absolute;top:20px;bottom:20px;width:3px;background:var(--volt);left:68%;box-shadow:0 0 14px var(--volt-glow)}
+  .youp50 .tag{position:absolute;bottom:-20px;left:50%;transform:translateX(-50%);font-family:var(--font-cond);font-weight:800;font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;color:var(--volt);white-space:nowrap}
+  .axislabels{display:flex;justify-content:space-between;margin:8px 6px 0}
+  .axislabels span{font-family:var(--font-mono);font-size:.62rem;color:var(--ink3)}
+  .distcols{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px}
+  .dcol{background:var(--s1);border:1px solid var(--hair);border-radius:12px;padding:11px 8px;text-align:center}
+  .dcol .v{font-family:var(--font-mono);font-weight:700;font-size:1.16rem}
+  .dcol.floor .v{color:var(--ink2)} .dcol.med .v{color:var(--volt)} .dcol.ceil .v{color:var(--blue-bright)}
+  .dcol .k{font-family:var(--font-cond);font-weight:700;font-size:.55rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink3);margin-top:4px}
+  .dcol .p{font-family:var(--font-mono);font-size:.58rem;color:var(--ink3);margin-top:1px}
+
+  /* win distribution bars */
+  .wins{padding:16px}
+  .barrow{display:flex;align-items:flex-end;gap:7px;height:92px;margin:4px 2px 0}
+  .bar{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;justify-content:flex-end}
+  .bar .col{width:100%;border-radius:4px 4px 2px 2px;background:linear-gradient(180deg,rgba(77,130,255,.4),rgba(77,130,255,.16));border:1px solid rgba(77,130,255,.3)}
+  .bar.mode .col{background:linear-gradient(180deg,var(--volt),var(--volt-deep));border-color:var(--volt);box-shadow:0 0 18px var(--volt-glow)}
+  .bar .n{font-family:var(--font-mono);font-size:.62rem;color:var(--ink3)}
+  .bar.mode .n{color:var(--volt);font-weight:700}
+  .winnote{margin-top:12px;font-size:.76rem;color:var(--ink2);text-align:center}
+  .winnote b{color:var(--volt);font-weight:600}
+
+  /* representative teams scroller */
+  .scroller{display:flex;gap:12px;overflow-x:auto;padding:2px 18px 4px;scroll-snap-type:x mandatory;scrollbar-width:none}
+  .scroller::-webkit-scrollbar{display:none}
+  .team{scroll-snap-align:start;flex:0 0 82%;background:var(--s2);border:1px solid var(--hair);border-radius:16px;padding:13px;box-shadow:0 8px 32px rgba(0,0,0,.36)}
+  .team.peek{flex-basis:82%}
+  .team-head{display:flex;align-items:center;justify-content:space-between;padding-bottom:9px;border-bottom:1px solid var(--hair)}
+  .team-head .sim{font-family:var(--font-cond);font-weight:700;font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink3)}
+  .team-head .rr{display:flex;align-items:center;gap:8px}
+  .team-head .wl{font-family:var(--font-mono);font-weight:700;font-size:.82rem;color:var(--ink)}
+  .team-head .tg{font-family:var(--font-display);font-size:1rem;line-height:1}
+  .tg.a{color:var(--volt)} .tg.b{color:var(--blue-bright)} .tg.c{color:var(--te)}
+  .roster{margin-top:8px;display:flex;flex-direction:column}
+  .rrow{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid rgba(150,180,255,.05)}
+  .rrow:last-child{border-bottom:none}
+  .pos{flex:0 0 30px;text-align:center;font-family:var(--font-cond);font-weight:800;font-size:.6rem;color:#04070d;border-radius:6px;padding:3px 0;letter-spacing:.02em}
+  .pos.qb{background:var(--qb)} .pos.rb{background:var(--rb)} .pos.wr{background:var(--wr)} .pos.te{background:var(--te)}
+  .pos.flx{background:#7d8bad} .pos.def{background:var(--def)} .pos.bn{background:#33415e;color:var(--ink3)}
+  .rname{flex:1;font-size:.8rem;font-weight:500;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .rname.bench{color:var(--ink3);font-weight:400}
+  .rprice{font-family:var(--font-mono);font-weight:700;font-size:.78rem;color:var(--ink2)}
+  .rprice.hi{color:var(--volt)}
+  .team-foot{display:flex;align-items:center;justify-content:space-between;margin-top:9px;padding-top:9px;border-top:1px solid var(--hair)}
+  .team-foot .spent{font-family:var(--font-cond);font-weight:700;font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3)}
+  .team-foot .spent b{color:var(--ink);font-family:var(--font-mono)}
+  .team-foot .fit{font-family:var(--font-cond);font-weight:700;font-size:.62rem;letter-spacing:.08em;text-transform:uppercase;color:var(--volt)}
+
+  /* saved / compare */
+  .saved{margin:0 18px;background:var(--s2);border:1px solid var(--hair);border-radius:16px;padding:14px;box-shadow:0 8px 32px rgba(0,0,0,.36)}
+  .savedrow{display:flex;align-items:center;gap:9px}
+  .runpill{flex:1;background:var(--s1);border:1px solid var(--hair);border-radius:11px;padding:9px 11px;display:flex;flex-direction:column;gap:2px}
+  .runpill .rn{font-family:var(--font-cond);font-weight:700;font-size:.74rem;color:var(--ink)}
+  .runpill .rm{font-family:var(--font-mono);font-size:.62rem;color:var(--ink3)}
+  .runpill.active{border-color:rgba(139,255,69,.4);box-shadow:0 0 0 1px rgba(139,255,69,.14) inset}
+  .runpill.active .rn{color:var(--volt)}
+  .cmpbtn{margin-top:11px;width:100%;display:flex;align-items:center;justify-content:center;gap:8px;
+    font-family:var(--font-cond);font-weight:800;font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--volt-ink);background:linear-gradient(180deg,var(--volt),var(--volt-deep));border:none;border-radius:999px;padding:12px;
+    box-shadow:0 12px 28px -10px var(--volt-glow),inset 0 1px 0 rgba(255,255,255,.4)}
+
+  /* bottom nav */
+  .nav{position:static;margin-top:22px;left:0;right:0;z-index:50;display:flex;justify-content:space-around;padding:9px 8px calc(9px + env(safe-area-inset-bottom,8px));
+    background:rgba(8,13,24,.96);border-top:1px solid var(--hair)}
+  .navitem{display:flex;flex-direction:column;align-items:center;gap:4px;font-family:var(--font-cond);font-weight:700;font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);position:relative}
+  .navitem.active{color:var(--volt)}
+  .navitem.active::after{content:'';position:absolute;bottom:-5px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:var(--volt);box-shadow:0 0 10px rgba(139,255,69,.6)}
+  .navicon{width:22px;height:22px;display:flex;align-items:center;justify-content:center}
+  .navicon svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2}
+  .divlabel{margin:22px 18px 2px;font-family:var(--font-cond);font-weight:800;font-size:.7rem;letter-spacing:.18em;text-transform:uppercase;color:var(--ink3)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- top bar -->
+  <div class="appbar">
+    <div class="wordmark"><span class="logo">FF</span><span class="ff">FF</span><span class="intel">Intelligence</span></div>
+    <div class="avatar">JR</div>
+  </div>
+
+  <!-- context header -->
+  <div class="ctx">
+    <span class="crumb">‹ Research</span>
+    <div class="h1">STRATEGY SIM</div>
+    <div class="runline">
+      <span class="stratchip"><span class="dot"></span><span class="nm">Balanced Value</span><span class="chg">Change</span></span>
+      <button class="rerun">↻ Re-run</button>
+    </div>
+    <div class="subnote"><b>500 seeded drafts.</b> Every one of the 12 managers bids to their own roster max via the solver, not historical ADP. Same seed reproduces the same draft.</div>
+  </div>
+
+  <!-- verdict hero -->
+  <section>
+    <div class="hero">
+      <div class="hero-top">
+        <div class="finish">
+          <div class="rec">9<span class="dash">-</span>5</div>
+          <div class="seed">Projected · Top 3 seed</div>
+        </div>
+        <div class="grade">
+          <div class="g">B+</div>
+          <div class="glabel">Build grade</div>
+        </div>
+      </div>
+      <div class="hero-stats">
+        <div class="hstat"><div class="v volt">78%</div><div class="k">Playoffs</div></div>
+        <div class="hstat"><div class="v">14%</div><div class="k">Title</div></div>
+        <div class="hstat"><div class="v">1,612</div><div class="k">Points P50</div></div>
+      </div>
+      <div class="read">Clears the league median by <b>~90 points</b>. Anchored by an elite RB-WR core. <span class="risk">Thin spot: WR depth</span> collapses your floor in the bottom 10% of sims.</div>
+    </div>
+  </section>
+
+  <!-- distribution -->
+  <section>
+    <div class="sechead"><span class="label">Projected season points vs league</span></div>
+    <div class="card dist">
+      <div class="axis">
+        <div class="leagueband"></div>
+        <div class="lmedian" style="left:41%"><span class="tag">League median</span></div>
+        <div class="youband"></div>
+        <div class="youp50" style="left:68%"><span class="tag">You · P50</span></div>
+      </div>
+      <div class="axislabels"><span>1,400</span><span>1,550</span><span>1,700</span><span>1,850</span></div>
+      <div class="distcols">
+        <div class="dcol floor"><div class="v">1,488</div><div class="k">Floor</div><div class="p mono">P10</div></div>
+        <div class="dcol med"><div class="v">1,612</div><div class="k">Median</div><div class="p mono">P50</div></div>
+        <div class="dcol ceil"><div class="v">1,731</div><div class="k">Ceiling</div><div class="p mono">P90</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- win distribution -->
+  <section>
+    <div class="sechead"><span class="label">Win total across 500 sims</span></div>
+    <div class="card wins">
+      <div class="barrow">
+        <div class="bar"><div class="col" style="height:16%"></div><div class="n">6</div></div>
+        <div class="bar"><div class="col" style="height:34%"></div><div class="n">7</div></div>
+        <div class="bar"><div class="col" style="height:62%"></div><div class="n">8</div></div>
+        <div class="bar mode"><div class="col" style="height:100%"></div><div class="n">9</div></div>
+        <div class="bar"><div class="col" style="height:70%"></div><div class="n">10</div></div>
+        <div class="bar"><div class="col" style="height:38%"></div><div class="n">11</div></div>
+        <div class="bar"><div class="col" style="height:14%"></div><div class="n">12</div></div>
+      </div>
+      <div class="winnote">Most common outcome <b>9 wins</b> · 31% of sims · playoffs in 78%</div>
+    </div>
+  </section>
+
+  <!-- representative teams -->
+  <section style="padding-left:0;padding-right:0">
+    <div class="sechead" style="padding:0 20px"><span class="label">How your $200 lands</span><span class="cap">4 of 500 · swipe</span></div>
+  </section>
+  <div class="scroller">
+    <!-- team 1 -->
+    <div class="team">
+      <div class="team-head">
+        <span class="sim">Sim #142</span>
+        <div class="rr"><span class="wl">10-4</span><span class="tg a">A-</span></div>
+      </div>
+      <div class="roster">
+        <div class="rrow"><span class="pos rb">RB</span><span class="rname">Bijan Robinson</span><span class="rprice hi">$71</span></div>
+        <div class="rrow"><span class="pos wr">WR</span><span class="rname">Puka Nacua</span><span class="rprice hi">$67</span></div>
+        <div class="rrow"><span class="pos rb">RB</span><span class="rname">Kyren Williams</span><span class="rprice">$28</span></div>
+        <div class="rrow"><span class="pos te">TE</span><span class="rname">Trey McBride</span><span class="rprice">$16</span></div>
+        <div class="rrow"><span class="pos qb">QB</span><span class="rname">Jayden Daniels</span><span class="rprice">$9</span></div>
+        <div class="rrow"><span class="pos flx">FLX</span><span class="rname">Jaylen Waddle</span><span class="rprice">$4</span></div>
+        <div class="rrow"><span class="pos flx">FLX</span><span class="rname">Tony Pollard</span><span class="rprice">$1</span></div>
+        <div class="rrow"><span class="pos def">DEF</span><span class="rname">Ravens D/ST</span><span class="rprice">$1</span></div>
+        <div class="rrow"><span class="pos bn">BN</span><span class="rname bench">+ 6 bench</span><span class="rprice">$3</span></div>
+      </div>
+      <div class="team-foot"><span class="spent">Spent <b>$200</b> · $0 left</span><span class="fit">Balanced core</span></div>
+    </div>
+    <!-- team 2 -->
+    <div class="team">
+      <div class="team-head">
+        <span class="sim">Sim #317</span>
+        <div class="rr"><span class="wl">9-5</span><span class="tg b">B+</span></div>
+      </div>
+      <div class="roster">
+        <div class="rrow"><span class="pos wr">WR</span><span class="rname">Ja'Marr Chase</span><span class="rprice hi">$74</span></div>
+        <div class="rrow"><span class="pos rb">RB</span><span class="rname">De'Von Achane</span><span class="rprice hi">$62</span></div>
+        <div class="rrow"><span class="pos wr">WR</span><span class="rname">Nico Collins</span><span class="rprice">$31</span></div>
+        <div class="rrow"><span class="pos qb">QB</span><span class="rname">Josh Allen</span><span class="rprice">$14</span></div>
+        <div class="rrow"><span class="pos te">TE</span><span class="rname">George Kittle</span><span class="rprice">$9</span></div>
+        <div class="rrow"><span class="pos flx">FLX</span><span class="rname">Jordan Mason</span><span class="rprice">$5</span></div>
+        <div class="rrow"><span class="pos flx">FLX</span><span class="rname">Khalil Shakir</span><span class="rprice">$3</span></div>
+        <div class="rrow"><span class="pos def">DEF</span><span class="rname">Eagles D/ST</span><span class="rprice">$1</span></div>
+        <div class="rrow"><span class="pos bn">BN</span><span class="rname bench">+ 6 bench</span><span class="rprice">$1</span></div>
+      </div>
+      <div class="team-foot"><span class="spent">Spent <b>$200</b> · $0 left</span><span class="fit">Stars + scrubs</span></div>
+    </div>
+    <!-- team 3 -->
+    <div class="team">
+      <div class="team-head">
+        <span class="sim">Sim #58</span>
+        <div class="rr"><span class="wl">8-6</span><span class="tg c">B-</span></div>
+      </div>
+      <div class="roster">
+        <div class="rrow"><span class="pos rb">RB</span><span class="rname">Jahmyr Gibbs</span><span class="rprice hi">$76</span></div>
+        <div class="rrow"><span class="pos rb">RB</span><span class="rname">Christian McCaffrey</span><span class="rprice hi">$70</span></div>
+        <div class="rrow"><span class="pos wr">WR</span><span class="rname">Drake London</span><span class="rprice">$22</span></div>
+        <div class="rrow"><span class="pos qb">QB</span><span class="rname">Bo Nix</span><span class="rprice">$3</span></div>
+        <div class="rrow"><span class="pos te">TE</span><span class="rname">Tucker Kraft</span><span class="rprice">$2</span></div>
+        <div class="rrow"><span class="pos flx">FLX</span><span class="rname">Rome Odunze</span><span class="rprice">$1</span></div>
+        <div class="rrow"><span class="pos flx">FLX</span><span class="rname">Cam Skattebo</span><span class="rprice">$1</span></div>
+        <div class="rrow"><span class="pos def">DEF</span><span class="rname">Broncos D/ST</span><span class="rprice">$1</span></div>
+        <div class="rrow"><span class="pos bn">BN</span><span class="rname bench">+ 6 bench</span><span class="rprice">$24</span></div>
+      </div>
+      <div class="team-foot"><span class="spent">Spent <b>$200</b> · $0 left</span><span class="fit">Hero RB pair</span></div>
+    </div>
+  </div>
+
+  <!-- saved / compare -->
+  <div class="divlabel">Saved runs</div>
+  <div class="saved">
+    <div class="savedrow">
+      <div class="runpill active"><span class="rn">Balanced Value</span><span class="rm">9-5 · B+ · just now</span></div>
+      <div class="runpill"><span class="rn">Zero-RB</span><span class="rm">7-7 · C+ · Tue</span></div>
+    </div>
+    <button class="cmpbtn">⇄ Compare head-to-head</button>
+  </div>
+
+</div>
+
+<!-- bottom nav -->
+<div class="nav">
+  <div class="navitem active">
+    <span class="navicon"><svg viewBox="0 0 24 24"><path d="M3 12l9-9 9 9M5 10v10h14V10"/></svg></span>Research
+  </div>
+  <div class="navitem">
+    <span class="navicon"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h7l-1 8 10-12h-7z"/></svg></span>Live Draft
+  </div>
+  <div class="navitem">
+    <span class="navicon"><svg viewBox="0 0 24 24"><path d="M8 21h8m-4-4v4M6 4h12v5a6 6 0 01-12 0zM6 6H3v2a3 3 0 003 3M18 6h3v2a3 3 0 01-3 3"/></svg></span>Post Draft
+  </div>
+  <div class="navitem">
+    <span class="navicon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 00-.1-1l2-1.5-2-3.5-2.3 1a7 7 0 00-1.7-1L14.5 2h-5l-.4 2.5a7 7 0 00-1.7 1l-2.3-1-2 3.5L3.1 11a7 7 0 000 2l-2 1.5 2 3.5 2.3-1a7 7 0 001.7 1l.4 2.5h5l.4-2.5a7 7 0 001.7-1l2.3 1 2-3.5-2-1.5a7 7 0 00.1-1z"/></svg></span>Setup
+  </div>
+</div>
+</body>
+</html>
