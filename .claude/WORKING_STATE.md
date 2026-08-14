@@ -29,6 +29,12 @@ The prior plan (S1–S8 / P2 DR / P3 VAL) marked the app "done" while it (a) pri
 
 **Next — Joe picks the thread:** (a) **Step 3 — DESIGN the look/feel** as its own proper visual effort (real reference apps + mockups + iteration, screen by screen — NOT one session); and/or (b) **resume the R# build** — next open R# is **R10b** (sim grading + output + saved runs, `[Opus]`).
 
+**Step 3 is now formalized into the plan (2026-08-14).** Joe's screen-by-screen feedback was grounded against the actual code (Strategies, Players, Sim, Live, nav — all with `file:line` evidence) and written into `BUILD_PLAN.md`:
+- Functional refinements folded into existing sessions — **R9 note** (Strategies UI gap: kill Generate/Dry-run, auto-rank, ratings, re-pull reconciliation), **R10b** (Sim: top-5 modal rosters + players-you-land-most frequency), **R11** (Live: FLEX tier row + T4/T5, collapsible My Team + on-block, surfaced strategy switcher + adaptive pivot, live target/avoid, live-updating values).
+- New **"🎨 THE LOOK — Step 3 visual identity overhaul (D-track)"** section: **D0** sign-off gate → **D1** design-system foundation → **D2** Research+nav → **D3** Strategies+ratings → **D4** Players card → **D5** Sim results → **D6** Live visual/UX.
+- **3 open decisions await Joe (locked in D0), Claude's recommendations recorded:** (1) identity scope → *reskin GRIDIRON's volt+blue bones, not a new palette*; (2) Sim nav home → *give Sim its own tab per the VISION lock* (reconciles the Option-A vs VISION conflict); (3) sequencing → *visual-foundation-first (D0→D1) before per-screen redesigns*.
+- **No code was written this session — documentation only**, per Joe's directive.
+
 ---
 
 #### Historical — how the vision gap was found (2026-08-13)

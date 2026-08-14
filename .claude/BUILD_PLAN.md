@@ -320,6 +320,7 @@ Work top to bottom. Each session is scoped to finish cleanly in one focused sitt
 > **Reads first:** `research/strategy/research.ts`, `roster-solver.ts`, `tendencies.ts`.
 > **Work:** auto-generate strategy options from the real pool + solver (not 4 hardcoded archetypes); **live adaptive guidance** that updates as the draft moves ("you missed the RB run — pivot to WR value + hero-RB").
 > **Done-when:** strategies come from the pool + solver; live guidance adapts to draft state; tests. Screenshot.
+> **Added 2026-08-14 (Joe feedback — Strategies screen review):** R9 shipped the **engine** (strategies emerge from the board + `adaptive-guidance.ts`) but **no UI** — the screen still renders the R6 card behind a cost-gated **"Generate Strategies" button** (`strategy-proposals.tsx:127-171`), an **unordered** list (`:207`, no sort), **no ratings**, and a page-level **"Dry-run this strategy"** link (`strategies/client.tsx:391-406`). Joe's target UI (all NEW work, not covered by R9's engine): kill the Generate button → **auto-render strategies on load**; **rank them objectively** by simulated strength-vs-league; per-strategy **expandable detail** (how to approach · player types to target · players you likely can't get · strength vs league); **persistent user star-ratings** that **re-reconcile on each new player pull**; **remove Dry-run** (every strategy is pre-simulated, which is what drives the ranking). This is a **new UI + a small ratings-persistence schema add** → built in **D3 (Strategies redesign)** under "🎨 THE LOOK." Also verify: **does a "new player pull" re-flow strategies/targets/values** when a projection/injury/role changes between pulls? If the pipeline doesn't re-run strategy generation on re-pull, log it as a functional gap.
 
 ### R10a — Simulation engine: Monte Carlo + auction opponents `[Opus]` · class: pipeline
 > **Why split:** the sim engine (the risky logic — a Monte-Carlo loop plus an opponent-bidding model) deserves the same isolation as R4. Build it pure and tested before any grading/UI/persistence hangs off it.
@@ -334,12 +335,25 @@ Work top to bottom. Each session is scoped to finish cleanly in one focused sitt
 > **Reads first:** R10a output, `prep/simulate/client.tsx`, `research_runs` schema.
 > **Work:** grade each run on **projected season points vs. the league**; output a projected **win-loss record**, 4–5 representative resulting teams, and **saved runs** (persist to `research_runs`, reload + compare).
 > **Done-when:** the sim produces a projected record + representative teams from the R10a distribution, and runs persist + reload + compare. Tests on the grading math. Screenshot.
+> **Added 2026-08-14 (Joe feedback — Sim mockup review, "really close, yes"):** two output refinements, both **pure post-processing on the R10a per-run rosters** (`SimRun.myRoster.players[]`, `sim-engine.ts:122-131`) — no engine change:
+>   - **"Top-5 most-likely rosters" replaces the vague "4-5 representative teams."** Do NOT surface all N (~500) runs. Cluster the `myRoster` outcomes by their **stud core** (players won above a $-threshold; the $1 bench fill is noise) and surface the **5 most frequently-occurring roster shapes**, each labeled with its frequency ("this shape hit in 22% of sims"). This makes the teams **modal** (most-common) — what Joe asked for — not floor/median/ceiling percentile picks.
+>   - **"Players you land most" frequency table.** Tally across all runs the fraction of `myRoster`s containing each player → a ranked list ("Bijan Robinson — in 78% of sims, avg $54"). A plain count over `myRoster.players[]`.
+>   - **Open question (decide before grading a strategy Joe acts on):** should the sim's "me" seat bid toward **Joe's targets/avoids** (weighted) instead of the generic ceiling-based valuation it uses today (`sim-engine.ts:294-311`)? Today targets/avoids do NOT bias sim bidding. Same question applies to R9 strategy generation.
+>   - **Screen note:** the Sim results screen has an approved static mockup (`.claude/mockups/sim-results-v1.html`). Whether R10b builds that screen or the visual pass (D5) does depends on the sequencing decision — see "🎨 THE LOOK." R10b's own scope is the **grading/record/top-5/frequency DATA** (Opus, tested); the pixels are D5.
 
 ### R11 — Live draft: offline cache + team-aware guidance `[Sonnet]` · class: pipeline
 > **Depends on:** R5 (team-aware max-bid).
 > **Reads first:** `draft/live/client.tsx`, `state.ts`, `use-remote-auctioneer-feed.ts`, `roster-solver.ts`.
 > **Work:** local **offline cache** so a mid-draft network drop doesn't lose state; any remaining `/draft/live` dead-screen root cause fully resolved here (if R1 deferred it); team-construction-aware advice surfaced in the room.
 > **Done-when:** the draft survives an offline blip via local cache and resyncs; live room shows roster-aware advice; solo-verifiable. (Full live-auctioneer proof → R15.) Screenshot.
+> **Added 2026-08-14 (Joe feedback — Live screens review). Grounded against the CURRENT room (`components/draft/live-room/auction-room.tsx`), which is in better shape than the old review implied.** It already has: money-remaining + single-player max-bid (`budget-strip.tsx:57-61`), slots filled/open, a per-position tier-count "Tier Context" panel with tap-to-list (`tier-context.tsx`), and a target-toggle on the Research tab. The gaps Joe flagged (these are the R11 UX scope — pixels land with D6, "built once"):
+>   - **Tier Context is incomplete.** Shows QB/RB/WR/TE only (`auction-room.tsx:34` `TIER_POSITIONS`) with **no FLEX row**, and only T1/T2/T3 (`explain.ts:32-34`) with **no T4/T5**. Add a **FLEX row** (combined RB/WR/TE remaining) and extend to **T4 (evaluate T5)** — Joe reads tier depth per position + FLEX to make in-the-moment calls.
+>   - **My Team is always-on, not collapsible** (`auction-room.tsx:293-294`). Make it **expand/collapse** so the space can hold tiers/strategy when the roster isn't needed.
+>   - **On-the-block card is not collapsible** (`on-the-block-card.tsx`). Make the player-context card **expand/collapse** — full context for players Joe cares about, minimized for the many he doesn't.
+>   - **Strategy is buried.** The switcher + adaptive pivot alerts live in a "More tools" accordion **closed by default** (`client.tsx:124`). Surface an **always-reachable strategy display + quick switcher** so Joe can flip strategy views mid-draft, and surface the R9 **adaptive-guidance** pivot line in the room (this IS R11's core "wire `adaptive-guidance.ts`" job per VISION §31).
+>   - **Avoid has no control in the room; target only toggles on the Research tab** (writes `'target'` only). Add **target AND avoid** toggles reachable during the draft (add / un-target / add-avoid live as the board changes).
+>   - **Live-updating player values (Players-screen ask).** Joe wants the player card's base/market/your-value to **update live as players are bought**. The prep Players screen is static (no auctioneer subscription); the live version of that card belongs here. Keep base/mkt/your-value + the range bar; tier on the card face; projected points → expansion; add "expert consensus." (The static prep card's density/tier redesign is D4.)
+>   - **Open question (route with R9/R10b):** does the in-room advice / strategy actually **prioritize Joe's targets and avoid his avoids**? Verify the solver + what-to-do path weight target/avoid grades; if not, log as a functional gap.
 
 ### R12 — Shell / UX / perf `[Sonnet]` · class: output (Design lens)
 > **Reads first:** `layout/app-shell.tsx`, `DESIGN_SYSTEM.md`.
@@ -361,6 +375,53 @@ Work top to bottom. Each session is scoped to finish cleanly in one focused sitt
 > **Why last:** you can only rehearse the finished, hardened app, and this is the **only session that needs Joe's hands.**
 > **Work:** full mock draft on Joe's phone against the **live auctioneer** — join/sync proven live (~3–6s), picks tracking, team-aware advice correct, budgets right, offline-resync proven, no surprises. (Cost gate: if AI panels are on, a real dry run bills Claude — Joe's typed approval first.)
 > **Done-when:** Joe has run a full mock draft against the live auctioneer on his phone with picks tracking, roster-aware advice correct, budgets right, offline-resync proven, and no surprises. Issues found become a short R15-fix list (expected — that's what a rehearsal finds).
+
+---
+
+## 🎨 THE LOOK — Step 3 visual identity overhaul (D-track)
+
+**Opened 2026-08-14** from Joe's screen-by-screen feedback. This is the "**Step 3 — DESIGN the look/feel**" thread that `WORKING_STATE.md` already names as a **separate, multi-session VISUAL effort** (real reference apps + mockups + iteration, screen by screen — never one session). It runs as its own track; the functional R# rebuild continues to own logic/data/engines. **Rule: logic + data land in R#; pixels land here in D#.** Where a screen has both a pending R# (Sim → R10b data, Live → R11 behavior) and a redesign, it is **built once** in the visual pass consuming the R# data — never built twice.
+
+### Why this track exists
+GRIDIRON v3 (`DESIGN_SYSTEM.md`, LOCKED 2026-06-04) is not landing in execution. Joe's verdict on the shipped screens (2026-08-14): the bolt/`Zap` motif, gradient buttons, box/card treatment, icons, and menus read as "AI slop." Grounded evidence: nav uses the `Zap` lightning bolt (`app-shell.tsx:38`); buttons are gradient pills (`globals.css:451-475`); cards are navy boxes + blue-glow + an iridescent gradient sheen (`globals.css:495-540`); the token layer is inconsistent (`--ffi-gold` = `#8bff45` green, but nav glow uses cream `rgba(253,239,182)`). `DESIGN_SYSTEM.md` is a LOCKED doc — this track is the sanctioned re-open, and its output updates that doc (or supersedes v3 → v4).
+
+### 🔒 Decisions — LOCKED by Joe 2026-08-14
+1. **Identity scope = FULL NEW IDENTITY.** Do NOT assume the volt-green + electric-blue GRIDIRON palette or Anton/Saira type carry over. D0 picks a **fresh reference app** and may introduce a new palette + type. GRIDIRON v3 is superseded, not reskinned; `DESIGN_SYSTEM.md` gets rewritten (→ v4) from the new direction, not patched.
+2. **Sim's nav home = INSIDE RESEARCH.** Sim is reached as a top-level destination *from Research* — it is NOT a separate nav tab. Sim remains a first-class *pillar* (equal importance, real `sim-engine.ts`, not the buried toy), but its nav placement is under Research. This reverses VISION.md's "own nav home" call (§29/§44/§57) — VISION.md updated 2026-08-14 to match. The nav stays four tabs (Research / Live Draft / Post Draft / Setup).
+3. **Sequencing = VISUAL-FOUNDATION-FIRST.** D0 (direction + sign-off) → D1 (foundation) before any per-screen redesign. Logic-only R# work (R10b grading math, R11 offline/adaptive logic) is invisible and may run in parallel; the screens that surface it are built in the visual pass, once, to the new look.
+
+### The reference bar (Joe's standard, non-negotiable)
+Name a real reference app before building (Linear, EA FC — never generic dark-glass/gradient slop). Show a mockup, get Joe's explicit **yes** on the look BEFORE code. A persistent bottom nav with genuinely nice icons is a Joe hard-requirement.
+
+### D0 — Identity direction + foundation mockup + SIGN-OFF GATE `[design · Joe-gated]` · no code
+> **The three scope decisions are LOCKED (above): full new identity, Sim-inside-Research, visual-first.** D0's job is the *look*.
+> **Work:** name the **fresh reference app(s)** (Joe's bar: a real named app — Linear, EA FC, etc. — never generic dark-glass/gradient slop); propose the new palette + type; produce a **static foundation mockup on the Research screen** (Joe's chosen starting point — "we'll use this one to start our complete redesign") showing the new nav (four tabs, Sim reached from Research), icons, cards, buttons, and color/type. Iterate to Joe's yes.
+> **Done-when:** Joe types **yes** on a static mockup of the new identity on the Research screen. NO production code. **This gate blocks D1+.**
+
+### D1 — Design-system foundation (code) `[Sonnet]` · class: shared/output
+> **Depends on:** D0 sign-off.
+> **Work:** rebuild the shared visual layer to the approved direction — color tokens (resolve the `--ffi-gold` drift), card treatment, buttons (kill gradient pills if D0 says so), **new icon set (kill the `Zap` bolt)**, and the **persistent bottom nav**. Reconcile `DESIGN_SYSTEM.md` to the new truth (or supersede v3 → v4). Prove on one screen with a mobile arm's-length screenshot.
+> **Done-when:** shared components render the new look on ≥1 screen, mobile screenshot pasted, `DESIGN_SYSTEM.md` updated. Everything else reskins from here.
+
+### D2 — Research landing + nav `[Sonnet]` · class: output
+> **Folds in the Research feedback.** Current hub is a card-dump with a paragraph explainer. Rebuild per `UX_OVERHAUL_2026-08.md` §9.1 AND: **demote "Run Research"** (Joe uses it 2–4×/year, not a hero); **rename + define it** as a **Player Pull / full Research Pull** — state plainly what a pull produces (projections, injury status, starting roles, analysis, consensus, auction values, sleepers/breakouts/busts — confirm exact contents with Joe and document them); **no paragraph explainer**; make **Players · Cheat Sheet · Strategies · Sims** the real destinations (the things Joe lives in for weeks).
+> **Done-when:** Research landing matches the approved look, Run-Research demoted + clearly labeled with a defined action, destinations are the heroes. Screenshot.
+
+### D3 — Strategies redesign + auto-rank + ratings `[Sonnet · +schema]` · class: output/schema
+> **Folds in the Strategies feedback (see R9 note).** Kill the Generate button (auto-render), kill Dry-run, **rank by simulated strength-vs-league**, expandable detail (approach · target types · likely-unavailable · strength vs league), **persistent user star-ratings** that re-reconcile on each new pull. Ratings need a small schema add (table/column + re-pull reconciliation) — treat the migration like R7a (own migration, Ops/Security lens).
+> **Done-when:** strategies auto-render ranked, detail expands, ratings persist across a re-pull. Screenshot + migration proof.
+
+### D4 — Players card redesign `[Sonnet]` · class: output
+> **Folds in the Players feedback.** **Thinner** list cards; **tier on the card face** (absent today, `ffi-player-intel-card.tsx`); move projected points to the expansion; keep base/mkt/your-value + the range bar Joe likes; add **expert consensus**. (Live-updating values = R11/D6, not here.)
+> **Done-when:** thinner card with tier + consensus, points demoted to expansion, on the approved look. Screenshot.
+
+### D5 — Sim results screen `[Sonnet]` · class: output
+> **Depends on:** R10b (grading/record/top-5/frequency DATA) + D1. Builds the approved `sim-results-v1.html` mockup for real, consuming R10b's outputs.
+> **Done-when:** Sim results renders R10b data in the approved look (distribution, projected record, top-5 modal rosters, players-you-land-most, saved runs/compare). Screenshot.
+
+### D6 — Live room visual + UX pass `[Sonnet]` · class: output
+> **Pairs with R11** (build the room once). Applies the new look AND lands the R11 UX gaps: FLEX tier row + T4/T5, collapsible My Team + on-block card, surfaced strategy switcher + adaptive pivot, live target/avoid toggles, live-updating player card.
+> **Done-when:** room renders the new look with the R11 UX gaps closed, mobile. Screenshot.
 
 ---
 

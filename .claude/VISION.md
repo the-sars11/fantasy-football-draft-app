@@ -14,7 +14,7 @@ A personal live-draft advisor for **Joe's "Nasties" 12-team, $200, PPR, no-kicke
 
 ## The three pillars (equal — this is the whole point)
 
-The current app has Prep and Live as first-class, engine-backed pillars and Sim as a buried shell running a toy. In the finished app **all three are first-class, each with its own home in the nav, each running its real engine.** Making Sim equal to Prep and Live is a decision this vision locks.
+The current app has Prep and Live as first-class, engine-backed pillars and Sim as a buried shell running a toy. In the finished app **all three are first-class, each running its real engine.** Making Sim equal to Prep and Live is a decision this vision locks. **(Nav placement updated 2026-08-14: Sim is reached as a top-level destination *from Research*, not as its own nav tab — Joe's call. It stays a first-class pillar by engine + importance; it is not buried, but it is not a separate tab either.)**
 
 ### PILLAR 1 — PREP  *(builds on R2, R6, R7a, R7b, R8, R9)*
 
@@ -26,7 +26,7 @@ The current app has Prep and Live as first-class, engine-backed pillars and Sim 
 
 - **What it does:** lets Joe pressure-test a strategy **before** draft night — run his plan through hundreds of realistic auction drafts and see what rosters and what season outcome it actually produces.
 - **How it works:** pick a strategy → run **Monte Carlo** (N seeded drafts where all 12 opponents bid up to their own roster-completion max via the solver — competition-aware, NOT ADP) → get a **distribution**: projected season points vs. the league, a projected **win-loss record**, and **4–5 representative resulting teams** → **save runs, reload, and compare** strategies head-to-head.
-- **Done feels like:** Sim is a first-class pillar with its own nav home (not buried under Prep); it runs the real `sim-engine.ts` Monte-Carlo (the toy inline sim is gone); a result is a confidence read Joe can act on ("this plan finishes top-3 in most drafts, and here's the roster it usually gets me"), and it persists so he can compare plan A vs. plan B.
+- **Done feels like:** Sim is a first-class pillar reached from Research (not buried, not a separate nav tab — Joe's call 2026-08-14); it runs the real `sim-engine.ts` Monte-Carlo (the toy inline sim is gone); a result is a confidence read Joe can act on ("this plan finishes top-3 in most drafts, and here's the roster it usually gets me"), and it persists so he can compare plan A vs. plan B.
 
 ### PILLAR 3 — LIVE  *(builds on R5 [shipped], R9 [adaptive], R11, R15)*
 
@@ -41,7 +41,7 @@ The current app has Prep and Live as first-class, engine-backed pillars and Sim 
 The rebuild is finished, and the app is ready for draft night, when ALL of these are true:
 
 1. **All three pillars run their real engines end-to-end.** Prep research → solver-priced strategies; Sim → the real Monte-Carlo `sim-engine.ts`; Live → roster-aware advice + adaptive re-fit. **No orphaned engines** — `adaptive-guidance.ts` is wired into the live room (R11) and `sim-engine.ts` is wired into the Sim screen (R10b). No toy sim survives.
-2. **Sim is a first-class nav pillar,** equal to Prep and Live — its own destination, not a page hidden inside Prep.
+2. **Sim is a first-class pillar,** equal to Prep and Live — reached as a top-level destination from Research (Joe's nav call 2026-08-14), running its real engine; not the buried toy it was, and not a separate nav tab.
 3. **Every number serves the North Star and none lies.** No silo max-bid, no label showing a value it isn't, no path that recommends paying past worth. (The R1–R3 trust/valuation fixes stay true.)
 4. **It works the way Joe will actually use it:** one-thumb, mobile-first, dark-first GRIDIRON, with page switches fast enough not to break draft-night flow (R12).
 5. **It's hardened where it counts:** `/bug-hunt full` clean and real test coverage on the draft-deciding engines — solver, roster-aware max-bid, strategy target prices, Monte-Carlo sim (R13) — plus a full first-person usability walkthrough with friction fixed before Joe's hands touch it (R14).
@@ -54,7 +54,7 @@ The rebuild is finished, and the app is ready for draft night, when ALL of these
 
 Everything above is a restatement of the North Star + build plan except these two, which follow directly from "Prep, Sim, and Live are equally important":
 
-1. **Sim becomes a first-class pillar with its own nav home** — today it's a single screen buried under Prep. Equal importance means equal presence.
+1. **Sim becomes a first-class pillar reached from Research** — today it's a single screen buried under Prep running a toy. Equal importance means the real engine and a real destination; nav placement is *inside Research*, not a separate tab (Joe's call 2026-08-14).
 2. **The two built-but-orphaned engines get wired, not left dead** — `sim-engine.ts` (R10a shipped) is wired in R10b; `adaptive-guidance.ts` (R9 shipped) is wired into the live room in R11. Equal importance means the live-adaptive and real-sim behavior actually reach the screen.
 
 Everything else the build plan already covers. Nothing here changes the auction-only / ESPN-only / no-snake / no-keeper / no-Tyler / GRIDIRON / no-in-season locks.
