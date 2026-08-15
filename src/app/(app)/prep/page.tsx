@@ -193,8 +193,8 @@ export default function PrepPage() {
           className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-wider"
           style={{
             fontFamily: 'var(--font-cond)',
-            background: 'rgba(121,166,255,0.10)',
-            border: '1px solid rgba(121,166,255,0.20)',
+            background: 'rgba(95,168,224,0.10)',
+            border: '1px solid rgba(95,168,224,0.20)',
             color: 'var(--ffi-blue-bright)',
             letterSpacing: '0.14em',
           }}
@@ -318,8 +318,8 @@ export default function PrepPage() {
             <div
               className="mt-4 rounded-[12px] p-3.5"
               style={{
-                background: 'rgba(139,255,69,0.06)',
-                border: '1px solid rgba(139,255,69,0.20)',
+                background: 'rgba(95,168,224,0.06)',
+                border: '1px solid rgba(95,168,224,0.20)',
               }}
             >
               <p className="text-[13px] leading-[1.4]" style={{ color: 'var(--ffi-ink)' }}>
@@ -383,22 +383,22 @@ export default function PrepPage() {
       <div className="space-y-2">
         <JumpRow
           href="/prep/players"
-          icon={<Search className="w-[18px] h-[18px]" strokeWidth={1.8} color="#56E0A0" />}
-          iconBg="rgba(86,224,160,0.10)"
+          icon={<Search className="w-[18px] h-[18px]" strokeWidth={1.8} color="#ffffff" />}
+          iconBg="rgba(166,60,65,0.15)"
           label="Player Browser"
           sub="Search and scan the full pool"
         />
         <JumpRow
           href="/prep/board"
-          icon={<BarChart3 className="w-[18px] h-[18px]" strokeWidth={1.8} color="var(--ffi-blue-bright)" />}
-          iconBg="rgba(121,166,255,0.10)"
+          icon={<BarChart3 className="w-[18px] h-[18px]" strokeWidth={1.8} color="#ffffff" />}
+          iconBg="rgba(166,60,65,0.15)"
           label="Cheat Sheet"
           sub="Your ranked, position-colored board - for reference during the live draft"
         />
         <JumpRow
           href="/prep/strategies"
-          icon={<Layers className="w-[18px] h-[18px]" strokeWidth={1.8} color="var(--ffi-volt)" />}
-          iconBg="rgba(139,255,69,0.10)"
+          icon={<Layers className="w-[18px] h-[18px]" strokeWidth={1.8} color="#ffffff" />}
+          iconBg="rgba(166,60,65,0.15)"
           label="Strategies"
           sub="Set budget-by-position targets"
         />
@@ -472,7 +472,7 @@ function JumpRow({
     >
       <div
         className="w-10 h-10 rounded-[11px] flex items-center justify-center shrink-0"
-        style={{ background: iconBg }}
+        style={{ background: iconBg, border: '1px solid rgba(166,60,65,0.35)' }}
       >
         {icon}
       </div>

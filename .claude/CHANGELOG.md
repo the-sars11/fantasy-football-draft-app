@@ -2,6 +2,27 @@
 
 ---
 
+## 2026-08-14 / D0+D1 -- SHIELD identity locked (D0) + ported into the app (D1)
+
+**Task:** Close the D0 identity gate and ship D1 — rebuild the shared visual layer to the approved direction and prove it on one real screen. | **Class:** shared/output | **Lenses:** Design, QA, Architecture
+
+**D0 (gate closed, Joe 2026-08-14):** Joe was shown two finished directions (Option A "League Trophy" oak/bronze; Option B "Blacked-Out Shield" navy-steel) plus three icon boards, and locked **Option B SHIELD**: navy-steel field `#0C1524→#05070C`, lifted steel-blue cards `#26364E→#1A2637`, chrome-silver titles, muted brick-RED action accent `#A63C41` (sparing), steel-blue info `#5FA8E0`; **Kanit + Hanken Grotesk**; **duotone** icons (red chip + white glyph). NO gold, NO volt-green. Record: `.claude/mockups/d0-craft/NOTES.md`; canonical screen `optionB_shield.png`. Option A kept on file as an alternate (oak/engraving refinement parked).
+
+**D1 (code) — "names stable, values swapped" repaint so all 61 screens shift at once with no per-component edits:**
+- **`src/app/layout.tsx`** — fonts → **Kanit** (display, via stable `--font-anton`/`--font-saira-cond`) + **Hanken Grotesk** (UI, via `--font-saira`); PWA `themeColor` `#8BFF45` → `#A63C41`.
+- **`src/app/globals.css`** — full palette swap (transform verified **0 leftover v3 volt/blue tokens**): semantic map VOLT/green (action) → brick-RED `#A63C41` (sparing), ELECTRIC-BLUE (structure) → steel-blue `#5FA8E0`; field → navy-steel; ink → chrome-silver `#EAF1F8`; legacy `--ffi-gold*` → same red (resolves the `--ffi-gold` drift); `.ffi-btn-hero` red gradient / `.ffi-btn-primary` steel gradient; `.ffi-nav-active` red glow; `success` state re-pointed to steel-blue (informational, never red); atmosphere glows blue→steel, one faint red whisper.
+- **`src/components/layout/app-shell.tsx`** — killed the **`Zap` bolt → `Gavel`** (auction) for Live Draft; leftover cream-gold nav drop-shadows → red. Persistent bottom nav proven (red active tab + red active dot).
+- **`src/app/(app)/prep/page.tsx`** — hand-cleaned the component-level inline literals the globals-only swap can't reach (three green icon chips → consistent duotone-red + white glyph; green cost-guard confirm box + NASTIES pill → steel-blue) as the one-screen proof.
+- **`.claude/DESIGN_SYSTEM.md`** — reconciled v3 GRIDIRON → **v4 SHIELD**: header, version history, North Star, color palette (real shipped values), typography, canvas/atmosphere, surfaces, auction components, buttons, a Motion color-mapping note, and What-NOT-to-Do. Live Auction Room + Motion *mechanics* sections preserved (that room ships its own scoped `theme.ts` palette, unchanged this session).
+
+**Proof:** `.claude/mockups/d0-craft/d1_prep_shield.png` — mobile arm's-length `/prep`: navy-steel field, lifted steel-blue hero, chrome-silver Kanit title, single red RUN RESEARCH button, three duotone-red destination icons, red active nav + Gavel Live-Draft icon. No volt-green, red sparing.
+
+**Gate:** `npm run test:run` **392/392 green** (30 files); `npm run lint` **0 new** (61 pre-existing errors all in untouched files — research sources/intel/supabase middleware — not caused by this change); live JS check confirms **no horizontal overflow at 375px** (`overflowX:false`). $0, no paid calls. Marked D0 CLOSED + D1 DONE in `BUILD_PLAN.md`; `WORKING_STATE.md` next-item → D2.
+
+**Known D1 tail (separate follow-on):** component-level inline color literals across the other ~60 screens; position-color system (green RB `#56E0A0`) decision; Live Auction Room `theme.ts` scoped palette.
+
+---
+
 ## 2026-08-14 / VISION -- Locked the whole-app vision + definition of done
 
 **Task:** Align on the FINAL vision — what the app looks/feels/works/does — and the whole-app definition of done, before any more R# work. Root cause of ten R# sessions run with no fixed target: two contradicting North Stars. | **Class:** docs | **Lenses:** Delivery

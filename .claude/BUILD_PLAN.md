@@ -393,8 +393,17 @@ GRIDIRON v3 (`DESIGN_SYSTEM.md`, LOCKED 2026-06-04) is not landing in execution.
 ### The reference bar (Joe's standard, non-negotiable)
 Name a real reference app before building (Linear, EA FC — never generic dark-glass/gradient slop). Show a mockup, get Joe's explicit **yes** on the look BEFORE code. A persistent bottom nav with genuinely nice icons is a Joe hard-requirement.
 
-### D0 — Identity direction + foundation mockup + SIGN-OFF GATE `[design · Joe-gated]` · no code
-> **The three scope decisions are LOCKED (above): full new identity, Sim-inside-Research, visual-first.** D0's job is the *look*. **D0 is a GATE and is NOT passed yet** — it stays open until Joe picks a palette + type + icon direction on the Research screen. Blocks D1+.
+### D0 — Identity direction + foundation mockup + SIGN-OFF GATE `[design · Joe-gated]` · no code — ✅ CLOSED 2026-08-14
+> **The three scope decisions are LOCKED (above): full new identity, Sim-inside-Research, visual-first.** D0's job is the *look*.
+>
+> #### ✅ D0 GATE CLOSED (Joe, 2026-08-14) — "SHIELD" (Option B) is the anchor identity
+> Full decision record: `.claude/mockups/d0-craft/NOTES.md`. Joe was shown two finished directions (Option A "League Trophy" oak/bronze; Option B "Blacked-Out Shield" navy-steel) and three icon boards, and locked:
+> - **Palette ✓ — Option B SHIELD:** navy-steel field `#0C1524→#05070C` · lifted steel-blue cards `#26364E→#1A2637` · chrome-silver titles · muted brick-RED accent `#A63C41` (action only, sparing) · steel-blue info `#5FA8E0`. NO gold, NO volt-green.
+> - **Type ✓ — Kanit** (broadcast display) **+ Hanken Grotesk** (UI).
+> - **Icons ✓ — DUOTONE** (muted-red chip `bg rgba(166,60,65,0.15)` / `border rgba(166,60,65,0.45)` + white glyph), picked over outline + etched-steel.
+> - **Canonical locked screen:** `.claude/mockups/d0-craft/optionB_shield.png`. Option A stays on file as an alternate (its oak-texture/engraving refinement parked, NOT pursued).
+>
+> This supersedes the earlier recommendation "reskin GRIDIRON's volt+blue bones" — Joe chose a FULL new identity, per the locked scope at the top of this section.
 
 > #### D0 session 1 (2026-08-14) — the STITCH design is the KEEPER; my mockup was slop. Decision record:
 > Two artifacts came out of this session. Keep them straight — Joe was emphatic:
@@ -415,10 +424,19 @@ Name a real reference app before building (Linear, EA FC — never generic dark-
 > **Deliverable:** a comparison the eye can scan — the 4 re-skinned Stitch screens side by side + a font specimen board + an icon set board — to **lock palette + type + icons** on the design Joe already approved.
 > **Done-when:** Joe picks a palette direction + type + icon set (or narrows to 1–2 to iterate). NO production code. **This is the gate that blocks D1+.**
 
-### D1 — Design-system foundation (code) `[Sonnet]` · class: shared/output
-> **Depends on:** D0 sign-off.
+### D1 — Design-system foundation (code) `[Sonnet]` · class: shared/output — ✅ DONE 2026-08-14
+> **Depends on:** D0 sign-off. ✅ met.
 > **Work:** rebuild the shared visual layer to the approved direction — color tokens (resolve the `--ffi-gold` drift), card treatment, buttons (kill gradient pills if D0 says so), **new icon set (kill the `Zap` bolt)**, and the **persistent bottom nav**. Reconcile `DESIGN_SYSTEM.md` to the new truth (or supersede v3 → v4). Prove on one screen with a mobile arm's-length screenshot.
 > **Done-when:** shared components render the new look on ≥1 screen, mobile screenshot pasted, `DESIGN_SYSTEM.md` updated. Everything else reskins from here.
+>
+> **✅ Shipped (2026-08-14):** Ported SHIELD into the real app via a "names stable, values swapped" repaint so all 61 screens shift at once with no per-component edits:
+> - **`layout.tsx`** — fonts swapped to **Kanit + Hanken Grotesk** (CSS-var names `--font-anton`/`--font-saira`/`--font-saira-cond` kept stable); PWA `themeColor` `#8BFF45` → `#A63C41`.
+> - **`globals.css`** — full palette swap (0 leftover v3 volt/blue tokens): `--ffi-volt*` → brick-RED `#A63C41`, `--ffi-blue*` → steel-blue `#5FA8E0`, field navy-steel, ink chrome-silver, legacy `--ffi-gold*` → same red, `.ffi-btn-hero` red / `.ffi-btn-primary` steel gradients, nav-active red glow, `success` reads steel-blue. Resolves the `--ffi-gold` drift.
+> - **`app-shell.tsx`** — killed the **`Zap` bolt** → **`Gavel`** (auction) for Live Draft; leftover cream-gold nav glows → red. Persistent bottom nav proven.
+> - **`prep/page.tsx`** — hand-cleaned the component-level inline literals the globals swap can't reach (green icon chips → duotone-red, green cost-guard box → steel-blue) as the one-screen proof.
+> - **`DESIGN_SYSTEM.md`** — reconciled v3 GRIDIRON → **v4 SHIELD** (palette, type, canvas, buttons, components, motion color-note, What-NOT-to-do; Live Auction Room + Motion mechanics preserved).
+> **Proof:** `.claude/mockups/d0-craft/d1_prep_shield.png` (mobile arm's-length, `/prep`). Verify gate: **test:run 392/392 green**, lint **0 new** (61 pre-existing in untouched files), no horizontal overflow at 375px (live JS check).
+> **Known D1 tail (follow-on, NOT this item):** component-level inline color literals across the other ~60 screens; position-color system (green RB `#56E0A0`) decision; Live Auction Room `theme.ts` (its own scoped four-move palette).
 
 ### D2 — Research landing + nav `[Sonnet]` · class: output
 > **Folds in the Research feedback.** Current hub is a card-dump with a paragraph explainer. Rebuild per `UX_OVERHAUL_2026-08.md` §9.1 AND: **demote "Run Research"** (Joe uses it 2–4×/year, not a hero); **rename + define it** as a **Player Pull / full Research Pull** — state plainly what a pull produces (projections, injury status, starting roles, analysis, consensus, auction values, sleepers/breakouts/busts — confirm exact contents with Joe and document them); **no paragraph explainer**; make **Players · Cheat Sheet · Strategies · Sims** the real destinations (the things Joe lives in for weeks).

@@ -5,11 +5,12 @@
 @custom-variant dark (&:is(.dark *));
 
 /* ============================================================
-   GRIDIRON v3 (UXV2-2) — EA FC energy + Linear discipline.
-   SET palette: colorful-dark canvas + VOLT (moment/value/action)
-   + ELECTRIC BLUE (structure). No gold. No backdrop-filter blur.
-   Class/token NAMES are kept stable from v2.0 so every screen
-   re-skins at once; only values + treatments changed.
+   SHIELD v4 (D0-locked 2026-08-14) — NFFL blacked-out broadcast.
+   Palette: navy-steel FIELD + muted brick RED (moment/value/action,
+   used sparingly) + STEEL-BLUE (structure/info) + chrome-silver text.
+   Kanit + Hanken Grotesk. Class/token NAMES kept stable from v3 so
+   every screen re-skins at once; only values + treatments changed.
+   Supersedes GRIDIRON v3 (volt-green + electric-blue).
    ============================================================ */
 
 @theme inline {
@@ -57,60 +58,60 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 
   /* FFIntelligence custom colors — GRIDIRON values */
-  --color-ffi-background: #080d18;
-  --color-ffi-background-secondary: #0c1322;
-  --color-ffi-surface: #0c1322;
-  --color-ffi-surface-elevated: #16223a;
-  --color-ffi-primary: #4d82ff;
-  --color-ffi-accent: #8bff45;
-  --color-ffi-text-primary: #eaf1ff;
-  --color-ffi-text-secondary: #9fb0ce;
-  --color-ffi-text-muted: #637396;
-  --color-ffi-border: rgba(150, 180, 255, 0.1);
-  --color-ffi-success: #8bff45;
+  --color-ffi-background: #08101c;
+  --color-ffi-background-secondary: #121a28;
+  --color-ffi-surface: #121a28;
+  --color-ffi-surface-elevated: #26364e;
+  --color-ffi-primary: #5fa8e0;
+  --color-ffi-accent: #a63c41;
+  --color-ffi-text-primary: #eaf1f8;
+  --color-ffi-text-secondary: #9fb2c6;
+  --color-ffi-text-muted: #5e708a;
+  --color-ffi-border: rgba(180, 200, 224, 0.1);
+  --color-ffi-success: #5fa8e0;
   --color-ffi-warning: #ffb05c;
   --color-ffi-danger: #ff6e8a;
-  --color-ffi-info: #4d82ff;
+  --color-ffi-info: #5fa8e0;
 
   /* live-data signal — remapped into palette (electric blue, never cyan/gold) */
-  --color-ffi-live: #79a6ff;
+  --color-ffi-live: #7fc0ea;
 
   /* THE MOMENT / VALUE / ACTION = VOLT (gold-named tokens remapped to volt for back-compat) */
-  --color-volt: #8bff45;
-  --color-volt-bright: #b6ff7a;
-  --color-volt-deep: #5fe21f;
-  --color-gold: #8bff45;
-  --color-gold-bright: #b6ff7a;
-  --color-gold-deep: #5fe21f;
-  --color-gold-ink: #0a1f02;
-  --color-value-green: #8bff45;
+  --color-volt: #a63c41;
+  --color-volt-bright: #c25a5e;
+  --color-volt-deep: #6e2225;
+  --color-gold: #a63c41;
+  --color-gold-bright: #c25a5e;
+  --color-gold-deep: #6e2225;
+  --color-gold-ink: #ffffff;
+  --color-value-green: #a63c41;
 
   /* Electric blue ramp + colorful-dark surfaces */
-  --color-blue: #4d82ff;
-  --color-blue-bright: #79a6ff;
-  --color-surface-dim: #05080f;
-  --color-surface-bright: #16223a;
-  --color-surface-container: #111a2e;
-  --color-surface-container-low: #0c1322;
-  --color-surface-container-high: #16223a;
-  --color-surface-container-highest: #1b2a44;
-  --color-surface-container-lowest: #05080f;
-  --color-surface-variant: #16223a;
-  --color-surface-tint: #79a6ff;
-  --color-on-surface: #eaf1ff;
-  --color-on-surface-variant: #9fb0ce;
-  --color-gridiron-primary: #79a6ff;
-  --color-gridiron-secondary: #8bff45;
-  --color-on-secondary: #0a1f02;
-  --color-secondary-container: #1f7a12;
-  --color-on-secondary-container: #e7ffd9;
-  --color-primary-container: #274fb8;
-  --color-on-primary-container: #d6e3ff;
-  --color-outline: #4a5a78;
-  --color-outline-variant: #2a3754;
-  --color-error-dim: #ff8aa0;
-  --color-on-error: #3a0009;
-  --color-on-error-container: #ffd0d8;
+  --color-blue: #5fa8e0;
+  --color-blue-bright: #7fc0ea;
+  --color-surface-dim: #05070c;
+  --color-surface-bright: #26364e;
+  --color-surface-container: #1a2637;
+  --color-surface-container-low: #121a28;
+  --color-surface-container-high: #26364e;
+  --color-surface-container-highest: #2c3b50;
+  --color-surface-container-lowest: #05070c;
+  --color-surface-variant: #26364e;
+  --color-surface-tint: #7fc0ea;
+  --color-on-surface: #eaf1f8;
+  --color-on-surface-variant: #9fb2c6;
+  --color-gridiron-primary: #7fc0ea;
+  --color-gridiron-secondary: #a63c41;
+  --color-on-secondary: #ffffff;
+  --color-secondary-container: #6e2225;
+  --color-on-secondary-container: #f3dadb;
+  --color-primary-container: #1b3348;
+  --color-on-primary-container: #dce9f4;
+  --color-outline: #3b4e63;
+  --color-outline-variant: #2c3b50;
+  --color-error-dim: #e08a8e;
+  --color-on-error: #2a0708;
+  --color-on-error-container: #f3d5d6;
 
   /* Position chips — muted */
   --color-pos-qb: #ff6e8a;
@@ -164,29 +165,29 @@
   --sidebar-ring: oklch(0.708 0 0);
 
   /* GRIDIRON colorful-dark canvas */
-  --ffi-bg-0: #05080f;
-  --ffi-bg-1: #080d18;
-  --ffi-surface-1: #0c1322;
-  --ffi-surface-2: #111a2e;
-  --ffi-surface-3: #16223a;
-  --ffi-hairline: rgba(150, 180, 255, 0.1);
-  --ffi-hairline-bright: rgba(180, 205, 255, 0.18);
+  --ffi-bg-0: #05070c;
+  --ffi-bg-1: #08101c;
+  --ffi-surface-1: #121a28;
+  --ffi-surface-2: #1a2637;
+  --ffi-surface-3: #26364e;
+  --ffi-hairline: rgba(180, 200, 224, 0.1);
+  --ffi-hairline-bright: rgba(200, 215, 235, 0.18);
 
   /* VOLT — moment / value / action */
-  --ffi-volt: #8bff45;
-  --ffi-volt-deep: #5fe21f;
-  --ffi-volt-ink: #0a1f02;
-  --ffi-volt-glow: rgba(139, 255, 69, 0.32);
+  --ffi-volt: #a63c41;
+  --ffi-volt-deep: #6e2225;
+  --ffi-volt-ink: #ffffff;
+  --ffi-volt-glow: rgba(166, 60, 65, 0.32);
 
   /* ELECTRIC BLUE — structure / info / depth */
-  --ffi-blue: #4d82ff;
-  --ffi-blue-bright: #79a6ff;
-  --ffi-blue-glow: rgba(77, 130, 255, 0.28);
+  --ffi-blue: #5fa8e0;
+  --ffi-blue-bright: #7fc0ea;
+  --ffi-blue-glow: rgba(95, 168, 224, 0.28);
 
   /* Ink */
-  --ffi-ink: #eaf1ff;
-  --ffi-ink-2: #9fb0ce;
-  --ffi-ink-3: #637396;
+  --ffi-ink: #eaf1f8;
+  --ffi-ink-2: #9fb2c6;
+  --ffi-ink-3: #5e708a;
 
   /* Position chips */
   --ffi-pos-qb: #ff6e8a;
@@ -195,42 +196,42 @@
   --ffi-pos-te: #ffb05c;
 
   /* Semantic tokens (names kept; values = GRIDIRON) */
-  --ffi-background: #080d18;
-  --ffi-background-secondary: #0c1322;
-  --ffi-surface: #0c1322;
-  --ffi-surface-elevated: #16223a;
-  --ffi-surface-bright: #16223a;
-  --ffi-primary: #4d82ff;
-  --ffi-accent: #8bff45;
-  --ffi-text-primary: #eaf1ff;
-  --ffi-text-secondary: #9fb0ce;
-  --ffi-text-muted: #637396;
-  --ffi-border: rgba(150, 180, 255, 0.1);
-  --ffi-success: #8bff45;
+  --ffi-background: #08101c;
+  --ffi-background-secondary: #121a28;
+  --ffi-surface: #121a28;
+  --ffi-surface-elevated: #26364e;
+  --ffi-surface-bright: #26364e;
+  --ffi-primary: #5fa8e0;
+  --ffi-accent: #a63c41;
+  --ffi-text-primary: #eaf1f8;
+  --ffi-text-secondary: #9fb2c6;
+  --ffi-text-muted: #5e708a;
+  --ffi-border: rgba(180, 200, 224, 0.1);
+  --ffi-success: #5fa8e0;
   --ffi-warning: #ffb05c;
   --ffi-danger: #ff6e8a;
-  --ffi-info: #4d82ff;
+  --ffi-info: #5fa8e0;
 
   /* Effects (volt + blue, no blur) */
-  --ffi-glow-accent: 0 0 22px rgba(139, 255, 69, 0.32);
-  --ffi-glow-primary: 0 0 18px rgba(77, 130, 255, 0.28);
-  --ffi-shadow-card: 0 8px 32px rgba(0, 0, 0, 0.45), 0 0 15px rgba(77, 130, 255, 0.08);
-  --ffi-shadow-elevated: 0 16px 44px rgba(0, 0, 0, 0.55), 0 0 22px rgba(77, 130, 255, 0.12);
+  --ffi-glow-accent: 0 0 22px rgba(166, 60, 65, 0.32);
+  --ffi-glow-primary: 0 0 18px rgba(95, 168, 224, 0.28);
+  --ffi-shadow-card: 0 8px 32px rgba(0, 0, 0, 0.45), 0 0 15px rgba(95, 168, 224, 0.08);
+  --ffi-shadow-elevated: 0 16px 44px rgba(0, 0, 0, 0.55), 0 0 22px rgba(95, 168, 224, 0.12);
 
   /* gold-named tokens remapped to VOLT so legacy usages read on-palette */
-  --ffi-gold: #8bff45;
-  --ffi-gold-bright: #b6ff7a;
-  --ffi-gold-deep: #5fe21f;
-  --ffi-gold-ink: #0a1f02;
-  --ffi-gold-glow: rgba(139, 255, 69, 0.3);
-  --value-green: #8bff45;
-  --ffi-glow-gold: 0 0 22px rgba(139, 255, 69, 0.3);
-  --ffi-glow-gold-strong: 0 0 38px rgba(139, 255, 69, 0.45);
+  --ffi-gold: #a63c41;
+  --ffi-gold-bright: #c25a5e;
+  --ffi-gold-deep: #6e2225;
+  --ffi-gold-ink: #ffffff;
+  --ffi-gold-glow: rgba(166, 60, 65, 0.3);
+  --value-green: #a63c41;
+  --ffi-glow-gold: 0 0 22px rgba(166, 60, 65, 0.3);
+  --ffi-glow-gold-strong: 0 0 38px rgba(166, 60, 65, 0.45);
 
   /* live-data signal = electric blue (kept name) */
-  --ffi-live: #79a6ff;
-  --ffi-live-dim: rgba(121, 166, 255, 0.14);
-  --ffi-glow-live: 0 0 18px rgba(121, 166, 255, 0.28);
+  --ffi-live: #7fc0ea;
+  --ffi-live-dim: rgba(95, 168, 224, 0.14);
+  --ffi-glow-live: 0 0 18px rgba(95, 168, 224, 0.28);
 
   /* Named motion curves */
   --ease-broadcast: cubic-bezier(0.22, 1, 0.36, 1);
@@ -250,39 +251,39 @@
 .dark {
   color-scheme: dark;
 
-  --background: #080d18;
-  --foreground: #eaf1ff;
-  --card: #111a2e;
-  --card-foreground: #eaf1ff;
-  --popover: #0c1322;
-  --popover-foreground: #eaf1ff;
-  --primary: #4d82ff;
+  --background: #08101c;
+  --foreground: #eaf1f8;
+  --card: #1a2637;
+  --card-foreground: #eaf1f8;
+  --popover: #121a28;
+  --popover-foreground: #eaf1f8;
+  --primary: #5fa8e0;
   --primary-foreground: #ffffff;
-  --secondary: #16223a;
-  --secondary-foreground: #eaf1ff;
-  --muted: #16223a;
-  --muted-foreground: #9fb0ce;
-  --accent: #8bff45;
-  --accent-foreground: #0a1f02;
+  --secondary: #26364e;
+  --secondary-foreground: #eaf1f8;
+  --muted: #26364e;
+  --muted-foreground: #9fb2c6;
+  --accent: #a63c41;
+  --accent-foreground: #ffffff;
   --destructive: #ff6e8a;
-  --border: rgba(150, 180, 255, 0.1);
-  --input: rgba(150, 180, 255, 0.14);
-  --ring: #4d82ff;
+  --border: rgba(180, 200, 224, 0.1);
+  --input: rgba(180, 200, 224, 0.14);
+  --ring: #5fa8e0;
 
-  --chart-1: #4d82ff;
-  --chart-2: #8bff45;
-  --chart-3: #79a6ff;
+  --chart-1: #5fa8e0;
+  --chart-2: #a63c41;
+  --chart-3: #7fc0ea;
   --chart-4: #ffb05c;
-  --chart-5: #9fb0ce;
+  --chart-5: #9fb2c6;
 
-  --sidebar: #0c1322;
-  --sidebar-foreground: #eaf1ff;
-  --sidebar-primary: #4d82ff;
+  --sidebar: #121a28;
+  --sidebar-foreground: #eaf1f8;
+  --sidebar-primary: #5fa8e0;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #8bff45;
-  --sidebar-accent-foreground: #0a1f02;
-  --sidebar-border: rgba(150, 180, 255, 0.1);
-  --sidebar-ring: #4d82ff;
+  --sidebar-accent: #a63c41;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: rgba(180, 200, 224, 0.1);
+  --sidebar-ring: #5fa8e0;
 }
 
 @layer base {
@@ -354,10 +355,10 @@
 .glass-interactive:hover {
   transform: translateY(-2px);
   border-color: var(--ffi-hairline-bright);
-  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.5), 0 0 22px rgba(77, 130, 255, 0.16);
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.5), 0 0 22px rgba(95, 168, 224, 0.16);
 }
 .ffi-scrim { background: linear-gradient(180deg, rgba(5, 8, 15, 0) 0%, rgba(5, 8, 15, 0.4) 100%); }
-.flash-streak { background: linear-gradient(115deg, transparent 0%, rgba(139, 255, 69, 0.07) 50%, transparent 100%); }
+.flash-streak { background: linear-gradient(115deg, transparent 0%, rgba(166, 60, 65, 0.07) 50%, transparent 100%); }
 
 /* Legacy tactical streak/flash selectors kept as on-palette no-cost layers */
 .light-streak, .light-streak-2, .light-streak-3 { position: fixed; pointer-events: none; z-index: 0; }
@@ -373,10 +374,10 @@
   z-index: 0;
   pointer-events: none;
   background:
-    radial-gradient(60% 42% at 22% -6%, rgba(77, 130, 255, 0.16) 0%, transparent 58%),
-    radial-gradient(46% 40% at 92% 6%, rgba(139, 255, 69, 0.06) 0%, transparent 55%),
-    radial-gradient(60% 50% at 50% 116%, rgba(120, 80, 255, 0.12) 0%, transparent 60%),
-    linear-gradient(180deg, #070c16 0%, #05090f 50%, #04060d 100%);
+    radial-gradient(60% 42% at 22% -6%, rgba(95, 168, 224, 0.16) 0%, transparent 58%),
+    radial-gradient(46% 40% at 92% 6%, rgba(166, 60, 65, 0.06) 0%, transparent 55%),
+    radial-gradient(60% 50% at 50% 116%, rgba(95, 168, 224, 0.12) 0%, transparent 60%),
+    linear-gradient(180deg, #0c1524 0%, #08101c 50%, #05070c 100%);
   transform: translateZ(0);
 }
 
@@ -395,10 +396,10 @@
 .stadium-atmos.atmos-clock,
 body.ffi-on-the-clock .stadium-atmos {
   background:
-    radial-gradient(70% 50% at 50% -8%, rgba(77, 130, 255, 0.26) 0%, transparent 62%),
-    radial-gradient(46% 42% at 90% 6%, rgba(139, 255, 69, 0.1) 0%, transparent 55%),
-    radial-gradient(60% 52% at 50% 116%, rgba(120, 80, 255, 0.14) 0%, transparent 60%),
-    linear-gradient(180deg, #08101f 0%, #060b14 50%, #04060d 100%);
+    radial-gradient(70% 50% at 50% -8%, rgba(95, 168, 224, 0.26) 0%, transparent 62%),
+    radial-gradient(46% 42% at 90% 6%, rgba(166, 60, 65, 0.1) 0%, transparent 55%),
+    radial-gradient(60% 52% at 50% 116%, rgba(95, 168, 224, 0.14) 0%, transparent 60%),
+    linear-gradient(180deg, #0c1524 0%, #08101c 50%, #05070c 100%);
   animation: atmos-clock-pulse 3.2s ease-in-out infinite;
   will-change: filter;
 }
@@ -408,7 +409,7 @@ body.ffi-on-the-clock .stadium-atmos {
   50% { filter: brightness(1.12); }
 }
 
-.neon-glow { box-shadow: 0 0 22px rgba(139, 255, 69, 0.4); }
+.neon-glow { box-shadow: 0 0 22px rgba(166, 60, 65, 0.4); }
 .shadow-card-glow { box-shadow: var(--ffi-shadow-card); }
 
 .no-scrollbar::-webkit-scrollbar { display: none; }
@@ -429,7 +430,7 @@ body.ffi-on-the-clock .stadium-atmos {
 .ffi-shadow-elevated { box-shadow: var(--ffi-shadow-elevated); }
 .ffi-glow-accent { box-shadow: var(--ffi-glow-accent); }
 .ffi-glow-primary { box-shadow: var(--ffi-glow-primary); }
-.ffi-glow-hover:hover { box-shadow: 0 0 26px rgba(139, 255, 69, 0.45); }
+.ffi-glow-hover:hover { box-shadow: 0 0 26px rgba(166, 60, 65, 0.45); }
 
 /* ========================================
    GRIDIRON Gradients
@@ -437,12 +438,12 @@ body.ffi-on-the-clock .stadium-atmos {
 
 .ffi-bg-gradient {
   background:
-    radial-gradient(circle at 20% 30%, #16223a 0%, transparent 50%),
-    radial-gradient(circle at 80% 70%, #0c1322 0%, transparent 60%),
-    #05080f;
+    radial-gradient(circle at 20% 30%, #26364e 0%, transparent 50%),
+    radial-gradient(circle at 80% 70%, #121a28 0%, transparent 60%),
+    #05070c;
 }
-.ffi-gradient-primary { background: linear-gradient(135deg, #8bff45 0%, #5fe21f 100%); }
-.ffi-gradient-progress { background: linear-gradient(90deg, #4d82ff 0%, #8bff45 100%); }
+.ffi-gradient-primary { background: linear-gradient(135deg, #a63c41 0%, #6e2225 100%); }
+.ffi-gradient-progress { background: linear-gradient(90deg, #5fa8e0 0%, #a63c41 100%); }
 
 /* ========================================
    GRIDIRON Buttons (meaning-driven)
@@ -450,17 +451,17 @@ body.ffi-on-the-clock .stadium-atmos {
 
 .ffi-btn-primary {
   @apply inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-full font-semibold text-white transition-all duration-200;
-  background: linear-gradient(180deg, #4d82ff 0%, #2e5bff 100%);
-  box-shadow: 0 8px 22px -8px rgba(77, 130, 255, 0.5);
+  background: linear-gradient(180deg, #5fa8e0 0%, #3e6e96 100%);
+  box-shadow: 0 8px 22px -8px rgba(95, 168, 224, 0.5);
 }
-.ffi-btn-primary:hover { box-shadow: 0 10px 28px -8px rgba(77, 130, 255, 0.6); transform: translateY(-1px); }
+.ffi-btn-primary:hover { box-shadow: 0 10px 28px -8px rgba(95, 168, 224, 0.6); transform: translateY(-1px); }
 .ffi-btn-primary:active { transform: translateY(0); }
 
 /* VOLT hero button — the moment: Record Pick, Start Draft, Confirm */
 .ffi-btn-hero {
   @apply inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-full font-bold transition-all duration-200;
   color: var(--ffi-volt-ink);
-  background: linear-gradient(180deg, #8bff45 0%, #5fe21f 100%);
+  background: linear-gradient(180deg, #a63c41 0%, #6e2225 100%);
   box-shadow: 0 12px 28px -10px var(--ffi-volt-glow), inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
 .ffi-btn-hero:hover { box-shadow: 0 16px 34px -10px var(--ffi-volt-glow); transform: translateY(-2px); }
@@ -469,9 +470,9 @@ body.ffi-on-the-clock .stadium-atmos {
 .ffi-btn-value {
   @apply inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-full font-bold transition-all duration-200;
   color: var(--ffi-volt-ink);
-  background: linear-gradient(180deg, #8bff45 0%, #5fe21f 100%);
+  background: linear-gradient(180deg, #a63c41 0%, #6e2225 100%);
 }
-.ffi-btn-value:hover { box-shadow: 0 0 26px rgba(139, 255, 69, 0.5); transform: translateY(-1px); }
+.ffi-btn-value:hover { box-shadow: 0 0 26px rgba(166, 60, 65, 0.5); transform: translateY(-1px); }
 .ffi-btn-value:active { transform: translateY(0); }
 
 .ffi-btn-secondary {
@@ -486,7 +487,7 @@ body.ffi-on-the-clock .stadium-atmos {
   color: var(--ffi-ink-2);
   background: transparent;
 }
-.ffi-btn-ghost:hover { background: rgba(150, 180, 255, 0.08); color: var(--ffi-ink); }
+.ffi-btn-ghost:hover { background: rgba(180, 200, 224, 0.08); color: var(--ffi-ink); }
 
 /* ========================================
    GRIDIRON Cards (solid surfaces + light-catch hairline, NO blur)
@@ -496,20 +497,20 @@ body.ffi-on-the-clock .stadium-atmos {
   @apply rounded-2xl p-4;
   background: var(--ffi-surface-2);
   border: 1px solid var(--ffi-hairline);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.36), 0 0 15px rgba(77, 130, 255, 0.06);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.36), 0 0 15px rgba(95, 168, 224, 0.06);
 }
 .ffi-card-elevated {
   @apply rounded-2xl p-5;
   background: linear-gradient(160deg, var(--ffi-surface-3) 0%, var(--ffi-surface-2) 75%);
   border: 1px solid var(--ffi-hairline-bright);
-  box-shadow: 0 16px 44px rgba(0, 0, 0, 0.5), 0 0 22px rgba(77, 130, 255, 0.1);
+  box-shadow: 0 16px 44px rgba(0, 0, 0, 0.5), 0 0 22px rgba(95, 168, 224, 0.1);
 }
 .ffi-card-interactive {
   @apply rounded-2xl p-4 cursor-pointer;
   position: relative;
   background: var(--ffi-surface-2);
   border: 1px solid var(--ffi-hairline);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.36), 0 0 15px rgba(77, 130, 255, 0.06);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.36), 0 0 15px rgba(95, 168, 224, 0.06);
   transition: transform var(--dur-fast) var(--ease-spring), box-shadow var(--dur-fast) var(--ease-spring), border-color var(--dur-fast), background var(--dur-fast);
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
@@ -518,12 +519,12 @@ body.ffi-on-the-clock .stadium-atmos {
   transform: translateY(-2px);
   background: var(--ffi-surface-3);
   border-color: var(--ffi-hairline-bright);
-  box-shadow: 0 16px 44px rgba(0, 0, 0, 0.5), 0 0 22px rgba(77, 130, 255, 0.16);
+  box-shadow: 0 16px 44px rgba(0, 0, 0, 0.5), 0 0 22px rgba(95, 168, 224, 0.16);
 }
 .ffi-card-interactive::before {
   content: "";
   position: absolute; inset: 0; border-radius: inherit; padding: 1px;
-  background: linear-gradient(115deg, transparent 20%, rgba(77,130,255,0.5) 45%, rgba(139,255,69,0.3) 55%, transparent 80%);
+  background: linear-gradient(115deg, transparent 20%, rgba(95, 168, 224,0.5) 45%, rgba(166, 60, 65,0.3) 55%, transparent 80%);
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;
   mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
@@ -545,8 +546,8 @@ body.ffi-on-the-clock .stadium-atmos {
   border-radius: 18px;
   overflow: hidden;
   background:
-    radial-gradient(120% 90% at 0% 0%, rgba(77, 130, 255, 0.22), transparent 55%),
-    radial-gradient(120% 120% at 100% 0%, rgba(139, 255, 69, 0.1), transparent 50%),
+    radial-gradient(120% 90% at 0% 0%, rgba(95, 168, 224, 0.22), transparent 55%),
+    radial-gradient(120% 120% at 100% 0%, rgba(166, 60, 65, 0.1), transparent 50%),
     linear-gradient(160deg, var(--ffi-surface-3), var(--ffi-surface-2) 70%);
   border: 1px solid var(--ffi-hairline-bright);
   box-shadow: 0 22px 50px -22px rgba(0, 0, 0, 0.8);
@@ -557,7 +558,7 @@ body.ffi-on-the-clock .stadium-atmos {
   inset: 0;
   border-radius: inherit;
   padding: 1px;
-  background: linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, 0.55) 47%, rgba(139, 255, 69, 0.5) 52%, transparent 70%);
+  background: linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, 0.55) 47%, rgba(166, 60, 65, 0.5) 52%, transparent 70%);
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;
   mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
@@ -584,16 +585,16 @@ body.ffi-on-the-clock .stadium-atmos {
 .ffi-input::placeholder { color: var(--ffi-ink-3); }
 .ffi-input:focus {
   outline: none;
-  border-color: rgba(77, 130, 255, 0.55);
-  box-shadow: 0 0 0 3px rgba(77, 130, 255, 0.18);
+  border-color: rgba(95, 168, 224, 0.55);
+  box-shadow: 0 0 0 3px rgba(95, 168, 224, 0.18);
 }
 
 /* Prep form inputs — volt glow on focus */
 .ffi-form-input:focus-visible,
 .ffi-form-input:focus {
   outline: none !important;
-  border-color: rgba(139, 255, 69, 0.55) !important;
-  box-shadow: 0 0 0 3px rgba(139, 255, 69, 0.14), 0 0 12px rgba(139, 255, 69, 0.08) !important;
+  border-color: rgba(166, 60, 65, 0.55) !important;
+  box-shadow: 0 0 0 3px rgba(166, 60, 65, 0.14), 0 0 12px rgba(166, 60, 65, 0.08) !important;
 }
 
 /* ========================================
@@ -605,12 +606,12 @@ body.ffi-on-the-clock .stadium-atmos {
 .ffi-badge-rb { background: rgba(86, 224, 160, 0.18); color: #56e0a0; }
 .ffi-badge-wr { background: rgba(108, 168, 255, 0.18); color: #6ca8ff; }
 .ffi-badge-te { background: rgba(255, 176, 92, 0.18); color: #ffb05c; }
-.ffi-badge-k { background: rgba(159, 176, 206, 0.18); color: #9fb0ce; }
-.ffi-badge-def { background: rgba(159, 176, 206, 0.18); color: #9fb0ce; }
-.ffi-badge-success { background: rgba(139, 255, 69, 0.16); color: #8bff45; }
+.ffi-badge-k { background: rgba(159, 176, 206, 0.18); color: #9fb2c6; }
+.ffi-badge-def { background: rgba(159, 176, 206, 0.18); color: #9fb2c6; }
+.ffi-badge-success { background: rgba(95, 168, 224, 0.16); color: #5fa8e0; }
 .ffi-badge-warning { background: rgba(255, 176, 92, 0.16); color: #ffb05c; }
 .ffi-badge-danger { background: rgba(255, 110, 138, 0.16); color: #ff6e8a; }
-.ffi-badge-info { background: rgba(77, 130, 255, 0.16); color: #79a6ff; }
+.ffi-badge-info { background: rgba(95, 168, 224, 0.16); color: #7fc0ea; }
 .ffi-tag { @apply inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wide; }
 
 /* Solid position chips (for hero/feed) */
@@ -624,11 +625,11 @@ body.ffi-on-the-clock .stadium-atmos {
    GRIDIRON Progress
    ======================================== */
 
-.ffi-progress { @apply w-full h-2 rounded-full overflow-hidden; background: rgba(150, 180, 255, 0.1); }
-.ffi-progress-bar { @apply h-full rounded-full transition-all duration-500; background: linear-gradient(90deg, #4d82ff 0%, #8bff45 100%); }
+.ffi-progress { @apply w-full h-2 rounded-full overflow-hidden; background: rgba(180, 200, 224, 0.1); }
+.ffi-progress-bar { @apply h-full rounded-full transition-all duration-500; background: linear-gradient(90deg, #5fa8e0 0%, #a63c41 100%); }
 .ffi-progress-critical .ffi-progress-bar { background: linear-gradient(90deg, #ff6e8a 0%, #ffb05c 100%); }
-.ffi-progress-stable .ffi-progress-bar { background: linear-gradient(90deg, #ffb05c 0%, #4d82ff 100%); }
-.ffi-progress-elite .ffi-progress-bar { background: linear-gradient(90deg, #4d82ff 0%, #8bff45 100%); }
+.ffi-progress-stable .ffi-progress-bar { background: linear-gradient(90deg, #ffb05c 0%, #5fa8e0 100%); }
+.ffi-progress-elite .ffi-progress-bar { background: linear-gradient(90deg, #5fa8e0 0%, #a63c41 100%); }
 
 .segmented-progress { display: flex; gap: 2px; }
 .segment { height: 8px; flex: 1; border-radius: 1px; }
@@ -640,7 +641,7 @@ body.ffi-on-the-clock .stadium-atmos {
    GRIDIRON Navigation
    ======================================== */
 
-.ffi-nav-active { color: var(--ffi-volt); text-shadow: 0 0 12px rgba(139, 255, 69, 0.5); }
+.ffi-nav-active { color: var(--ffi-volt); text-shadow: 0 0 12px rgba(166, 60, 65, 0.5); }
 .ffi-nav-active::after {
   content: '';
   position: absolute;
@@ -651,7 +652,7 @@ body.ffi-on-the-clock .stadium-atmos {
   height: 4px;
   border-radius: 50%;
   background: var(--ffi-volt);
-  box-shadow: 0 0 10px rgba(139, 255, 69, 0.6);
+  box-shadow: 0 0 10px rgba(166, 60, 65, 0.6);
 }
 
 /* ========================================
@@ -676,8 +677,8 @@ body.ffi-on-the-clock .stadium-atmos {
 }
 
 @keyframes ffi-glow-pulse {
-  0%, 100% { box-shadow: 0 0 20px rgba(139, 255, 69, 0.4); }
-  50% { box-shadow: 0 0 30px rgba(139, 255, 69, 0.6); }
+  0%, 100% { box-shadow: 0 0 20px rgba(166, 60, 65, 0.4); }
+  50% { box-shadow: 0 0 30px rgba(166, 60, 65, 0.6); }
 }
 @keyframes ffi-shake {
   0%, 100% { transform: translateX(0); }
@@ -689,9 +690,9 @@ body.ffi-on-the-clock .stadium-atmos {
   to { opacity: 1; transform: translateY(0); }
 }
 @keyframes ffi-success-pulse {
-  0% { box-shadow: 0 0 0 0 rgba(139, 255, 69, 0.5); }
-  50% { box-shadow: 0 0 0 8px rgba(139, 255, 69, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(139, 255, 69, 0); }
+  0% { box-shadow: 0 0 0 0 rgba(166, 60, 65, 0.5); }
+  50% { box-shadow: 0 0 0 8px rgba(166, 60, 65, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(166, 60, 65, 0); }
 }
 @keyframes ffi-expand {
   0% { opacity: 0; max-height: 0; transform: scaleY(0.95); }
@@ -703,8 +704,8 @@ body.ffi-on-the-clock .stadium-atmos {
   100% { transform: scale(1); }
 }
 @keyframes ffi-attention {
-  0%, 100% { box-shadow: 0 0 20px rgba(139, 255, 69, 0.2), 0 8px 30px rgba(0, 0, 0, 0.4); }
-  50% { box-shadow: 0 0 30px rgba(139, 255, 69, 0.4), 0 8px 30px rgba(0, 0, 0, 0.4); }
+  0%, 100% { box-shadow: 0 0 20px rgba(166, 60, 65, 0.2), 0 8px 30px rgba(0, 0, 0, 0.4); }
+  50% { box-shadow: 0 0 30px rgba(166, 60, 65, 0.4), 0 8px 30px rgba(0, 0, 0, 0.4); }
 }
 @keyframes ffi-trash-talk-enter {
   0% { opacity: 0; transform: translateX(100%) rotate(2deg); }
@@ -715,13 +716,13 @@ body.ffi-on-the-clock .stadium-atmos {
 
 /* On-the-clock hero banner — volt light-catch edge + breathing glow (was gold) */
 .ffi-onclock-banner {
-  border: 1px solid rgba(139, 255, 69, 0.4);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.36), 0 0 40px rgba(139, 255, 69, 0.16), inset 0 1px 0 rgba(139, 255, 69, 0.22);
+  border: 1px solid rgba(166, 60, 65, 0.4);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.36), 0 0 40px rgba(166, 60, 65, 0.16), inset 0 1px 0 rgba(166, 60, 65, 0.22);
   animation: ffi-onclock-sheen 3.2s ease-in-out infinite;
 }
 @keyframes ffi-onclock-sheen {
-  0%, 100% { box-shadow: 0 8px 32px rgba(0, 0, 0, 0.36), 0 0 36px rgba(139, 255, 69, 0.14), inset 0 1px 0 rgba(139, 255, 69, 0.22); }
-  50% { box-shadow: 0 8px 32px rgba(0, 0, 0, 0.36), 0 0 56px rgba(139, 255, 69, 0.26), inset 0 1px 0 rgba(139, 255, 69, 0.3); }
+  0%, 100% { box-shadow: 0 8px 32px rgba(0, 0, 0, 0.36), 0 0 36px rgba(166, 60, 65, 0.14), inset 0 1px 0 rgba(166, 60, 65, 0.22); }
+  50% { box-shadow: 0 8px 32px rgba(0, 0, 0, 0.36), 0 0 56px rgba(166, 60, 65, 0.26), inset 0 1px 0 rgba(166, 60, 65, 0.3); }
 }
 
 .ffi-pick-flash { animation: ffi-volt-flash 0.7s ease-out 0.1s both; }
@@ -732,15 +733,15 @@ body.ffi-on-the-clock .stadium-atmos {
   100% { opacity: 1; transform: scale(1); }
 }
 @keyframes ffi-volt-flash {
-  0% { box-shadow: 0 0 0 rgba(139, 255, 69, 0); }
-  40% { box-shadow: 0 0 50px rgba(139, 255, 69, 0.55), 0 0 100px rgba(139, 255, 69, 0.22); }
-  100% { box-shadow: 0 0 16px rgba(139, 255, 69, 0.14); }
+  0% { box-shadow: 0 0 0 rgba(166, 60, 65, 0); }
+  40% { box-shadow: 0 0 50px rgba(166, 60, 65, 0.55), 0 0 100px rgba(166, 60, 65, 0.22); }
+  100% { box-shadow: 0 0 16px rgba(166, 60, 65, 0.14); }
 }
 /* legacy name kept */
 @keyframes ffi-gold-flash {
-  0% { box-shadow: 0 0 0 rgba(139, 255, 69, 0); }
-  40% { box-shadow: 0 0 50px rgba(139, 255, 69, 0.55), 0 0 100px rgba(139, 255, 69, 0.22); }
-  100% { box-shadow: 0 0 16px rgba(139, 255, 69, 0.14); }
+  0% { box-shadow: 0 0 0 rgba(166, 60, 65, 0); }
+  40% { box-shadow: 0 0 50px rgba(166, 60, 65, 0.55), 0 0 100px rgba(166, 60, 65, 0.22); }
+  100% { box-shadow: 0 0 16px rgba(166, 60, 65, 0.14); }
 }
 @keyframes ffi-stagger-fade {
   from { opacity: 0; transform: translateY(10px); }
@@ -773,9 +774,9 @@ body.ffi-on-the-clock .stadium-atmos {
 /* Steal card burst — volt ring flash then settle */
 @keyframes ffi-steal-burst {
   0%   { box-shadow: none; }
-  25%  { box-shadow: 0 0 0 3px rgba(139,255,69,0.7), 0 0 60px -6px rgba(139,255,69,0.6); background: rgba(139,255,69,0.14); }
-  60%  { box-shadow: 0 0 0 2px rgba(139,255,69,0.4), 0 0 30px -8px rgba(139,255,69,0.3); background: rgba(139,255,69,0.07); }
-  100% { box-shadow: 0 0 0 1px rgba(139,255,69,0.2); background: rgba(139,255,69,0.04); }
+  25%  { box-shadow: 0 0 0 3px rgba(166, 60, 65,0.7), 0 0 60px -6px rgba(166, 60, 65,0.6); background: rgba(166, 60, 65,0.14); }
+  60%  { box-shadow: 0 0 0 2px rgba(166, 60, 65,0.4), 0 0 30px -8px rgba(166, 60, 65,0.3); background: rgba(166, 60, 65,0.07); }
+  100% { box-shadow: 0 0 0 1px rgba(166, 60, 65,0.2); background: rgba(166, 60, 65,0.04); }
 }
 
 /* Steal banner pop — Anton text scales in then fades */
@@ -791,14 +792,14 @@ body.ffi-on-the-clock .stadium-atmos {
   0%, 100% {
     box-shadow: 0 22px 50px -22px rgba(0,0,0,0.8),
                 0 0 0 1px rgba(255,255,255,0.02) inset,
-                0 0 0 2px rgba(139,255,69,0.35),
-                0 0 40px -8px rgba(139,255,69,0.22);
+                0 0 0 2px rgba(166, 60, 65,0.35),
+                0 0 40px -8px rgba(166, 60, 65,0.22);
   }
   50% {
     box-shadow: 0 22px 50px -22px rgba(0,0,0,0.8),
                 0 0 0 1px rgba(255,255,255,0.02) inset,
-                0 0 0 2px rgba(139,255,69,0.55),
-                0 0 60px -4px rgba(139,255,69,0.36);
+                0 0 0 2px rgba(166, 60, 65,0.55),
+                0 0 60px -4px rgba(166, 60, 65,0.36);
   }
 }
 
@@ -871,8 +872,8 @@ body.ffi-on-the-clock .stadium-atmos {
 .ffi-pill-indicator {
   position: absolute;
   top: 4px; bottom: 4px;
-  background: linear-gradient(135deg, rgba(77,130,255,0.22), rgba(77,130,255,0.12));
-  border: 1px solid rgba(77,130,255,0.35);
+  background: linear-gradient(135deg, rgba(95, 168, 224,0.22), rgba(95, 168, 224,0.12));
+  border: 1px solid rgba(95, 168, 224,0.35);
   border-radius: 8px;
   pointer-events: none;
   transition: left var(--dur-fast) var(--ease-spring), width var(--dur-fast) var(--ease-spring);
@@ -994,11 +995,11 @@ body.ffi-on-the-clock .stadium-atmos {
   .ffi-card-interactive:hover { transform: none; }
   .ffi-btn-primary:hover, .ffi-btn-hero:hover, .ffi-btn-value:hover { transform: none; }
   .ffi-card-interactive:active { transform: scale(0.98); transition: transform 0.1s ease-out; }
-  .ffi-btn-primary:active { transform: scale(0.97); box-shadow: 0 0 15px rgba(77, 130, 255, 0.4); }
-  .ffi-btn-hero:active { transform: scale(0.97); box-shadow: 0 0 15px rgba(139, 255, 69, 0.45); }
-  .ffi-btn-value:active { transform: scale(0.97); box-shadow: 0 0 15px rgba(139, 255, 69, 0.4); }
+  .ffi-btn-primary:active { transform: scale(0.97); box-shadow: 0 0 15px rgba(95, 168, 224, 0.4); }
+  .ffi-btn-hero:active { transform: scale(0.97); box-shadow: 0 0 15px rgba(166, 60, 65, 0.45); }
+  .ffi-btn-value:active { transform: scale(0.97); box-shadow: 0 0 15px rgba(166, 60, 65, 0.4); }
   .ffi-btn-secondary:active { transform: scale(0.98); background: var(--ffi-surface-2); }
-  .ffi-btn-ghost:active { background: rgba(150, 180, 255, 0.12); }
+  .ffi-btn-ghost:active { background: rgba(180, 200, 224, 0.12); }
 }
 
 /* ========================================
@@ -1045,13 +1046,13 @@ body.ffi-on-the-clock .stadium-atmos {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: linear-gradient(100deg, transparent 35%, rgba(139, 255, 69, 0.22) 50%, transparent 65%);
+  background: linear-gradient(100deg, transparent 35%, rgba(166, 60, 65, 0.22) 50%, transparent 65%);
   background-size: 220% 100%;
   background-position: -160% 0;
   animation: ffi-sheen-sweep 0.7s var(--ease-broadcast) 1;
 }
 .ffi-lower-third-live::after {
-  background: linear-gradient(100deg, transparent 35%, rgba(121, 166, 255, 0.2) 50%, transparent 65%);
+  background: linear-gradient(100deg, transparent 35%, rgba(95, 168, 224, 0.2) 50%, transparent 65%);
   background-size: 220% 100%;
   background-position: -160% 0;
 }
@@ -1061,8 +1062,8 @@ body.ffi-on-the-clock .stadium-atmos {
 }
 
 .ffi-ticker {
-  border: 1px solid rgba(121, 166, 255, 0.22);
-  background: linear-gradient(90deg, rgba(121, 166, 255, 0.1) 0%, rgba(121, 166, 255, 0.04) 100%);
+  border: 1px solid rgba(95, 168, 224, 0.22);
+  background: linear-gradient(90deg, rgba(95, 168, 224, 0.1) 0%, rgba(95, 168, 224, 0.04) 100%);
 }
 
 .ffi-scorebug {
@@ -1071,7 +1072,7 @@ body.ffi-on-the-clock .stadium-atmos {
 }
 
 @keyframes ffi-num-flash {
-  0% { color: var(--ffi-volt); text-shadow: 0 0 12px rgba(139, 255, 69, 0.6); }
+  0% { color: var(--ffi-volt); text-shadow: 0 0 12px rgba(166, 60, 65, 0.6); }
   100% { color: inherit; text-shadow: none; }
 }
 .ffi-num-flash { animation: ffi-num-flash 0.6s ease-out 1; }
@@ -1094,10 +1095,10 @@ body.ffi-on-the-clock .stadium-atmos {
   padding: 3px;
   background: conic-gradient(
     from var(--ffi-sheen-angle),
-    rgba(139, 255, 69, 0) 0deg,
-    rgba(139, 255, 69, 0) 210deg,
-    rgba(139, 255, 69, 0.9) 300deg,
-    rgba(139, 255, 69, 0) 360deg
+    rgba(166, 60, 65, 0) 0deg,
+    rgba(166, 60, 65, 0) 210deg,
+    rgba(166, 60, 65, 0.9) 300deg,
+    rgba(166, 60, 65, 0) 360deg
   );
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;

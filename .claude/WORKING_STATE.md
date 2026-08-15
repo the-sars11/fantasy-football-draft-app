@@ -23,13 +23,15 @@ The prior plan (S1–S8 / P2 DR / P3 VAL) marked the app "done" while it (a) pri
 
 ## Next open item
 
-### 🎨 D0 session 2 (NEXT) — new colors + fonts + icons ON THE STITCH DESIGN (Joe-gated, NO code)
+### ✅ D0 CLOSED + ✅ D1 DONE (2026-08-14) — next open item is **D2** (Research landing + nav)
 
-**Where D0 stands (2026-08-14):** Keep two things straight —
-- **MY "Ink & Ember" mockup = DISCARDED SLOP.** Joe: "one-dimensional neon AI slop dogshit." Files `research-foundation-v1.html` + `.png` deleted. **Not a source, not a keeper, do not cite it.**
-- **THE STITCH DESIGN = THE APPROVED KEEPER** — `UI/stitch_multi_theme_layout_variations/screen.png` + `code.html`. Joe: "I LOVE THE DESIGN." Keep the whole design (layout + treatment). **The ONLY problem is its colors + fonts are "too regal"** (navy + metallic-gold + Merriweather serif). **Change ONLY colors + fonts + icons; change nothing else about the design.** Full decision record in `BUILD_PLAN.md` → "🎨 THE LOOK" → **D0 session 1 + 2**.
+**D0 gate CLOSED (Joe, 2026-08-14):** Joe locked the **"SHIELD" (Option B)** identity — navy-steel field `#0C1524→#05070C` + lifted steel-blue cards `#26364E→#1A2637` + chrome-silver titles + muted brick-RED action accent `#A63C41` (sparing) + steel-blue info `#5FA8E0`; **Kanit + Hanken Grotesk** type; **duotone** icons (red chip + white glyph). NO gold, NO volt-green. Full record: `.claude/mockups/d0-craft/NOTES.md`; canonical screen `.claude/mockups/d0-craft/optionB_shield.png`. (Option A "League Trophy" kept on file as an alternate; its oak/engraving refinement parked.)
 
-**Next session does (see BUILD_PLAN D0 session 2 for the full spec):** take `UI/stitch_multi_theme_layout_variations/code.html` as the literal base and **re-skin it** — render **4 sports-app color schemes** (NOT the too-regal navy+gold, NOT cheesy neon; name a real sports reference app for each), **multiple font options** (kill the serif), and **multiple icon sets**, applied to the Stitch Research design. Keep its layout/structure/hierarchy untouched. Render real headless-Chrome PNGs — **the Browser pane does not composite in this env.** Gate: Joe picks palette + type + icons. This blocks D1+.
+**D1 DONE (2026-08-14):** SHIELD ported into the real app by a "names stable, values swapped" repaint (all 61 screens shift at once). Touched `src/app/layout.tsx` (Kanit+Hanken fonts, red theme-color), `src/app/globals.css` (full palette swap, 0 leftover v3 tokens, red/steel buttons, `--ffi-gold` drift resolved), `src/components/layout/app-shell.tsx` (Zap→Gavel, red nav glow), `src/app/(app)/prep/page.tsx` (one-screen proof: duotone-red icon chips, steel cost-guard box), and reconciled `.claude/DESIGN_SYSTEM.md` v3 GRIDIRON → **v4 SHIELD**. Proof `.claude/mockups/d0-craft/d1_prep_shield.png`. Gate: 392/392 tests green, lint 0 new, no h-overflow at 375px. Full entry in `CHANGELOG.md` + `BUILD_PLAN.md` D1.
+
+**Next session does (D2, see BUILD_PLAN D2):** rebuild the Research landing + nav to the SHIELD look — demote Run-Research to a defined "Player Pull", make Players · Cheat Sheet · Strategies · Sims the hero destinations, no paragraph explainer. Screenshot to prove.
+
+**D1 tail (separate follow-on, not blocking D2):** sweep component-level inline color literals across the other ~60 screens; decide the position-color system (green RB `#56E0A0`); the Live Auction Room keeps its own scoped `theme.ts` four-move palette for now.
 
 ---
 
@@ -93,7 +95,7 @@ The prior plan (S1–S8 / P2 DR / P3 VAL) marked the app "done" while it (a) pri
 
 ## What is real (safe to build on)
 
-Data pipeline (~491 real 2026 players in `players_cache`, verified via API) · GRIDIRON design system · corrected 16-yr Nasties calibration ledger in-repo (`src/data/league-history/`) + reproducible script — real curves, the good raw material for R4 · 12-team config truth (duplicate-active-league drift fixed) · auctioneer feed proxy + state machine + rule-based What-To-Do (built, unit-tested, **NOT live-verified** → R15).
+Data pipeline (~491 real 2026 players in `players_cache`, verified via API) · SHIELD v4 design system (D0-locked, D1-ported 2026-08-14) · corrected 16-yr Nasties calibration ledger in-repo (`src/data/league-history/`) + reproducible script — real curves, the good raw material for R4 · 12-team config truth (duplicate-active-league drift fixed) · auctioneer feed proxy + state machine + rule-based What-To-Do (built, unit-tested, **NOT live-verified** → R15).
 
 ## What is NOT real (rebuild targets, despite prior "done")
 

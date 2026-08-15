@@ -1,30 +1,31 @@
 import type { Metadata, Viewport } from 'next'
-import { Anton, Saira, Saira_Condensed, JetBrains_Mono } from 'next/font/google'
+import { Kanit, Hanken_Grotesk, JetBrains_Mono } from 'next/font/google'
 import { ThemeProvider } from '@/components/theme-provider'
 import './globals.css'
 
-// GRIDIRON v3 type system (UXV2-2):
-// Anton = broadcast hero (names, big stats, verdicts), Saira = body/UI default,
-// Saira Condensed = labels/section heads, JetBrains Mono = every number (tabular).
-// Distinct variable names so the .font-* custom classes resolve to the loaded families at runtime.
-const anton = Anton({
+// SHIELD v4 type system (D0-locked, 2026-08-14):
+// Kanit = athletic broadcast display (names, big stats, verdicts, section heads),
+// Hanken Grotesk = body/UI default, JetBrains Mono = every number (tabular).
+// CSS-var NAMES kept stable from v3 (--font-anton / --font-saira / --font-saira-cond)
+// so every screen re-types at once — only the loaded families changed.
+const anton = Kanit({
   variable: '--font-anton',
   subsets: ['latin'],
-  weight: ['400'],
+  weight: ['500', '600', '700'],
   display: 'swap',
 })
 
-const saira = Saira({
+const saira = Hanken_Grotesk({
   variable: '--font-saira',
   subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
+  weight: ['400', '500', '600', '700', '800'],
   display: 'swap',
 })
 
-const sairaCondensed = Saira_Condensed({
+const sairaCondensed = Kanit({
   variable: '--font-saira-cond',
   subsets: ['latin'],
-  weight: ['600', '700', '800'],
+  weight: ['500', '600', '700'],
   display: 'swap',
 })
 
@@ -58,7 +59,7 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',
-  themeColor: '#8BFF45',
+  themeColor: '#A63C41',
 }
 
 export default function RootLayout({

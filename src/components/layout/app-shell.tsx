@@ -7,7 +7,7 @@ import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import type { User } from '@supabase/supabase-js'
 import {
-  Zap,
+  Gavel,
   Settings,
   LogOut,
   ChevronLeft,
@@ -35,7 +35,7 @@ interface NavItem {
 // .claude/UX_OVERHAUL_2026-08.md.
 const navItems: NavItem[] = [
   { label: 'Research', href: '/prep', icon: Search },
-  { label: 'Live Draft', href: '/draft', icon: Zap },
+  { label: 'Live Draft', href: '/draft', icon: Gavel },
   { label: 'Post Draft', href: '/draft/review', icon: Trophy },
   { label: 'Setup', href: '/settings', icon: Settings },
 ]
@@ -280,7 +280,7 @@ export function AppShell({
                 >
                   <Icon className={cn(
                     'h-5 w-5 relative z-10',
-                    isActive && 'drop-shadow-[0_0_8px_rgba(253,239,182,0.6)]'
+                    isActive && 'drop-shadow-[0_0_8px_rgba(166,60,65,0.6)]'
                   )} />
                 </motion.div>
                 {/* Animated dot indicator */}
@@ -291,7 +291,7 @@ export function AppShell({
                       animate={{ scale: 1, opacity: 1 }}
                       exit={{ scale: 0, opacity: 0 }}
                       transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                      className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[var(--ffi-gold-bright)] shadow-[0_0_8px_rgba(253,239,182,0.85)]"
+                      className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[var(--ffi-gold-bright)] shadow-[0_0_8px_rgba(166,60,65,0.85)]"
                     />
                   )}
                 </AnimatePresence>
