@@ -46,6 +46,12 @@
 
 **Gate:** `tsc --noEmit` clean; `test:run` 392/392 pass; grep confirms 0 `#2ff801` left in the 4 live files. Live-data cards render behind Supabase auth (unavailable in this env), so treatment proof is the direction board `green_sweep_direction.png` on the real motifs, not a live-data screenshot. $0.
 
+**Part 2 (same day) — status traffic-light softened + amber warning aligned (finishes the live sweep):** Joe: "soften, keep traffic-light" + "yes, finish live sweep."
+- **`src/components/draft/connection-status-pill.tsx`** — LIVE neon `#2ff801`/`rgba(47,248,1,x)` → soft green `#56E0A0` (bg `rgba(86,224,160,0.10)`, border `.22`); STALE amber `#fbbf24`/`rgba(251,191,36,x)` → Shield warning `#FFB05C` (bg `rgba(255,176,92,0.12)`, border `.22`). OFFLINE red `#ef4444` and MANUAL grey `#94a3b8` unchanged — it stays a legible traffic-light, just no neon.
+- **`src/components/draft/ffi-ai-insight.tsx`** — thin-data warning amber `#f59e0b` → Shield warning `#FFB05C` (bar color + banner bg/border/icon/text, 4 spots), so the one semantic warning color matches the pill's STALE state.
+- Proof: `status_pill_states.png` (all 4 softened states on the Shield field). **Gate:** `tsc --noEmit` clean; `test:run` 392/392; grep confirms 0 `#2ff801`/`#f59e0b`/`#fbbf24` left in the 2 files.
+- **Deferred to their own decisions (not in "live screens"):** `--ffi-gold` global token (self-indicator, wants its own direction board), `lib/draft/export.ts` golds (PDF/CSV, not a screen), parked season/inseason (~63 spots, P8 rebuild).
+
 ---
 
 ## 2026-08-14 / D0+D1 -- SHIELD identity locked (D0) + ported into the app (D1)

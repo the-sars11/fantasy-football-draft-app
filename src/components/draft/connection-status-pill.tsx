@@ -34,8 +34,8 @@ const STATE_CONFIG: Record<ConnState, {
   pulse: boolean
   Icon: LucideIcon
 }> = {
-  LIVE:    { bg: 'rgba(47,248,1,0.10)',    color: '#2ff801', border: 'rgba(47,248,1,0.22)',     label: 'LIVE',    pulse: true,  Icon: Radio    },
-  STALE:   { bg: 'rgba(251,191,36,0.12)',  color: '#fbbf24', border: 'rgba(251,191,36,0.22)',   label: 'STALE',   pulse: false, Icon: Clock    },
+  LIVE:    { bg: 'rgba(86,224,160,0.10)',  color: '#56E0A0', border: 'rgba(86,224,160,0.22)',   label: 'LIVE',    pulse: true,  Icon: Radio    },
+  STALE:   { bg: 'rgba(255,176,92,0.12)',  color: '#FFB05C', border: 'rgba(255,176,92,0.22)',   label: 'STALE',   pulse: false, Icon: Clock    },
   OFFLINE: { bg: 'rgba(239,68,68,0.12)',   color: '#ef4444', border: 'rgba(239,68,68,0.25)',    label: 'OFFLINE', pulse: false, Icon: WifiOff  },
   MANUAL:  { bg: 'rgba(148,163,184,0.08)', color: '#94a3b8', border: 'rgba(148,163,184,0.12)',  label: 'MANUAL',  pulse: false, Icon: Keyboard },
 }

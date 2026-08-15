@@ -26,7 +26,7 @@ export function FFIAIInsight({ explanation, confidence }: FFIAIInsightProps) {
   const isThinData = !!explanation.dataWarning
   const isLowConfidence = explanation.confidence === 'low'
   const barColor = isThinData
-    ? '#f59e0b'   // amber for thin data
+    ? '#FFB05C'   // amber for thin data
     : isLowConfidence
     ? '#ff716c'   // red for conflicting signals
     : '#5FA8E0'   // green default
@@ -35,9 +35,9 @@ export function FFIAIInsight({ explanation, confidence }: FFIAIInsightProps) {
     <div className="bg-black/80 p-5 space-y-4 border-t border-[#3c4a53]/10">
       {/* FF-270: Thin data warning banner */}
       {isThinData && (
-        <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-[#f59e0b]/10 border border-[#f59e0b]/30">
-          <AlertTriangle className="h-3 w-3 text-[#f59e0b]" aria-hidden="true" />
-          <span className="text-[9px] font-bold text-[#f59e0b] uppercase tracking-wider">
+        <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-[#FFB05C]/10 border border-[#FFB05C]/30">
+          <AlertTriangle className="h-3 w-3 text-[#FFB05C]" aria-hidden="true" />
+          <span className="text-[9px] font-bold text-[#FFB05C] uppercase tracking-wider">
             Low confidence: {explanation.dataWarning}
           </span>
         </div>

@@ -1,0 +1,38 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#08101C;font-family:'Hanken Grotesk',sans-serif;padding:34px}
+.field{background:radial-gradient(60% 42% at 22% -6%,rgba(95,168,224,0.16),transparent 58%),linear-gradient(180deg,#0C1524,#05070C);border-radius:18px;padding:30px}
+h1{color:#9FB2C6;font-size:13px;letter-spacing:.14em;text-transform:uppercase;margin-bottom:6px}
+.sub{color:#5E708A;font-size:12px;margin-bottom:26px}
+.row{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.pill{display:inline-flex;align-items:center;gap:7px;padding:6px 13px;border-radius:999px;font-size:11px;font-weight:700;letter-spacing:.08em}
+.dot{width:8px;height:8px;border-radius:50%}
+.cap{display:block;color:#5E708A;font-size:10px;margin-top:8px;letter-spacing:.05em}
+.cell{text-align:center}
+</style></head><body>
+<div class="field">
+  <h1>Connection status pill: softened traffic-light</h1>
+  <div class="sub">Neon #2ff801 → soft green #56E0A0 (LIVE), amber #fbbf24 → Shield warning #FFB05C (STALE). OFFLINE red + MANUAL grey unchanged.</div>
+  <div class="row">
+    <div class="cell">
+      <span class="pill" style="background:rgba(86,224,160,.10);border:1px solid rgba(86,224,160,.22);color:#56E0A0"><span class="dot" style="background:#56E0A0"></span>LIVE · 2s</span>
+      <span class="cap">connected</span>
+    </div>
+    <div class="cell">
+      <span class="pill" style="background:rgba(255,176,92,.12);border:1px solid rgba(255,176,92,.22);color:#FFB05C"><span class="dot" style="background:#FFB05C"></span>STALE · 45s</span>
+      <span class="cap">warning</span>
+    </div>
+    <div class="cell">
+      <span class="pill" style="background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.25);color:#ef4444"><span class="dot" style="background:#ef4444"></span>OFFLINE</span>
+      <span class="cap">unchanged</span>
+    </div>
+    <div class="cell">
+      <span class="pill" style="background:rgba(148,163,184,.08);border:1px solid rgba(148,163,184,.12);color:#94a3b8"><span class="dot" style="background:#94a3b8"></span>MANUAL</span>
+      <span class="cap">unchanged</span>
+    </div>
+  </div>
+</div>
+</body></html>
