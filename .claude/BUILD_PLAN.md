@@ -460,7 +460,7 @@ Name a real reference app before building (Linear, EA FC — never generic dark-
 > - `src/app/(app)/prep/strategies/client.tsx` — Dry-run link + `PlayCircle` import removed.
 > - Ranking key: `projected_ceiling` DESC (R9 board-derived). MC per-strategy ranking deferred to R10b (no per-strategy me-seat in `SimEngineInput`).
 > - **Functional gap (confirmed):** player pull on `/prep` does NOT re-flow strategy proposals. Fix: wire a pull-complete signal to reset `fetchedRef.current` in `StrategyProposals`. Target: R10b or D3-fix.
-> - **Proof:** type-check 0 errors; 392/392 tests green; lint 0 new; build clean; 375px screenshot `d3_strategies_375.png`.
+> - **Proof:** type-check 0 errors; 392/392 tests green; lint 0 new; build clean; 375px screenshot `d3_strategies_375.png`. Migration applied to production Supabase (Joe, 2026-08-15 via SQL Editor).
 
 ### D4 — Players card redesign `[Sonnet]` · class: output
 > **Folds in the Players feedback.** **Thinner** list cards; **tier on the card face** (absent today, `ffi-player-intel-card.tsx`); move projected points to the expansion; keep base/mkt/your-value + the range bar Joe likes; add **expert consensus**. (Live-updating values = R11/D6, not here.)
