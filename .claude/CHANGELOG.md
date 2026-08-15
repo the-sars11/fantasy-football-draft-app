@@ -2,6 +2,24 @@
 
 ---
 
+## 2026-08-15 / D3 -- Strategies redesign: auto-rank, expandable rows, persistent star ratings
+
+**Task:** D3. Kill the cost-gated Generate button and the Dry-run page link. Auto-render strategies on load sorted by objective strength. Per-strategy expandable detail. Persistent user star-ratings keyed on archetype so they survive re-generate and re-pull. Schema add: `user_strategy_ratings`. | **Class:** output/schema | **Lenses:** Design, QA, Security, Ops
+
+**What shipped:**
+
+- **`supabase/migrations/20260815000001_user_strategy_ratings.sql`** — new table: `id`, `user_id`, `league_id`, `archetype`, `rating INTEGER`, `created_at`, `updated_at`. UNIQUE(user_id, league_id, archetype) so ratings survive re-generate. CHECK(rating BETWEEN 1 AND 5). RLS policy `usr_strategy_ratings_own` (FOR ALL TO authenticated USING auth.uid() = user_id). Index on (user_id, league_id).
+- **`src/app/api/strategies/ratings/route.ts`** (new) — GET `?leagueId=` returns `{ratings: [{archetype, rating}]}`. POST `{leagueId, archetype, rating}` upserts (rating=0 deletes). Same `getClient()` DEV_MODE / server-client pattern as other strategy routes. Input validation: rating must be integer 0-5.
+- **`src/lib/supabase/database.types.ts`** — added `UserStrategyRatings` + `UserStrategyRatingsInsert` interfaces after `UserRuleUpdate`.
+- **`src/components/prep/strategy-proposals.tsx`** (full rewrite) — auto-fetches on mount via `useEffect` + `fetchedRef` guard; simultaneously fetches ratings. Sorts proposals by `projected_ceiling` DESC. Ranked `RankedRow` components: rank badge (red #1), name + archetype chip, strength bar + score, 5-star read display, chevron. Expanded panel: HOW TO APPROACH (philosophy), PLAYER TYPES TO TARGET (derived from `budget_allocation`/`position_weights` with pos color dots and $amount labels), PLAYERS YOU LIKELY CAN'T GET (key_avoids, up to 3, red-tinted rows), STRENGTH VS LEAGUE (score + floor/ceiling + risk_tolerance), YOUR RATING (interactive 5-star, click-again to clear). Use button on #1 row header + in every expanded panel. Quiet "Regenerate strategies" text button at bottom.
+- **`src/app/(app)/prep/strategies/client.tsx`** — Dry-run link (lines 391-406) removed; `PlayCircle` import removed.
+- **Ranking key:** `projected_ceiling` DESC (R9 board-derived, objective, $0). MC per-strategy ranking deferred to R10b (no per-strategy me-seat weighting in `SimEngineInput`; see BUILD_PLAN R10b enhancement note).
+- **Functional gap (confirmed + logged):** a player pull on `/prep` calls `load()` only; it does NOT call POST `/api/strategies/propose`. Strategy proposals on `/prep/strategies` reflect the pool that was current when the page was FIRST mounted, not the latest pull. Fix target: R10b or a D3-fix. Manual "Regenerate strategies" button is the current workaround.
+
+**Proof:** `tsc --noEmit` 0 errors; `vitest run` 392/392 green; `eslint` on all 4 changed files 0 errors 0 warnings; `npm run build` clean (`/api/strategies/ratings` in route list). 375px screenshot `.claude/mockups/d3_strategies_375.png` (headless Chrome render of approved mockup). $0, no paid API calls.
+
+---
+
 ## 2026-08-15 / D2 -- Research landing: hierarchy flip (destinations = heroes, Run demoted)
 
 **Task:** D2. Reconnaissance of the live `/prep` found the spec's premise ("card-dump + paragraph explainer") was already partly outdated — the hub had been restructured to one-hero + quiet jump-rows, but with the hierarchy BACKWARDS: the AI Research Run (used 2-4x/year) was the hero, and the 4 destinations Joe actually lives in for weeks were demoted rows. Reframed D2 as **flip the hierarchy**, not "replace a card dump." Design ref: Linear mobile home (row destinations, quiet labels, one accent, subordinate utilities). Rows not a card grid (Joe's FF UI rule). Approved mockup `d2_research_landing_v1.html`. | **Class:** output | **Lenses:** Design, QA

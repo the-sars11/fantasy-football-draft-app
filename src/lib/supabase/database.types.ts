@@ -405,6 +405,25 @@ export interface UserRuleUpdate {
   validation_error?: string | null
 }
 
+// --- D3: User star-ratings for generated strategy proposals ---
+
+export interface UserStrategyRatings {
+  id: string
+  user_id: string
+  league_id: string
+  archetype: string
+  rating: number
+  created_at: string
+  updated_at: string
+}
+
+export interface UserStrategyRatingsInsert {
+  user_id?: string
+  league_id: string
+  archetype: string
+  rating: number
+}
+
 // Source freshness configuration
 export interface FreshnessConfig {
   rankings_ttl_hours: number

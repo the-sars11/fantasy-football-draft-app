@@ -448,9 +448,19 @@ Name a real reference app before building (Linear, EA FC — never generic dark-
 > **Done-when:** Research landing matches the approved look, Run-Research demoted + clearly labeled with a defined action, destinations are the heroes. Screenshot.
 > **DONE:** `src/app/(app)/prep/page.tsx` fully rewritten. Reconnaissance found the hub was already one-hero + quiet-jump-rows but with the hierarchy BACKWARDS (AI run = hero) → reframed D2 as "flip the hierarchy". Now: header → "Where you work" 4 destination hero rows (Players → real pool count · Cheat Sheet → your #1 target · Strategies → saved count via new `GET /api/strategies?leagueId` fetch · Sims → New badge, → `/prep/simulate`) → "Latest run highlights" (existing target/avoid chips, kept) → "Data" demoted **Player Pull** strip (freshness Fresh/Stale, one plain what-it-produces line, cost-guard confirm preserved, "Free data pull · no AI credits"). All metrics real/graceful-absent — no fabricated numbers. Approved mockup `d2_research_landing_v1.html`. tsc clean · 392/392 tests · lint clean · build clean. Live render proof (375px mobile, real data 3,148 pool + THE NASTIES): `scratchpad/prep_frame.png`. Commit `c247070` (pushed to origin/master).
 
-### D3 — Strategies redesign + auto-rank + ratings `[Sonnet · +schema]` · class: output/schema
+### D3 — Strategies redesign + auto-rank + ratings `[Sonnet · +schema]` · class: output/schema ✅ DONE (2026-08-15)
 > **Folds in the Strategies feedback (see R9 note).** Kill the Generate button (auto-render), kill Dry-run, **rank by simulated strength-vs-league**, expandable detail (approach · target types · likely-unavailable · strength vs league), **persistent user star-ratings** that re-reconcile on each new pull. Ratings need a small schema add (table/column + re-pull reconciliation) — treat the migration like R7a (own migration, Ops/Security lens).
 > **Done-when:** strategies auto-render ranked, detail expands, ratings persist across a re-pull. Screenshot + migration proof.
+>
+> **Shipped (2026-08-15):**
+> - `supabase/migrations/20260815000001_user_strategy_ratings.sql` — new table UNIQUE(user_id, league_id, archetype), rating CHECK(1-5), RLS `usr_strategy_ratings_own`.
+> - `src/app/api/strategies/ratings/route.ts` — GET list + POST upsert/delete (rating=0 clears).
+> - `src/lib/supabase/database.types.ts` — `UserStrategyRatings` + `UserStrategyRatingsInsert` added.
+> - `src/components/prep/strategy-proposals.tsx` — full rewrite: auto-load on mount, sorted by `projected_ceiling` DESC, ranked expandable rows with star ratings, Regenerate button.
+> - `src/app/(app)/prep/strategies/client.tsx` — Dry-run link + `PlayCircle` import removed.
+> - Ranking key: `projected_ceiling` DESC (R9 board-derived). MC per-strategy ranking deferred to R10b (no per-strategy me-seat in `SimEngineInput`).
+> - **Functional gap (confirmed):** player pull on `/prep` does NOT re-flow strategy proposals. Fix: wire a pull-complete signal to reset `fetchedRef.current` in `StrategyProposals`. Target: R10b or D3-fix.
+> - **Proof:** type-check 0 errors; 392/392 tests green; lint 0 new; build clean; 375px screenshot `d3_strategies_375.png`.
 
 ### D4 — Players card redesign `[Sonnet]` · class: output
 > **Folds in the Players feedback.** **Thinner** list cards; **tier on the card face** (absent today, `ffi-player-intel-card.tsx`); move projected points to the expansion; keep base/mkt/your-value + the range bar Joe likes; add **expert consensus**. (Live-updating values = R11/D6, not here.)

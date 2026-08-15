@@ -9,7 +9,7 @@ import type { StrategyProposal } from '@/lib/research/strategy/research'
 import type { Strategy, StrategyUpdate } from '@/lib/supabase/database.types'
 import type { DraftFormat, Player } from '@/lib/players/types'
 import { cacheToPlayers } from '@/lib/players/convert'
-import { AlertTriangle, Sparkles, SlidersHorizontal, PlayCircle, ChevronRight, ChevronLeft, Pencil } from 'lucide-react'
+import { AlertTriangle, Sparkles, SlidersHorizontal, ChevronRight, ChevronLeft, Pencil } from 'lucide-react'
 
 interface LeagueSummary {
   id: string
@@ -388,22 +388,6 @@ export function StrategiesPageClient() {
         </div>
       )}
 
-      {/* Dry Run — quiet power-tool row */}
-      <Link
-        href="/prep/simulate"
-        className="ffi-card-interactive flex items-center gap-3 mt-6 rounded-[14px] px-4 py-3.5"
-      >
-        <PlayCircle className="h-5 w-5 shrink-0" style={{ color: 'var(--ffi-ink-2)' }} />
-        <div className="min-w-0 flex-1">
-          <div className="text-[14px] font-semibold" style={{ color: 'var(--ffi-ink)' }}>
-            Dry-run this strategy
-          </div>
-          <div className="text-[12px]" style={{ color: 'var(--ffi-ink-3)' }}>
-            Simulate a full auction against the field
-          </div>
-        </div>
-        <ChevronRight className="h-4 w-4 shrink-0" style={{ color: 'var(--ffi-ink-3)' }} />
-      </Link>
     </div>
   )
 }

@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>D3 Strategies screen -- ranked + expandable + ratings</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@600;700&family=Kanit:wght@500;600;700&family=Hanken+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap');
+:root{
+  --bg0:#05070c;--bg1:#08101c;--s1:#121a28;--s2:#1a2637;--s3:#26364e;
+  --hair:rgba(180,200,224,0.10);--hairb:rgba(200,215,235,0.18);
+  --volt:#a63c41;--voltdeep:#6e2225;--voltglow:rgba(166,60,65,0.32);
+  --blue:#5fa8e0;--blueb:#7fc0ea;--blueglow:rgba(95,168,224,0.28);
+  --ink:#eaf1f8;--ink2:#9fb2c6;--ink3:#5e708a;--warn:#ffb05c;--red:#c25a5e;
+  --qb:#ff6b8b;--rb:#56e0a0;--wr:#79a6ff;--te:#ffb05c;
+  --oswald:'Oswald',sans-serif;--cond:'Kanit',sans-serif;--body:'Hanken Grotesk',sans-serif;--mono:'JetBrains Mono',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  background:#0a0f18;font-family:var(--body);
+  display:flex;justify-content:center;gap:32px;flex-wrap:wrap;
+  padding:40px 20px;align-items:flex-start
+}
+.phone{width:375px;border-radius:30px;overflow:hidden;border:1px solid #1c2635;box-shadow:0 30px 80px -20px rgba(0,0,0,.8)}
+.field{
+  background:
+    radial-gradient(60% 42% at 22% -6%,rgba(95,168,224,.16) 0%,transparent 58%),
+    radial-gradient(46% 40% at 92% 6%,rgba(166,60,65,.06) 0%,transparent 55%),
+    radial-gradient(60% 50% at 50% 116%,rgba(95,168,224,.12) 0%,transparent 60%),
+    linear-gradient(180deg,#0c1524 0%,#08101c 50%,#05070c 100%);
+  min-height:812px;padding:20px 16px 88px;
+}
+.capt{width:375px;color:#8aa0b8;font-size:12px;line-height:1.55;margin-top:8px}
+.capt b{color:#cfe0f0}
+
+/* header */
+.back{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--ink3);margin-bottom:10px;font-family:var(--cond);font-weight:600;letter-spacing:.04em}
+.back svg{width:10px;height:10px;stroke:var(--ink3);stroke-width:2.5;fill:none}
+.hrow{display:flex;align-items:center;gap:10px;margin-bottom:20px}
+.h1{font-family:var(--oswald);color:var(--red);font-weight:700;font-size:26px;line-height:1;letter-spacing:.2px}
+.lchip{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:5px 11px;
+  font-family:var(--cond);font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--blueb);background:rgba(95,168,224,.10);border:1px solid rgba(95,168,224,.20)}
+.ldot{width:5px;height:5px;border-radius:50%;background:var(--volt)}
+
+/* quiet label */
+.qlabel{font-family:var(--cond);font-size:9.5px;font-weight:700;letter-spacing:.28em;text-transform:uppercase;color:var(--ink3);margin:0 0 8px 2px;display:block}
+
+/* strategy row */
+.srow{
+  position:relative;overflow:hidden;border-radius:14px;margin-bottom:7px;
+  background:var(--s2);border:1px solid var(--hair);
+  transition:border-color .15s
+}
+.srow.expanded{border-color:var(--hairb)}
+.srow-inner{display:flex;align-items:center;gap:0;padding:13px 13px 13px 0}
+
+/* rank badge */
+.rank{
+  width:32px;min-width:32px;display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-weight:700;font-size:11px;color:var(--ink3)
+}
+.rank.top{color:var(--volt)}
+
+/* left red accent on top-ranked */
+.srow.rank1::before{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:3px;
+  background:linear-gradient(180deg,var(--volt),var(--voltdeep))
+}
+
+/* main content area */
+.srow-main{flex:1;min-width:0}
+.srow-name{
+  font-family:var(--cond);font-weight:700;font-size:15px;color:var(--ink);
+  line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis
+}
+.srow-meta{display:flex;align-items:center;gap:7px;margin-top:4px}
+.archchip{
+  font-family:var(--cond);font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  border-radius:5px;padding:2px 6px;color:var(--ink2);
+  background:rgba(159,178,198,.10);border:1px solid rgba(159,178,198,.14)
+}
+.strbar{flex:1;height:4px;border-radius:99px;background:rgba(95,168,224,.12);overflow:hidden;max-width:64px}
+.strfill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--blue),var(--blueb))}
+.strpct{font-family:var(--mono);font-size:10px;color:var(--ink3);font-weight:500}
+
+/* stars */
+.stars{display:flex;gap:3px;align-items:center;margin-left:4px}
+.star svg{width:13px;height:13px}
+.star.filled svg{fill:var(--volt);stroke:var(--volt)}
+.star.empty svg{fill:none;stroke:var(--ink3);stroke-width:1.5}
+
+/* chevron */
+.chev{width:14px;height:14px;stroke:var(--ink3);stroke-width:2;fill:none;margin-left:8px;flex-shrink:0;opacity:.5;transition:transform .2s}
+.expanded .chev{transform:rotate(90deg)}
+
+/* save button (on first/top row only) */
+.save-btn{
+  margin-left:6px;font-family:var(--cond);font-size:10px;font-weight:700;letter-spacing:.08em;
+  text-transform:uppercase;border-radius:7px;padding:5px 9px;
+  background:var(--volt);color:#fff;border:none;cursor:pointer;flex-shrink:0
+}
+
+/* expanded detail panel */
+.detail{padding:0 13px 14px 32px;border-top:1px solid var(--hair)}
+.dsection{margin-top:12px}
+.dlabel{
+  font-family:var(--cond);font-size:9px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;
+  color:var(--ink3);margin-bottom:5px;display:block
+}
+.dtext{font-size:12px;color:var(--ink2);line-height:1.5}
+.dtypes{display:flex;flex-wrap:wrap;gap:5px;margin-top:0}
+.dtype{
+  display:inline-flex;align-items:center;gap:5px;border-radius:7px;padding:4px 8px;
+  background:rgba(95,168,224,.08);border:1px solid rgba(95,168,224,.16);font-size:11px;color:var(--ink2)
+}
+.pos-rb{width:8px;height:8px;border-radius:2px;background:var(--rb)}
+.pos-wr{width:8px;height:8px;border-radius:2px;background:var(--wr)}
+.pos-te{width:8px;height:8px;border-radius:2px;background:var(--te)}
+.pos-qb{width:8px;height:8px;border-radius:2px;background:var(--qb)}
+.players-cant{display:flex;flex-direction:column;gap:4px}
+.pgone{display:flex;align-items:center;justify-content:space-between;padding:5px 8px;border-radius:8px;background:rgba(255,110,138,.07);border:1px solid rgba(255,110,138,.14)}
+.pgone-name{font-size:12px;color:var(--ink);font-family:var(--cond);font-weight:600}
+.pgone-cost{font-family:var(--mono);font-size:11px;color:var(--warn);font-weight:700}
+.str-detail{display:flex;align-items:center;gap:10px;margin-top:2px}
+.str-bignum{font-family:var(--mono);font-size:22px;font-weight:700;color:var(--ink);line-height:1}
+.str-unit{font-size:11px;color:var(--ink3);line-height:1}
+.str-sep{width:1px;height:28px;background:var(--hair)}
+.str-stat{display:flex;flex-direction:column;gap:2px}
+.str-val{font-family:var(--mono);font-size:14px;font-weight:700;color:var(--blue)}
+.str-lbl{font-size:9.5px;color:var(--ink3);text-transform:uppercase;letter-spacing:.08em;font-family:var(--cond)}
+
+/* star ratings (interactive hint) */
+.stars-input{display:flex;gap:4px;margin-top:8px}
+.stars-input svg{width:16px;height:16px;cursor:pointer}
+.stars-input .filled svg{fill:var(--volt);stroke:var(--volt)}
+.stars-input .empty svg{fill:none;stroke:var(--ink3);stroke-width:1.5}
+.rate-label{font-size:10px;color:var(--ink3);font-family:var(--cond);letter-spacing:.04em;margin-bottom:4px}
+
+/* regenerate quiet link */
+.regen{
+  display:flex;align-items:center;justify-content:center;gap:6px;margin-top:14px;
+  font-family:var(--cond);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--ink3);background:none;border:none;cursor:pointer
+}
+.regen svg{width:12px;height:12px;stroke:var(--ink3);stroke-width:2;fill:none}
+
+/* active strategy hero (compact) */
+.active-hero{
+  border-radius:14px;padding:13px 14px;margin-bottom:16px;
+  background:linear-gradient(145deg,var(--s3),var(--s2));border:1px solid var(--hairb);position:relative;overflow:hidden
+}
+.active-hero::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,var(--volt),var(--voltdeep))}
+.ah-row{display:flex;align-items:center;gap:8px}
+.ah-badge{font-family:var(--cond);font-size:8.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;border-radius:4px;padding:2px 6px;background:var(--volt);color:#fff}
+.ah-name{font-family:var(--cond);font-weight:700;font-size:15px;color:var(--ink)}
+.ah-edit{font-family:var(--cond);font-size:10px;font-weight:700;letter-spacing:.06em;color:var(--ink3);background:rgba(159,178,198,.10);border:1px solid rgba(159,178,198,.16);border-radius:7px;padding:4px 8px}
+</style>
+</head>
+<body>
+
+<!-- Frame 1: ranked list, one row expanded -->
+<div class="phone">
+<div class="field">
+
+  <!-- back + header -->
+  <div class="back">
+    <svg viewBox="0 0 10 10"><polyline points="7,1 3,5 7,9"/></svg>
+    Research
+  </div>
+  <div class="hrow">
+    <h1 class="h1">Strategies</h1>
+    <span class="lchip"><span class="ldot"></span>The Nasties</span>
+  </div>
+
+  <!-- Active strategy mini-hero (kept from current design) -->
+  <div class="active-hero">
+    <div class="ah-row">
+      <span class="ah-badge">Active</span>
+      <span class="ah-name">Zero-to-Hero RB</span>
+      <span style="flex:1"></span>
+      <button class="ah-edit">Edit</button>
+    </div>
+  </div>
+
+  <!-- Ranked proposals (auto-loaded) -->
+  <span class="qlabel">Strategy options</span>
+
+  <!-- Row 1: top ranked, expanded -->
+  <div class="srow rank1 expanded">
+    <div class="srow-inner">
+      <div class="rank top">1</div>
+      <div class="srow-main">
+        <div class="srow-name">Zero-to-Hero RB</div>
+        <div class="srow-meta">
+          <span class="archchip">Hero RB</span>
+          <div class="strbar"><div class="strfill" style="width:88%"></div></div>
+          <span class="strpct">88</span>
+          <div class="stars" style="margin-left:2px">
+            <span class="star filled"><svg viewBox="0 0 12 12"><path d="M6,1l1.5,3h3.2L8,5.7l.8,3.2L6,7.2 3.2 8.9l.8-3.2L1.3,4h3.2Z"/></svg></span>
+            <span class="star filled"><svg viewBox="0 0 12 12"><path d="M6,1l1.5,3h3.2L8,5.7l.8,3.2L6,7.2 3.2 8.9l.8-3.2L1.3,4h3.2Z"/></svg></span>
+            <span class="star filled"><svg viewBox="0 0 12 12"><path d="M6,1l1.5,3h3.2L8,5.7l.8,3.2L6,7.2 3.2 8.9l.8-3.2L1.3,4h3.2Z"/></svg></span>
+            <span class="star filled"><svg viewBox="0 0 12 12"><path d="M6,1l1.5,3h3.2L8,5.7l.8,3.2L6,7.2 3.2 8.9l.8-3.2L1.3,4h3.2Z"/></svg></span>
+            <span class="star empty"><svg viewBox="0 0 12 12"><path d="M6,1l1.5,3h3.2L8,5.7l.8,3.2L6,7.2 3.2 8.9l.8-3.2L1.3,4h3.2Z"/></svg></span>
+          </div>
+        </div>
+      </div>
+      <button class="save-btn">Use</button>
+      <svg class="chev" viewBox="0 0 14 14"><polyline points="4,3 10,7 4,11"/></svg>
+    </div>
+    <!-- expanded detail -->
+    <div class="detail">
+      <div class="dsection">
+        <span class="dlabel">How to approach</span>
+        <p class="dtext">Spend $65-75 on an elite RB1 in the first wave, then stack WR value picks at $10-25. Let TE and QB run to late-round bargains. Your edge is total floor from the anchor.</p>
+      </div>
+      <div class="dsection">
+        <span class="dlabel">Player types to target</span>
+        <div class="dtypes">
+          <span class="dtype"><span class="pos-rb"></span>Elite RB $55-75</span>
+          <span class="dtype"><span class="pos-wr"></span>WR value $10-28</span>
+          <span class="dtype"><span class="pos-te"></span>Late TE $8-15</span>
+          <span class="dtype"><span class="pos-qb"></span>Bargain QB $5-12</span>
+        </div>
+      </div>
+      <div class="dsection">
+        <span class="dlabel">Players you likely can't get</span>
+        <div class="players-cant">
+          <div class="pgone"><span class="pgone-name">Bijan Robinson</span><span class="pgone-cost">$73 avg</span></div>
+          <div class="pgone"><span class="pgone-name">Christian McCaffrey</span><span class="pgone-cost">$68 avg</span></div>
+        </div>
+      </div>
+      <div class="dsection">
+        <span class="dlabel">Strength vs league</span>
+        <div class="str-detail">
+          <div>
+            <div class="str-bignum">88</div>
+            <div class="str-unit">/ 100 score</div>
+          </div>
+          <div class="str-sep"></div>
+          <div class="str-stat">
+            <span class="str-val">$189</span>
+            <span class="str-lbl">Avg target spend</span>
+          </div>
+          <div class="str-stat">
+            <span class="str-val">Aggressive</span>
+            <span class="str-lbl">Risk</span>
+          </div>
+        </div>
+      </div>
+      <div class="dsection">
+        <div class="rate-label">Your rating</div>
+        <div class="stars-input">
+          <span class="filled"><svg viewBox="0 0 16 16"><path d="M8,1.5l1.9,3.8H14l-3.4,2.6 1.3 4L8,9.5 6.1,11.9l1.3-4L4,5.3h4.1Z"/></svg></span>
+          <span class="filled"><svg viewBox="0 0 16 16"><path d="M8,1.5l1.9,3.8H14l-3.4,2.6 1.3 4L8,9.5 6.1,11.9l1.3-4L4,5.3h4.1Z"/></svg></span>
+          <span class="filled"><svg viewBox="0 0 16 16"><path d="M8,1.5l1.9,3.8H14l-3.4,2.6 1.3 4L8,9.5 6.1,11.9l1.3-4L4,5.3h4.1Z"/></svg></span>
+          <span class="filled"><svg viewBox="0 0 16 16"><path d="M8,1.5l1.9,3.8H14l-3.4,2.6 1.3 4L8,9.5 6.1,11.9l1.3-4L4,5.3h4.1Z"/></svg></span>
+          <span class="empty"><svg viewBox="0 0 16 16"><path d="M8,1.5l1.9,3.8H14l-3.4,2.6 1.3 4L8,9.5 6.1,11.9l1.3-4L4,5.3h4.1Z"/></svg></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Row 2: collapsed -->
+  <div class="srow">
+    <div class="srow-inner">
+      <div class="rank">2</div>
+      <div class="srow-main">
+        <div class="srow-name">WR Deep Field</div>
+        <div class="srow-meta">
+          <span class="archchip">Wide Receiver</span>
+          <div class="strbar"><div class="strfill" style="width:74%"></div></div>
+          <span class="strpct">74</span>
+          <div class="stars">
+            <span class="star filled"><svg viewBox="0 0 12 12"><path d="M6,1l1.5,3h3.2L8,5.7l.8,3.2L6,7.2 3.2 8.9l.8-3.2L1.3,4h3.2Z"/></svg></span>
+            <span class="star filled"><svg viewBox="0 0 12 12"><path d="M6,1l1.5,3h3.2L8,5.7l.8,3.2L6,7.2 3.2 8.9l.8-3.2L1.3,4h3.2Z"/></svg></span>
+            <span class="star filled"><svg viewBox="0 0 12 12"><path d="M6,1l1.5,3h3.2L8,5.7l.8,3.2L6,7.2 3.2 8.9l.8-3.2L1.3,4h3.2Z"/></svg></span>
+            <span class="star empty"><svg viewBox="0 0 12 12"><path d="M6,1l1.5,3h3.2L8,5.7l.8,3.2L6,7.2 3.2 8.9l.8-3.2L1.3,4h3.2Z"/></svg></span>
+            <span class="star empty"><svg viewBox="0 0 12 12"><path d="M6,1l1.5,3h3.2L8,5.7l.8,3.2L6,7.2 3.2 8.9l.8-3.2L1.3,4h3.2Z"/></svg></span>
+          </div>
+        </div>
+      </div>
+      <svg class="chev" viewBox="0 0 14 14"><polyline points="4,3 10,7 4,11"/></svg>
+    </div>
+  </div>
+
+  <!-- Row 3: collapsed -->
+  <div class="srow">
+    <div class="srow-inner">
+      <div class="rank">3</div>
+      <div class="srow-main">
+        <div class="srow-name">Balanced Build</div>
+        <div class="srow-meta">
+          <span class="archchip">Balanced</span>
+          <div class="strbar"><div class="strfill" style="width:61%"></div></div>
+          <span class="strpct">61</span>
+          <div class="stars">
+            <span class="star filled"><svg viewBox="0 0 12 12"><path d="M6,1l1.5,3h3.2L8,5.7l.8,3.2L6,7.2 3.2 8.9l.8-3.2L1.3,4h3.2Z"/></svg></span>
+            <span class="star filled"><svg viewBox="0 0 12 12"><path d="M6,1l1.5,3h3.2L8,5.7l.8,3.2L6,7.2 3.2 8.9l.8-3.2L1.3,4h3.2Z"/></svg></span>
+            <span class="star empty"><svg viewBox="0 0 12 12"><path d="M6,1l1.5,3h3.2L8,5.7l.8,3.2L6,7.2 3.2 8.9l.8-3.2L1.3,4h3.2Z"/></svg></span>
+            <span class="star empty"><svg viewBox="0 0 12 12"><path d="M6,1l1.5,3h3.2L8,5.7l.8,3.2L6,7.2 3.2 8.9l.8-3.2L1.3,4h3.2Z"/></svg></span>
+            <span class="star empty"><svg viewBox="0 0 12 12"><path d="M6,1l1.5,3h3.2L8,5.7l.8,3.2L6,7.2 3.2 8.9l.8-3.2L1.3,4h3.2Z"/></svg></span>
+          </div>
+        </div>
+      </div>
+      <svg class="chev" viewBox="0 0 14 14"><polyline points="4,3 10,7 4,11"/></svg>
+    </div>
+  </div>
+
+  <!-- Row 4: collapsed, no rating yet -->
+  <div class="srow">
+    <div class="srow-inner">
+      <div class="rank">4</div>
+      <div class="srow-main">
+        <div class="srow-name">Scarcity Punt</div>
+        <div class="srow-meta">
+          <span class="archchip">Value Spread</span>
+          <div class="strbar"><div class="strfill" style="width:47%"></div></div>
+          <span class="strpct">47</span>
+          <div class="stars">
+            <span class="star empty"><svg viewBox="0 0 12 12"><path d="M6,1l1.5,3h3.2L8,5.7l.8,3.2L6,7.2 3.2 8.9l.8-3.2L1.3,4h3.2Z"/></svg></span>
+            <span class="star empty"><svg viewBox="0 0 12 12"><path d="M6,1l1.5,3h3.2L8,5.7l.8,3.2L6,7.2 3.2 8.9l.8-3.2L1.3,4h3.2Z"/></svg></span>
+            <span class="star empty"><svg viewBox="0 0 12 12"><path d="M6,1l1.5,3h3.2L8,5.7l.8,3.2L6,7.2 3.2 8.9l.8-3.2L1.3,4h3.2Z"/></svg></span>
+            <span class="star empty"><svg viewBox="0 0 12 12"><path d="M6,1l1.5,3h3.2L8,5.7l.8,3.2L6,7.2 3.2 8.9l.8-3.2L1.3,4h3.2Z"/></svg></span>
+            <span class="star empty"><svg viewBox="0 0 12 12"><path d="M6,1l1.5,3h3.2L8,5.7l.8,3.2L6,7.2 3.2 8.9l.8-3.2L1.3,4h3.2Z"/></svg></span>
+          </div>
+        </div>
+      </div>
+      <svg class="chev" viewBox="0 0 14 14"><polyline points="4,3 10,7 4,11"/></svg>
+    </div>
+  </div>
+
+  <!-- quiet regenerate -->
+  <button class="regen">
+    <svg viewBox="0 0 12 12"><polyline points="10,2 10,5 7,5"/><path d="M10,5A5,5,0,1,1,8.5,2.5"/></svg>
+    Regenerate strategies
+  </button>
+
+</div><!-- .field -->
+</div><!-- .phone -->
+
+<!-- annotation -->
+<div style="width:340px">
+  <div style="font-family:'Hanken Grotesk',sans-serif;color:#9fb2c6;font-size:13px;line-height:1.7;padding-top:8px">
+    <div style="color:#eaf1f8;font-size:14px;font-weight:700;font-family:'Kanit',sans-serif;margin-bottom:12px">D3 Strategies screen -- PROPOSED</div>
+    <p><b style="color:#c25a5e">Reference: Linear</b> (ranked list + tap-to-expand rows, compact row density, inline action, quiet left accent on #1)</p>
+    <br>
+    <p><b style="color:#7fc0ea">What changed from today:</b></p>
+    <ul style="padding-left:16px;margin-top:6px">
+      <li>"Generate Strategies" button gone -- proposals auto-load on screen entry</li>
+      <li>Proposals ranked #1-N by solver strength score (R9 projected_ceiling)</li>
+      <li>Red left-rail accent on #1 (highest strength)</li>
+      <li>Tap any row to expand: approach, target types, who you can't get, strength detail</li>
+      <li>5-star rating inside the expanded panel -- saves to DB by archetype key, survives re-load and re-generate</li>
+      <li>"Use" button on the top row inline (sets active) -- other rows get it in the expanded panel</li>
+      <li>Compact "Regenerate strategies" quiet link at the bottom -- not a hero</li>
+      <li>Dry-run link completely removed</li>
+    </ul>
+    <br>
+    <p><b style="color:#7fc0ea">What stays:</b></p>
+    <ul style="padding-left:16px;margin-top:6px">
+      <li>Active-strategy mini-hero at the top (current design, kept)</li>
+      <li>Strategy editor (edit button on the hero)</li>
+      <li>All saved strategies list (below, off-screen)</li>
+    </ul>
+    <br>
+    <p style="color:#5e708a;font-size:11px">Schema add: user_strategy_ratings (user_id + league_id + archetype + rating 1-5, RLS user-scoped). Ratings key on archetype so they survive re-generate.</p>
+  </div>
+</div>
+
+</body></html>

@@ -23,15 +23,17 @@ The prior plan (S1–S8 / P2 DR / P3 VAL) marked the app "done" while it (a) pri
 
 ## Next open item
 
-### ✅ D0 CLOSED + ✅ D1 DONE + ✅ D2 DONE — next open item is **D3** (Strategies redesign + auto-rank + ratings)
+### ✅ D0 + D1 + D2 + D3 DONE — next open item is **D4** (Players card redesign)
 
-**D2 DONE (2026-08-15):** Research landing hierarchy FLIPPED in `src/app/(app)/prep/page.tsx`. The 4 destinations (Players · Cheat Sheet · Strategies · Sims) are now hero rows with real glanceable metrics; "Run Research" demoted to a bottom **Player Pull** Data strip with a plain what-it-produces line, Fresh/Stale freshness, and the preserved cost-guard confirm ("Free data pull · no AI credits"). Sims row added → `/prep/simulate`. Strategies metric sourced from new `GET /api/strategies?leagueId` fetch — no fabricated numbers. Approved mockup `d2_research_landing_v1.html`; live 375px proof `scratchpad/prep_frame.png` (real data: 3,148 pool, THE NASTIES). Gate: tsc clean · 392/392 · lint clean · build clean. Full entry in `CHANGELOG.md` + `BUILD_PLAN.md` D2.
+**D3 DONE (2026-08-15):** Strategies page fully redesigned. Generate button + Dry-run link removed. Strategies now auto-load on mount sorted by `projected_ceiling` DESC. Ranked expandable rows with red left-rail on #1, star ratings (read in header, interactive when expanded), expandable detail (HOW TO APPROACH / PLAYER TYPES TO TARGET / PLAYERS YOU LIKELY CAN'T GET / STRENGTH VS LEAGUE / YOUR RATING). Persistent ratings table `user_strategy_ratings` (migration + API route + types). Quiet "Regenerate strategies" button at bottom. Functional gap confirmed and logged in BUILD_PLAN: player pull on `/prep` does NOT re-flow strategy proposals. Gate: tsc 0 errors · 392/392 · lint 0 new · build clean. Screenshot: `.claude/mockups/d3_strategies_375.png`.
 
-**D0 gate CLOSED (Joe, 2026-08-14):** Joe locked the **"SHIELD" (Option B)** identity — navy-steel field `#0C1524→#05070C` + lifted steel-blue cards `#26364E→#1A2637` + chrome-silver titles + muted brick-RED action accent `#A63C41` (sparing) + steel-blue info `#5FA8E0`; **Kanit + Hanken Grotesk** type; **duotone** icons (red chip + white glyph). NO gold, NO volt-green. Full record: `.claude/mockups/d0-craft/NOTES.md`; canonical screen `.claude/mockups/d0-craft/optionB_shield.png`. (Option A "League Trophy" kept on file as an alternate; its oak/engraving refinement parked.)
+**D2 DONE (2026-08-15):** Research landing hierarchy FLIPPED in `src/app/(app)/prep/page.tsx`. The 4 destinations (Players · Cheat Sheet · Strategies · Sims) are now hero rows with real glanceable metrics; "Run Research" demoted to a bottom **Player Pull** Data strip. Gate: tsc clean · 392/392 · lint clean · build clean. Full entry in `CHANGELOG.md` + `BUILD_PLAN.md` D2.
 
-**D1 DONE (2026-08-14):** SHIELD ported into the real app by a "names stable, values swapped" repaint (all 61 screens shift at once). Touched `src/app/layout.tsx` (Kanit+Hanken fonts, red theme-color), `src/app/globals.css` (full palette swap, 0 leftover v3 tokens, red/steel buttons, `--ffi-gold` drift resolved), `src/components/layout/app-shell.tsx` (Zap→Gavel, red nav glow), `src/app/(app)/prep/page.tsx` (one-screen proof: duotone-red icon chips, steel cost-guard box), and reconciled `.claude/DESIGN_SYSTEM.md` v3 GRIDIRON → **v4 SHIELD**. Proof `.claude/mockups/d0-craft/d1_prep_shield.png`. Gate: 392/392 tests green, lint 0 new, no h-overflow at 375px. Full entry in `CHANGELOG.md` + `BUILD_PLAN.md` D1.
+**D0 gate CLOSED (Joe, 2026-08-14):** Joe locked the **"SHIELD" (Option B)** identity. Full record: `.claude/mockups/d0-craft/NOTES.md`.
 
-**Next session does (D3, see BUILD_PLAN D3):** Strategies redesign — kill the Generate/Dry-run buttons (auto-render ranked by simulated strength-vs-league), expandable detail per strategy, persistent user star-ratings that re-reconcile on each new pull. Needs a small schema add (Ops/Security lens). Screenshot + migration proof.
+**D1 DONE (2026-08-14):** SHIELD ported into the real app. Full entry in `CHANGELOG.md` + `BUILD_PLAN.md` D1.
+
+**Next session does (D4, see BUILD_PLAN D4):** Players card redesign — thinner cards, tier on card face, projected points demoted to expansion, expert consensus added. Screenshot required.
 
 **D1 tail (separate follow-on, not blocking D3):** sweep component-level inline color literals across the other ~60 screens; decide the position-color system (green RB `#56E0A0`); the Live Auction Room keeps its own scoped `theme.ts` four-move palette for now.
 
