@@ -29,7 +29,7 @@ export function FFIAIInsight({ explanation, confidence }: FFIAIInsightProps) {
     ? '#f59e0b'   // amber for thin data
     : isLowConfidence
     ? '#ff716c'   // red for conflicting signals
-    : '#2ff801'   // green default
+    : '#5FA8E0'   // green default
 
   return (
     <div className="bg-black/80 p-5 space-y-4 border-t border-[#3c4a53]/10">
@@ -45,11 +45,11 @@ export function FFIAIInsight({ explanation, confidence }: FFIAIInsightProps) {
 
       {/* Insight header and content */}
       <div className="flex items-start gap-3">
-        <span className="material-symbols-outlined text-[#2ff801] text-sm mt-1" style={{ fontVariationSettings: "'FILL' 1" }}>
+        <span className="material-symbols-outlined text-[#5FA8E0] text-sm mt-1" style={{ fontVariationSettings: "'FILL' 1" }}>
           query_stats
         </span>
         <div className="space-y-2 flex-1">
-          <h4 className="font-headline text-xs font-bold text-[#2ff801] uppercase tracking-widest">
+          <h4 className="font-headline text-xs font-bold text-[#5FA8E0] uppercase tracking-widest">
             Tactical Insight
           </h4>
           <p className="text-xs text-[#9eadb8] leading-relaxed">
@@ -115,7 +115,7 @@ export function FFIAIInsight({ explanation, confidence }: FFIAIInsightProps) {
                 key={i}
                 className={`px-2 py-1 rounded text-[9px] font-bold tracking-wider ${
                   factor.impact === 'positive'
-                    ? 'bg-[#106e00]/30 text-[#2ff801]'
+                    ? 'bg-[#5FA8E0]/15 text-[#5FA8E0]'
                     : factor.impact === 'negative'
                       ? 'bg-[#9f0519]/20 text-[#ff716c]'
                       : 'bg-[#142834] text-[#9eadb8]'

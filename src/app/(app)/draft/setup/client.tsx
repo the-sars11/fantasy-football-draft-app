@@ -247,14 +247,14 @@ export function DraftSetupClient() {
         {selectedLeague ? (
           <div className={`relative rounded-2xl border-2 p-8 text-center space-y-2 overflow-hidden ${
             isAuction
-              ? 'border-[#2ff801]/40 bg-[#2ff801]/5'
+              ? 'border-[#5FA8E0]/40 bg-[#5FA8E0]/5'
               : 'border-[#8bacff]/40 bg-[#8bacff]/5'
           }`}>
             <div className={`absolute inset-0 blur-3xl -z-10 opacity-10 ${
-              isAuction ? 'bg-[#2ff801]' : 'bg-[#8bacff]'
+              isAuction ? 'bg-[#5FA8E0]' : 'bg-[#8bacff]'
             }`} />
             <div className={`font-headline text-6xl font-black tracking-tighter uppercase leading-none ${
-              isAuction ? 'text-[#2ff801]' : 'text-[#8bacff]'
+              isAuction ? 'text-[#5FA8E0]' : 'text-[#8bacff]'
             }`}>
               {isAuction ? 'AUCTION' : 'SNAKE'}
             </div>
@@ -342,7 +342,7 @@ export function DraftSetupClient() {
               onClick={() => setDraftMode(mode)}
               className={`w-full flex items-center gap-4 p-4 rounded-2xl border transition-all text-left
                 ${draftMode === mode
-                  ? 'border-[#2ff801]/50 bg-[#2ff801]/5'
+                  ? 'border-[#5FA8E0]/50 bg-[#5FA8E0]/5'
                   : 'border-[var(--ffi-border)]/20 bg-[var(--ffi-surface)] hover:border-[#8bacff]/30'
                 }`}
             >
@@ -354,7 +354,7 @@ export function DraftSetupClient() {
                 <div className="ffi-body-md text-[var(--ffi-text-secondary)] text-sm">{desc}</div>
               </div>
               {draftMode === mode && (
-                <Check className="h-5 w-5 text-[#2ff801] shrink-0" aria-hidden="true" />
+                <Check className="h-5 w-5 text-[#5FA8E0] shrink-0" aria-hidden="true" />
               )}
             </button>
           ))}
@@ -432,12 +432,12 @@ export function DraftSetupClient() {
                 onClick={() => setTrashTalkMode(mode)}
                 className={`flex flex-col items-center gap-1 p-3 rounded-xl border transition-all text-center
                   ${trashTalkMode === mode
-                    ? 'border-[#2ff801]/50 bg-[#2ff801]/5'
+                    ? 'border-[#5FA8E0]/50 bg-[#5FA8E0]/5'
                     : 'border-[var(--ffi-border)]/20 bg-[var(--ffi-surface)] hover:border-[#8bacff]/30'
                   }`}
               >
                 <Icon className="h-5 w-5" aria-hidden="true" />
-                <span className={`ffi-caption font-semibold ${trashTalkMode === mode ? 'text-[#2ff801]' : 'text-white'}`}>
+                <span className={`ffi-caption font-semibold ${trashTalkMode === mode ? 'text-[#5FA8E0]' : 'text-white'}`}>
                   {label}
                 </span>
                 <span className="ffi-caption text-[var(--ffi-text-muted)] text-[10px]">{desc}</span>
@@ -466,7 +466,7 @@ export function DraftSetupClient() {
                 }
                 className={`w-full flex items-center gap-3 p-3 rounded-xl border transition-all text-left
                   ${auctioneerConnectionType === 'localstorage'
-                    ? 'border-[#2ff801]/50 bg-[#2ff801]/5'
+                    ? 'border-[#5FA8E0]/50 bg-[#5FA8E0]/5'
                     : 'border-[var(--ffi-border)]/20 bg-[var(--ffi-surface)] hover:border-[#8bacff]/30'
                   }`}
               >
@@ -478,7 +478,7 @@ export function DraftSetupClient() {
                   </div>
                 </div>
                 {auctioneerConnectionType === 'localstorage' && (
-                  <Check className="h-5 w-5 text-[#2ff801] shrink-0" aria-hidden="true" />
+                  <Check className="h-5 w-5 text-[#5FA8E0] shrink-0" aria-hidden="true" />
                 )}
               </button>
 
@@ -508,7 +508,7 @@ export function DraftSetupClient() {
                 }}
                 className={`w-full flex items-center gap-3 p-3 rounded-xl border transition-all text-left
                   ${auctioneerConnectionType === 'file'
-                    ? 'border-[#2ff801]/50 bg-[#2ff801]/5'
+                    ? 'border-[#5FA8E0]/50 bg-[#5FA8E0]/5'
                     : 'border-[var(--ffi-border)]/20 bg-[var(--ffi-surface)] hover:border-[#8bacff]/30'
                   }`}
               >
@@ -522,7 +522,7 @@ export function DraftSetupClient() {
                   </div>
                 </div>
                 {auctioneerConnectionType === 'file' && (
-                  <Check className="h-5 w-5 text-[#2ff801] shrink-0" aria-hidden="true" />
+                  <Check className="h-5 w-5 text-[#5FA8E0] shrink-0" aria-hidden="true" />
                 )}
               </button>
             </div>

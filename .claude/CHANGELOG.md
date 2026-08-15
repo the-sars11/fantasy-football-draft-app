@@ -26,6 +26,28 @@
 
 ---
 
+## 2026-08-15 / D2 green sweep (part 1) — neon green → steel-blue, live screens
+
+**Task:** Joe: "start the green and gold sweep." Boundary first — the Shield palette KEEPS greens/golds on purpose (position colors `--ffi-pos-rb #56E0A0`, the live-room four-move system `ROOM.gold`/lime/`#22c55e`). The slop is the old pre-Shield neon `#2ff801`. Direction board (`green_sweep_direction.png`) offered green vs steel-blue vs brick-red on the real card motifs; **Joe picked steel-blue** (Shield: "success reads steel-blue, never red" + red stays sparing). **Scope: Joe picked live screens only** — skip the parked season/inseason screens (they get Shield in the P8 rebuild). | **Class:** shared/output | **Lenses:** Design, QA
+
+**What shipped (4 live files, ~42 spots):**
+- **`src/components/prep/ffi-player-intel-card.tsx`** (19) — target/elite/value/range/stepper accents `#2ff801` → `#5FA8E0`, glows `rgba(47,248,1,x)` → `rgba(95,168,224,x)`.
+- **`src/components/draft/ffi-player-card.tsx`** (7) — target highlights + glows → steel-blue.
+- **`src/components/draft/ffi-ai-insight.tsx`** (4) — good/default confidence → steel-blue; paired dark-green chip bg `#106e00/30` → `#5FA8E0/15`.
+- **`src/app/(app)/draft/setup/client.tsx`** (11) — selected-format / checkmark / active-mode states → steel-blue.
+
+**Held for a separate gold/status decision (NOT swept):**
+- **`connection-status-pill.tsx`** LIVE green — it's a LIVE/STALE/OFFLINE traffic-light (green/amber/red), functional status not decor. Needs its own call (keep green vs soften vs blue).
+- **`--ffi-gold` global token** — "your pick / elite rank / celebration" self-indicator (pick-feed, pick-lower-third, trash-talk, player-card rank, review celebration). It's a re-pointable token; deserves its own direction board like green got.
+- **`ffi-ai-insight` amber warning `#f59e0b`** — semantic "thin data" warning; aligns to Shield warning `#FFB05C` in the warm-color pass.
+- **`lib/draft/export.ts`** golds — PDF/CSV export styling, not a screen. Out of scope for "live screens."
+
+**Untouched by rule:** all of `src/components/draft/live-room/` (sanctioned four-move palette); position colors; parked season/`inseason` screens (~63 green spots, deferred to P8 rebuild).
+
+**Gate:** `tsc --noEmit` clean; `test:run` 392/392 pass; grep confirms 0 `#2ff801` left in the 4 live files. Live-data cards render behind Supabase auth (unavailable in this env), so treatment proof is the direction board `green_sweep_direction.png` on the real motifs, not a live-data screenshot. $0.
+
+---
+
 ## 2026-08-14 / D0+D1 -- SHIELD identity locked (D0) + ported into the app (D1)
 
 **Task:** Close the D0 identity gate and ship D1 — rebuild the shared visual layer to the approved direction and prove it on one real screen. | **Class:** shared/output | **Lenses:** Design, QA, Architecture

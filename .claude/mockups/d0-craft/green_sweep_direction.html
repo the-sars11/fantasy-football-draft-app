@@ -1,0 +1,107 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@600;700&family=Hanken+Grotesk:wght@600;700&family=JetBrains+Mono:wght@700&display=swap');
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:#08101C; font-family:'Hanken Grotesk',sans-serif; padding:28px; color:#EAF1F8; }
+  .field {
+    background:
+      radial-gradient(60% 42% at 22% -6%, rgba(95,168,224,0.16), transparent 58%),
+      radial-gradient(46% 40% at 92% 6%, rgba(166,60,65,0.06), transparent 55%),
+      linear-gradient(180deg,#0C1524,#08101C 50%,#05070C);
+    border-radius:20px; padding:26px;
+  }
+  h1 { font-family:'Kanit'; font-size:15px; letter-spacing:.14em; text-transform:uppercase; color:#9FB2C6; margin-bottom:4px; }
+  .sub { font-size:12px; color:#5E708A; margin-bottom:24px; }
+  .cols { display:grid; grid-template-columns:repeat(3,1fr); gap:18px; }
+  .col > .tag { font-family:'Kanit'; font-size:11px; letter-spacing:.12em; text-transform:uppercase; margin-bottom:12px; display:block; }
+  .card { background:#1A2637; border:1px solid rgba(180,200,224,0.10); border-radius:16px; padding:16px; box-shadow:0 8px 32px rgba(0,0,0,.36); }
+  .rowlbl { font-family:'Hanken Grotesk'; font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; }
+  .name { font-family:'Kanit'; font-weight:700; font-size:18px; color:#EAF1F8; }
+  .pos { font-family:'Kanit'; font-size:10px; font-weight:700; padding:2px 6px; border-radius:5px; background:#56E0A0; color:#08101C; }
+  .pill { display:inline-flex; align-items:center; gap:5px; padding:3px 9px; border-radius:999px; font-size:10px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; }
+  .bar { height:7px; border-radius:6px; overflow:hidden; background:rgba(255,255,255,0.06); margin-top:6px; }
+  .bar > i { display:block; height:100%; width:62%; }
+  .num { font-family:'JetBrains Mono'; font-weight:700; }
+  .step { display:inline-flex; align-items:center; gap:8px; }
+  .step button { width:26px; height:26px; border:none; border-radius:8px; font-weight:700; font-size:14px; cursor:default; }
+  .r { display:flex; align-items:center; justify-content:space-between; margin-top:13px; }
+  .divlabel { display:flex; gap:9px; align-items:baseline; margin-top:13px; }
+  .divlabel .rowlbl { width:74px; flex:none; }
+</style>
+</head>
+<body>
+<div class="field">
+  <h1>Green sweep — direction board</h1>
+  <div class="sub">Same player-intel card motifs. LEFT = current neon-green slop (#2ff801). MIDDLE = steel-blue (Shield "success reads blue"). RIGHT = brick-red pop. Pick one.</div>
+  <div class="cols">
+
+    <!-- GREEN -->
+    <div class="col">
+      <span class="tag" style="color:#2ff801">A · current (neon green)</span>
+      <div class="card">
+        <div class="r"><span class="name">Bijan Robinson</span><span class="pos">RB</span></div>
+        <div class="r">
+          <span class="pill" style="background:rgba(47,248,1,.30);color:#2ff801;box-shadow:0 0 8px rgba(47,248,1,.4)">◎ Target</span>
+          <span class="pill" style="background:rgba(47,248,1,.18);color:#2ff801">⚡ Elite</span>
+        </div>
+        <div class="divlabel"><span class="rowlbl" style="color:#2ff801">Range</span>
+          <div style="flex:1"><div class="bar"><i style="background:rgba(47,248,1,.55)"></i></div></div></div>
+        <div class="divlabel"><span class="rowlbl" style="color:#2ff801">Projection</span>
+          <span class="num" style="color:#EAF1F8">284.6 pts</span></div>
+        <div class="r"><span class="step">
+          <button style="background:rgba(47,248,1,.10);color:#2ff801">−</button>
+          <span class="num" style="color:#2ff801;font-size:17px">$48</span>
+          <button style="background:rgba(47,248,1,.10);color:#2ff801">+</button>
+        </span><span style="color:#2ff801">▸ push value</span></div>
+      </div>
+    </div>
+
+    <!-- STEEL BLUE -->
+    <div class="col">
+      <span class="tag" style="color:#5FA8E0">B · steel-blue (recommended)</span>
+      <div class="card">
+        <div class="r"><span class="name">Bijan Robinson</span><span class="pos">RB</span></div>
+        <div class="r">
+          <span class="pill" style="background:rgba(95,168,224,.30);color:#5FA8E0;box-shadow:0 0 8px rgba(95,168,224,.4)">◎ Target</span>
+          <span class="pill" style="background:rgba(95,168,224,.18);color:#5FA8E0">⚡ Elite</span>
+        </div>
+        <div class="divlabel"><span class="rowlbl" style="color:#5FA8E0">Range</span>
+          <div style="flex:1"><div class="bar"><i style="background:rgba(95,168,224,.55)"></i></div></div></div>
+        <div class="divlabel"><span class="rowlbl" style="color:#5FA8E0">Projection</span>
+          <span class="num" style="color:#EAF1F8">284.6 pts</span></div>
+        <div class="r"><span class="step">
+          <button style="background:rgba(95,168,224,.10);color:#5FA8E0">−</button>
+          <span class="num" style="color:#5FA8E0;font-size:17px">$48</span>
+          <button style="background:rgba(95,168,224,.10);color:#5FA8E0">+</button>
+        </span><span style="color:#5FA8E0">▸ push value</span></div>
+      </div>
+    </div>
+
+    <!-- RED -->
+    <div class="col">
+      <span class="tag" style="color:#C25A5E">C · brick-red pop</span>
+      <div class="card">
+        <div class="r"><span class="name">Bijan Robinson</span><span class="pos">RB</span></div>
+        <div class="r">
+          <span class="pill" style="background:rgba(166,60,65,.30);color:#C25A5E;box-shadow:0 0 8px rgba(166,60,65,.4)">◎ Target</span>
+          <span class="pill" style="background:rgba(166,60,65,.18);color:#C25A5E">⚡ Elite</span>
+        </div>
+        <div class="divlabel"><span class="rowlbl" style="color:#C25A5E">Range</span>
+          <div style="flex:1"><div class="bar"><i style="background:rgba(166,60,65,.55)"></i></div></div></div>
+        <div class="divlabel"><span class="rowlbl" style="color:#C25A5E">Projection</span>
+          <span class="num" style="color:#EAF1F8">284.6 pts</span></div>
+        <div class="r"><span class="step">
+          <button style="background:rgba(166,60,65,.10);color:#C25A5E">−</button>
+          <span class="num" style="color:#C25A5E;font-size:17px">$48</span>
+          <button style="background:rgba(166,60,65,.10);color:#C25A5E">+</button>
+        </span><span style="color:#C25A5E">▸ push value</span></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</body>
+</html>

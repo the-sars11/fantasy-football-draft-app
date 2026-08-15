@@ -77,14 +77,14 @@ const BADGE_CONFIG: Record<BadgeType, {
 }> = {
   target: {
     bgClass: 'bg-secondary-container/40',
-    textClass: 'text-[#2ff801]',
+    textClass: 'text-[#5FA8E0]',
     label: 'TARGET',
     icon: Target,
     glow: true,
   },
   breakout: {
     bgClass: 'bg-secondary-container/30',
-    textClass: 'text-[#2ff801]',
+    textClass: 'text-[#5FA8E0]',
     label: 'BREAKOUT',
     icon: Zap,
   },
@@ -96,7 +96,7 @@ const BADGE_CONFIG: Record<BadgeType, {
   },
   sleeper: {
     bgClass: 'bg-secondary-container/30',
-    textClass: 'text-[#2ff801]',
+    textClass: 'text-[#5FA8E0]',
     label: 'SLEEPER',
     icon: Star,
   },
@@ -119,7 +119,7 @@ const BADGE_CONFIG: Record<BadgeType, {
   },
   recommended: {
     bgClass: 'bg-secondary-container/30',
-    textClass: 'text-[#2ff801]',
+    textClass: 'text-[#5FA8E0]',
     label: 'RECOMMENDED',
   },
   'best-available': {
@@ -240,13 +240,13 @@ export function FFIPlayerCard({
     <div className="relative group">
       {/* Ambient glow for highlighted players */}
       {isHighlighted && (
-        <div className="absolute inset-0 bg-[#2ff801]/5 blur-2xl rounded-xl -z-10" />
+        <div className="absolute inset-0 bg-[#5FA8E0]/5 blur-2xl rounded-xl -z-10" />
       )}
 
       <div className={`
         glass-panel rounded-xl overflow-hidden transition-all cursor-pointer
         ${isHighlighted
-          ? 'shadow-[0_0_20px_rgba(47,248,1,0.05)] border border-[#2ff801]/10'
+          ? 'shadow-[0_0_20px_rgba(95,168,224,0.05)] border border-[#5FA8E0]/10'
           : 'border border-[#8bacff]/5 hover:border-[#8bacff]/20'
         }
       `}>
@@ -284,7 +284,7 @@ export function FFIPlayerCard({
               <div className="flex gap-2 mt-2">
                 <span
                   className={`px-2 py-0.5 rounded-full text-[9px] font-bold tracking-wider ${getBadgeClasses(compactBadge.type)} ${
-                    compactBadge.type === 'target' ? 'shadow-[0_0_8px_rgba(47,248,1,0.4)]' : ''
+                    compactBadge.type === 'target' ? 'shadow-[0_0_8px_rgba(95,168,224,0.4)]' : ''
                   }`}
                 >
                   {getBadgeLabel(compactBadge.type)}
@@ -299,7 +299,7 @@ export function FFIPlayerCard({
                   <div key={`${badge.type}-${idx}`} className="flex items-start gap-2">
                     <span
                       className={`px-2 py-0.5 rounded-full text-[9px] font-bold tracking-wider shrink-0 ${getBadgeClasses(badge.type)} ${
-                        badge.type === 'target' ? 'shadow-[0_0_8px_rgba(47,248,1,0.4)]' : ''
+                        badge.type === 'target' ? 'shadow-[0_0_8px_rgba(95,168,224,0.4)]' : ''
                       }`}
                     >
                       {getBadgeLabel(badge.type)}
@@ -334,7 +334,7 @@ export function FFIPlayerCard({
                 </div>
                 <div className={`font-body text-[9px] font-bold tracking-wider ${
                   maxBidDelta != null && maxBidDelta > 2
-                    ? 'text-[#2ff801]'
+                    ? 'text-[#5FA8E0]'
                     : maxBidDelta != null && maxBidDelta < -2
                       ? 'text-[#f97316]'
                       : 'text-[#9eadb8]'

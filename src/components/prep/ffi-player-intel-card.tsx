@@ -50,8 +50,8 @@ interface TagStyle {
 }
 
 const TAG_STYLE: Record<PlayerTagId, TagStyle> = {
-  elite: { bgClass: 'bg-[#2ff801]/18', textClass: 'text-[#2ff801]', icon: Zap, glow: true },
-  pocket: { bgClass: 'bg-[#2ff801]/14', textClass: 'text-[#2ff801]', icon: TrendingUp },
+  elite: { bgClass: 'bg-[#5FA8E0]/18', textClass: 'text-[#5FA8E0]', icon: Zap, glow: true },
+  pocket: { bgClass: 'bg-[#5FA8E0]/14', textClass: 'text-[#5FA8E0]', icon: TrendingUp },
   tax: { bgClass: 'bg-[#ff716c]/16', textClass: 'text-[#ff716c]', icon: TrendingDown },
   volatile: { bgClass: 'bg-[#f5b301]/15', textClass: 'text-[#f5b301]', icon: AlertTriangle },
   injury: { bgClass: 'bg-[#f5b301]/13', textClass: 'text-[#f5b301]', icon: Activity },
@@ -59,7 +59,7 @@ const TAG_STYLE: Record<PlayerTagId, TagStyle> = {
 }
 
 // TARGET / AVOID user badge styles
-const TARGET_STYLE: TagStyle = { bgClass: 'bg-[#2ff801]/30', textClass: 'text-[#2ff801]', icon: Target, glow: true }
+const TARGET_STYLE: TagStyle = { bgClass: 'bg-[#5FA8E0]/30', textClass: 'text-[#5FA8E0]', icon: Target, glow: true }
 const AVOID_STYLE: TagStyle = { bgClass: 'bg-[#ff716c]/25', textClass: 'text-[#ff716c]', icon: Ban }
 
 // Priority order for the single compact-view badge.
@@ -141,7 +141,7 @@ export function FFIPlayerIntelCard({
   const rec = computeRecommendation(player)
   const isTax = (player.valueGap ?? 0) <= -4
   const rangeLabel = range.low === range.high ? `$${range.base}` : `$${range.low}-${range.high}`
-  const rangeColor = isTax ? 'text-[#deedf9]' : 'text-[#2ff801]'
+  const rangeColor = isTax ? 'text-[#deedf9]' : 'text-[#5FA8E0]'
 
   // Range bar geometry (only when there's a real spread). Scaled 0..high.
   const showBar = range.high > range.low && range.high > 0
@@ -155,18 +155,18 @@ export function FFIPlayerIntelCard({
   return (
     <div className="relative group">
       {isHighlighted && !isNegative && (
-        <div className="absolute inset-0 bg-[#2ff801]/5 blur-2xl rounded-xl -z-10" />
+        <div className="absolute inset-0 bg-[#5FA8E0]/5 blur-2xl rounded-xl -z-10" />
       )}
 
       <div
         className={`
           glass-panel rounded-xl overflow-hidden transition-all cursor-pointer
           ${isTarget
-            ? 'border border-[#2ff801]/30 shadow-[0_0_20px_rgba(47,248,1,0.1)]'
+            ? 'border border-[#5FA8E0]/30 shadow-[0_0_20px_rgba(95,168,224,0.1)]'
             : isNegative
             ? 'border border-[#ff716c]/20'
             : isHighlighted
-            ? 'border border-[#2ff801]/10'
+            ? 'border border-[#5FA8E0]/10'
             : 'border border-[#8bacff]/5 hover:border-[#8bacff]/20'
           }
         `}
@@ -195,7 +195,7 @@ export function FFIPlayerIntelCard({
           <div
             className={`
               font-headline text-2xl sm:text-3xl font-extrabold tracking-tighter italic hidden sm:block
-              ${isTarget ? 'text-[#2ff801]/40' : isHighlighted ? 'text-[#8bacff]/30' : 'text-[#8bacff]/20'}
+              ${isTarget ? 'text-[#5FA8E0]/40' : isHighlighted ? 'text-[#8bacff]/30' : 'text-[#8bacff]/20'}
             `}
           >
             {rankDisplay}
@@ -230,7 +230,7 @@ export function FFIPlayerIntelCard({
                   className={`
                     inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold tracking-wider
                     ${primaryBadge.style.bgClass} ${primaryBadge.style.textClass}
-                    ${primaryBadge.style.glow ? 'shadow-[0_0_8px_rgba(47,248,1,0.4)]' : ''}
+                    ${primaryBadge.style.glow ? 'shadow-[0_0_8px_rgba(95,168,224,0.4)]' : ''}
                   `}
                 >
                   <primaryBadge.style.icon className="h-3 w-3" />
@@ -279,7 +279,7 @@ export function FFIPlayerIntelCard({
         {showBar && (
           <div className="mx-4 sm:mx-5 mb-2 h-[5px] rounded-full bg-[#8bacff]/10 relative overflow-hidden">
             <div
-              className={`absolute h-full ${isTax ? 'bg-[#ff716c]/50' : 'bg-[#2ff801]/55'}`}
+              className={`absolute h-full ${isTax ? 'bg-[#ff716c]/50' : 'bg-[#5FA8E0]/55'}`}
               style={{ left: `${fillLeft}%`, width: `${fillWidth}%` }}
             />
             <div className="absolute w-0.5 h-full bg-[#deedf9]" style={{ left: `${baseLeft}%` }} />
@@ -293,10 +293,10 @@ export function FFIPlayerIntelCard({
             background:
               rec.intent === 'pass'
                 ? 'linear-gradient(90deg, rgba(255,113,108,0.09), transparent)'
-                : 'linear-gradient(90deg, rgba(47,248,1,0.08), rgba(47,248,1,0.02))',
+                : 'linear-gradient(90deg, rgba(95,168,224,0.08), rgba(95,168,224,0.02))',
           }}
         >
-          <span className={`text-sm ${rec.intent === 'pass' ? 'text-[#ff716c]' : 'text-[#2ff801]'}`}>▸</span>
+          <span className={`text-sm ${rec.intent === 'pass' ? 'text-[#ff716c]' : 'text-[#5FA8E0]'}`}>▸</span>
           <span className="font-body text-[12px] sm:text-[13px] text-[#deedf9] leading-snug">{rec.line}</span>
         </div>
 
@@ -322,7 +322,7 @@ export function FFIPlayerIntelCard({
 
             {/* Range provenance */}
             <div className="flex gap-3 text-[11px]">
-              <span className="w-[92px] flex-shrink-0 font-body text-[9px] font-bold uppercase tracking-wider text-[#2ff801] pt-0.5">Range</span>
+              <span className="w-[92px] flex-shrink-0 font-body text-[9px] font-bold uppercase tracking-wider text-[#5FA8E0] pt-0.5">Range</span>
               <span className="text-[#9eadb8] leading-relaxed">
                 {range.source === 'league' ? (
                   <>
@@ -340,7 +340,7 @@ export function FFIPlayerIntelCard({
             {/* Per-tag sources - every tag traces to real data (FB-9) */}
             {visibleTags.map((t) => (
               <div key={t.id} className="flex gap-3 text-[11px]">
-                <span className="w-[92px] flex-shrink-0 font-body text-[9px] font-bold uppercase tracking-wider text-[#2ff801] pt-0.5">{t.label}</span>
+                <span className="w-[92px] flex-shrink-0 font-body text-[9px] font-bold uppercase tracking-wider text-[#5FA8E0] pt-0.5">{t.label}</span>
                 <span className="text-[#9eadb8] leading-relaxed">{t.source}</span>
               </div>
             ))}
@@ -348,7 +348,7 @@ export function FFIPlayerIntelCard({
             {/* Projection */}
             {projPts != null && (
               <div className="flex gap-3 text-[11px]">
-                <span className="w-[92px] flex-shrink-0 font-body text-[9px] font-bold uppercase tracking-wider text-[#2ff801] pt-0.5">Projection</span>
+                <span className="w-[92px] flex-shrink-0 font-body text-[9px] font-bold uppercase tracking-wider text-[#5FA8E0] pt-0.5">Projection</span>
                 <span className="text-[#9eadb8] leading-relaxed">
                   <span className="text-[#deedf9] font-bold">{Math.round(projPts)} pts</span> - ESPN 2026 full-PPR season projection, your exact scoring.
                 </span>
@@ -366,7 +366,7 @@ export function FFIPlayerIntelCard({
           <div className="px-4 sm:px-5 pb-4 sm:pb-5 pt-2 border-t border-[#8bacff]/10 space-y-4">
             {/* Value breakdown - range / market / proj */}
             <div className="grid grid-cols-3 gap-2 text-center">
-              <div className="rounded-lg py-2" style={{ background: 'rgba(47,248,1,0.06)' }}>
+              <div className="rounded-lg py-2" style={{ background: 'rgba(95,168,224,0.06)' }}>
                 <div className="text-[9px] text-[#697782] uppercase tracking-widest font-bold">Value range</div>
                 <div className={`font-headline text-lg font-bold ${rangeColor}`}>{rangeLabel}</div>
                 <div className="text-[9px] text-[#9eadb8]">base ${range.base}</div>
@@ -394,7 +394,7 @@ export function FFIPlayerIntelCard({
                 <div className="space-y-2 mb-3">
                   {isTarget && (
                     <div className="flex items-start gap-2">
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold tracking-wider bg-[#2ff801]/30 text-[#2ff801] shadow-[0_0_8px_rgba(47,248,1,0.4)] shrink-0">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold tracking-wider bg-[#5FA8E0]/30 text-[#5FA8E0] shadow-[0_0_8px_rgba(95,168,224,0.4)] shrink-0">
                         <Target className="h-3 w-3" />
                         TARGET
                       </span>
@@ -477,8 +477,8 @@ export function FFIPlayerIntelCard({
                   className={`
                     inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all
                     ${isTarget
-                      ? 'bg-[#2ff801]/30 text-[#2ff801] shadow-[0_0_12px_rgba(47,248,1,0.3)]'
-                      : 'bg-surface-container-high text-[#9eadb8] hover:bg-[#2ff801]/10 hover:text-[#2ff801]'
+                      ? 'bg-[#5FA8E0]/30 text-[#5FA8E0] shadow-[0_0_12px_rgba(95,168,224,0.3)]'
+                      : 'bg-surface-container-high text-[#9eadb8] hover:bg-[#5FA8E0]/10 hover:text-[#5FA8E0]'
                     }
                     disabled:opacity-50 disabled:cursor-not-allowed
                   `}
@@ -515,12 +515,12 @@ export function FFIPlayerIntelCard({
                         onUpdateGrade?.(Math.max(1, tagWeight - 1), undefined)
                       }}
                       disabled={isTagLoading || tagWeight <= 1}
-                      className="w-7 h-7 rounded-lg flex items-center justify-center text-sm font-bold transition-all bg-[#2ff801]/10 text-[#2ff801] hover:bg-[#2ff801]/20 disabled:opacity-30 disabled:cursor-not-allowed"
+                      className="w-7 h-7 rounded-lg flex items-center justify-center text-sm font-bold transition-all bg-[#5FA8E0]/10 text-[#5FA8E0] hover:bg-[#5FA8E0]/20 disabled:opacity-30 disabled:cursor-not-allowed"
                       aria-label="Decrease priority"
                     >
                       −
                     </button>
-                    <span className="font-headline text-lg font-bold text-[#2ff801] w-6 text-center tabular-nums">
+                    <span className="font-headline text-lg font-bold text-[#5FA8E0] w-6 text-center tabular-nums">
                       {tagWeight}
                     </span>
                     <button
@@ -529,7 +529,7 @@ export function FFIPlayerIntelCard({
                         onUpdateGrade?.(Math.min(10, tagWeight + 1), undefined)
                       }}
                       disabled={isTagLoading || tagWeight >= 10}
-                      className="w-7 h-7 rounded-lg flex items-center justify-center text-sm font-bold transition-all bg-[#2ff801]/10 text-[#2ff801] hover:bg-[#2ff801]/20 disabled:opacity-30 disabled:cursor-not-allowed"
+                      className="w-7 h-7 rounded-lg flex items-center justify-center text-sm font-bold transition-all bg-[#5FA8E0]/10 text-[#5FA8E0] hover:bg-[#5FA8E0]/20 disabled:opacity-30 disabled:cursor-not-allowed"
                       aria-label="Increase priority"
                     >
                       +
