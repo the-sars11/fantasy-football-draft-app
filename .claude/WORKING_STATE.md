@@ -33,6 +33,8 @@ The prior plan (S1–S8 / P2 DR / P3 VAL) marked the app "done" while it (a) pri
 
 **D1 tail (separate follow-on, not blocking D2):** sweep component-level inline color literals across the other ~60 screens; decide the position-color system (green RB `#56E0A0`); the Live Auction Room keeps its own scoped `theme.ts` four-move palette for now.
 
+**D1-tail progress (2026-08-15):** header treatment locked (**Oswald solid brick-red** across 14 page titles + section headers, commit `6f15dde`); **green/gold literal sweep done for all LIVE screens** (neon `#2ff801` → steel-blue `#5FA8E0`, status pill softened, amber aligned; commits `67de4c0` + `c4a73db`; 392/392 green). Deferred to their own decisions: `--ffi-gold` self-indicator token, `lib/draft/export.ts` golds, parked season/inseason greens (~63 spots → P8), position-color system. Full detail in `CHANGELOG.md` + `BUILD_PLAN.md` D1.
+
 ---
 
 ### ✅ VISION LOCKED 2026-08-14 — canonical target is `.claude/VISION.md`
