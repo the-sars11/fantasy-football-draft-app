@@ -93,7 +93,7 @@ export default async function SettingsPage() {
   return (
     <div className="space-y-0 max-w-lg">
       <div className="pb-4">
-        <h1 className="ffi-display-md text-white">Setup</h1>
+        <h1 className="ffi-title-red ffi-display-md">Setup</h1>
       </div>
 
       <SectionLabel>League</SectionLabel>

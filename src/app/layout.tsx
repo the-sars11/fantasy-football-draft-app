@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Kanit, Hanken_Grotesk, JetBrains_Mono } from 'next/font/google'
+import { Kanit, Hanken_Grotesk, JetBrains_Mono, Oswald } from 'next/font/google'
 import { ThemeProvider } from '@/components/theme-provider'
 import './globals.css'
 
@@ -31,6 +31,15 @@ const sairaCondensed = Kanit({
 
 const jetbrainsMono = JetBrains_Mono({
   variable: '--font-jetbrains',
+  subsets: ['latin'],
+  weight: ['500', '600', '700'],
+  display: 'swap',
+})
+
+// Oswald = page/section HEADERS only (Joe pick, 2026-08-15). Solid, no emboss.
+// Scoped to the .ffi-title-* classes so labels/pills stay on Kanit.
+const oswald = Oswald({
+  variable: '--font-oswald',
   subsets: ['latin'],
   weight: ['500', '600', '700'],
   display: 'swap',
@@ -70,7 +79,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`dark ${anton.variable} ${saira.variable} ${sairaCondensed.variable} ${jetbrainsMono.variable} h-full antialiased`}
+      className={`dark ${anton.variable} ${saira.variable} ${sairaCondensed.variable} ${jetbrainsMono.variable} ${oswald.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col">

@@ -709,10 +709,7 @@ function PlayersHeader({ count }: { count: number | null }) {
       </Link>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <h1
-            className="text-[26px] font-bold leading-none"
-            style={{ fontFamily: 'var(--font-cond)', color: 'var(--ffi-ink)', letterSpacing: '-0.01em' }}
-          >
+          <h1 className="ffi-title-red text-[26px] font-bold leading-none">
             Players
           </h1>
           {count !== null && (

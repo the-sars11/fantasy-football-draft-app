@@ -69,10 +69,7 @@ export function ReviewClient() {
     <div className="pb-2">
       {/* ── Screen header (blueprint 9.7) ─────────────────────── */}
       <div className="flex items-center justify-between mb-1">
-        <h1
-          className="font-extrabold text-[26px] leading-none"
-          style={{ fontFamily: 'var(--font-cond)', color: 'var(--ffi-ink)' }}
-        >
+        <h1 className="ffi-title-red font-extrabold text-[26px] leading-none">
           Post Draft
         </h1>
         {sessionDateLabel && (

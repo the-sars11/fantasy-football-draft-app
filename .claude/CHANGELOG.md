@@ -2,6 +2,24 @@
 
 ---
 
+## 2026-08-15 / D1-fix -- Header treatment: Oswald in solid red (Joe redirect)
+
+**Task:** Joe rejected the D1 headers twice — first the flat-white titles ("look terrible, might be the font"), then the chrome-silver/red emboss I tried as a fix ("too plain" earlier, "embossed I didn't like" now). Reset: showed an 8-way font+finish board on the Shield field, no emboss. Joe picked **Oswald in red**. | **Class:** shared/output | **Lenses:** Design, QA
+
+**What shipped:**
+- **`src/app/layout.tsx`** — added **Oswald** via `next/font/google` on a new stable var `--font-oswald`, scoped to headers only (labels/pills/names stay on Kanit).
+- **`src/app/globals.css`** — redefined `.ffi-title-red` as **Oswald, solid brick-red `#C25A5E`, no emboss / no gradient / no text-shadow**. Removed the rejected `.ffi-title-silver` bevel + the red gradient-emboss entirely.
+- **Page-title sweep (14 screens)** — every `<h1>` page title converted to `.ffi-title-red`, old inline `var(--font-cond)`/`var(--ffi-ink)` and hardcoded `text-[#deedf9]`/`text-white` removed so Oswald+red wins: prep hub, board, players, strategies, simulate; draft, draft/setup, draft/review; season + start-sit/matchups/waivers/trade; settings. Existing per-screen size/case preserved (season stays uppercase). On `/prep`, the hero title + 3 jump-row section titles are also red.
+- **`.claude/DESIGN_SYSTEM.md`** — headers reconciled: Oswald solid red is the locked header treatment; the "red is SPARING" rule now explicitly exempts headers (red = header identity + sparing body action); chrome-silver reassigned to player names/stat readouts only.
+
+**Proof (mobile arm's-length headless renders):** `.claude/mockups/d0-craft/d1_prep_oswald_red.png` (/prep), `roll_season.png` ("IN-SEASON COMMAND"), `roll_prep_players.png` ("Players") — all page titles Oswald red; player names/chips/stats untouched. Option board: `header_options.png`.
+
+**Gate:** `tsc --noEmit` clean; `eslint` on touched files 0 new (the 1 error + warnings are pre-existing, on lines not touched). $0, no paid calls.
+
+**Known tail:** section/sub-headers on non-prep screens (e.g. "START/SIT ADVISOR", "WAIVER WIRE AI") are still white Kanit — only `/prep`'s section titles are red so far. Whether to sweep those red too is an open question for Joe. Green/gold icon literals on season/players remain the separate D2+ component-literal tail.
+
+---
+
 ## 2026-08-14 / D0+D1 -- SHIELD identity locked (D0) + ported into the app (D1)
 
 **Task:** Close the D0 identity gate and ship D1 — rebuild the shared visual layer to the approved direction and prove it on one real screen. | **Class:** shared/output | **Lenses:** Design, QA, Architecture

@@ -83,7 +83,7 @@ export default function SeasonHubPage() {
       <div className="relative z-10 max-w-4xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="font-headline text-3xl sm:text-4xl font-black text-[#deedf9] uppercase tracking-tight mb-2">
+          <h1 className="ffi-title-red text-3xl sm:text-4xl font-black uppercase tracking-tight mb-2">
             In-Season Command
           </h1>
           <p className="text-[#9eadb8] text-sm">

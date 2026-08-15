@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Header treatment options</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Anton&family=Bebas+Neue&family=Oswald:wght@500;600;700&family=Archivo:wght@700;800;900&family=Kanit:wght@600;700&family=Hanken+Grotesk:wght@700;800&family=Saira+Condensed:wght@600;700;800&family=Teko:wght@600;700&display=swap');
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html,body { background:#05070C; }
+  body {
+    font-family:'Hanken Grotesk',sans-serif;
+    color:#EAF1F8;
+    background:
+      radial-gradient(120% 55% at 50% -6%, rgba(95,168,224,0.12), transparent 55%),
+      linear-gradient(180deg,#0C1524 0%,#08101C 46%,#05070C 100%);
+    background-attachment:fixed;
+    padding:40px;
+  }
+  .head { margin-bottom:34px; }
+  .head h1 { font-family:'Hanken Grotesk'; font-weight:800; font-size:22px; letter-spacing:-0.01em; }
+  .head p  { color:#9FB2C6; font-size:14px; margin-top:6px; }
+  .grid { display:grid; grid-template-columns:1fr 1fr; gap:22px; }
+
+  .card {
+    border-radius:16px;
+    padding:30px 30px 34px;
+    background:
+      repeating-linear-gradient(0deg, rgba(255,255,255,0.02) 0 1px, rgba(255,255,255,0) 1px 3px),
+      linear-gradient(180deg,#26364E 0%,#1A2637 100%);
+    box-shadow:0 14px 34px -12px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.08);
+    border:1px solid rgba(180,200,224,0.10);
+  }
+  .tag {
+    font-family:'JetBrains Mono','Hanken Grotesk',monospace;
+    font-size:10px; letter-spacing:0.22em; text-transform:uppercase;
+    color:#5FA8E0; margin-bottom:6px; font-weight:700;
+  }
+  .desc { color:#9FB2C6; font-size:12.5px; margin-top:16px; line-height:1.5; }
+  .sub {
+    display:block; margin-top:20px; font-size:16px; font-weight:700;
+    color:#C7D5E3; letter-spacing:0.01em;
+  }
+
+  /* ============ TITLE TREATMENTS (no emboss anywhere) ============ */
+
+  /* A - Bebas Neue: tall broadcast caps, solid chrome */
+  .a { font-family:'Bebas Neue'; font-size:64px; line-height:0.9; letter-spacing:0.02em; color:#EAF1F8; }
+  .a-sub { font-family:'Bebas Neue'; font-size:22px; letter-spacing:0.03em; color:#C7D5E3; font-weight:400; }
+
+  /* B - Anton: heavy compressed, solid brick red, confident and big */
+  .b { font-family:'Anton'; font-size:52px; line-height:0.92; letter-spacing:0.005em; color:#C25A5E; text-transform:uppercase; }
+  .b-sub { font-family:'Anton'; font-size:19px; letter-spacing:0.01em; color:#EAF1F8; text-transform:uppercase; font-weight:400; }
+
+  /* C - Oswald: clean, white with a red accent bar underneath */
+  .c { font-family:'Oswald'; font-weight:700; font-size:44px; line-height:1; letter-spacing:0.01em; color:#F2F6FB; text-transform:uppercase; display:inline-block; }
+  .c-bar { width:64px; height:5px; border-radius:3px; background:#A63C41; margin-top:10px; }
+  .c-sub { font-family:'Oswald'; font-weight:600; font-size:18px; text-transform:uppercase; letter-spacing:0.02em; color:#C7D5E3; }
+
+  /* D - Archivo wide: modern/tech, spaced caps, steel-white */
+  .d { font-family:'Archivo'; font-weight:900; font-size:38px; line-height:1.05; letter-spacing:0.06em; color:#EAF1F8; text-transform:uppercase; }
+  .d-sub { font-family:'Archivo'; font-weight:800; font-size:15px; letter-spacing:0.05em; text-transform:uppercase; color:#9FB2C6; }
+
+  /* E - Kanit SOLID red, heavier weight, NO emboss (isolate: was it the finish or the font?) */
+  .e { font-family:'Kanit'; font-weight:700; font-size:48px; line-height:0.98; letter-spacing:-0.01em; color:#C25A5E; }
+  .e-sub { font-family:'Kanit'; font-weight:700; font-size:20px; color:#EAF1F8; }
+
+  /* F - Hanken Grotesk 800: no display font at all, clean editorial */
+  .f { font-family:'Hanken Grotesk'; font-weight:800; font-size:44px; line-height:1; letter-spacing:-0.02em; color:#F2F6FB; }
+  .f-sub { font-family:'Hanken Grotesk'; font-weight:800; font-size:18px; letter-spacing:-0.01em; color:#C7D5E3; }
+
+  /* G - Teko: ultra-tall condensed scoreboard, red */
+  .g { font-family:'Teko'; font-weight:700; font-size:62px; line-height:0.82; letter-spacing:0.01em; color:#C25A5E; text-transform:uppercase; }
+  .g-sub { font-family:'Teko'; font-weight:600; font-size:26px; line-height:0.9; text-transform:uppercase; color:#EAF1F8; }
+
+  /* H - Saira Condensed heavy, white, red keyline left */
+  .h-wrap { border-left:4px solid #A63C41; padding-left:16px; }
+  .h { font-family:'Saira Condensed'; font-weight:800; font-size:46px; line-height:0.95; text-transform:uppercase; letter-spacing:0.01em; color:#F2F6FB; }
+  .h-sub { font-family:'Saira Condensed'; font-weight:700; font-size:19px; text-transform:uppercase; color:#C7D5E3; }
+</style>
+</head>
+<body>
+  <div class="head">
+    <h1>Header treatment options &mdash; Shield field, no emboss</h1>
+    <p>Same word ("Research" page title + a section-title sample) in 8 different font + finish directions. Point at a letter.</p>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <div class="tag">Option A / Bebas Neue</div>
+      <div class="a">RESEARCH</div>
+      <span class="a-sub">PLAYER BROWSER</span>
+      <div class="desc">Tall broadcast caps, solid chrome-white. Very ESPN lower-third. Confident, zero shine.</div>
+    </div>
+
+    <div class="card">
+      <div class="tag">Option B / Anton</div>
+      <div class="b">Research</div>
+      <span class="b-sub">Player Browser</span>
+      <div class="desc">Heavy compressed weight in brick red. Fixes "plain" with mass, not with shine.</div>
+    </div>
+
+    <div class="card">
+      <div class="tag">Option C / Oswald + accent bar</div>
+      <div class="c">Research</div>
+      <div class="c-bar"></div>
+      <span class="c-sub" style="display:block;margin-top:18px;">Player Browser</span>
+      <div class="desc">Clean white caps with a short red underline. Modern sports, restrained.</div>
+    </div>
+
+    <div class="card">
+      <div class="tag">Option D / Archivo wide</div>
+      <div class="d">RESEARCH</div>
+      <span class="d-sub" style="display:block;margin-top:18px;">PLAYER BROWSER</span>
+      <div class="desc">Wide, letter-spaced, techy. Steel-white. Reads like a modern data product.</div>
+    </div>
+
+    <div class="card">
+      <div class="tag">Option E / Kanit solid (no emboss)</div>
+      <div class="e">Research</div>
+      <span class="e-sub" style="display:block;margin-top:16px;">Player Browser</span>
+      <div class="desc">Same font as now, but solid red and heavier. Isolates whether the emboss was the whole problem.</div>
+    </div>
+
+    <div class="card">
+      <div class="tag">Option F / Hanken 800 (no display font)</div>
+      <div class="f">Research</div>
+      <span class="f-sub" style="display:block;margin-top:16px;">Player Browser</span>
+      <div class="desc">Drop the display font entirely. Clean editorial sans, tight. Quietest option.</div>
+    </div>
+
+    <div class="card">
+      <div class="tag">Option G / Teko scoreboard</div>
+      <div class="g">Research</div>
+      <span class="g-sub" style="display:block;margin-top:12px;">Player Browser</span>
+      <div class="desc">Ultra-tall condensed, red. Full scoreboard / stat-line energy.</div>
+    </div>
+
+    <div class="card">
+      <div class="tag">Option H / Saira Cond + keyline</div>
+      <div class="h-wrap">
+        <div class="h">Research</div>
+        <span class="h-sub" style="display:block;margin-top:12px;">Player Browser</span>
+      </div>
+      <div class="desc">Heavy condensed white with a red left keyline. Editorial sports masthead.</div>
+    </div>
+  </div>
+</body>
+</html>

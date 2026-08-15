@@ -331,6 +331,13 @@
 .font-label { font-family: var(--font-saira-cond), ui-sans-serif, system-ui, sans-serif; }
 .font-cond { font-family: var(--font-saira-cond), ui-sans-serif, system-ui, sans-serif; }
 
+/* ── Header title treatment (Joe pick, 2026-08-15): Oswald, SOLID brick-red.
+   No emboss, no gradient, no text-shadow. Emboss/silver-bevel was rejected. */
+.ffi-title-red {
+  font-family: var(--font-oswald), ui-sans-serif, sans-serif;
+  color: #c25a5e;
+}
+
 /* ========================================
    GRIDIRON Surfaces, Glass & Cards (light-catch, NO blur)
    ======================================== */

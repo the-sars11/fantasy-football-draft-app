@@ -13,7 +13,7 @@ export default function DraftSetupPage() {
           <ChevronLeft className="h-3 w-3" aria-hidden="true" />
           Setup
         </Link>
-        <h1 className="ffi-display-md text-white">Draft Setup</h1>
+        <h1 className="ffi-title-red ffi-display-md">Draft Setup</h1>
         <p className="ffi-body-md text-[var(--ffi-text-secondary)]">
           Confirm your league, managers, and connection before going live
         </p>

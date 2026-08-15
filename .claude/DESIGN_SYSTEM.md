@@ -22,9 +22,9 @@ The app should feel like a **defensive coordinator's tablet on a broadcast night
 
 **Key principles**
 - **One committed point of view.** Steel and silence at rest; RED only for the moment of action. Never a second loud color competing with it.
-- **Color carries meaning, on a SET palette.** Brick-RED = the moment / value / your action (SPARING). Steel-blue = structure / info / depth (the everyday workhorse). Chrome-silver = titles / hero readouts. Nothing decorative, never a rainbow.
+- **Color carries meaning, on a SET palette.** Brick-RED = page/section HEADERS (Oswald) + the moment / value / your action (sparing in the body). Steel-blue = structure / info / depth (the everyday workhorse). Chrome-silver = player names + big stat readouts. Nothing decorative, never a rainbow.
 - **Navy-steel FIELD, with depth.** The dark is a cool navy-steel gradient (`#0C1524 -> #05070C`) with faint steel-blue lit depth and one whisper of red. Never flat black, never light mode, never colorful-dark neon.
-- **Type and numbers are craft.** Kanit broadcast display + Hanken Grotesk UI + tabular mono numbers.
+- **Type and numbers are craft.** Oswald red headers + Kanit broadcast display (names/stats) + Hanken Grotesk UI + tabular mono numbers.
 - **Performance is design.** Solid layered surfaces + box-shadow glows + transform/opacity motion. NO stacked `backdrop-filter: blur()` (it killed the old build's perf and screenshots).
 
 ---
@@ -62,9 +62,9 @@ The app should feel like a **defensive coordinator's tablet on a broadcast night
 ```
 
 **Meaning rule (enforce everywhere):**
-- **RED (brick)** — the moment + value + the user's own action, used SPARINGLY: on-the-clock, your max bid, primary CTA (RUN RESEARCH / Record Pick), a steal, your pick, active nav, positive delta. If red is on more than a couple of elements per screen, it is overused — pull it back.
+- **RED (brick)** — two roles: (1) **page + section HEADERS** wear brick-red as the identity treatment (Oswald, `.ffi-title-red`); (2) the moment + value + the user's own action, used SPARINGLY in the BODY: on-the-clock, your max bid, primary CTA (RUN RESEARCH / Record Pick), a steal, your pick, active nav, positive delta. The "sparing" test applies to body/interactive elements, NOT to headers — headers are expected to be red. (Joe pick 2026-08-15; supersedes the earlier chrome-silver-titles direction.)
 - **Steel-blue** — structure, the default non-action color: nav frame, info, AI-read panel, secondary data, depth highlights, confirmation/info boxes, `success` state.
-- **Chrome-silver ink** — hero titles and big readouts (Kanit) sit in `--ffi-ink`, reading as brushed metal on navy.
+- **Chrome-silver ink** — player names + big stat readouts (Kanit) sit in `--ffi-ink`, reading as brushed metal on navy. (Page/section HEADERS are the exception: Oswald solid brick-red, see Typography.)
 - **Duotone icons** — an icon is a RED chip (`bg rgba(166,60,65,0.15)`, `border rgba(166,60,65,0.45)`) with a WHITE glyph. Consistent across a screen; never per-icon rainbow colors.
 - **Position chips** — QB/RB/WR/TE identity only, small; a separate data-encoding system left intact from v3.
 - **NO gold. NO volt-green. NO rainbow. NO decorative color.**
@@ -73,15 +73,17 @@ The app should feel like a **defensive coordinator's tablet on a broadcast night
 
 ## Typography (no blur, big confidence)
 
-Loaded via `next/font/google` in `layout.tsx`. **CSS-var names kept stable from v3** (`--font-anton` / `--font-saira` / `--font-saira-cond`) so every screen re-typed at once; only the loaded families changed.
+Loaded via `next/font/google` in `layout.tsx`. **CSS-var names kept stable from v3** (`--font-anton` / `--font-saira` / `--font-saira-cond`) so every screen re-typed at once; only the loaded families changed. **Oswald (`--font-oswald`) was added 2026-08-15** for page/section HEADERS only, scoped to `.ffi-title-red`.
 ```
-Kanit            → broadcast hero + section heads (var --font-anton / --font-saira-cond)   .font-display / .font-cond
+Oswald           → page + section HEADERS, solid brick-red  (var --font-oswald)              .ffi-title-red
+Kanit            → player names, stat readouts, labels, chips (var --font-anton / --font-saira-cond)   .font-display / .font-cond
 Hanken Grotesk   → body + UI (default app font)      (var --font-saira)                     .font-body / font-sans
 JetBrains Mono   → EVERY number (budgets, prices, ranks), tabular  (var --font-jetbrains)    font-mono
 ```
 - All numbers: JetBrains Mono, `tabular-nums`, right-aligned in lists.
 - Labels: Kanit, uppercase, wide letter-spacing.
-- Hero moments: Kanit, large, tight leading, in chrome-silver `--ffi-ink`.
+- **HEADERS (page titles + prominent section titles): Oswald, solid brick-red `#C25A5E` via `.ffi-title-red`. No emboss, no gradient, no silver bevel** (both were tried and rejected 2026-08-15 — flat-white read as plain, embossed read as cheesy). Oswald in red is the locked header treatment.
+- Player names + big stat readouts: Kanit, large, tight leading, in chrome-silver `--ffi-ink`.
 
 ---
 

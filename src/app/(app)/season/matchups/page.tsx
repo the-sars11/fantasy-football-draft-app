@@ -89,7 +89,7 @@ export default function MatchupsPage() {
             <ArrowLeft className="w-5 h-5 text-[#9eadb8]" />
           </button>
           <div className="flex-1">
-            <h1 className="font-headline text-2xl font-black text-[#deedf9] uppercase tracking-tight">
+            <h1 className="ffi-title-red text-2xl font-black uppercase tracking-tight">
               Weekly Matchup
             </h1>
             <p className="text-sm text-[#9eadb8]">

@@ -660,10 +660,7 @@ function BoardHeader({ leagueName }: { leagueName?: string }) {
         Research
       </Link>
       <div className="flex items-center justify-between">
-        <h1
-          className="font-extrabold text-[26px] leading-none"
-          style={{ fontFamily: 'var(--font-cond)', color: 'var(--ffi-ink)' }}
-        >
+        <h1 className="ffi-title-red font-extrabold text-[26px] leading-none">
           Cheat Sheet
         </h1>
         <span

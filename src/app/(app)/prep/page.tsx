@@ -183,10 +183,7 @@ export default function PrepPage() {
     <div className="pb-2">
       {/* ── Screen header ─────────────────────────────────────── */}
       <div className="flex items-center justify-between mb-4">
-        <h1
-          className="font-extrabold text-[26px] leading-none"
-          style={{ fontFamily: 'var(--font-cond)', color: 'var(--ffi-ink)' }}
-        >
+        <h1 className="ffi-title-red font-extrabold text-[26px] leading-none">
           Research
         </h1>
         <span
@@ -249,10 +246,7 @@ export default function PrepPage() {
 
           {phase === 'ready' && latestRun ? (
             <>
-              <p
-                className="font-extrabold text-[24px] leading-[1.08] mt-1.5"
-                style={{ fontFamily: 'var(--font-cond)', color: 'var(--ffi-ink)' }}
-              >
+              <p className="ffi-title-red font-extrabold text-[24px] leading-[1.08] mt-1.5">
                 Last run {relTime(latestRun.completed_at ?? latestRun.created_at)}
               </p>
               <p className="text-[13px] leading-[1.45] mt-1" style={{ color: 'var(--ffi-ink-2)' }}>
@@ -264,10 +258,7 @@ export default function PrepPage() {
             </>
           ) : (
             <>
-              <p
-                className="font-extrabold text-[24px] leading-[1.08] mt-1.5"
-                style={{ fontFamily: 'var(--font-cond)', color: 'var(--ffi-ink)' }}
-              >
+              <p className="ffi-title-red font-extrabold text-[24px] leading-[1.08] mt-1.5">
                 Run your first research
               </p>
               <p className="text-[13px] leading-[1.45] mt-1" style={{ color: 'var(--ffi-ink-2)' }}>
@@ -477,10 +468,7 @@ function JumpRow({
         {icon}
       </div>
       <div className="flex-1 min-w-0">
-        <p
-          className="font-extrabold text-[15px] leading-tight"
-          style={{ fontFamily: 'var(--font-cond)', color: 'var(--ffi-ink)' }}
-        >
+        <p className="ffi-title-red font-extrabold text-[15px] leading-tight">
           {label}
         </p>
         <p className="text-[12px] mt-0.5 truncate" style={{ color: 'var(--ffi-ink-2)' }}>

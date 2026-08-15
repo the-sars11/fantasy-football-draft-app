@@ -174,10 +174,7 @@ export default function DraftPage() {
     <div className="pb-2">
       {/* ── Screen header ─────────────────────────────────────── */}
       <div className="flex items-center justify-between mb-4">
-        <h1
-          className="font-extrabold text-[26px] leading-none"
-          style={{ fontFamily: 'var(--font-cond)', color: 'var(--ffi-ink)' }}
-        >
+        <h1 className="ffi-title-red font-extrabold text-[26px] leading-none">
           Live Draft
         </h1>
         {remote.hasPolled && (
