@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>D2 Research landing</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@600;700&family=Kanit:wght@500;600;700&family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap');
+:root{
+  --bg0:#05070c;--bg1:#08101c;--s1:#121a28;--s2:#1a2637;--s3:#26364e;
+  --hair:rgba(180,200,224,0.10);--hairb:rgba(200,215,235,0.18);
+  --volt:#a63c41;--voltdeep:#6e2225;--voltglow:rgba(166,60,65,0.32);
+  --blue:#5fa8e0;--blueb:#7fc0ea;
+  --ink:#eaf1f8;--ink2:#9fb2c6;--ink3:#5e708a;--warn:#ffb05c;--red:#c25a5e;
+  --qb:#ff6b8b;--rb:#56e0a0;--wr:#79a6ff;--te:#ffb05c;
+  --oswald:'Oswald',sans-serif;--cond:'Kanit',sans-serif;--body:'Hanken Grotesk',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0f18;font-family:var(--body);display:flex;justify-content:center;gap:34px;flex-wrap:wrap;padding:40px 24px;align-items:flex-start}
+.phone{width:375px;border-radius:30px;overflow:hidden;border:1px solid #1c2635;box-shadow:0 30px 80px -20px rgba(0,0,0,.8)}
+.field{
+  background:
+    radial-gradient(60% 42% at 22% -6%, rgba(95,168,224,0.16) 0%, transparent 58%),
+    radial-gradient(46% 40% at 92% 6%, rgba(166,60,65,0.06) 0%, transparent 55%),
+    radial-gradient(60% 50% at 50% 116%, rgba(95,168,224,0.12) 0%, transparent 60%),
+    linear-gradient(180deg,#0c1524 0%,#08101c 50%,#05070c 100%);
+  min-height:812px;padding:22px 18px 90px;
+}
+.capt{width:375px;color:#8aa0b8;font-size:12.5px;line-height:1.55;margin-top:2px}
+.capt b{color:#cfe0f0}
+.capt .k{color:var(--red);font-weight:700;font-family:var(--cond)}
+
+/* header */
+.head{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px}
+.h1{font-family:var(--oswald);color:var(--red);font-weight:700;font-size:27px;line-height:1;letter-spacing:.2px}
+.nasties{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:5px 11px;font-family:var(--cond);
+  font-size:10.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--blueb);
+  background:rgba(95,168,224,.10);border:1px solid rgba(95,168,224,.20)}
+.nasties .dot{width:6px;height:6px;border-radius:50%;background:var(--volt);box-shadow:0 0 6px var(--voltglow)}
+
+/* quiet label */
+.qlabel{font-family:var(--cond);font-size:10px;font-weight:700;letter-spacing:.28em;text-transform:uppercase;color:var(--ink3);margin:22px 2px 11px}
+
+/* destination hero rows */
+.dest{display:flex;align-items:center;gap:13px;border-radius:15px;padding:15px 15px;
+  background:linear-gradient(160deg,var(--s3) 0%,var(--s2) 78%);border:1px solid var(--hairb);margin-bottom:9px;position:relative;overflow:hidden}
+.dest::after{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,var(--volt),var(--voltdeep))}
+.chip{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  background:rgba(166,60,65,.16);border:1px solid rgba(166,60,65,.38)}
+.chip svg{width:20px;height:20px;stroke:#fff;stroke-width:1.9;fill:none}
+.dtext{flex:1;min-width:0}
+.dtitle{font-family:var(--oswald);font-weight:700;color:var(--red);font-size:17px;line-height:1.05;letter-spacing:.2px}
+.dsub{font-size:12px;color:var(--ink2);margin-top:3px;line-height:1.3}
+.dmetric{text-align:right;flex-shrink:0}
+.dmet-num{font-family:var(--cond);font-weight:700;font-size:19px;color:var(--ink);line-height:1;font-variant-numeric:tabular-nums}
+.dmet-lab{font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--ink3);margin-top:4px;font-family:var(--cond);font-weight:600}
+.dmet-new{font-family:var(--cond);font-weight:700;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--blueb);
+  border:1px solid rgba(95,168,224,.3);border-radius:6px;padding:3px 7px;background:rgba(95,168,224,.08)}
+.chev{width:16px;height:16px;stroke:var(--ink2);stroke-width:2;fill:none;opacity:.32;flex-shrink:0;margin-left:2px}
+
+/* highlights */
+.hl{border-radius:14px;padding:13px 14px;background:var(--s1);border:1px solid var(--hair);margin-bottom:9px}
+.hl-head{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.hl-ico{width:24px;height:24px;border-radius:7px;display:flex;align-items:center;justify-content:center}
+.hl-ico svg{width:14px;height:14px;stroke-width:2;fill:none}
+.hl-title{font-family:var(--cond);font-weight:700;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;flex:1}
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.tag{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:4px 10px 4px 5px;font-size:12px;
+  background:var(--s2);border:1px solid var(--hair);color:var(--ink)}
+.pos{border-radius:5px;padding:1px 4px;font-size:9px;font-weight:700;font-family:var(--cond)}
+
+/* subordinate player-pull strip */
+.pull{border-radius:14px;padding:14px;background:var(--s1);border:1px solid var(--hair);margin-top:2px}
+.pull-top{display:flex;align-items:center;gap:9px}
+.pull-ico{width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;
+  background:rgba(95,168,224,.10);border:1px solid rgba(95,168,224,.22);flex-shrink:0}
+.pull-ico svg{width:15px;height:15px;stroke:var(--blueb);stroke-width:2;fill:none}
+.pull-name{font-family:var(--cond);font-weight:700;font-size:13px;color:var(--ink);letter-spacing:.02em}
+.pull-status{font-size:11px;color:var(--ink3);margin-top:1px;font-variant-numeric:tabular-nums}
+.fresh{margin-left:auto;font-family:var(--cond);font-weight:700;font-size:9px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--rb);border:1px solid rgba(86,224,160,.28);background:rgba(86,224,160,.10);border-radius:999px;padding:3px 8px;flex-shrink:0}
+.pull-what{font-size:11px;color:var(--ink2);line-height:1.45;margin-top:10px;padding-top:10px;border-top:1px solid var(--hair)}
+.pull-what b{color:var(--ink);font-weight:600}
+.pull-btn{margin-top:11px;width:100%;border-radius:11px;padding:10px;font-family:var(--cond);font-weight:700;font-size:12px;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--ink2);background:var(--s2);border:1px solid var(--hair);
+  display:flex;align-items:center;justify-content:center;gap:7px}
+.pull-btn svg{width:13px;height:13px;stroke:var(--ink2);stroke-width:2.4;fill:none}
+.pull-note{text-align:center;font-family:var(--cond);font-weight:600;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink3);margin-top:8px}
+</style></head>
+<body>
+
+<div class="phone"><div class="field">
+
+  <div class="head">
+    <div class="h1">Research</div>
+    <div class="nasties"><span class="dot"></span>The Nasties</div>
+  </div>
+
+  <!-- FOUR DESTINATION HEROES (rows, not a grid — per Joe's rule) -->
+  <div class="qlabel">Where you work</div>
+
+  <!-- Players -->
+  <div class="dest">
+    <div class="chip"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></div>
+    <div class="dtext">
+      <div class="dtitle">Players</div>
+      <div class="dsub">Search &amp; scan the full pool</div>
+    </div>
+    <div class="dmetric"><div class="dmet-num">491</div><div class="dmet-lab">in pool</div></div>
+    <svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
+  </div>
+
+  <!-- Cheat Sheet -->
+  <div class="dest">
+    <div class="chip"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/></svg></div>
+    <div class="dtext">
+      <div class="dtitle">Cheat Sheet</div>
+      <div class="dsub">Ranked, position-colored board</div>
+    </div>
+    <div class="dmetric"><div class="dmet-num">T1</div><div class="dmet-lab">Chase top</div></div>
+    <svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
+  </div>
+
+  <!-- Strategies -->
+  <div class="dest">
+    <div class="chip"><svg viewBox="0 0 24 24"><path d="M12 2 2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
+    <div class="dtext">
+      <div class="dtitle">Strategies</div>
+      <div class="dsub">Budget-by-position plans</div>
+    </div>
+    <div class="dmetric"><div class="dmet-num">4</div><div class="dmet-lab">ranked</div></div>
+    <svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
+  </div>
+
+  <!-- Sims (NEW 4th destination) -->
+  <div class="dest">
+    <div class="chip"><svg viewBox="0 0 24 24"><path d="M3 12h4l3 8 4-16 3 8h4"/></svg></div>
+    <div class="dtext">
+      <div class="dtitle">Sims</div>
+      <div class="dsub">Mock the auction, see your rosters</div>
+    </div>
+    <div class="dmetric"><span class="dmet-new">New</span></div>
+    <svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
+  </div>
+
+  <!-- LATEST RUN HIGHLIGHTS (glanceable value) -->
+  <div class="qlabel">Latest run highlights</div>
+
+  <div class="hl">
+    <div class="hl-head">
+      <div class="hl-ico" style="background:rgba(166,60,65,.12)"><svg viewBox="0 0 24 24" stroke="#c25a5e"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1"/></svg></div>
+      <div class="hl-title" style="color:var(--red)">Top targets</div>
+      <svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
+    </div>
+    <div class="tags">
+      <span class="tag"><span class="pos" style="background:#79a6ff22;color:#79a6ff">WR</span>Ja'Marr Chase</span>
+      <span class="tag"><span class="pos" style="background:#56e0a022;color:#56e0a0">RB</span>Bijan Robinson</span>
+      <span class="tag"><span class="pos" style="background:#79a6ff22;color:#79a6ff">WR</span>Puka Nacua</span>
+      <span class="tag"><span class="pos" style="background:#ffb05c22;color:#ffb05c">TE</span>Brock Bowers</span>
+    </div>
+  </div>
+
+  <div class="hl">
+    <div class="hl-head">
+      <div class="hl-ico" style="background:rgba(255,176,92,.10)"><svg viewBox="0 0 24 24" stroke="#ffb05c"><path d="M12 3l9 16H3L12 3z"/><path d="M12 10v4M12 17h.01"/></svg></div>
+      <div class="hl-title" style="color:var(--warn)">Steer clear</div>
+      <svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
+    </div>
+    <div class="tags">
+      <span class="tag"><span class="pos" style="background:#56e0a022;color:#56e0a0">RB</span>Overpriced RB1</span>
+      <span class="tag"><span class="pos" style="background:#ff6b8b22;color:#ff6b8b">QB</span>Early QB reach</span>
+    </div>
+  </div>
+
+  <!-- SUBORDINATE PLAYER-PULL UTILITY (demoted; runs 2-4x/yr) -->
+  <div class="qlabel">Data</div>
+
+  <div class="pull">
+    <div class="pull-top">
+      <div class="pull-ico"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg></div>
+      <div>
+        <div class="pull-name">Player Pull</div>
+        <div class="pull-status">491 players · updated Aug 12</div>
+      </div>
+      <span class="fresh">Fresh</span>
+    </div>
+    <div class="pull-what">
+      One pull refreshes <b>projections, injury &amp; starting roles, consensus ranks, auction values, tiers, and sleepers/breakouts/busts</b> for the Nasties' scoring.
+    </div>
+    <button class="pull-btn"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg>Pull fresh data</button>
+    <div class="pull-note">Free data pull · no AI credits</div>
+  </div>
+
+</div></div>
+
+<div class="capt">
+  <b>D2 — Research landing redesign.</b> Reference: <b>Linear mobile home</b> (row destinations, quiet labels, one accent, subordinate utilities).<br><br>
+  The flip: the four things you live in for weeks — <span class="k">Players · Cheat Sheet · Strategies · Sims</span> — are now the <b>heroes</b> (rich rows, each with a glanceable stat, red Oswald titles), and <b>Sims is added</b> as the 4th.<br><br>
+  The AI pull you run a few times a year is <b>demoted</b> to a subordinate "<span class="k">Player Pull</span>" strip at the bottom: renamed, freshness at a glance, one plain line saying exactly what a pull produces, and a quiet ghost button — no longer the centerpiece.<br><br>
+  Rows, not a card grid (your stated rule). No paragraph explainer up top.
+</div>
+
+</body></html>

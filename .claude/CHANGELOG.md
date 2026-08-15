@@ -2,6 +2,25 @@
 
 ---
 
+## 2026-08-15 / D2 -- Research landing: hierarchy flip (destinations = heroes, Run demoted)
+
+**Task:** D2. Reconnaissance of the live `/prep` found the spec's premise ("card-dump + paragraph explainer") was already partly outdated — the hub had been restructured to one-hero + quiet jump-rows, but with the hierarchy BACKWARDS: the AI Research Run (used 2-4x/year) was the hero, and the 4 destinations Joe actually lives in for weeks were demoted rows. Reframed D2 as **flip the hierarchy**, not "replace a card dump." Design ref: Linear mobile home (row destinations, quiet labels, one accent, subordinate utilities). Rows not a card grid (Joe's FF UI rule). Approved mockup `d2_research_landing_v1.html`. | **Class:** output | **Lenses:** Design, QA
+
+**What shipped (`src/app/(app)/prep/page.tsx`, full rewrite):**
+- **"Where you work" — 4 destination hero rows** (rich rows, red identity chip + Oswald red title + red left accent bar + chevron), each with a REAL glanceable metric, gracefully absent when data is missing (no fabricated numbers):
+  - **Players** → `/prep/players` — pool count from `/api/players/status` (live: 3,148 in pool).
+  - **Cheat Sheet** → `/prep/board` — "#1 {lastName}" from the latest completed run's top target.
+  - **Strategies** → `/prep/strategies` — saved-strategy count from a **new** `GET /api/strategies?leagueId=` fetch added to `load()`.
+  - **Sims** → `/prep/simulate` — "New" badge (new destination, added this pass).
+- **"Latest run highlights"** — the existing target/avoid position-colored chip cards, kept, shown only when a completed run exists.
+- **"Data" — demoted Player Pull strip:** the old hero Research Run panel, renamed **Player Pull** and moved to the bottom. Shows freshness (Fresh steel-green / Stale amber) + last-updated date, one plain line of what a pull produces (projections, injury & starting roles, consensus ranks, auction values, tiers, sleepers/breakouts/busts), and the **preserved cost-guard**: inline confirm ("Pulls fresh data... 30-60s. No AI credits used.") → "Run pull", footnote "Free data pull · no AI credits". `runState` idle/confirm/running + `runError` logic carried over intact. Removed the now-unused `relTime` helper.
+
+**Proof (live running app, real data):** started preview on :3003, loaded `/prep` — read_page + JS both confirmed real connected data (Joe signed in, 3,148 pool, "updated Aug 11 · Stale", THE NASTIES). JS measured **zero horizontal overflow at 375px** (docScrollWidth 375 == clientWidth, first row right edge 359 < 375). Clean 375px mobile capture via iframe wrapper: `scratchpad/prep_frame.png` (the preview pane wasn't displayed so live compositing/headless-mobile emulation both failed; iframe forces the 375 layout). Desktop render (sidebar layout) also clean: `scratchpad/prep_live2.png`.
+
+**Gate:** `tsc --noEmit` clean · `vitest run` **392/392** · `eslint` on the file clean (0 warnings after removing `relTime`) · `npm run build` clean (`/prep` prerenders static). $0, no paid calls.
+
+---
+
 ## 2026-08-15 / D1-fix -- Header treatment: Oswald in solid red (Joe redirect)
 
 **Task:** Joe rejected the D1 headers twice — first the flat-white titles ("look terrible, might be the font"), then the chrome-silver/red emboss I tried as a fix ("too plain" earlier, "embossed I didn't like" now). Reset: showed an 8-way font+finish board on the Shield field, no emboss. Joe picked **Oswald in red**. | **Class:** shared/output | **Lenses:** Design, QA

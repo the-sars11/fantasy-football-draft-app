@@ -23,15 +23,17 @@ The prior plan (S1–S8 / P2 DR / P3 VAL) marked the app "done" while it (a) pri
 
 ## Next open item
 
-### ✅ D0 CLOSED + ✅ D1 DONE (2026-08-14) — next open item is **D2** (Research landing + nav)
+### ✅ D0 CLOSED + ✅ D1 DONE + ✅ D2 DONE — next open item is **D3** (Strategies redesign + auto-rank + ratings)
+
+**D2 DONE (2026-08-15):** Research landing hierarchy FLIPPED in `src/app/(app)/prep/page.tsx`. The 4 destinations (Players · Cheat Sheet · Strategies · Sims) are now hero rows with real glanceable metrics; "Run Research" demoted to a bottom **Player Pull** Data strip with a plain what-it-produces line, Fresh/Stale freshness, and the preserved cost-guard confirm ("Free data pull · no AI credits"). Sims row added → `/prep/simulate`. Strategies metric sourced from new `GET /api/strategies?leagueId` fetch — no fabricated numbers. Approved mockup `d2_research_landing_v1.html`; live 375px proof `scratchpad/prep_frame.png` (real data: 3,148 pool, THE NASTIES). Gate: tsc clean · 392/392 · lint clean · build clean. Full entry in `CHANGELOG.md` + `BUILD_PLAN.md` D2.
 
 **D0 gate CLOSED (Joe, 2026-08-14):** Joe locked the **"SHIELD" (Option B)** identity — navy-steel field `#0C1524→#05070C` + lifted steel-blue cards `#26364E→#1A2637` + chrome-silver titles + muted brick-RED action accent `#A63C41` (sparing) + steel-blue info `#5FA8E0`; **Kanit + Hanken Grotesk** type; **duotone** icons (red chip + white glyph). NO gold, NO volt-green. Full record: `.claude/mockups/d0-craft/NOTES.md`; canonical screen `.claude/mockups/d0-craft/optionB_shield.png`. (Option A "League Trophy" kept on file as an alternate; its oak/engraving refinement parked.)
 
 **D1 DONE (2026-08-14):** SHIELD ported into the real app by a "names stable, values swapped" repaint (all 61 screens shift at once). Touched `src/app/layout.tsx` (Kanit+Hanken fonts, red theme-color), `src/app/globals.css` (full palette swap, 0 leftover v3 tokens, red/steel buttons, `--ffi-gold` drift resolved), `src/components/layout/app-shell.tsx` (Zap→Gavel, red nav glow), `src/app/(app)/prep/page.tsx` (one-screen proof: duotone-red icon chips, steel cost-guard box), and reconciled `.claude/DESIGN_SYSTEM.md` v3 GRIDIRON → **v4 SHIELD**. Proof `.claude/mockups/d0-craft/d1_prep_shield.png`. Gate: 392/392 tests green, lint 0 new, no h-overflow at 375px. Full entry in `CHANGELOG.md` + `BUILD_PLAN.md` D1.
 
-**Next session does (D2, see BUILD_PLAN D2):** rebuild the Research landing + nav to the SHIELD look — demote Run-Research to a defined "Player Pull", make Players · Cheat Sheet · Strategies · Sims the hero destinations, no paragraph explainer. Screenshot to prove.
+**Next session does (D3, see BUILD_PLAN D3):** Strategies redesign — kill the Generate/Dry-run buttons (auto-render ranked by simulated strength-vs-league), expandable detail per strategy, persistent user star-ratings that re-reconcile on each new pull. Needs a small schema add (Ops/Security lens). Screenshot + migration proof.
 
-**D1 tail (separate follow-on, not blocking D2):** sweep component-level inline color literals across the other ~60 screens; decide the position-color system (green RB `#56E0A0`); the Live Auction Room keeps its own scoped `theme.ts` four-move palette for now.
+**D1 tail (separate follow-on, not blocking D3):** sweep component-level inline color literals across the other ~60 screens; decide the position-color system (green RB `#56E0A0`); the Live Auction Room keeps its own scoped `theme.ts` four-move palette for now.
 
 **D1-tail progress (2026-08-15):** header treatment locked (**Oswald solid brick-red** across 14 page titles + section headers, commit `6f15dde`); **green/gold literal sweep done for all LIVE screens** (neon `#2ff801` → steel-blue `#5FA8E0`, status pill softened, amber aligned; commits `67de4c0` + `c4a73db`; 392/392 green). Deferred to their own decisions: `--ffi-gold` self-indicator token, `lib/draft/export.ts` golds, parked season/inseason greens (~63 spots → P8), position-color system. Full detail in `CHANGELOG.md` + `BUILD_PLAN.md` D1.
 
