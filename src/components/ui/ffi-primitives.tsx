@@ -591,7 +591,7 @@ export function FFISectionHeader({
   return (
     <div className={cn("flex items-center justify-between mb-4", className)} {...props}>
       <div>
-        <h2 className="ffi-display-md text-white">{title}</h2>
+        <h2 className="ffi-title-red ffi-display-md">{title}</h2>
         {subtitle && (
           <p className="ffi-body-md text-[var(--ffi-text-secondary)]">{subtitle}</p>
         )}

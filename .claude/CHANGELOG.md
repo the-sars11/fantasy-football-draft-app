@@ -16,7 +16,13 @@
 
 **Gate:** `tsc --noEmit` clean; `eslint` on touched files 0 new (the 1 error + warnings are pre-existing, on lines not touched). $0, no paid calls.
 
-**Known tail:** section/sub-headers on non-prep screens (e.g. "START/SIT ADVISOR", "WAIVER WIRE AI") are still white Kanit — only `/prep`'s section titles are red so far. Whether to sweep those red too is an open question for Joe. Green/gold icon literals on season/players remain the separate D2+ component-literal tail.
+**Section-header sweep (same day, Joe: "sweep the section sub-headers red too"):**
+- **`src/components/ui/ffi-primitives.tsx`** — `FFISectionHeader` `<h2>` changed from `ffi-display-md text-white` to `ffi-title-red ffi-display-md`. One edit flips every real section header app-wide (draft/setup "Live Draft", draft/live, prep/simulate, + parked season screens).
+- **`prep/runs`** ("Run History") and **`prep/configure`** ("League Config") page-level `<h2>`s → `.ffi-title-red`.
+- Deliberately NOT reddened: eyebrow labels (small uppercase muted), card/item names (strategy card titles, player names, `var(--font-cond)` Kanit ink), countdowns. Proof: `sub_draft_setup.png` (title + section both red, "LEAGUE" eyebrow stays grey), `sub_prep_configure.png`.
+- **Still white — open question for Joe:** card-INTERNAL group titles ("League Details", "Roster Slots") — a finer tier inside cards/forms, ~app-wide. Not swept unprompted; flagged for his call.
+
+**Green/gold tail:** icon/position literals (`#2ff801` green, gold accents) on season/players/parked screens remain the separate D2+ component-literal sweep. Untouched here.
 
 ---
 

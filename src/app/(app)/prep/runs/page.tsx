@@ -13,7 +13,7 @@ export default function RunHistoryPage() {
           <ChevronLeft className="h-3 w-3" aria-hidden="true" />
           Setup
         </Link>
-        <h2 className="ffi-display-md text-white">Run History</h2>
+        <h2 className="ffi-title-red ffi-display-md">Run History</h2>
         <p className="ffi-body-md text-[var(--ffi-text-secondary)]">
           View, load, and compare saved research runs
         </p>

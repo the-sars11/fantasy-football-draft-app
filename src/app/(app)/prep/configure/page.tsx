@@ -16,7 +16,7 @@ export default async function ConfigurePage() {
           <ChevronLeft className="h-3 w-3" aria-hidden="true" />
           Setup
         </Link>
-        <h2 className="ffi-display-md text-white">League Config</h2>
+        <h2 className="ffi-title-red ffi-display-md">League Config</h2>
         <p className="ffi-body-md text-[var(--ffi-text-secondary)]">
           The Nasties defaults are pre-filled. Edit as needed and save.
         </p>
