@@ -391,7 +391,7 @@ GRIDIRON v3 (`DESIGN_SYSTEM.md`, LOCKED 2026-06-04) is not landing in execution.
 3. **Sequencing = VISUAL-FOUNDATION-FIRST.** D0 (direction + sign-off) → D1 (foundation) before any per-screen redesign. Logic-only R# work (R10b grading math, R11 offline/adaptive logic) is invisible and may run in parallel; the screens that surface it are built in the visual pass, once, to the new look.
 
 ### The reference bar (Joe's standard, non-negotiable)
-Name a real reference app before building (Linear, EA FC — never generic dark-glass/gradient slop). Show a mockup, get Joe's explicit **yes** on the look BEFORE code. A persistent bottom nav with genuinely nice icons is a Joe hard-requirement.
+Name a real reference app before building (EA FC — never generic dark-glass/gradient slop). Show a mockup, get Joe's explicit **yes** on the look BEFORE code. A persistent bottom nav with genuinely nice icons is a Joe hard-requirement.
 
 ### D0 — Identity direction + foundation mockup + SIGN-OFF GATE `[design · Joe-gated]` · no code — ✅ CLOSED 2026-08-14
 > **The three scope decisions are LOCKED (above): full new identity, Sim-inside-Research, visual-first.** D0's job is the *look*.
@@ -525,3 +525,59 @@ Name a real reference app before building (Linear, EA FC — never generic dark-
 - **Auctioneer integration (P1/P1b):** feed proxy + state machine + offline-reconcile code + rule-based What-To-Do. Built, unit-tested, **NOT live-verified** (→ R15).
 - **Config-truth fix (FB-1):** duplicate-active-league drift fixed at source; real 12-team config.
 - **Core engine (Phases 0–8):** scaffold/auth/config, data adapters, strategy model, live-draft state machines, review/export. Note: the "valuation done" and "strategies done" claims from this history are corrected above — treat those two as rebuild targets (R3–R6, R9), not done.
+
+## Session Operating System (retrofit)
+
+These sections were added to an existing plan by `devflow add-session-os`. Fold them into their ideal positions in a Thinking session if you want; they are functional as-is. Wind-down and continuation-prompt guidance live in the /session-lifecycle skill this command also installed.
+
+## Session Type - every session is either Thinking or Doing
+
+Sessions come in two kinds, and conflating them is the root cause of drift. Name the type on every card.
+
+| Type | Purpose | Model | Produces | Is allowed to |
+|------|---------|-------|----------|---------------|
+| **Thinking** | scope, plan, research, decide, re-plan | Opus (Sonnet for bounded research) | a decision, a scoped plan, a findings doc | range wide, explore, spiral - this is the work |
+| **Doing** | execute an already-decided chunk | Sonnet (Haiku if mechanical) | code + tests + a clean commit | build exactly the card, nothing else |
+
+**The one rule that ties the whole plan together:** a **Thinking session is allowed to spiral** - exploring, learning, and deciding are a single connected act and must not be chopped mid-thought. A **Doing session is not allowed to spiral** - if it starts to, that is a signal, not a failure. It means an unresolved decision was left in the plan (the Scoping Gate was not met). Stop the Doing session, capture the decision as discovered work (see Discovered-Work Capture), and route it to a Thinking session. Do not resolve it inline.
+
+**Diagnostic:** the frequency with which your Doing sessions spiral is the health readout on your scoping. Well-scoped plans produce Doing sessions that just execute. Frequent spiraling means the Thinking work was too shallow - deepen the KICKOFF / Re-Plan pass, do not blame the executor.
+
+## The Scoping Gate (a chunk is not ready until decisions are out of it)
+
+Session Size asks "does it fit a window?" The Scoping Gate asks the harder question: **"does this chunk still contain a decision nobody has made yet?"** A chunk can fit a window and still be un-executable because it hides an unresolved judgment call.
+
+**The gate:** a session card may be authored as a **Doing** session only if it contains **zero open judgment calls.** Every "we'll figure it out when we get there," every "pick whichever seems right," every unresolved design or architecture fork inside the scope is a **judgment call that has leaked out of planning.** It does not belong in a Doing session.
+
+When you find an open judgment call in a chunk, you have exactly two moves:
+- **Resolve it now**, in the current Thinking session, and write the resolution into the card as a fixed instruction (not a choice). OR
+- **Pull it back out** into its own Thinking session (or the KICKOFF / Re-Plan pass), and mark the Doing session `DEPENDS ON` that Thinking session.
+
+**Why this matters:** an executor that meets an unresolved decision mid-build will invent an answer to keep moving. That invented answer is the "arbitrary decision" and the "shortcut" you keep seeing. The fix is not to tell the executor to try harder. It is to make sure no decision is ever left in a Doing session for it to trip over.
+
+**The scoping test, in one line:** read a Doing card and ask "could a competent executor build exactly this with no choices left to make?" If no, it is not scoped yet - it is still a Thinking task wearing a Doing card.
+
+## Model Handoff Logic (Opus for Opus, Sonnet for Sonnet, as things change)
+
+Model choice is not fixed at authoring time - it can change mid-plan. Three rules govern the handoff:
+
+- **Default flow:** one **Opus** Thinking session sets scope, then a run of **Sonnet** Doing sessions execute it, then **Opus** returns only at a Re-Plan checkpoint or when a decision surfaces.
+- **Promotion trigger:** the moment new requirements, feedback, or a discovered fork introduces a judgment call, the next session becomes **Thinking / Opus** - do not let a Sonnet Doing session absorb a decision. That single rule is what keeps "Opus for Opus, Sonnet for Sonnet" honest as things change.
+- **Demotion:** once the decision is made and written into cards, drop back to **Sonnet** for the execution run. Opus should be rare and decisive, not resident.
+
+## Discovered-Work Capture (scoped, defined, placed correctly)
+
+When a bug, item, or requirement is discovered mid-session, run this three-step capture instead of dropping it into a flat queue - it keeps every discovered item scoped, defined, model-bound, and filed in the right contextual place.
+
+1. **CLASSIFY it** - which of four buckets:
+   - **BLOCKER** (stops current work) -> P0 table, jumps the queue.
+   - **FITS-CURRENT-PHASE** -> author a card in this phase, in dependency order.
+   - **LATER-PHASE** -> park a one-line stub under that phase with a `NEW` tag.
+   - **DECISION** (a judgment call, not buildable yet) -> a Thinking session stub, never a Doing card.
+2. **SCOPE it** to the capture standard, even as a stub: Type (Thinking or Doing), a guessed Model, a one-line goal, and the success check if known. A DECISION-bucket item records the question, not an answer.
+3. **PLACE + LINK it**: write it where it belongs (P0, phase, or decision list), and if it changes or blocks existing cards, note the `DEPENDS ON` in both directions. Record the discovery in `DECISION_LOG.md`.
+
+Nothing lands as an undated one-liner in a flat table. Every discovered item leaves the session already carrying a type, a model, a home, and its links, so a future session can pick it up cold.
+
+---
+
