@@ -3,14 +3,14 @@
 /**
  * FFIPlayerIntelCard
  *
- * Player card for the Player Browser. Enriched in S3 (FB-9/10/13/14):
- *   - real ESPN headshot (name -> espnId -> CDN, silhouette fallback)   [FB-13]
- *   - value shown as a RANGE ($low-$high) not a false-precision point    [FB-10]
- *   - a one-line, league-specific recommendation strip                   [FB-13]
- *   - dollar-based, sourced tags (POCKET/TAX/INJURY/…)                    [FB-9]
- *   - a "how this is calculated / sources" popover on every card         [FB-14]
+ * Player card for the Player Browser. Rebuilt in D4 as a broadcast-style
+ * compact list (NFL lower-third / EA FC reference, SHIELD v4):
+ *   - collapsed = one thin ~50px row: position chip | name | tier | value      [D4]
+ *   - expert-consensus TIER badge on the face (T1 red = elite, T2 blue, T3+ muted)
+ *   - projected points demoted into the expansion                              [D4]
+ *   - expansion is three labeled groups: Valuation / Outlook / Your call        [D4]
  *
- * Every number traces to real data: VORP worth (ESPN 2026 full-PPR,
+ * Every number still traces to real data: VORP worth (ESPN 2026 full-PPR,
  * roster-aware), the 16-yr Nasties room-price ledger, FantasyPros ECR/tier/std,
  * and injury status. Nothing fabricated. No ADP (that's a snake stat; this is an
  * auction). All of it re-derives on each pull, so a fresh fetch refreshes values.
@@ -32,11 +32,10 @@ import {
   Check,
   X,
 } from 'lucide-react'
-import type { Player } from '@/lib/players/types'
+import type { Player, Position } from '@/lib/players/types'
 import type { PlayerTag, PlayerTagId } from '@/lib/players/tags'
 import { computeValueRange } from '@/lib/players/value-range'
 import { computeRecommendation } from '@/lib/players/recommendation'
-import { headshotUrl, SILHOUETTE_SRC } from '@/lib/players/headshot'
 import { CALIBRATION_ERA, CALIBRATION_DRAFTS_USED } from '@/lib/draft/league-calibration'
 
 // --- Tag styling (keyed by real tag id). Labels come from the tag itself
@@ -58,14 +57,22 @@ const TAG_STYLE: Record<PlayerTagId, TagStyle> = {
   sleeper: { bgClass: 'bg-[#8bacff]/16', textClass: 'text-[#8bacff]', icon: Star },
 }
 
-// TARGET / AVOID user badge styles
-const TARGET_STYLE: TagStyle = { bgClass: 'bg-[#5FA8E0]/30', textClass: 'text-[#5FA8E0]', icon: Target, glow: true }
-const AVOID_STYLE: TagStyle = { bgClass: 'bg-[#ff716c]/25', textClass: 'text-[#ff716c]', icon: Ban }
-
-// Priority order for the single compact-view badge.
-const TAG_PRIORITY: PlayerTagId[] = ['elite', 'pocket', 'sleeper', 'tax', 'volatile', 'injury']
 const POSITIVE_TAGS: PlayerTagId[] = ['elite', 'pocket', 'sleeper']
 const NEGATIVE_TAGS: PlayerTagId[] = ['tax']
+
+// Position chip color-encoding (SHIELD v4 --ffi-pos-*). QB/RB/WR/TE carry hue;
+// DEF/K fall back to muted steel. `wash` is the faint left-to-right rail tint.
+const POS_CHIP: Record<string, { bg: string; wash: string }> = {
+  QB: { bg: 'var(--ffi-pos-qb)', wash: 'rgba(255,110,138,0.10)' },
+  RB: { bg: 'var(--ffi-pos-rb)', wash: 'rgba(86,224,160,0.10)' },
+  WR: { bg: 'var(--ffi-pos-wr)', wash: 'rgba(108,168,255,0.10)' },
+  TE: { bg: 'var(--ffi-pos-te)', wash: 'rgba(255,176,92,0.10)' },
+}
+const POS_CHIP_FALLBACK = { bg: '#64768c', wash: 'rgba(100,118,140,0.10)' }
+
+function posChipFor(position: Position) {
+  return POS_CHIP[position] ?? POS_CHIP_FALLBACK
+}
 
 // --- Component Props ---
 
@@ -93,7 +100,6 @@ interface FFIPlayerIntelCardProps {
 // --- Component ---
 
 export function FFIPlayerIntelCard({
-  rank,
   player,
   tags,
   isTarget,
@@ -112,21 +118,9 @@ export function FFIPlayerIntelCard({
   fitLine,
 }: FFIPlayerIntelCardProps) {
   const [showCalc, setShowCalc] = useState(false)
-  const rankDisplay = rank.toString().padStart(2, '0')
 
   // Visible (non-dismissed) tags.
   const visibleTags = tags.filter((t) => !dismissedSystemTags.includes(t.id))
-
-  // Compact-view primary badge: TARGET > AVOID > highest-priority tag.
-  const primaryBadge = ((): { style: TagStyle; label: string } | null => {
-    if (isTarget) return { style: TARGET_STYLE, label: 'TARGET' }
-    if (isAvoid) return { style: AVOID_STYLE, label: 'AVOID' }
-    for (const id of TAG_PRIORITY) {
-      const found = visibleTags.find((t) => t.id === id)
-      if (found) return { style: TAG_STYLE[found.id], label: found.label }
-    }
-    return null
-  })()
 
   const isHighlighted = isTarget || visibleTags.some((t) => POSITIVE_TAGS.includes(t.id))
   const isNegative = isAvoid || visibleTags.some((t) => NEGATIVE_TAGS.includes(t.id))
@@ -134,14 +128,15 @@ export function FFIPlayerIntelCard({
   // Real value fields + derived S3 model.
   const market = player.marketAuctionValue
   const projPts = player.projectedPoints
-  const posRank = player.positionRankByPoints
+  const posRank = player.positionRankByPoints // projection rank -> chip number
   const posRankLabel = posRank ? `${player.position}${posRank}` : null
+  const expertRankLabel =
+    player.ecrPositionRank != null ? `${player.position}${player.ecrPositionRank}` : null
 
   const range = computeValueRange(player)
   const rec = computeRecommendation(player)
   const isTax = (player.valueGap ?? 0) <= -4
   const rangeLabel = range.low === range.high ? `$${range.base}` : `$${range.low}-${range.high}`
-  const rangeColor = isTax ? 'text-[#deedf9]' : 'text-[#5FA8E0]'
 
   // Range bar geometry (only when there's a real spread). Scaled 0..high.
   const showBar = range.high > range.low && range.high > 0
@@ -149,8 +144,48 @@ export function FFIPlayerIntelCard({
   const fillWidth = showBar ? ((range.high - range.low) / range.high) * 100 : 0
   const baseLeft = showBar ? (range.base / range.high) * 100 : 0
 
-  // Headshot with silhouette fallback (guarded against error loops).
-  const shot = headshotUrl(player.name) ?? SILHOUETTE_SRC
+  const chip = posChipFor(player.position)
+
+  // Expert-consensus tier badge (real FantasyPros tier; 1 = elite).
+  const tier = player.expertTier
+  const tierBadge =
+    tier != null ? (
+      tier === 1 ? (
+        <span
+          className="font-headline font-bold text-[11px] leading-none px-[7px] py-[3px] rounded-md text-white"
+          style={{ background: '#A63C41', boxShadow: '0 0 11px rgba(166,60,65,0.45)' }}
+        >
+          T1
+        </span>
+      ) : tier === 2 ? (
+        <span
+          className="font-headline font-bold text-[11px] leading-none px-[7px] py-[3px] rounded-md"
+          style={{ background: 'rgba(95,168,224,0.12)', color: '#7FC0EA', border: '1px solid rgba(95,168,224,0.5)' }}
+        >
+          T2
+        </span>
+      ) : (
+        <span
+          className="font-headline font-bold text-[11px] leading-none px-[7px] py-[3px] rounded-md"
+          style={{ color: '#5e708a', border: '1px solid rgba(180,200,224,0.1)' }}
+        >
+          T{tier}
+        </span>
+      )
+    ) : null
+
+  // Small position chip (color rail + POS + projection rank), used on face + hero.
+  const posChipEl = (
+    <div
+      className="flex items-baseline justify-center gap-px h-[21px] rounded-md flex-shrink-0"
+      style={{ background: chip.bg }}
+    >
+      <span className="font-headline font-bold text-[11px] leading-none text-[#04070d]">{player.position}</span>
+      {posRank != null && (
+        <span className="font-mono font-bold text-[9px] leading-none text-[#04070d]/85">{posRank}</span>
+      )}
+    </div>
+  )
 
   return (
     <div className="relative group">
@@ -160,316 +195,238 @@ export function FFIPlayerIntelCard({
 
       <div
         className={`
-          glass-panel rounded-xl overflow-hidden transition-all cursor-pointer
+          rounded-xl overflow-hidden transition-all
           ${isTarget
-            ? 'border border-[#5FA8E0]/30 shadow-[0_0_20px_rgba(95,168,224,0.1)]'
+            ? 'border border-[#5FA8E0]/40 shadow-[0_0_20px_rgba(95,168,224,0.12)]'
             : isNegative
-            ? 'border border-[#ff716c]/20'
+            ? 'border border-[#ff716c]/25'
             : isHighlighted
-            ? 'border border-[#5FA8E0]/10'
-            : 'border border-[#8bacff]/5 hover:border-[#8bacff]/20'
+            ? 'border border-[#5FA8E0]/12'
+            : 'border border-[rgba(180,200,224,0.1)] hover:border-[rgba(200,215,235,0.18)]'
           }
         `}
+        style={{ background: 'var(--ffi-surface-2)' }}
       >
-        {/* Main card content */}
-        <div
-          className="p-4 sm:p-5 flex items-center gap-3 sm:gap-4 relative"
-          onClick={onToggleExpand}
-        >
-          {isTarget && (
-            <div className="flash-streak absolute top-0 left-0 w-full h-full pointer-events-none" />
-          )}
-
-          {/* Headshot (FB-13) */}
-          <img
-            src={shot}
-            alt=""
-            loading="lazy"
-            onError={(e) => {
-              if (!e.currentTarget.src.endsWith(SILHOUETTE_SRC)) e.currentTarget.src = SILHOUETTE_SRC
+        {/* ---------- COLLAPSED: one thin broadcast row ---------- */}
+        {!isExpanded && (
+          <div
+            onClick={onToggleExpand}
+            className="relative grid items-center gap-3 pl-[11px] pr-3 py-[9px] min-h-[50px] cursor-pointer overflow-hidden"
+            style={{
+              gridTemplateColumns: '30px minmax(0,1fr) auto 16px',
+              background: `linear-gradient(90deg, ${chip.wash} 0%, transparent 38%)`,
             }}
-            className="w-12 h-12 sm:w-14 sm:h-14 flex-shrink-0 rounded-xl object-cover bg-[#15181d] border border-[#8bacff]/10"
-          />
-
-          {/* Rank number */}
-          <div
-            className={`
-              font-headline text-2xl sm:text-3xl font-extrabold tracking-tighter italic hidden sm:block
-              ${isTarget ? 'text-[#5FA8E0]/40' : isHighlighted ? 'text-[#8bacff]/30' : 'text-[#8bacff]/20'}
-            `}
           >
-            {rankDisplay}
-          </div>
-
-          {/* Player info */}
-          <div className="flex-1 min-w-0">
-            <h3 className="font-headline text-base sm:text-lg font-bold text-[#deedf9] leading-tight truncate">
-              {player.name.toUpperCase()}
-            </h3>
-            <p className="font-body text-[10px] text-[#9eadb8] tracking-widest uppercase mt-0.5">
-              {player.team} • {player.position}
-              {player.byeWeek > 0 && ` • BYE ${player.byeWeek}`}
-              {projPts != null && (
-                <>
-                  {' · '}
-                  <span className="text-[#deedf9] font-bold">{Math.round(projPts)} PTS</span>
-                </>
-              )}
-              {posRankLabel && (
-                <>
-                  {' • '}
-                  <span className="text-[#deedf9] font-bold">{posRankLabel}</span>
-                </>
-              )}
-            </p>
-
-            {/* Primary badge in compact view */}
-            {!isExpanded && primaryBadge && (
-              <div className="flex gap-2 mt-2">
-                <span
-                  className={`
-                    inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold tracking-wider
-                    ${primaryBadge.style.bgClass} ${primaryBadge.style.textClass}
-                    ${primaryBadge.style.glow ? 'shadow-[0_0_8px_rgba(95,168,224,0.4)]' : ''}
-                  `}
-                >
-                  <primaryBadge.style.icon className="h-3 w-3" />
-                  {primaryBadge.label}
-                </span>
-                {visibleTags.length > 1 && (
-                  <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-bold text-[#697782]">
-                    +{visibleTags.length - 1}
-                  </span>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Value RANGE (FB-10) + market anchor */}
-          <div className="text-right flex-shrink-0">
-            <div className="font-body text-[8px] text-[#697782] font-bold uppercase tracking-widest">
-              Your value
-            </div>
-            <div className={`font-headline text-lg sm:text-xl font-bold leading-none mt-0.5 whitespace-nowrap ${rangeColor}`}>
-              {rangeLabel}
-            </div>
-            <div className="font-body text-[10px] text-[#9eadb8] mt-1 whitespace-nowrap">
-              base <span className="text-[#deedf9] font-bold">${range.base}</span>
-              {market != null && market > 0 && <> · mkt ~${Math.round(market)}</>}
-            </div>
-          </div>
-
-          {/* Info (how-calculated) + expand */}
-          <div className="flex flex-col items-center gap-2 flex-shrink-0">
-            <button
-              onClick={(e) => { e.stopPropagation(); setShowCalc((v) => !v) }}
-              className={`transition-colors ${showCalc ? 'text-[#8bacff]' : 'text-[#9eadb8]/40 hover:text-[#9eadb8]'}`}
-              aria-label="How this is calculated"
-              title="How this is calculated"
-            >
-              <Info className="w-4 h-4" />
-            </button>
-            <button className="text-[#9eadb8]/40 hover:text-[#9eadb8] transition-colors" aria-label={isExpanded ? 'Collapse' : 'Expand'}>
-              {isExpanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
-            </button>
-          </div>
-        </div>
-
-        {/* Range bar (compact) */}
-        {showBar && (
-          <div className="mx-4 sm:mx-5 mb-2 h-[5px] rounded-full bg-[#8bacff]/10 relative overflow-hidden">
-            <div
-              className={`absolute h-full ${isTax ? 'bg-[#ff716c]/50' : 'bg-[#5FA8E0]/55'}`}
-              style={{ left: `${fillLeft}%`, width: `${fillWidth}%` }}
-            />
-            <div className="absolute w-0.5 h-full bg-[#deedf9]" style={{ left: `${baseLeft}%` }} />
-          </div>
-        )}
-
-        {/* Recommendation strip (FB-13) */}
-        <div
-          className="flex items-center gap-2 px-4 sm:px-5 py-2.5 border-t border-[#8bacff]/10"
-          style={{
-            background:
-              rec.intent === 'pass'
-                ? 'linear-gradient(90deg, rgba(255,113,108,0.09), transparent)'
-                : 'linear-gradient(90deg, rgba(95,168,224,0.08), rgba(95,168,224,0.02))',
-          }}
-        >
-          <span className={`text-sm ${rec.intent === 'pass' ? 'text-[#ff716c]' : 'text-[#5FA8E0]'}`}>▸</span>
-          <span className="font-body text-[12px] sm:text-[13px] text-[#deedf9] leading-snug">{rec.line}</span>
-        </div>
-
-        {/* R7b: Solver-driven strategy-fit line */}
-        {fitLine && (
-          <div
-            className="flex items-center gap-2 px-4 sm:px-5 py-2 border-t border-[#8bacff]/8"
-            style={{ background: 'linear-gradient(90deg, rgba(139,172,255,0.04), transparent)' }}
-          >
-            <span className="text-[#8bacff]/50 text-[10px] shrink-0">◆</span>
-            <span className="font-body text-[10px] sm:text-[11px] leading-snug" style={{ color: 'var(--ffi-ink-3)' }}>
-              {fitLine}
-            </span>
-          </div>
-        )}
-
-        {/* How-this-is-calculated popover (FB-14) */}
-        {showCalc && (
-          <div className="px-4 sm:px-5 py-4 border-t border-[#8bacff]/10 bg-[#101318]/60 space-y-2.5">
-            <h4 className="font-headline text-xs font-bold text-[#deedf9] uppercase tracking-wide">
-              How this value is calculated
-            </h4>
-
-            {/* Range provenance */}
-            <div className="flex gap-3 text-[11px]">
-              <span className="w-[92px] flex-shrink-0 font-body text-[9px] font-bold uppercase tracking-wider text-[#5FA8E0] pt-0.5">Range</span>
-              <span className="text-[#9eadb8] leading-relaxed">
-                {range.source === 'league' ? (
-                  <>
-                    <span className="text-[#deedf9] font-bold">Worth ${player.ceilingValue}</span> (roster-aware VORP, ESPN 2026 full-PPR) ↔{' '}
-                    <span className="text-[#deedf9] font-bold">Room ${player.expectedRoomPrice}</span> (16-yr Nasties price for {posRankLabel ?? 'his rank'}). Band is those two real numbers; base is the midpoint.
-                  </>
-                ) : range.source === 'national' ? (
-                  <>Modeled from national FantasyPros expert-rank spread - no Nasties calibration for this player yet.</>
-                ) : (
-                  <>A single consensus value - not enough data for a range.</>
-                )}
-              </span>
-            </div>
-
-            {/* Per-tag sources - every tag traces to real data (FB-9) */}
-            {visibleTags.map((t) => (
-              <div key={t.id} className="flex gap-3 text-[11px]">
-                <span className="w-[92px] flex-shrink-0 font-body text-[9px] font-bold uppercase tracking-wider text-[#5FA8E0] pt-0.5">{t.label}</span>
-                <span className="text-[#9eadb8] leading-relaxed">{t.source}</span>
-              </div>
-            ))}
-
-            {/* Projection */}
-            {projPts != null && (
-              <div className="flex gap-3 text-[11px]">
-                <span className="w-[92px] flex-shrink-0 font-body text-[9px] font-bold uppercase tracking-wider text-[#5FA8E0] pt-0.5">Projection</span>
-                <span className="text-[#9eadb8] leading-relaxed">
-                  <span className="text-[#deedf9] font-bold">{Math.round(projPts)} pts</span> - ESPN 2026 full-PPR season projection, your exact scoring.
-                </span>
-              </div>
+            {/* color rail */}
+            <div className="absolute left-0 top-0 bottom-0 w-[3px]" style={{ background: chip.bg }} />
+            {isTarget && (
+              <div className="flash-streak absolute top-0 left-0 w-full h-full pointer-events-none" />
             )}
 
-            <p className="pt-2 border-t border-[#8bacff]/10 font-body text-[10px] text-[#697782] leading-relaxed">
-              Calibrated on {CALIBRATION_ERA.length} Nasties seasons ({CALIBRATION_DRAFTS_USED} drafts) · sources: ESPN projections · FantasyPros ECR · Nasties auction ledger
-            </p>
+            {posChipEl}
+
+            <div className="min-w-0">
+              <div className="font-headline font-semibold text-[16px] leading-[1.05] text-[#eaf1f8] truncate">
+                {player.name}
+              </div>
+              <div className="font-body font-semibold text-[10px] tracking-[0.05em] uppercase text-[#5e708a] mt-[2px]">
+                {player.team}
+                {player.byeWeek > 0 && <> &middot; Bye {player.byeWeek}</>}
+              </div>
+            </div>
+
+            <div className="flex items-center gap-[10px]">
+              {tierBadge}
+              <div className="text-right min-w-[58px]">
+                <div className="font-mono font-extrabold text-[15px] leading-none text-[#eaf1f8]">{rangeLabel}</div>
+                <div className="font-mono font-semibold text-[9.5px] text-[#5e708a] mt-[3px]">base ${range.base}</div>
+              </div>
+            </div>
+
+            <ChevronDown className="w-4 h-4 text-[#5e708a] justify-self-end" />
           </div>
         )}
 
-        {/* Expanded content */}
+        {/* ---------- EXPANDED ---------- */}
         {isExpanded && (
-          <div className="px-4 sm:px-5 pb-4 sm:pb-5 pt-2 border-t border-[#8bacff]/10 space-y-4">
-            {/* Value breakdown - range / market / proj */}
-            <div className="grid grid-cols-3 gap-2 text-center">
-              <div className="rounded-lg py-2" style={{ background: 'rgba(95,168,224,0.06)' }}>
-                <div className="text-[9px] text-[#697782] uppercase tracking-widest font-bold">Value range</div>
-                <div className={`font-headline text-lg font-bold ${rangeColor}`}>{rangeLabel}</div>
-                <div className="text-[9px] text-[#9eadb8]">base ${range.base}</div>
-              </div>
-              <div className="rounded-lg py-2" style={{ background: 'rgba(139,172,255,0.06)' }}>
-                <div className="text-[9px] text-[#697782] uppercase tracking-widest font-bold">Market</div>
-                <div className="font-headline text-lg font-bold text-[#deedf9]">
-                  {market != null && market > 0 ? `~$${Math.round(market)}` : '-'}
+          <>
+            {/* HERO */}
+            <div
+              onClick={onToggleExpand}
+              className="relative grid items-center gap-3 pl-[15px] pr-[14px] py-[13px] cursor-pointer overflow-hidden"
+              style={{
+                gridTemplateColumns: '30px minmax(0,1fr) auto',
+                background: `linear-gradient(90deg, ${chip.wash} 0%, transparent 60%)`,
+              }}
+            >
+              <div className="absolute left-0 top-0 bottom-0 w-[3px]" style={{ background: chip.bg }} />
+              {posChipEl}
+              <div className="min-w-0">
+                <div className="font-headline font-bold text-[19px] leading-tight text-[#eaf1f8]">{player.name}</div>
+                <div className="font-body font-semibold text-[10px] tracking-[0.05em] uppercase text-[#5e708a] mt-[2px]">
+                  {player.team}
+                  {player.byeWeek > 0 && <> &middot; Bye {player.byeWeek}</>}
                 </div>
               </div>
-              <div className="rounded-lg py-2" style={{ background: 'rgba(139,172,255,0.06)' }}>
-                <div className="text-[9px] text-[#697782] uppercase tracking-widest font-bold">Proj Pts</div>
-                <div className="font-headline text-lg font-bold text-[#deedf9]">{projPts != null ? Math.round(projPts) : '-'}</div>
+              <div className="flex flex-col items-end gap-[5px] text-right">
+                {tierBadge}
+                <div className="font-body font-bold text-[8px] tracking-[0.14em] uppercase text-[#5e708a]">Your value</div>
+                <div className="font-mono font-extrabold text-[21px] leading-none" style={{ color: '#7FC0EA' }}>
+                  {rangeLabel}
+                </div>
+                <ChevronUp className="w-4 h-4 text-[#5e708a] mt-[2px]" />
               </div>
             </div>
 
-            {/* Tags with reasoning */}
-            <div>
-              <h4 className="text-[10px] text-[#9eadb8] font-bold uppercase tracking-widest mb-2">
-                Draft Intel
-              </h4>
+            {/* VALUATION */}
+            <div className="pl-[15px] pr-[14px] pt-3 pb-[13px] border-t border-[rgba(180,200,224,0.1)]">
+              <div className="font-body font-bold text-[8.5px] tracking-[0.15em] uppercase text-[#5e708a] mb-[9px]">
+                Valuation
+              </div>
+              {showBar && (
+                <>
+                  <div className="h-[7px] rounded-full relative overflow-hidden" style={{ background: 'rgba(95,168,224,0.12)' }}>
+                    <div
+                      className="absolute h-full"
+                      style={{
+                        left: `${fillLeft}%`,
+                        width: `${fillWidth}%`,
+                        background: isTax ? 'rgba(255,113,108,0.5)' : 'rgba(95,168,224,0.55)',
+                      }}
+                    />
+                    <div className="absolute w-[2px] h-full bg-[#eaf1f8]" style={{ left: `${baseLeft}%` }} />
+                  </div>
+                  <div className="flex justify-between font-mono text-[10px] text-[#5e708a] mt-[7px]">
+                    <span>room <b className="text-[#eaf1f8] font-bold">${range.low}</b></span>
+                    <span>base <b className="text-[#eaf1f8] font-bold">${range.base}</b></span>
+                    <span>worth <b className="text-[#eaf1f8] font-bold">${range.high}</b></span>
+                  </div>
+                </>
+              )}
+              <div className="grid grid-cols-3 gap-px mt-3 rounded-lg overflow-hidden" style={{ background: 'rgba(180,200,224,0.1)' }}>
+                <div className="px-[10px] py-2" style={{ background: 'var(--ffi-surface-1)' }}>
+                  <div className="font-body font-bold text-[8px] tracking-[0.1em] uppercase text-[#5e708a]">Market</div>
+                  <div className="font-mono font-extrabold text-[14px] text-[#eaf1f8] mt-[3px]">
+                    {market != null && market > 0 ? `~$${Math.round(market)}` : '-'}
+                  </div>
+                </div>
+                <div className="px-[10px] py-2" style={{ background: 'var(--ffi-surface-1)' }}>
+                  <div className="font-body font-bold text-[8px] tracking-[0.1em] uppercase text-[#5e708a]">Proj Pts</div>
+                  <div className="font-mono font-extrabold text-[14px] text-[#eaf1f8] mt-[3px]">
+                    {projPts != null ? Math.round(projPts) : '-'}
+                  </div>
+                </div>
+                <div className="px-[10px] py-2" style={{ background: 'var(--ffi-surface-1)' }}>
+                  <div className="font-body font-bold text-[8px] tracking-[0.1em] uppercase text-[#5e708a]">Experts</div>
+                  <div className="font-mono font-extrabold text-[14px] text-[#eaf1f8] mt-[3px]">{expertRankLabel ?? '-'}</div>
+                </div>
+              </div>
+            </div>
 
-              {/* User tags */}
-              {(isTarget || isAvoid) && (
-                <div className="space-y-2 mb-3">
-                  {isTarget && (
-                    <div className="flex items-start gap-2">
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold tracking-wider bg-[#5FA8E0]/30 text-[#5FA8E0] shadow-[0_0_8px_rgba(95,168,224,0.4)] shrink-0">
-                        <Target className="h-3 w-3" />
-                        TARGET
-                      </span>
-                      <span className="text-[10px] text-[#9eadb8] leading-relaxed">
-                        You&apos;ve marked this player as a draft target
-                      </span>
-                    </div>
-                  )}
-                  {isAvoid && (
-                    <div className="flex items-start gap-2">
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold tracking-wider bg-[#ff716c]/25 text-[#ff716c] shrink-0">
-                        <Ban className="h-3 w-3" />
-                        AVOID
-                      </span>
-                      <span className="text-[10px] text-[#9eadb8] leading-relaxed">
-                        You&apos;ve marked this player to avoid
-                      </span>
-                    </div>
-                  )}
+            {/* OUTLOOK */}
+            <div className="pl-[15px] pr-[14px] pt-3 pb-[13px] border-t border-[rgba(180,200,224,0.1)]">
+              <div className="font-body font-bold text-[8.5px] tracking-[0.15em] uppercase text-[#5e708a] mb-[9px]">
+                Outlook
+              </div>
+              <div className="flex gap-2 items-start">
+                <span className={`text-[12px] leading-[1.3] mt-px ${rec.intent === 'pass' ? 'text-[#ff716c]' : 'text-[#5FA8E0]'}`}>▸</span>
+                <span className="font-body text-[12.5px] text-[#eaf1f8] leading-[1.45]">{rec.line}</span>
+              </div>
+              {fitLine && (
+                <div className="flex gap-2 items-start mt-[9px]">
+                  <span className="text-[#8bacff]/50 text-[10px] shrink-0 mt-px">◆</span>
+                  <span className="font-body text-[11px] leading-snug text-[#5e708a]">{fitLine}</span>
                 </div>
               )}
+            </div>
 
-              {/* System tags (real, computed) */}
-              {tags.length > 0 ? (
-                <div className="space-y-2">
-                  {tags.map((tag) => {
-                    const style = TAG_STYLE[tag.id]
-                    const Icon = style.icon
-                    const isDismissed = dismissedSystemTags.includes(tag.id)
-                    return (
-                      <div key={tag.id} className={`flex items-start gap-2 ${isDismissed ? 'opacity-40' : ''}`}>
-                        <span
-                          className={`
-                            inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold tracking-wider shrink-0
-                            ${isDismissed ? 'bg-[#8bacff]/10 text-[#697782]' : `${style.bgClass} ${style.textClass}`}
-                          `}
-                        >
-                          <Icon className="h-3 w-3" />
-                          {tag.label}
+            {/* DRAFT INTEL (real, computed tags) */}
+            {(tags.length > 0 || isTarget || isAvoid) && (
+              <div className="pl-[15px] pr-[14px] pt-3 pb-[13px] border-t border-[rgba(180,200,224,0.1)]">
+                <div className="font-body font-bold text-[8.5px] tracking-[0.15em] uppercase text-[#5e708a] mb-[9px]">
+                  Draft intel
+                </div>
+
+                {(isTarget || isAvoid) && (
+                  <div className="space-y-2 mb-3">
+                    {isTarget && (
+                      <div className="flex items-start gap-2">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold tracking-wider bg-[#5FA8E0]/30 text-[#5FA8E0] shadow-[0_0_8px_rgba(95,168,224,0.4)] shrink-0">
+                          <Target className="h-3 w-3" />
+                          TARGET
                         </span>
-                        <span className="text-[10px] text-[#9eadb8] leading-relaxed flex-1">
-                          {isDismissed ? <span className="text-[#697782] italic">Dismissed</span> : tag.hint}
+                        <span className="text-[10px] text-[#9fb2c6] leading-relaxed">
+                          You&apos;ve marked this player as a draft target
                         </span>
-                        {isDismissed ? (
-                          <button
-                            onClick={(e) => { e.stopPropagation(); onUndismissSystemTag?.(tag.id) }}
-                            disabled={isTagLoading}
-                            className="text-[9px] text-[#8bacff] hover:text-[#deedf9] transition-colors shrink-0 disabled:opacity-50"
-                          >
-                            restore
-                          </button>
-                        ) : (
-                          <button
-                            onClick={(e) => { e.stopPropagation(); onDismissSystemTag?.(tag.id) }}
-                            disabled={isTagLoading}
-                            className="text-[#697782] hover:text-[#ff716c] transition-colors shrink-0 disabled:opacity-50 opacity-0 group-hover:opacity-100"
-                            title="Dismiss tag"
-                          >
-                            <X className="h-3 w-3" />
-                          </button>
-                        )}
                       </div>
-                    )
-                  })}
-                </div>
-              ) : !isTarget && !isAvoid && (
-                <p className="text-[10px] text-[#697782] italic">No standout signals for this player</p>
-              )}
-            </div>
+                    )}
+                    {isAvoid && (
+                      <div className="flex items-start gap-2">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold tracking-wider bg-[#ff716c]/25 text-[#ff716c] shrink-0">
+                          <Ban className="h-3 w-3" />
+                          AVOID
+                        </span>
+                        <span className="text-[10px] text-[#9fb2c6] leading-relaxed">
+                          You&apos;ve marked this player to avoid
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                )}
 
-            {/* User tag controls */}
-            <div>
-              <h4 className="text-[10px] text-[#9eadb8] font-bold uppercase tracking-widest mb-2">
-                Your Tags
-              </h4>
+                {tags.length > 0 ? (
+                  <div className="space-y-2">
+                    {tags.map((tag) => {
+                      const style = TAG_STYLE[tag.id]
+                      const Icon = style.icon
+                      const isDismissed = dismissedSystemTags.includes(tag.id)
+                      return (
+                        <div key={tag.id} className={`flex items-start gap-2 ${isDismissed ? 'opacity-40' : ''}`}>
+                          <span
+                            className={`
+                              inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold tracking-wider shrink-0
+                              ${isDismissed ? 'bg-[#8bacff]/10 text-[#697782]' : `${style.bgClass} ${style.textClass}`}
+                            `}
+                          >
+                            <Icon className="h-3 w-3" />
+                            {tag.label}
+                          </span>
+                          <span className="text-[10px] text-[#9fb2c6] leading-relaxed flex-1">
+                            {isDismissed ? <span className="text-[#697782] italic">Dismissed</span> : tag.hint}
+                          </span>
+                          {isDismissed ? (
+                            <button
+                              onClick={(e) => { e.stopPropagation(); onUndismissSystemTag?.(tag.id) }}
+                              disabled={isTagLoading}
+                              className="text-[9px] text-[#8bacff] hover:text-[#deedf9] transition-colors shrink-0 disabled:opacity-50"
+                            >
+                              restore
+                            </button>
+                          ) : (
+                            <button
+                              onClick={(e) => { e.stopPropagation(); onDismissSystemTag?.(tag.id) }}
+                              disabled={isTagLoading}
+                              className="text-[#697782] hover:text-[#ff716c] transition-colors shrink-0 disabled:opacity-50 opacity-0 group-hover:opacity-100"
+                              title="Dismiss tag"
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
+                          )}
+                        </div>
+                      )
+                    })}
+                  </div>
+                ) : !isTarget && !isAvoid && (
+                  <p className="text-[10px] text-[#697782] italic">No standout signals for this player</p>
+                )}
+              </div>
+            )}
+
+            {/* YOUR CALL (target / avoid + grades) */}
+            <div className="pl-[15px] pr-[14px] pt-3 pb-[13px] border-t border-[rgba(180,200,224,0.1)]">
+              <div className="font-body font-bold text-[8.5px] tracking-[0.15em] uppercase text-[#5e708a] mb-[9px]">
+                Your call
+              </div>
               <div className="flex flex-wrap gap-2">
                 <button
                   onClick={(e) => { e.stopPropagation(); onToggleTarget?.() }}
@@ -478,12 +435,12 @@ export function FFIPlayerIntelCard({
                     inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all
                     ${isTarget
                       ? 'bg-[#5FA8E0]/30 text-[#5FA8E0] shadow-[0_0_12px_rgba(95,168,224,0.3)]'
-                      : 'bg-surface-container-high text-[#9eadb8] hover:bg-[#5FA8E0]/10 hover:text-[#5FA8E0]'
+                      : 'bg-surface-container-high text-[#9fb2c6] hover:bg-[#5FA8E0]/10 hover:text-[#5FA8E0]'
                     }
                     disabled:opacity-50 disabled:cursor-not-allowed
                   `}
                 >
-                  {isTarget ? <><Check className="h-3.5 w-3.5" />TARGET SET</> : <><Target className="h-3.5 w-3.5" />Mark as Target</>}
+                  {isTarget ? <><Check className="h-3.5 w-3.5" />Target set</> : <><Target className="h-3.5 w-3.5" />Mark as target</>}
                 </button>
 
                 <button
@@ -493,18 +450,18 @@ export function FFIPlayerIntelCard({
                     inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all
                     ${isAvoid
                       ? 'bg-[#ff716c]/25 text-[#ff716c]'
-                      : 'bg-surface-container-high text-[#9eadb8] hover:bg-[#ff716c]/10 hover:text-[#ff716c]'
+                      : 'bg-surface-container-high text-[#9fb2c6] hover:bg-[#ff716c]/10 hover:text-[#ff716c]'
                     }
                     disabled:opacity-50 disabled:cursor-not-allowed
                   `}
                 >
-                  {isAvoid ? <><X className="h-3.5 w-3.5" />AVOIDING</> : <><Ban className="h-3.5 w-3.5" />Mark to Avoid</>}
+                  {isAvoid ? <><X className="h-3.5 w-3.5" />Avoiding</> : <><Ban className="h-3.5 w-3.5" />Mark to avoid</>}
                 </button>
               </div>
 
-              {/* Grade controls — only shown when a tag is active */}
+              {/* Grade controls - only shown when a tag is active */}
               {isTarget && (
-                <div className="flex items-center gap-3 mt-3 pt-3 border-t border-[#8bacff]/10">
+                <div className="flex items-center gap-3 mt-3 pt-3 border-t border-[rgba(180,200,224,0.1)]">
                   <span className="font-body text-[10px] font-bold uppercase tracking-widest text-[#697782] w-16 shrink-0">
                     Priority
                   </span>
@@ -520,7 +477,7 @@ export function FFIPlayerIntelCard({
                     >
                       −
                     </button>
-                    <span className="font-headline text-lg font-bold text-[#5FA8E0] w-6 text-center tabular-nums">
+                    <span className="font-mono text-lg font-bold text-[#5FA8E0] w-6 text-center tabular-nums">
                       {tagWeight}
                     </span>
                     <button
@@ -540,7 +497,7 @@ export function FFIPlayerIntelCard({
               )}
 
               {isAvoid && (
-                <div className="flex items-center gap-3 mt-3 pt-3 border-t border-[#8bacff]/10">
+                <div className="flex items-center gap-3 mt-3 pt-3 border-t border-[rgba(180,200,224,0.1)]">
                   <span className="font-body text-[10px] font-bold uppercase tracking-widest text-[#697782] w-16 shrink-0">
                     Severity
                   </span>
@@ -556,7 +513,7 @@ export function FFIPlayerIntelCard({
                             ? s === 'hard'
                               ? 'bg-[#ff716c]/40 text-[#ff716c] shadow-[0_0_8px_rgba(255,113,108,0.3)]'
                               : 'bg-[#ff716c]/20 text-[#ff716c]'
-                            : 'bg-[#8bacff]/8 text-[#697782] hover:text-[#9eadb8]'
+                            : 'bg-[#8bacff]/8 text-[#697782] hover:text-[#9fb2c6]'
                           }
                           disabled:opacity-50 disabled:cursor-not-allowed
                         `}
@@ -568,7 +525,58 @@ export function FFIPlayerIntelCard({
                 </div>
               )}
             </div>
-          </div>
+
+            {/* HOW THIS IS CALCULATED (provenance) */}
+            <div className="pl-[15px] pr-[14px] pt-3 pb-[13px] border-t border-[rgba(180,200,224,0.1)]">
+              <button
+                onClick={(e) => { e.stopPropagation(); setShowCalc((v) => !v) }}
+                className={`inline-flex items-center gap-1.5 font-body text-[10px] font-bold uppercase tracking-widest transition-colors ${showCalc ? 'text-[#8bacff]' : 'text-[#5e708a] hover:text-[#9fb2c6]'}`}
+              >
+                <Info className="w-3.5 h-3.5" />
+                {showCalc ? 'Hide the math' : 'How this value is calculated'}
+              </button>
+
+              {showCalc && (
+                <div className="mt-3 space-y-2.5">
+                  <div className="flex gap-3 text-[11px]">
+                    <span className="w-[92px] flex-shrink-0 font-body text-[9px] font-bold uppercase tracking-wider text-[#5FA8E0] pt-0.5">Range</span>
+                    <span className="text-[#9fb2c6] leading-relaxed">
+                      {range.source === 'league' ? (
+                        <>
+                          <span className="text-[#eaf1f8] font-bold">Worth ${player.ceilingValue}</span> (roster-aware VORP, ESPN 2026 full-PPR) ↔{' '}
+                          <span className="text-[#eaf1f8] font-bold">Room ${player.expectedRoomPrice}</span> (16-yr Nasties price for {posRankLabel ?? 'his rank'}). Band is those two real numbers; base is the midpoint.
+                        </>
+                      ) : range.source === 'national' ? (
+                        <>Modeled from national FantasyPros expert-rank spread - no Nasties calibration for this player yet.</>
+                      ) : (
+                        <>A single consensus value - not enough data for a range.</>
+                      )}
+                    </span>
+                  </div>
+
+                  {visibleTags.map((t) => (
+                    <div key={t.id} className="flex gap-3 text-[11px]">
+                      <span className="w-[92px] flex-shrink-0 font-body text-[9px] font-bold uppercase tracking-wider text-[#5FA8E0] pt-0.5">{t.label}</span>
+                      <span className="text-[#9fb2c6] leading-relaxed">{t.source}</span>
+                    </div>
+                  ))}
+
+                  {projPts != null && (
+                    <div className="flex gap-3 text-[11px]">
+                      <span className="w-[92px] flex-shrink-0 font-body text-[9px] font-bold uppercase tracking-wider text-[#5FA8E0] pt-0.5">Projection</span>
+                      <span className="text-[#9fb2c6] leading-relaxed">
+                        <span className="text-[#eaf1f8] font-bold">{Math.round(projPts)} pts</span> - ESPN 2026 full-PPR season projection, your exact scoring.
+                      </span>
+                    </div>
+                  )}
+
+                  <p className="pt-2 border-t border-[rgba(180,200,224,0.1)] font-body text-[10px] text-[#697782] leading-relaxed">
+                    Calibrated on {CALIBRATION_ERA.length} Nasties seasons ({CALIBRATION_DRAFTS_USED} drafts) · sources: ESPN projections · FantasyPros ECR · Nasties auction ledger
+                  </p>
+                </div>
+              )}
+            </div>
+          </>
         )}
       </div>
     </div>

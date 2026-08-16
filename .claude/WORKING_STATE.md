@@ -23,7 +23,9 @@ The prior plan (S1–S8 / P2 DR / P3 VAL) marked the app "done" while it (a) pri
 
 ## Next open item
 
-### ✅ D0 + D1 + D2 + D3 DONE — next open item is **D4** (Players card redesign)
+### ✅ D0 + D1 + D2 + D3 + D4 DONE — next open item is **D5** (Sim results screen)
+
+**D4 DONE (2026-08-16):** Players card (`src/components/prep/ffi-player-intel-card.tsx`) fully redesigned on the 4th attempt against the approved v3 mockup. Compact row is now one ~50px line (color rail + position chip w/ pos+rank | mixed-case name + team/BYE | tier badge | value range + base | chevron) — removed the headshot, `.toUpperCase()` all-caps names, rec strip, range bar, and "Your value" label from the compact face. **Tier is now on the card face** from `player.expertTier` (T1 brick-red glow, T2 steel-blue outline, T3+ muted). Projected points demoted into the expansion, which is reorganized into labeled groups: Valuation (range bar + Market/Proj Pts/Experts strip — expert rank shown plainly as "RB2", no ECR jargon), Outlook (rec + solver fitLine), Draft Intel, Your Call, and a "how this is calculated" provenance toggle. Zero em/en-dashes. Gate: tsc 0 source errors · 392/392 · changed-file lint clean (exit 0) · build ✓ Compiled successfully. Proof: two live 390px real-Chrome screenshots via a temporary `/d4preview` harness (deleted after capture) — expanded McCaffrey (all 5 groups, real fonts) + all-8 collapsed rows (T1/T2/T3/T4 variety, RB/WR/QB/TE/DEF chip colors). Full entry in `BUILD_PLAN.md` D4 + `CHANGELOG.md`.
 
 **D3 DONE (2026-08-15):** Strategies page fully redesigned. Generate button + Dry-run link removed. Strategies now auto-load on mount sorted by `projected_ceiling` DESC. Ranked expandable rows with red left-rail on #1, star ratings (read in header, interactive when expanded), expandable detail (HOW TO APPROACH / PLAYER TYPES TO TARGET / PLAYERS YOU LIKELY CAN'T GET / STRENGTH VS LEAGUE / YOUR RATING). Persistent ratings table `user_strategy_ratings` (migration + API route + types). Quiet "Regenerate strategies" button at bottom. Functional gap confirmed and logged in BUILD_PLAN: player pull on `/prep` does NOT re-flow strategy proposals. Gate: tsc 0 errors · 392/392 · lint 0 new · build clean. Screenshot: `.claude/mockups/d3_strategies_375.png`.
 
@@ -33,7 +35,7 @@ The prior plan (S1–S8 / P2 DR / P3 VAL) marked the app "done" while it (a) pri
 
 **D1 DONE (2026-08-14):** SHIELD ported into the real app. Full entry in `CHANGELOG.md` + `BUILD_PLAN.md` D1.
 
-**Next session does (D4, see BUILD_PLAN D4):** Players card redesign — thinner cards, tier on card face, projected points demoted to expansion, expert consensus added. Screenshot required.
+**Next session does (D5, see BUILD_PLAN D5):** Sim results screen — build the approved `sim-results-v1.html` for real, consuming R10b outputs (distribution, projected record, top-5 modal rosters, players-you-land-most, saved runs/compare). Depends on R10b + D1. Screenshot required.
 
 **D1 tail (separate follow-on, not blocking D3):** sweep component-level inline color literals across the other ~60 screens; decide the position-color system (green RB `#56E0A0`); the Live Auction Room keeps its own scoped `theme.ts` four-move palette for now.
 

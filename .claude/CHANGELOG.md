@@ -2,6 +2,22 @@
 
 ---
 
+## 2026-08-16 / D4 -- Players card redesign: thin rows, tier on the card face, points demoted
+
+**Task:** D4. 4th attempt after 3 rejected mockups. Thin the Players list cards from 130-160px to a single ~50px line; put the expert-consensus **tier on the card face** (absent today); demote projected points into the expansion; keep the base/mkt/your-value range bar Joe likes; add expert positional consensus shown in plain English (no "ECR"). UI only, no engine changes. Ref: NFL broadcast lower-thirds / EA Sports FC. | **Class:** output | **Lenses:** Design, QA
+
+**What shipped (`src/components/prep/ffi-player-intel-card.tsx`, full rewrite):**
+- **Compact row = one ~50px line:** color rail (3px, position color) + position chip (position + positional rank) | mixed-case name + team · BYE meta | tier badge | value range with base underneath | chevron. Grid `30px minmax(0,1fr) auto 16px`. **Removed from the compact face:** the headshot, the `.toUpperCase()` all-caps names, the recommendation strip, the range bar, and the "Your value" label — all per the hard-won failed-session constraints.
+- **Tier on the card face** from `player.expertTier`: T1 = brick-red (`#A63C41`) filled badge with glow (elite — the one RED signal), T2 = steel-blue outline, T3+ = muted steel outline. This is the single most-important signal getting its own loud treatment instead of collapsing into the blue tonal family.
+- **Position chips** from a `POS_CHIP` map (RB green `#56e0a0`, WR blue `#6ca8ff`, QB pink `#ff6e8a`, TE orange `#ffb05c`) + a muted steel fallback for DEF/K (no token today).
+- **Expansion reorganized into labeled groups:** HERO (chip + name + tier + Your value + collapse) → **Valuation** (range bar room/base/worth from the league-calibrated band, `isTax` red fill; 3-col Market / Proj Pts / Experts strip — expert positional rank rendered plainly as e.g. "RB2", never "ECR") → **Outlook** (plain-English rec line + solver `fitLine`) → **Draft Intel** (user TARGET/AVOID + system tags with dismiss/restore) → **Your Call** (Target/Avoid buttons + Priority stepper / Severity soft-hard graders) → **How this value is calculated** (Info toggle: range provenance + per-tag sources + projection). Projected points now live here, not on the face.
+- **`src/components/prep/__tests__/ffi-player-intel-card-fitline.test.tsx`** — updated `renderCard` to render the card open (`isExpanded ?? true`) since the solver fitLine moved from always-visible to the expansion. The fitLine-reaches-DOM guard is preserved; only its location changed. 3 previously-failing presence tests pass again.
+- **Zero em/en-dashes** anywhere in the file (hyphens only), including JSX comments, per Joe's global policy.
+
+**Proof:** `vitest run` **392/392** green · changed-file lint clean (`npx eslint` on the 2 files = exit 0; the 61 project-wide lint errors are all pre-existing in untouched `src/lib/research/*` + `src/lib/supabase/*`) · `npm run build` **✓ Compiled successfully** (no `/d4preview` route — temp harness removed). Two live 390px real-Chrome screenshots via a temporary auth-free `/d4preview` harness mounting the REAL component with real-shaped fixtures (harness deleted after capture): (1) expanded McCaffrey card showing all five groups with real Kanit/Hanken/JetBrains fonts, range bar room $70 / base $77 / worth $83, Market ~$52 / Proj Pts 347 / Experts RB2; (2) all 8 collapsed rows proving tier variety (T1 red glow on Gibbs/Puka/McCaffrey/St. Brown, T2 blue outline on Jefferson/Allen, T3/T4 muted on Bowers/Ravens) and the position-color chips. $0, no paid API calls.
+
+---
+
 ## 2026-08-15 / D3 -- Strategies redesign: auto-rank, expandable rows, persistent star ratings
 
 **Task:** D3. Kill the cost-gated Generate button and the Dry-run page link. Auto-render strategies on load sorted by objective strength. Per-strategy expandable detail. Persistent user star-ratings keyed on archetype so they survive re-generate and re-pull. Schema add: `user_strategy_ratings`. | **Class:** output/schema | **Lenses:** Design, QA, Security, Ops

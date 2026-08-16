@@ -65,6 +65,7 @@ function renderCard(props: {
   isTarget?: boolean
   isAvoid?: boolean
   fitLine?: string
+  isExpanded?: boolean
 }) {
   return render(
     <FFIPlayerIntelCard
@@ -73,6 +74,9 @@ function renderCard(props: {
       tags={[]}
       isTarget={props.isTarget ?? false}
       isAvoid={props.isAvoid ?? false}
+      // D4: card detail (incl. the solver fitLine) now lives in the expansion,
+      // so the presence assertions render the card open. Default open here.
+      isExpanded={props.isExpanded ?? true}
       fitLine={props.fitLine}
     />,
   )

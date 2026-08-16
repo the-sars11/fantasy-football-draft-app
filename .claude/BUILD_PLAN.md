@@ -462,9 +462,25 @@ Name a real reference app before building (Linear, EA FC — never generic dark-
 > - **Functional gap (confirmed):** player pull on `/prep` does NOT re-flow strategy proposals. Fix: wire a pull-complete signal to reset `fetchedRef.current` in `StrategyProposals`. Target: R10b or D3-fix.
 > - **Proof:** type-check 0 errors; 392/392 tests green; lint 0 new; build clean; 375px screenshot `d3_strategies_375.png`. Migration applied to production Supabase (Joe, 2026-08-15 via SQL Editor).
 
-### D4 — Players card redesign `[Sonnet]` · class: output
+### D4 — Players card redesign `[Sonnet]` · class: output ✅ DONE (2026-08-16)
 > **Folds in the Players feedback.** **Thinner** list cards; **tier on the card face** (absent today, `ffi-player-intel-card.tsx`); move projected points to the expansion; keep base/mkt/your-value + the range bar Joe likes; add **expert consensus**. (Live-updating values = R11/D6, not here.)
 > **Done-when:** thinner card with tier + consensus, points demoted to expansion, on the approved look. Screenshot.
+>
+> **Shipped (2026-08-16) — 4th attempt, approved v3 mockup, all failed-session constraints honored:**
+> - `src/components/prep/ffi-player-intel-card.tsx` — full rewrite. Compact row = one ~50px line: color rail + position chip (pos + rank) | mixed-case name + team/BYE | tier badge | value range + base underneath | chevron. Removed headshot, `.toUpperCase()`, rec strip, range bar, and the "Your value" label from the compact face. Tier now on the card face from `player.expertTier`: T1 = brick-red glow (elite), T2 = steel-blue outline, T3+ = muted outline. Projected points demoted into the expansion.
+> - Expansion reorganized into labeled groups: **Valuation** (range bar room/base/worth + Market / Proj Pts / Experts strip — expert positional rank shown plainly, e.g. "RB2", no "ECR" jargon), **Outlook** (plain-English rec + solver fitLine), **Draft Intel** (user + system tags), **Your Call** (target/avoid + priority/severity graders), and a "how this value is calculated" provenance toggle.
+> - `src/components/prep/__tests__/ffi-player-intel-card-fitline.test.tsx` — updated: fitLine now lives in the expansion, so the presence assertions render the card open (`isExpanded ?? true`). Guard preserved (fitLine-reaches-DOM), only location changed.
+> - **Zero em/en-dashes** (hyphens only), per Joe's global policy. Verified across the whole file.
+> - **Proof:** `npm run test:run` 392/392 green · changed-file lint clean (`npx eslint <2 files>` exit 0; the 61 project-wide lint errors are all pre-existing in untouched `src/lib/research/*` + `src/lib/supabase/*`) · `npm run build` ✓ Compiled successfully · two real 390px screenshots captured live in real Chrome via a temporary `/d4preview` auth-free harness (harness deleted after capture): (1) expanded McCaffrey card showing all five groups with real Kanit/Hanken/JetBrains fonts, range bar room $70/base $77/worth $83, Market ~$52 / Proj Pts 347 / Experts RB2; (2) all 8 collapsed rows proving tier variety (T1 red glow, T2 blue outline, T3/T4 muted) and position-color chips (RB green, WR blue, QB pink, TE orange, DEF grey).
+>
+> **FAILED SESSION (2026-08-16) — hard-won design constraints for the next attempt:**
+> Three mockups, all rejected. Do NOT repeat these mistakes:
+> - **NO ALL-CAPS names.** Current code does `.toUpperCase()` on player names -- this must be removed. Names read as yelling and scan poorly in a list.
+> - **NO unexplained jargon.** "WR2 ECR" means nothing at a glance. If you show expert position rank, label it plainly ("WR2 consensus" or just show it contextually) or drop it from the face entirely -- Joe does not want acronym clutter.
+> - **NO "Your value" label above the range.** The range is obviously the value. The label is noise.
+> - **No blue blob.** Every element in all three mockups collapsed into the same steel-blue tonal family -- tier badge, value, tags, strip. Use RED for the one most important signal (T1 tier = elite, act now). Everything else earns its own clear treatment or gets dropped.
+> - **Compact row = one line, ~44px tall.** Current cards are 130-160px. The entire compact row should be: position chip | name | tier | value | expand. Nothing else. No headshot, no recommendation strip, no range bar -- those open in the expansion.
+> - **SHOW JOE A REAL BROWSER SCREENSHOT of the actual current card first.** Joe's feedback was partly about not recognizing the design. Start the next session by screenshotting the live card at 375px so you and Joe have a shared baseline before any mockup work.
 
 ### D5 — Sim results screen `[Sonnet]` · class: output
 > **Depends on:** R10b (grading/record/top-5/frequency DATA) + D1. Builds the approved `sim-results-v1.html` mockup for real, consuming R10b's outputs.
