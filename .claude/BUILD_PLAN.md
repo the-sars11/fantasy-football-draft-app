@@ -1,37 +1,31 @@
 <!-- DASHBOARD_STATUS
 {
-  "currentPhase": "REBUILD — the app was marked 'done' but prices players in a silo and breaks on a dead model. Reset to truth 2026-08-12. New North Star: build the best full 15-man roster for $200, not price players one at a time. Ordered rebuild sessions R1→R15 (17 with the R7a/R7b + R10a/R10b splits), model-bound, one-sitting each, testing + bug hunts baked in. NO date gating — built well, done right.",
+  "currentPhase": "REBUILD + LOOK. Reset to truth 2026-08-12 after the app was marked 'done' while it priced players in a silo and broke on a dead model. North Star: build the best full 15-man roster for $200, not price players one at a time. Two parallel tracks: the R-track (logic/data/engines, R1-R15) and the D-track ('THE LOOK' visual identity, D0-D6). Model-bound, one-sitting each, testing + bug hunts baked in. NO date gating. As of 2026-08-16: R1-R10a done, D0-D4 done; next buildable is R10b (sim grading), which unblocks D5. R11 is split into R11a (offline cache) + R11b (in-room guidance). One open decision (DEC-1, targets/avoids bias) gates R10b + R11b.",
   "status": "active",
   "milestones": [
-    { "name": "Data pipeline — Sleeper/FantasyPros seed + Supabase cache (real, verified via API)", "done": true },
-    { "name": "GRIDIRON design system (real, shipped)", "done": true },
-    { "name": "Live auction state machine + rule-based advisor (built, NOT live-verified)", "done": false },
-    { "name": "Auctioneer remote sync proxy (built, NOT verified against a running auctioneer)", "done": false },
-    { "name": "Per-player calibrated valuation ceiling/room/gap (built, but prices in a SILO — no roster context)", "done": false },
-    { "name": "TEAM-CONSTRUCTION ENGINE — best full roster for $200 (THE North Star — NOT BUILT)", "done": false },
-    { "name": "Strategy engine (partial — 500s on the dead model)", "done": false },
-    { "name": "Simulation (built but deterministic toy — not Monte Carlo, opponents draft by ADP)", "done": false },
-    { "name": "Live AI panels (BROKEN — point at a 404 model id)", "done": false }
+    { "name": "Data pipeline - Sleeper/FantasyPros seed + Supabase cache (real, verified via API)", "done": true },
+    { "name": "SHIELD v4 design system (D0-locked + D1-ported 2026-08-14; supersedes GRIDIRON v3)", "done": true },
+    { "name": "Per-player calibrated valuation - never recommends above worth (R3), roster context added (R5)", "done": true },
+    { "name": "TEAM-CONSTRUCTION ENGINE - best full roster for $200 (R4 solver + R5 live wire + R6 strategy prices)", "done": true },
+    { "name": "Strategy engine - board-derived generation + target prices + adaptive-guidance (R6/R9), D3 UI", "done": true },
+    { "name": "Live AI panels - model id fixed + error-gated fallback (R1); live path verify is a Joe-approved paid check", "done": true },
+    { "name": "Visual redesign D-track - Research/Strategies/Players screens done (D2-D4); Sim (D5) + Live (D6) pending", "done": false },
+    { "name": "Simulation - Monte-Carlo roster-aware engine done (R10a); grading/record/saved-runs + UI pending (R10b/D5)", "done": false },
+    { "name": "Live auction state machine + rule-based advisor - built + roster-aware wired (R5); live-verify pending R15", "done": false },
+    { "name": "Auctioneer remote sync proxy - built; live-verify against a running auctioneer pending R15", "done": false }
   ],
   "nextItems": [
-    "R1 [Sonnet]: Trust triage — dead model id, error-gated AI fallback, ADP off the Cheat Sheet, nav active-state, kill the dead theme toggle, /draft/live renders (not null). The app stops lying and stops throwing.",
-    "R2 [Sonnet]: Data truth — ECR/PTS show real fields (not round(ADP)), kill the fake ±15% range, surface tier data.",
-    "R3 [Opus]: Valuation correctness — never recommend a max-bid above worth; kill the 'pay up to $97' ceiling line; legible POCKET/TAX; wire or delete the breakout/bust detector.",
-    "R4 [Opus]: Team-construction SOLVER (pure lib) — best full-roster allocation for $200 given budget/slots/board; per-nomination max-bid that still lets you finish the roster. The North Star, as a tested library.",
-    "R5 [Opus]: Wire the solver into the LIVE max-bid — 'THE PLAY' becomes roster-aware, not silo.",
-    "R6 [Opus]: Wire the solver into STRATEGY target prices — each strategy's targets sum to a completable $200 roster.",
-    "R7a [Sonnet]: Persistence rework + graded tag scale — migrate user_tags to player_id anchor (+ backfill), wire the weight/severity scale into the tagging UI. (Schema session, isolated from UI.)",
-    "R7b [Sonnet+Opus]: Player filters + strategy-fit line — expanded filters (position/FLEX/tier/pocket/bye/tag), solver-driven per-player fit line. Depends on R4 + R7a.",
-    "R8 [Sonnet]: Cheat Sheet resolution + FLEX view — stop duplicating Players; add a real roster-construction board + a FLEX list.",
-    "R9 [Opus]: Strategy engine rebuild — auto-generate options from the pool + solver; live adaptive guidance.",
-    "R10a [Opus]: Simulation engine — Monte Carlo + auction-priced roster-aware opponents (via the solver), returns per-run rosters + a distribution. Pure + tested, no UI. (Isolated like R4.)",
-    "R10b [Opus]: Sim grading + output — season-points-vs-league grade, projected record, 4-5 representative teams, saved runs (persist/reload/compare). Depends on R10a.",
-    "R11 [Sonnet]: Live draft — offline cache + team-aware live guidance in the room.",
-    "R12 [Sonnet]: Shell/UX/perf — page-switch load time, mobile-first verification across every screen.",
-    "R13 [Sonnet+Opus]: Dedicated bug hunt + test hardening — /bug-hunt full, real coverage on the new engines (the old 205 tested the wrong things).",
-    "R14 [Claude drives Chrome + Sonnet]: usability walkthrough — walk every flow mobile arm's-length, fix friction before Joe touches it.",
-    "R15 [Sonnet + Joe]: rehearsal GATE — full mock draft on Joe's phone against the live auctioneer. The only session that needs Joe's hands.",
-    "Per-session gate (R1-R13): type-check + test:run + lint(0 new) + build + /bug-hunt free on changed modules + a screenshot from a preview I loaded myself. No session is 'done' without all of it."
+    "DEC-1 [Opus/Joe]: targets/avoids bias decision - should the sim 'me' seat (R10b) and in-room advice (R11b) bid toward Joe's graded targets/avoids instead of the generic ceiling valuation? Gates R10b + R11b. Joe's call; recommendation recorded in the plan.",
+    "R10b [Opus, L]: Sim grading + output - season-points-vs-league grade, projected record, top-5 modal rosters, players-you-land-most frequency, saved runs (persist/reload/compare). Depends on R10a; gated on DEC-1 for the me-seat bias.",
+    "R11a [Sonnet, M]: Live offline cache + resync - local cache survives a mid-draft network drop; resolve any remaining /draft/live dead-screen root cause. Depends on R5.",
+    "R11b [Sonnet, M]: Team-aware in-room guidance - wire adaptive-guidance pivot line, in-room target/avoid writes, verify the solver/what-to-do weight targets/avoids. Depends on R9 + DEC-1. Pixels land in D6.",
+    "R12 [Sonnet, M]: Shell/UX/perf - measure + fix page-switch load time, mobile-first verification across every screen.",
+    "R13 [Sonnet+Opus, L]: Dedicated bug hunt + test hardening - /bug-hunt full, real coverage on the new engines. If findings exceed one sitting, catalog here and split fixes into R13-fix cards.",
+    "R14 [Claude+Sonnet, L]: usability walkthrough - walk every flow mobile arm's-length, fix P1s this session; P2 overflow becomes R14-fix cards.",
+    "R15 [Sonnet+Joe, M]: rehearsal GATE - full mock draft on Joe's phone against the live auctioneer. The only session that needs Joe's hands.",
+    "D5 [Sonnet, M]: Sim results screen - build the approved sim-results-v1.html consuming R10b data. BLOCKED on R10b.",
+    "D6 [Sonnet, L]: Live room visual + UX pass - new look + R11 UX gaps (FLEX tier row + T4/T5, collapsible My Team + on-block, surfaced strategy switcher + adaptive pivot, live target/avoid, live-updating values). Pairs with R11b.",
+    "Per-session gate (R1-R14): type-check + test:run + lint(0 new) + build + /bug-hunt free on changed modules + a screenshot from a preview I loaded myself. No session is 'done' without all of it."
   ]
 }
 -->
@@ -330,48 +324,68 @@ Work top to bottom. Each session is scoped to finish cleanly in one focused sitt
 > **Done-when:** the engine runs N drafts with realistic auction opponents and returns a stable distribution; unit tests cover the opponent-bidding math + determinism-under-seed. No UI/persistence yet.
 > **Shipped 2026-08-13 (Opus):** `src/lib/draft/sim-engine.ts` — pure Monte-Carlo auction engine. `runMonteCarlo` runs N seeded English auctions where all 12 seats bid via `computeRosterConstrainedMaxBid` (roster-completion max from the R4 solver, competition-aware, NOT ADP); `runAuctionSim` clears each lot at second-price+1 capped at winner willingness; returns per-run rosters + `SimDistribution` (min/max/mean/median/p10/p90/stdev over the me-seat). Proof pasted in-chat: **20 new tests green** (`src/lib/draft/__tests__/sim-engine.test.ts` — PRNG determinism/range, second-price clearing = $50 parity, uncontested = $1, budget/capacity/reserve invariants, no double-draft, byte-identical-under-seed, sequential seeds [40..44], full 12-team Nasties smoke fills every seat to cap); type-check **0 errors**; full suite **392/392** (372 baseline +20); lint **0 new** (my 2 files 0/0); build **✓ 54/54 static pages**. Bug-hunt free: 0 crit/high/med, 1 LOW deferred perf (BUG-R10a-01), dead `nominator` counter removed. No UI/persistence — surfaces in R10b.
 
-### R10b — Sim grading, record, representative teams + saved runs `[Opus]` · class: output/pipeline
-> **Depends on:** R10a.
+### 🔲 DEC-1 — Targets/avoids bias `[Opus/Joe]` · OPEN DECISION · gates R10b + R11b
+> **Type:** Thinking / DECISION. Extracted from inside R10b and R11 during the 2026-08-16 Re-Plan so no Doing card carries a buried judgment call (Scoping Gate).
+> **The question:** should the sim's "me" seat (R10b) and the in-room advice (R11b) bid toward **Joe's graded targets/avoids** (weighted) instead of the generic ceiling-based valuation they use today (`sim-engine.ts:294-311`)? Today targets/avoids do NOT bias sim bidding, and the same question applies to R9 strategy generation.
+> **Why it gates:** R10b grades a strategy Joe acts on and R11b advises him live. If the me-seat ignores his targets while grading/advising against opponents who also ignore them, the grade and the advice model a draft Joe would not actually run. This is a product-behavior call, not an implementation detail, so it cannot be resolved inside a Doing card.
+> **Recommendation (recorded, NOT a resolution - Joe still rules):** bias the me-seat toward graded targets/avoids with a bounded weight (respect the graded weight 1-10 / severity soft-hard already in `user_tags`), while keeping opponents on the generic ceiling model, so the grade answers "how does MY plan fare," not "how does a generic drafter fare."
+> **Done-when:** Joe picks (a) bias the me-seat toward targets/avoids, or (b) keep the generic valuation. Write the ruling into R10b + R11b as a fixed instruction. Until then both cards are `[!]` blocked on this line.
+
+### R10b — Sim grading, record, representative teams + saved runs `[Opus]` · class: output/pipeline · `[!]` blocked on DEC-1
+> **Size:** L - grading math + record + top-5 modal clustering + players-you-land-most frequency + saved-runs persist/reload/compare, on top of the existing R10a engine. Large but bounded (the engine already exists, this is post-processing + one persistence path); if saved-runs compare overflows the window, it splits to an R10b-tail card.
+> **Depends on:** R10a. **Gated on:** DEC-1 (me-seat targets/avoids bias) before grading a strategy Joe acts on.
 > **Reads first:** R10a output, `prep/simulate/client.tsx`, `research_runs` schema.
 > **Work:** grade each run on **projected season points vs. the league**; output a projected **win-loss record**, 4–5 representative resulting teams, and **saved runs** (persist to `research_runs`, reload + compare).
 > **Done-when:** the sim produces a projected record + representative teams from the R10a distribution, and runs persist + reload + compare. Tests on the grading math. Screenshot.
 > **Added 2026-08-14 (Joe feedback — Sim mockup review, "really close, yes"):** two output refinements, both **pure post-processing on the R10a per-run rosters** (`SimRun.myRoster.players[]`, `sim-engine.ts:122-131`) — no engine change:
 >   - **"Top-5 most-likely rosters" replaces the vague "4-5 representative teams."** Do NOT surface all N (~500) runs. Cluster the `myRoster` outcomes by their **stud core** (players won above a $-threshold; the $1 bench fill is noise) and surface the **5 most frequently-occurring roster shapes**, each labeled with its frequency ("this shape hit in 22% of sims"). This makes the teams **modal** (most-common) — what Joe asked for — not floor/median/ceiling percentile picks.
 >   - **"Players you land most" frequency table.** Tally across all runs the fraction of `myRoster`s containing each player → a ranked list ("Bijan Robinson — in 78% of sims, avg $54"). A plain count over `myRoster.players[]`.
->   - **Open question (decide before grading a strategy Joe acts on):** should the sim's "me" seat bid toward **Joe's targets/avoids** (weighted) instead of the generic ceiling-based valuation it uses today (`sim-engine.ts:294-311`)? Today targets/avoids do NOT bias sim bidding. Same question applies to R9 strategy generation.
+>   - **GATED on DEC-1 (see the DEC-1 card above):** whether the sim's "me" seat biases toward Joe's targets/avoids is now the explicit DEC-1 decision (shared with R11b). Do not start R10b grading until Joe rules on DEC-1, then encode the ruling here as a fixed instruction.
 >   - **Screen note:** the Sim results screen has an approved static mockup (`.claude/mockups/sim-results-v1.html`). Whether R10b builds that screen or the visual pass (D5) does depends on the sequencing decision — see "🎨 THE LOOK." R10b's own scope is the **grading/record/top-5/frequency DATA** (Opus, tested); the pixels are D5.
 
-### R11 — Live draft: offline cache + team-aware guidance `[Sonnet]` · class: pipeline
+### R11a — Live draft: offline cache + resync `[Sonnet]` · class: pipeline
+> **Size:** M - one focused Sonnet sitting: a local cache layer + resync path, isolated from the in-room guidance work (R11b) and the pixels (D6). This is the "offline cache" chunk the 2026-08-16 Re-Plan split out of the old bundled R11.
 > **Depends on:** R5 (team-aware max-bid).
-> **Reads first:** `draft/live/client.tsx`, `state.ts`, `use-remote-auctioneer-feed.ts`, `roster-solver.ts`.
-> **Work:** local **offline cache** so a mid-draft network drop doesn't lose state; any remaining `/draft/live` dead-screen root cause fully resolved here (if R1 deferred it); team-construction-aware advice surfaced in the room.
-> **Done-when:** the draft survives an offline blip via local cache and resyncs; live room shows roster-aware advice; solo-verifiable. (Full live-auctioneer proof → R15.) Screenshot.
-> **Added 2026-08-14 (Joe feedback — Live screens review). Grounded against the CURRENT room (`components/draft/live-room/auction-room.tsx`), which is in better shape than the old review implied.** It already has: money-remaining + single-player max-bid (`budget-strip.tsx:57-61`), slots filled/open, a per-position tier-count "Tier Context" panel with tap-to-list (`tier-context.tsx`), and a target-toggle on the Research tab. The gaps Joe flagged (these are the R11 UX scope — pixels land with D6, "built once"):
+> **Reads first:** `draft/live/client.tsx`, `state.ts`, `use-remote-auctioneer-feed.ts`.
+> **Work:** local **offline cache** so a mid-draft network drop doesn't lose state; any remaining `/draft/live` dead-screen root cause fully resolved here (if R1 deferred it).
+> **Done-when:** the draft survives an offline blip via local cache and resyncs; solo-verifiable. (Full live-auctioneer proof -> R15.) Screenshot.
+
+### R11b — Live draft: team-aware in-room guidance `[Sonnet]` · class: pipeline · `[!]` blocked on DEC-1
+> **Size:** M - one Sonnet sitting for the in-room guidance BEHAVIOR only. The six UX-gap PIXELS listed below land once in D6 (build-once rule), not here; R11b owns the logic they surface.
+> **Depends on:** R5 (team-aware max-bid), R9 (adaptive-guidance engine). **Gated on:** DEC-1 (targets/avoids bias) before the in-room advice weights targets/avoids.
+> **Reads first:** `draft/live/client.tsx`, `roster-solver.ts`, `adaptive-guidance.ts`, `what-to-do.ts`.
+> **Work:** wire `adaptive-guidance.ts` pivot line into the room; in-room target/avoid toggle writes (add / un-target / add-avoid live); surface an always-reachable strategy display + quick switcher (the logic behind D6's pixels).
+> **Done-when:** live room shows roster-aware advice + the adaptive pivot line; target AND avoid are settable during the draft; solo-verifiable. (Full live-auctioneer proof -> R15.) Screenshot.
+> **Added 2026-08-14 (Joe feedback — Live screens review). Grounded against the CURRENT room (`components/draft/live-room/auction-room.tsx`), which is in better shape than the old review implied.** It already has: money-remaining + single-player max-bid (`budget-strip.tsx:57-61`), slots filled/open, a per-position tier-count "Tier Context" panel with tap-to-list (`tier-context.tsx`), and a target-toggle on the Research tab. The gaps Joe flagged (these are the R11b UX scope — the PIXELS land with D6, "built once"):
 >   - **Tier Context is incomplete.** Shows QB/RB/WR/TE only (`auction-room.tsx:34` `TIER_POSITIONS`) with **no FLEX row**, and only T1/T2/T3 (`explain.ts:32-34`) with **no T4/T5**. Add a **FLEX row** (combined RB/WR/TE remaining) and extend to **T4 (evaluate T5)** — Joe reads tier depth per position + FLEX to make in-the-moment calls.
 >   - **My Team is always-on, not collapsible** (`auction-room.tsx:293-294`). Make it **expand/collapse** so the space can hold tiers/strategy when the roster isn't needed.
 >   - **On-the-block card is not collapsible** (`on-the-block-card.tsx`). Make the player-context card **expand/collapse** — full context for players Joe cares about, minimized for the many he doesn't.
 >   - **Strategy is buried.** The switcher + adaptive pivot alerts live in a "More tools" accordion **closed by default** (`client.tsx:124`). Surface an **always-reachable strategy display + quick switcher** so Joe can flip strategy views mid-draft, and surface the R9 **adaptive-guidance** pivot line in the room (this IS R11's core "wire `adaptive-guidance.ts`" job per VISION §31).
 >   - **Avoid has no control in the room; target only toggles on the Research tab** (writes `'target'` only). Add **target AND avoid** toggles reachable during the draft (add / un-target / add-avoid live as the board changes).
 >   - **Live-updating player values (Players-screen ask).** Joe wants the player card's base/market/your-value to **update live as players are bought**. The prep Players screen is static (no auctioneer subscription); the live version of that card belongs here. Keep base/mkt/your-value + the range bar; tier on the card face; projected points → expansion; add "expert consensus." (The static prep card's density/tier redesign is D4.)
->   - **Open question (route with R9/R10b):** does the in-room advice / strategy actually **prioritize Joe's targets and avoid his avoids**? Verify the solver + what-to-do path weight target/avoid grades; if not, log as a functional gap.
+>   - **GATED on DEC-1 (see the DEC-1 card above R10b):** whether in-room advice biases toward Joe's targets/avoids is now the explicit DEC-1 decision (shared with R10b). R11b's own Doing scope is to VERIFY the current solver + what-to-do path against DEC-1's ruling once Joe rules; if the code does not match the ruling, log it as a functional gap and fix it here.
 
 ### R12 — Shell / UX / perf `[Sonnet]` · class: output (Design lens)
+> **Size:** M - measure page-switch timing + targeted fixes + one mobile-first arm's-length pass. Screen fixes beyond quick wins spawn follow-up cards rather than bloating this sitting.
 > **Reads first:** `layout/app-shell.tsx`, `DESIGN_SYSTEM.md`.
 > **Work:** measure + fix page-switch load time (Joe flagged slow switches); verify mobile-first arm's-length across every screen.
 > **Done-when:** measured switch times acceptable; every screen verified mobile-first. Before/after timing + screenshots.
 
 ### R13 — Dedicated bug hunt + test hardening `[Sonnet · Opus for logic bugs]` · class: bugfix
+> **Size:** L - `/bug-hunt full` across the whole app + coverage expansion on the new engines. If findings exceed one sitting, catalog + triage them here and split the fixes into R13-fix cards (a full bug hunt legitimately produces more fix work than one window holds).
 > **Why:** the old 205 tests passed while the core was missing. This is where coverage finally lands on the things that decide the draft.
 > **Reads first:** `.claude/REVIEW_LENSES.md`, the R1–R12 CHANGELOG entries, `src/**/*.test.ts`.
 > **Work:** `/bug-hunt full` across the whole rebuilt app, triage by severity, fix the real ones; **expand automated coverage on the new engines** — roster-solver, team-aware max-bid, strategy target prices, Monte Carlo sim — so the logic that wins the draft is actually tested.
 > **Done-when:** `/bug-hunt full` clean (or every finding triaged with a written defer reason); tests cover the team-construction paths; type-check + lint (0 new) + build clean. Findings + fixes in BUG_LOG + CHANGELOG.
 
 ### R14 — Usability walkthrough — Claude drives Chrome `[Claude driving + Sonnet fixes]` · class: output/bugfix
+> **Size:** L - walk every flow at mobile arm's-length + fix P1/P2. Fix P1s in-session; P2 overflow becomes R14-fix cards so the walkthrough itself stays one sitting.
 > **Why:** Joe's phone rehearsal (R15) must not be the first human click-through.
 > **How:** load the app at **mobile viewport, arm's-length**, and walk **every** real flow end-to-end as a first-time user: Research → pull players → read a player card (tags/range/sources/fit) → set graded targets/avoids → strategies → Cheat Sheet/construction board → enter the live room → join → track picks → budget/pace/roster fit → Post Draft. Catalog every dead-end, "how do I get back," confusing label, jank, or cheap-looking moment. Screenshot each.
 > **Done-when:** a written findings list (each with a screenshot), every P1/P2 issue fixed and re-shot, and a clean full-walkthrough screenshot set. This is the "ready for Joe's hands" sign-off.
 
 ### R15 — Rehearsal GATE `[Sonnet + Joe]` · class: pipeline — **THE GATE**
+> **Size:** M - a single rehearsal sitting with Joe on his phone; issues found become a short R15-fix list (expected, that is what a rehearsal produces).
 > **Why last:** you can only rehearse the finished, hardened app, and this is the **only session that needs Joe's hands.**
 > **Work:** full mock draft on Joe's phone against the **live auctioneer** — join/sync proven live (~3–6s), picks tracking, team-aware advice correct, budgets right, offline-resync proven, no surprises. (Cost gate: if AI panels are on, a real dry run bills Claude — Joe's typed approval first.)
 > **Done-when:** Joe has run a full mock draft against the live auctioneer on his phone with picks tracking, roster-aware advice correct, budgets right, offline-resync proven, and no surprises. Issues found become a short R15-fix list (expected — that's what a rehearsal finds).
@@ -482,12 +496,14 @@ Name a real reference app before building (EA FC — never generic dark-glass/gr
 > - **Compact row = one line, ~44px tall.** Current cards are 130-160px. The entire compact row should be: position chip | name | tier | value | expand. Nothing else. No headshot, no recommendation strip, no range bar -- those open in the expansion.
 > - **SHOW JOE A REAL BROWSER SCREENSHOT of the actual current card first.** Joe's feedback was partly about not recognizing the design. Start the next session by screenshotting the live card at 375px so you and Joe have a shared baseline before any mockup work.
 
-### D5 — Sim results screen `[Sonnet]` · class: output
+### D5 — Sim results screen `[Sonnet]` · class: output · `[!]` blocked on R10b
+> **Size:** M - one Sonnet sitting to build the approved `sim-results-v1.html` against R10b's data. BLOCKED on R10b (it consumes R10b's grading/record/top-5/frequency outputs), so R10b is the true next buildable item, not D5.
 > **Depends on:** R10b (grading/record/top-5/frequency DATA) + D1. Builds the approved `sim-results-v1.html` mockup for real, consuming R10b's outputs.
 > **Done-when:** Sim results renders R10b data in the approved look (distribution, projected record, top-5 modal rosters, players-you-land-most, saved runs/compare). Screenshot.
 
 ### D6 — Live room visual + UX pass `[Sonnet]` · class: output
-> **Pairs with R11** (build the room once). Applies the new look AND lands the R11 UX gaps: FLEX tier row + T4/T5, collapsible My Team + on-block card, surfaced strategy switcher + adaptive pivot, live target/avoid toggles, live-updating player card.
+> **Size:** L - new look + the R11 UX gaps landed once. Large; if the UX gaps overflow one sitting, the visual reskin ships first and the gap-closure splits to a D6-tail card.
+> **Pairs with R11b** (build the room once). Applies the new look AND lands the R11b UX gaps: FLEX tier row + T4/T5, collapsible My Team + on-block card, surfaced strategy switcher + adaptive pivot, live target/avoid toggles, live-updating player card.
 > **Done-when:** room renders the new look with the R11 UX gaps closed, mobile. Screenshot.
 
 ---

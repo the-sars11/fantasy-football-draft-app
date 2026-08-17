@@ -13,7 +13,7 @@ The prior plan (S1–S8 / P2 DR / P3 VAL) marked the app "done" while it (a) pri
 
 **New North Star:** *build the best possible full 15-man roster for $200* — not price players one at a time. Everything hangs off the team-construction engine (R4), which was never built.
 
-**Active phase:** REBUILD — ordered model-bound sessions **R1 → R15** (see `BUILD_PLAN.md` "THE REBUILD"). R1 trust triage → R2 data truth → R3 valuation correctness → R4 team-construction solver → R5/R6 wire it into live max-bid + strategy prices → R7a persistence rework → R7b filters+fit → R8 cheat-sheet+FLEX → R9 strategy engine → R10a Monte-Carlo engine → R10b sim grading+record → R11 live offline+guidance → R12 shell/perf → R13 bug-hunt+tests → R14 Claude usability → R15 Joe's rehearsal gate. (17 sessions with the R7a/R7b + R10a/R10b splits.)
+**Active phase:** REBUILD — ordered model-bound sessions **R1 → R15** (see `BUILD_PLAN.md` "THE REBUILD"). R1 trust triage → R2 data truth → R3 valuation correctness → R4 team-construction solver → R5/R6 wire it into live max-bid + strategy prices → R7a persistence rework → R7b filters+fit → R8 cheat-sheet+FLEX → R9 strategy engine → R10a Monte-Carlo engine → R10b sim grading+record → R11a live offline cache → R11b in-room guidance → R12 shell/perf → R13 bug-hunt+tests → R14 Claude usability → R15 Joe's rehearsal gate. (18 sessions with the R7a/R7b, R10a/R10b, and R11a/R11b splits.)
 
 **Per-session gate (R1–R13):** type-check + test:run + lint(0 new) + build + `/bug-hunt free` on changed modules + a screenshot from a preview I loaded myself. No session is "done" without all of it.
 
@@ -23,7 +23,7 @@ The prior plan (S1–S8 / P2 DR / P3 VAL) marked the app "done" while it (a) pri
 
 ## Next open item
 
-### ✅ D0 + D1 + D2 + D3 + D4 DONE — next open item is **D5** (Sim results screen)
+### ✅ D0 + D1 + D2 + D3 + D4 DONE — next buildable item is **R10b** (sim grading); **D5 is BLOCKED on R10b**
 
 **D4 DONE (2026-08-16):** Players card (`src/components/prep/ffi-player-intel-card.tsx`) fully redesigned on the 4th attempt against the approved v3 mockup. Compact row is now one ~50px line (color rail + position chip w/ pos+rank | mixed-case name + team/BYE | tier badge | value range + base | chevron) — removed the headshot, `.toUpperCase()` all-caps names, rec strip, range bar, and "Your value" label from the compact face. **Tier is now on the card face** from `player.expertTier` (T1 brick-red glow, T2 steel-blue outline, T3+ muted). Projected points demoted into the expansion, which is reorganized into labeled groups: Valuation (range bar + Market/Proj Pts/Experts strip — expert rank shown plainly as "RB2", no ECR jargon), Outlook (rec + solver fitLine), Draft Intel, Your Call, and a "how this is calculated" provenance toggle. Zero em/en-dashes. Gate: tsc 0 source errors · 392/392 · changed-file lint clean (exit 0) · build ✓ Compiled successfully. Proof: two live 390px real-Chrome screenshots via a temporary `/d4preview` harness (deleted after capture) — expanded McCaffrey (all 5 groups, real fonts) + all-8 collapsed rows (T1/T2/T3/T4 variety, RB/WR/QB/TE/DEF chip colors). Full entry in `BUILD_PLAN.md` D4 + `CHANGELOG.md`.
 
@@ -35,7 +35,9 @@ The prior plan (S1–S8 / P2 DR / P3 VAL) marked the app "done" while it (a) pri
 
 **D1 DONE (2026-08-14):** SHIELD ported into the real app. Full entry in `CHANGELOG.md` + `BUILD_PLAN.md` D1.
 
-**Next session does (D5, see BUILD_PLAN D5):** Sim results screen — build the approved `sim-results-v1.html` for real, consuming R10b outputs (distribution, projected record, top-5 modal rosters, players-you-land-most, saved runs/compare). Depends on R10b + D1. Screenshot required.
+**Next buildable item is R10b** (see BUILD_PLAN R10b), gated on **DEC-1** (targets/avoids bias, Joe's call): sim grading + output — season-points-vs-league grade, projected record, top-5 modal rosters, players-you-land-most frequency, saved runs (persist/reload/compare). Depends on R10a (done). **D5 (Sim results screen) is BLOCKED on R10b** — it consumes R10b's data, so it cannot be the next buildable item. Build R10b first, then D5 builds the approved `sim-results-v1.html` on top of it.
+
+**Re-Plan note (2026-08-16):** R11 was split into **R11a** (offline cache) + **R11b** (in-room guidance); the targets/avoids-bias judgment call buried in R10b + R11 was extracted into **DEC-1** (Joe's call, recommendation recorded); all open R#/D# cards now carry an S/M/L size with a window-fit reason; the DASHBOARD_STATUS JSON was refreshed to current reality. See the appended Re-Plan section in `docs/plan-health/PLAN_HEALTH_2026-08-16.md`.
 
 **D1 tail (separate follow-on, not blocking D3):** sweep component-level inline color literals across the other ~60 screens; decide the position-color system (green RB `#56E0A0`); the Live Auction Room keeps its own scoped `theme.ts` four-move palette for now.
 
