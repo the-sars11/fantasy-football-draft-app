@@ -3,6 +3,8 @@
 > Thin overlay. The source of truth for item status is `.claude/BUILD_PLAN.md`. History lives in
 > `.claude/CHANGELOG.md` + git. Do NOT accrete a per-session changelog here.
 
+classification tags added 2026-08-17
+
 **App:** personal live-draft advisor for Joe's "Nasties" 12-team, $200, PPR, no-kicker **ESPN auction** draft. Advises Joe; never bids. Picks arrive live over the network from the deployed **auctioneer** app (system of record). No Google Sheets, no snake/keeper (Tyler's league = permanent hold).
 
 ---
