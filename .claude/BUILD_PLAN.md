@@ -426,6 +426,13 @@ GRIDIRON v3 (`DESIGN_SYSTEM.md`, LOCKED 2026-06-04) is not landing in execution.
 ### The reference bar (Joe's standard, non-negotiable)
 Name a real reference app before building (EA FC — never generic dark-glass/gradient slop). Show a mockup, get Joe's explicit **yes** on the look BEFORE code. A persistent bottom nav with genuinely nice icons is a Joe hard-requirement.
 
+### 📥 Outsourced wireframes — KEEPER reference for the unbuilt screens (2026-08-17)
+Joe outsourced 5 phone mockups (402px) and likes them. They are saved into `UI/mockup-*/` (per the `UI/` per-screen convention: `DESIGN.md` + as-received `screen.png`/`code.html`), with a shared translation guide at **`UI/mockup-SHIELD-token-map.md`**. **Two decisions LOCKED with Joe:**
+1. **Every green → SHIELD steel-blue.** The mockups use lime-green `#A3E635` for all win/positive/grade/value signals; SHIELD has no green ("success reads steel-blue"). All green maps to `--ffi-blue`/`--ffi-success` `#5FA8E0`. **Zero new hues — the SHIELD palette stays locked.** (Mockup sky-blue also → steel-blue; ink `#EAF1F8` is already SHIELD ink exactly.)
+2. **These 5 are the new keeper reference for the unbuilt screens** — **D5** (`UI/mockup-strategy-detail/` + `UI/mockup-post-draft-review/`) and **D6** (`UI/mockup-roster-pressure/`). The older `.claude/mockups/sim-results-v1.html` is **annotated SUPERSEDED** (kept for numeric-density reference only; do not build against it).
+
+Screen → target: S1 research-hub `/research`; S2 player-browser (D4, already built); S3 strategy-detail (D5); S4 roster-pressure `/draft/live` (D6); S5 post-draft-review `/review`. Built-vs-new feature intents (including the winning-team-% bars, sample-roster carousel, per-slot expand-to-alternates, in-draft strategy switch, and the "no em-dashes" narrative rule) are captured per screen in each `UI/mockup-*/DESIGN.md`. **No app code changes were made — this is reference capture only.**
+
 ### D0 — Identity direction + foundation mockup + SIGN-OFF GATE `[design · Joe-gated]` · no code — ✅ CLOSED 2026-08-14
 > **The three scope decisions are LOCKED (above): full new identity, Sim-inside-Research, visual-first.** D0's job is the *look*.
 >
@@ -517,15 +524,17 @@ Name a real reference app before building (EA FC — never generic dark-glass/gr
 
 ### D5 — Sim results screen `[Sonnet]` · class: output · `[!]` blocked on R10b
 > - Class: WORKHORSE
->   Reason: testable UI implementation against locked sim-results-v1.html mockup
-> **Size:** M - one Sonnet sitting to build the approved `sim-results-v1.html` against R10b's data. BLOCKED on R10b (it consumes R10b's grading/record/top-5/frequency outputs), so R10b is the true next buildable item, not D5.
-> **Depends on:** R10b (grading/record/top-5/frequency DATA) + D1. Builds the approved `sim-results-v1.html` mockup for real, consuming R10b's outputs.
+>   Reason: testable UI implementation against the keeper mockups (see below)
+> **Keeper reference (updated 2026-08-17):** `UI/mockup-strategy-detail/` + `UI/mockup-post-draft-review/`, translated via `UI/mockup-SHIELD-token-map.md` (all green → steel-blue). `.claude/mockups/sim-results-v1.html` is SUPERSEDED — numeric-density reference only.
+> **Size:** M - one Sonnet sitting to build the keeper look against R10b's data. BLOCKED on R10b (it consumes R10b's grading/record/top-5/frequency outputs), so R10b is the true next buildable item, not D5.
+> **Depends on:** R10b (grading/record/top-5/frequency DATA) + D1. Builds the keeper mockups for real, consuming R10b's outputs. Includes the NEW winning-team-% bars (winning teams only, not raw roster frequency) + the up-to-5 sample-roster carousel + the collapsible no-em-dashes narrative.
 > **Done-when:** Sim results renders R10b data in the approved look (distribution, projected record, top-5 modal rosters, players-you-land-most, saved runs/compare). Screenshot.
 
 ### D6 — Live room visual + UX pass `[Sonnet]` · class: output
 > - Class: FRONTIER
->   Reason: awaiting approved spec, no locked mockup
+>   Reason: keeper mockup now exists (`UI/mockup-roster-pressure/`, 2026-08-17); still awaiting R11b behavior wiring
 >   Verifier: OTHER_FAMILY
+> **Keeper reference (2026-08-17):** `UI/mockup-roster-pressure/` via `UI/mockup-SHIELD-token-map.md` (reconcile against the room's scoped `theme.ts`). NEW asks captured there: per-slot expand-to-alternates at target prices (active-strategy driven), REMOVE the arbitrary "next target," and an in-draft strategy switch that re-runs the pure/$0 solver.
 > **Size:** L - new look + the R11 UX gaps landed once. Large; if the UX gaps overflow one sitting, the visual reskin ships first and the gap-closure splits to a D6-tail card.
 > **Pairs with R11b** (build the room once). Applies the new look AND lands the R11b UX gaps: FLEX tier row + T4/T5, collapsible My Team + on-block card, surfaced strategy switcher + adaptive pivot, live target/avoid toggles, live-updating player card.
 > **Done-when:** room renders the new look with the R11 UX gaps closed, mobile. Screenshot.
