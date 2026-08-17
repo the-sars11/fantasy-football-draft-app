@@ -15,15 +15,15 @@
     { "name": "Auctioneer remote sync proxy - built; live-verify against a running auctioneer pending R15", "done": false }
   ],
   "nextItems": [
-    "DEC-1 [Opus/Joe]: targets/avoids bias decision - should the sim 'me' seat (R10b) and in-room advice (R11b) bid toward Joe's graded targets/avoids instead of the generic ceiling valuation? Gates R10b + R11b. Joe's call; recommendation recorded in the plan.",
-    "R10b [Opus, L]: Sim grading + output - season-points-vs-league grade, projected record, top-5 modal rosters, players-you-land-most frequency, saved runs (persist/reload/compare). Depends on R10a; gated on DEC-1 for the me-seat bias.",
-    "R11a [Sonnet, M]: Live offline cache + resync - local cache survives a mid-draft network drop; resolve any remaining /draft/live dead-screen root cause. Depends on R5.",
-    "R11b [Sonnet, M]: Team-aware in-room guidance - wire adaptive-guidance pivot line, in-room target/avoid writes, verify the solver/what-to-do weight targets/avoids. Depends on R9 + DEC-1. Pixels land in D6.",
+    "DEC-1 [Opus/Joe]: RESOLVED 2026-08-17 = BIAS. The sim 'me' seat (R10b) + in-room advice (R11b) bias toward Joe's graded targets/avoids at a bounded weight (respect user_tags weight 1-10 + soft/hard severity); opponents stay generic-ceiling. Encoded as a fixed instruction in R10b + R11b; both unblocked.",
+    "R10b [Opus, L]: NEXT BUILDABLE. Sim grading + output - season-points-vs-league grade, projected record, top-5 modal rosters, players-you-land-most frequency, saved runs (persist/reload/compare). Me-seat biases to targets/avoids per DEC-1. Depends on R10a (done).",
+    "R11a [Sonnet, M]: Live offline cache + resync - local cache survives a mid-draft network drop; resolve any remaining /draft/live dead-screen root cause. Depends on R5 (done). NOT gated - runnable in parallel now.",
+    "R11b [Sonnet, M]: Team-aware in-room guidance - wire adaptive-guidance pivot line, in-room target/avoid writes, verify the solver/what-to-do weight targets/avoids per DEC-1 = BIAS. Depends on R9. Pixels land in D6.",
     "R12 [Sonnet, M]: Shell/UX/perf - measure + fix page-switch load time, mobile-first verification across every screen.",
     "R13 [Sonnet+Opus, L]: Dedicated bug hunt + test hardening - /bug-hunt full, real coverage on the new engines. If findings exceed one sitting, catalog here and split fixes into R13-fix cards.",
     "R14 [Claude+Sonnet, L]: usability walkthrough - walk every flow mobile arm's-length, fix P1s this session; P2 overflow becomes R14-fix cards.",
     "R15 [Sonnet+Joe, M]: rehearsal GATE - full mock draft on Joe's phone against the live auctioneer. The only session that needs Joe's hands.",
-    "D5 [Sonnet, M]: Sim results screen - build the approved sim-results-v1.html consuming R10b data. BLOCKED on R10b.",
+    "D5 [Sonnet, M]: Sim results + strategy-detail screens - build from keeper refs UI/mockup-strategy-detail/ + UI/mockup-post-draft-review/ (sim-results-v1.html superseded), consuming R10b data; winning-team-% bars + 5-roster carousel + no-em-dash narrative, all green -> steel-blue per UI/mockup-SHIELD-token-map.md. BLOCKED on R10b.",
     "D6 [Sonnet, L]: Live room visual + UX pass - new look + R11 UX gaps (FLEX tier row + T4/T5, collapsible My Team + on-block, surfaced strategy switcher + adaptive pivot, live target/avoid, live-updating values). Pairs with R11b.",
     "Per-session gate (R1-R14): type-check + test:run + lint(0 new) + build + /bug-hunt free on changed modules + a screenshot from a preview I loaded myself. No session is 'done' without all of it."
   ]
@@ -324,29 +324,29 @@ Work top to bottom. Each session is scoped to finish cleanly in one focused sitt
 > **Done-when:** the engine runs N drafts with realistic auction opponents and returns a stable distribution; unit tests cover the opponent-bidding math + determinism-under-seed. No UI/persistence yet.
 > **Shipped 2026-08-13 (Opus):** `src/lib/draft/sim-engine.ts` — pure Monte-Carlo auction engine. `runMonteCarlo` runs N seeded English auctions where all 12 seats bid via `computeRosterConstrainedMaxBid` (roster-completion max from the R4 solver, competition-aware, NOT ADP); `runAuctionSim` clears each lot at second-price+1 capped at winner willingness; returns per-run rosters + `SimDistribution` (min/max/mean/median/p10/p90/stdev over the me-seat). Proof pasted in-chat: **20 new tests green** (`src/lib/draft/__tests__/sim-engine.test.ts` — PRNG determinism/range, second-price clearing = $50 parity, uncontested = $1, budget/capacity/reserve invariants, no double-draft, byte-identical-under-seed, sequential seeds [40..44], full 12-team Nasties smoke fills every seat to cap); type-check **0 errors**; full suite **392/392** (372 baseline +20); lint **0 new** (my 2 files 0/0); build **✓ 54/54 static pages**. Bug-hunt free: 0 crit/high/med, 1 LOW deferred perf (BUG-R10a-01), dead `nominator` counter removed. No UI/persistence — surfaces in R10b.
 
-### 🔲 DEC-1 — Targets/avoids bias `[Opus/Joe]` · OPEN DECISION · gates R10b + R11b
+### ✅ DEC-1 — Targets/avoids bias `[Opus/Joe]` · RESOLVED 2026-08-17: BIAS · unblocked R10b + R11b
 > - Class: FRONTIER
 >   Reason: ambiguous product decision
 >   Verifier: OTHER_FAMILY
 > **Type:** Thinking / DECISION. Extracted from inside R10b and R11 during the 2026-08-16 Re-Plan so no Doing card carries a buried judgment call (Scoping Gate).
 > **The question:** should the sim's "me" seat (R10b) and the in-room advice (R11b) bid toward **Joe's graded targets/avoids** (weighted) instead of the generic ceiling-based valuation they use today (`sim-engine.ts:294-311`)? Today targets/avoids do NOT bias sim bidding, and the same question applies to R9 strategy generation.
 > **Why it gates:** R10b grades a strategy Joe acts on and R11b advises him live. If the me-seat ignores his targets while grading/advising against opponents who also ignore them, the grade and the advice model a draft Joe would not actually run. This is a product-behavior call, not an implementation detail, so it cannot be resolved inside a Doing card.
-> **Recommendation (recorded, NOT a resolution - Joe still rules):** bias the me-seat toward graded targets/avoids with a bounded weight (respect the graded weight 1-10 / severity soft-hard already in `user_tags`), while keeping opponents on the generic ceiling model, so the grade answers "how does MY plan fare," not "how does a generic drafter fare."
-> **Done-when:** Joe picks (a) bias the me-seat toward targets/avoids, or (b) keep the generic valuation. Write the ruling into R10b + R11b as a fixed instruction. Until then both cards are `[!]` blocked on this line.
+> **RULING (Joe, 2026-08-17): BIAS.** The sim "me" seat (R10b) and the in-room advice (R11b) DO bias toward Joe's graded targets/avoids, with a **bounded weight** that respects the graded weight (1-10) + severity (soft/hard) already in `user_tags`. Opponents stay on the generic ceiling model, so the grade answers "how does MY plan fare," not "how does a generic drafter fare." This is now a fixed instruction for R10b + R11b (and applies to R9 strategy generation where the same question arises).
+> **Done-when:** ✅ Joe ruled BIAS. Ruling written into R10b + R11b below as a fixed instruction; both cards unblocked.
 
-### R10b — Sim grading, record, representative teams + saved runs `[Opus]` · class: output/pipeline · `[!]` blocked on DEC-1
+### R10b — Sim grading, record, representative teams + saved runs `[Opus]` · class: output/pipeline · UNBLOCKED (DEC-1 = BIAS)
 > - Class: FRONTIER
->   Reason: awaiting approved spec, DEC-1
+>   Reason: approved spec; DEC-1 ruled BIAS 2026-08-17
 >   Verifier: OTHER_FAMILY
 > **Size:** L - grading math + record + top-5 modal clustering + players-you-land-most frequency + saved-runs persist/reload/compare, on top of the existing R10a engine. Large but bounded (the engine already exists, this is post-processing + one persistence path); if saved-runs compare overflows the window, it splits to an R10b-tail card.
-> **Depends on:** R10a. **Gated on:** DEC-1 (me-seat targets/avoids bias) before grading a strategy Joe acts on.
+> **Depends on:** R10a. **DEC-1 = BIAS (2026-08-17):** the me-seat bids toward Joe's graded targets/avoids at a bounded weight (respect `user_tags` weight 1-10 + soft/hard severity); opponents stay generic-ceiling. Encode this in the me-seat bidding path (`sim-engine.ts:294-311`) before grading.
 > **Reads first:** R10a output, `prep/simulate/client.tsx`, `research_runs` schema.
 > **Work:** grade each run on **projected season points vs. the league**; output a projected **win-loss record**, 4–5 representative resulting teams, and **saved runs** (persist to `research_runs`, reload + compare).
 > **Done-when:** the sim produces a projected record + representative teams from the R10a distribution, and runs persist + reload + compare. Tests on the grading math. Screenshot.
 > **Added 2026-08-14 (Joe feedback — Sim mockup review, "really close, yes"):** two output refinements, both **pure post-processing on the R10a per-run rosters** (`SimRun.myRoster.players[]`, `sim-engine.ts:122-131`) — no engine change:
 >   - **"Top-5 most-likely rosters" replaces the vague "4-5 representative teams."** Do NOT surface all N (~500) runs. Cluster the `myRoster` outcomes by their **stud core** (players won above a $-threshold; the $1 bench fill is noise) and surface the **5 most frequently-occurring roster shapes**, each labeled with its frequency ("this shape hit in 22% of sims"). This makes the teams **modal** (most-common) — what Joe asked for — not floor/median/ceiling percentile picks.
 >   - **"Players you land most" frequency table.** Tally across all runs the fraction of `myRoster`s containing each player → a ranked list ("Bijan Robinson — in 78% of sims, avg $54"). A plain count over `myRoster.players[]`.
->   - **GATED on DEC-1 (see the DEC-1 card above):** whether the sim's "me" seat biases toward Joe's targets/avoids is now the explicit DEC-1 decision (shared with R11b). Do not start R10b grading until Joe rules on DEC-1, then encode the ruling here as a fixed instruction.
+>   - **DEC-1 RULED BIAS (2026-08-17):** the me-seat biases toward Joe's graded targets/avoids at a bounded weight (respect `user_tags` weight 1-10 + soft/hard severity), opponents stay generic-ceiling. This makes the top-5 rosters + "players you land most" reflect the draft Joe would actually run, not a generic drafter. Fixed instruction — no longer a blocker.
 >   - **Screen note:** the Sim results screen has an approved static mockup (`.claude/mockups/sim-results-v1.html`). Whether R10b builds that screen or the visual pass (D5) does depends on the sequencing decision — see "🎨 THE LOOK." R10b's own scope is the **grading/record/top-5/frequency DATA** (Opus, tested); the pixels are D5.
 
 ### R11a — Live draft: offline cache + resync `[Sonnet]` · class: pipeline
@@ -358,12 +358,12 @@ Work top to bottom. Each session is scoped to finish cleanly in one focused sitt
 > **Work:** local **offline cache** so a mid-draft network drop doesn't lose state; any remaining `/draft/live` dead-screen root cause fully resolved here (if R1 deferred it).
 > **Done-when:** the draft survives an offline blip via local cache and resyncs; solo-verifiable. (Full live-auctioneer proof -> R15.) Screenshot.
 
-### R11b — Live draft: team-aware in-room guidance `[Sonnet]` · class: pipeline · `[!]` blocked on DEC-1
+### R11b — Live draft: team-aware in-room guidance `[Sonnet]` · class: pipeline · UNBLOCKED (DEC-1 = BIAS)
 > - Class: FRONTIER
->   Reason: awaiting approved spec, DEC-1
+>   Reason: approved spec; DEC-1 ruled BIAS 2026-08-17
 >   Verifier: OTHER_FAMILY
 > **Size:** M - one Sonnet sitting for the in-room guidance BEHAVIOR only. The six UX-gap PIXELS listed below land once in D6 (build-once rule), not here; R11b owns the logic they surface.
-> **Depends on:** R5 (team-aware max-bid), R9 (adaptive-guidance engine). **Gated on:** DEC-1 (targets/avoids bias) before the in-room advice weights targets/avoids.
+> **Depends on:** R5 (team-aware max-bid), R9 (adaptive-guidance engine). **DEC-1 = BIAS (2026-08-17):** in-room advice weights Joe's targets/avoids at a bounded weight (respect `user_tags` weight 1-10 + soft/hard severity). Verify the solver + what-to-do path honor this; if not, fix here.
 > **Reads first:** `draft/live/client.tsx`, `roster-solver.ts`, `adaptive-guidance.ts`, `what-to-do.ts`.
 > **Work:** wire `adaptive-guidance.ts` pivot line into the room; in-room target/avoid toggle writes (add / un-target / add-avoid live); surface an always-reachable strategy display + quick switcher (the logic behind D6's pixels).
 > **Done-when:** live room shows roster-aware advice + the adaptive pivot line; target AND avoid are settable during the draft; solo-verifiable. (Full live-auctioneer proof -> R15.) Screenshot.
@@ -374,7 +374,7 @@ Work top to bottom. Each session is scoped to finish cleanly in one focused sitt
 >   - **Strategy is buried.** The switcher + adaptive pivot alerts live in a "More tools" accordion **closed by default** (`client.tsx:124`). Surface an **always-reachable strategy display + quick switcher** so Joe can flip strategy views mid-draft, and surface the R9 **adaptive-guidance** pivot line in the room (this IS R11's core "wire `adaptive-guidance.ts`" job per VISION §31).
 >   - **Avoid has no control in the room; target only toggles on the Research tab** (writes `'target'` only). Add **target AND avoid** toggles reachable during the draft (add / un-target / add-avoid live as the board changes).
 >   - **Live-updating player values (Players-screen ask).** Joe wants the player card's base/market/your-value to **update live as players are bought**. The prep Players screen is static (no auctioneer subscription); the live version of that card belongs here. Keep base/mkt/your-value + the range bar; tier on the card face; projected points → expansion; add "expert consensus." (The static prep card's density/tier redesign is D4.)
->   - **GATED on DEC-1 (see the DEC-1 card above R10b):** whether in-room advice biases toward Joe's targets/avoids is now the explicit DEC-1 decision (shared with R10b). R11b's own Doing scope is to VERIFY the current solver + what-to-do path against DEC-1's ruling once Joe rules; if the code does not match the ruling, log it as a functional gap and fix it here.
+>   - **DEC-1 RULED BIAS (2026-08-17):** in-room advice biases toward Joe's targets/avoids at a bounded weight (respect `user_tags` weight 1-10 + soft/hard severity). R11b's Doing scope: VERIFY the current solver + what-to-do path honors this; if the code does not match the ruling, log it as a functional gap and fix it here. No longer a blocker.
 
 ### R12 — Shell / UX / perf `[Sonnet]` · class: output (Design lens)
 > - Class: WORKHORSE
