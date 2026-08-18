@@ -34,10 +34,16 @@ export function StatusBar({
   leagueName,
   online,
   onLeave,
+  round,
+  pick,
 }: {
   leagueName: string
   online: boolean
   onLeave: () => void
+  /** D6b-1: current nomination round (nominations / teamCount + 1). */
+  round?: number
+  /** D6b-1: total nominations completed + 1 (current pick number). */
+  pick?: number
 }) {
   // Draft clock starts when the room first mounts.
   const elapsed = useElapsed()
@@ -61,33 +67,43 @@ export function StatusBar({
       </button>
 
       <div className="flex items-center gap-2">
-        {online ? (
-          <span
-            className="flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] font-bold tracking-wider"
-            style={{
-              background: 'rgba(95,168,224,0.12)',
-              border: '1px solid rgba(95,168,224,0.28)',
-              color: ROOM.live,
-            }}
-          >
+        <div className="flex flex-col items-start gap-0.5">
+          {online ? (
             <span
-              className="h-1.5 w-1.5 rounded-full motion-safe:animate-pulse"
-              style={{ background: ROOM.live }}
-            />
-            LIVE
-          </span>
-        ) : (
-          <span
-            className="flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] font-bold tracking-wider"
-            style={{
-              background: 'rgba(249,115,22,0.12)',
-              border: '1px solid rgba(249,115,22,0.3)',
-              color: ROOM.offline,
-            }}
-          >
-            OFFLINE
-          </span>
-        )}
+              className="flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] font-bold tracking-wider"
+              style={{
+                background: 'rgba(95,168,224,0.12)',
+                border: '1px solid rgba(95,168,224,0.28)',
+                color: ROOM.live,
+              }}
+            >
+              <span
+                className="h-1.5 w-1.5 rounded-full motion-safe:animate-pulse"
+                style={{ background: ROOM.live }}
+              />
+              LIVE
+            </span>
+          ) : (
+            <span
+              className="flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] font-bold tracking-wider"
+              style={{
+                background: 'rgba(249,115,22,0.12)',
+                border: '1px solid rgba(249,115,22,0.3)',
+                color: ROOM.offline,
+              }}
+            >
+              OFFLINE
+            </span>
+          )}
+          {round != null && pick != null && (
+            <span
+              className="pl-0.5 font-mono text-[10px] tabular-nums leading-none"
+              style={{ color: ROOM.t3 }}
+            >
+              R{round} · PICK {pick}
+            </span>
+          )}
+        </div>
         <span className="font-mono text-[11px] tabular-nums" style={{ color: ROOM.t3 }}>
           {elapsed}
         </span>

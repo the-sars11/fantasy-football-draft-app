@@ -2,6 +2,23 @@
 
 ---
 
+## 2026-08-18 / D6b-1 -- Live-room v5 UI alignment pass
+
+**Class:** output (Design + QA lenses). **Scope:** pure UI, no Monte Carlo (D6b-2/Opus). Aligned the shipped D6 live room to the locked v5 cockpit spec (`docs/ux_redesign/d6_cockpit_mockup_v5.html`). All $0 (no API calls).
+
+- **`status-bar.tsx`:** Added `round?` + `pick?` props. Stacks "R{N} · PICK {N}" subtitle under the LIVE pill in JetBrains Mono tabular-nums (gap #4).
+- **`strategy-strip.tsx`:** Label changed to "Strategy · ranked from your research". Active strategy shows `{name} - #{rank}` (hyphen, not dash per Joe rule). Dropdown items show rank suffix. (gap #3).
+- **`on-the-block-card.tsx` (complete restructure):** Summary row always shows $X tgt chip when capValue is present (gap #2). Headshot slot (silhouette placeholder) + positional rank "RB6" in meta line "LAR · RB6 · TIER 2 · BYE 6" (gap #5). `MarketBand` sub-component: steel-blue region + red target marker on a positioned track (gap #1). "The Read" section label replaces "What to do". `CONF · HIGH/MED/LOW` chip wired from `explain.ts` rule-based confidence (DEC-2b Sonnet half -- not fabricated). Red `inset 3px 0 0` left rail per v5 shell. `ACTION_GLOW` constant replaces non-existent `ROOM.voltGlow`.
+- **`inline-players-panel.tsx` (NEW):** Collapsible Players section. Search input + ALL/QB/RB/WR/TE/DEF filter pills + Rk/Player/Proj/Value/Fav grid. 15-row default, "Show all N players" expand. Star toggle calls `onToggleTarget`. Sorted by `combinedScore` DESC. (gap #6).
+- **`auction-room.tsx`:** StrategyStrip moved above OnTheBlockCard. `explainPlayer()` called to produce `confidence` for the CONF chip. StatusBar receives `round={Math.floor(state.picks.length / teamCount) + 1}` + `pick={state.picks.length + 1}`. InlinePlayersPanel added below My Team roster section.
+- **`__tests__/d6b1-ui-alignment.test.tsx` (NEW):** 19 tests covering all 6 gaps + CONF chip + "The Read" label + R5 roster-note regression: market band labels, legend, null-guard; CONF HIGH/LOW/absent; collapsed tgt chip; RB6 positional rank; R3 PICK 27; ranked strategy label; "ranked from your research" label.
+
+**Tests:** 485/485 green (466 baseline + 19 new).
+
+**Gate:** type-check 0 errors · `test:run` 485/485 · lint 0 new errors in changed files (147 total problems, 39 errors, all pre-existing in untouched files) · build compiles clean (56 static pages). Bug-hunt free: 0 CRITICAL/HIGH/MED across 5 changed files. Visual proof: headless-env limitation (same as D6/R11a/D5 -- no active /draft/live session reachable); DOM/type/test proof stands.
+
+---
+
 ## 2026-08-18 / R13 phase 2 -- Bug-hunt fixes + test hardening
 
 Class: bugfix + shared (QA + Architecture lenses). Root cause: the R13 full-mode bug hunt (this file's `BUG_LOG.md`) surfaced 1 HIGH, 3 MEDIUM, 3 LOW findings; phase 2 fixes the correctness/logic bugs and hardens tests. All $0 (no live AI).

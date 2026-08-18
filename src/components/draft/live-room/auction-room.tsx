@@ -15,6 +15,7 @@ import { useMemo, useState, type ReactNode } from 'react'
 import type { Player, Position } from '@/lib/players/types'
 import type { ScoredPlayer } from '@/lib/research/strategy/scoring'
 import type { PositionScarcityExtended } from '@/lib/draft/explain'
+import { explainPlayer } from '@/lib/draft/explain'
 import type { DraftState, DraftPick } from '@/lib/draft/state'
 import type { RosterSlots, Strategy as DbStrategy } from '@/lib/supabase/database.types'
 import { computeWhatToDo } from '@/lib/draft/what-to-do'
@@ -31,6 +32,7 @@ import { BottomNav } from './bottom-nav'
 import { BlockPickerSheet, type BlockPickerFilter } from './block-picker-sheet'
 import { FixPickSheet } from './fix-pick-sheet'
 import { ResearchView } from './research-view'
+import { InlinePlayersPanel } from './inline-players-panel'
 
 const TIER_POSITIONS: Position[] = ['QB', 'RB', 'WR', 'TE']
 const FLEX_ELIGIBLE = new Set<Position>(['RB', 'WR', 'TE'])
@@ -165,9 +167,9 @@ export function AuctionDraftRoom({
     return m
   }, [scarcity])
 
-  // --- What To Do for the player on the block -------------------------------
-  const advice = useMemo(() => {
-    if (!onBlockPlayer) return null
+  // --- What To Do + rule-based confidence for the player on the block -------
+  const { advice, confidence } = useMemo(() => {
+    if (!onBlockPlayer) return { advice: null, confidence: undefined }
     const scored =
       available.find(sp => sp.player.id === onBlockPlayer.id) ??
       scoredPlayers.find(sp => sp.player.id === onBlockPlayer.id) ??
@@ -176,7 +178,7 @@ export function AuctionDraftRoom({
       .filter(sp => sp.player.position === onBlockPlayer.position && sp.player.id !== onBlockPlayer.id)
       .sort((a, b) => b.combinedScore - a.combinedScore)
       .slice(0, 12)
-    return computeWhatToDo({
+    const computedAdvice = computeWhatToDo({
       player: onBlockPlayer,
       scored,
       myMaxBid: maxBidMap.get(onBlockPlayer.name.toLowerCase()) ?? null,
@@ -190,6 +192,16 @@ export function AuctionDraftRoom({
       // RV-1: the roster-completion constraint line for the on-block card.
       rosterNote: rosterAdviceMap.get(onBlockPlayer.name.toLowerCase())?.note ?? null,
     })
+    // D6b-1: plumb explain.ts HIGH/MED/LOW confidence onto the on-block card.
+    const computedConf = scored
+      ? explainPlayer(
+          scored,
+          state,
+          myManager,
+          available.map(sp => sp.player),
+        ).confidence
+      : undefined
+    return { advice: computedAdvice, confidence: computedConf }
   }, [
     onBlockPlayer,
     available,
@@ -201,6 +213,8 @@ export function AuctionDraftRoom({
     isTarget,
     isAvoid,
     avoidSeverity,
+    state,
+    myManager,
   ])
 
   // --- Awareness ("what's next") --------------------------------------------
@@ -301,7 +315,13 @@ export function AuctionDraftRoom({
       style={{ background: ROOM.bg, border: `1px solid ${ROOM.border}` }}
     >
       <div className="sticky top-0 z-30">
-        <StatusBar leagueName={leagueName} online={online} onLeave={onLeave} />
+        <StatusBar
+          leagueName={leagueName}
+          online={online}
+          onLeave={onLeave}
+          round={Math.floor(state.picks.length / teamCount) + 1}
+          pick={state.picks.length + 1}
+        />
       </div>
 
       <div className="flex-1 px-3 pb-3">
@@ -321,10 +341,21 @@ export function AuctionDraftRoom({
           />
         ) : (
           <>
+            {/* D6b-1: strategy switcher moved ABOVE the on-block card */}
             <div className="pt-3">
+              <StrategyStrip
+                activeStrategy={activeStrategy}
+                strategies={strategies}
+                onSelect={onSwitchStrategy}
+                pivot={pivot}
+              />
+            </div>
+
+            <div className="pt-2.5">
               <OnTheBlockCard
                 player={onBlockPlayer}
                 advice={advice}
+                confidence={confidence}
                 onChangePlayer={() => openPicker()}
                 onToggleTarget={onToggleTarget}
                 onToggleAvoid={onToggleAvoid}
@@ -333,15 +364,6 @@ export function AuctionDraftRoom({
 
             <div className="pt-2.5">
               <AwarenessStrip items={awarenessItems} />
-            </div>
-
-            <div className="pt-2.5">
-              <StrategyStrip
-                activeStrategy={activeStrategy}
-                strategies={strategies}
-                onSelect={onSwitchStrategy}
-                pivot={pivot}
-              />
             </div>
 
             <div className="pt-2.5">
@@ -398,6 +420,15 @@ export function AuctionDraftRoom({
                 onSelectPlayer={setOnBlockPlayer}
               />
             )}
+
+            {/* D6b-1 gap #6: inline collapsible Players section */}
+            <InlinePlayersPanel
+              available={available}
+              maxBidMap={maxBidMap}
+              isTarget={isTarget}
+              onToggleTarget={onToggleTarget}
+              onSelectPlayer={setOnBlockPlayer}
+            />
           </>
         )}
       </div>

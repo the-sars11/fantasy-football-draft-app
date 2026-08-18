@@ -31,7 +31,12 @@ export interface StrategyStripProps {
 export function StrategyStrip({ activeStrategy, strategies, onSelect, pivot }: StrategyStripProps) {
   const [open, setOpen] = useState(false)
 
-  const otherStrategies = strategies.filter(s => s.id !== activeStrategy?.id)
+  // Preserve original index as rank (#1 = best from research, #2 next, etc.)
+  const activeRank = strategies.findIndex(s => s.id === activeStrategy?.id)
+  const activeRankLabel = activeRank >= 0 ? ` - #${activeRank + 1}` : ''
+  const otherStrategiesRanked = strategies
+    .map((s, i) => ({ ...s, rank: i + 1 }))
+    .filter(s => s.id !== activeStrategy?.id)
 
   return (
     <div
@@ -46,10 +51,12 @@ export function StrategyStrip({ activeStrategy, strategies, onSelect, pivot }: S
       >
         <div className="min-w-0 flex-1">
           <div className="text-[8.5px] font-bold uppercase tracking-[2px]" style={{ color: ROOM.t3 }}>
-            Strategy
+            Strategy · ranked from your research
           </div>
           <div className="truncate text-[14px] font-bold" style={{ color: ROOM.t1 }}>
-            {activeStrategy?.name ?? 'No strategy set'}
+            {activeStrategy
+              ? `${activeStrategy.name}${activeRankLabel}`
+              : 'No strategy set'}
           </div>
         </div>
         {strategies.length > 1 && (
@@ -69,9 +76,9 @@ export function StrategyStrip({ activeStrategy, strategies, onSelect, pivot }: S
         </div>
       )}
 
-      {open && otherStrategies.length > 0 && (
+      {open && otherStrategiesRanked.length > 0 && (
         <div className="border-t px-1.5 py-1.5" style={{ borderColor: ROOM.border2 }}>
-          {otherStrategies.map(s => (
+          {otherStrategiesRanked.map(s => (
             <button
               key={s.id}
               onClick={() => {
@@ -81,7 +88,9 @@ export function StrategyStrip({ activeStrategy, strategies, onSelect, pivot }: S
               className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left transition-colors"
               style={{ color: ROOM.t2 }}
             >
-              <span className="min-w-0 flex-1 truncate text-[13px] font-semibold">{s.name}</span>
+              <span className="min-w-0 flex-1 truncate text-[13px] font-semibold">
+                {s.name} - #{s.rank}
+              </span>
             </button>
           ))}
         </div>
