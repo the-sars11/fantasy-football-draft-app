@@ -87,18 +87,21 @@ export function OnTheBlockCard({
           <div className="flex shrink-0 items-center gap-1.5">
             <button
               onClick={onChangePlayer}
-              className="rounded px-2 py-1 text-[9.5px] font-bold tracking-wide transition-opacity hover:opacity-80"
+              className="relative rounded px-2 py-1 text-[9.5px] font-bold tracking-wide transition-opacity hover:opacity-80"
               style={{ background: ROOM.cardEl, border: `1px solid ${ROOM.border}`, color: ROOM.t2 }}
             >
+              {/* Layout-neutral vertical hit-slop: 44px tap height, visible box unchanged. */}
+              <span aria-hidden="true" className="absolute inset-x-0 -inset-y-[12px]" />
               Change player
             </button>
             <button
               onClick={() => setCollapsed(c => !c)}
-              className="flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded transition-opacity hover:opacity-80"
+              className="relative flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded transition-opacity hover:opacity-80"
               style={{ background: ROOM.cardEl, border: `1px solid ${ROOM.border}`, color: ROOM.t2 }}
               aria-label={collapsed ? 'Expand on the block card' : 'Collapse on the block card'}
               aria-expanded={!collapsed}
             >
+              <span aria-hidden="true" className="absolute inset-x-0 -inset-y-[9px]" />
               <span className="text-[11px]">{collapsed ? '▾' : '▴'}</span>
             </button>
           </div>

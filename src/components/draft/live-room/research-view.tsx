@@ -1,7 +1,7 @@
 'use client'
 
 /**
- * ResearchView (UXV2-6 part 2) — the Research tab in draft mode.
+ * ResearchView (UXV2-6 part 2) -- the Research tab in draft mode.
  *
  * A decision-first "who's available / who do I want / how much / record from
  * here" screen that lives INSIDE the live room (an internal tab, not a route
@@ -11,7 +11,7 @@
  * Top to bottom: sticky on-the-block mini strip + inline record -> filter bar
  * (position pills + Target View) -> available player list (star / position /
  * name + signal / tier / range or AVOID) -> tappable tier context that filters
- * the list. Pure composition over the existing draft engine — tapping a row
+ * the list. Pure composition over the existing draft engine -- tapping a row
  * sets that player on the block, the inline record calls the same addManualPick
  * used everywhere else. No new data fetching, no paid calls.
  *

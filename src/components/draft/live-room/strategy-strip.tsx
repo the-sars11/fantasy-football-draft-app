@@ -1,7 +1,7 @@
 'use client'
 
 /**
- * StrategyStrip (R11b) — the always-reachable strategy display + quick
+ * StrategyStrip (R11b) -- the always-reachable strategy display + quick
  * switcher, plus R9's adaptive pivot line, surfaced directly in the draft
  * view instead of buried inside the closed-by-default "More tools" accordion.
  *

@@ -1,7 +1,7 @@
 'use client'
 
 /**
- * AuctionDraftRoom (UXV2-6) — the approved v4 decision-first live room.
+ * AuctionDraftRoom (UXV2-6) -- the approved v4 decision-first live room.
  *
  * Layout, top to bottom: status bar -> on-the-block hero with What To Do ->
  * awareness strip -> budget strip -> tier context (tappable) -> My Team roster
@@ -153,7 +153,7 @@ export function AuctionDraftRoom({
 
   const teamCount = state.manager_order.length || 12
 
-  // Undrafted, scored — the pool for alternatives, tiers, and the picker.
+  // Undrafted, scored -- the pool for alternatives, tiers, and the picker.
   const available = useMemo(
     () => scoredPlayers.filter(sp => !draftedNames.has(sp.player.name.toLowerCase())),
     [scoredPlayers, draftedNames],
@@ -287,7 +287,7 @@ export function AuctionDraftRoom({
   }
 
   // Auto-open the picker when sync drops and nobody is on the block (v4 ask).
-  // Tracks the previous online value during render — React's documented pattern
+  // Tracks the previous online value during render -- React's documented pattern
   // for reacting to a changed prop without a cascading effect.
   const [prevOnline, setPrevOnline] = useState(online)
   if (prevOnline !== online) {
@@ -359,9 +359,10 @@ export function AuctionDraftRoom({
               action={
                 <button
                   onClick={() => openPicker()}
-                  className="whitespace-nowrap text-[9.5px] font-bold uppercase tracking-wide underline"
+                  className="relative whitespace-nowrap text-[9.5px] font-bold uppercase tracking-wide underline"
                   style={{ color: ROOM.t2 }}
                 >
+                  <span aria-hidden="true" className="absolute inset-x-0 -inset-y-[15px]" />
                   tap to filter
                 </button>
               }
@@ -377,11 +378,12 @@ export function AuctionDraftRoom({
               action={
                 <button
                   onClick={() => setMyTeamCollapsed(v => !v)}
-                  className="whitespace-nowrap text-[9.5px] font-bold uppercase tracking-wide underline"
+                  className="relative whitespace-nowrap text-[9.5px] font-bold uppercase tracking-wide underline"
                   style={{ color: ROOM.t2 }}
                   aria-expanded={!myTeamCollapsed}
                   aria-label={myTeamCollapsed ? 'Expand my team' : 'Collapse my team'}
                 >
+                  <span aria-hidden="true" className="absolute inset-x-0 -inset-y-[15px]" />
                   {myTeamCollapsed ? 'show' : 'hide'}
                 </button>
               }

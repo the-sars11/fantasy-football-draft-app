@@ -2,7 +2,15 @@
 
 ---
 
-## 2026-08-18 / D6 -- Live room visual + UX reskin: steel-blue primary, action-red BID-only, per-slot targets + alternates, live strategy switch
+## 2026-08-18 / D6-polish -- Live-room tap-target + dash cleanup (D6 verify follow-up)
+
+Class: output (Design + QA lenses). Root cause: the independent D6 verification flagged (a) 6 pre-existing comment em-dashes across live-room components and (b) three new interactive controls under the 44px mobile touch-target floor.
+
+- **Dash cleanup:** removed all 6 em-dash characters from comment headers/inline comments in `strategy-strip.tsx`, `research-view.tsx`, and `auction-room.tsx` (Joe no-dash rule). Live-room dash sweep now returns zero.
+- **Tap targets (layout-neutral hit-slop):** the live room is a deliberately dense cockpit (approved UXV2-6); a blanket 44px would break the approved density, and its packed chip rows sit adjacent where enlarged hit areas would collide. So only the isolated header toggles were enlarged, via a transparent absolutely-positioned span that expands the tap zone VERTICALLY only (where thumb misses happen), leaving the visible box byte-identical and avoiding horizontal collision with neighbors. Applied to: on-the-block card collapse chevron (26px -> 44px tap height) + its "Change player" sibling, and the "tap to filter" and My Team "show/hide" header links. Dense chip rows (tier chips, position filters, research/sheet chips) intentionally left at approved density.
+- Gate: type-check 0 errors, tests 463/463, lint 0 errors on the 4 touched files, build compiles clean (56 static pages). Visual confirmation of the enlarged tap zones not possible in this headless env (same limitation as D6); the hit-slop is layout-neutral and degrades safely to current sizing if ever clipped, so it carries no visible-regression risk.
+
+---
 
 **Task:** D6. Final pixels for R11b's already-wired target/avoid bias behavior (build-once rule: R11b owns behavior, D6 owns the look). Recolor the live room to Joe's approved direction (2026-08-18): steel-blue is PRIMARY/structural, brick-red reserved only for the BID verdict + max-bid, muted/neutral for spent/inactive. Remove the old red-to-green budget bar. Land the remaining bundled R11 UX gaps: per-slot target-at-price, per-slot expand-to-alternates driven by active strategy, collapsible My Team panel, collapsible on-block card, FLEX tier row + T4/T5. | **Class:** output | **Lenses:** Design, QA
 
