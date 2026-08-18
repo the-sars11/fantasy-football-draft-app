@@ -1,7 +1,7 @@
 'use client'
 
 /**
- * SimulateClient (R10b)
+ * SimulateClient (R10b data + D5 SHIELD visual pass)
  *
  * Runs the R10a Monte-Carlo auction engine on the real Nasties pool, biased
  * toward Joe's graded targets/avoids (DEC-1), then grades the outcome:
@@ -11,26 +11,29 @@
  *   - and saved runs you can reload and compare.
  *
  * Entirely client-side compute; only saved runs hit the server (/api/sim-runs).
- * This card is DATA ONLY. The visual pass is D5 - rendering here is plain FFI.
+ * Data wiring is unchanged from R10b; D5 swaps the plain-FFI rendering for the
+ * SHIELD-look presentational components in sim-results-cards.tsx.
  */
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
-import { Play, Loader2, AlertCircle, Trophy, Save, RotateCcw } from 'lucide-react'
+import { Play, Loader2, AlertCircle, Save } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
+import { FFICard, FFIButton } from '@/components/ui/ffi-primitives'
 import {
-  FFICard,
-  FFIButton,
-  FFIBadge,
-  FFISectionHeader,
-  FFIPositionBadge,
-} from '@/components/ui/ffi-primitives'
+  SimRecordHero,
+  SimWinningTeamPlayers,
+  SimRosterCarousel,
+  SimLandedTable,
+  SimNarrative,
+  SimCompareRows,
+  SimSavedRunsList,
+} from '@/components/prep/sim-results-cards'
 import { cacheToPlayers } from '@/lib/players/convert'
 import { buildBoardPlayers } from '@/lib/draft/solver-bridge'
 import { buildSimSummary, buildMyBiasFromTags, toPersistedSim } from '@/lib/draft/sim-results'
 import type { PersistedSimResults, SimSummary } from '@/lib/draft/sim-results'
 import type { SimRosterConfig } from '@/lib/draft/sim-engine'
-import type { GradeSummary, ModalRoster, LandedPlayer } from '@/lib/draft/sim-grade'
 import { useUserTags } from '@/hooks/use-user-tags'
 import type { Player, DraftFormat } from '@/lib/players/types'
 
@@ -250,7 +253,7 @@ export function SimulateClient() {
 
           {selectedLeague && (
             <Badge variant="outline">
-              {selectedLeague.team_count} teams · ${selectedLeague.budget ?? 200}
+              {selectedLeague.team_count} teams, ${selectedLeague.budget ?? 200}
             </Badge>
           )}
 
@@ -261,7 +264,7 @@ export function SimulateClient() {
           <FFIButton
             onClick={handleRun}
             disabled={simulating || players.length === 0 || !selectedLeague}
-            variant="primary"
+            variant="hero"
             size="sm"
             className="ml-auto"
           >
@@ -273,7 +276,7 @@ export function SimulateClient() {
           </FFIButton>
         </div>
 
-        <p className="mt-3 text-xs text-muted-foreground">
+        <p className="mt-3 text-xs text-[var(--ffi-ink-3)]">
           Runs {SIM_RUNS} Monte-Carlo auctions with {selectedLeague?.team_count ?? 12} managers and a
           ${selectedLeague?.budget ?? 200} budget. Your seat leans toward your graded targets and away
           from your avoids; the other eleven bid on generic value. Projected record ranks your best
@@ -282,7 +285,7 @@ export function SimulateClient() {
       </FFICard>
 
       {error && (
-        <div className="flex items-center gap-2 text-sm text-destructive bg-destructive/10 rounded-lg px-3 py-2">
+        <div className="flex items-center gap-2 text-sm text-[var(--ffi-danger)] bg-[var(--ffi-danger)]/10 rounded-lg px-3 py-2">
           <AlertCircle className="h-4 w-4 shrink-0" />
           {error}
         </div>
@@ -296,198 +299,60 @@ export function SimulateClient() {
               {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" /> : <Save className="h-3.5 w-3.5 mr-1.5" />}
               Save this run
             </FFIButton>
-            {saveMsg && <span className="text-xs text-muted-foreground">{saveMsg}</span>}
+            {saveMsg && <span className="text-xs text-[var(--ffi-ink-3)]">{saveMsg}</span>}
           </div>
 
-          <RecordCard grade={summary.grade} biasedPlayers={summary.config.biasedPlayers} />
-          <ModalRostersCard rosters={summary.topRosters} runs={summary.config.runs} />
-          <LandedCard landed={summary.landed} />
+          <SimRecordHero grade={summary.grade} biasedPlayers={summary.config.biasedPlayers} />
+          <SimWinningTeamPlayers topRosters={summary.topRosters} grade={summary.grade} />
+          <SimRosterCarousel rosters={summary.topRosters} runs={summary.config.runs} />
+          <SimLandedTable landed={summary.landed} />
+          <SimNarrative
+            grade={summary.grade}
+            topRosters={summary.topRosters}
+            landed={summary.landed}
+            biasedPlayers={summary.config.biasedPlayers}
+          />
         </div>
       )}
 
       {/* Saved runs + compare */}
       {savedRuns.length > 0 && (
-        <FFICard>
-          <FFISectionHeader title="Saved runs" subtitle="Reload a past run to compare" />
-          <div className="mt-3 space-y-1">
-            {savedRuns.map((run) => (
-              <div key={run.id} className="flex items-center gap-3 py-1.5 px-2 rounded-lg hover:bg-muted/30">
-                <span className="flex-1 text-sm font-medium truncate">
-                  {run.strategy_settings?.name ?? 'Sim run'}
-                </span>
-                <span className="text-xs text-muted-foreground">
-                  {new Date(run.created_at).toLocaleDateString()}
-                </span>
-                <FFIButton onClick={() => handleLoad(run)} variant="ghost" size="sm">
-                  <RotateCcw className="h-3.5 w-3.5 mr-1" />Load
-                </FFIButton>
-              </div>
-            ))}
-          </div>
-        </FFICard>
+        <SimSavedRunsList
+          runs={savedRuns.map((run) => ({
+            id: run.id,
+            name: run.strategy_settings?.name ?? 'Sim run',
+            createdAt: new Date(run.created_at).toLocaleDateString(),
+          }))}
+          onLoad={(id) => {
+            const run = savedRuns.find((r) => r.id === id)
+            if (run) handleLoad(run)
+          }}
+        />
       )}
 
       {/* Comparison: current live run vs a loaded saved run */}
       {loadedRun && (
         <>
           {summary && (
-            <CompareCard
+            <SimCompareRows
               current={summary.grade}
               currentLabel="This run"
               other={loadedRun.results.grade}
               otherLabel={loadedRun.name}
             />
           )}
-          <FFISectionHeader title={`Loaded: ${loadedRun.name}`} subtitle="Saved run detail" />
+          <div>
+            <h2 className="ffi-title-red ffi-display-md">Loaded: {loadedRun.name}</h2>
+            <p className="text-sm text-[var(--ffi-ink-2)]">Saved run detail</p>
+          </div>
           <div className="space-y-4">
-            <RecordCard grade={loadedRun.results.grade} biasedPlayers={loadedRun.results.config.biasedPlayers} />
-            <ModalRostersCard rosters={loadedRun.results.topRosters} runs={loadedRun.results.config.runs} />
-            <LandedCard landed={loadedRun.results.landed} />
+            <SimRecordHero grade={loadedRun.results.grade} biasedPlayers={loadedRun.results.config.biasedPlayers} />
+            <SimWinningTeamPlayers topRosters={loadedRun.results.topRosters} grade={loadedRun.results.grade} />
+            <SimRosterCarousel rosters={loadedRun.results.topRosters} runs={loadedRun.results.config.runs} />
+            <SimLandedTable landed={loadedRun.results.landed} />
           </div>
         </>
       )}
     </div>
-  )
-}
-
-// ─── Sub-components (plain FFI rendering; D5 restyles) ────────────────────────
-
-function RecordCard({ grade, biasedPlayers }: { grade: GradeSummary; biasedPlayers: number }) {
-  return (
-    <FFICard variant="elevated" className="border-l-4 border-[var(--ffi-success)]/30">
-      <div className="flex items-center justify-between flex-wrap gap-4">
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-[var(--ffi-success)]/15">
-            <Trophy className="h-5 w-5 text-[var(--ffi-success)]" />
-          </div>
-          <div>
-            <div className="text-xs text-muted-foreground uppercase tracking-wider">Projected record</div>
-            <div className="text-2xl font-bold text-foreground">
-              {grade.modalRecord.wins}-{grade.modalRecord.losses}
-              <span className="ml-2 text-sm font-normal text-muted-foreground">
-                most likely ({grade.modalRecord.frequencyPct}% of sims)
-              </span>
-            </div>
-          </div>
-        </div>
-        <div className="grid grid-cols-3 gap-4 text-right">
-          <Stat label="Avg wins" value={grade.meanWins.toFixed(1)} />
-          <Stat label="Avg rank" value={`#${grade.meanRank.toFixed(1)}`} />
-          <Stat label="Starter pts" value={grade.meanStarterPoints.toFixed(0)} />
-        </div>
-      </div>
-      <div className="mt-3 pt-3 border-t border-border/30 text-xs text-muted-foreground">
-        Range {grade.worstRecord.wins}-{grade.worstRecord.losses} to {grade.bestRecord.wins}-{grade.bestRecord.losses}
-        {' '}across {grade.runs} sims of a {grade.games}-game season, {grade.numManagers} teams.
-        {' '}Your seat biased toward {biasedPlayers} graded {biasedPlayers === 1 ? 'player' : 'players'}.
-        {' '}Record ranks projected starting-lineup points vs the other {grade.numManagers - 1} teams.
-      </div>
-    </FFICard>
-  )
-}
-
-function Stat({ label, value }: { label: string; value: string }) {
-  return (
-    <div>
-      <div className="text-xs text-muted-foreground">{label}</div>
-      <div className="text-xl font-bold text-foreground">{value}</div>
-    </div>
-  )
-}
-
-function ModalRostersCard({ rosters, runs }: { rosters: ModalRoster[]; runs: number }) {
-  if (rosters.length === 0) return null
-  return (
-    <FFICard>
-      <FFISectionHeader
-        title="Most likely rosters"
-        subtitle={`Top ${rosters.length} stud cores across ${runs} sims`}
-      />
-      <div className="mt-3 space-y-3">
-        {rosters.map((r, i) => (
-          <div key={i} className="rounded-lg border border-border/40 p-3">
-            <div className="flex items-center justify-between gap-3 flex-wrap">
-              <span className="text-sm font-semibold text-foreground">
-                Shape {i + 1}
-                <span className="ml-2 text-[var(--ffi-accent)]">{r.frequencyPct}%</span>
-                <span className="ml-1 text-xs text-muted-foreground">({r.frequency} of {runs})</span>
-              </span>
-              <span className="text-xs text-muted-foreground">
-                avg ${r.avgSpent} spent · {r.avgWins.toFixed(1)} wins · {r.avgStarterPoints.toFixed(0)} pts
-              </span>
-            </div>
-            <div className="mt-2 flex flex-wrap gap-1.5">
-              {r.coreNames.length === 0 ? (
-                <span className="text-xs text-muted-foreground">No stud-tier picks (all value plays)</span>
-              ) : (
-                r.coreNames.map((name, j) => (
-                  <FFIBadge key={j} status="info" className="text-[10px]">{name}</FFIBadge>
-                ))
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
-    </FFICard>
-  )
-}
-
-function LandedCard({ landed }: { landed: LandedPlayer[] }) {
-  if (landed.length === 0) return null
-  const top = landed.slice(0, 20)
-  return (
-    <FFICard>
-      <FFISectionHeader title="Players you land most" subtitle="Share of sims you end up with them" />
-      <div className="mt-3 space-y-1">
-        {top.map((p) => (
-          <div key={p.id} className="flex items-center gap-3 py-1.5 px-2 rounded-lg hover:bg-muted/30">
-            <FFIPositionBadge position={p.position === 'DEF' ? 'DEF' : p.position} />
-            <span className="flex-1 text-sm font-medium truncate">{p.name}</span>
-            <span className="text-xs font-mono text-[var(--ffi-accent)] w-14 text-right">
-              {Math.round(p.landRate * 100)}%
-            </span>
-            <span className="text-xs font-mono text-muted-foreground w-12 text-right">${p.avgPrice}</span>
-          </div>
-        ))}
-      </div>
-    </FFICard>
-  )
-}
-
-function CompareCard({
-  current, currentLabel, other, otherLabel,
-}: {
-  current: GradeSummary; currentLabel: string; other: GradeSummary; otherLabel: string
-}) {
-  const rows: [string, string, string][] = [
-    ['Most likely record', `${current.modalRecord.wins}-${current.modalRecord.losses}`, `${other.modalRecord.wins}-${other.modalRecord.losses}`],
-    ['Avg wins', current.meanWins.toFixed(1), other.meanWins.toFixed(1)],
-    ['Avg rank', `#${current.meanRank.toFixed(1)}`, `#${other.meanRank.toFixed(1)}`],
-    ['Avg starter pts', current.meanStarterPoints.toFixed(0), other.meanStarterPoints.toFixed(0)],
-  ]
-  return (
-    <FFICard>
-      <FFISectionHeader title="Compare" subtitle="This run vs a saved run" />
-      <div className="mt-3 overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="text-xs text-muted-foreground text-left">
-              <th className="py-1.5 pr-3 font-medium"></th>
-              <th className="py-1.5 pr-3 font-medium">{currentLabel}</th>
-              <th className="py-1.5 font-medium truncate max-w-[140px]">{otherLabel}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map(([label, a, b]) => (
-              <tr key={label} className="border-t border-border/30">
-                <td className="py-1.5 pr-3 text-muted-foreground">{label}</td>
-                <td className="py-1.5 pr-3 font-mono font-semibold text-foreground">{a}</td>
-                <td className="py-1.5 font-mono text-foreground">{b}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </FFICard>
   )
 }

@@ -13,8 +13,8 @@ export default function SimulatePage() {
           <ChevronLeft className="h-3 w-3" aria-hidden="true" />
           Strategies
         </Link>
-        <h1 className="ffi-title-red text-2xl font-bold">Dry Run Simulation</h1>
-        <p className="text-muted-foreground">
+        <h1 className="ffi-title-red ffi-display-lg">Dry Run Simulation</h1>
+        <p className="text-[var(--ffi-ink-2)]">
           Simulate a full draft using your active strategy against historical ADP
         </p>
       </div>
