@@ -102,6 +102,8 @@ export function buildBoardPlayers(
       position: p.position as BoardPlayer['position'],
       expectedCost: Math.max(1, Math.round(expectedCost)),
       ceiling: Math.max(1, Math.round(ceiling)),
+      // Real season-points projection for R10b grading (0 when unknown).
+      projectedPoints: Math.max(0, p.projectedPoints ?? p.projections?.points ?? 0),
     })
   }
   return board

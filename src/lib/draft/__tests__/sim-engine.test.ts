@@ -306,3 +306,67 @@ describe('full 12-team Nasties smoke run', () => {
     expect(my.positionCounts.DEF).toBeGreaterThanOrEqual(1)
   })
 })
+
+// ─── (5) DEC-1 me-seat bias ──────────────────────────────────────────────────
+
+describe('DEC-1 me-seat bias', () => {
+  // Land count: how many runs ended with `id` on the me-seat roster.
+  function myLandCount(res: ReturnType<typeof runMonteCarlo>, id: string): number {
+    return res.runs.filter(r => r.myRoster.players.some(pl => pl.id === id)).length
+  }
+
+  it('hard avoid: the me-seat never drafts the avoided player', () => {
+    const res = runMonteCarlo(
+      nastiesInput({ runs: 16, myBias: { RB1: { kind: 'avoid', severity: 'hard' } } }),
+    )
+    expect(myLandCount(res, 'RB1')).toBe(0)
+  })
+
+  it('opponents stay generic: a hard-avoided stud still sells to another seat', () => {
+    const res = runMonteCarlo(
+      nastiesInput({ runs: 16, myBias: { RB1: { kind: 'avoid', severity: 'hard' } } }),
+    )
+    const landedByOpponent = res.runs.some(run =>
+      run.rosters.some(r => !r.isMe && r.players.some(pl => pl.id === 'RB1')),
+    )
+    expect(landedByOpponent).toBe(true)
+  })
+
+  it('target lift never reduces landings and flips a player from never to sometimes', () => {
+    // Bias does not consume the RNG stream, so nomination/opponent draws are
+    // identical run-for-run; a target on one player can only raise (or hold)
+    // how often the me-seat wins THAT player. Contrast avoid (0) vs target (>0).
+    const base = runMonteCarlo(nastiesInput({ runs: 24 }))
+    const targeted = runMonteCarlo(
+      nastiesInput({ runs: 24, myBias: { RB6: { kind: 'target', weight: 10 } } }),
+    )
+    const avoided = runMonteCarlo(
+      nastiesInput({ runs: 24, myBias: { RB6: { kind: 'avoid', severity: 'hard' } } }),
+    )
+    expect(myLandCount(targeted, 'RB6')).toBeGreaterThanOrEqual(myLandCount(base, 'RB6'))
+    expect(myLandCount(avoided, 'RB6')).toBe(0)
+    expect(myLandCount(targeted, 'RB6')).toBeGreaterThan(0)
+  })
+
+  it('soft avoid lands the player no more often than no bias', () => {
+    const base = runMonteCarlo(nastiesInput({ runs: 24 }))
+    const soft = runMonteCarlo(
+      nastiesInput({ runs: 24, myBias: { RB6: { kind: 'avoid', severity: 'soft' } } }),
+    )
+    expect(myLandCount(soft, 'RB6')).toBeLessThanOrEqual(myLandCount(base, 'RB6'))
+  })
+
+  it('is deterministic under seed with a bias applied', () => {
+    const bias = { RB3: { kind: 'target' as const, weight: 7 } }
+    const a = runMonteCarlo(nastiesInput({ myBias: bias }))
+    const b = runMonteCarlo(nastiesInput({ myBias: bias }))
+    expect(a.runs).toEqual(b.runs)
+  })
+
+  it('carries projectedPoints onto every won player', () => {
+    const run = runAuctionSim(nastiesInput(), 1)
+    for (const pl of run.myRoster.players) {
+      expect(typeof pl.projectedPoints).toBe('number')
+    }
+  })
+})

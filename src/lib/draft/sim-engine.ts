@@ -94,7 +94,27 @@ export interface SimEngineInput {
   noisePct?: number
   /** Seat index that is "me" (Joe). Default 0. */
   myManagerIndex?: number
+  /**
+   * DEC-1 (BIAS): the "me" seat bids toward Joe's graded targets/avoids at a
+   * BOUNDED weight. Keyed by BoardPlayer.id. The 11 opponents are NEVER biased —
+   * they stay on generic ceiling valuation. The bias only nudges the me-seat's
+   * private valuation; the roster-constrained max-bid still caps every bid, so a
+   * target can never blow the roster. Absent => no bias (pure R10a behavior).
+   */
+  myBias?: SimMyBias
 }
+
+/** One graded lean for the me-seat. Targets use weight; avoids use severity. */
+export interface SimBiasEntry {
+  kind: 'target' | 'avoid'
+  /** Target weight 1..10 (from user_tags.tag_weight). Ignored for avoids. */
+  weight?: number
+  /** Avoid severity. 'hard' => me never bids; 'soft' => me only takes a discount. */
+  severity?: 'soft' | 'hard'
+}
+
+/** Me-seat graded leans keyed by BoardPlayer.id. */
+export type SimMyBias = Record<string, SimBiasEntry>
 
 /** One player a manager won, with what they paid. */
 export interface SimWonPlayer {
@@ -103,6 +123,8 @@ export interface SimWonPlayer {
   position: BoardPlayer['position']
   price: number
   ceiling: number
+  /** Projected full-PPR season points, carried from the board for R10b grading. */
+  projectedPoints: number
 }
 
 /** A single manager's resulting roster after one simulated draft. */
@@ -170,6 +192,12 @@ interface ManagerState {
 const POSITIONS: BoardPlayer['position'][] = ['QB', 'RB', 'WR', 'TE', 'DEF']
 
 const FLEX_ELIGIBLE = new Set<BoardPlayer['position']>(['RB', 'WR', 'TE'])
+
+// ─── DEC-1 me-seat bias constants (bounded) ──────────────────────────────────
+/** Max valuation lift for a weight-10 target: +35% over generic ceiling worth. */
+const TARGET_MAX_BOOST = 0.35
+/** Soft-avoid valuation multiplier: me only takes the player at a real discount. */
+const SOFT_AVOID_FACTOR = 0.5
 
 const POSITION_TO_DEDICATED: Record<BoardPlayer['position'], keyof SlotsRemaining> = {
   QB: 'qb',
@@ -254,6 +282,7 @@ export function runAuctionSim(
     numManagers,
     budget,
     myManagerIndex = 0,
+    myBias,
   } = input
   const noisePct = input.noisePct ?? 0.15
   const rng = mulberry32(seed)
@@ -292,7 +321,29 @@ export function runAuctionSim(
 
       // Noisy private valuation of this player (bounded worth this manager sees).
       const noise = 1 + (rng() * 2 - 1) * noisePct
-      const valuation = Math.max(1, Math.round(nominated.ceiling * noise))
+      let valuation = Math.max(1, Math.round(nominated.ceiling * noise))
+
+      // DEC-1 (BIAS): only the "me" seat leans toward Joe's graded targets/avoids,
+      // and only its valuation is nudged (the roster max-bid below still caps it).
+      // Opponents fall straight through with the generic valuation above.
+      if (m.index === myManagerIndex && myBias) {
+        const bias = myBias[nominated.id]
+        if (bias) {
+          if (bias.kind === 'avoid') {
+            // Hard avoid: me never bids on this lot at all.
+            if (bias.severity === 'hard') continue
+            // Soft avoid: me only bites at a genuine discount.
+            valuation = Math.max(1, Math.round(valuation * SOFT_AVOID_FACTOR))
+          } else {
+            // Target: bounded lift, scaled by graded weight (1..10).
+            const w = Math.min(10, Math.max(1, bias.weight ?? 5))
+            valuation = Math.max(
+              1,
+              Math.round(valuation * (1 + TARGET_MAX_BOOST * (w / 10))),
+            )
+          }
+        }
+      }
 
       // Roster-constrained max-bid via the R4 solver: the most this manager can
       // pay and still complete the best affordable rest-of-roster at $1 reserve.
@@ -336,6 +387,7 @@ export function runAuctionSim(
       position: nominated.position,
       price,
       ceiling: nominated.ceiling,
+      projectedPoints: nominated.projectedPoints ?? 0,
     })
 
     remaining.splice(remaining.indexOf(nominated), 1)
@@ -451,6 +503,7 @@ export function runMonteCarlo(input: SimEngineInput): SimEngineResult {
       seed,
       noisePct,
       myManagerIndex,
+      myBias: input.myBias ?? {},
       rosterConfig: input.rosterConfig,
     },
   }

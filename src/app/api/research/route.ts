@@ -49,6 +49,10 @@ export async function GET(req: NextRequest) {
       .select('id, league_id, strategy_settings, status, error_message, created_at, completed_at')
       .eq('league_id', leagueId)
       .eq('user_id', user.id)
+      // R10b: sim runs share this table (strategy_settings.kind === 'sim') but
+      // belong on the Simulate screen, not here. Null-tolerant so legacy research
+      // rows (no kind) are still returned.
+      .or('strategy_settings->>kind.is.null,strategy_settings->>kind.neq.sim')
       .order('created_at', { ascending: false })
       .limit(20)
 

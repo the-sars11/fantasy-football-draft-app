@@ -25,6 +25,12 @@ export interface BoardPlayer {
   expectedCost: number
   /** Genuine Nasties worth — ceilingValue ?? consensusAuctionValue */
   ceiling: number
+  /**
+   * Projected full-PPR season points (ESPN proj_points). Optional: the solver
+   * ignores it entirely. Carried through the sim so R10b grading can score a
+   * roster on real projected points, not the $-ceiling proxy.
+   */
+  projectedPoints?: number
 }
 
 /**

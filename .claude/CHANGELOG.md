@@ -2,6 +2,26 @@
 
 ---
 
+## 2026-08-17 / R10b -- Sim grading, projected record, top-5 modal rosters, players-you-land-most + saved runs (DEC-1 = BIAS)
+
+**Task:** R10b. Post-processing + persistence on top of the R10a Monte-Carlo engine: grade each run on real projected season points vs the league → a projected win-loss record; surface the top-5 most-LIKELY (modal) rosters clustered by stud core; a "players you land most" frequency table; and saved runs (persist/reload/compare). DEC-1 ruled BIAS, so the sim "me" seat now leans toward Joe's graded targets/avoids at a bounded weight; the 11 opponents stay on generic ceiling valuation. Scope = DATA (the pixels are D5). | **Class:** output/pipeline | **Lenses:** Architecture, QA, Security, Delivery
+
+**What shipped:**
+- **`src/lib/draft/sim-grade.ts` (NEW, pure $0):** `bestLineupPoints` fills the Nasties starting lineup (QB/RB/WR/TE dedicated, then FLEX from the best leftover RB/WR/TE) and scores it on real projected points, missing slots = 0. `gradeRun` ranks that lineup vs the league (winProb = (numManagers-rank)/(numManagers-1)) → projected wins over a 14-game season. `summarizeGrades` (mean/modal record, best/worst). `studCore` clusters a roster by players won at/above a $-threshold (`DEFAULT_STUD_THRESHOLD=10`; the $1 bench fill is noise). `topModalRosters` returns the 5 most-frequent stud-core shapes, tie-broken on avg starter points. `playersYouLandMost` tallies land-rate + avg $.
+- **`src/lib/draft/sim-results.ts` (NEW, pure $0):** `buildMyBiasFromTags` maps graded `user_tags` → a bounded me-seat bias (avoid→severity hard/soft, target→weight clamped 1-10, untagged omitted). `buildSimSummary` orchestrates run→grade→cluster→frequency into a `SimSummary`. `toPersistedSim` trims (drops per-run grades, caps landed list) for storage. `SIM_RUN_KIND='sim'`, `DEFAULT_REGULAR_SEASON_GAMES=14`.
+- **DEC-1 = BIAS wired in `sim-engine.ts`** me-seat branch ONLY: target lift ≤ `TARGET_MAX_BOOST=0.35` scaled by weight/10; soft avoid ×`SOFT_AVOID_FACTOR=0.5`; hard avoid skipped. Applied AFTER the RNG draw, so determinism-under-seed and the 11 generic-ceiling opponents are byte-identical to R10a. `SimWonPlayer` gains `projectedPoints`.
+- **Real projected points carried through:** `roster-solver.ts` `BoardPlayer.projectedPoints?` (optional; the solver ignores it), set in `solver-bridge.ts`, echoed on the sim award — so grading scores real points, not the $-ceiling proxy.
+- **`src/app/api/sim-runs/` (NEW):** POST save / GET list / GET `[id]` detail. Persists to `research_runs` behind a `strategy_settings.kind='sim'` discriminator — NO migration. `api/research/route.ts` GET now excludes sim rows (null-tolerant `.or`) so they never appear on `/prep/runs`.
+- **`src/app/(app)/prep/simulate/client.tsx` rewritten:** loads leagues + players + graded tags, builds the board (top-240 by ceiling) + bias, runs `buildSimSummary`, renders the projected-record card, top-5 modal rosters, and players-you-land-most; saves via POST and reloads/compares saved runs. (Pixels are D5; this wires the data.)
+
+**Tests:** 45 new (`sim-grade.test.ts`, `sim-results.test.ts`, + 6 DEC-1 bias tests in `sim-engine.test.ts`: hard avoid never drafted, opponent still lands a hard-avoided stud, target lift never reduces / flips never→sometimes, soft avoid ≤ base, deterministic under seed, carries projectedPoints). **417/417 green** (372 baseline +45).
+
+**Gate:** type-check 0 errors · lint 0 on R10b files (exit 0; 61 pre-existing errors all in untouched files) · build ✓ Compiled successfully (`/api/sim-runs` + `/api/sim-runs/[id]` registered). **Live-verified on the running dev server (port 3003):** 30 sims → projected record 14-0 (70% of sims, range 11-3→14-0, avg 13.4 wins, avg rank #1.4), top-5 stud-core clustering (Shape 1 = 23.3%, 7 of 30), players-you-land-most (Amon-Ra/Bijan/CMC 100%), Save → POST /api/sim-runs 200 → row read back into the Saved-runs list. **Pixel screenshot BLOCKED** — the Browser pane is not compositing frames in this headless session (same env constraint as R5/R6/R9/D4-note); proof is real connected DOM + network traces pasted in-chat, not faked. **Root cause note:** the pre-existing unchunked `useUserTags` batch fetch 500s once on cold compile then recovers; the "0 graded players biasing your seat" readout is honest (this dev league has zero graded tags), and the DEC-1 engine itself is covered by the 6 bias tests.
+
+**Unblocks:** D5 (Sim results screen) — it restyles this data path to the SHIELD look.
+
+---
+
 ## 2026-08-16 / D4 -- Players card redesign: thin rows, tier on the card face, points demoted
 
 **Task:** D4. 4th attempt after 3 rejected mockups. Thin the Players list cards from 130-160px to a single ~50px line; put the expert-consensus **tier on the card face** (absent today); demote projected points into the expansion; keep the base/mkt/your-value range bar Joe likes; add expert positional consensus shown in plain English (no "ECR"). UI only, no engine changes. Ref: NFL broadcast lower-thirds / EA Sports FC. | **Class:** output | **Lenses:** Design, QA
