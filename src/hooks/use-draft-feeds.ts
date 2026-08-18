@@ -14,7 +14,7 @@
  * restarting the feed interval.
  */
 
-import { useCallback, useRef } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   useDraftFeed,
   type AuctioneerConnectionType,
@@ -78,20 +78,32 @@ export function useDraftFeeds({
     onNewPicks: onAuctioneerpicks,
   })
 
-  // FF-315: Detect offline→online transition for offline resync.
-  // `wasConnectedRef` tracks whether the remote auctioneer was ever connected
-  // this session — if it was never connected (manual-only mode) there is nothing
-  // to reconcile against and we skip provisional tagging entirely.
-  const wasConnectedRef = useRef(false)
+  // FF-315: Detect offline/online transitions for offline resync.
+  // `wasConnected` records whether the remote auctioneer was ever connected this
+  // session. If it was never connected (manual-only mode) there is nothing to
+  // reconcile against and provisional tagging is skipped.
+  //
+  // BUG-R13-01 fix: edge detection lives in an effect, not the render body. The
+  // previous version mutated and read refs during render, so a discarded React 19
+  // concurrent/StrictMode render could eat the one-shot reconnect signal and the
+  // offline resync would silently never fire. `reconnectNonce` increments once per
+  // rising edge of the remote connection; the consumer reconciles once per nonce.
+  const [wasConnected, setWasConnected] = useState(false)
+  const [reconnectNonce, setReconnectNonce] = useState(0)
   const prevRemoteConnectedRef = useRef(false)
 
-  // Update refs in render path (not in effect) so they are always current.
-  const prevConnected = prevRemoteConnectedRef.current
-  prevRemoteConnectedRef.current = remoteConnected
-  if (remoteConnected) wasConnectedRef.current = true
+  useEffect(() => {
+    const prev = prevRemoteConnectedRef.current
+    prevRemoteConnectedRef.current = remoteConnected
+    if (remoteConnected && !prev) {
+      // Rising edge of the remote connection (first connect included): fire the
+      // one-shot reconcile signal and mark that we have been connected.
+      setReconnectNonce(n => n + 1)
+      if (!wasConnected) setWasConnected(true)
+    }
+  }, [remoteConnected, wasConnected])
 
-  const isOfflineFromAuctioneer = wasConnectedRef.current && !remoteConnected
-  const justReconnected = wasConnectedRef.current && !prevConnected && remoteConnected
+  const isOfflineFromAuctioneer = wasConnected && !remoteConnected
 
   return {
     aifEnabled,
@@ -105,10 +117,16 @@ export function useDraftFeeds({
     remoteHasPolled,
     // FF-315 reconnect / offline-mode signals + snapshot for reconciliation.
     isOfflineFromAuctioneer,
-    justReconnected,
+    /**
+     * BUG-R13-01: monotonic counter that increments once on each rising edge of
+     * the remote connection. The consumer reconciles once per nonce (deduped by a
+     * ref), which survives React 19 concurrent/StrictMode re-renders where the old
+     * "true for one render" boolean could be dropped.
+     */
+    reconnectNonce,
     /**
      * FF-315: Full normalized pick list from the last successful remote poll.
-     * Pass to reconcileWithAuctioneer when justReconnected is true.
+     * Pass to reconcileWithAuctioneer once per new reconnectNonce.
      * RemoteAuctioneerPick is structurally a superset of AuctioneerPickSnapshot,
      * so the caller can pass it directly to reconcileWithAuctioneer.
      */

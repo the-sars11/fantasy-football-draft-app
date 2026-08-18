@@ -1,5 +1,130 @@
 # Bug Hunt Log
 
+## Hunt: 2026-08-18 -- FULL mode -- Scope: whole app (R13 phase 1)
+
+**Project:** fantasy_football_draft_app
+**Type:** TypeScript / Next.js 16 (App Router, Turbopack) + React 19 + Vitest
+**Auditor:** Claude Code (static read-only pass + dynamic gates)
+**Mode:** FULL -- static analysis of the whole app, Opus lens aimed at the decision engines (R4 solver, R5 valuation, R6 target-pricing, R9 adaptive, R10a/b sim, R11b bias, what-to-do), plus the four dynamic gates (type-check, tests, lint, build). $0 -- no live AI calls.
+
+### Dynamic gates (baseline this hunt)
+
+| Gate | Result |
+|------|--------|
+| `npm run type-check` (tsc --noEmit) | CLEAN -- 0 errors |
+| `npm run test:run` (vitest) | 463 / 463 pass, 35 files, ~7s |
+| `npm run build` (next build) | PASS -- exit 0, all routes compiled |
+| `npm run lint` (eslint) | 60 errors / 109 warnings -- but only ~21 errors are in shipped app code (13 use-draft-feeds, 7 nav-context, 1 StealFlash). The other ~39 are dev scripts, `.claude/mockups` build files, and test files (em-dashes, `any`, `require()`) -- not shipped to users. |
+
+### Summary
+
+| Severity | Count |
+|----------|-------|
+| CRITICAL | 0 |
+| HIGH | 1 |
+| MEDIUM | 3 |
+| LOW | 3 |
+
+### Findings
+
+#### HIGH
+
+##### BUG-R13-01: Offline resync can silently never fire (refs mutated during render)
+- **File:** `src/hooks/use-draft-feeds.ts:88-91` (consumed at `src/app/(app)/draft/live/client.tsx:237-243`)
+- **Category:** Logic / silent-failure
+- **Effort:** M
+- **Class:** shared (hook) -- Lenses: Architecture, QA
+- **Description:** The hook computes `justReconnected` and `isOfflineFromAuctioneer` by reading AND writing three refs (`prevRemoteConnectedRef`, `wasConnectedRef`) directly in the render body, with no eslint-disable (unlike the deliberate one at line 40). `justReconnected` must be `true` for exactly one committed render to trigger `reconcileWithAuctioneer(remoteLastSnapshot)` in the live client -- the client comment even says "because justReconnected goes false after this render cycle." Under React 19 StrictMode (Next.js default) and concurrent rendering, a render pass can be discarded while its ref mutation persists. When that happens on the reconnect tick, the committed render sees `prevConnected === remoteConnected`, so `justReconnected` collapses to `false` and the reconcile never runs.
+- **Failure scenario:** Auctioneer feed drops mid-draft. Picks are entered/continue. Feed reconnects. The one-shot reconnect signal is eaten by a discarded double-render, so `reconcileWithAuctioneer` never runs -- picks that happened while offline are never merged back in. The advisor then advises against a stale board (wrong max-bids, wrong scarcity, wrong what-to-do) with no error shown. This is the live-draft safety net failing quietly, in the exact scenario it exists for.
+- **Evidence:** 13 of the 20 `react-hooks/refs` lint errors are in this file; lint sample: "use-draft-feeds.ts:90 Cannot update ref during render". Consumer: `client.tsx:237-243` gates `reconcileWithAuctioneer` on `justReconnected`.
+- **Fix (proposed, not applied):** Move the prev-connected / was-connected tracking out of render into a `useEffect` keyed on `remoteConnected`, and expose `justReconnected` via state set in that effect (or derive the reconnect edge inside the consuming effect from a single state value). Then re-run type-check + tests + the live-draft offline/reconnect path.
+
+#### MEDIUM
+
+##### BUG-R13-02: DEF budget weight silently defaults for auto-generated strategies (DEF vs DST key split)
+- **File:** `src/lib/research/strategy/scoring.ts:255-256` (`computeAdjustedAuctionValue`)
+- **Category:** Data / Logic
+- **Effort:** S
+- **Class:** pipeline -- Lenses: Architecture, QA
+- **Description:** `computeAdjustedAuctionValue` looks up `strategy.budget_allocation[player.position]` with NO DEF->DST normalization, even though the same file normalizes at line 98 and `target-pricing.ts:52-54` documents and applies the DEF->DST rule. The producer side is also split: `presets.ts` stores `budget_allocation` with a `DEF` key (copied raw at presets.ts:213), while LLM-generated (`research.ts:186`) and rule-based generated (`generate.ts:340` emits `DST`) strategies use the `DST` key. So a DEF player scored against a DST-keyed strategy reads `undefined` and silently falls back to the 10% default; `target-pricing.ts` does the opposite. The two engines disagree on the same input.
+- **Failure scenario:** User runs an auto-generated or LLM strategy (DST-keyed). The board view's `adjustedAuctionValue` for a defense ignores the strategy's actual DEF budget and uses a flat 10% baseline, while the target-pricing engine uses the real DST allocation -- two different DEF values from one strategy.
+- **Impact:** Real but small: DEF is a ~$1 position in this no-kicker league, so dollar impact is minor today. It is a confirmed cross-module inconsistency and a latent trap if DEF allocation ever matters.
+- **Fix (proposed):** Normalize once (`player.position === 'DEF' ? 'DST' : player.position`) in `computeAdjustedAuctionValue`, and make presets emit `DST` too so producer + both consumers share one convention. Add a test asserting a DST-keyed strategy yields the configured DEF weight.
+
+##### BUG-R13-03: `isLastOfScarceTier` PUSH trigger unverified against the on-block count
+- **File:** `src/lib/draft/what-to-do.ts:193-202`
+- **Category:** Logic (NEEDS VERIFICATION)
+- **Effort:** S
+- **Class:** shared -- Lenses: QA
+- **Description:** The PUSH move fires when the player is the last of a scarce wanted tier via `scarcity.tier1Remaining <= 1` (and the tier<=2 branch). Whether this is off-by-one depends on if the upstream scarcity count includes the on-block player in `tier1Remaining`. If the on-block player is NOT counted, `<= 1` means "one OTHER left besides this one," so PUSH would fire one player early (recommending an aggressive push when there is still a fallback in the tier).
+- **Fix (proposed):** Trace how `scarcity.tier1Remaining` is populated at the call site; add a unit test pinning the intended semantics (last-one-standing vs one-left-after-this) so the threshold is provably correct.
+
+##### BUG-R13-04: Monte-Carlo sim re-solves the full board per bidder per lot (perf ceiling)
+- **File:** `src/lib/draft/sim-engine.ts` (`runAuctionSim` bidding loop; re-sort at line 311)
+- **Category:** Performance
+- **Effort:** M
+- **Class:** shared -- Lenses: Architecture
+- **Description:** Every lot re-sorts the whole remaining board and asks every eligible manager to run `computeRosterConstrainedMaxBid` (a full greedy solve). Cost is O(runs x lots x managers x board x slots). Fine at Nasties scale (24 runs, ~180 lots, 12 seats -- tests sub-second, build clean) but scales poorly if the UI lets the user crank runs or feeds the full ~450-player prep board. This restates BUG-R10a-01 from the 2026-08-13 hunt, still open.
+- **Fix (proposed):** Pre-trim the priced board to top-K per position (K = total slots across all seats) before simulating -- players below every seat's Kth need are never both affordable and wanted, so trimming changes cost, not outcomes. Sort once outside the lot loop and maintain order on splice.
+
+#### LOW
+
+##### BUG-R13-05: nav-context reads/writes refs during render (7 lint errors, benign today)
+- **File:** `src/lib/nav-context.tsx:75-84`
+- **Category:** Logic / code-smell
+- **Effort:** S
+- **Description:** `NavProvider` mutates `previousPathRef` / `directionRef` in the render body to compute the page-transition direction (7 of the 20 `react-hooks/refs` errors). Functionally benign: a StrictMode double-render recomputes to the same direction because `pathname` is stable within a render. Worst case under concurrent tearing is a wrong transition-animation direction -- cosmetic, never a data issue.
+- **Fix (proposed):** Move the direction calc into a `useEffect` on `pathname`, or accept and document with a scoped eslint-disable if the team judges it safe.
+
+##### BUG-R13-06: StealFlash calls setState synchronously in an effect (1 lint error)
+- **File:** `src/components/motion/StealFlash.tsx:31`
+- **Category:** Performance / code-smell
+- **Effort:** S
+- **Description:** `setFiring(true)` runs synchronously in a `useEffect` body (react-hooks/set-state-in-effect). Guarded by a trigger-change check (line 26) and a cooldown ref, so it does not cascade or loop -- the steal-burst animation works. Lint-flagged pattern only.
+- **Fix (proposed):** Drive the burst from the trigger transition without the intermediate synchronous setState, or disable the rule locally with a note.
+
+##### BUG-R13-07: adjustedAuctionValue can return a fractional cap
+- **File:** `src/lib/research/strategy/scoring.ts:269`
+- **Category:** UX / cosmetic
+- **Effort:** XS
+- **Description:** `Math.max(1, Math.min(Math.round(adjusted), maxBid))` -- `adjusted` is rounded but `maxBid` (leagueBudget * pct / 100) is not, so when the cap binds the returned value can be non-integer (e.g. $70.4). Auction dollars should be whole.
+- **Fix (proposed):** `Math.round` the `maxBid` too, or round the final result.
+
+### Items verified clean (no bugs found this pass)
+
+- **roster-solver.ts (R4):** `affordable()` guard keeps $1/slot reserve for every unfilled slot; `computeRosterConstrainedMaxBid` floors at minPerSlot; `resolvePlayerSlot` returns null safely (BUG-007 path -> maxBid 1, feasible false). Pure, no shared-state mutation across calls.
+- **solver-bridge.ts (R5 seam):** FLAT_REPLACEMENT $1/slot, FLEX contention modeled, IR folds to bench, K dropped, expectedCost floored $1, name keys lowercased consistently.
+- **target-pricing.ts (R6):** invariant sum(target prices) + reserve <= budget holds -- scale-down then $1-trim-from-largest loop terminates and cannot exceed the pool; DEF->DST normalized correctly here.
+- **adaptive-guidance.ts (R9):** live re-fit re-runs anchor strategies on the current board; run-detection thresholds constant; no state leak.
+- **sim-grade.ts (R10b):** best-lineup fill (dedicated then FLEX from leftovers) is correct; rank-vs-league win model is a stated model on real projected points, not an invented number; modal clustering deterministic.
+- **what-to-do.ts (R11) precedence:** PASS > PUSH > HOLD > BID ordering is sound; `computeRange` low = high * 0.75; hold-alternative comparability math consistent (only the scarce-tier threshold in BUG-R13-03 needs a semantics check).
+- **DEC-1 bias:** hard-avoid excluded, soft-avoid 0.5x cap discount, target boost bounded to +35% -- applied identically across solver, sim me-seat, and what-to-do.
+- **Non-shipped lint errors:** `scripts/populate-auction-values.ts` (`any`), `.claude/mockups/**` build scripts (em-dashes, `require()`), and test files are pre-existing housekeeping, not user-facing. Not in scope for R13 fixes.
+
+### Recommended fix order for R13 phase 2
+
+1. **BUG-R13-01 (HIGH)** -- fix the offline-resync ref bug; it is the one finding that can silently corrupt live advice.
+2. **BUG-R13-02 (MEDIUM)** -- unify the DEF/DST key convention; cheap and removes a latent trap.
+3. **BUG-R13-03 (MEDIUM)** -- verify + pin the scarce-tier PUSH threshold with a test.
+4. **BUG-R13-04 (MEDIUM/perf)** -- board pre-trim; defer if sim N stays small.
+5. **BUG-R13-05/06/07 (LOW)** -- batch into a lint-cleanup card.
+
+### Resolution -- R13 phase 2 (2026-08-18)
+
+Gates after fixes: type-check CLEAN, `test:run` **466/466** (3 new pins), `build` exit 0 (compiled in 3.7s), lint **39 errors / 108 warnings** (down from 60/109 -- the 21 removed are exactly the 13 use-draft-feeds + 7 nav-context refs + 1 StealFlash set-state errors; the remaining 39 are pre-existing en-dash violations in untouched test fixtures).
+
+| Bug | Status | What changed |
+|-----|--------|--------------|
+| BUG-R13-01 (HIGH) | **FIXED** | `use-draft-feeds.ts` -- moved prev/was-connected edge detection out of the render body into a `useEffect` keyed on `remoteConnected`; replaced the one-shot `justReconnected` boolean with a monotonic `reconnectNonce`. `client.tsx` reconciles once per new nonce (deduped by a ref), which survives StrictMode/concurrent discarded renders and also the snapshot-arrives-after-reconnect race. |
+| BUG-R13-02 (MEDIUM) | **FIXED** | `scoring.ts` `computeAdjustedAuctionValue` now reads `alloc.DST ?? alloc.DEF ?? 10` for defenses (DST-first, legacy-DEF fallback -- no DB migration needed). `presets.ts` now emits `DST` via a new `mapBudgetAllocToDb` helper, so producer + both consumers share one convention. |
+| BUG-R13-03 (MEDIUM) | **VERIFIED CORRECT + PINNED** | Traced the live call site (`client.tsx:287-290`): scarcity is built from `availablePlayers` = undrafted players, which **includes** the on-block (nominated, not-yet-won) player. So `tier1Remaining <= 1` correctly means "this is the last tier-1." `consensusTier` is always an integer in practice (FantasyPros tiers + `Math.ceil` in `normalize.ts`/`convert.ts`), so `tierOf` (Math.round) and `calculateScarcity` (`<=1`/`===2`/`>=3`) agree on every real input. No logic change; added 3 pinning tests to `what-to-do.test.ts` locking the tier-1 and tier-2 PUSH boundaries. **Latent note:** if the pipeline ever emits fractional tiers, `calculateScarcity`'s strict `=== 2` would silently undercount tier-2 -- watch item, not an active bug. |
+| BUG-R13-04 (MEDIUM/perf) | **DEFERRED** | Performance ceiling only; correct at Nasties scale (sub-second). Board pre-trim carried forward as a watch item (still open, restates BUG-R10a-01). |
+| BUG-R13-05 (LOW) | **FIXED** | `nav-context.tsx` -- replaced render-body ref mutation with React's blessed "store info from previous renders" pattern (`useState` + adjust-during-render). Behavior identical; removed 7 refs errors + the dead `useCallback` import. |
+| BUG-R13-06 (LOW) | **FIXED** | `StealFlash.tsx` -- documented the intentional trigger-driven animation setState with a scoped `eslint-disable-next-line react-hooks/set-state-in-effect` (matches the codebase convention in `client.tsx`/`use-draft-feeds.ts`). |
+| BUG-R13-07 (LOW) | **FIXED** | `scoring.ts` -- `maxBid` is now `Math.round`ed so a binding cap can no longer return fractional auction dollars. |
+
+---
+
 ## Hunt: 2026-08-13 -- free mode -- Scope: R10a changed modules (sim-engine.ts, sim-engine.test.ts)
 
 **Project:** fantasy_football_draft_app

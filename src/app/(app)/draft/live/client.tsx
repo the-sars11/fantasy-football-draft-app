@@ -218,7 +218,7 @@ export function LiveDraftClient() {
     remoteConnected,
     // FF-315: offline resync signals.
     isOfflineFromAuctioneer,
-    justReconnected,
+    reconnectNonce,
     remoteLastSnapshot,
   } = useDraftFeeds({
     format: session?.format,
@@ -233,14 +233,21 @@ export function LiveDraftClient() {
   // FF-315: When the phone reconnects to the auctioneer after being offline,
   // reconcile any provisional picks against the auctioneer's full snapshot.
   // Auctioneer is the system of record; corrected picks populate the banner.
+  //
+  // BUG-R13-01: reconcile once per reconnect. reconnectNonce increments on each
+  // rising edge of the remote connection; a ref records the last nonce we
+  // reconciled so a routine snapshot poll (same nonce) does not re-trigger, and a
+  // reconnect that arrives before its snapshot still fires once the snapshot lands.
+  const lastReconciledNonceRef = useRef(0)
   useEffect(() => {
-    if (!justReconnected || !remoteLastSnapshot || remoteLastSnapshot.length === 0) return
+    if (reconnectNonce === 0 || reconnectNonce === lastReconciledNonceRef.current) return
+    if (!remoteLastSnapshot || remoteLastSnapshot.length === 0) return
+    lastReconciledNonceRef.current = reconnectNonce
     const corrected = reconcileWithAuctioneer(remoteLastSnapshot)
-    // Responding to an external reconnect signal — one-shot, safe from infinite loops
-    // because justReconnected goes false after this render cycle.
+    // Responding to an external reconnect signal, deduped by nonce above.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     if (corrected.length > 0) setCorrections(corrected)
-  }, [justReconnected, remoteLastSnapshot, reconcileWithAuctioneer])
+  }, [reconnectNonce, remoteLastSnapshot, reconcileWithAuctioneer])
 
   // FF-315: Tag manual picks as provisional when the auctioneer is offline
   // (was connected, now isn't). The auctioneer reconciles them on reconnect.

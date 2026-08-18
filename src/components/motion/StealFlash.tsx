@@ -28,6 +28,11 @@ export function StealFlash({ trigger, children, className, bannerText = 'STEAL' 
 
     if (cooldownRef.current) return
     cooldownRef.current = true
+    // BUG-R13-06: intentional. An external `trigger` prop change must start the
+    // timed burst; there is no event handler in this component to hang it on, so
+    // an effect + setState is the correct tool. The single extra render is the
+    // animation starting, not a wasted pass.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setFiring(true)
 
     setTimeout(() => {

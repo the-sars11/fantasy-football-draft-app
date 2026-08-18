@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useCallback, useRef, type ReactNode } from 'react'
+import { createContext, useContext, useState, type ReactNode } from 'react'
 import { usePathname } from 'next/navigation'
 
 export type NavDirection = 'left' | 'right' | 'up' | 'down' | 'fade'
@@ -68,20 +68,24 @@ function getDirection(from: string | null, to: string): NavDirection {
 
 export function NavProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname()
-  const previousPathRef = useRef<string | null>(null)
-  const directionRef = useRef<NavDirection>('fade')
+  // BUG-R13-05: derive the transition direction from the pathname change using
+  // React's blessed "store info from previous renders" pattern (setState during
+  // render), instead of mutating refs in the render body. Behavior is identical:
+  // on a route change we set the new direction and record the path, React
+  // immediately re-renders, and the second pass stabilizes (prevPath === pathname).
+  const [prevPath, setPrevPath] = useState<string | null>(null)
+  const [direction, setDirection] = useState<NavDirection>('fade')
 
-  // Update direction based on route change
-  if (previousPathRef.current !== pathname) {
-    directionRef.current = getDirection(previousPathRef.current, pathname)
-    previousPathRef.current = pathname
+  if (prevPath !== pathname) {
+    setDirection(getDirection(prevPath, pathname))
+    setPrevPath(pathname)
   }
 
   return (
     <NavContext.Provider
       value={{
-        direction: directionRef.current,
-        previousPath: previousPathRef.current,
+        direction,
+        previousPath: pathname,
       }}
     >
       {children}

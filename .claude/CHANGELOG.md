@@ -2,6 +2,24 @@
 
 ---
 
+## 2026-08-18 / R13 phase 2 -- Bug-hunt fixes + test hardening
+
+Class: bugfix + shared (QA + Architecture lenses). Root cause: the R13 full-mode bug hunt (this file's `BUG_LOG.md`) surfaced 1 HIGH, 3 MEDIUM, 3 LOW findings; phase 2 fixes the correctness/logic bugs and hardens tests. All $0 (no live AI).
+
+- **BUG-R13-01 (HIGH) -- offline resync silent-failure.** `src/hooks/use-draft-feeds.ts` computed the reconnect edge by mutating refs in the render body (no eslint-disable), so a React 19 StrictMode/concurrent discarded render could eat the one-shot `justReconnected` signal and `reconcileWithAuctioneer` would silently never run -- the live-draft safety net failing in the exact scenario it exists for. Fixed: edge detection moved into a `useEffect` keyed on `remoteConnected`; the one-shot boolean replaced with a monotonic `reconnectNonce`. `src/app/(app)/draft/live/client.tsx` now reconciles once per new nonce (deduped by `lastReconciledNonceRef`), which survives discarded renders AND the snapshot-arrives-after-reconnect race the old boolean couldn't. Removed 13 `react-hooks/refs` lint errors.
+- **BUG-R13-02 (MEDIUM) -- DEF vs DST budget-key split.** `computeAdjustedAuctionValue` (`scoring.ts`) read `budget_allocation[player.position]` with no DEF->DST normalization, so a defense scored against a DST-keyed auto/LLM strategy silently fell back to the 10% default while `target-pricing.ts` used the real DST allocation -- two DEF values from one strategy. Fixed: `scoring.ts` reads `alloc.DST ?? alloc.DEF ?? 10` for defenses (DST-first, legacy-DEF fallback, no DB migration); `presets.ts` now emits `DST` via a new `mapBudgetAllocToDb` helper so producer + both consumers share one convention.
+- **BUG-R13-03 (MEDIUM) -- scarce-tier PUSH threshold.** Verified CORRECT, not off-by-one. Traced the live call site (`client.tsx:287-290`): scarcity is built from `availablePlayers` = undrafted players, which includes the on-block (nominated, not-yet-won) player, so `tier1Remaining <= 1` correctly means "this is the last tier-1." `consensusTier` is always integer in practice (FantasyPros tiers + `Math.ceil`), so `tierOf` (Math.round) and `calculateScarcity` (`<=1`/`===2`/`>=3`) agree on every real input. No logic change; added 3 pinning tests to `what-to-do.test.ts` locking the tier-1 and tier-2 PUSH boundaries. Documented a latent watch-item: strict `=== 2` would undercount if the pipeline ever emitted fractional tiers.
+- **BUG-R13-05 (LOW) -- nav-context refs-in-render.** `NavProvider` (`src/lib/nav-context.tsx`) mutated refs in render to derive page-transition direction (7 refs errors). Replaced with React's blessed "store info from previous renders" pattern (`useState` + adjust-during-render); behavior identical; also dropped a dead `useCallback` import.
+- **BUG-R13-06 (LOW) -- StealFlash setState-in-effect.** `src/components/motion/StealFlash.tsx` -- the trigger-driven animation burst genuinely needs a setState in an effect (no event handler to hang it on). Documented with a scoped `eslint-disable-next-line react-hooks/set-state-in-effect`, matching the codebase convention.
+- **BUG-R13-07 (LOW) -- fractional auction cap.** `scoring.ts` -- `maxBid` is now `Math.round`ed so a binding cap can no longer return non-integer dollars (e.g. $70.4).
+- **BUG-R13-04 (MEDIUM/perf) -- DEFERRED.** Sim board re-solve is a performance ceiling only, correct and sub-second at Nasties scale; board pre-trim carried forward as an open watch item (restates BUG-R10a-01).
+
+**Tests:** 466/466 green (463 baseline + 3 new pins in `what-to-do.test.ts`).
+
+**Gate:** type-check 0 errors · `test:run` 466/466 · `build` exit 0 (`✓ Compiled successfully in 3.7s`, all routes) · `lint` 39 errors / 108 warnings, DOWN from 60/109 -- the 21 removed are exactly the refs/set-state errors fixed above; the remaining 39 are pre-existing en-dash violations in untouched test fixtures, 0 new problems introduced this session. Verified none of the 7 touched files appear in the lint error list (client.tsx shows only pre-existing unused-import warnings). No live-draft browser verification needed -- these are logic/hook/lint fixes proven by the type-check + test + build gates; the offline-resync path is covered by the nonce-dedupe reconcile logic and the existing hook contract, and the same headless `/draft/live` limitation documented at R11a-D6 still blocks an in-browser reconnect demo.
+
+---
+
 ## 2026-08-18 / D6-polish -- Live-room tap-target + dash cleanup (D6 verify follow-up)
 
 Class: output (Design + QA lenses). Root cause: the independent D6 verification flagged (a) 6 pre-existing comment em-dashes across live-room components and (b) three new interactive controls under the 44px mobile touch-target floor.

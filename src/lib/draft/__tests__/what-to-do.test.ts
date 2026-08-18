@@ -123,6 +123,60 @@ describe('computeWhatToDo', () => {
     assertNoDashes(result.cap, result.rationale, result.scarcityNote)
   })
 
+  // BUG-R13-03 pins. The live call site (draft/live/client.tsx) builds scarcity
+  // from availablePlayers = undrafted players, which INCLUDES the on-block player
+  // because a nominated player is not yet won. So tier1Remaining counts the player
+  // on the block: tier1Remaining === 1 means "this is genuinely the last tier-1."
+  // consensusTier is always an integer in practice (FantasyPros tiers + Math.ceil
+  // in normalize.ts / convert.ts), so tierOf (Math.round) and calculateScarcity
+  // (<=1 / ===2 / >=3) agree on every real input. These tests lock the boundary so
+  // a future edit to the <=1 / ===0 thresholds fails loudly.
+  it('does NOT PUSH a tier-1 target when another tier-1 is still on the board', () => {
+    const player = makePlayer({ consensusTier: 1 })
+    const result = computeWhatToDo(
+      baseInput({
+        player,
+        isTarget: true,
+        // 2 remaining (this player + one more) => not the last of the tier.
+        scarcity: makeScarcity({ tier1Remaining: 2, startableRemaining: 2 }),
+        alternatives: [],
+      }),
+    )
+    expect(result.move).not.toBe('PUSH')
+    expect(result.move).toBe('BID')
+    assertNoDashes(result.cap, result.rationale, result.scarcityNote)
+  })
+
+  it('PUSHes a tier-2 target when it is the last tier-2 and tier-1 is exhausted', () => {
+    const player = makePlayer({ consensusTier: 2 })
+    const result = computeWhatToDo(
+      baseInput({
+        player,
+        isTarget: true,
+        scarcity: makeScarcity({ tier1Remaining: 0, tier2Remaining: 1, startableRemaining: 1 }),
+        alternatives: [],
+      }),
+    )
+    expect(result.move).toBe('PUSH')
+    assertNoDashes(result.cap, result.rationale, result.scarcityNote)
+  })
+
+  it('does NOT PUSH a tier-2 target while a tier-1 is still available', () => {
+    const player = makePlayer({ consensusTier: 2 })
+    const result = computeWhatToDo(
+      baseInput({
+        player,
+        isTarget: true,
+        // Last tier-2, but a tier-1 remains, so the tier is not yet scarce enough.
+        scarcity: makeScarcity({ tier1Remaining: 1, tier2Remaining: 1, startableRemaining: 2 }),
+        alternatives: [],
+      }),
+    )
+    expect(result.move).not.toBe('PUSH')
+    expect(result.move).toBe('BID')
+    assertNoDashes(result.cap, result.rationale, result.scarcityNote)
+  })
+
   it('PUSH cap is clamped to the budget ceiling', () => {
     const player = makePlayer({ consensusTier: 1 })
     const result = computeWhatToDo(

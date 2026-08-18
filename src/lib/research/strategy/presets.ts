@@ -190,6 +190,16 @@ function mapWeightsToDb(weights: Record<Position, number>): Record<DbPosition, n
   return { ...rest, DST: DEF } as Record<DbPosition, number>
 }
 
+/**
+ * BUG-R13-02: Map app-level DEF to DB DST in a budget allocation, preserving the
+ * bench key. Presets author budget_allocation with a DEF key; the DB convention
+ * (and every consumer) keys it DST, so normalize here at persist time.
+ */
+function mapBudgetAllocToDb(alloc: Record<string, number>): Record<string, number> {
+  const { DEF, ...rest } = alloc
+  return DEF === undefined ? { ...rest } : { ...rest, DST: DEF }
+}
+
 export function presetToStrategyInsert(
   leagueId: string,
   archetype: string,
@@ -210,7 +220,7 @@ export function presetToStrategyInsert(
 
   // Attach format-specific fields only
   if ('budget_allocation' in preset) {
-    base.budget_allocation = preset.budget_allocation
+    base.budget_allocation = mapBudgetAllocToDb(preset.budget_allocation)
     base.max_bid_percentage = preset.max_bid_percentage
   } else {
     base.round_targets = preset.round_targets as Record<DbPosition, number[]>

@@ -252,8 +252,14 @@ function computeAdjustedAuctionValue(
   score: number
 ): number {
   const baseValue = player.consensusAuctionValue || 1
-  const posKey = player.position as string
-  const posBudgetPct = strategy.budget_allocation?.[posKey] ?? 10
+  // BUG-R13-02: budget_allocation keys DEF as 'DST' (DB convention, same as the
+  // position-weight lookup above and target-pricing). Read DST, but fall back to a
+  // legacy 'DEF' key so strategies persisted before this fix still resolve.
+  const alloc = strategy.budget_allocation as Record<string, number> | undefined
+  const posBudgetPct =
+    player.position === 'DEF'
+      ? alloc?.DST ?? alloc?.DEF ?? 10
+      : alloc?.[player.position] ?? 10
   const budgetMultiplier = posBudgetPct / 15 // 15% is "neutral" baseline
 
   // Score multiplier: 50 = 1.0x, 80 = 1.15x, 20 = 0.85x
@@ -261,10 +267,13 @@ function computeAdjustedAuctionValue(
 
   const adjusted = baseValue * budgetMultiplier * scoreMultiplier
 
-  // Cap at max bid percentage
-  const maxBid = strategy.max_bid_percentage
-    ? (leagueBudget * strategy.max_bid_percentage) / 100
-    : leagueBudget * 0.35
+  // Cap at max bid percentage. BUG-R13-07: round the cap so a binding cap cannot
+  // return fractional auction dollars.
+  const maxBid = Math.round(
+    strategy.max_bid_percentage
+      ? (leagueBudget * strategy.max_bid_percentage) / 100
+      : leagueBudget * 0.35,
+  )
 
   return Math.max(1, Math.min(Math.round(adjusted), maxBid))
 }
