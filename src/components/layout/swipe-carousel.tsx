@@ -131,25 +131,33 @@ export function SwipeCarousel({ children }: SwipeCarouselProps) {
         </div>
       </motion.div>
 
-      {/* Dot indicators - fixed at bottom, above tab bar */}
+      {/* Dot indicators - fixed at bottom, above tab bar.
+          R12 mobile fix: the visible dot stays 8px (unchanged SHIELD look),
+          but the button's tappable box is expanded to 44px via padding +
+          an equal negative margin, so it satisfies the Design lens's 44px
+          touch-target minimum without changing dot spacing/appearance. */}
       <div className="absolute bottom-20 left-1/2 -translate-x-1/2 flex gap-2 z-20 md:hidden">
         {sections.map((section, index) => (
           <motion.button
             key={section.href}
             onClick={() => router.push(section.href)}
-            className={cn(
-              'w-2 h-2 rounded-full transition-colors',
-              index === activeIndex
-                ? 'bg-[var(--ffi-accent)]'
-                : 'bg-[var(--ffi-text-muted)]/40'
-            )}
-            animate={{
-              scale: index === activeIndex ? 1.2 : 1,
-            }}
+            className="relative flex items-center justify-center p-[18px] -m-[18px] touch-manipulation"
             whileTap={{ scale: 0.9 }}
-            transition={{ type: 'spring', stiffness: 500, damping: 30 }}
             aria-label={`Go to ${section.label}`}
-          />
+          >
+            <motion.span
+              className={cn(
+                'block w-2 h-2 rounded-full transition-colors',
+                index === activeIndex
+                  ? 'bg-[var(--ffi-accent)]'
+                  : 'bg-[var(--ffi-text-muted)]/40'
+              )}
+              animate={{
+                scale: index === activeIndex ? 1.2 : 1,
+              }}
+              transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+            />
+          </motion.button>
         ))}
       </div>
     </div>

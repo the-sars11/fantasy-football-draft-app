@@ -49,8 +49,17 @@ export function PageTransition({ children }: PageTransitionProps) {
   const { direction } = useNavDirection()
   const variants = slideVariants[direction]
 
+  // R12 perf: was mode="wait", which serializes the swap (old page's full exit
+  // spring finishes before the new page even mounts) -- a real, measurable
+  // chunk of blocking time on every page switch. popLayout lets the incoming
+  // page mount and animate in while the outgoing page animates out
+  // concurrently (matches DESIGN_SYSTEM.md's own "spring cross-fade, never a
+  // hard cut" -- mode="wait" was technically a sequential fade, not a
+  // crossfade). Exiting elements are pulled out of layout flow immediately
+  // (position: absolute) so there's no double-height flash; <main> already
+  // has `relative` for that to anchor against.
   return (
-    <AnimatePresence mode="wait" initial={false}>
+    <AnimatePresence mode="popLayout" initial={false}>
       <motion.div
         key={pathname}
         variants={variants}
