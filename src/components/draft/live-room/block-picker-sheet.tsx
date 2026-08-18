@@ -13,9 +13,12 @@ import { ROOM, posColors } from './theme'
 
 type Segment = 'top' | 'targets' | 'search'
 
+const FLEX_ELIGIBLE = new Set<Position>(['RB', 'WR', 'TE'])
+
 export interface BlockPickerFilter {
-  position?: Position
-  tier?: 1 | 2 | 3
+  /** 'FLEX' pools RB/WR/TE, matching the room's TierContext FLEX row. */
+  position?: Position | 'FLEX'
+  tier?: 1 | 2 | 3 | 4 | 5
 }
 
 function rangeFor(sp: ScoredPlayer, maxBidMap: Map<string, number>): {
@@ -57,8 +60,8 @@ function PickerRow({
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-1.5 text-[15px] font-semibold" style={{ color: ROOM.t1 }}>
           <span className="truncate">{sp.player.name}</span>
-          {sp.isUserTarget && <span className="text-[11px]" style={{ color: ROOM.gold }}>★</span>}
-          {sp.isUserAvoid && <span className="text-[10px]" style={{ color: ROOM.red }}>avoid</span>}
+          {sp.isUserTarget && <span className="text-[11px]" style={{ color: ROOM.blue }}>★</span>}
+          {sp.isUserAvoid && <span className="text-[10px]" style={{ color: ROOM.danger }}>avoid</span>}
         </div>
         <div className="mt-0.5 truncate text-[11px]" style={{ color: ROOM.t3 }}>
           {sp.player.team}
@@ -71,7 +74,7 @@ function PickerRow({
       >
         {tier === null ? 'NR' : `T${tier}`}
       </span>
-      <span className="shrink-0 font-mono text-[13px] font-semibold" style={{ color: ROOM.volt }}>
+      <span className="shrink-0 font-mono text-[13px] font-semibold" style={{ color: ROOM.blue }}>
         ${suggested}
       </span>
     </button>
@@ -100,7 +103,9 @@ export function BlockPickerSheet({
 
   const rows = useMemo(() => {
     let pool = available
-    if (initialFilter?.position) {
+    if (initialFilter?.position === 'FLEX') {
+      pool = pool.filter(sp => FLEX_ELIGIBLE.has(sp.player.position))
+    } else if (initialFilter?.position) {
       pool = pool.filter(sp => sp.player.position === initialFilter.position)
     }
     if (initialFilter?.tier) {
@@ -156,7 +161,7 @@ export function BlockPickerSheet({
         <div className="px-4 pb-3">
           <div
             className="flex items-center gap-2.5 rounded-[10px] px-3 py-2.5"
-            style={{ background: ROOM.cardEl, border: `1px solid ${ROOM.volt20}` }}
+            style={{ background: ROOM.cardEl, border: `1px solid ${ROOM.blue20}` }}
           >
             <span className="text-[15px]" style={{ color: ROOM.t3 }} aria-hidden="true">🔍</span>
             <input
@@ -188,9 +193,9 @@ export function BlockPickerSheet({
                 className="rounded-full text-[10px] font-bold tracking-wide"
                 style={{
                   padding: '5px 12px',
-                  background: on ? ROOM.volt10 : 'rgba(255,255,255,0.05)',
-                  color: on ? ROOM.volt : ROOM.t3,
-                  border: `1px solid ${on ? ROOM.volt20 : ROOM.border}`,
+                  background: on ? ROOM.blue10 : 'rgba(255,255,255,0.05)',
+                  color: on ? ROOM.blue : ROOM.t3,
+                  border: `1px solid ${on ? ROOM.blue20 : ROOM.border}`,
                 }}
               >
                 {seg.label}
@@ -200,7 +205,7 @@ export function BlockPickerSheet({
           {query.trim().length > 0 && (
             <span
               className="rounded-full text-[10px] font-bold tracking-wide"
-              style={{ padding: '5px 12px', background: ROOM.volt10, color: ROOM.volt, border: `1px solid ${ROOM.volt20}` }}
+              style={{ padding: '5px 12px', background: ROOM.blue10, color: ROOM.blue, border: `1px solid ${ROOM.blue20}` }}
             >
               Search: &quot;{query.trim()}&quot;
             </span>

@@ -56,9 +56,9 @@ function rangeOf(sp: ScoredPlayer, maxBidMap: Map<string, number>): { low: numbe
 function signalTagOf(player: Player): { label: string; color: string; bg: string } | null {
   const a = player.analysis
   if (!a) return null
-  if (a.isSleeper) return { label: 'SLEEPER', color: ROOM.volt, bg: ROOM.volt10 }
-  if (a.riskLevel === 'high') return { label: 'RISK', color: ROOM.orange, bg: ROOM.orange10 }
-  if (a.targetStatus === 'target') return { label: 'VALUE', color: ROOM.gold, bg: ROOM.gold10 }
+  if (a.isSleeper) return { label: 'SLEEPER', color: ROOM.blue, bg: ROOM.blue10 }
+  if (a.riskLevel === 'high') return { label: 'RISK', color: ROOM.amber, bg: ROOM.amber10 }
+  if (a.targetStatus === 'target') return { label: 'VALUE', color: ROOM.blue, bg: ROOM.blue10 }
   return null
 }
 
@@ -96,7 +96,7 @@ function PlayerRow({
       <button
         onClick={() => onToggleTarget(sp.player.id)}
         className="flex h-11 w-7 shrink-0 items-center justify-center pl-1.5 text-[15px] transition-transform active:scale-90"
-        style={{ color: isTarget ? ROOM.gold : ROOM.t3 }}
+        style={{ color: isTarget ? ROOM.blue : ROOM.t3 }}
         aria-label={isTarget ? `Remove ${sp.player.name} from targets` : `Add ${sp.player.name} to targets`}
         aria-pressed={isTarget}
       >
@@ -105,7 +105,7 @@ function PlayerRow({
       <button
         onClick={() => onToggleAvoid(sp.player.id)}
         className="flex h-11 w-6 shrink-0 items-center justify-center text-[13px] transition-transform active:scale-90"
-        style={{ color: isAvoid ? ROOM.red : ROOM.t3 }}
+        style={{ color: isAvoid ? ROOM.danger : ROOM.t3 }}
         aria-label={isAvoid ? `Remove ${sp.player.name} from avoids` : `Add ${sp.player.name} to avoids`}
         aria-pressed={isAvoid}
       >
@@ -153,7 +153,7 @@ function PlayerRow({
         </span>
 
         {isAvoid ? (
-          <span className="shrink-0 text-[11px] font-bold tracking-wide" style={{ color: ROOM.red }}>
+          <span className="shrink-0 text-[11px] font-bold tracking-wide" style={{ color: ROOM.danger }}>
             AVOID
           </span>
         ) : (
@@ -194,7 +194,7 @@ export function ResearchView({
   onToggleAvoid,
 }: ResearchViewProps) {
   const [posFilter, setPosFilter] = useState<PosFilter>('ALL')
-  const [tierFilter, setTierFilter] = useState<1 | 2 | 3 | null>(null)
+  const [tierFilter, setTierFilter] = useState<1 | 2 | 3 | 4 | 5 | null>(null)
   const [targetView, setTargetView] = useState(false)
 
   // Inline record state (mirrors ManualPickEntry's bar): price + winning team.
@@ -227,15 +227,25 @@ export function ResearchView({
   const tierRows = useMemo<TierRow[]>(() => {
     return TIER_POSITIONS.map(pos => {
       const s = scarcityByPos.get(pos)
-      const targets = available.filter(sp => sp.player.position === pos && sp.isUserTarget).length
+      const posPool = available.filter(sp => sp.player.position === pos)
+      const targets = posPool.filter(sp => sp.isUserTarget).length
       const startable = s?.startableRemaining ?? 0
       const fillPct = Math.min(100, (startable / (teamCount * 1.5)) * 100)
+      const countTier = (tier: 4 | 5) =>
+        posPool.filter(sp => {
+          const raw = sp.player.consensusTier
+          if (!Number.isFinite(raw)) return false
+          const rounded = Math.max(1, Math.round(raw))
+          return tier === 4 ? rounded === 4 : rounded >= 5
+        }).length
       return {
         position: pos,
         fillPct,
         t1: s?.tier1Remaining ?? 0,
         t2: s?.tier2Remaining ?? 0,
         t3: s?.tier3Remaining ?? 0,
+        t4: countTier(4),
+        t5: countTier(5),
         targets,
       }
     }).sort((a, b) => a.t1 + a.t2 - (b.t1 + b.t2))
@@ -298,7 +308,7 @@ export function ResearchView({
               >
                 {blockTier === null ? 'NR' : `T${blockTier}`}
               </span>
-              {blockIsTarget && <span className="text-[11px]" style={{ color: ROOM.gold }}>★</span>}
+              {blockIsTarget && <span className="text-[11px]" style={{ color: ROOM.blue }}>★</span>}
               <span className="ml-auto truncate text-[11px]" style={{ color: ROOM.t3 }}>
                 {onBlockPlayer.team}
                 {onBlockPlayer.byeWeek ? ` · Bye ${onBlockPlayer.byeWeek}` : ''}
@@ -307,7 +317,7 @@ export function ResearchView({
 
             <div className="mt-2 flex items-center gap-2">
               {blockRange && (
-                <span className="shrink-0 font-mono text-[13px] font-bold" style={{ color: ROOM.gold }}>
+                <span className="shrink-0 font-mono text-[13px] font-bold" style={{ color: ROOM.blue }}>
                   ${blockRange.low}-${blockRange.high}
                 </span>
               )}
@@ -348,7 +358,7 @@ export function ResearchView({
                   className="rounded-[8px] px-3 py-1.5 text-[10px] font-bold tracking-wider transition-transform active:scale-95"
                   style={
                     canRecord
-                      ? { background: ROOM.volt, color: '#0a1400' }
+                      ? { background: ROOM.blue, color: '#06131f' }
                       : { background: 'rgba(255,255,255,0.06)', color: ROOM.t3 }
                   }
                 >
@@ -382,9 +392,9 @@ export function ResearchView({
               className="shrink-0 rounded-full text-[11px] font-bold tracking-wide transition-colors"
               style={{
                 padding: '5px 12px',
-                background: on ? (pc ? pc.bg : ROOM.volt10) : 'rgba(255,255,255,0.05)',
-                color: on ? (pc ? pc.color : ROOM.volt) : ROOM.t3,
-                border: `1px solid ${on ? (pc ? pc.color : ROOM.volt20) : 'transparent'}`,
+                background: on ? (pc ? pc.bg : ROOM.blue10) : 'rgba(255,255,255,0.05)',
+                color: on ? (pc ? pc.color : ROOM.blue) : ROOM.t3,
+                border: `1px solid ${on ? (pc ? pc.color : ROOM.blue20) : 'transparent'}`,
               }}
             >
               {p === 'ALL' ? 'All' : p}
@@ -396,9 +406,9 @@ export function ResearchView({
           className="ml-auto shrink-0 rounded-full text-[11px] font-bold tracking-wide transition-colors"
           style={{
             padding: '5px 12px',
-            background: targetView ? ROOM.gold10 : 'rgba(255,255,255,0.05)',
-            color: targetView ? ROOM.gold : ROOM.t3,
-            border: `1px solid ${targetView ? ROOM.gold25 : 'transparent'}`,
+            background: targetView ? ROOM.blue10 : 'rgba(255,255,255,0.05)',
+            color: targetView ? ROOM.blue : ROOM.t3,
+            border: `1px solid ${targetView ? ROOM.blue20 : 'transparent'}`,
           }}
           aria-pressed={targetView}
         >

@@ -733,6 +733,7 @@ export function LiveDraftClient() {
         maxBidMap={maxBidAdviceMap}
         rosterAdviceMap={rosterAdviceMap}
         myBudget={myBudget}
+        leagueBudget={league?.budget ?? 200}
         myMaxBid={myMaxBid}
         myPicks={myPicks}
         rosterSlots={rosterSlots}

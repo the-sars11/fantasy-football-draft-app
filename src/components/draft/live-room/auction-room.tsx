@@ -33,6 +33,20 @@ import { FixPickSheet } from './fix-pick-sheet'
 import { ResearchView } from './research-view'
 
 const TIER_POSITIONS: Position[] = ['QB', 'RB', 'WR', 'TE']
+const FLEX_ELIGIBLE = new Set<Position>(['RB', 'WR', 'TE'])
+
+/** T4/T5 aren't in the shared scarcity type (explain.ts caps at "T3 = 25+"),
+ * so the room computes them locally from the raw available pool. T5 is a
+ * catch-all for tier 5 and deeper, matching how T3 used to catch everything
+ * >= 3 before this room split it further. */
+function countTier(pool: ScoredPlayer[], tier: 4 | 5): number {
+  return pool.filter(sp => {
+    const raw = sp.player.consensusTier
+    if (!Number.isFinite(raw)) return false
+    const rounded = Math.max(1, Math.round(raw))
+    return tier === 4 ? rounded === 4 : rounded >= 5
+  }).length
+}
 
 function SectionHeader({ label, action }: { label: string; action?: ReactNode }) {
   return (
@@ -60,6 +74,8 @@ export interface AuctionRoomProps {
   /** R5 (RV-1): roster-completion max bid + plain-English note, keyed by lower name. */
   rosterAdviceMap: Map<string, RosterMaxBidEntry>
   myBudget: number | null
+  /** D6: league starting budget (default 200) so BudgetStrip can render spent-vs-remaining. */
+  leagueBudget?: number
   myMaxBid: number | null
   myPicks: Array<{ player_name: string; position?: string; price?: number }>
   rosterSlots: RosterSlots
@@ -105,6 +121,7 @@ export function AuctionDraftRoom({
   maxBidMap,
   rosterAdviceMap,
   myBudget,
+  leagueBudget = 200,
   myMaxBid,
   myPicks,
   rosterSlots,
@@ -132,6 +149,7 @@ export function AuctionDraftRoom({
   const [pickerOpen, setPickerOpen] = useState(false)
   const [pickerFilter, setPickerFilter] = useState<BlockPickerFilter | undefined>(undefined)
   const [fixOpen, setFixOpen] = useState(false)
+  const [myTeamCollapsed, setMyTeamCollapsed] = useState(false)
 
   const teamCount = state.manager_order.length || 12
 
@@ -215,11 +233,12 @@ export function AuctionDraftRoom({
     return items
   }, [scarcity, available, maxBidMap, myPicks.length, rosterSlots, myBudget])
 
-  // --- Tier context rows ----------------------------------------------------
+  // --- Tier context rows (D6: extended to T1-T5 + a FLEX row) ---------------
   const tierRows = useMemo<TierRow[]>(() => {
-    return TIER_POSITIONS.map(pos => {
+    const posRows = TIER_POSITIONS.map(pos => {
       const s = scarcityByPos.get(pos)
-      const targets = available.filter(sp => sp.player.position === pos && sp.isUserTarget).length
+      const posPool = available.filter(sp => sp.player.position === pos)
+      const targets = posPool.filter(sp => sp.isUserTarget).length
       const startable = s?.startableRemaining ?? 0
       const fillPct = Math.min(100, (startable / (teamCount * 1.5)) * 100)
       return {
@@ -228,10 +247,30 @@ export function AuctionDraftRoom({
         t1: s?.tier1Remaining ?? 0,
         t2: s?.tier2Remaining ?? 0,
         t3: s?.tier3Remaining ?? 0,
+        t4: countTier(posPool, 4),
+        t5: countTier(posPool, 5),
         targets,
       }
-    }).sort((a, b) => a.t1 + a.t2 - (b.t1 + b.t2)) // scarcest first
-  }, [scarcityByPos, available, teamCount])
+    })
+
+    // FLEX (R11 gap): RB/WR/TE pooled together, since that's the actual
+    // competing pool for the league's 3 FLEX slots.
+    const flexPool = available.filter(sp => FLEX_ELIGIBLE.has(sp.player.position))
+    const flexScarcity = scarcity.filter(s => FLEX_ELIGIBLE.has(s.position))
+    const flexStartable = flexScarcity.reduce((a, s) => a + s.startableRemaining, 0)
+    const flexRow: TierRow = {
+      position: 'FLEX',
+      fillPct: Math.min(100, (flexStartable / (teamCount * 3)) * 100),
+      t1: flexScarcity.reduce((a, s) => a + s.tier1Remaining, 0),
+      t2: flexScarcity.reduce((a, s) => a + s.tier2Remaining, 0),
+      t3: flexScarcity.reduce((a, s) => a + s.tier3Remaining, 0),
+      t4: countTier(flexPool, 4),
+      t5: countTier(flexPool, 5),
+      targets: flexPool.filter(sp => sp.isUserTarget).length,
+    }
+
+    return [...posRows, flexRow].sort((a, b) => a.t1 + a.t2 - (b.t1 + b.t2)) // scarcest first
+  }, [scarcityByPos, available, teamCount, scarcity])
 
   const filledSlots = myPicks.length
   const totalSlots = Object.values(rosterSlots).reduce((a, b) => a + (b ?? 0), 0)
@@ -308,6 +347,7 @@ export function AuctionDraftRoom({
             <div className="pt-2.5">
               <BudgetStrip
                 remaining={myBudget}
+                leagueBudget={leagueBudget}
                 maxBid={myMaxBid}
                 filledSlots={filledSlots}
                 totalSlots={totalSlots}
@@ -332,8 +372,30 @@ export function AuctionDraftRoom({
               onTapTier={(pos, tier) => openPicker({ position: pos, tier })}
             />
 
-            <SectionHeader label="My Team · glance only" />
-            <MyTeamRoster picks={myPicks} roster={rosterSlots} />
+            <SectionHeader
+              label="My Team · glance only"
+              action={
+                <button
+                  onClick={() => setMyTeamCollapsed(v => !v)}
+                  className="whitespace-nowrap text-[9.5px] font-bold uppercase tracking-wide underline"
+                  style={{ color: ROOM.t2 }}
+                  aria-expanded={!myTeamCollapsed}
+                  aria-label={myTeamCollapsed ? 'Expand my team' : 'Collapse my team'}
+                >
+                  {myTeamCollapsed ? 'show' : 'hide'}
+                </button>
+              }
+            />
+            {!myTeamCollapsed && (
+              <MyTeamRoster
+                picks={myPicks}
+                roster={rosterSlots}
+                activeStrategy={activeStrategy}
+                available={available}
+                budgetRemaining={myBudget}
+                onSelectPlayer={setOnBlockPlayer}
+              />
+            )}
           </>
         )}
       </div>

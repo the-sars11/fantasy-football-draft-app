@@ -5,6 +5,7 @@
  * Answers "what do I do right now" with a color-coded move + a plain rationale.
  */
 
+import { useState } from 'react'
 import type { Player } from '@/lib/players/types'
 import type { WhatToDoAdvice } from '@/lib/draft/what-to-do'
 import { ROOM, posColors, moveTheme } from './theme'
@@ -57,6 +58,8 @@ export function OnTheBlockCard({
   onToggleTarget: (playerId: string) => void
   onToggleAvoid: (playerId: string) => void
 }) {
+  const [collapsed, setCollapsed] = useState(false)
+
   if (!player || !advice) {
     return <WaitingCard onChangePlayer={onChangePlayer} />
   }
@@ -81,13 +84,24 @@ export function OnTheBlockCard({
           >
             On the Block
           </span>
-          <button
-            onClick={onChangePlayer}
-            className="rounded px-2 py-1 text-[9.5px] font-bold tracking-wide transition-opacity hover:opacity-80"
-            style={{ background: ROOM.cardEl, border: `1px solid ${ROOM.border}`, color: ROOM.t2 }}
-          >
-            Change player
-          </button>
+          <div className="flex shrink-0 items-center gap-1.5">
+            <button
+              onClick={onChangePlayer}
+              className="rounded px-2 py-1 text-[9.5px] font-bold tracking-wide transition-opacity hover:opacity-80"
+              style={{ background: ROOM.cardEl, border: `1px solid ${ROOM.border}`, color: ROOM.t2 }}
+            >
+              Change player
+            </button>
+            <button
+              onClick={() => setCollapsed(c => !c)}
+              className="flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded transition-opacity hover:opacity-80"
+              style={{ background: ROOM.cardEl, border: `1px solid ${ROOM.border}`, color: ROOM.t2 }}
+              aria-label={collapsed ? 'Expand on the block card' : 'Collapse on the block card'}
+              aria-expanded={!collapsed}
+            >
+              <span className="text-[11px]">{collapsed ? '▾' : '▴'}</span>
+            </button>
+          </div>
         </div>
 
         {/* row 1: badge, name, meta */}
@@ -110,7 +124,26 @@ export function OnTheBlockCard({
           </span>
         </div>
 
+        {collapsed && (
+          <div
+            className="flex items-center gap-2.5 rounded-[10px] px-3 py-2"
+            style={{ background: move.bg, border: `1px solid ${move.border}` }}
+          >
+            <span className="font-headline text-[13px] tracking-wide" style={{ color: move.color }}>
+              {advice.move}
+            </span>
+            <span className="font-mono text-[12px] font-semibold" style={{ color: move.color }}>
+              {advice.cap}
+            </span>
+            <span className="ml-auto font-mono text-[11px]" style={{ color: ROOM.t3 }}>
+              {rangeText}
+            </span>
+          </div>
+        )}
+
         {/* row 2: tier, tag, scarcity */}
+        {!collapsed && (
+        <>
         <div className="mb-2.5 flex flex-wrap items-center gap-1.5">
           <span
             className="rounded px-2 py-1 text-[10px] font-bold tracking-wide"
@@ -124,7 +157,7 @@ export function OnTheBlockCard({
             className="rounded px-2 py-1 text-[10px] font-bold transition-transform active:scale-95"
             style={
               advice.isTarget
-                ? { background: ROOM.gold10, border: `1px solid ${ROOM.gold25}`, color: ROOM.gold }
+                ? { background: ROOM.blue10, border: `1px solid ${ROOM.blue20}`, color: ROOM.blue }
                 : { background: 'rgba(255,255,255,0.05)', border: `1px solid ${ROOM.border}`, color: ROOM.t3 }
             }
             aria-pressed={advice.isTarget}
@@ -137,7 +170,7 @@ export function OnTheBlockCard({
             className="rounded px-2 py-1 text-[10px] font-bold transition-transform active:scale-95"
             style={
               advice.isAvoid
-                ? { background: ROOM.red10, border: `1px solid ${ROOM.red25}`, color: ROOM.red }
+                ? { background: ROOM.danger10, border: `1px solid ${ROOM.danger25}`, color: ROOM.danger }
                 : { background: 'rgba(255,255,255,0.05)', border: `1px solid ${ROOM.border}`, color: ROOM.t3 }
             }
             aria-pressed={advice.isAvoid}
@@ -152,22 +185,22 @@ export function OnTheBlockCard({
           )}
         </div>
 
-        {/* range row */}
+        {/* range row -- always steel-blue: supporting info, not the action moment */}
         <div
           className="mb-2.5 flex items-center gap-2 rounded-lg px-3 py-1.5"
-          style={{ background: ROOM.volt10, border: `1px solid ${ROOM.volt20}` }}
+          style={{ background: ROOM.blue10, border: `1px solid ${ROOM.blue20}` }}
         >
           <span
             className="text-[8.5px] font-bold uppercase tracking-[2px]"
-            style={{ color: 'rgba(212,255,0,0.5)' }}
+            style={{ color: ROOM.blue45 }}
           >
             Your range
           </span>
-          <span className="font-headline text-[20px]" style={{ color: ROOM.volt }}>
+          <span className="font-headline text-[20px]" style={{ color: ROOM.blue }}>
             {rangeText}
           </span>
           {advice.marketEst != null && (
-            <span className="ml-auto text-[11px]" style={{ color: ROOM.volt45 }}>
+            <span className="ml-auto text-[11px]" style={{ color: ROOM.blue45 }}>
               mkt ≈ ${advice.marketEst}
             </span>
           )}
@@ -210,6 +243,8 @@ export function OnTheBlockCard({
             </div>
           )}
         </div>
+        </>
+        )}
       </div>
     </div>
   )

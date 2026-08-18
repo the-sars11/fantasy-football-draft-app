@@ -22,7 +22,6 @@
  * Pure and $0 — no React, no network, no Claude. Deterministic.
  */
 
-import type { ConsensusPlayer } from '@/lib/research/normalize'
 import type { Position, RosterSlots } from '@/lib/players/types'
 import {
   solveAllocation,
@@ -126,11 +125,23 @@ function positionEmphasis(
 
 // ─── Main ────────────────────────────────────────────────────────────────────
 
+/**
+ * D6: minimal structural shape this module actually reads off a player.
+ * Both `ConsensusPlayer` (prep-time research) and the live room's `Player`
+ * (from `@/lib/players/types`) satisfy this without a cast -- narrowing the
+ * param to only what's used lets the live room reuse this solver directly.
+ */
+export interface TargetPricingPlayer {
+  name: string
+  position: Position
+  consensusAuctionValue?: number | null
+}
+
 export interface AssignTargetPricesInput {
   targetNames: string[]
   budgetAllocation?: Record<string, number>
   maxBidPercentage?: number
-  players: ConsensusPlayer[]
+  players: TargetPricingPlayer[]
   rosterSlots: RosterSlots
   budget: number
 }
@@ -143,7 +154,7 @@ export function assignTargetPrices(input: AssignTargetPricesInput): TargetPricin
   const { targetNames, budgetAllocation, maxBidPercentage, players, rosterSlots, budget } = input
 
   // Resolve targets by name (case-insensitive), dedupe, skip unknown / kickers.
-  const byName = new Map<string, ConsensusPlayer>()
+  const byName = new Map<string, TargetPricingPlayer>()
   for (const p of players) byName.set(p.name.toLowerCase(), p)
 
   const seen = new Set<string>()

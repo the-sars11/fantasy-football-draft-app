@@ -63,7 +63,7 @@ export function StrategyStrip({ activeStrategy, strategies, onSelect, pivot }: S
       {pivot && (
         <div
           className="mx-2.5 mb-2.5 rounded-lg px-2.5 py-1.5 text-[11.5px] leading-snug"
-          style={{ background: ROOM.gold10, border: `1px solid ${ROOM.gold25}`, color: ROOM.t1 }}
+          style={{ background: ROOM.blue10, border: `1px solid ${ROOM.blue20}`, color: ROOM.t1 }}
         >
           {pivot}
         </div>
@@ -92,7 +92,7 @@ export function StrategyStrip({ activeStrategy, strategies, onSelect, pivot }: S
           className={cn('flex items-center gap-1.5 px-3 pb-2.5 text-[10.5px]')}
           style={{ color: ROOM.t3 }}
         >
-          <Check className="h-3 w-3" style={{ color: ROOM.gold }} />
+          <Check className="h-3 w-3" style={{ color: ROOM.blue }} />
           <span>{activeStrategy.name} is active</span>
         </div>
       )}

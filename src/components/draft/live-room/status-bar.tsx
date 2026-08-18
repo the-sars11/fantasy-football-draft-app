@@ -65,8 +65,8 @@ export function StatusBar({
           <span
             className="flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] font-bold tracking-wider"
             style={{
-              background: 'rgba(34,197,94,0.12)',
-              border: '1px solid rgba(34,197,94,0.28)',
+              background: 'rgba(95,168,224,0.12)',
+              border: '1px solid rgba(95,168,224,0.28)',
               color: ROOM.live,
             }}
           >

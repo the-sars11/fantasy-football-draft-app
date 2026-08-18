@@ -65,7 +65,7 @@ function PickRow({
         </span>
       )}
       {pick.price !== undefined && (
-        <span className="shrink-0 font-mono text-[14px] font-bold" style={{ color: ROOM.volt }}>
+        <span className="shrink-0 font-mono text-[14px] font-bold" style={{ color: ROOM.blue }}>
           ${pick.price}
         </span>
       )}
@@ -138,7 +138,7 @@ function EditCard({
   return (
     <div
       className="mx-2 mb-3.5 overflow-hidden rounded-[14px]"
-      style={{ background: ROOM.card, border: `1px solid ${ROOM.gold25}` }}
+      style={{ background: ROOM.card, border: `1px solid ${ROOM.blue20}` }}
     >
       <div className="flex items-center gap-2.5 px-3 pb-2.5 pt-3" style={{ borderBottom: `1px solid ${ROOM.border2}` }}>
         <div
@@ -150,7 +150,7 @@ function EditCard({
         <span className="truncate text-[16px] font-bold" style={{ color: ROOM.t1 }}>
           {playerName}
         </span>
-        <span className="ml-auto text-[9px] font-extrabold uppercase tracking-[1.5px]" style={{ color: ROOM.gold }}>
+        <span className="ml-auto text-[9px] font-extrabold uppercase tracking-[1.5px]" style={{ color: ROOM.blue }}>
           Pick {pick.pick_number}
         </span>
       </div>
@@ -170,7 +170,7 @@ function EditCard({
             <span className="shrink-0 text-[11px]" style={{ color: ROOM.t3 }}>change</span>
           </button>
         ) : (
-          <div className="rounded-[10px]" style={{ background: ROOM.cardEl, border: `1px solid ${ROOM.volt20}` }}>
+          <div className="rounded-[10px]" style={{ background: ROOM.cardEl, border: `1px solid ${ROOM.blue20}` }}>
             <input
               autoFocus
               value={query}
@@ -237,14 +237,14 @@ function EditCard({
             Price
           </label>
           <div className="flex items-center gap-1 rounded-[10px] px-3 py-2.5" style={{ background: ROOM.cardEl, border: `1px solid ${ROOM.border}` }}>
-            <span className="font-mono text-[14px] font-bold" style={{ color: ROOM.volt }}>$</span>
+            <span className="font-mono text-[14px] font-bold" style={{ color: ROOM.blue }}>$</span>
             <input
               value={price}
               onChange={e => setPrice(e.target.value.replace(/[^0-9]/g, ''))}
               inputMode="numeric"
               placeholder="0"
               className="w-full bg-transparent font-mono text-[14px] font-bold tabular-nums outline-none"
-              style={{ color: ROOM.volt }}
+              style={{ color: ROOM.blue }}
             />
           </div>
         </div>
@@ -261,7 +261,7 @@ function EditCard({
         <button
           onClick={() => onRemove(pick.pick_number)}
           className="flex items-center gap-1.5 rounded-[10px] px-3.5 py-2.5 text-[12px] font-extrabold uppercase tracking-wide"
-          style={{ background: ROOM.red10, color: '#ff6b6b', border: `1px solid ${ROOM.red25}` }}
+          style={{ background: ROOM.danger10, color: ROOM.danger, border: `1px solid ${ROOM.danger25}` }}
         >
           <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M3 6h18" />
@@ -272,7 +272,7 @@ function EditCard({
         <button
           onClick={handleSave}
           className="flex-1 rounded-[10px] px-4 py-2.5 text-[12px] font-extrabold uppercase tracking-wide"
-          style={{ background: ROOM.volt, color: '#0a0f05' }}
+          style={{ background: ROOM.blue, color: '#06131f' }}
         >
           Save
         </button>

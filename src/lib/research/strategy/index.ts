@@ -19,4 +19,4 @@ export { proposeStrategies } from './research'
 export type { StrategyProposal, StrategyResearchInput, StrategyResearchResult } from './research'
 
 export { assignTargetPrices } from './target-pricing'
-export type { TargetPricing, TargetPrice, AssignTargetPricesInput } from './target-pricing'
+export type { TargetPricing, TargetPrice, AssignTargetPricesInput, TargetPricingPlayer } from './target-pricing'

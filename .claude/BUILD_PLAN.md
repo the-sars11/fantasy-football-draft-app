@@ -1,6 +1,6 @@
 <!-- DASHBOARD_STATUS
 {
-  "currentPhase": "REBUILD + LOOK. Reset to truth 2026-08-12 after the app was marked 'done' while it priced players in a silo and broke on a dead model. North Star: build the best full 15-man roster for $200, not price players one at a time. Two parallel tracks: the R-track (logic/data/engines, R1-R15) and the D-track ('THE LOOK' visual identity, D0-D6). Model-bound, one-sitting each, testing + bug hunts baked in. NO date gating. As of 2026-08-17: R1-R11b done, D0-D5 done; next buildable is D6 (live room visual pass). R11 is split into R11a (offline cache, done) + R11b (in-room guidance, done). DEC-1 (targets/avoids bias) RESOLVED = BIAS, wired in R10b.",
+  "currentPhase": "REBUILD + LOOK. Reset to truth 2026-08-12 after the app was marked 'done' while it priced players in a silo and broke on a dead model. North Star: build the best full 15-man roster for $200, not price players one at a time. Two parallel tracks: the R-track (logic/data/engines, R1-R15) and the D-track ('THE LOOK' visual identity, D0-D6). Model-bound, one-sitting each, testing + bug hunts baked in. NO date gating. As of 2026-08-18: R1-R11b done, D0-D6 done (full D-track complete); next buildable is R12 (shell/UX/perf pass). R11 is split into R11a (offline cache, done) + R11b (in-room guidance, done). DEC-1 (targets/avoids bias) RESOLVED = BIAS, wired in R10b, reskinned live in D6.",
   "status": "active",
   "milestones": [
     { "name": "Data pipeline - Sleeper/FantasyPros seed + Supabase cache (real, verified via API)", "done": true },
@@ -9,7 +9,7 @@
     { "name": "TEAM-CONSTRUCTION ENGINE - best full roster for $200 (R4 solver + R5 live wire + R6 strategy prices)", "done": true },
     { "name": "Strategy engine - board-derived generation + target prices + adaptive-guidance (R6/R9), D3 UI", "done": true },
     { "name": "Live AI panels - model id fixed + error-gated fallback (R1); live path verify is a Joe-approved paid check", "done": true },
-    { "name": "Visual redesign D-track - Research/Strategies/Players/Sim screens done (D2-D5); Live (D6) pending", "done": false },
+    { "name": "Visual redesign D-track - Research/Strategies/Players/Sim/Live screens all done (D2-D6 complete 2026-08-18)", "done": true },
     { "name": "Simulation - Monte-Carlo engine (R10a) + grading/record/top-5/frequency/saved-runs data (R10b) + SHIELD pixels (D5) all done", "done": true },
     { "name": "Live auction state machine + rule-based advisor - built + roster-aware wired (R5); live-verify pending R15", "done": false },
     { "name": "Auctioneer remote sync proxy - built; live-verify against a running auctioneer pending R15", "done": false }
@@ -24,7 +24,7 @@
     "R14 [Claude+Sonnet, L]: usability walkthrough - walk every flow mobile arm's-length, fix P1s this session; P2 overflow becomes R14-fix cards.",
     "R15 [Sonnet+Joe, M]: rehearsal GATE - full mock draft on Joe's phone against the live auctioneer. The only session that needs Joe's hands.",
     "D5 [Sonnet, M]: DONE 2026-08-17. Sim results screen restyled to SHIELD from keeper refs UI/mockup-strategy-detail/ + UI/mockup-post-draft-review/, consuming R10b data; winning-team-% bars (deriveWinningTeamLanded, winning shapes only) + 5-roster carousel + no-em-dash narrative shipped. 429/429 tests green, live-verified with real 30-sim data (screenshot blocked, DOM/network/console proof in-chat).",
-    "D6 [Sonnet, L]: NEXT BUILDABLE (R11b done 2026-08-17). Live room visual + UX pass - new look + R11 UX gaps (FLEX tier row + T4/T5, collapsible My Team + on-block, live-updating values; strategy switcher/adaptive pivot/target-avoid toggles now already wired by R11b, this card reskins them). Pairs with R11b.",
+    "D6 [Sonnet, L]: DONE 2026-08-18. Live room visual + UX pass - steel-blue primary / brick-red BID-verdict-only reskin (moveTheme recolor), old red-to-green budget bar replaced with a steel-blue progress fill, top 'Next Target' banner removed. R11 UX gaps closed: FLEX tier row + T4/T5, collapsible My Team panel + collapsible on-block card, per-slot target-at-price (NEW room-target-pricing.ts adapter reusing assignTargetPrices, no re-implemented solver math) with expand-to-alternates driven by the active strategy's combinedScore ranking. In-draft strategy switch + live target/avoid toggles were already wired by R11b -- this card only reskinned their pixels. 463/463 tests green (+7 new for the target-pricing adapter), 0 type errors, 0 new lint errors, build compiles clean (56 static pages). Visual confirmation blocked by the same known headless-env limitation as R11b/R12 (no reachable active draft session in this browser sandbox -- see WORKING_STATE.md); DOM/type/test proof only. Full D-track (D0-D6) now complete.",
     "Per-session gate (R1-R14): type-check + test:run + lint(0 new) + build + /bug-hunt free on changed modules + a screenshot from a preview I loaded myself. No session is 'done' without all of it."
   ]
 }
