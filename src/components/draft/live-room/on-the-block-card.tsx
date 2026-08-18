@@ -208,6 +208,7 @@ export function OnTheBlockCard({
   player,
   advice,
   confidence,
+  landProbability,
   onChangePlayer,
   onToggleTarget,
   onToggleAvoid,
@@ -216,6 +217,12 @@ export function OnTheBlockCard({
   advice: WhatToDoAdvice | null
   /** D6b-1: rule-based confidence from explain.ts (high/medium/low). */
   confidence?: 'high' | 'medium' | 'low'
+  /**
+   * D6b-2: real Monte-Carlo land probability (0..1) for this player from the
+   * live board. Null/undefined => no meaningful signal, chip hidden. This is a
+   * real runMonteCarlo fraction (DEC-2b), never a fabricated number.
+   */
+  landProbability?: number | null
   onChangePlayer: () => void
   /** R11b: target and avoid settable right from the hero card. */
   onToggleTarget: (playerId: string) => void
@@ -476,6 +483,22 @@ export function OnTheBlockCard({
                   }}
                 >
                   CONF · {confidence.toUpperCase()}
+                </span>
+              )}
+              {/* LAND chip — real Monte-Carlo land probability (D6b-2). Neutral/
+                  muted styling: a data readout, not a verdict, so it never
+                  competes with the blue CONF or the one true action red. */}
+              {landProbability != null && (
+                <span
+                  className="rounded-full px-2 py-[2px] font-mono text-[10px] font-bold"
+                  style={{
+                    background: ROOM.muted10,
+                    border: `1px solid ${ROOM.muted25}`,
+                    color: ROOM.muted,
+                  }}
+                  title="Chance you land this player, across simulated drafts"
+                >
+                  LAND · {Math.round(landProbability * 100)}%
                 </span>
               )}
               <span

@@ -2,6 +2,22 @@
 
 ---
 
+## 2026-08-18 / D6b-2 -- Live Read: Monte Carlo land-probability wiring
+
+**Class:** pipeline (Architecture + QA + Security lenses). **DEC-2b Opus half.** Wires a REAL `runMonteCarlo` land probability into the on-block Read. All $0 (pure math, no API calls).
+
+- **`room-sim-probability.ts` (NEW):** Pure $0 adapter `computeLandProbability(input)`. Ensures the on-block player is in the pool, builds the board from the live undrafted pool minus drafted names (`buildBoardPlayers`), maps the me-seat's REMAINING roster shape + budget (`buildSlotsRemaining`) into `runMonteCarlo` (R10a engine, NOT modified), and returns `{ probability: hits/total, runs, hits }` where `hits` = runs whose me-seat roster ends with the on-block player. `LAND_PROB_RUNS = 16`; board capped at `numManagers * openSlots + BOARD_MARGIN(12)` to bound early-draft latency (lossless -- the tail never sells before rosters fill; on-block always kept). Returns `null` (caller hides the chip) on no meaningful signal: `numManagers < 1 || budget < 1`, empty board, on-block not on the board (e.g. just drafted), or `slotsOpen <= 0` (roster full). **DEC-2b:** the displayed % is ALWAYS a real `runMonteCarlo` fraction or null -- never fabricated; fixed default `seed = 1` makes it deterministic (same inputs -> byte-identical). Header documents the deliberate symmetric "from-here" approximation (the engine has no per-manager initial state, so all seats get the me-seat's remaining shape/budget) as in-scope for the wiring step.
+- **`on-the-block-card.tsx`:** Added `landProbability?: number | null` to props/type. Renders a `LAND · NN%` chip (muted-neutral `ROOM.muted10`/`muted25`, `Math.round(prob*100)`) immediately after the CONF chip inside The Read. Guard is `landProbability != null` -- `0` renders "LAND · 0%" honestly, `null`/`undefined` hides the chip.
+- **`auction-room.tsx`:** New `landProbability` useMemo calls `computeLandProbability` from live room state (`onBlockPlayer`, `available.map(sp => sp.player)`, `draftedNames`, `rosterSlots`, `myPicks`, `teamCount`, `myBudget ?? leagueBudget`), returns `res ? res.probability : null`, and is passed to the single `<OnTheBlockCard>` render.
+- **`client.tsx` (bug-hunt HIGH fix):** Hoisted `myPicks` from a render-body `.filter()` (a new array reference every render) into a `useMemo` keyed off `state`. The render-body version defeated the `landProbability` memo's identity check, re-running 16 Monte-Carlo auctions on the render thread on every remote-feed poll, picker-open, and star-toggle. Now stable between picks.
+- **Tests (NEW, +12):** `__tests__/room-sim-probability.test.ts` (8: probability in [0,1] backed by real runs + `hits/runs` reconstructs the % exactly; deterministic under fixed seed; hit-count moves across a seed spread; drops drafted on-block -> null; rosterable player positive land chance; roster-full -> null; degenerate 0-managers/$0-budget -> null; latency `< 1000ms` with a logged real number) + `live-room/__tests__/d6b2-land-prob.test.tsx` (4: renders "LAND · 58%" beside "CONF · HIGH"; rounds 0.333 -> "33%"; shows "LAND · 0%"; hides at null).
+
+**Tests:** 497/497 green (485 baseline + 12 new).
+
+**Gate:** type-check 0 errors · `test:run` 497/497 · lint 0 new errors in changed files (warnings all pre-existing) · build ✓ Compiled successfully in 4.6s · **latency 173.6ms** worst-case (16 runs, empty early-draft board). **Bug-hunt (static, D6b-2 change set):** 1 HIGH FIXED (the `myPicks` memoization defect above); BUG-D6b2-01 (LOW-MED, deterministic tie-break favors the me-seat -- pre-existing R10a engine behavior) and BUG-D6b2-02 (LOW, symmetric-state approximation -- disclosed in the module header) logged + deferred, out of this one-step scope. Visual proof: headless-env limitation (same as D6/D6b-1/R11a -- no active `/draft/live` session reachable); the chip render path is proven by the 4 RTL DOM tests against the real `OnTheBlockCard` plus a faithful static HTML render (exact `theme.ts` tokens + chip markup) delivered in-chat.
+
+---
+
 ## 2026-08-18 / D6b-1 -- Live-room v5 UI alignment pass
 
 **Class:** output (Design + QA lenses). **Scope:** pure UI, no Monte Carlo (D6b-2/Opus). Aligned the shipped D6 live room to the locked v5 cockpit spec (`docs/ux_redesign/d6_cockpit_mockup_v5.html`). All $0 (no API calls).

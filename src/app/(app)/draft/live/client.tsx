@@ -339,6 +339,17 @@ export function LiveDraftClient() {
     return computeAdaptiveGuidance(state, myMgr, players)
   }, [state, players])
 
+  // D6b-2: memoize the me-seat picks. auction-room's land-probability memo depends
+  // on this array, and each land probability is 16 Monte-Carlo auctions on the
+  // render thread. A fresh `.filter()` array every render would give a new
+  // reference each time, defeating that memo and re-running the sim on every
+  // render (remote-feed poll, picker open, star toggle). Keyed off `state` so it
+  // is stable between picks and only changes when a pick actually lands.
+  const myPicks = useMemo(
+    () => (state ? state.picks.filter(p => p.manager === state.manager_order[0]) : []),
+    [state],
+  )
+
   // R5 (RV-1): the roster-completion solver input, rebuilt on every pick. Maps
   // Joe's live budget + remaining slots (FLEX contention modeled) + the undrafted
   // board into the pure R4 solver. $0 math, no network.
@@ -589,7 +600,8 @@ export function LiveDraftClient() {
   const myBudget = getBudget(myManager)
   const myMaxBid = getMaxBidFor(myManager)
   const myNeeds = getNeeds(myManager)
-  const myPicks = state.picks.filter(p => p.manager === myManager)
+  // myPicks is memoized above (D6b-2) so the land-probability sim stays stable
+  // between picks; do not recompute it here with a fresh filter().
 
   // UXV2-6: connection health for the room status pill. Sim has no real feed.
   // DR-5.2: reflect an ACTUAL connected feed (same-device or remote), not merely

@@ -20,6 +20,7 @@ import type { DraftState, DraftPick } from '@/lib/draft/state'
 import type { RosterSlots, Strategy as DbStrategy } from '@/lib/supabase/database.types'
 import { computeWhatToDo } from '@/lib/draft/what-to-do'
 import type { RosterMaxBidEntry } from '@/lib/draft/solver-bridge'
+import { computeLandProbability } from '@/lib/draft/room-sim-probability'
 import { ROOM } from './theme'
 import { StatusBar } from './status-bar'
 import { OnTheBlockCard } from './on-the-block-card'
@@ -217,6 +218,32 @@ export function AuctionDraftRoom({
     myManager,
   ])
 
+  // --- D6b-2: real Monte-Carlo land probability for the on-block player ------
+  // Runs once per nomination (memoized), not per render. The % it produces is a
+  // real runMonteCarlo fraction (DEC-2b), never fabricated. Null => chip hidden.
+  const landProbability = useMemo<number | null>(() => {
+    if (!onBlockPlayer) return null
+    const res = computeLandProbability({
+      onBlockPlayer,
+      availablePlayers: available.map(sp => sp.player),
+      draftedNames,
+      rosterSlots,
+      myPicks,
+      numManagers: teamCount,
+      budget: myBudget ?? leagueBudget,
+    })
+    return res ? res.probability : null
+  }, [
+    onBlockPlayer,
+    available,
+    draftedNames,
+    rosterSlots,
+    myPicks,
+    teamCount,
+    myBudget,
+    leagueBudget,
+  ])
+
   // --- Awareness ("what's next") --------------------------------------------
   const awarenessItems = useMemo<AwarenessItem[]>(() => {
     const items: AwarenessItem[] = []
@@ -356,6 +383,7 @@ export function AuctionDraftRoom({
                 player={onBlockPlayer}
                 advice={advice}
                 confidence={confidence}
+                landProbability={landProbability}
                 onChangePlayer={() => openPicker()}
                 onToggleTarget={onToggleTarget}
                 onToggleAvoid={onToggleAvoid}

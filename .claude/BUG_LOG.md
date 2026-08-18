@@ -1,5 +1,47 @@
 # Bug Hunt Log
 
+## Hunt: 2026-08-18 -- FREE mode (static) -- Scope: D6b-2 change set
+
+**Project:** fantasy_football_draft_app
+**Auditor:** Claude Code (static read-only sub-agent pass)
+**Mode:** FREE -- static analysis of the 5 D6b-2 files (`room-sim-probability.ts` + its test, `on-the-block-card.tsx`, `auction-room.tsx`, `d6b2-land-prob.test.tsx`) and their live consumer (`client.tsx`). $0 -- no live AI calls.
+
+### Summary
+
+| Severity | Count | Status |
+|----------|-------|--------|
+| CRITICAL | 0 | -- |
+| HIGH | 1 | FIXED this session |
+| LOW-MED | 1 | Deferred (pre-existing engine) |
+| LOW | 1 | Deferred (disclosed approximation) |
+
+### Findings
+
+#### HIGH -- FIXED
+
+##### BUG-D6b2-03: Land-probability memo re-ran 16 Monte-Carlo sims on every render
+- **File:** `src/app/(app)/draft/live/client.tsx:592` (feeding the `landProbability` useMemo at `src/components/draft/live-room/auction-room.tsx`).
+- **Category:** Performance / broken-memoization.
+- **Description:** `const myPicks = state.picks.filter(...)` in the render body produced a new array reference every render, and `myPicks` is a dependency of the `landProbability` memo. `Object.is` was false every render, so the memo recomputed each time -- calling `computeLandProbability` -> `runMonteCarlo` (16 full auction sims over a board of up to ~168 players, up to ~1000ms budgeted) synchronously on the render thread. The module comments promise "runs once per nomination (memoized), not per render" -- false as originally wired.
+- **Failure scenario:** During a live auction the remote feed polls ~every 3s (re-render) and every interaction (picker open, card collapse, star toggle) re-renders; each blocked the main thread for hundreds of ms re-running the sim, on a mobile-first UI, even while the card was collapsed or the research view was showing.
+- **Fix (APPLIED):** Hoisted `myPicks` into a `useMemo(() => state ? state.picks.filter(p => p.manager === state.manager_order[0]) : [], [state])` in the hooks region (above the early returns), removed the render-body recompute. Now stable between picks. Re-verified: type-check 0, 497/497 tests, build clean.
+
+#### LOW-MED -- DEFERRED (pre-existing R10a engine behavior, out of D6b-2 scope)
+
+##### BUG-D6b2-01: Deterministic tie-break biases the displayed % upward for the me-seat
+- **File:** `src/lib/draft/sim-engine.ts:375` (`bids.sort((a,b) => (b.willing - a.willing) || (a.manager.index - b.manager.index))`), surfaced via `room-sim-probability.ts:149` always setting `myManagerIndex: 0`.
+- **Description:** On equal willingness the lowest manager index wins; the me-seat is always index 0, so it wins every willingness tie. Because end-of-draft bids floor at `willing = max(1, ...)`, many managers tie at $1 late, and seat 0 hoovers all of them -- systematically overstating land% for cheap/deep players. For the primary case (a contested stud with distinct noisy valuations) ties are rare and the effect is small.
+- **Why deferred:** pre-existing R10a engine behavior, not introduced by D6b-2. Fixing it means changing the shared sim engine (randomize/rotate tie-break seat), which is out of this one-step wiring scope and affects R10b sim grading too. Watch item.
+
+#### LOW -- DEFERRED (deliberately disclosed approximation)
+
+##### BUG-D6b2-02: Symmetric "from-here" state can bias the % mid/late draft
+- **File:** `src/lib/draft/room-sim-probability.ts:130` (+ header modeling note).
+- **Description:** All 12 seats are given the me-seat's remaining budget + roster shape, and the board cap uses the me-seat's open-slot count. When Joe has fewer slots/less budget left than opponents, the model shrinks everyone symmetrically, understating opponent demand and inflating his land chance.
+- **Why deferred:** explicitly documented in the module header as an in-scope approximation for the wiring step; a true per-seat-state sim requires extending `sim-engine.ts` with per-manager initial state (a separate future step). Known limitation, on record.
+
+---
+
 ## Hunt: 2026-08-18 -- FULL mode -- Scope: whole app (R13 phase 1)
 
 **Project:** fantasy_football_draft_app

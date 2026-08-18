@@ -569,10 +569,21 @@ Screen → target: S1 research-hub `/research`; S2 player-browser (D4, already b
 >
 > **Not in D6b-1 scope:** Monte Carlo land-probability (D6b-2, Opus session).
 
-### D6b-2 -- Live Read: Monte Carlo land-probability wiring `[Opus]` · class: pipeline
+### ✅ D6b-2 -- Live Read: Monte Carlo land-probability wiring `[Opus]` · class: pipeline · DONE 2026-08-18
 > **Depends on:** D6b-1 (UI slot for the sim% signal is now built). **DEC-2b Opus half.**
 > **Work:** wire `runMonteCarlo` land-probability into the live Read display. After a latency check -- 24 seeded runs per nomination synchronous may stall; precompute per nomination or cap at a fast-enough N to stay within the nomination clock window.
 > **Done-when:** live Read shows a real sim% from Monte Carlo (not a fabricated number); latency budget confirmed. Tests on the wiring. Screenshot.
+>
+> **Shipped (2026-08-18, Opus):**
+> - `src/lib/draft/room-sim-probability.ts` (NEW) -- pure $0 adapter `computeLandProbability`. Builds the board from live undrafted pool + drafted names, maps the me-seat's REMAINING roster shape + budget into `runMonteCarlo` (R10a engine, unchanged), and returns `hits/total` = the fraction of `LAND_PROB_RUNS` (16) seeded auctions where the me-seat ends holding the on-block player. Board capped at `numManagers * openSlots + 12` (lossless: the tail never sells before rosters fill) to bound early-draft latency. Returns `null` (chip hidden) on no signal: degenerate input (0 managers / $0), empty board, on-block already drafted, or roster full. **DEC-2b honored:** the % is always a real `runMonteCarlo` fraction or null, never fabricated; fixed default `seed=1` keeps it deterministic. Header documents the deliberate symmetric "from-here" approximation (engine has no per-manager initial state) as in-scope for the wiring step.
+> - `src/components/draft/live-room/on-the-block-card.tsx` -- added `landProbability?: number | null` prop; renders a `LAND · NN%` chip (muted neutral, `Math.round`) right after the CONF chip in The Read. `!= null` guard: shows "LAND · 0%" honestly at 0, hides entirely at null/undefined.
+> - `src/components/draft/live-room/auction-room.tsx` -- new `landProbability` useMemo calls `computeLandProbability` from live room state (on-block, available pool, drafted names, roster slots, my picks, team count, my/league budget); passes the result to OnTheBlockCard.
+> - `src/app/(app)/draft/live/client.tsx` -- **bug-hunt fix (HIGH):** hoisted `myPicks` into a `useMemo` keyed off `state` (was a fresh `.filter()` array every render, which defeated the land-probability memo and re-ran 16 Monte-Carlo auctions on the render thread on every poll/interaction). Now stable between picks.
+> - Tests (NEW): `src/lib/draft/__tests__/room-sim-probability.test.ts` (8 -- real-sim-output/DEC-2b, determinism, seed-distribution, drops-drafted, positive-land, roster-full null, degenerate null, latency) + `src/components/draft/live-room/__tests__/d6b2-land-prob.test.tsx` (4 -- renders NN% next to CONF, rounds, shows 0%, hides at null).
+>
+> **Gate:** type-check 0 errors · **497/497** tests green (+12) · lint 0 new errors in changed files (warnings all pre-existing) · build ✓ Compiled successfully in 4.6s · **latency 173.6ms** worst-case (16 runs, empty early-draft board -- well under the multi-second nomination clock, and memoized to run once per pick). **Bug-hunt (static, D6b-2 change set):** 1 HIGH (memoization defect -- FIXED this session, see above), 2 findings logged + deferred as pre-existing/disclosed engine behavior (BUG-D6b2-01 tie-break bias, BUG-D6b2-02 symmetric-state approximation). Visual proof: same headless-env limitation as D6/D6b-1/R11a (no active `/draft/live` session reachable) -- the LAND chip render path is proven by the 4 RTL DOM tests against the real `OnTheBlockCard`, plus a faithful static HTML render (exact `theme.ts` tokens + exact chip markup) delivered in-chat.
+>
+> **Not in D6b-2 scope:** extending `sim-engine.ts` with true per-manager initial state (each opponent's own budget/filled slots) -- documented as a separate future step.
 
 ---
 
