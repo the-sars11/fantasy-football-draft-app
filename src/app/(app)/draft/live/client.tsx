@@ -156,12 +156,14 @@ export function LiveDraftClient() {
     [toggleTag, refetchUserTags],
   )
   // DEC-1 (BIAS): severity of an avoid tag, undefined when the player isn't
-  // avoided at all. Feeds computeWhatToDo's soft-vs-hard discount path.
+  // avoided at all. A quick-tapped avoid carries no severity, so an unset value
+  // defaults to 'soft' (discount, not force-PASS) to match the sim + solver.
+  // (Joe ruling 2026-08-17.) Feeds computeWhatToDo's soft-vs-hard path.
   const avoidSeverity = useCallback(
     (playerId: string): 'soft' | 'hard' | undefined => {
       const entry = userTagsMap[playerId]
       if (!entry || !entry.tags.includes('avoid')) return undefined
-      return entry.tagSeverity === 'soft' ? 'soft' : 'hard'
+      return entry.tagSeverity === 'hard' ? 'hard' : 'soft'
     },
     [userTagsMap],
   )

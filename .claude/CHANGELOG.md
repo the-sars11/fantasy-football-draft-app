@@ -2,6 +2,20 @@
 
 ---
 
+## 2026-08-17 / R11b-fix -- Avoid default reconciled to soft across live advice, sim, and solver
+
+**Task:** Post-verification fixes on R11b (`9c4b68f`). The independent audit found the live what-to-do path defaulted an avoid tag with no explicit severity to `'hard'` (force PASS), while the sim (`sim-results.ts`) and solver (via `buildMyBiasFromTags`) defaulted the same unset severity to `'soft'` (discount only). Because a quick-tapped avoid never sends a severity (`use-user-tags.ts` PATCH body omits it; `api/user-tags/route.ts` only writes `tag_severity` when provided), the default governed EVERY toggled avoid, not a legacy edge -- so the live advisor would say PASS on a player the sim still graded as draftable-at-a-discount. **Joe ruling 2026-08-17: soft everywhere.** | **Class:** pipeline/bugfix | **Lenses:** QA
+
+**What changed:**
+- **`src/app/(app)/draft/live/client.tsx`:** `avoidSeverity()` now returns `'soft'` for an avoided player whose severity is unset (was `'hard'`), matching the sim + solver.
+- **`src/lib/draft/what-to-do.ts`:** `hardAvoid` gate changed from `(avoidSeverity ?? 'hard') === 'hard'` to `avoidSeverity === 'hard'` -- only an explicit hard avoid forces PASS; unset defaults to the soft discount path. Interface + inline comments updated.
+- **`src/lib/draft/__tests__/what-to-do.test.ts`:** three tests that encoded the old hard default rewritten to the decided soft behavior (a plain/unset avoid now flows through at a discounted cap, not an automatic PASS); explicit-hard PASS regressions retained.
+- **`.claude/CHANGELOG.md`:** restored the D2 (2026-08-15) entry's "Design ref: Linear mobile home (...)" phrase that R11b's commit had inadvertently rewritten (audit-trail integrity; out-of-scope hunk reverted).
+
+**Gate:** type-check 0 errors · `npx eslint` on touched files 0 errors · `npm run test:run` green · build clean.
+
+---
+
 ## 2026-08-17 / R11a -- Live draft: offline cache + resync (mid-draft network drop no longer loses picks)
 
 **Task:** R11a. Root cause: zero localStorage usage existed anywhere in the draft path -- a mid-draft network drop went straight to a dead error screen (`use-live-draft-data.ts`'s fetch had no fallback) and a failed pick-save PATCH was silently swallowed with no retry and no durability (`use-draft-state.ts`'s `persistPicks` never even checked `res.ok`). Build a local offline cache + resync path so this can't happen; resolve any remaining `/draft/live` dead-screen root cause if R1 deferred it (none was found open). $0 pure client/state logic, no paid calls. | **Class:** pipeline | **Lenses:** Architecture, QA, Security
@@ -112,7 +126,7 @@
 
 ## 2026-08-15 / D2 -- Research landing: hierarchy flip (destinations = heroes, Run demoted)
 
-**Task:** D2. Reconnaissance of the live `/prep` found the spec's premise ("card-dump + paragraph explainer") was already partly outdated — the hub had been restructured to one-hero + quiet jump-rows, but with the hierarchy BACKWARDS: the AI Research Run (used 2-4x/year) was the hero, and the 4 destinations Joe actually lives in for weeks were demoted rows. Reframed D2 as **flip the hierarchy**, not "replace a card dump." Design ref: row destinations, quiet labels, one accent, subordinate utilities (dense list pattern). Rows not a card grid (Joe's FF UI rule). Approved mockup `d2_research_landing_v1.html`. | **Class:** output | **Lenses:** Design, QA
+**Task:** D2. Reconnaissance of the live `/prep` found the spec's premise ("card-dump + paragraph explainer") was already partly outdated — the hub had been restructured to one-hero + quiet jump-rows, but with the hierarchy BACKWARDS: the AI Research Run (used 2-4x/year) was the hero, and the 4 destinations Joe actually lives in for weeks were demoted rows. Reframed D2 as **flip the hierarchy**, not "replace a card dump." Design ref: Linear mobile home (row destinations, quiet labels, one accent, subordinate utilities). Rows not a card grid (Joe's FF UI rule). Approved mockup `d2_research_landing_v1.html`. | **Class:** output | **Lenses:** Design, QA
 
 **What shipped (`src/app/(app)/prep/page.tsx`, full rewrite):**
 - **"Where you work" — 4 destination hero rows** (rich rows, red identity chip + Oswald red title + red left accent bar + chevron), each with a REAL glanceable metric, gracefully absent when data is missing (no fabricated numbers):

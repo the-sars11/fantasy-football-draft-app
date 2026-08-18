@@ -79,8 +79,8 @@ function assertNoDashes(...strings: string[]): void {
 // --- Tests ----------------------------------------------------------------
 
 describe('computeWhatToDo', () => {
-  it('PASS when the player is tagged avoid', () => {
-    const result = computeWhatToDo(baseInput({ isAvoid: true }))
+  it('PASS when the player is a hard avoid', () => {
+    const result = computeWhatToDo(baseInput({ isAvoid: true, avoidSeverity: 'hard' }))
     expect(result.move).toBe('PASS')
     expect(result.moveColor).toBe('red')
     expect(result.rationale).toContain('avoid')
@@ -94,11 +94,13 @@ describe('computeWhatToDo', () => {
     assertNoDashes(result.cap, result.rationale)
   })
 
-  it('avoid takes precedence over affordability', () => {
-    // Even affordable, an avoid tag should still PASS with the avoid rationale.
+  it('an unset-severity avoid is soft by default, not an automatic PASS', () => {
+    // Joe ruling 2026-08-17: a quick-tapped avoid carries no severity and now
+    // defaults to soft, so an affordable one flows through at a discounted cap
+    // instead of forcing PASS. (myMaxBid 50 halved by the soft discount = 25.)
     const result = computeWhatToDo(baseInput({ isAvoid: true, budgetMaxBid: 200 }))
-    expect(result.move).toBe('PASS')
-    expect(result.rationale).toContain('avoid')
+    expect(result.move).not.toBe('PASS')
+    expect(result.capValue).toBe(25)
   })
 
   it('PUSH when this is the last startable player of a scarce tier you want', () => {
@@ -231,9 +233,9 @@ describe('computeWhatToDo', () => {
 })
 
 // --- DEC-1 (BIAS): avoidSeverity ------------------------------------------
-// Mirrors sim-engine.ts's already-shipped pattern: hard avoid = never bid
-// (unchanged PASS behavior, including when severity is unset for backward
-// compatibility), soft avoid = discount only, still in the decision tree.
+// Mirrors sim-engine.ts's already-shipped pattern: only an explicit hard avoid
+// = never bid (force PASS). An unset severity defaults to soft (Joe ruling
+// 2026-08-17), so soft avoid = discount only, still in the decision tree.
 
 describe('computeWhatToDo -DEC-1 (BIAS) avoidSeverity', () => {
   it('explicit hard avoid still forces PASS (regression protection)', () => {
@@ -242,9 +244,9 @@ describe('computeWhatToDo -DEC-1 (BIAS) avoidSeverity', () => {
     expect(result.rationale).toContain('avoid')
   })
 
-  it('unset severity on an avoid still defaults to hard PASS (backward compatible)', () => {
+  it('unset severity on an avoid defaults to soft (discount, not PASS)', () => {
     const result = computeWhatToDo(baseInput({ isAvoid: true }))
-    expect(result.move).toBe('PASS')
+    expect(result.move).not.toBe('PASS')
   })
 
   it('soft avoid does NOT force PASS: it flows through at a discounted cap', () => {

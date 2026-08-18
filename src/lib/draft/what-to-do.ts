@@ -49,10 +49,10 @@ export interface WhatToDoInput {
   /** True when Joe tagged this player AVOID. */
   isAvoid: boolean
   /**
-   * DEC-1 (BIAS): severity of the avoid tag. 'hard' (or unset, for backward
-   * compatibility) forces PASS as before. 'soft' means "only at a discount":
-   * the player stays in the normal decision tree with a reduced personal cap,
-   * and PUSH is suppressed either way.
+   * DEC-1 (BIAS): severity of the avoid tag. Only an explicit 'hard' forces
+   * PASS. 'soft' (and unset, which defaults to soft per Joe's 2026-08-17
+   * ruling) means "only at a discount": the player stays in the normal
+   * decision tree with a reduced personal cap, and PUSH is suppressed either way.
    */
   avoidSeverity?: 'soft' | 'hard'
   /**
@@ -211,9 +211,10 @@ export function computeWhatToDo(input: WhatToDoInput): WhatToDoAdvice {
   const { player, scored, myMaxBid, budgetMaxBid, scarcity, isTarget, isAvoid, avoidSeverity } = input
   const rosterNote = input.rosterNote ?? null
 
-  // DEC-1 (BIAS): default unset severity to 'hard' so existing avoid callers
-  // (no severity known) keep today's force-PASS behavior unchanged.
-  const hardAvoid = isAvoid && (avoidSeverity ?? 'hard') === 'hard'
+  // DEC-1 (BIAS): only an explicit 'hard' avoid forces PASS. An unset severity
+  // (every quick-tapped avoid) defaults to soft, so live advice agrees with the
+  // sim + solver instead of silently blocking the player. (Joe ruling 2026-08-17.)
+  const hardAvoid = isAvoid && avoidSeverity === 'hard'
   const softAvoid = isAvoid && !hardAvoid
 
   const market = player.consensusAuctionValue ?? 0
