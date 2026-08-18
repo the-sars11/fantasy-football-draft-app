@@ -15,6 +15,7 @@ import { useState, useEffect } from 'react'
 import type { DraftSession, League } from '@/lib/supabase/database.types'
 import type { Strategy as DbStrategy } from '@/lib/supabase/database.types'
 import type { Player } from '@/lib/players/types'
+import { saveSessionCache, loadSessionCache } from '@/lib/draft/offline-cache'
 
 // UX-7.3: Mock session + league for sim demo mode (?sim=1 with no ?session=)
 // Persistence calls to /api/draft/sessions/demo will 404 and fail silently.
@@ -78,6 +79,9 @@ export function useLiveDraftData({
   const [allStrategies, setAllStrategies] = useState<DbStrategy[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  // R11a: true when session/league came from the local offline cache because
+  // the network fetch could not reach the server at all (not a real 404/500).
+  const [usingCachedData, setUsingCachedData] = useState(false)
 
   // Load session + league + players + active strategy
   useEffect(() => {
@@ -98,10 +102,14 @@ export function useLiveDraftData({
       return
     }
 
+    // Narrow once outside the closure -- TS can't see the `if (!sessionId) return`
+    // guard above from inside `load`, and the offline-cache calls need a `string`.
+    const id: string = sessionId
+
     async function load() {
       try {
         const [sessionRes, playersRes, stratRes] = await Promise.all([
-          fetch(`/api/draft/sessions/${sessionId}`),
+          fetch(`/api/draft/sessions/${id}`),
           fetch('/api/players'),
           fetch('/api/strategies'),
         ])
@@ -111,6 +119,10 @@ export function useLiveDraftData({
 
         setSession(sessionData.session)
         setLeague(sessionData.league)
+        setUsingCachedData(false)
+        // R11a: cache the last known-good session+league so a later network
+        // drop can fall back to it instead of a dead error screen.
+        saveSessionCache(id, sessionData.session, sessionData.league ?? null)
 
         const playersData = await playersRes.json()
         if (playersRes.ok && playersData.players) {
@@ -127,7 +139,28 @@ export function useLiveDraftData({
           if (active) setStrategy(active)
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load draft data')
+        // R11a: a network-level failure (offline, server unreachable -- `fetch`
+        // itself throws a TypeError) falls back to the last cached session
+        // instead of the dead error screen. An HTTP-level error (404 session
+        // not found, 500) means we DID reach the server and it told us
+        // something's genuinely wrong -- that still surfaces as a real error,
+        // never masked by a stale cache.
+        const isNetworkFailure = err instanceof TypeError
+        const cached = isNetworkFailure ? loadSessionCache(id) : null
+        if (cached) {
+          setSession(cached.session)
+          setLeague(cached.league)
+          setUsingCachedData(true)
+          setError(null)
+          // Players are secondary -- best-effort, non-blocking, no cache needed
+          // since the player pool doesn't change mid-draft.
+          fetch('/api/players')
+            .then(r => r.json())
+            .then(data => { if (data.players) setPlayers(data.players) })
+            .catch(() => {})
+        } else {
+          setError(err instanceof Error ? err.message : 'Failed to load draft data')
+        }
       } finally {
         setLoading(false)
       }
@@ -147,5 +180,6 @@ export function useLiveDraftData({
     setAllStrategies,
     loading,
     error,
+    usingCachedData,
   }
 }

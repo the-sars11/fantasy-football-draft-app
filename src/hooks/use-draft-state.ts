@@ -27,13 +27,29 @@ import type {
   AuctioneerPickSnapshot,
   PickCorrection,
 } from '@/lib/draft/state'
+import {
+  loadDraftStateCache,
+  saveDraftStateCache,
+  resolveInitialDraftState,
+} from '@/lib/draft/offline-cache'
 import type { DraftFormat, RosterSlots, DraftSession } from '@/lib/supabase/database.types'
+
+// R11a: how long to wait between automatic resync retries while a PATCH is
+// pending. Fixed interval (not exponential) -- this is our own low-traffic
+// backend, not a third-party API needing backoff courtesy.
+const RESYNC_RETRY_MS = 5000
 
 interface UseDraftStateOptions {
   session: DraftSession | null
   rosterSlots: RosterSlots
   onPickApplied?: (pick: DraftPick) => void
+  /** R11a: true when `session` itself came from the offline cache (network
+   *  unreachable) rather than a fresh server fetch. Drives cache-vs-server
+   *  resolution on hydration. */
+  usingCachedData?: boolean
 }
+
+export type DraftSyncStatus = 'synced' | 'pending' | 'offline'
 
 interface UseDraftStateResult {
   state: DraftState | null
@@ -52,15 +68,20 @@ interface UseDraftStateResult {
   getBudget: (manager: string) => number | null
   getMaxBidFor: (manager: string) => number | null
   saving: boolean
+  /** R11a: 'synced' = last write confirmed on the server, 'pending' = a PATCH
+   *  is in flight, 'offline' = the last PATCH failed and a retry is queued. */
+  syncStatus: DraftSyncStatus
 }
 
 export function useDraftState({
   session,
   rosterSlots,
   onPickApplied,
+  usingCachedData,
 }: UseDraftStateOptions): UseDraftStateResult {
   const [state, setState] = useState<DraftState | null>(null)
   const [saving, setSaving] = useState(false)
+  const [syncStatus, setSyncStatus] = useState<DraftSyncStatus>('synced')
   const onPickAppliedRef = useRef(onPickApplied)
   onPickAppliedRef.current = onPickApplied
 
@@ -81,9 +102,8 @@ export function useDraftState({
 
     // Replay any existing picks from the session
     if (session.picks && session.picks.length > 0) {
-      let replayed = initial
       for (const p of session.picks) {
-        replayed = applyPick(replayed, {
+        initial = applyPick(initial, {
           pick_number: p.pick_number,
           player_name: p.player_id, // stored as player name in our schema
           manager: p.manager,
@@ -92,18 +112,35 @@ export function useDraftState({
           position: undefined,
         })
       }
-      setState(replayed)
-    } else {
-      setState(initial)
     }
+
+    // R11a: decide whether the server-replayed state or the local offline
+    // cache should seed the room -- protects picks made during a network
+    // drop that never made it to Supabase (see resolveInitialDraftState).
+    const cached = loadDraftStateCache(session.id)
+    const resolved = resolveInitialDraftState(initial, cached, !!usingCachedData)
+    setState(resolved.state)
+    if (resolved.source === 'cache' && !cached?.synced) {
+      // Picked up unsynced local work -- flag it and let the resync effect
+      // below push it to the server the moment persistPicks succeeds.
+      setSyncStatus('offline')
+    } else {
+      saveDraftStateCache(session.id, resolved.state, true)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session, rosterSlots])
 
-  // Persist picks to Supabase
-  const persistPicks = useCallback(async (picks: DraftPick[]) => {
+  // Persist picks to Supabase. Write-through: the cache is updated with the
+  // pre-persist state as `synced: false` BEFORE the network call, so a reload
+  // during the request (or a request that never completes) still has the
+  // picks locally. On success the cache flips to `synced: true`.
+  const persistPicks = useCallback(async (picks: DraftPick[], fullState: DraftState) => {
     if (!session) return
+    saveDraftStateCache(session.id, fullState, false)
     setSaving(true)
+    setSyncStatus('pending')
     try {
-      await fetch(`/api/draft/sessions/${session.id}`, {
+      const res = await fetch(`/api/draft/sessions/${session.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -117,12 +154,39 @@ export function useDraftState({
           status: 'live',
         }),
       })
+      if (!res.ok) throw new Error(`Persist failed with status ${res.status}`)
+      saveDraftStateCache(session.id, fullState, true)
+      setSyncStatus('synced')
     } catch (err) {
       console.error('Failed to persist picks:', err)
+      // Cache already has the picks (written above); leaving synced:false so
+      // the resync effect retries once connectivity returns.
+      setSyncStatus('offline')
     } finally {
       setSaving(false)
     }
   }, [session])
+
+  // R11a: resync path. While a write is pending/offline, retry on a fixed
+  // interval and immediately on the browser's `online` event, so a picks
+  // recorded during a network drop lands on the server as soon as it can.
+  useEffect(() => {
+    if (syncStatus === 'synced') return
+    if (!session) return
+
+    const retry = () => {
+      const current = stateRef.current
+      if (!current) return
+      void persistPicks(current.picks, current)
+    }
+
+    const interval = setInterval(retry, RESYNC_RETRY_MS)
+    window.addEventListener('online', retry)
+    return () => {
+      clearInterval(interval)
+      window.removeEventListener('online', retry)
+    }
+  }, [syncStatus, session, persistPicks])
 
   // Manual pick entry
   const addManualPick = useCallback((pickData: Omit<DraftPick, 'pick_number'>) => {
@@ -136,7 +200,7 @@ export function useDraftState({
 
       const updated = applyPick(prev, pick)
       onPickAppliedRef.current?.(pick)
-      persistPicks(updated.picks)
+      persistPicks(updated.picks, updated)
       return updated
     })
   }, [persistPicks])
@@ -167,7 +231,7 @@ export function useDraftState({
     setState(prev => {
       if (!prev || prev.picks.length === 0) return prev
       const rebuilt = rebuildFromPicks(prev, prev.picks.slice(0, -1))
-      persistPicks(rebuilt.picks)
+      persistPicks(rebuilt.picks, rebuilt)
       return rebuilt
     })
   }, [persistPicks, rebuildFromPicks])
@@ -179,7 +243,7 @@ export function useDraftState({
       const next = removePickByNumber(prev.picks, pickNumber)
       if (next.length === prev.picks.length) return prev // no matching pick
       const rebuilt = rebuildFromPicks(prev, next)
-      persistPicks(rebuilt.picks)
+      persistPicks(rebuilt.picks, rebuilt)
       return rebuilt
     })
   }, [persistPicks, rebuildFromPicks])
@@ -190,7 +254,7 @@ export function useDraftState({
       if (!prev) return prev
       const next = editPickByNumber(prev.picks, pickNumber, changes)
       const rebuilt = rebuildFromPicks(prev, next)
-      persistPicks(rebuilt.picks)
+      persistPicks(rebuilt.picks, rebuilt)
       return rebuilt
     })
   }, [persistPicks, rebuildFromPicks])
@@ -211,7 +275,7 @@ export function useDraftState({
         // Re-run inside setState for freshness in concurrent mode.
         const fresh = reconcileWithAuctioneerPicks(prev.picks, auctioneerPicks)
         const rebuilt = rebuildFromPicks(prev, fresh.picks)
-        persistPicks(fresh.picks)
+        persistPicks(fresh.picks, rebuilt)
         return rebuilt
       })
 
@@ -262,5 +326,6 @@ export function useDraftState({
     getBudget,
     getMaxBidFor,
     saving,
+    syncStatus,
   }
 }

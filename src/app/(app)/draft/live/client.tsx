@@ -116,6 +116,7 @@ export function LiveDraftClient() {
     setAllStrategies,
     loading,
     error,
+    usingCachedData,
   } = useLiveDraftData({ sessionId, simEnabled })
   const [pivotDismissed, setPivotDismissed] = useState(false)
   const [pivotHistory, setPivotHistory] = useState<PivotEntry[]>([])
@@ -192,9 +193,11 @@ export function LiveDraftClient() {
     getBudget,
     getMaxBidFor,
     saving,
+    syncStatus,
   } = useDraftState({
     session,
     rosterSlots,
+    usingCachedData,
   })
 
   // Trash-talk engine (extracted: finding 9)
@@ -657,6 +660,27 @@ export function LiveDraftClient() {
   return (
     <div className="space-y-4">
       {simHud}
+
+      {/* R11a: offline-cache banner — shown when the room is running off a locally
+          cached session (network unreachable) or a pick write hasn't confirmed on
+          the server yet. Clears itself the moment usingCachedData/syncStatus recover. */}
+      {(usingCachedData || syncStatus !== 'synced') && (
+        <div
+          className="mx-auto max-w-md rounded-[14px] px-3.5 py-3"
+          style={{ background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.3)' }}
+        >
+          <div className="text-[11px] font-extrabold uppercase tracking-[1px]" style={{ color: '#f59e0b' }}>
+            {usingCachedData ? 'Offline - showing cached draft' : 'Syncing pick to server...'}
+          </div>
+          <div className="mt-1 text-[11px]" style={{ color: 'rgba(255,255,255,0.6)' }}>
+            {usingCachedData
+              ? 'Working from your last saved draft state. Picks are being recorded locally and will resync automatically once the connection returns.'
+              : syncStatus === 'offline'
+                ? 'The last pick could not reach the server. It is saved on this device and will retry automatically.'
+                : 'Saving your last pick…'}
+          </div>
+        </div>
+      )}
 
       {/* FF-315: Auto-correction banner — shown when provisional picks were corrected on reconnect. */}
       {corrections.length > 0 && (
