@@ -25,6 +25,7 @@
     "R15 [Sonnet+Joe, M]: rehearsal GATE - full mock draft on Joe's phone against the live auctioneer. The only session that needs Joe's hands.",
     "D5 [Sonnet, M]: DONE 2026-08-17. Sim results screen restyled to SHIELD from keeper refs UI/mockup-strategy-detail/ + UI/mockup-post-draft-review/, consuming R10b data; winning-team-% bars (deriveWinningTeamLanded, winning shapes only) + 5-roster carousel + no-em-dash narrative shipped. 429/429 tests green, live-verified with real 30-sim data (screenshot blocked, DOM/network/console proof in-chat).",
     "D6 [Sonnet, L]: DONE 2026-08-18. Live room visual + UX pass - steel-blue primary / brick-red BID-verdict-only reskin (moveTheme recolor), the mockup's red-to-green budget bar rendered instead as a steel-blue progress fill, top 'Next Target' banner removed. R11 UX gaps closed: FLEX tier row + T4/T5, collapsible My Team panel + collapsible on-block card, per-slot target-at-price (NEW room-target-pricing.ts adapter reusing assignTargetPrices, no re-implemented solver math) with expand-to-alternates driven by the active strategy's combinedScore ranking. In-draft strategy switch + live target/avoid toggles were already wired by R11b -- this card only reskinned their pixels. 463/463 tests green (+7 new for the target-pricing adapter), 0 type errors, 0 new lint errors, build compiles clean (56 static pages). Visual confirmation blocked by the same known headless-env limitation as R11b/R12 (no reachable active draft session in this browser sandbox -- see WORKING_STATE.md); DOM/type/test proof only. Full D-track (D0-D6) now complete.",
+    "SP-track [added 2026-08-18]: SHIELD Screen-Parity Sprint (13 items, SP-0..SP-7 + validators) -- rebuild every non-SHIELD screen to the real SHIELD bar (a repaint is not a redesign; only D2-D6 got a true craft pass). Tier A (token sweep only) = draft hub/review/board; Tier B (design + re-layout) = draft/setup, prep/configure, prep/runs, settings; Tier C (from scratch) = (auth). Spine: SP-0 (lens fix) + SP-1 (Tier A sweep) run now; SP-2 (Opus design mockups) is a JOE-GATED HALT that blocks all SP-3..SP-7 builds; each build has an OTHER_FAMILY validator behind it. Full item detail in the SP-track section below; plan of record = C:\\Users\\jrasa\\.claude\\plans\\cozy-waddling-creek.md.",
     "DEC-2 [Opus/Joe]: RESOLVED 2026-08-18. (a) D6 COCKPIT SPEC LOCKED = docs/ux_redesign/d6_cockpit_mockup_v5.html (iterated v1->v5 with Joe; v4 locked the layout, v5 corrected the Read region). This mockup is the source of truth for the live-room look; shipped D6 predates it and diverges (see D6b). (b) READ ENGINE = DETERMINISTIC. The on-block Read stays 100% rule/solver-driven ($0, no hallucination): rule move + roster-solver cap + range. UPGRADE with two signals that are already built but NOT wired to the card: the Monte Carlo land-probability (sim-engine.ts runMonteCarlo, currently PREP-ONLY) and the rule-based confidence HIGH/MED/LOW (explain.ts:318-330, currently feeds only the collapsed player-pool panel). AI (the /api/draft/recommend Haiku path) stays OPT-IN behind 'More tools' for LIVE NEWS/injury context only - it must NOT drive the per-pick Read (costs money each pick + reintroduces the reasoning-text hallucination surface the rule path avoids). NOTE: the '78% conf' drawn in earlier mockups was fabricated and has been removed; real signal is HIGH/MED/LOW.",
     "D6b-1 [Sonnet, M]: DONE 2026-08-18. UI alignment pass -- aligned shipped live room to locked v5 cockpit spec. 6 gaps closed: market band + red target marker, $X tgt in collapsed summary, strategy strip above block + ranked #1-#5, status bar R3 PICK 27, headshot + RB6 positional rank, inline Players panel. CONF chip wired from explain.ts HIGH/MED/LOW. 19 new tests, 485/485 green. 5 files changed/created.",
     "D6b-2 [Opus, M]: NOT STARTED. Wire runMonteCarlo land-probability into the live Read (DEC-2b Opus half) after a latency check (24 seeded runs/nomination synchronous may stall -- precompute per nomination or cap runs).",
@@ -584,6 +585,150 @@ Screen → target: S1 research-hub `/research`; S2 player-browser (D4, already b
 > **Gate:** type-check 0 errors · **497/497** tests green (+12) · lint 0 new errors in changed files (warnings all pre-existing) · build ✓ Compiled successfully in 4.6s · **latency 173.6ms** worst-case (16 runs, empty early-draft board -- well under the multi-second nomination clock, and memoized to run once per pick). **Bug-hunt (static, D6b-2 change set):** 1 HIGH (memoization defect -- FIXED this session, see above), 2 findings logged + deferred as pre-existing/disclosed engine behavior (BUG-D6b2-01 tie-break bias, BUG-D6b2-02 symmetric-state approximation). Visual proof: same headless-env limitation as D6/D6b-1/R11a (no active `/draft/live` session reachable) -- the LAND chip render path is proven by the 4 RTL DOM tests against the real `OnTheBlockCard`, plus a faithful static HTML render (exact `theme.ts` tokens + exact chip markup) delivered in-chat.
 >
 > **Not in D6b-2 scope:** extending `sim-engine.ts` with true per-manager initial state (each opponent's own budget/filled slots) -- documented as a separate future step.
+
+---
+
+## SP-track -- SHIELD Screen-Parity Sprint (added 2026-08-18)
+
+**Why this track exists:** SHIELD v4.0 (D0-locked) was rolled out as a token-VALUE swap in `globals.css`. Because the token NAMES were kept stable from GRIDIRON v3, that one change repainted all 61 screens at once -- but a repaint is not a redesign. Only 5 areas got a true craft pass (D2 /prep hub, D3 /prep/strategies, D4 /prep/players, D5 /prep/simulate, D6 /draft/live). Every other screen still wears GRIDIRON-era structure (flat forms, iOS list rows, generic primitive shells) plus stale off-token color literals the paint swap could not reach. Joe's verdict: the app "is in some of the right colors, but NOT THE ACTUAL DESIGN OBJECTS, BACKGROUND AND EVERY OTHER THING." This track rebuilds every non-SHIELD screen to the real SHIELD bar, comprehensively and verifiably. Opus is reserved for the one design/decision item; every build is a bounded Sonnet WORKHORSE against an approved mockup; a fresh-eyes OTHER_FAMILY validator runs behind every builder. Full scoped plan of record: `C:\Users\jrasa\.claude\plans\cozy-waddling-creek.md`.
+
+**The SHIELD bar (what "rebuilt" means, from the 5 DONE screens):** (1) Oswald brick-red 26px page header `ffi-title-red text-[26px]` + steel-blue context chip; (2) rich hero/destination objects from inline `var(--ffi-*)` tokens (surface-3->surface-2 gradient, red left-rail accent, duotone icon chip) -- pattern in `prep/page.tsx` DestRow 464-539; (3) QuietLabel section headers (Kanit-cond, uppercase, 0.28em, `--ffi-ink-3`); (4) dedicated per-screen presentational components (generic `FFICard`/`FFIButton` shells alone do NOT qualify); (5) all color via inline `var(--ffi-*)`/rgba, `tabular-nums` on numbers, no hardcoded structure hex, no shadcn `Card`; (6) navy field (`.stadium-atmos`) inherited from `app-shell.tsx:106-107` for the `(app)` group -- the `(auth)` group lacks it and must be given it.
+
+**Screen tiers:** A (near-target, token sweep only) = /draft hub, /draft/review, /prep/board. B (on-token but plain, needs design + re-layout) = /draft/setup (largest), /prep/configure, /prep/runs, /settings. C (from scratch) = (auth) sign-in + sign-up.
+
+**Reuse, do not rebuild:** `src/components/ui/ffi-primitives.tsx`; `src/components/prep/ffi-player-intel-card.tsx`; `src/components/draft/review-cards.tsx`; `prep/page.tsx` DestRow/QuietLabel; class vocab in `src/app/globals.css` (`.ffi-title-red`, `.ffi-card*`, `.ffi-hero`, `.ffi-btn-hero`/`.ffi-btn-primary`, `.stadium-atmos`). Mockup translation via `UI/mockup-SHIELD-token-map.md`.
+
+**Leave alone:** sanctioned position-chip hex (`board/client.tsx:38-43`, `prep/page.tsx:91-99`); legacy `--ffi-gold*` token names in `app-shell.tsx:144,271,294` (map to red via globals, functionally correct).
+
+**Dependency spine:** SP-0 and SP-1 run immediately (no mockup needed). SP-2 (Opus design) is a HARD Joe-gated halt -- no SP-3..SP-7 build starts until Joe signs off the mockups. Each build has its own OTHER_FAMILY validator behind it.
+
+### SP-0 -- Refresh stale Design review lens to SHIELD v4.0 `[Sonnet]` · class: docs
+> - Class: WORKHORSE
+>   Reason: bounded doc rewrite against an already-LOCKED spec (DESIGN_SYSTEM SHIELD v4.0); zero open judgment.
+>   Verifier: self (docs class, QA lens only)
+> **Size:** S. **Depends on:** nothing -- run first, validators depend on it.
+> **Why:** `REVIEW_LENSES.md` Design lens still describes the retired Tactical Hologram system (`#8bacff`, `#2ff801`, `#031018`, Space Grotesk). Every SP validator uses that lens; if it is wrong, validation is wrong.
+> **Reads first:** `.claude/DESIGN_SYSTEM.md` (SHIELD v4.0 LOCKED), `.claude/REVIEW_LENSES.md:73-83`, `src/app/globals.css`.
+> **Work:** rewrite the Design lens pre-check + verify checklist to the SHIELD bar (Oswald-red 26px header + steel-blue chip; inline `var(--ffi-*)` only, no structure hex; dedicated components over generic shells; RED sparingly for action/moment/headers, steel-blue as everyday structure; 44px touch targets; navy field inherited from app-shell). Also commit the already-uncommitted `DESIGN_SYSTEM.md` + `UI/mockup-SHIELD-token-map.md` so the reference is version-pinned.
+> **Done-when:** Design lens has zero references to Tactical Hologram / Space Grotesk / `#8bacff` / `#2ff801`; grep of `REVIEW_LENSES.md` for those literals returns 0; the SHIELD reference files show committed in `git status`.
+
+### SP-1 -- Tier A token sweep: draft hub, draft/review, cheat sheet `[Sonnet]` · class: output
+> - Class: WORKHORSE
+>   Reason: mechanical find-replace against a known literal map on 3 already-SHIELD-shaped screens; zero layout decisions.
+>   Verifier: OTHER_FAMILY (SP-1V)
+> **Size:** M. **Depends on:** SP-0 (validator needs the correct lens). Not blocked on SP-2.
+> **Why:** these 3 already hit the structural bar but carry stale GRIDIRON literals the paint swap missed: volt-green `rgba(139,255,69,...)`, off-token blue `rgba(77,130,255,...)` / `#8bacff` (NOT the SHIELD `--ffi-blue #5FA8E0`), plus a retired `Zap` bolt on the hub (DESIGN_SYSTEM says Live Draft carries `Gavel`).
+> **Reads first:** `src/app/(app)/draft/page.tsx`, `src/app/(app)/draft/review/client.tsx`, `src/app/(app)/prep/board/client.tsx`, `src/app/globals.css`.
+> **Work (exact literal map):** `rgba(139,255,69,...)` -> `var(--ffi-volt)`/`var(--ffi-volt-glow)` at `review/client.tsx:80-81,267` and `board/client.tsx:349-350,405,562-563`; off-token blue `rgba(77,130,255,...)`/`#8bacff` -> `var(--ffi-blue)`/rgba(95,168,224,...) at `board/client.tsx:335,442,476,532`; `Zap` -> `Gavel` at `draft/page.tsx:333`. DO NOT touch sanctioned position-chip hex (`board/client.tsx:38-43`). `runs/client.tsx:66` is out of scope here (SP-5).
+> **Done-when:** grep of the 3 files for `139,255,69`, `77,130,255`, `8bacff`, `Zap` returns 0 (position-chip hex untouched); type-check 0; test:run green; lint 0-new; build clean; screenshots of all 3 show red/steel-blue accents and no green; A1-A10 pass.
+
+### SP-1V -- Validate Tier A sweep `[Sonnet · Opus if visual dispute]` · class: output
+> - Class: WORKHORSE (validation)
+>   Reason: bounded verification against SP-1's literal map + screenshots; runs behind the builder.
+>   Verifier: OTHER_FAMILY -- fresh context, adversarial, did NOT write SP-1.
+> **Size:** S. **Depends on:** SP-1.
+> **Work:** fresh-eyes `/code-review` (adversarial) + `/bug-hunt free` on the 3 changed files; re-run the SP-1 grep independently; apply the SHIELD Design lens (post-SP-0) + QA lens; screenshots confirm no green remains and structure blue is `--ffi-blue`.
+> **Done-when:** validation report with 0 unresolved HIGH; independent grep confirms 0 stale literals; screenshots attached; gate re-run green.
+
+### SP-2 -- SHIELD design + mockups for setup, configure, runs, settings, auth `[Opus]` · class: output -- **JOE-GATED HALT**
+> - Class: FRONTIER
+>   Reason: open layout judgment for 5 screens with no existing mockup (Tier B + C); the only planning/decision item; Opus per the model-handoff rule.
+>   Verifier: Joe (explicit look sign-off before any build starts).
+> **Size:** L. **Depends on:** nothing (can run alongside SP-1). Gates all of SP-3..SP-7.
+> **Why:** Joe's quality gate requires he approves the look of substantial UI BEFORE it is built. These 5 have no mockup, so their layout is an open judgment call that must be resolved and signed off before any WORKHORSE touches them. One combined pass keeps the 5 consistent and gives Joe a single sign-off (his chosen cadence).
+> **Reads first:** `.claude/DESIGN_SYSTEM.md`, `prep/page.tsx` (DestRow/QuietLabel gold-standard), `prep/simulate/client.tsx` + `src/components/draft/live-room/*` (component-departure pattern), `UI/mockup-SHIELD-token-map.md`, and the current source of each target screen.
+> **Work:** produce a SHIELD mockup (annotated static HTML/spec, translated through the token map) for each of: `/draft/setup` (3-step flow -> hero + section objects, kill the `blur-3xl` wallpaper), `/prep/configure` (flat form -> SHIELD sections), `/prep/runs` (card list -> hero/section treatment), `/settings` (iOS list -> SHIELD rows), `(auth)` sign-in + sign-up (from scratch: navy field, Oswald-red header, brick `.ffi-btn-hero` CTA, Kanit display, `ffi-*` inputs). Each mockup MUST name the header treatment, hero/destination object, section headers, and which existing primitives to reuse (no net-new component unless justified). Save under `UI/`.
+> **Done-when:** Joe types explicit approval ("yes"/"go"/"approved"); approved mockups saved under `UI/` and referenced by ID; every mockup names its reused primitives. NO SP-3..SP-7 build may start until this is checked.
+
+### SP-3 -- Rebuild /draft/setup to approved mockup `[Sonnet]` · class: output
+> - Class: WORKHORSE
+>   Reason: bounded build against the SP-2 mockup; largest surface but zero open judgment once the mockup is approved.
+>   Verifier: OTHER_FAMILY (SP-3V)
+> **Size:** L (biggest rebuild). **Depends on:** SP-2 (approved mockup).
+> **Why:** the most GRIDIRON route in the app: generic `FFICard`/`FFIButton` primitives, a forbidden `blur-3xl` glow wallpaper (`client.tsx:253`), and heavy off-token hex (`#5FA8E0`, `#8bacff`, `#9eadb8` across `:250,251,254,257,287,345-346,350,357,435-440,469-473,481,511-525`).
+> **Reads first:** approved SP-2 setup mockup; `src/app/(app)/draft/setup/page.tsx` + `client.tsx`; `ffi-primitives.tsx`; `prep/page.tsx` DestRow.
+> **Work:** re-layout the 3-step flow to SHIELD hero + section objects per the mockup; remove the `blur-3xl` wallpaper; replace all hardcoded hex with inline `var(--ffi-*)`; reuse primitives (new component only if the mockup calls for it).
+> **Done-when:** screenshot matches the approved mockup (header, hero, sections, no glow); grep of the 2 files for `#5FA8E0`, `#8bacff`, `#9eadb8`, `blur-3xl` returns 0; type-check 0; test:run green; lint 0-new; build clean; `/bug-hunt free` clean; A1-A10 pass.
+
+### SP-3V -- Validate /draft/setup rebuild `[Sonnet · Opus for visual parity]` · class: output
+> - Class: WORKHORSE (validation)
+>   Reason: independent accuracy + visual-parity check behind the largest build.
+>   Verifier: OTHER_FAMILY -- fresh context, did NOT write SP-3.
+> **Size:** S-M. **Depends on:** SP-3.
+> **Work:** adversarial `/code-review` + `/bug-hunt free`; SHIELD Design + QA lenses; side-by-side screenshot vs the approved mockup (flag hero/section/spacing/type drift); independent grep for off-token hex + `blur-3xl`; re-run the gate.
+> **Done-when:** 0 unresolved HIGH; screenshot parity confirmed + attached; independent grep clean; gate green.
+
+### SP-4 -- Rebuild /prep/configure to approved mockup `[Sonnet]` · class: output
+> - Class: WORKHORSE
+>   Reason: bounded re-layout of a flat form to SHIELD sections against the SP-2 mockup.
+>   Verifier: OTHER_FAMILY (SP-4V)
+> **Size:** M. **Depends on:** SP-2.
+> **Why:** header is on-token (`ffi-title-red`) but the body is a flat stacked form with no SHIELD hero/section identity, plus one off-token blue badge `rgba(77,130,255,...)` at `league-config-form.tsx:240`.
+> **Reads first:** approved SP-2 configure mockup; `src/app/(app)/prep/configure/page.tsx`; `src/components/prep/league-config-form.tsx`.
+> **Work:** promote the form to SHIELD section objects per the mockup; replace the off-token blue badge with `var(--ffi-blue)`; token-only; reuse primitives.
+> **Done-when:** screenshot matches mockup; grep for `77,130,255` in the 2 files returns 0; gate green; A1-A10 pass.
+
+### SP-4V -- Validate /prep/configure rebuild `[Sonnet]` · class: output
+> - Class: WORKHORSE (validation)
+>   Reason: independent check behind SP-4.
+>   Verifier: OTHER_FAMILY -- did NOT write SP-4.
+> **Size:** S. **Depends on:** SP-4.
+> **Work:** adversarial `/code-review` + `/bug-hunt free`; Design + QA lenses; screenshot vs mockup; independent grep for off-token blue; re-run gate.
+> **Done-when:** 0 unresolved HIGH; screenshot parity attached; grep clean; gate green.
+
+### SP-5 -- Rebuild /prep/runs to approved mockup `[Sonnet]` · class: output
+> - Class: WORKHORSE
+>   Reason: bounded promotion of a utility card-list to SHIELD card/section objects against the SP-2 mockup.
+>   Verifier: OTHER_FAMILY (SP-5V)
+> **Size:** M. **Depends on:** SP-2.
+> **Why:** on-token header but a plain "list of cards" utility layout with no hero/section SHIELD objects, plus a stale volt-green leftover `rgba(139,255,69,0.16)` at `client.tsx:66` (completed-status style).
+> **Reads first:** approved SP-2 runs mockup; `src/app/(app)/prep/runs/page.tsx` + `client.tsx` (includes `RunDetailView`/`CompareView`).
+> **Work:** promote list rows + detail/compare views to SHIELD card/section treatment per the mockup; replace the green status literal with `var(--ffi-volt)`; token-only.
+> **Done-when:** screenshot matches mockup; grep for `139,255,69` in the file returns 0; gate green; A1-A10 pass.
+
+### SP-5V -- Validate /prep/runs rebuild `[Sonnet]` · class: output
+> - Class: WORKHORSE (validation)
+>   Reason: independent check behind SP-5.
+>   Verifier: OTHER_FAMILY -- did NOT write SP-5.
+> **Size:** S. **Depends on:** SP-5.
+> **Work:** adversarial `/code-review` + `/bug-hunt free`; Design + QA lenses; screenshot vs mockup; independent grep for green literal; re-run gate.
+> **Done-when:** 0 unresolved HIGH; screenshot parity attached; grep clean; gate green.
+
+### SP-6 -- Rebuild /settings to approved mockup `[Sonnet]` · class: output
+> - Class: WORKHORSE
+>   Reason: bounded restyle of an iOS-style grouped list to SHIELD rows against the SP-2 mockup.
+>   Verifier: OTHER_FAMILY (SP-6V)
+> **Size:** S-M. **Depends on:** SP-2.
+> **Why:** header is on-token but the body is an iOS-style grouped list with no SHIELD hero/card/section objects, plus an off-token blue badge `bg-[#8bacff]/15 text-[#8bacff]` at `page.tsx:45`.
+> **Reads first:** approved SP-2 settings mockup; `src/app/(app)/settings/page.tsx` + `client.tsx` (local `SectionLabel`/`SettingsGroup`/`NavRow`/`InfoRow`/`SignOutRow`).
+> **Work:** restyle the list rows to SHIELD section/card treatment per the mockup; replace the `#8bacff` badge with `var(--ffi-blue)`; token-only; keep 44px touch targets.
+> **Done-when:** screenshot matches mockup; grep for `8bacff` in the 2 files returns 0; gate green; A1-A10 pass.
+
+### SP-6V -- Validate /settings rebuild `[Sonnet]` · class: output
+> - Class: WORKHORSE (validation)
+>   Reason: independent check behind SP-6.
+>   Verifier: OTHER_FAMILY -- did NOT write SP-6.
+> **Size:** S. **Depends on:** SP-6.
+> **Work:** adversarial `/code-review` + `/bug-hunt free`; Design + QA lenses; screenshot vs mockup; independent grep for `8bacff`; re-run gate.
+> **Done-when:** 0 unresolved HIGH; screenshot parity attached; grep clean; gate green.
+
+### SP-7 -- Rebuild (auth) sign-in + sign-up to approved mockup `[Sonnet]` · class: output
+> - Class: WORKHORSE
+>   Reason: bounded from-scratch build against the SP-2 mockup; judgment was resolved in SP-2, this is execution.
+>   Verifier: OTHER_FAMILY (SP-7V)
+> **Size:** M. **Depends on:** SP-2.
+> **Why:** the `(auth)` screens are pure shadcn New-York cards with zero `ffi-*` styling and no navy field (their own `(auth)/layout.tsx` uses `bg-background` + a `bg-primary/5 blur-3xl` glow). No SHIELD identity at all.
+> **Reads first:** approved SP-2 auth mockup; `src/app/(auth)/sign-in/page.tsx`, `sign-up/page.tsx`, `(auth)/layout.tsx`; `ffi-primitives.tsx`; `globals.css` (`.stadium-atmos`, `.ffi-btn-hero`, `.ffi-title-red`).
+> **Work:** re-theme both screens per the mockup -- add the navy field to `(auth)/layout.tsx` (mount `.stadium-atmos`/`.atmos-grain` or equivalent), Oswald-red header, brick `.ffi-btn-hero` primary CTA, Kanit display, `ffi-*` inputs; remove the shadcn `Card` shells and the `blur-3xl` glow; PRESERVE all Supabase auth wiring and form behavior.
+> **Done-when:** screenshot matches mockup (both sign-in and sign-up); screens use `ffi-*` and carry the navy field; no shadcn `Card` or `blur-3xl` remains; auth still functions (sign-in/sign-up submit works against Supabase in dev); gate green; A1-A10 pass.
+
+### SP-7V -- Validate (auth) rebuild `[Sonnet · Opus for visual parity]` · class: output
+> - Class: WORKHORSE (validation)
+>   Reason: independent check behind the from-scratch auth build, including a functional auth smoke test.
+>   Verifier: OTHER_FAMILY -- did NOT write SP-7.
+> **Size:** S-M. **Depends on:** SP-7.
+> **Work:** adversarial `/code-review` + `/bug-hunt free`; Design + QA lenses; screenshots of both screens vs mockup; confirm navy field present and no shadcn `Card`/`blur-3xl`; smoke-test that sign-in and sign-up forms submit and error-handle correctly; re-run gate.
+> **Done-when:** 0 unresolved HIGH; screenshot parity for both screens attached; auth smoke test passes; gate green.
 
 ---
 

@@ -25,7 +25,15 @@ The prior plan (S1–S8 / P2 DR / P3 VAL) marked the app "done" while it (a) pri
 
 ## Next open item
 
-### ✅ D6b-2 DONE 2026-08-18 -- next open item: **R14** `[Claude drives Chrome + Sonnet fixes]` usability walkthrough
+### ▶ SP-track added 2026-08-18 -- SHIELD Screen-Parity Sprint is the new active focus
+
+Joe flagged that the SHIELD rollout was a token-VALUE repaint, not a per-screen redesign: only D2-D6 got a real craft pass; every other screen still wears GRIDIRON-era structure + stale off-token literals. A 13-item SP-track (SP-0..SP-7 + OTHER_FAMILY validators) was authored to rebuild them all to the true SHIELD bar. See `BUILD_PLAN.md` "SP-track" section; plan of record `C:\Users\jrasa\.claude\plans\cozy-waddling-creek.md`.
+
+**Immediately startable (no gate):** **SP-0** `[Sonnet]` refresh the stale Design review lens to SHIELD v4.0 (validators depend on it), then **SP-1** `[Sonnet]` Tier A token sweep (draft hub / review / cheat sheet). **SP-2** `[Opus]` design mockups (setup, configure, runs, settings, auth) can run in parallel but is a **JOE-GATED HALT** -- no SP-3..SP-7 build starts until Joe signs off the mockups.
+
+**R14** `[Claude drives Chrome + Sonnet fixes]` usability walkthrough remains open and can follow the SP-track (or interleave); it is not blocked by SP work.
+
+### ✅ D6b-2 DONE 2026-08-18
 
 **D6b-2 DONE (2026-08-18, Opus):** Live Read now shows a REAL Monte-Carlo land probability. New pure $0 `src/lib/draft/room-sim-probability.ts` (`computeLandProbability`) maps live room state (undrafted board minus drafted, me-seat remaining slots + budget) into `runMonteCarlo` (R10a engine, unchanged) and returns `hits/total` over `LAND_PROB_RUNS=16` seeded auctions; board capped at `numManagers*openSlots+12` for latency; returns null (chip hidden) on no signal. **DEC-2b honored** -- the % is always a real sim fraction or null, deterministic at `seed=1`, never fabricated. `on-the-block-card.tsx` renders a `LAND · NN%` chip after CONF (`0%` shown honestly, null hidden); `auction-room.tsx` computes it in a memo from live state. **Bug-hunt HIGH fixed:** hoisted `myPicks` in `client.tsx` into a `useMemo` (was a fresh array every render, defeating the memo and re-running 16 sims per render). 12 new tests. **497/497 green.** Gate: type-check 0, lint 0 new, build clean 4.6s, **latency 173.6ms** worst-case. 2 bug-hunt findings deferred (pre-existing tie-break bias + disclosed symmetric-state approximation). Visual proof blocked (same headless-env constraint as D6/D6b-1/R11a -- no active /draft/live session); chip render path proven by 4 RTL DOM tests + faithful static HTML render in-chat. **Next:** R14 [Claude drives Chrome + Sonnet fixes] -- walk every flow at mobile arm's-length, catalog + fix P1/P2.
 

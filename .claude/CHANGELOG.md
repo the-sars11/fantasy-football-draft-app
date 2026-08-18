@@ -2,6 +2,19 @@
 
 ---
 
+## 2026-08-18 / SP-track authored -- SHIELD Screen-Parity Sprint (planning, no code)
+
+**Class:** docs (Delivery lens). **No code touched** -- this entry records the addition of 13 scoped build-plan items, not an implementation.
+
+- **What / why:** Joe flagged that the SHIELD v4.0 rollout was a token-VALUE repaint (one `globals.css` swap repainted all 61 screens because the token NAMES were kept stable from GRIDIRON v3) and NOT a per-screen redesign. Evidence-backed per-screen inventory (3 Explore agents) confirmed only D2-D6 (5 areas) got a true SHIELD craft pass; every other screen still wears GRIDIRON-era structure (flat forms, iOS list rows, generic primitive shells) plus stale off-token literals the paint swap could not reach.
+- **Authored:** a new **SP-track** (SP-0..SP-7 + OTHER_FAMILY validators = 13 items) in `BUILD_PLAN.md`. Opus is reserved for the single design/decision item (SP-2 mockups); every build is a bounded Sonnet WORKHORSE against an approved mockup; a fresh-eyes OTHER_FAMILY validator runs behind each builder. Screen tiers: A (token sweep only) = draft hub/review/board; B (design + re-layout) = draft/setup, prep/configure, prep/runs, settings; C (from scratch) = (auth). Dependency spine: SP-0 + SP-1 start now; SP-2 is a JOE-GATED HALT blocking all SP-3..SP-7 builds.
+- **Files (docs only):** `BUILD_PLAN.md` (new SP-track section + dashboard `nextItems` entry), `WORKING_STATE.md` (next-item pointer), this `CHANGELOG.md`. Plan of record: `C:\Users\jrasa\.claude\plans\cozy-waddling-creek.md`.
+- **Known follow-up baked into SP-0:** `REVIEW_LENSES.md` Design lens is STALE (still names the retired Tactical Hologram / Space Grotesk / `#8bacff` palette); SP-0 fixes it first so validators check against SHIELD.
+
+**Gate:** N/A -- planning entry, no code. Type-check/tests/build unaffected.
+
+---
+
 ## 2026-08-18 / D6b-2 -- Live Read: Monte Carlo land-probability wiring
 
 **Class:** pipeline (Architecture + QA + Security lenses). **DEC-2b Opus half.** Wires a REAL `runMonteCarlo` land probability into the on-block Read. All $0 (pure math, no API calls).
