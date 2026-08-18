@@ -16,7 +16,7 @@ import type { Player, Position } from '@/lib/players/types'
 import type { ScoredPlayer } from '@/lib/research/strategy/scoring'
 import type { PositionScarcityExtended } from '@/lib/draft/explain'
 import type { DraftState, DraftPick } from '@/lib/draft/state'
-import type { RosterSlots } from '@/lib/supabase/database.types'
+import type { RosterSlots, Strategy as DbStrategy } from '@/lib/supabase/database.types'
 import { computeWhatToDo } from '@/lib/draft/what-to-do'
 import type { RosterMaxBidEntry } from '@/lib/draft/solver-bridge'
 import { ROOM } from './theme'
@@ -24,6 +24,7 @@ import { StatusBar } from './status-bar'
 import { OnTheBlockCard } from './on-the-block-card'
 import { AwarenessStrip, type AwarenessItem } from './awareness-strip'
 import { BudgetStrip } from './budget-strip'
+import { StrategyStrip } from './strategy-strip'
 import { TierContext, type TierRow } from './tier-context'
 import { MyTeamRoster } from './my-team-roster'
 import { BottomNav } from './bottom-nav'
@@ -66,6 +67,8 @@ export interface AuctionRoomProps {
   setOnBlockPlayer: (p: Player | null) => void
   isTarget: (id: string) => boolean
   isAvoid: (id: string) => boolean
+  /** DEC-1 (BIAS): severity of an avoid tag, undefined when the player has none. */
+  avoidSeverity: (id: string) => 'soft' | 'hard' | undefined
   onLeave: () => void
   onNavigate: (href: string) => void
   /** Rendered just above the bottom nav (the pick/record bar). Draft view only. */
@@ -78,10 +81,18 @@ export interface AuctionRoomProps {
   onRecordPick: (pick: Omit<DraftPick, 'pick_number'>) => void
   /** Toggle a player's target star from the Research list. */
   onToggleTarget: (playerId: string) => void
+  /** R11b: toggle a player's avoid flag, settable anywhere target is settable. */
+  onToggleAvoid: (playerId: string) => void
   /** Edit any recorded pick (finding 12). Rebuilds budgets/roster from scratch. */
   onEditPick: (pickNumber: number, changes: Partial<Omit<DraftPick, 'pick_number'>>) => void
   /** Remove any recorded pick (finding 12). Renumbers the remainder. */
   onRemovePick: (pickNumber: number) => void
+  /** R11b: R9's adaptive pivot line, always reachable instead of buried in More tools. */
+  pivot: string
+  /** R11b: the currently active strategy plus the full switchable list. */
+  activeStrategy: DbStrategy | null
+  strategies: DbStrategy[]
+  onSwitchStrategy: (strategy: DbStrategy) => void
 }
 
 export function AuctionDraftRoom({
@@ -101,6 +112,7 @@ export function AuctionDraftRoom({
   setOnBlockPlayer,
   isTarget,
   isAvoid,
+  avoidSeverity,
   onLeave,
   onNavigate,
   recordBar,
@@ -108,8 +120,13 @@ export function AuctionDraftRoom({
   myManager,
   onRecordPick,
   onToggleTarget,
+  onToggleAvoid,
   onEditPick,
   onRemovePick,
+  pivot,
+  activeStrategy,
+  strategies,
+  onSwitchStrategy,
 }: AuctionRoomProps) {
   const [view, setView] = useState<'draft' | 'research'>('draft')
   const [pickerOpen, setPickerOpen] = useState(false)
@@ -150,10 +167,23 @@ export function AuctionDraftRoom({
       alternatives,
       isTarget: isTarget(onBlockPlayer.id),
       isAvoid: isAvoid(onBlockPlayer.id),
+      // DEC-1 (BIAS): soft avoid flows through at a discount instead of forcing PASS.
+      avoidSeverity: avoidSeverity(onBlockPlayer.id),
       // RV-1: the roster-completion constraint line for the on-block card.
       rosterNote: rosterAdviceMap.get(onBlockPlayer.name.toLowerCase())?.note ?? null,
     })
-  }, [onBlockPlayer, available, scoredPlayers, maxBidMap, rosterAdviceMap, myMaxBid, scarcityByPos, isTarget, isAvoid])
+  }, [
+    onBlockPlayer,
+    available,
+    scoredPlayers,
+    maxBidMap,
+    rosterAdviceMap,
+    myMaxBid,
+    scarcityByPos,
+    isTarget,
+    isAvoid,
+    avoidSeverity,
+  ])
 
   // --- Awareness ("what's next") --------------------------------------------
   const awarenessItems = useMemo<AwarenessItem[]>(() => {
@@ -248,6 +278,7 @@ export function AuctionDraftRoom({
             myManager={myManager}
             onRecordPick={onRecordPick}
             onToggleTarget={onToggleTarget}
+            onToggleAvoid={onToggleAvoid}
           />
         ) : (
           <>
@@ -256,11 +287,22 @@ export function AuctionDraftRoom({
                 player={onBlockPlayer}
                 advice={advice}
                 onChangePlayer={() => openPicker()}
+                onToggleTarget={onToggleTarget}
+                onToggleAvoid={onToggleAvoid}
               />
             </div>
 
             <div className="pt-2.5">
               <AwarenessStrip items={awarenessItems} />
+            </div>
+
+            <div className="pt-2.5">
+              <StrategyStrip
+                activeStrategy={activeStrategy}
+                strategies={strategies}
+                onSelect={onSwitchStrategy}
+                pivot={pivot}
+              />
             </div>
 
             <div className="pt-2.5">

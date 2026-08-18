@@ -67,11 +67,13 @@ function PlayerRow({
   maxBidMap,
   onTapPlayer,
   onToggleTarget,
+  onToggleAvoid,
 }: {
   sp: ScoredPlayer
   maxBidMap: Map<string, number>
   onTapPlayer: (p: Player) => void
   onToggleTarget: (playerId: string) => void
+  onToggleAvoid: (playerId: string) => void
 }) {
   const pc = posColors(sp.player.position)
   const tier = tierOf(sp.player)
@@ -81,21 +83,33 @@ function PlayerRow({
   const signal = signalTagOf(sp.player)
 
   return (
-    // Row is a plain container so the star and the tap-target can be sibling
-    // buttons (nesting <button> in <button> is invalid HTML / hydration error).
+    // Row is a plain container so the star, the avoid toggle and the
+    // tap-target can be sibling buttons (nesting <button> in <button> is
+    // invalid HTML / hydration error).
     <div
-      className="flex w-full items-center gap-2.5 rounded-[10px] pr-2.5 transition-colors hover:bg-white/[0.03]"
+      className="flex w-full items-center gap-1 rounded-[10px] pr-2.5 transition-colors hover:bg-white/[0.03]"
       style={{ opacity: isAvoid ? 0.45 : 1 }}
     >
-      {/* Star / avoid toggle */}
+      {/* R11b: target and avoid are two independent toggles, each settable
+          live during the draft, so tagging one never requires clearing the
+          other through a separate screen. */}
       <button
         onClick={() => onToggleTarget(sp.player.id)}
-        className="flex h-11 w-8 shrink-0 items-center justify-center pl-1.5 text-[15px] transition-transform active:scale-90"
-        style={{ color: isAvoid ? ROOM.red : isTarget ? ROOM.gold : ROOM.t3 }}
+        className="flex h-11 w-7 shrink-0 items-center justify-center pl-1.5 text-[15px] transition-transform active:scale-90"
+        style={{ color: isTarget ? ROOM.gold : ROOM.t3 }}
         aria-label={isTarget ? `Remove ${sp.player.name} from targets` : `Add ${sp.player.name} to targets`}
         aria-pressed={isTarget}
       >
-        {isAvoid ? '✗' : '★'}
+        ★
+      </button>
+      <button
+        onClick={() => onToggleAvoid(sp.player.id)}
+        className="flex h-11 w-6 shrink-0 items-center justify-center text-[13px] transition-transform active:scale-90"
+        style={{ color: isAvoid ? ROOM.red : ROOM.t3 }}
+        aria-label={isAvoid ? `Remove ${sp.player.name} from avoids` : `Add ${sp.player.name} to avoids`}
+        aria-pressed={isAvoid}
+      >
+        ✗
       </button>
 
       {/* Tap the player area to set them on the block */}
@@ -163,6 +177,7 @@ export interface ResearchViewProps {
   myManager: string
   onRecordPick: (pick: Omit<DraftPick, 'pick_number'>) => void
   onToggleTarget: (playerId: string) => void
+  onToggleAvoid: (playerId: string) => void
 }
 
 export function ResearchView({
@@ -176,6 +191,7 @@ export function ResearchView({
   myManager,
   onRecordPick,
   onToggleTarget,
+  onToggleAvoid,
 }: ResearchViewProps) {
   const [posFilter, setPosFilter] = useState<PosFilter>('ALL')
   const [tierFilter, setTierFilter] = useState<1 | 2 | 3 | null>(null)
@@ -430,6 +446,7 @@ export function ResearchView({
                 maxBidMap={maxBidMap}
                 onTapPlayer={setOnBlockPlayer}
                 onToggleTarget={onToggleTarget}
+                onToggleAvoid={onToggleAvoid}
               />
             ))
         )}

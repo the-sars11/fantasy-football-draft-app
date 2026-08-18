@@ -49,6 +49,13 @@ export interface WhatToDoInput {
   /** True when Joe tagged this player AVOID. */
   isAvoid: boolean
   /**
+   * DEC-1 (BIAS): severity of the avoid tag. 'hard' (or unset, for backward
+   * compatibility) forces PASS as before. 'soft' means "only at a discount":
+   * the player stays in the normal decision tree with a reduced personal cap,
+   * and PUSH is suppressed either way.
+   */
+  avoidSeverity?: 'soft' | 'hard'
+  /**
    * R5 (RV-1): plain-English roster-completion constraint for this player, e.g.
    * "More than $24 and you cannot fill QB, 2 FLEX and 4 bench." Null when no
    * solver result is available. Surfaced verbatim on the on-block card.
@@ -88,6 +95,9 @@ const MOVE_COLORS: Record<WhatToDoMove, WhatToDoColor> = {
   PUSH: 'orange',
   PASS: 'red',
 }
+
+/** DEC-1 (BIAS): soft-avoid personal-cap discount. Mirrors sim-engine.ts's SOFT_AVOID_FACTOR. */
+const SOFT_AVOID_DISCOUNT = 0.5
 
 function round(n: number): number {
   return Math.max(0, Math.round(n))
@@ -198,8 +208,13 @@ function isLastOfScarceTier(
  * want) > HOLD (a comparable alternative is still on the board cheaper) > BID.
  */
 export function computeWhatToDo(input: WhatToDoInput): WhatToDoAdvice {
-  const { player, scored, myMaxBid, budgetMaxBid, scarcity, isTarget, isAvoid } = input
+  const { player, scored, myMaxBid, budgetMaxBid, scarcity, isTarget, isAvoid, avoidSeverity } = input
   const rosterNote = input.rosterNote ?? null
+
+  // DEC-1 (BIAS): default unset severity to 'hard' so existing avoid callers
+  // (no severity known) keep today's force-PASS behavior unchanged.
+  const hardAvoid = isAvoid && (avoidSeverity ?? 'hard') === 'hard'
+  const softAvoid = isAvoid && !hardAvoid
 
   const market = player.consensusAuctionValue ?? 0
   const marketEst = market > 0 ? round(market) : null
@@ -208,6 +223,10 @@ export function computeWhatToDo(input: WhatToDoInput): WhatToDoAdvice {
   let myCap: number | null = myMaxBid != null ? round(myMaxBid) : null
   if (myCap != null && budgetMaxBid != null) {
     myCap = Math.min(myCap, round(budgetMaxBid))
+  }
+  // DEC-1 (BIAS): a soft avoid only stays interesting at a real discount.
+  if (softAvoid && myCap != null) {
+    myCap = Math.max(1, round(myCap * SOFT_AVOID_DISCOUNT))
   }
 
   const range = computeRange(myCap, marketEst)
@@ -224,9 +243,11 @@ export function computeWhatToDo(input: WhatToDoInput): WhatToDoAdvice {
     rosterNote,
   }
 
-  // --- PASS: explicitly avoided, or you cannot afford even a $1-competitive bid.
+  // --- PASS: hard-avoided, or you cannot afford even a $1-competitive bid.
+  // A soft avoid does NOT force PASS: it flows through the normal decision
+  // tree below at a discounted cap (DEC-1 BIAS).
   const cannotAfford = budgetMaxBid != null && budgetMaxBid < 1
-  if (isAvoid) {
+  if (hardAvoid) {
     return {
       ...base,
       move: 'PASS',
@@ -248,7 +269,8 @@ export function computeWhatToDo(input: WhatToDoInput): WhatToDoAdvice {
   }
 
   // --- PUSH: last startable of a scarce tier that you actually want.
-  const wantIt = isTarget || (scored != null && scored.combinedScore >= 60)
+  // DEC-1 (BIAS): never push for an avoided player, soft or hard.
+  const wantIt = !isAvoid && (isTarget || (scored != null && scored.combinedScore >= 60))
   if (wantIt && isLastOfScarceTier(player, scarcity)) {
     const stretch = myCap != null ? round(myCap * 1.15) : marketEst != null ? round(marketEst * 1.1) : null
     const affordableStretch =
@@ -283,9 +305,11 @@ export function computeWhatToDo(input: WhatToDoInput): WhatToDoAdvice {
   const rawBidCap = myCap != null ? myCap : marketEst
   const bidCap = rawBidCap != null ? Math.max(1, rawBidCap) : null
   const capText = bidCap != null ? `go up to $${bidCap}` : 'your call'
-  const rationale = isTarget
-    ? `${player.name} is one of your targets and the math still works. Bid with confidence up to your cap and stop there.`
-    : `Solid fit at fair value and nothing comparable is waiting. Bid up to your cap and stop there.`
+  const rationale = softAvoid
+    ? `You marked ${player.name} as a soft avoid. Only worth it at a real discount, your cap is already cut for that.`
+    : isTarget
+      ? `${player.name} is one of your targets and the math still works. Bid with confidence up to your cap and stop there.`
+      : `Solid fit at fair value and nothing comparable is waiting. Bid up to your cap and stop there.`
   return {
     ...base,
     move: 'BID',

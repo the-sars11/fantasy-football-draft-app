@@ -41,7 +41,13 @@ describe('OnTheBlockCard roster note (R5 RV-1)', () => {
   it('renders the plain-English roster-completion note verbatim when present', () => {
     const note = 'More than $24 and you cannot fill QB, 2 FLEX and 2 bench.'
     render(
-      <OnTheBlockCard player={player} advice={makeAdvice(note)} onChangePlayer={() => {}} />
+      <OnTheBlockCard
+        player={player}
+        advice={makeAdvice(note)}
+        onChangePlayer={() => {}}
+        onToggleTarget={() => {}}
+        onToggleAvoid={() => {}}
+      />
     )
     // The plain-English constraint is on the card, exactly as the solver produced it.
     expect(screen.getByText(note)).toBeInTheDocument()
@@ -51,7 +57,13 @@ describe('OnTheBlockCard roster note (R5 RV-1)', () => {
 
   it('omits the roster-note block entirely when rosterNote is null', () => {
     render(
-      <OnTheBlockCard player={player} advice={makeAdvice(null)} onChangePlayer={() => {}} />
+      <OnTheBlockCard
+        player={player}
+        advice={makeAdvice(null)}
+        onChangePlayer={() => {}}
+        onToggleTarget={() => {}}
+        onToggleAvoid={() => {}}
+      />
     )
     expect(screen.queryByText('Roster')).not.toBeInTheDocument()
   })

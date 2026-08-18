@@ -54,6 +54,7 @@ import { MySquadPanel } from '@/components/draft/my-squad-panel'
 import type { PivotEntry } from '@/components/draft/pivot-history'
 import { scorePlayersWithStrategy, buildIntelContextMap } from '@/lib/research/strategy/scoring'
 import { calculateScarcityExtended, explainPlayer } from '@/lib/draft/explain'
+import { computeAdaptiveGuidance } from '@/lib/draft/adaptive-guidance'
 import { analyzeDraftFlow, detectStrategyDrift } from '@/lib/draft/flow-monitor'
 import type { StrategyDrift } from '@/lib/draft/flow-monitor'
 import { detectPivotOpportunity } from '@/lib/draft/pivot-detector'
@@ -144,6 +145,24 @@ export function LiveDraftClient() {
       if (res.success) await refetchUserTags()
     },
     [toggleTag, refetchUserTags],
+  )
+  // R11b: avoid is settable anywhere target is, using the same generic toggle.
+  const onToggleAvoid = useCallback(
+    async (playerId: string) => {
+      const res = await toggleTag(playerId, 'avoid')
+      if (res.success) await refetchUserTags()
+    },
+    [toggleTag, refetchUserTags],
+  )
+  // DEC-1 (BIAS): severity of an avoid tag, undefined when the player isn't
+  // avoided at all. Feeds computeWhatToDo's soft-vs-hard discount path.
+  const avoidSeverity = useCallback(
+    (playerId: string): 'soft' | 'hard' | undefined => {
+      const entry = userTagsMap[playerId]
+      if (!entry || !entry.tags.includes('avoid')) return undefined
+      return entry.tagSeverity === 'soft' ? 'soft' : 'hard'
+    },
+    [userTagsMap],
   )
 
   // Build intel context map from user tags
@@ -300,6 +319,14 @@ export function LiveDraftClient() {
     return result.active ? result : null
   }, [strategy, state, draftedNames, myPickedNames, driftDismissed])
 
+  // R11b: R9's adaptive pivot line, surfaced always-on in the room instead of
+  // buried inside the closed-by-default More tools accordion.
+  const adaptiveGuidance = useMemo(() => {
+    if (!state) return null
+    const myMgr = state.manager_order[0]
+    return computeAdaptiveGuidance(state, myMgr, players)
+  }, [state, players])
+
   // R5 (RV-1): the roster-completion solver input, rebuilt on every pick. Maps
   // Joe's live budget + remaining slots (FLEX contention modeled) + the undrafted
   // board into the pure R4 solver. $0 math, no network.
@@ -314,8 +341,11 @@ export function LiveDraftClient() {
       myPicks: myPicksLocal,
       players,
       draftedNames,
+      // DEC-1 (BIAS): the solver's own selection priority honors Joe's graded
+      // targets/avoids too, not just the live max-bid advisor.
+      userTagsMap,
     })
-  }, [state, getBudget, league?.budget, rosterSlots, players, draftedNames])
+  }, [state, getBudget, league?.budget, rosterSlots, players, draftedNames, userTagsMap])
 
   // R5: roster-constrained max bid + plain-English constraint per undrafted player.
   const rosterAdviceMap = useMemo((): Map<string, RosterMaxBidEntry> => {
@@ -684,6 +714,7 @@ export function LiveDraftClient() {
         setOnBlockPlayer={setOnBlockPlayer}
         isTarget={isTarget}
         isAvoid={isAvoid}
+        avoidSeverity={avoidSeverity}
         onLeave={goBack}
         onNavigate={(href) => router.push(href)}
         recordBar={recordBar}
@@ -691,8 +722,13 @@ export function LiveDraftClient() {
         myManager={myManager}
         onRecordPick={handleRecordPick}
         onToggleTarget={onToggleTarget}
+        onToggleAvoid={onToggleAvoid}
         onEditPick={editPick}
         onRemovePick={removePick}
+        pivot={adaptiveGuidance?.pivot ?? ''}
+        activeStrategy={strategy}
+        strategies={allStrategies}
+        onSwitchStrategy={(s) => handleStrategySwap(s, false)}
       />
 
       {/* More tools -- every secondary panel preserved, mounted only when

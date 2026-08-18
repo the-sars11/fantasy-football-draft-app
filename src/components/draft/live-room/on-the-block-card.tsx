@@ -47,10 +47,15 @@ export function OnTheBlockCard({
   player,
   advice,
   onChangePlayer,
+  onToggleTarget,
+  onToggleAvoid,
 }: {
   player: Player | null
   advice: WhatToDoAdvice | null
   onChangePlayer: () => void
+  /** R11b: target and avoid are settable right from the hero card, not just Research. */
+  onToggleTarget: (playerId: string) => void
+  onToggleAvoid: (playerId: string) => void
 }) {
   if (!player || !advice) {
     return <WaitingCard onChangePlayer={onChangePlayer} />
@@ -113,22 +118,33 @@ export function OnTheBlockCard({
           >
             {advice.tierLabel}
           </span>
-          {advice.isTarget && (
-            <span
-              className="rounded px-2 py-1 text-[10px] font-bold"
-              style={{ background: ROOM.gold10, border: `1px solid ${ROOM.gold25}`, color: ROOM.gold }}
-            >
-              ★ TARGET
-            </span>
-          )}
-          {advice.isAvoid && (
-            <span
-              className="rounded px-2 py-1 text-[10px] font-bold"
-              style={{ background: ROOM.red10, border: `1px solid ${ROOM.red25}`, color: ROOM.red }}
-            >
-              AVOID
-            </span>
-          )}
+          {/* R11b: tappable, so target/avoid are settable right here, live. */}
+          <button
+            onClick={() => onToggleTarget(player.id)}
+            className="rounded px-2 py-1 text-[10px] font-bold transition-transform active:scale-95"
+            style={
+              advice.isTarget
+                ? { background: ROOM.gold10, border: `1px solid ${ROOM.gold25}`, color: ROOM.gold }
+                : { background: 'rgba(255,255,255,0.05)', border: `1px solid ${ROOM.border}`, color: ROOM.t3 }
+            }
+            aria-pressed={advice.isTarget}
+            aria-label={advice.isTarget ? `Remove ${player.name} from targets` : `Add ${player.name} to targets`}
+          >
+            ★ TARGET
+          </button>
+          <button
+            onClick={() => onToggleAvoid(player.id)}
+            className="rounded px-2 py-1 text-[10px] font-bold transition-transform active:scale-95"
+            style={
+              advice.isAvoid
+                ? { background: ROOM.red10, border: `1px solid ${ROOM.red25}`, color: ROOM.red }
+                : { background: 'rgba(255,255,255,0.05)', border: `1px solid ${ROOM.border}`, color: ROOM.t3 }
+            }
+            aria-pressed={advice.isAvoid}
+            aria-label={advice.isAvoid ? `Remove ${player.name} from avoids` : `Add ${player.name} to avoids`}
+          >
+            AVOID
+          </button>
           {advice.scarcityNote && (
             <span className="ml-auto text-[11px]" style={{ color: ROOM.t2 }}>
               {advice.scarcityNote}

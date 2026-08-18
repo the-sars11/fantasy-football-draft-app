@@ -24,6 +24,7 @@ import {
   type SolverInput,
   type RosterConstrainedMaxBid,
 } from './roster-solver'
+import { buildMyBiasFromTags, type GradedTagLike } from './sim-results'
 
 /** Flat $1 reserve per empty slot — the roster-completion floor. */
 const FLAT_REPLACEMENT: ReplacementCosts = {
@@ -116,6 +117,8 @@ export function buildSolverInput(args: {
   myPicks: FilledPick[]
   players: Player[]
   draftedNames: Set<string>
+  /** DEC-1 (BIAS): Joe's graded target/avoid tags, keyed by player id. */
+  userTagsMap?: Record<string, GradedTagLike>
 }): SolverInput {
   return {
     budgetRemaining: Math.max(0, Math.round(args.budgetRemaining)),
@@ -123,6 +126,7 @@ export function buildSolverInput(args: {
     availablePlayers: buildBoardPlayers(args.players, args.draftedNames),
     replacementCosts: FLAT_REPLACEMENT,
     minPerSlot: 1,
+    bias: args.userTagsMap ? buildMyBiasFromTags(args.userTagsMap) : undefined,
   }
 }
 

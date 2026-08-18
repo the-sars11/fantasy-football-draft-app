@@ -65,6 +65,7 @@ function baseInput(overrides: Partial<WhatToDoInput> = {}): WhatToDoInput {
     alternatives: overrides.alternatives ?? [],
     isTarget: overrides.isTarget ?? false,
     isAvoid: overrides.isAvoid ?? false,
+    avoidSeverity: overrides.avoidSeverity,
   }
 }
 
@@ -226,5 +227,56 @@ describe('computeWhatToDo', () => {
     expect(['BID', 'HOLD', 'PUSH', 'PASS']).toContain(result.move)
     expect(result.marketEst).toBe(52)
     assertNoDashes(result.cap, result.rationale)
+  })
+})
+
+// --- DEC-1 (BIAS): avoidSeverity ------------------------------------------
+// Mirrors sim-engine.ts's already-shipped pattern: hard avoid = never bid
+// (unchanged PASS behavior, including when severity is unset for backward
+// compatibility), soft avoid = discount only, still in the decision tree.
+
+describe('computeWhatToDo -DEC-1 (BIAS) avoidSeverity', () => {
+  it('explicit hard avoid still forces PASS (regression protection)', () => {
+    const result = computeWhatToDo(baseInput({ isAvoid: true, avoidSeverity: 'hard' }))
+    expect(result.move).toBe('PASS')
+    expect(result.rationale).toContain('avoid')
+  })
+
+  it('unset severity on an avoid still defaults to hard PASS (backward compatible)', () => {
+    const result = computeWhatToDo(baseInput({ isAvoid: true }))
+    expect(result.move).toBe('PASS')
+  })
+
+  it('soft avoid does NOT force PASS: it flows through at a discounted cap', () => {
+    const result = computeWhatToDo(
+      baseInput({ isAvoid: true, avoidSeverity: 'soft', myMaxBid: 50, budgetMaxBid: 120 }),
+    )
+    expect(result.move).not.toBe('PASS')
+    // 50 (myMaxBid, budget allows it) halved by the soft-avoid discount = 25.
+    expect(result.capValue).toBe(25)
+    expect(result.rationale.toLowerCase()).toContain('discount')
+    assertNoDashes(result.cap, result.rationale)
+  })
+
+  it('soft avoid never PUSHes, even on the last of a scarce tier you would otherwise want', () => {
+    const player = makePlayer({ consensusTier: 1 })
+    const result = computeWhatToDo(
+      baseInput({
+        player,
+        isTarget: true,
+        isAvoid: true,
+        avoidSeverity: 'soft',
+        scarcity: makeScarcity({ tier1Remaining: 1, startableRemaining: 1 }),
+        alternatives: [],
+      }),
+    )
+    expect(result.move).not.toBe('PUSH')
+  })
+
+  it('hard avoid takes precedence over affordability regardless of severity default', () => {
+    const result = computeWhatToDo(
+      baseInput({ isAvoid: true, avoidSeverity: 'hard', budgetMaxBid: 200 }),
+    )
+    expect(result.move).toBe('PASS')
   })
 })

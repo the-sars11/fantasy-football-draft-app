@@ -16,6 +16,7 @@ import type {
   BoardPlayer,
   SlotsRemaining,
   ReplacementCosts,
+  SolverBias,
 } from '../roster-solver'
 
 // ─── Fixtures ──────────────────────────────────────────────────────────────
@@ -46,12 +47,14 @@ function makeInput(
   slots: SlotsRemaining,
   players: BoardPlayer[],
   replacement: ReplacementCosts = DEFAULT_REPLACEMENT,
+  bias?: SolverBias,
 ): SolverInput {
   return {
     budgetRemaining: budget,
     slotsRemaining: slots,
     availablePlayers: players,
     replacementCosts: replacement,
+    bias,
   }
 }
 
@@ -632,5 +635,84 @@ describe('computeRosterConstrainedMaxBid -BUG-007 no slot available', () => {
     // WR takes the bench slot; only the QB slot remains at $1 replacement.
     expect(ok.feasible).toBe(true)
     expect(ok.explanation).not.toBe('No slot available for WR')
+  })
+})
+
+// ─── DEC-1 (BIAS): solveAllocation honors bounded target/avoid bias ──────────
+// Mirrors sim-engine.ts's already-shipped pattern: target = bounded lift scaled
+// by weight (max +35% at weight 10), soft avoid = half-value deprioritization
+// (still eligible), hard avoid = excluded entirely. Selection priority only:
+// the money math (assignedCost / completionCost) must always use the real,
+// un-adjusted expectedCost.
+
+describe('DEC-1 (BIAS): a weight-10 target outranks a higher raw ceiling', () => {
+  // qbB's raw ceiling (45) is below qbA's (50), but a weight-10 target lift
+  // (45 * 1.35 = 60.75) pushes it above qbA's unbiased 50.
+  const qbA = p('qbA', 'QB', 50, 40)
+  const qbB = p('qbB', 'QB', 45, 38)
+  const slots: SlotsRemaining = { ...EMPTY_SLOTS, qb: 1 }
+  const bias: SolverBias = { qbB: { kind: 'target', weight: 10 } }
+  const result = solveAllocation(makeInput(200, slots, [qbA, qbB], DEFAULT_REPLACEMENT, bias))
+
+  it('fills the QB slot with the biased target, not the raw-ceiling leader', () => {
+    expect(result.assignments[0]?.player?.id).toBe('qbB')
+  })
+
+  it('charges the real expectedCost, never an inflated bias-adjusted price', () => {
+    expect(result.assignments[0]?.assignedCost).toBe(38)
+    expect(result.completionCost).toBe(38)
+  })
+})
+
+describe('DEC-1 (BIAS): a hard avoid is excluded from the allocation entirely', () => {
+  // rbA has the best raw ceiling but is hard-avoided: it must never be
+  // assigned, even to FLEX, even though it would otherwise win both slots.
+  const rbA = p('rbA', 'RB', 70, 60)
+  const rbB = p('rbB', 'RB', 50, 45)
+  const rbC = p('rbC', 'RB', 40, 35)
+  const slots: SlotsRemaining = { ...EMPTY_SLOTS, rb: 1, flex: 1 }
+  const bias: SolverBias = { rbA: { kind: 'avoid', severity: 'hard' } }
+  const result = solveAllocation(makeInput(200, slots, [rbA, rbB, rbC], DEFAULT_REPLACEMENT, bias))
+
+  it('never assigns the hard-avoided player to any slot', () => {
+    const ids = result.assignments.map(a => a.player?.id)
+    expect(ids).not.toContain('rbA')
+  })
+
+  it('falls through to the next-best eligible players instead', () => {
+    const ids = result.assignments.map(a => a.player?.id)
+    expect(ids).toContain('rbB')
+    expect(ids).toContain('rbC')
+  })
+})
+
+describe('DEC-1 (BIAS): a soft avoid is deprioritized but stays eligible', () => {
+  // wrA's raw ceiling (60) beats wrB's (40), but a soft avoid halves wrA's
+  // priority (60 * 0.5 = 30 < 40), so wrB should fill the single WR slot.
+  const wrA = p('wrA', 'WR', 60, 50)
+  const wrB = p('wrB', 'WR', 40, 35)
+  const slots: SlotsRemaining = { ...EMPTY_SLOTS, wr: 1 }
+  const bias: SolverBias = { wrA: { kind: 'avoid', severity: 'soft' } }
+  const result = solveAllocation(makeInput(200, slots, [wrA, wrB], DEFAULT_REPLACEMENT, bias))
+
+  it('prefers the untagged alternative over the soft-avoided higher ceiling', () => {
+    expect(result.assignments[0]?.player?.id).toBe('wrB')
+  })
+
+  it('still places the soft-avoided player when it is the only option', () => {
+    const onlyOption = solveAllocation(
+      makeInput(200, slots, [wrA], DEFAULT_REPLACEMENT, bias),
+    )
+    expect(onlyOption.assignments[0]?.player?.id).toBe('wrA')
+    // Real cost, not the halved priority number.
+    expect(onlyOption.assignments[0]?.assignedCost).toBe(50)
+  })
+})
+
+describe('DEC-1 (BIAS): undefined bias is a no-op (backward compatible)', () => {
+  it('produces identical output to the unbiased Nasties fill', () => {
+    const withBias = solveAllocation(makeInput(300, NASTIES_SLOTS, NASTIES_BOARD, DEFAULT_REPLACEMENT, undefined))
+    const withoutBias = solveAllocation(makeInput(300, NASTIES_SLOTS, NASTIES_BOARD))
+    expect(withBias).toEqual(withoutBias)
   })
 })

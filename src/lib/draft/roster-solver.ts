@@ -63,6 +63,20 @@ export interface ReplacementCosts {
   bench: number
 }
 
+/**
+ * DEC-1 (BIAS): one graded lean on a player, keyed by player id in SolverBias.
+ * Structurally identical to sim-engine.ts's SimBiasEntry/SimMyBias (kept as a
+ * separate type here, not imported, so roster-solver.ts stays free of any
+ * sim-layer dependency). A value built by buildMyBiasFromTags (sim-results.ts)
+ * satisfies this shape directly, no cast needed.
+ */
+export interface SolverBiasEntry {
+  kind: 'target' | 'avoid'
+  weight?: number
+  severity?: 'soft' | 'hard'
+}
+export type SolverBias = Record<string, SolverBiasEntry>
+
 export interface SolverInput {
   /** Joe's current remaining budget (before paying for any nominated player). */
   budgetRemaining: number
@@ -72,6 +86,12 @@ export interface SolverInput {
   replacementCosts: ReplacementCosts
   /** Minimum per-slot bid floor (default 1). */
   minPerSlot?: number
+  /**
+   * DEC-1 (BIAS): Joe's graded targets/avoids, keyed by player id. Affects
+   * which players the best-fill allocation prefers (selection priority only);
+   * expectedCost / completionCost money math is never adjusted by bias.
+   */
+  bias?: SolverBias
 }
 
 // ─── Output types ─────────────────────────────────────────────────────────────
@@ -138,6 +158,32 @@ const DEDICATED_ORDER: DedicatedSlot[] = ['qb', 'te', 'rb', 'wr', 'dst']
 
 const FLEX_ELIGIBLE = new Set<BoardPlayer['position']>(['RB', 'WR', 'TE'])
 
+// ─── DEC-1 bias helpers ────────────────────────────────────────────────────────
+
+/** Max ceiling lift for a weight-10 target: +35% over generic ceiling worth. */
+const TARGET_MAX_BOOST = 0.35
+/** Soft-avoid ceiling multiplier: still eligible, but deprioritized in fill order. */
+const SOFT_AVOID_FACTOR = 0.5
+
+/**
+ * Bias-adjusted ceiling used ONLY to decide selection priority (bucket / FLEX
+ * pool sort + which player wins an affordable slot). Returns null for a
+ * hard-avoid player, meaning: exclude from the best-fill allocation entirely
+ * (never assigned, never nominated as part of the rest-of-roster). Money math
+ * (expectedCost / completionCost) always uses the player's real expectedCost,
+ * never this adjusted number.
+ */
+function biasedCeiling(player: BoardPlayer, bias: SolverBias | undefined): number | null {
+  const entry = bias?.[player.id]
+  if (!entry) return player.ceiling
+  if (entry.kind === 'avoid') {
+    if (entry.severity === 'hard') return null
+    return player.ceiling * SOFT_AVOID_FACTOR
+  }
+  const w = Math.min(10, Math.max(1, entry.weight ?? 5))
+  return player.ceiling * (1 + TARGET_MAX_BOOST * (w / 10))
+}
+
 // ─── Core: best-fill allocation ───────────────────────────────────────────────
 
 /**
@@ -146,7 +192,7 @@ const FLEX_ELIGIBLE = new Set<BoardPlayer['position']>(['RB', 'WR', 'TE'])
  * falling back to replacementCosts when the board is dry at a position.
  */
 export function solveAllocation(input: SolverInput): SolverResult {
-  const { slotsRemaining, availablePlayers, replacementCosts, budgetRemaining } = input
+  const { slotsRemaining, availablePlayers, replacementCosts, budgetRemaining, bias } = input
   const minPerSlot = input.minPerSlot ?? 1
 
   // Total remaining slots to fill — drives the affordability guard below.
@@ -159,14 +205,17 @@ export function solveAllocation(input: SolverInput): SolverResult {
     (slotsRemaining.dst ?? 0) +
     (slotsRemaining.bench ?? 0)
 
-  // Build per-position buckets sorted by ceiling DESC (best players first).
+  // Build per-position buckets sorted by bias-adjusted ceiling DESC (best
+  // players first). DEC-1: hard-avoid players are excluded entirely (null
+  // biasedCeiling); soft-avoid and target only reorder priority, never touch
+  // expectedCost.
   const buckets = new Map<BoardPlayer['position'], BoardPlayer[]>()
   for (const pos of ['QB', 'RB', 'WR', 'TE', 'DEF'] as const) {
     buckets.set(
       pos,
       availablePlayers
-        .filter(p => p.position === pos)
-        .sort((a, b) => b.ceiling - a.ceiling),
+        .filter(p => p.position === pos && biasedCeiling(p, bias) !== null)
+        .sort((a, b) => biasedCeiling(b, bias)! - biasedCeiling(a, bias)!),
     )
   }
 
@@ -223,7 +272,7 @@ export function solveAllocation(input: SolverInput): SolverResult {
   // Build after Phase 1 so dedicated-slot players are already excluded via `used`.
   const flexPool: BoardPlayer[] = (['RB', 'WR', 'TE'] as const)
     .flatMap(pos => (buckets.get(pos) ?? []).filter(p => !used.has(p.id)))
-    .sort((a, b) => b.ceiling - a.ceiling)
+    .sort((a, b) => biasedCeiling(b, bias)! - biasedCeiling(a, bias)!)
 
   const minFlexReplacement = Math.min(
     replacementCosts.rb,
