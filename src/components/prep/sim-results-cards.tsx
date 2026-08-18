@@ -222,7 +222,7 @@ export function SimRosterCarousel({ rosters, runs }: { rosters: ModalRoster[]; r
                 type="button"
                 onClick={() => scrollByCard(-1)}
                 aria-label="Previous sample roster"
-                className="h-9 w-9 rounded-full flex items-center justify-center bg-[var(--ffi-surface-1)] border border-[var(--ffi-hairline)] text-[var(--ffi-ink-2)] active:scale-95 transition-transform"
+                className="h-11 w-11 rounded-full flex items-center justify-center bg-[var(--ffi-surface-1)] border border-[var(--ffi-hairline)] text-[var(--ffi-ink-2)] active:scale-95 transition-transform"
               >
                 <ChevronLeft className="h-4 w-4" aria-hidden="true" />
               </button>
@@ -230,7 +230,7 @@ export function SimRosterCarousel({ rosters, runs }: { rosters: ModalRoster[]; r
                 type="button"
                 onClick={() => scrollByCard(1)}
                 aria-label="Next sample roster"
-                className="h-9 w-9 rounded-full flex items-center justify-center bg-[var(--ffi-surface-1)] border border-[var(--ffi-hairline)] text-[var(--ffi-ink-2)] active:scale-95 transition-transform"
+                className="h-11 w-11 rounded-full flex items-center justify-center bg-[var(--ffi-surface-1)] border border-[var(--ffi-hairline)] text-[var(--ffi-ink-2)] active:scale-95 transition-transform"
               >
                 <ChevronRight className="h-4 w-4" aria-hidden="true" />
               </button>
