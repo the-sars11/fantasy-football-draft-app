@@ -1,5 +1,5 @@
 /**
- * room-target-pricing.test.ts — D6: per-slot target-at-price for the live
+ * room-target-pricing.test.ts -- D6: per-slot target-at-price for the live
  * room's My Team panel. Covers the RosterSlots adapter and the open-slot
  * mapping on top of the existing $0 solver (assignTargetPrices). Pure, $0.
  */

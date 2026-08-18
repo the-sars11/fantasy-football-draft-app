@@ -1,5 +1,5 @@
 /**
- * Live-room palette (UXV2-6, recolored D6) — the approved v4 decision-first
+ * Live-room palette (UXV2-6, recolored D6) -- the approved v4 decision-first
  * draft room, restyled to the SHIELD color language Joe approved 2026-08-18.
  *
  * COLOR LANGUAGE: steel-blue is the PRIMARY/structural color -- budget
