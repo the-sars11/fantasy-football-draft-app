@@ -2,6 +2,20 @@
 
 ---
 
+## 2026-08-18 / SP-2 -- SHIELD design mockups for setup, configure, runs, settings, auth (Joe-approved)
+
+**Class:** output (Delivery + Design lenses). **Opus, FRONTIER.** Design/decision item only -- NO app source touched; the deliverable is an annotated mockup that gates SP-3..SP-7. Joe-gated halt satisfied: Joe typed explicit approval 2026-08-18.
+
+- **What / why:** the 5 remaining Tier B + C screens (`/draft/setup`, `/prep/configure`, `/prep/runs`, `/settings`, `(auth)` sign-in/up) had no mockup, so their layout was an open judgment call Joe's quality gate requires he sign off BEFORE any build. One combined pass keeps the 5 consistent and gives Joe a single sign-off.
+- **Deliverable:** `UI/mockup-SHIELD-screens.html` (self-contained, 5 annotated phone frames + per-screen SHIELD-translation panels). Published artifact `aa36d1ca-4dd2-4669-94ec-62ce90624634`.
+- **First pass rejected** as flat color blocks. Root cause: the SHIELD richness is a CSS composite (there is NO photographic background image in the app -- grepped `src/` + `public/`, only favicons), and the first mockup approximated it instead of porting it. **v2 ports the real texture stack verbatim from `globals.css`:** `.stadium-atmos` navy field (378) + `.atmos-grain` film-grain SVG-turbulence overlay (398, mix-blend overlay) + animated `.ffi-hero::before` sheen (562) + `.ffi-card-interactive::before` iridescent edge-sheen (531) + inset-lit `.ffi-btn-hero` (468) + DestRow red-rail/duotone-chip pattern from `prep/page.tsx`.
+- **Per-screen translation + reuse (no net-new components):** (1) `/draft/setup` -- AUCTION format-gate promoted to `.ffi-hero`; reuses FFISectionHeader, FFICard/-Elevated, FFIButton, FFIBadge, FFIInput, DestRow; kills `blur-3xl` glow (`client.tsx:253`) + `#5FA8E0`/`#8bacff`/`#9eadb8`. (2) `/prep/configure` -- flat form to SHIELD sections; reuses FFISectionHeader, FFIInput, FFIBadge, FFIButton, FFICard; kills `rgba(77,130,255)` (`league-config-form.tsx:240`). (3) `/prep/runs` -- latest-run `.ffi-hero` + DestRow history; reuses DestRow, FFIBadge, FFIPositionBadge, review-cards.tsx, FFIButton; kills green `rgba(139,255,69)` (`runs/client.tsx:66`). (4) `/settings` -- iOS grouped list to DestRows + QuietLabel; reuses DestRow, QuietLabel, FFICard+InfoRow, FFIBadge; `signOut` action preserved; kills `#8bacff` Dev badge (`settings/page.tsx:45`). (5) `(auth)` -- from scratch: Oswald-red wordmark hero on full `.stadium-atmos` field + `.ffi-card-elevated` panel + brick `.ffi-btn-hero` CTA; removes shadcn Card + `blur-3xl` glow (`layout.tsx:9`); **all Supabase wiring preserved** (`useActionState` -> `signIn/signUp/signOut`, field names, `/prep` redirect, success screen).
+- **Constraint honored:** zero em/en-dashes (9 caught in my own first output -- CSS comments + `&mdash;` entities -- all removed, re-verified to 0).
+
+**Gate:** N/A for app tests (no source touched). Render verified structurally via `read_page` (all 5 screens + annotations present, no parse errors); pixel screenshot blocked by the known headless-env limitation (Browser pane not compositing -- same constraint documented R5/R6/R10b/D5/D6), so the live artifact is the visual proof Joe approved from. **Joe approved the look 2026-08-18 -> SP-3..SP-7 unblocked.**
+
+---
+
 ## 2026-08-18 / SP-track authored -- SHIELD Screen-Parity Sprint (planning, no code)
 
 **Class:** docs (Delivery lens). **No code touched** -- this entry records the addition of 13 scoped build-plan items, not an implementation.

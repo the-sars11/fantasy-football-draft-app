@@ -29,7 +29,9 @@ The prior plan (S1–S8 / P2 DR / P3 VAL) marked the app "done" while it (a) pri
 
 Joe flagged that the SHIELD rollout was a token-VALUE repaint, not a per-screen redesign: only D2-D6 got a real craft pass; every other screen still wears GRIDIRON-era structure + stale off-token literals. A 13-item SP-track (SP-0..SP-7 + OTHER_FAMILY validators) was authored to rebuild them all to the true SHIELD bar. See `BUILD_PLAN.md` "SP-track" section; plan of record `C:\Users\jrasa\.claude\plans\cozy-waddling-creek.md`.
 
-**Immediately startable (no gate):** **SP-0** `[Sonnet]` refresh the stale Design review lens to SHIELD v4.0 (validators depend on it), then **SP-1** `[Sonnet]` Tier A token sweep (draft hub / review / cheat sheet). **SP-2** `[Opus]` design mockups (setup, configure, runs, settings, auth) can run in parallel but is a **JOE-GATED HALT** -- no SP-3..SP-7 build starts until Joe signs off the mockups.
+**✅ SP-2 DONE (Joe-approved 2026-08-18, Opus):** SHIELD design mockups for all 5 screens (setup, configure, runs, settings, auth) shipped as `UI/mockup-SHIELD-screens.html` (artifact `aa36d1ca-4dd2-4669-94ec-62ce90624634`), rebuilt on the real SHIELD texture stack (`.stadium-atmos` + `.atmos-grain` grain + `.ffi-hero`/`.ffi-card-interactive` sheen + inset-lit `.ffi-btn-hero`), each screen naming its reused primitives, zero em/en-dashes. Joe signed off the look -> **SP-3..SP-7 build is now UNBLOCKED.**
+
+**Next open items:** **SP-3** `[Sonnet]` rebuild `/draft/setup` to the approved mockup (biggest surface, now unblocked). Still open and immediately startable: **SP-0** `[Sonnet]` refresh the stale Design review lens to SHIELD v4.0 (validators depend on it) and **SP-1** `[Sonnet]` Tier A token sweep (draft hub / review / cheat sheet) -- both independent of SP-2. Recommended order: SP-0 first (validators depend on the corrected lens), then SP-1 and SP-3 in parallel.
 
 **R14** `[Claude drives Chrome + Sonnet fixes]` usability walkthrough remains open and can follow the SP-track (or interleave); it is not blocked by SP work.
 
