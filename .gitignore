@@ -44,8 +44,11 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# design mockups
-/UI/
+# design mockups: heavy reference art stays local; version-pin the SP spec mockups
+# (the build plan references these two by path, so SP-3..SP-7 build against tracked source)
+/UI/*
+!/UI/mockup-SHIELD-screens.html
+!/UI/mockup-SHIELD-token-map.md
 
 .vercel
 

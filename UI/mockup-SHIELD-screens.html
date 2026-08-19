@@ -1,0 +1,540 @@
+<title>SHIELD Screen-Parity Mockups</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Kanit:wght@600;700;800&family=Saira+Condensed:wght@600;700&family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap');
+
+  :root{
+    --ffi-surface-1:#121a28; --ffi-surface-2:#1a2637; --ffi-surface-3:#26364e;
+    --ffi-hairline:rgba(180,200,224,.10); --ffi-hairline-bright:rgba(200,215,235,.18);
+    --ffi-volt:#a63c41; --ffi-volt-bright:#c25a5e; --ffi-volt-deep:#6e2225; --ffi-volt-glow:rgba(166,60,65,.32);
+    --ffi-blue:#5fa8e0; --ffi-blue-bright:#7fc0ea;
+    --ffi-ink:#eaf1f8; --ffi-ink-2:#9fb2c6; --ffi-ink-3:#5e708a;
+    --ffi-title-red:#c25a5e; --ffi-danger:#ff6e8a;
+    --font-title:'Oswald','Bahnschrift SemiCondensed','Bahnschrift','Arial Narrow',sans-serif;
+    --font-display:'Kanit','Anton','Bahnschrift','Arial Narrow',sans-serif;
+    --font-cond:'Saira Condensed','Bahnschrift Condensed','Bahnschrift','Arial Narrow',sans-serif;
+    --font-body:'Hanken Grotesk','Saira','Segoe UI',system-ui,sans-serif;
+    --font-mono:'JetBrains Mono',ui-monospace,monospace;
+    /* grain texture, verbatim from globals.css:398 (.atmos-grain) */
+    --grain:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* page ground carries the real stadium-atmos field so the whole review sits on the SHIELD surface */
+  body{margin:0;color:var(--ffi-ink);font-family:var(--font-body);-webkit-font-smoothing:antialiased;
+    background:
+      radial-gradient(60% 30% at 15% -4%, rgba(95,168,224,.14) 0%, transparent 60%),
+      radial-gradient(40% 30% at 95% 2%, rgba(166,60,65,.07) 0%, transparent 58%),
+      linear-gradient(180deg,#0c1524 0%,#08101c 55%,#05070c 100%);
+    background-attachment:fixed;}
+  body::after{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.05;mix-blend-mode:overlay;background-image:var(--grain);}
+  .wrap{position:relative;z-index:1;max-width:1520px;margin:0 auto;padding:36px 22px 90px;}
+  .lede h1{font-family:var(--font-title);color:var(--ffi-title-red);font-weight:700;font-size:31px;letter-spacing:.01em;margin:0 0 7px;}
+  .lede p{color:var(--ffi-ink-2);font-size:14px;max-width:820px;line-height:1.65;margin:0;}
+  .lede code,.notes code{font-family:var(--font-mono);font-size:11px;color:var(--ffi-blue-bright);background:rgba(95,168,224,.08);padding:1px 5px;border-radius:4px;}
+  .legend{display:flex;flex-wrap:wrap;gap:10px;margin:20px 0 6px;}
+  .legend .pill{display:flex;align-items:center;gap:8px;background:linear-gradient(160deg,var(--ffi-surface-2),var(--ffi-surface-1));border:1px solid var(--ffi-hairline-bright);
+    border-radius:999px;padding:7px 13px;font-family:var(--font-cond);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ffi-ink-2);box-shadow:0 6px 20px rgba(0,0,0,.35);}
+  .legend .sw{width:13px;height:13px;border-radius:4px;box-shadow:inset 0 1px 0 rgba(255,255,255,.25);}
+  .kill{color:var(--ffi-danger);}
+
+  .gallery{display:flex;flex-wrap:wrap;gap:28px;margin-top:30px;align-items:flex-start;}
+  .col{width:398px;flex:0 0 auto;}
+  .col > .tag{font-family:var(--font-cond);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--ffi-ink-3);margin:0 0 10px 4px;display:flex;gap:8px;align-items:center;}
+  .col > .tag b{color:var(--ffi-blue-bright);font-weight:700;}
+
+  /* ===== phone frame ===== */
+  .phone{width:398px;border-radius:36px;padding:11px;background:linear-gradient(155deg,#223350,#0a1120 70%);
+    border:1px solid var(--ffi-hairline-bright);box-shadow:0 40px 90px -34px #000,0 2px 0 rgba(255,255,255,.06) inset,0 0 0 1px rgba(0,0,0,.5);}
+  .screen{position:relative;border-radius:25px;overflow:hidden;height:760px;isolation:isolate;
+    background:
+      radial-gradient(60% 42% at 22% -6%, rgba(95,168,224,.16) 0%, transparent 58%),
+      radial-gradient(46% 40% at 92% 6%, rgba(166,60,65,.06) 0%, transparent 55%),
+      radial-gradient(60% 50% at 50% 116%, rgba(95,168,224,.12) 0%, transparent 60%),
+      linear-gradient(180deg,#0c1524 0%,#08101c 50%,#05070c 100%);}
+  /* film grain + broadcast light streaks, the real atmosphere layers */
+  .screen::before{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.07;mix-blend-mode:overlay;background-image:var(--grain);}
+  .screen::after{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;
+    background:linear-gradient(115deg,transparent 0%,rgba(166,60,65,.05) 48%,transparent 62%),
+               radial-gradient(38% 20% at 78% 20%, rgba(95,168,224,.10), transparent 70%);}
+  .screen.scroll{overflow-y:auto;}
+  .screen.scroll::-webkit-scrollbar{width:0;}
+  .pad{position:relative;z-index:1;padding:20px 17px 26px;}
+
+  .statusbar{position:relative;z-index:1;height:26px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;font-family:var(--font-cond);
+    font-size:11px;color:var(--ffi-ink-2);letter-spacing:.08em;}
+  .backrow{display:flex;align-items:center;gap:6px;color:var(--ffi-ink-3);font-family:var(--font-cond);font-size:12px;
+    text-transform:uppercase;letter-spacing:.14em;margin-bottom:12px;}
+  .backrow svg{width:15px;height:15px;stroke:var(--ffi-ink-3);}
+
+  .h-red{font-family:var(--font-title);color:var(--ffi-title-red);font-weight:700;line-height:.98;letter-spacing:.005em;text-shadow:0 1px 0 rgba(0,0,0,.35);}
+  .ctx-chip{display:inline-flex;align-items:center;gap:7px;background:linear-gradient(160deg,rgba(95,168,224,.16),rgba(95,168,224,.06));border:1px solid rgba(95,168,224,.30);
+    border-radius:999px;padding:5px 11px;font-family:var(--font-cond);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ffi-blue-bright);box-shadow:0 4px 14px rgba(95,168,224,.14);}
+  .ctx-chip .dot{width:6px;height:6px;border-radius:50%;background:var(--ffi-volt-bright);box-shadow:0 0 9px var(--ffi-volt-bright);}
+  .quiet{font-family:var(--font-cond);font-weight:700;font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:var(--ffi-ink-3);margin:22px 0 10px;}
+  .quiet:first-child{margin-top:0;}
+
+  /* real .ffi-card / -elevated (globals.css:503-513): solid surface, hairline, layered blue-glow shadow */
+  .card{position:relative;border-radius:16px;padding:15px;background:var(--ffi-surface-2);border:1px solid var(--ffi-hairline);
+    box-shadow:0 8px 32px rgba(0,0,0,.36),0 0 15px rgba(95,168,224,.06);}
+  .card-el{position:relative;border-radius:16px;padding:16px;background:linear-gradient(160deg,var(--ffi-surface-3) 0%,var(--ffi-surface-2) 75%);
+    border:1px solid var(--ffi-hairline-bright);box-shadow:0 16px 44px rgba(0,0,0,.5),0 0 22px rgba(95,168,224,.10);overflow:hidden;}
+  /* the iridescent edge-sheen from .ffi-card-interactive::before, shown at rest for the mockup */
+  .sheen{position:relative;overflow:hidden;}
+  .sheen::before{content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;
+    background:linear-gradient(115deg,transparent 22%,rgba(95,168,224,.5) 45%,rgba(166,60,65,.3) 55%,transparent 80%);
+    -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;opacity:.55;pointer-events:none;}
+
+  /* real .ffi-hero (globals.css:551) with animated sheen ::before */
+  .hero{position:relative;border-radius:18px;overflow:hidden;padding:22px 18px;border:1px solid var(--ffi-hairline-bright);
+    background:
+      radial-gradient(120% 90% at 0% 0%, rgba(95,168,224,.22), transparent 55%),
+      radial-gradient(120% 120% at 100% 0%, rgba(166,60,65,.10), transparent 50%),
+      linear-gradient(160deg,var(--ffi-surface-3),var(--ffi-surface-2) 70%);
+    box-shadow:0 22px 50px -22px rgba(0,0,0,.8);}
+  .hero > *{position:relative;z-index:1;}
+  .hero::before{content:"";position:absolute;inset:0;z-index:0;border-radius:inherit;padding:1px;
+    background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.55) 47%,rgba(166,60,65,.5) 52%,transparent 70%);
+    -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;
+    background-size:280% 280%;animation:sheen 5.5s ease-in-out infinite;opacity:.75;pointer-events:none;}
+  @keyframes sheen{0%,100%{background-position:0% 50%;}50%{background-position:100% 50%;}}
+
+  /* DestRow, verbatim from prep hub gold standard */
+  .destrow{position:relative;display:flex;align-items:center;gap:13px;padding:13px 15px 13px 17px;border-radius:14px;overflow:hidden;
+    background:linear-gradient(160deg,var(--ffi-surface-3) 0%,var(--ffi-surface-2) 78%);border:1px solid var(--ffi-hairline-bright);margin-bottom:9px;
+    box-shadow:0 10px 30px rgba(0,0,0,.4),0 0 14px rgba(95,168,224,.05);}
+  .destrow .rail{position:absolute;left:0;top:11px;bottom:11px;width:3px;border-radius:3px;background:linear-gradient(180deg,var(--ffi-volt),var(--ffi-volt-deep));box-shadow:0 0 12px rgba(166,60,65,.55);}
+  .destrow .chip{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex:0 0 auto;
+    background:radial-gradient(120% 120% at 30% 20%,rgba(166,60,65,.28),rgba(166,60,65,.12));border:1px solid rgba(166,60,65,.42);box-shadow:inset 0 1px 0 rgba(255,255,255,.10),0 0 12px rgba(166,60,65,.18);}
+  .destrow .chip.blue{background:radial-gradient(120% 120% at 30% 20%,rgba(95,168,224,.26),rgba(95,168,224,.10));border-color:rgba(95,168,224,.40);box-shadow:inset 0 1px 0 rgba(255,255,255,.10),0 0 12px rgba(95,168,224,.18);}
+  .destrow .chip svg{width:20px;height:20px;}
+  .destrow .body{flex:1;min-width:0;}
+  .destrow .lbl{font-family:var(--font-title);color:var(--ffi-title-red);font-weight:700;font-size:16px;line-height:1.05;}
+  .destrow .sub{font-size:12px;color:var(--ffi-ink-2);margin-top:2px;line-height:1.3;}
+  .destrow .metric{font-family:var(--font-mono);font-size:13px;color:var(--ffi-ink);font-variant-numeric:tabular-nums;}
+  .destrow .chev{width:16px;height:16px;stroke:var(--ffi-ink-3);flex:0 0 auto;}
+
+  /* real buttons (globals.css:459-490) with inset highlight + glow */
+  .btn-hero{position:relative;display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;border-radius:999px;border:0;
+    font-family:var(--font-body);font-weight:700;font-size:15px;color:#fff;cursor:pointer;
+    background:linear-gradient(180deg,#a63c41 0%,#6e2225 100%);box-shadow:0 14px 30px -10px var(--ffi-volt-glow),inset 0 1px 0 rgba(255,255,255,.42),inset 0 -1px 0 rgba(0,0,0,.3);}
+  .btn-sec{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:12px;border-radius:12px;
+    font-family:var(--font-body);font-weight:600;font-size:14px;color:#fff;background:linear-gradient(180deg,var(--ffi-surface-2),var(--ffi-surface-1));border:1px solid var(--ffi-hairline-bright);box-shadow:0 8px 22px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.05);}
+
+  .field{margin-bottom:12px;}
+  .field label{display:block;font-family:var(--font-cond);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ffi-ink-2);margin-bottom:6px;}
+  .inp{width:100%;box-sizing:border-box;padding:11px 13px;border-radius:11px;background:linear-gradient(180deg,#0f1622,var(--ffi-surface-1));border:1px solid var(--ffi-hairline);
+    color:var(--ffi-ink);font-family:var(--font-body);font-size:14px;box-shadow:inset 0 2px 6px rgba(0,0,0,.35);}
+  .inp.focus{border-color:rgba(166,60,65,.55);box-shadow:inset 0 2px 6px rgba(0,0,0,.35),0 0 0 3px rgba(166,60,65,.14),0 0 12px rgba(166,60,65,.10);}
+  .inp::placeholder{color:var(--ffi-ink-3);}
+
+  .badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:7px;font-family:var(--font-cond);font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;}
+  .badge.blue{background:rgba(95,168,224,.16);color:var(--ffi-blue-bright);border:1px solid rgba(95,168,224,.22);}
+  .badge.info{background:rgba(95,168,224,.16);color:var(--ffi-blue);border:1px solid rgba(95,168,224,.22);}
+  .pos{display:inline-flex;align-items:center;justify-content:center;min-width:34px;padding:2px 7px;border-radius:6px;font-family:var(--font-cond);font-weight:700;font-size:11px;letter-spacing:.04em;}
+  .pos.rb{background:rgba(86,224,160,.18);color:#56e0a0;} .pos.wr{background:rgba(108,168,255,.18);color:#6ca8ff;}
+  .pos.qb{background:rgba(255,110,138,.18);color:#ff6e8a;} .pos.te{background:rgba(255,176,92,.18);color:#ffb05c;}
+
+  .muted{color:var(--ffi-ink-3);font-size:12px;line-height:1.4;}
+  .subtle{color:var(--ffi-ink-2);font-size:12.5px;line-height:1.45;}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+
+  .divide{height:1px;background:var(--ffi-hairline);margin:0 -15px;}
+  .inforow{display:flex;justify-content:space-between;align-items:center;padding:12px 0;}
+  .inforow .k{font-size:13px;color:var(--ffi-ink-2);} .inforow .v{font-size:13px;color:var(--ffi-ink);font-weight:600;}
+
+  .stats{display:flex;gap:14px;margin-top:14px;}
+  .stat .n{font-family:var(--font-mono);font-size:20px;font-weight:600;font-variant-numeric:tabular-nums;line-height:1;}
+  .stat .l{font-family:var(--font-cond);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ffi-ink-3);margin-top:5px;}
+  .stat.red .n{color:var(--ffi-volt-bright);} .stat.blue .n{color:var(--ffi-blue-bright);} .stat.ink .n{color:var(--ffi-ink);} .stat.pink .n{color:var(--ffi-danger);}
+
+  .actionbar{position:absolute;left:0;right:0;bottom:64px;z-index:2;padding:14px 17px 18px;background:linear-gradient(180deg,transparent,rgba(5,7,12,.94) 34%);}
+
+  /* mobile bottom tab bar, verbatim from app-shell.tsx:249-315 (md:hidden, hidden only on the live room) */
+  .bottomnav{position:absolute;left:0;right:0;bottom:0;z-index:4;height:64px;display:flex;align-items:center;justify-content:space-around;
+    border-top:1px solid rgba(255,255,255,.05);background:rgba(3,16,24,.9);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+    border-radius:12px 12px 0 0;box-shadow:0 -4px 20px rgba(0,0,0,.5);}
+  .navtab{position:relative;flex:1;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:var(--ffi-ink-3);}
+  .navtab svg{width:20px;height:20px;stroke:currentColor;position:relative;z-index:1;}
+  .navtab .nlbl{font-family:var(--font-body);font-size:10px;font-weight:500;color:currentColor;}
+  .navtab.on{color:var(--ffi-volt-bright);}
+  .navtab.on .icwrap{position:relative;}
+  .navtab.on .icwrap::before{content:"";position:absolute;inset:-6px -8px;background:rgba(166,60,65,.12);border-radius:8px;}
+  .navtab.on svg{filter:drop-shadow(0 0 8px rgba(166,60,65,.6));transform:scale(1.1);}
+  .navtab.on .dot{position:absolute;bottom:9px;left:50%;transform:translateX(-50%);width:6px;height:6px;border-radius:50%;background:var(--ffi-volt-bright);box-shadow:0 0 8px rgba(166,60,65,.85);}
+  .navtab .icwrap{padding:6px;}
+  /* raise pinned/scroll content above the 64px nav */
+  .screen.hasnav .pad{padding-bottom:78px;}
+
+  .notes{margin-top:16px;background:linear-gradient(160deg,var(--ffi-surface-2),var(--ffi-surface-1));border:1px solid var(--ffi-hairline-bright);border-radius:16px;padding:15px 16px;box-shadow:0 12px 34px rgba(0,0,0,.4);}
+  .notes h4{margin:0 0 10px;font-family:var(--font-cond);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--ffi-blue-bright);}
+  .notes dl{margin:0;display:grid;grid-template-columns:104px 1fr;gap:7px 12px;}
+  .notes dt{font-family:var(--font-cond);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ffi-ink-3);padding-top:2px;}
+  .notes dd{margin:0;font-size:12.5px;line-height:1.45;color:var(--ffi-ink-2);}
+  .notes dd b{color:var(--ffi-ink);font-weight:600;}
+  .notes .re{color:var(--ffi-title-red);font-weight:600;}
+  .notes .kl{color:var(--ffi-danger);}
+
+  @media (prefers-reduced-motion: reduce){.hero::before{animation:none;}}
+</style>
+
+<div class="wrap">
+  <div class="lede">
+    <h1>SHIELD Screen-Parity Mockups &middot; SP-2 &middot; v2</h1>
+    <p>Rebuilt with the <b>real</b> SHIELD surfaces ported verbatim from <code>globals.css</code>: the navy <code>.stadium-atmos</code> field, the <code>.atmos-grain</code> film-grain texture, elevated card gradients with layered blue-glow shadows, the animated <code>.ffi-hero</code> edge-sheen, and inset-lit brick buttons. There is no photographic background image in SHIELD; the field is this CSS stack. Every off-token literal is killed and swapped to a token; no net-new component (each screen reuses <b>DestRow</b> / <b>QuietLabel</b> from the prep hub plus <code>ffi-primitives.tsx</code>).</p>
+  </div>
+
+  <div class="legend">
+    <span class="pill"><span class="sw" style="background:#c25a5e"></span>Title / action = brick red</span>
+    <span class="pill"><span class="sw" style="background:#5fa8e0"></span>Structure / info = steel blue</span>
+    <span class="pill"><span class="sw" style="background:#eaf1f8"></span>Ink = chrome silver</span>
+    <span class="pill"><span class="sw" style="background:linear-gradient(180deg,#0c1524,#05070c)"></span>Field = stadium-atmos + grain</span>
+    <span class="pill kill">KILLED: blur-3xl glow &middot; #5FA8E0 &middot; #8bacff &middot; #9eadb8 &middot; rgba(77,130,255) &middot; rgba(139,255,69)</span>
+  </div>
+
+  <div class="gallery">
+
+    <!-- ============ 1. DRAFT SETUP ============ -->
+    <div class="col">
+      <p class="tag"><b>01</b> /draft/setup &middot; step 1 format gate</p>
+      <div class="phone"><div class="screen hasnav">
+        <div class="statusbar"><span>9:41</span><span>NASTIES &middot; LIVE</span></div>
+        <div class="pad">
+          <div class="backrow">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Setup
+          </div>
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:4px;">
+            <h1 class="h-red" style="font-size:26px;margin:0;">Draft&nbsp;Setup</h1>
+            <span class="ctx-chip"><span class="dot"></span>Step 1 of 3</span>
+          </div>
+          <p class="subtle" style="margin:0 0 18px;">Confirm your league, managers, and connection before going live.</p>
+
+          <div class="quiet">Live Draft</div>
+
+          <div class="hero">
+            <div style="font-family:var(--font-cond);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--ffi-blue-bright);margin-bottom:6px;">Confirm format</div>
+            <div class="h-red" style="font-size:52px;letter-spacing:.02em;">AUCTION</div>
+            <div style="font-family:var(--font-cond);font-size:15px;letter-spacing:.42em;text-transform:uppercase;color:var(--ffi-ink-3);margin-top:-2px;">Draft</div>
+            <div style="margin-top:14px;font-family:var(--font-title);font-size:17px;color:var(--ffi-ink);">The Nasties</div>
+            <div class="muted" style="margin-top:3px;">12 teams &middot; $200 budget</div>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:6px;margin-top:14px;">
+            <span class="muted">Wrong format?</span>
+            <span style="font-family:var(--font-cond);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--ffi-blue-bright);font-weight:700;">Update in Setup</span>
+          </div>
+        </div>
+
+        <div class="actionbar">
+          <button class="btn-hero">
+            Confirm &middot; Start Auction Draft
+            <svg viewBox="0 0 24 24" width="17" height="17" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+
+        <nav class="bottomnav">
+          <div class="navtab"><div class="icwrap"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></div><span class="nlbl">Research</span></div>
+          <div class="navtab"><div class="icwrap"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h8"/><path d="M4.5 14.5l6-6 3 3-6 6z"/><path d="M13 7l4-4 4 4-4 4z"/></svg></div><span class="nlbl">Live Draft</span></div>
+          <div class="navtab"><div class="icwrap"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4zM7 5H4v2a3 3 0 0 0 3 3M17 5h3v2a3 3 0 0 1-3 3"/></svg></div><span class="nlbl">Post Draft</span></div>
+          <div class="navtab on"><div class="icwrap"><span class="dot"></span><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M12 2v3M12 19v3M22 12h-3M5 12H2M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1M18.4 18.4l-2.1-2.1M7.7 7.7L5.6 5.6"/></svg></div><span class="nlbl">Setup</span></div>
+        </nav>
+      </div></div>
+
+      <div class="notes">
+        <h4>SHIELD translation</h4>
+        <dl>
+          <dt>Header</dt><dd><b class="re">.ffi-title-red</b> H1 (Oswald solid <code>#c25a5e</code>, 26px) + steel-blue context chip with red pulse dot, matching the prep-hub header pattern (<code>prep/page.tsx:206</code>).</dd>
+          <dt>Hero object</dt><dd>Format-gate promoted to <b class="re">.ffi-hero</b> with its animated edge-sheen; giant <b>AUCTION</b> in title-red. <span class="kl">Kills blur-3xl glow (client.tsx:253)</span>.</dd>
+          <dt>Sections</dt><dd><b class="re">QuietLabel</b> (&ldquo;LIVE DRAFT&rdquo;, &ldquo;INPUT METHOD&rdquo;, &ldquo;SESSION DETAILS&rdquo;).</dd>
+          <dt>Off-token</dt><dd><span class="kl">#5FA8E0 / #8bacff / #9eadb8</span> &rarr; steel-blue <code>--ffi-blue</code>; selected option = red volt rail (DestRow).</dd>
+          <dt>Reuses</dt><dd><b>FFISectionHeader, FFICard/-Elevated, FFIButton, FFIBadge, FFIInput, DestRow</b>. No net-new.</dd>
+        </dl>
+      </div>
+    </div>
+
+    <!-- ============ 2. PREP CONFIGURE ============ -->
+    <div class="col">
+      <p class="tag"><b>02</b> /prep/configure &middot; league config</p>
+      <div class="phone"><div class="screen scroll hasnav">
+        <div class="statusbar"><span>9:41</span><span>NASTIES</span></div>
+        <div class="pad">
+          <div class="backrow">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Setup
+          </div>
+          <h1 class="h-red" style="font-size:24px;margin:0 0 3px;">League&nbsp;Config</h1>
+          <p class="subtle" style="margin:0 0 16px;">The Nasties defaults are pre-filled. Edit as needed and save.</p>
+
+          <div class="hero" style="padding:15px 16px;">
+            <div class="h-red" style="font-size:22px;">The Nasties</div>
+            <div class="muted" style="margin-top:3px;">Auction &middot; 12 teams &middot; $200 &middot; PPR, no-K</div>
+          </div>
+
+          <div class="quiet">League Details</div>
+          <div class="card sheen">
+            <div class="grid2">
+              <div class="field" style="margin:0;"><label>League Name</label><div class="inp">The Nasties</div></div>
+              <div class="field" style="margin:0;"><label>Platform</label><div class="inp">ESPN</div></div>
+              <div class="field" style="margin:0;"><label>Draft Format</label><div class="inp" style="color:var(--ffi-ink-3);">Auction (Nasties)</div></div>
+              <div class="field" style="margin:0;"><label>Teams</label><div class="inp">12</div></div>
+              <div class="field" style="margin:0;"><label>Auction Budget ($)</label><div class="inp focus">200</div></div>
+              <div class="field" style="margin:0;"><label>Scoring Format</label><div class="inp">Full PPR</div></div>
+            </div>
+          </div>
+
+          <div class="quiet">Roster Slots</div>
+          <div class="card">
+            <div class="grid3" style="gap:10px;">
+              <div><label style="font-family:var(--font-cond);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ffi-ink-2);">QB</label><div class="inp" style="padding:8px 11px;">1</div></div>
+              <div><label style="font-family:var(--font-cond);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ffi-ink-2);">RB</label><div class="inp" style="padding:8px 11px;">1</div></div>
+              <div><label style="font-family:var(--font-cond);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ffi-ink-2);">WR</label><div class="inp" style="padding:8px 11px;">1</div></div>
+              <div><label style="font-family:var(--font-cond);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ffi-ink-2);">TE</label><div class="inp" style="padding:8px 11px;">1</div></div>
+              <div><label style="font-family:var(--font-cond);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ffi-ink-2);">FLEX</label><div class="inp" style="padding:8px 11px;">3</div></div>
+              <div><label style="font-family:var(--font-cond);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ffi-ink-2);">Bench</label><div class="inp" style="padding:8px 11px;">5</div></div>
+            </div>
+          </div>
+
+          <div class="quiet">Scoring Settings</div>
+          <div class="card">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+              <span class="badge blue">Full PPR</span>
+              <span class="muted">preset values</span>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-top:1px solid var(--ffi-hairline);">
+              <span class="subtle">Receiving &middot; Rec: 1.0, Yds: 0.1, TD: 6</span>
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none"><path d="M9 6l6 6-6 6" stroke="#5e708a" stroke-width="2" stroke-linecap="round"/></svg>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-top:1px solid var(--ffi-hairline);">
+              <span class="subtle">Rushing &middot; Yds: 0.1, TD: 6</span>
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none"><path d="M9 6l6 6-6 6" stroke="#5e708a" stroke-width="2" stroke-linecap="round"/></svg>
+            </div>
+          </div>
+
+          <div style="margin-top:18px;"><button class="btn-hero">Save League Config</button></div>
+        </div>
+
+        <nav class="bottomnav">
+          <div class="navtab"><div class="icwrap"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></div><span class="nlbl">Research</span></div>
+          <div class="navtab"><div class="icwrap"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h8"/><path d="M4.5 14.5l6-6 3 3-6 6z"/><path d="M13 7l4-4 4 4-4 4z"/></svg></div><span class="nlbl">Live Draft</span></div>
+          <div class="navtab"><div class="icwrap"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4zM7 5H4v2a3 3 0 0 0 3 3M17 5h3v2a3 3 0 0 1-3 3"/></svg></div><span class="nlbl">Post Draft</span></div>
+          <div class="navtab on"><div class="icwrap"><span class="dot"></span><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M12 2v3M12 19v3M22 12h-3M5 12H2M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1M18.4 18.4l-2.1-2.1M7.7 7.7L5.6 5.6"/></svg></div><span class="nlbl">Setup</span></div>
+        </nav>
+      </div></div>
+
+      <div class="notes">
+        <h4>SHIELD translation</h4>
+        <dl>
+          <dt>Header</dt><dd><b class="re">.ffi-title-red</b> &ldquo;League Config&rdquo; + back-chevron &ldquo;Setup&rdquo; row.</dd>
+          <dt>Hero object</dt><dd>Top <b class="re">.ffi-hero</b> identity strip anchors the form.</dd>
+          <dt>Sections</dt><dd><b class="re">FFISectionHeader</b> &rarr; QuietLabel dividers (replaces flat <code>h3</code>).</dd>
+          <dt>Off-token</dt><dd><span class="kl">rgba(77,130,255) badge (form.tsx:240)</span> &rarr; <b>FFIBadge</b> steel-blue. Inputs get red volt focus.</dd>
+          <dt>Reuses</dt><dd><b>FFISectionHeader, FFIInput, FFIBadge, FFIButton, FFICard</b>. Collapsible scoring rows keep chevrons.</dd>
+        </dl>
+      </div>
+    </div>
+
+    <!-- ============ 3. PREP RUNS ============ -->
+    <div class="col">
+      <p class="tag"><b>03</b> /prep/runs &middot; run history</p>
+      <div class="phone"><div class="screen scroll hasnav">
+        <div class="statusbar"><span>9:41</span><span>NASTIES</span></div>
+        <div class="pad">
+          <div class="backrow">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Setup
+          </div>
+          <h1 class="h-red" style="font-size:24px;margin:0 0 3px;">Run&nbsp;History</h1>
+          <p class="subtle" style="margin:0 0 16px;">View, load, and compare saved research runs.</p>
+
+          <div class="quiet">Latest Run</div>
+          <div class="hero" style="padding:17px 17px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+              <div class="h-red" style="font-size:19px;">Aug 18, 3:42 PM</div>
+              <span class="badge blue">Completed</span>
+            </div>
+            <div style="margin-top:6px;"><span class="badge info">Balanced (default)</span></div>
+            <div class="stats">
+              <div class="stat ink"><div class="n">312</div><div class="l">Players</div></div>
+              <div class="stat red"><div class="n">28</div><div class="l">Targets</div></div>
+              <div class="stat pink"><div class="n">14</div><div class="l">Avoids</div></div>
+              <div class="stat blue"><div class="n">19</div><div class="l">Value</div></div>
+            </div>
+          </div>
+
+          <div class="quiet">All Runs</div>
+          <div class="destrow">
+            <div class="rail"></div>
+            <div class="chip"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#c25a5e" stroke-width="2"/><path d="M12 7v5l3 2" stroke="#c25a5e" stroke-width="2" stroke-linecap="round"/></svg></div>
+            <div class="body"><div class="lbl" style="font-size:15px;">Aug 17, 9:10 PM</div><div class="sub">Aggressive &middot; 312 players</div></div>
+            <span class="metric">28&nbsp;tgt</span>
+          </div>
+          <div class="destrow">
+            <div class="rail"></div>
+            <div class="chip"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#c25a5e" stroke-width="2"/><path d="M12 7v5l3 2" stroke="#c25a5e" stroke-width="2" stroke-linecap="round"/></svg></div>
+            <div class="body"><div class="lbl" style="font-size:15px;">Aug 15, 2:03 PM</div><div class="sub">Value-Hunter &middot; 308 players</div></div>
+            <span class="metric">31&nbsp;tgt</span>
+          </div>
+
+          <div class="quiet">Top Targets &middot; latest</div>
+          <div class="card sheen">
+            <div style="display:flex;align-items:center;gap:10px;padding:7px 0;">
+              <span class="pos rb">RB</span><span style="flex:1;font-size:13px;color:var(--ffi-ink);">Bijan Robinson</span>
+              <span class="metric" style="font-size:12px;">98.4 &middot; $61</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-top:1px solid var(--ffi-hairline);">
+              <span class="pos wr">WR</span><span style="flex:1;font-size:13px;color:var(--ffi-ink);">Ja&rsquo;Marr Chase</span>
+              <span class="metric" style="font-size:12px;">96.1 &middot; $58</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-top:1px solid var(--ffi-hairline);">
+              <span class="pos te">TE</span><span style="flex:1;font-size:13px;color:var(--ffi-ink);">Brock Bowers</span>
+              <span class="metric" style="font-size:12px;">89.7 &middot; $34</span>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:10px;margin-top:16px;">
+            <button class="btn-sec" style="flex:1;">Refresh Data</button>
+            <button class="btn-hero" style="flex:1;">Compare</button>
+          </div>
+        </div>
+
+        <nav class="bottomnav">
+          <div class="navtab on"><div class="icwrap"><span class="dot"></span><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></div><span class="nlbl">Research</span></div>
+          <div class="navtab"><div class="icwrap"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h8"/><path d="M4.5 14.5l6-6 3 3-6 6z"/><path d="M13 7l4-4 4 4-4 4z"/></svg></div><span class="nlbl">Live Draft</span></div>
+          <div class="navtab"><div class="icwrap"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4zM7 5H4v2a3 3 0 0 0 3 3M17 5h3v2a3 3 0 0 1-3 3"/></svg></div><span class="nlbl">Post Draft</span></div>
+          <div class="navtab"><div class="icwrap"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M12 2v3M12 19v3M22 12h-3M5 12H2M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1M18.4 18.4l-2.1-2.1M7.7 7.7L5.6 5.6"/></svg></div><span class="nlbl">Setup</span></div>
+        </nav>
+      </div></div>
+
+      <div class="notes">
+        <h4>SHIELD translation</h4>
+        <dl>
+          <dt>Header</dt><dd><b class="re">.ffi-title-red</b> &ldquo;Run History&rdquo; + back-chevron row.</dd>
+          <dt>Hero object</dt><dd>Newest run &rarr; <b class="re">.ffi-hero</b> with tabular-nums stat cluster.</dd>
+          <dt>Sections</dt><dd><b class="re">QuietLabel</b>: LATEST RUN / ALL RUNS / TOP TARGETS.</dd>
+          <dt>Off-token</dt><dd><span class="kl">green rgba(139,255,69) badge (client.tsx:66)</span> &rarr; steel-blue; failed stays danger-pink.</dd>
+          <dt>Reuses</dt><dd><b>DestRow</b> (run rows), <b>FFIBadge, FFIPositionBadge, review-cards.tsx, FFIButton</b>.</dd>
+        </dl>
+      </div>
+    </div>
+
+    <!-- ============ 4. SETTINGS ============ -->
+    <div class="col">
+      <p class="tag"><b>04</b> /settings</p>
+      <div class="phone"><div class="screen scroll hasnav">
+        <div class="statusbar"><span>9:41</span><span>NASTIES</span></div>
+        <div class="pad">
+          <h1 class="h-red" style="font-size:26px;margin:0 0 16px;">Setup</h1>
+
+          <div class="hero" style="padding:16px 17px;">
+            <div style="font-family:var(--font-cond);font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--ffi-blue-bright);">Active League</div>
+            <div class="h-red" style="font-size:22px;margin-top:4px;">The Nasties</div>
+            <div class="muted" style="margin-top:3px;">Auction &middot; 12 teams &middot; $200</div>
+          </div>
+
+          <div class="quiet">League</div>
+          <div class="destrow">
+            <div class="rail"></div>
+            <div class="chip"><svg viewBox="0 0 24 24" fill="none"><path d="M4 7h16M4 12h16M4 17h10" stroke="#c25a5e" stroke-width="2" stroke-linecap="round"/></svg></div>
+            <div class="body"><div class="lbl">League Config</div><div class="sub">The Nasties &middot; Auction &middot; 12 &middot; $200</div></div>
+            <svg class="chev" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke-width="2" stroke-linecap="round"/></svg>
+          </div>
+
+          <div class="quiet">Draft</div>
+          <div class="destrow">
+            <div class="rail"></div>
+            <div class="chip"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2v20M5 8l7-6 7 6" stroke="#c25a5e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div class="body"><div class="lbl">Draft Setup</div><div class="sub">Confirm managers before going live</div></div>
+            <svg class="chev" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke-width="2" stroke-linecap="round"/></svg>
+          </div>
+          <div class="destrow">
+            <div class="rail"></div>
+            <div class="chip blue"><svg viewBox="0 0 24 24" fill="none"><path d="M6 4l14 8-14 8V4z" stroke="#5fa8e0" stroke-width="2" stroke-linejoin="round"/></svg></div>
+            <div class="body">
+              <div style="display:flex;align-items:center;gap:7px;"><div class="lbl">Demo Draft</div><span class="badge blue" style="font-size:9px;padding:2px 6px;">Dev</span></div>
+              <div class="sub">Practice run &middot; no real draft</div>
+            </div>
+            <svg class="chev" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke-width="2" stroke-linecap="round"/></svg>
+          </div>
+
+          <div class="quiet">History</div>
+          <div class="destrow">
+            <div class="rail"></div>
+            <div class="chip"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#c25a5e" stroke-width="2"/><path d="M12 7v5l3 2" stroke="#c25a5e" stroke-width="2" stroke-linecap="round"/></svg></div>
+            <div class="body"><div class="lbl">Run History</div><div class="sub">Past research runs</div></div>
+            <svg class="chev" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke-width="2" stroke-linecap="round"/></svg>
+          </div>
+
+          <div class="quiet">Account</div>
+          <div class="card" style="padding:2px 15px;">
+            <div class="inforow"><span class="k">Name</span><span class="v">Joe Rasar</span></div>
+            <div class="divide"></div>
+            <div class="inforow"><span class="k">Email</span><span class="v">joe.rasar@propermuse.co</span></div>
+            <div class="divide"></div>
+            <div class="inforow"><span class="k" style="color:var(--ffi-danger);display:flex;align-items:center;gap:8px;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" stroke="#ff6e8a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Sign out</span><span></span></div>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:8px;margin-top:16px;">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none"><path d="M9 3h6M10 3v5l-4 9a2 2 0 002 3h8a2 2 0 002-3l-4-9V3" stroke="#5e708a" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span class="muted">Demo Draft launches a sim against real player data. No AI calls fired.</span>
+          </div>
+        </div>
+
+        <nav class="bottomnav">
+          <div class="navtab"><div class="icwrap"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></div><span class="nlbl">Research</span></div>
+          <div class="navtab"><div class="icwrap"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h8"/><path d="M4.5 14.5l6-6 3 3-6 6z"/><path d="M13 7l4-4 4 4-4 4z"/></svg></div><span class="nlbl">Live Draft</span></div>
+          <div class="navtab"><div class="icwrap"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4zM7 5H4v2a3 3 0 0 0 3 3M17 5h3v2a3 3 0 0 1-3 3"/></svg></div><span class="nlbl">Post Draft</span></div>
+          <div class="navtab on"><div class="icwrap"><span class="dot"></span><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M12 2v3M12 19v3M22 12h-3M5 12H2M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1M18.4 18.4l-2.1-2.1M7.7 7.7L5.6 5.6"/></svg></div><span class="nlbl">Setup</span></div>
+        </nav>
+      </div></div>
+
+      <div class="notes">
+        <h4>SHIELD translation</h4>
+        <dl>
+          <dt>Header</dt><dd><b class="re">.ffi-title-red</b> H1 &ldquo;Setup&rdquo; (Oswald, 26px).</dd>
+          <dt>Hero object</dt><dd>League identity &rarr; <b class="re">.ffi-hero</b> anchor; screen becomes the prep-hub twin.</dd>
+          <dt>Sections</dt><dd><b class="re">QuietLabel</b> replaces iOS grouped <code>SectionLabel</code>.</dd>
+          <dt>Off-token</dt><dd><span class="kl">#8bacff &ldquo;Dev&rdquo; badge (page.tsx:45)</span> &rarr; <b>FFIBadge</b> steel-blue.</dd>
+          <dt>Reuses</dt><dd><b>DestRow</b> (NavRow &rarr; DestRow), <b>QuietLabel, FFICard + InfoRow, FFIBadge</b>. <b>signOut action preserved</b>.</dd>
+        </dl>
+      </div>
+    </div>
+
+    <!-- ============ 5. AUTH ============ -->
+    <div class="col">
+      <p class="tag"><b>05</b> (auth) sign-in &middot; from scratch</p>
+      <div class="phone"><div class="screen">
+        <div class="statusbar"><span>9:41</span><span></span></div>
+        <div class="pad" style="display:flex;flex-direction:column;justify-content:center;height:calc(100% - 26px);box-sizing:border-box;">
+          <div style="text-align:center;margin-bottom:26px;">
+            <div style="font-family:var(--font-display);font-weight:800;font-size:15px;letter-spacing:.02em;color:var(--ffi-ink);">FANTASY</div>
+            <div class="h-red" style="font-size:40px;line-height:.9;letter-spacing:.01em;">DRAFT ADVISOR</div>
+            <div style="font-family:var(--font-cond);font-size:12px;letter-spacing:.24em;text-transform:uppercase;color:var(--ffi-ink-3);margin-top:8px;">Sign in to your account</div>
+          </div>
+
+          <div class="card-el sheen">
+            <div class="field"><label>Email</label><div class="inp">joe@example.com</div></div>
+            <div class="field"><label>Password</label><div class="inp focus">&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;</div></div>
+            <button class="btn-hero" style="margin-top:6px;">Sign In</button>
+          </div>
+
+          <div style="display:flex;justify-content:space-between;margin-top:16px;padding:0 4px;">
+            <span style="font-size:12.5px;color:var(--ffi-blue-bright);">Forgot password?</span>
+            <span style="font-size:12.5px;color:var(--ffi-ink-3);">No account? <span style="color:var(--ffi-blue-bright);">Sign up</span></span>
+          </div>
+        </div>
+      </div></div>
+
+      <div class="notes">
+        <h4>SHIELD translation &middot; built from scratch</h4>
+        <dl>
+          <dt>Header</dt><dd><b class="re">.ffi-title-red</b> Oswald wordmark over Kanit display; the wordmark is the hero.</dd>
+          <dt>Field / hero</dt><dd>Full-screen navy <b class="re">.stadium-atmos</b> + grain; panel = <b class="re">.ffi-card-elevated</b> with sheen. <span class="kl">Removes shadcn Card + bg-primary/5 blur-3xl (layout.tsx:9)</span>.</dd>
+          <dt>Sections</dt><dd><b class="re">.ffi-input</b> red volt focus; CTA = brick <b class="re">.ffi-btn-hero</b>. Links steel-blue; &ldquo;Check Your Email&rdquo; success reuses the card.</dd>
+          <dt>Reuses</dt><dd><b>FFIButton</b> (hero), <b>FFIInput, FFICard-elevated</b>.</dd>
+          <dt class="re">Preserve</dt><dd><b>All Supabase wiring</b>: <code>useActionState</code> &rarr; <code>signIn/signUp/signOut</code>, field names, redirect to <code>/prep</code>, success screen. Styling-only.</dd>
+        </dl>
+      </div>
+    </div>
+
+  </div>
+</div>
