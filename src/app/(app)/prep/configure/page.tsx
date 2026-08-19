@@ -17,9 +17,15 @@ export default async function ConfigurePage() {
           Setup
         </Link>
         <h2 className="ffi-title-red ffi-display-md">League Config</h2>
-        <p className="ffi-body-md text-[var(--ffi-text-secondary)]">
+        <p className="ffi-body-md text-[var(--ffi-text-secondary)] mb-4">
           The Nasties defaults are pre-filled. Edit as needed and save.
         </p>
+        <div className="ffi-hero px-4 py-3.5">
+          <div className="ffi-title-red font-bold text-[22px] leading-none">The Nasties</div>
+          <p className="ffi-caption mt-1.5 text-[var(--ffi-ink-3)]" style={{ letterSpacing: '0.06em' }}>
+            Auction &middot; 12 teams &middot; $200 &middot; PPR, no-K
+          </p>
+        </div>
       </div>
       <LeagueConfigForm userId={user!.id} />
     </div>

@@ -2,6 +2,20 @@
 
 ---
 
+## 2026-08-18 / SP-4 -- Rebuild /prep/configure to the approved SHIELD mockup
+
+**Class:** output (Design + QA + Delivery lenses). **Sonnet, WORKHORSE.** Visual/layout rebuild only, no Supabase wiring, form submission, validation, or server action changes.
+
+- **What / why:** `/prep/configure`'s header already used `.ffi-title-red` + a back-chevron "Setup" row, matching the SP-2 mockup, but the body was a flat stacked form with no SHIELD hero/section identity, plus one off-token blue badge `rgba(77,130,255,...)` in `league-config-form.tsx`. SP-2's approved mockup (SCREEN 2, `UI/mockup-SHIELD-screens.html`) specified the SHIELD replacement.
+- **`page.tsx`:** added a `.ffi-hero` identity strip below the existing header/subtitle, before `<LeagueConfigForm />` -- "The Nasties" in `.ffi-title-red` plus a `.ffi-caption` line ("Auction, 12 teams, $200, PPR, no-K" via `&middot;` separators, no dashes). Text is static (the app is single-league/Nasties-only), so no new Supabase query was added.
+- **`league-config-form.tsx`:** the 3 flat `h3` section titles (League Details, Roster Slots, Scoring Settings) inside their `ffi-card` divs replaced with a local `QuietLabel` divider (small-caps, `font-cond`, 10px, 0.28em tracking) placed ABOVE each card, copied verbatim from the gold-standard pattern already defined in `prep/page.tsx` (that file stayed off-limits to edit, per the dirty-tree constraint on unrelated uncommitted changes, so the pattern was duplicated locally rather than imported). The off-token blue badge (`rgba(77,130,255,0.16)` background) replaced with `<FFIBadge status="info">`, which resolves through the pre-existing `.ffi-badge-info` CSS class in `globals.css` (`rgba(95,168,224,.16)` bg, `#7fc0ea` text, neither touched by this change) -- zero new color literals introduced. A second `<FFIBadge>` variant (steel token background) added for the "Custom" scoring-format state, which previously had no badge. Inputs already carried `ffi-input ffi-form-input` (red volt focus glow) before this change, so no edit was needed there.
+- **Constraint honored:** zero em/en-dashes. 4 pre-existing em-dashes in code comments (not UI copy) fixed to commas, since the file was already in-diff and the hard no-dash gate applies to the whole changed file.
+- **Not touched:** `actions.ts` (the `createLeague` server action), any Supabase query, and every form field's `name`/`id`/`value`/hidden-input attribute -- confirmed by reading `actions.ts` in full and diffing only JSX/styling moved, so the form still saves exactly as before.
+
+**Gate:** `npm run type-check` 0 errors. `npm run test:run` 497/497 tests green across 38 files (no regressions). `npm run lint` on the 2 touched files: 0 errors, 1 pre-existing unrelated warning (`'userId' is defined but never used`, outer function signature, confirmed via diff to be outside this change). `npm run build` clean. Grep for `77,130,255` on both changed files: 0 matches. Grep for raw hex/rgba on both changed files: 1 match (`rgba(255,110,138,...)` error-banner block), confirmed via `git diff -- league-config-form.tsx | grep "rgba(255,110,138"` returning no output, i.e. entirely pre-existing/untouched, exempt per the gate's own stated clause. Grep for em/en-dashes on both changed files: 0. Visual proof blocked: no live-render possible in this headless sandbox (Browser pane does not composite here, same known constraint as prior R/D/SP-track cards), and `/prep/configure` sits behind Supabase auth so a headless `next start` redirects to sign-in -- verified instead via a thorough source-vs-mockup structural read against SCREEN 2 of `UI/mockup-SHIELD-screens.html` and its SHIELD-translation annotation panel.
+
+---
+
 ## 2026-08-18 / SP-3V -- Validate /draft/setup rebuild (Opus, fresh context) + HIGH-1 fix
 
 **Class:** output (Design + QA lenses). **Opus validator, WORKHORSE (validation).** Independent adversarial check behind SP-3; did NOT write SP-3.

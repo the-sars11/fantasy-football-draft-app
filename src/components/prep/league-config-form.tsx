@@ -5,8 +5,22 @@ import { createLeague, type LeagueFormState } from '@/app/(app)/prep/configure/a
 import type { DraftFormat, ScoringSettings } from '@/lib/supabase/database.types'
 import { ChevronDown, ChevronRight } from 'lucide-react'
 import { getScoringPreset, JOES_ESPN_SCORING, SCORING_FIELDS } from '@/lib/scoring-presets'
+import { FFIBadge } from '@/components/ui/ffi-primitives'
 
-// Nasties locked config — auto-seeded on first render. Source of truth: FANTASY_FOOTBALL_MASTER.md.
+// Quiet section divider, matching the gold-standard pattern from prep/page.tsx
+// (small-caps label above a card, not a title inside it).
+function QuietLabel({ children }: { children: string }) {
+  return (
+    <p
+      className="font-bold text-[10px] uppercase mt-6 mb-2.5"
+      style={{ fontFamily: 'var(--font-cond)', letterSpacing: '0.28em', color: 'var(--ffi-ink-3)' }}
+    >
+      {children}
+    </p>
+  )
+}
+
+// Nasties locked config, auto-seeded on first render. Source of truth: FANTASY_FOOTBALL_MASTER.md.
 const NASTIES_PRESET = {
   name: 'The Nasties',
   platform: 'espn',
@@ -22,7 +36,7 @@ const NASTIES_PRESET = {
 export function LeagueConfigForm({ userId }: { userId: string }) {
   const [state, formAction, pending] = useActionState<LeagueFormState, FormData>(createLeague, {})
 
-  // Format is always auction for the Nasties — no toggle exposed.
+  // Format is always auction for the Nasties, no toggle exposed.
   const [format] = useState<DraftFormat>('auction')
   const [scoringFormat, setScoringFormat] = useState('custom')
   const [scoringSettings, setScoringSettings] = useState<ScoringSettings>(() => ({ ...JOES_ESPN_SCORING }))
@@ -111,8 +125,8 @@ export function LeagueConfigForm({ userId }: { userId: string }) {
         <input type="hidden" name="keepers" value="[]" />
 
         {/* Basic Info */}
+        <QuietLabel>League Details</QuietLabel>
         <div className="ffi-card">
-          <h3 className="ffi-title-md mb-3" style={{ color: 'var(--ffi-ink)' }}>League Details</h3>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <label htmlFor="name" className="text-sm font-medium" style={{ color: 'var(--ffi-ink-2)' }}>League Name</label>
@@ -141,7 +155,7 @@ export function LeagueConfigForm({ userId }: { userId: string }) {
               </select>
             </div>
 
-            {/* Format is auction-only — no toggle */}
+            {/* Format is auction-only, no toggle */}
             <div className="space-y-2">
               <label className="text-sm font-medium" style={{ color: 'var(--ffi-ink-2)' }}>Draft Format</label>
               <div
@@ -196,9 +210,9 @@ export function LeagueConfigForm({ userId }: { userId: string }) {
           </div>
         </div>
 
-        {/* Roster Slots — pre-filled with locked Nasties values (QB1/RB1/WR1/TE1/FLEX3/DEF1/K0/Bench5/IR1) */}
+        {/* Roster Slots, pre-filled with locked Nasties values (QB1/RB1/WR1/TE1/FLEX3/DEF1/K0/Bench5/IR1) */}
+        <QuietLabel>Roster Slots</QuietLabel>
         <div className="ffi-card">
-          <h3 className="ffi-title-md mb-3" style={{ color: 'var(--ffi-ink)' }}>Roster Slots</h3>
           <div className="grid grid-cols-3 gap-4 sm:grid-cols-5">
             {[
               { key: 'qb',    label: 'QB',    default: 1 },
@@ -230,18 +244,22 @@ export function LeagueConfigForm({ userId }: { userId: string }) {
         </div>
 
         {/* Custom Scoring Editor */}
+        <QuietLabel>Scoring Settings</QuietLabel>
         <div className="ffi-card">
-          <h3 className="ffi-title-md mb-3 flex items-center gap-2" style={{ color: 'var(--ffi-ink)' }}>
-            Scoring Settings
-            {scoringFormat === 'custom' && (
-              <span className="ffi-badge" style={{ background: 'var(--ffi-surface-1)', color: 'var(--ffi-ink-2)' }}>Custom</span>
+          <div className="flex items-center gap-2 mb-3">
+            {scoringFormat === 'custom' ? (
+              <FFIBadge className="text-xs" style={{ background: 'var(--ffi-surface-1)', color: 'var(--ffi-ink-2)' }}>
+                Custom
+              </FFIBadge>
+            ) : (
+              <>
+                <FFIBadge status="info" className="text-xs">
+                  {scoringFormat === 'standard' ? 'Standard' : scoringFormat === 'half_ppr' ? 'Half PPR' : 'Full PPR'}
+                </FFIBadge>
+                <span className="text-xs" style={{ color: 'var(--ffi-ink-3)' }}>preset values</span>
+              </>
             )}
-            {scoringFormat !== 'custom' && (
-              <span className="ffi-badge text-xs" style={{ background: 'rgba(77,130,255,0.16)', color: 'var(--ffi-blue-bright)' }}>
-                {scoringFormat === 'standard' ? 'Standard' : scoringFormat === 'half_ppr' ? 'Half PPR' : 'Full PPR'}
-              </span>
-            )}
-          </h3>
+          </div>
           <div className="space-y-3">
             {scoringFormat !== 'custom' && (
               <p className="text-sm" style={{ color: 'var(--ffi-ink-2)' }}>
