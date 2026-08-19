@@ -533,7 +533,7 @@ export function DraftSetupClient() {
                   <Icon className="h-5 w-5" style={{ color: selected ? 'var(--ffi-gold-bright)' : 'var(--ffi-ink-2)' }} aria-hidden="true" />
                   <span
                     className="ffi-caption font-semibold"
-                    style={{ color: selected ? 'var(--ffi-gold-bright)' : '#ffffff' }}
+                    style={{ color: selected ? 'var(--ffi-gold-bright)' : 'var(--ffi-text-primary)' }}
                   >
                     {label}
                   </span>

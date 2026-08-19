@@ -2,6 +2,18 @@
 
 ---
 
+## 2026-08-18 / SP-3V -- Validate /draft/setup rebuild (Opus, fresh context) + HIGH-1 fix
+
+**Class:** output (Design + QA lenses). **Opus validator, WORKHORSE (validation).** Independent adversarial check behind SP-3; did NOT write SP-3.
+
+- **Validation result:** re-ran the full gate independently -- type-check 0, test:run 497/497, build clean; lint failures are 100% pre-existing and outside the 2 setup files (neither `draft/setup/page.tsx` nor `client.tsx` appears in lint output). Structural parity vs the approved SP-2 mockup CONFIRMED: `.ffi-hero` AUCTION word renders (no `blur-3xl` in the DOM), StepChip "Step N of 3" + red pulse dot, three QuietLabel sections (Live Draft / Input Method / Session Details), DestRow-style red volt rail on selected selector rows. Verified `--ffi-gold-bright` resolves to brick-red `#c25a5e` (whole `--ffi-gold*` family repainted to the red palette), so the selected check icon + pulse dot render RED, not gold -- correct. Commit `ad17e11` swept ONLY its 5 intended files; the Supabase/state/handler wiring (`handleSubmit` -> POST `/api/draft/sessions` -> `router.push('/draft/live')`, load effect, manager CRUD) is byte-identical, only JSX/styling moved.
+- **HIGH-1 found + fixed:** SP-3 shipped a raw off-token hex `#ffffff` at `client.tsx:536` (`color: selected ? 'var(--ffi-gold-bright)' : '#ffffff'`), which contradicted its own "0 off-token hex" completion claim (styling must be token-only). Orchestrator (Opus) fixed it: swapped to `var(--ffi-text-primary)` (#eaf1f8, token-consistent with the sibling `var(--ffi-text-muted)` on the next line). Re-verified: raw-6-hex grep on both setup files -> 0 matches; off-token literal grep -> 0; em/en-dash grep -> 0. Gate re-run green: type-check 0, scoped lint 0, build clean (`/draft/setup` static), test:run 497/497.
+- **Verdict:** SP-3V PASS after the one-line HIGH-1 fix. Pixel screenshots blocked in the headless sandbox (Browser pane not compositing, and `/draft/setup` sits behind Supabase auth middleware so a headless `next start` redirects to sign-in) -- verified via the sanctioned source-vs-mockup structural read, same constraint documented across R5/R6/R10b/D5/D6/SP-2.
+
+**Gate:** type-check 0, test:run 497/497, build clean, greps 0. /draft/setup validated -> SP-4 next.
+
+---
+
 ## 2026-08-18 / SP-3 -- Rebuild /draft/setup to the approved SHIELD mockup
 
 **Class:** output (Design + QA + Delivery lenses). **Sonnet, WORKHORSE.** Visual/layout rebuild only, no Supabase wiring, data flow, or server action changes.
