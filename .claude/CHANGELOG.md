@@ -2,6 +2,21 @@
 
 ---
 
+## 2026-08-18 / SP-4V -- Validate /prep/configure rebuild (Opus, fresh context) + MED dash fix
+
+**Class:** output (Design + QA lenses). **Opus, WORKHORSE (validation), OTHER_FAMILY** (did NOT write SP-4). Independent adversarial check behind SP-4 commit `771ecc1`.
+
+- **VERDICT: PASS, 0 HIGH.** The rebuilt `/prep/configure` is structurally correct, gate-green, form-safe, and off-token-clean in source.
+- **Gate re-run (by the validator, from repo root):** `npm run type-check` 0 errors; `npm run test:run` 497/497 across 38 files; `npx eslint` on the 2 touched files 0 errors (1 pre-existing `userId` unused warning, not on a diffed line); `npm run build` clean, `/prep/configure` prerendered static among 56 pages.
+- **Off-token grep:** `77,130,255` = 0 on both source files. **Raw hex/rgba sweep:** 1 match, `rgba(255,110,138,...)` error banner at `league-config-form.tsx:114`, git-blame `a591de36` (2026-08-10), pre-existing and untouched by SP-4, exempt. No SP-3-class new literal.
+- **Structural parity vs mockup SCREEN 2:** full match. Back-chevron Setup row, `.ffi-title-red` header, `.ffi-hero` identity strip, 3 `QuietLabel` dividers replacing flat h3, `<FFIBadge status="info">` replacing the blue badge, red-volt-focus inputs. No missing or extra element.
+- **Supabase/form integrity:** `actions.ts` (`createLeague`) not in the diff; no form field `name`/`id`/`value`/hidden-input attribute changed. Form saves identically.
+- **Commit hygiene:** exactly 5 files in `771ecc1` (2 source + 3 docs); none of the 24 unrelated dirty working-tree files swept in.
+- **1 MED found and fixed by orchestrator (Opus):** the SP-4 build agent wrote 2 literal dashes (U+2014 em + U+2013 en) into the BUILD_PLAN.md SP-4 gate line (inside the phrase describing the dash grep, ironically), violating the "0 dashes in SP-4 doc additions" check. Swapped to ASCII codepoint names; re-verified the SP-4 doc block (BUILD_PLAN lines 672-680) is now 0 dashes. Legacy dashes elsewhere in BUILD_PLAN.md are pre-existing history, out of scope.
+- **Could not verify:** no live pixel render (`/prep/configure` behind Supabase auth in a headless no-composite sandbox). Parity established via source-vs-mockup structural read, the documented fallback used by every prior SP/D/R card.
+
+---
+
 ## 2026-08-18 / SP-4 -- Rebuild /prep/configure to the approved SHIELD mockup
 
 **Class:** output (Design + QA + Delivery lenses). **Sonnet, WORKHORSE.** Visual/layout rebuild only, no Supabase wiring, form submission, validation, or server action changes.
