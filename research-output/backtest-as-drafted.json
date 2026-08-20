@@ -1,0 +1,1517 @@
+{
+  "years": [
+    2022,
+    2023,
+    2024,
+    2025
+  ],
+  "weeks": 14,
+  "generatedFor": "Nasties as-drafted backtest",
+  "rows": [
+    {
+      "year": 2022,
+      "owner": "Rasar",
+      "points": 1693,
+      "top1": 61,
+      "top2": 89,
+      "top2Share": 45,
+      "unmatchedCost": 0,
+      "unmatchedNames": [],
+      "busts": [
+        {
+          "name": "Dalvin Cook",
+          "pos": "RB",
+          "price": 61,
+          "pts": 190
+        },
+        {
+          "name": "Travis Etian",
+          "pos": "RB",
+          "price": 28,
+          "pts": 149
+        }
+      ],
+      "finish": 1
+    },
+    {
+      "year": 2022,
+      "owner": "Leems",
+      "points": 1503,
+      "top1": 57,
+      "top2": 100,
+      "top2Share": 50,
+      "unmatchedCost": 0,
+      "unmatchedNames": [],
+      "busts": [
+        {
+          "name": "Najee Harris",
+          "pos": "RB",
+          "price": 57,
+          "pts": 158
+        },
+        {
+          "name": "Mark Andrews",
+          "pos": "TE",
+          "price": 38,
+          "pts": 158
+        },
+        {
+          "name": "Mike Evans",
+          "pos": "WR",
+          "price": 25,
+          "pts": 158
+        },
+        {
+          "name": "Tyreek Hill",
+          "pos": "WR",
+          "price": 43,
+          "pts": 290
+        }
+      ],
+      "finish": 8
+    },
+    {
+      "year": 2022,
+      "owner": "Reggie",
+      "points": 1458,
+      "top1": 71,
+      "top2": 115,
+      "top2Share": 57,
+      "unmatchedCost": 6,
+      "unmatchedNames": [
+        "Dallas Guntintight($6)"
+      ],
+      "busts": [
+        {
+          "name": "Alvin Kamara",
+          "pos": "RB",
+          "price": 44,
+          "pts": 158
+        },
+        {
+          "name": "Justin Jefferson",
+          "pos": "WR",
+          "price": 71,
+          "pts": 297
+        },
+        {
+          "name": "Aaron Jones",
+          "pos": "RB",
+          "price": 39,
+          "pts": 201
+        }
+      ],
+      "finish": 10
+    },
+    {
+      "year": 2022,
+      "owner": "Crandall",
+      "points": 1511,
+      "top1": 39,
+      "top2": 70,
+      "top2Share": 35,
+      "unmatchedCost": 0,
+      "unmatchedNames": [],
+      "busts": [
+        {
+          "name": "Kyle Pitts",
+          "pos": "TE",
+          "price": 31,
+          "pts": 76
+        },
+        {
+          "name": "Breece Hall",
+          "pos": "RB",
+          "price": 26,
+          "pts": 114
+        },
+        {
+          "name": "Josh Allen",
+          "pos": "QB",
+          "price": 39,
+          "pts": 323
+        }
+      ],
+      "finish": 7
+    },
+    {
+      "year": 2022,
+      "owner": "Kevin",
+      "points": 1649,
+      "top1": 75,
+      "top2": 117,
+      "top2Share": 59,
+      "unmatchedCost": 0,
+      "unmatchedNames": [],
+      "busts": [
+        {
+          "name": "Jonathan Taylor",
+          "pos": "RB",
+          "price": 75,
+          "pts": 144
+        },
+        {
+          "name": "S Barkley",
+          "pos": "RB",
+          "price": 42,
+          "pts": 225
+        }
+      ],
+      "finish": 2
+    },
+    {
+      "year": 2022,
+      "owner": "Bruce",
+      "points": 1565,
+      "top1": 63,
+      "top2": 120,
+      "top2Share": 60,
+      "unmatchedCost": 0,
+      "unmatchedNames": [],
+      "busts": [
+        {
+          "name": "Keenan Allen",
+          "pos": "WR",
+          "price": 34,
+          "pts": 84
+        },
+        {
+          "name": "Derek Henry",
+          "pos": "RB",
+          "price": 63,
+          "pts": 243
+        },
+        {
+          "name": "Stefon Diggs",
+          "pos": "WR",
+          "price": 57,
+          "pts": 278
+        }
+      ],
+      "finish": 6
+    },
+    {
+      "year": 2022,
+      "owner": "Garrett",
+      "points": 1168,
+      "top1": 67,
+      "top2": 112,
+      "top2Share": 56,
+      "unmatchedCost": 6,
+      "unmatchedNames": [
+        "Zach Huts($6)"
+      ],
+      "busts": [
+        {
+          "name": "D'Andre Swift",
+          "pos": "RB",
+          "price": 45,
+          "pts": 132
+        },
+        {
+          "name": "Christian McCaffrey",
+          "pos": "RB",
+          "price": 67,
+          "pts": 269
+        },
+        {
+          "name": "T Higgins",
+          "pos": "WR",
+          "price": 25,
+          "pts": 176
+        }
+      ],
+      "finish": 12
+    },
+    {
+      "year": 2022,
+      "owner": "Cross",
+      "points": 1500,
+      "top1": 75,
+      "top2": 128,
+      "top2Share": 64,
+      "unmatchedCost": 1,
+      "unmatchedNames": [
+        "Naheem Heinz($1)"
+      ],
+      "busts": [
+        {
+          "name": "Jemar Chase",
+          "pos": "WR",
+          "price": 75,
+          "pts": 186
+        },
+        {
+          "name": "Davante Adams",
+          "pos": "WR",
+          "price": 53,
+          "pts": 279
+        }
+      ],
+      "finish": 9
+    },
+    {
+      "year": 2022,
+      "owner": "Shultz",
+      "points": 1619,
+      "top1": 49,
+      "top2": 79,
+      "top2Share": 40,
+      "unmatchedCost": 2,
+      "unmatchedNames": [
+        "Mvs($1)",
+        "Terian Davis Price($1)"
+      ],
+      "busts": [
+        {
+          "name": "Travis Kelce",
+          "pos": "TE",
+          "price": 49,
+          "pts": 257
+        },
+        {
+          "name": "Michael Pittman",
+          "pos": "WR",
+          "price": 30,
+          "pts": 161
+        },
+        {
+          "name": "Patrick Mahomes",
+          "pos": "QB",
+          "price": 30,
+          "pts": 330
+        }
+      ],
+      "finish": 3
+    },
+    {
+      "year": 2022,
+      "owner": "Moe",
+      "points": 1377,
+      "top1": 56,
+      "top2": 109,
+      "top2Share": 55,
+      "unmatchedCost": 4,
+      "unmatchedNames": [
+        "Micole($4)"
+      ],
+      "busts": [
+        {
+          "name": "Javonte Williams",
+          "pos": "RB",
+          "price": 36,
+          "pts": 41
+        },
+        {
+          "name": "Joe Mixon",
+          "pos": "RB",
+          "price": 56,
+          "pts": 193
+        },
+        {
+          "name": "CeeDee Lamb",
+          "pos": "WR",
+          "price": 53,
+          "pts": 211
+        }
+      ],
+      "finish": 11
+    },
+    {
+      "year": 2022,
+      "owner": "Robbie",
+      "points": 1619,
+      "top1": 71,
+      "top2": 107,
+      "top2Share": 54,
+      "unmatchedCost": 0,
+      "unmatchedNames": [],
+      "busts": [
+        {
+          "name": "Cooper Cup",
+          "pos": "WR",
+          "price": 71,
+          "pts": 200
+        },
+        {
+          "name": "Nick Chubb",
+          "pos": "RB",
+          "price": 36,
+          "pts": 224
+        }
+      ],
+      "finish": 4
+    },
+    {
+      "year": 2022,
+      "owner": "Moonshine",
+      "points": 1611,
+      "top1": 65,
+      "top2": 115,
+      "top2Share": 57,
+      "unmatchedCost": 0,
+      "unmatchedNames": [],
+      "busts": [
+        {
+          "name": "Deebo Samuel",
+          "pos": "WR",
+          "price": 50,
+          "pts": 162
+        },
+        {
+          "name": "Austin Ekeler",
+          "pos": "RB",
+          "price": 65,
+          "pts": 293
+        },
+        {
+          "name": "DJ Moore",
+          "pos": "WR",
+          "price": 27,
+          "pts": 135
+        }
+      ],
+      "finish": 5
+    },
+    {
+      "year": 2023,
+      "owner": "Rasar",
+      "points": 1794,
+      "top1": 61,
+      "top2": 99,
+      "top2Share": 50,
+      "unmatchedCost": 0,
+      "unmatchedNames": [],
+      "busts": [
+        {
+          "name": "Tyreek Hill",
+          "pos": "WR",
+          "price": 61,
+          "pts": 323
+        },
+        {
+          "name": "Etienne",
+          "pos": "RB",
+          "price": 38,
+          "pts": 227
+        },
+        {
+          "name": "Rachaad White",
+          "pos": "RB",
+          "price": 27,
+          "pts": 204
+        },
+        {
+          "name": "Jalen Hurts",
+          "pos": "QB",
+          "price": 35,
+          "pts": 302
+        }
+      ],
+      "finish": 1
+    },
+    {
+      "year": 2023,
+      "owner": "Leems",
+      "points": 1453,
+      "top1": 71,
+      "top2": 92,
+      "top2Share": 46,
+      "unmatchedCost": 0,
+      "unmatchedNames": [],
+      "busts": [
+        {
+          "name": "Cooper Kupp",
+          "pos": "WR",
+          "price": 71,
+          "pts": 116
+        }
+      ],
+      "finish": 6
+    },
+    {
+      "year": 2023,
+      "owner": "Reggie",
+      "points": 1303,
+      "top1": 65,
+      "top2": 125,
+      "top2Share": 63,
+      "unmatchedCost": 0,
+      "unmatchedNames": [],
+      "busts": [
+        {
+          "name": "Barkley",
+          "pos": "RB",
+          "price": 60,
+          "pts": 166
+        },
+        {
+          "name": "Travis Kelce",
+          "pos": "TE",
+          "price": 65,
+          "pts": 198
+        },
+        {
+          "name": "Bijan Robinson",
+          "pos": "RB",
+          "price": 56,
+          "pts": 189
+        }
+      ],
+      "finish": 12
+    },
+    {
+      "year": 2023,
+      "owner": "Crandall",
+      "points": 1451,
+      "top1": 70,
+      "top2": 110,
+      "top2Share": 55,
+      "unmatchedCost": 1,
+      "unmatchedNames": [
+        "Renaldo Moore($1)"
+      ],
+      "busts": [
+        {
+          "name": "Austin Ekeler",
+          "pos": "RB",
+          "price": 70,
+          "pts": 150
+        },
+        {
+          "name": "Mark Andrews",
+          "pos": "TE",
+          "price": 32,
+          "pts": 135
+        },
+        {
+          "name": "Patrick Mahomes",
+          "pos": "QB",
+          "price": 40,
+          "pts": 247
+        }
+      ],
+      "finish": 7
+    },
+    {
+      "year": 2023,
+      "owner": "Kevin",
+      "points": 1439,
+      "top1": 49,
+      "top2": 81,
+      "top2Share": 41,
+      "unmatchedCost": 7,
+      "unmatchedNames": [
+        "Sunshine($7)"
+      ],
+      "busts": [
+        {
+          "name": "Derrick Henry",
+          "pos": "RB",
+          "price": 49,
+          "pts": 195
+        },
+        {
+          "name": "Calvin Ridley",
+          "pos": "WR",
+          "price": 32,
+          "pts": 165
+        }
+      ],
+      "finish": 9
+    },
+    {
+      "year": 2023,
+      "owner": "Bruce",
+      "points": 1667,
+      "top1": 68,
+      "top2": 132,
+      "top2Share": 66,
+      "unmatchedCost": 0,
+      "unmatchedNames": [],
+      "busts": [
+        {
+          "name": "Diggs",
+          "pos": "WR",
+          "price": 64,
+          "pts": 234
+        },
+        {
+          "name": "Christian McCaffrey",
+          "pos": "RB",
+          "price": 68,
+          "pts": 311
+        },
+        {
+          "name": "A.J. Brown",
+          "pos": "WR",
+          "price": 47,
+          "pts": 256
+        }
+      ],
+      "finish": 2
+    },
+    {
+      "year": 2023,
+      "owner": "Garrett",
+      "points": 1446,
+      "top1": 81,
+      "top2": 114,
+      "top2Share": 57,
+      "unmatchedCost": 2,
+      "unmatchedNames": [
+        "Pat Friar Tuck($2)"
+      ],
+      "busts": [
+        {
+          "name": "Jefferson",
+          "pos": "WR",
+          "price": 81,
+          "pts": 114
+        },
+        {
+          "name": "Jahmyr Gibbs",
+          "pos": "RB",
+          "price": 33,
+          "pts": 179
+        },
+        {
+          "name": "Rhamondre Stevenson",
+          "pos": "RB",
+          "price": 25,
+          "pts": 146
+        },
+        {
+          "name": "Lamar Jackson",
+          "pos": "QB",
+          "price": 28,
+          "pts": 260
+        }
+      ],
+      "finish": 8
+    },
+    {
+      "year": 2023,
+      "owner": "Cross",
+      "points": 1361,
+      "top1": 85,
+      "top2": 141,
+      "top2Share": 71,
+      "unmatchedCost": 1,
+      "unmatchedNames": [
+        "Mvs($1)"
+      ],
+      "busts": [
+        {
+          "name": "Ja'Marr Chase",
+          "pos": "WR",
+          "price": 85,
+          "pts": 239
+        },
+        {
+          "name": "Najee Harris",
+          "pos": "RB",
+          "price": 28,
+          "pts": 132
+        },
+        {
+          "name": "CeeDee Lamb",
+          "pos": "WR",
+          "price": 56,
+          "pts": 284
+        }
+      ],
+      "finish": 11
+    },
+    {
+      "year": 2023,
+      "owner": "Shultz",
+      "points": 1592,
+      "top1": 43,
+      "top2": 70,
+      "top2Share": 35,
+      "unmatchedCost": 0,
+      "unmatchedNames": [],
+      "busts": [
+        {
+          "name": "Jonathan Taylor",
+          "pos": "RB",
+          "price": 43,
+          "pts": 101
+        },
+        {
+          "name": "Darren Waller",
+          "pos": "TE",
+          "price": 25,
+          "pts": 80
+        },
+        {
+          "name": "Pitts",
+          "pos": "TE",
+          "price": 25,
+          "pts": 111
+        },
+        {
+          "name": "Deebo Samuel",
+          "pos": "WR",
+          "price": 27,
+          "pts": 189
+        }
+      ],
+      "finish": 5
+    },
+    {
+      "year": 2023,
+      "owner": "Moe",
+      "points": 1385,
+      "top1": 59,
+      "top2": 104,
+      "top2Share": 52,
+      "unmatchedCost": 1,
+      "unmatchedNames": [
+        "Chig Okingawa($1)"
+      ],
+      "busts": [
+        {
+          "name": "Nick Chubb",
+          "pos": "RB",
+          "price": 59,
+          "pts": 23
+        },
+        {
+          "name": "Garrett Wilson",
+          "pos": "WR",
+          "price": 45,
+          "pts": 176
+        },
+        {
+          "name": "Chris Olave",
+          "pos": "WR",
+          "price": 34,
+          "pts": 188
+        },
+        {
+          "name": "Breece Hall",
+          "pos": "RB",
+          "price": 26,
+          "pts": 188
+        }
+      ],
+      "finish": 10
+    },
+    {
+      "year": 2023,
+      "owner": "Robbie",
+      "points": 1598,
+      "top1": 55,
+      "top2": 105,
+      "top2Share": 53,
+      "unmatchedCost": 0,
+      "unmatchedNames": [],
+      "busts": [
+        {
+          "name": "Davante Adams",
+          "pos": "WR",
+          "price": 55,
+          "pts": 187
+        },
+        {
+          "name": "Tony Pollard",
+          "pos": "RB",
+          "price": 50,
+          "pts": 187
+        },
+        {
+          "name": "T.J. Hockenson",
+          "pos": "TE",
+          "price": 26,
+          "pts": 197
+        }
+      ],
+      "finish": 4
+    },
+    {
+      "year": 2023,
+      "owner": "Moonshine",
+      "points": 1657,
+      "top1": 52,
+      "top2": 99,
+      "top2Share": 50,
+      "unmatchedCost": 0,
+      "unmatchedNames": [],
+      "busts": [
+        {
+          "name": "Jaylen Waddle",
+          "pos": "WR",
+          "price": 47,
+          "pts": 164
+        },
+        {
+          "name": "Amon Ra St. Brown",
+          "pos": "WR",
+          "price": 52,
+          "pts": 230
+        },
+        {
+          "name": "Joe Mixon",
+          "pos": "RB",
+          "price": 34,
+          "pts": 200
+        },
+        {
+          "name": "Josh Allen",
+          "pos": "QB",
+          "price": 40,
+          "pts": 321
+        }
+      ],
+      "finish": 3
+    },
+    {
+      "year": 2024,
+      "owner": "Rasar",
+      "points": 1665,
+      "top1": 44,
+      "top2": 75,
+      "top2Share": 38,
+      "unmatchedCost": 7,
+      "unmatchedNames": [
+        "Nijigma($7)"
+      ],
+      "busts": [
+        {
+          "name": "A.J. Brown",
+          "pos": "WR",
+          "price": 44,
+          "pts": 156
+        },
+        {
+          "name": "Nico Collins",
+          "pos": "WR",
+          "price": 31,
+          "pts": 156
+        }
+      ],
+      "finish": 3
+    },
+    {
+      "year": 2024,
+      "owner": "Leems",
+      "points": 1617,
+      "top1": 75,
+      "top2": 131,
+      "top2Share": 66,
+      "unmatchedCost": 3,
+      "unmatchedNames": [
+        "Ar15($3)"
+      ],
+      "busts": [
+        {
+          "name": "Tyreek Hill",
+          "pos": "WR",
+          "price": 75,
+          "pts": 177
+        },
+        {
+          "name": "Michael Pittman",
+          "pos": "WR",
+          "price": 25,
+          "pts": 113
+        },
+        {
+          "name": "Barkley",
+          "pos": "RB",
+          "price": 56,
+          "pts": 300
+        }
+      ],
+      "finish": 4
+    },
+    {
+      "year": 2024,
+      "owner": "Reggie",
+      "points": 1488,
+      "top1": 70,
+      "top2": 115,
+      "top2Share": 57,
+      "unmatchedCost": 0,
+      "unmatchedNames": [],
+      "busts": [
+        {
+          "name": "Isiah Pacheco",
+          "pos": "RB",
+          "price": 45,
+          "pts": 46
+        },
+        {
+          "name": "Bijan Robinson",
+          "pos": "RB",
+          "price": 70,
+          "pts": 247
+        },
+        {
+          "name": "Deebo Samuel",
+          "pos": "WR",
+          "price": 25,
+          "pts": 114
+        },
+        {
+          "name": "Devon Achain",
+          "pos": "RB",
+          "price": 25,
+          "pts": 230
+        }
+      ],
+      "finish": 9
+    },
+    {
+      "year": 2024,
+      "owner": "Crandall",
+      "points": 1476,
+      "top1": 39,
+      "top2": 72,
+      "top2Share": 36,
+      "unmatchedCost": 0,
+      "unmatchedNames": [],
+      "busts": [
+        {
+          "name": "Drake London",
+          "pos": "WR",
+          "price": 39,
+          "pts": 197
+        },
+        {
+          "name": "Josh Allen",
+          "pos": "QB",
+          "price": 33,
+          "pts": 309
+        }
+      ],
+      "finish": 10
+    },
+    {
+      "year": 2024,
+      "owner": "Kevin",
+      "points": 1904,
+      "top1": 67,
+      "top2": 117,
+      "top2Share": 59,
+      "unmatchedCost": 0,
+      "unmatchedNames": [],
+      "busts": [
+        {
+          "name": "Justin Jefferson",
+          "pos": "WR",
+          "price": 67,
+          "pts": 235
+        },
+        {
+          "name": "Derek Henry",
+          "pos": "RB",
+          "price": 50,
+          "pts": 254
+        }
+      ],
+      "finish": 1
+    },
+    {
+      "year": 2024,
+      "owner": "Bruce",
+      "points": 1163,
+      "top1": 82,
+      "top2": 113,
+      "top2Share": 56,
+      "unmatchedCost": 0,
+      "unmatchedNames": [],
+      "busts": [
+        {
+          "name": "Christian McCaffrey",
+          "pos": "RB",
+          "price": 82,
+          "pts": 48
+        },
+        {
+          "name": "Chris Olave",
+          "pos": "WR",
+          "price": 30,
+          "pts": 77
+        },
+        {
+          "name": "Cooper Kupp",
+          "pos": "WR",
+          "price": 31,
+          "pts": 166
+        },
+        {
+          "name": "DK Metcalf",
+          "pos": "WR",
+          "price": 25,
+          "pts": 149
+        }
+      ],
+      "finish": 12
+    },
+    {
+      "year": 2024,
+      "owner": "Garrett",
+      "points": 1614,
+      "top1": 72,
+      "top2": 114,
+      "top2Share": 57,
+      "unmatchedCost": 0,
+      "unmatchedNames": [],
+      "busts": [
+        {
+          "name": "Breece Hall",
+          "pos": "RB",
+          "price": 72,
+          "pts": 189
+        },
+        {
+          "name": "Marvin Harrison",
+          "pos": "WR",
+          "price": 42,
+          "pts": 151
+        }
+      ],
+      "finish": 5
+    },
+    {
+      "year": 2024,
+      "owner": "Cross",
+      "points": 1751,
+      "top1": 74,
+      "top2": 144,
+      "top2Share": 72,
+      "unmatchedCost": 1,
+      "unmatchedNames": [
+        "Zach Sharbenay($1)"
+      ],
+      "busts": [
+        {
+          "name": "CeeDee Lamb",
+          "pos": "WR",
+          "price": 74,
+          "pts": 219
+        },
+        {
+          "name": "Ja'Marr Chase",
+          "pos": "WR",
+          "price": 70,
+          "pts": 317
+        },
+        {
+          "name": "Josh Jacobs",
+          "pos": "RB",
+          "price": 29,
+          "pts": 228
+        }
+      ],
+      "finish": 2
+    },
+    {
+      "year": 2024,
+      "owner": "Shultz",
+      "points": 1517,
+      "top1": 43,
+      "top2": 83,
+      "top2Share": 42,
+      "unmatchedCost": 0,
+      "unmatchedNames": [],
+      "busts": [
+        {
+          "name": "Mike Evans",
+          "pos": "WR",
+          "price": 40,
+          "pts": 144
+        },
+        {
+          "name": "Travis Kelce",
+          "pos": "TE",
+          "price": 43,
+          "pts": 158
+        }
+      ],
+      "finish": 7
+    },
+    {
+      "year": 2024,
+      "owner": "Moe",
+      "points": 1346,
+      "top1": 72,
+      "top2": 127,
+      "top2Share": 64,
+      "unmatchedCost": 5,
+      "unmatchedNames": [
+        "Tajay Pierce($5)"
+      ],
+      "busts": [
+        {
+          "name": "Jonathan Taylor",
+          "pos": "RB",
+          "price": 55,
+          "pts": 142
+        },
+        {
+          "name": "St. Brown",
+          "pos": "WR",
+          "price": 72,
+          "pts": 226
+        }
+      ],
+      "finish": 11
+    },
+    {
+      "year": 2024,
+      "owner": "Robbie",
+      "points": 1565,
+      "top1": 58,
+      "top2": 107,
+      "top2Share": 54,
+      "unmatchedCost": 0,
+      "unmatchedNames": [],
+      "busts": [
+        {
+          "name": "Etienne",
+          "pos": "RB",
+          "price": 49,
+          "pts": 95
+        },
+        {
+          "name": "Garrett Wilson",
+          "pos": "WR",
+          "price": 58,
+          "pts": 199
+        },
+        {
+          "name": "Kyren Williams",
+          "pos": "RB",
+          "price": 33,
+          "pts": 223
+        }
+      ],
+      "finish": 6
+    },
+    {
+      "year": 2024,
+      "owner": "Moonshine",
+      "points": 1510,
+      "top1": 53,
+      "top2": 105,
+      "top2Share": 53,
+      "unmatchedCost": 0,
+      "unmatchedNames": [],
+      "busts": [
+        {
+          "name": "Sam LaPorta",
+          "pos": "TE",
+          "price": 40,
+          "pts": 111
+        },
+        {
+          "name": "Puka Nacua",
+          "pos": "WR",
+          "price": 52,
+          "pts": 152
+        },
+        {
+          "name": "Jameer Gibbs",
+          "pos": "RB",
+          "price": 53,
+          "pts": 237
+        },
+        {
+          "name": "Jalen Hurts",
+          "pos": "QB",
+          "price": 25,
+          "pts": 287
+        }
+      ],
+      "finish": 8
+    },
+    {
+      "year": 2025,
+      "owner": "Rasar",
+      "points": 1682,
+      "top1": 31,
+      "top2": 58,
+      "top2Share": 29,
+      "unmatchedCost": 0,
+      "unmatchedNames": [],
+      "busts": [
+        {
+          "name": "Bucky Irving",
+          "pos": "RB",
+          "price": 31,
+          "pts": 104
+        },
+        {
+          "name": "Xavier Worthy",
+          "pos": "WR",
+          "price": 27,
+          "pts": 98
+        },
+        {
+          "name": "Tee Higgins",
+          "pos": "WR",
+          "price": 26,
+          "pts": 169
+        }
+      ],
+      "finish": 3
+    },
+    {
+      "year": 2025,
+      "owner": "Leems",
+      "points": 1477,
+      "top1": 59,
+      "top2": 98,
+      "top2Share": 49,
+      "unmatchedCost": 0,
+      "unmatchedNames": [],
+      "busts": [
+        {
+          "name": "Malik Nabers",
+          "pos": "WR",
+          "price": 59,
+          "pts": 57
+        },
+        {
+          "name": "De'Von Achane",
+          "pos": "RB",
+          "price": 39,
+          "pts": 272
+        }
+      ],
+      "finish": 8
+    },
+    {
+      "year": 2025,
+      "owner": "Reggie",
+      "points": 1586,
+      "top1": 75,
+      "top2": 127,
+      "top2Share": 64,
+      "unmatchedCost": 0,
+      "unmatchedNames": [],
+      "busts": [
+        {
+          "name": "Bijan Robinson",
+          "pos": "RB",
+          "price": 75,
+          "pts": 264
+        },
+        {
+          "name": "Nico Collins",
+          "pos": "WR",
+          "price": 52,
+          "pts": 184
+        },
+        {
+          "name": "Trey McBride",
+          "pos": "TE",
+          "price": 30,
+          "pts": 235
+        },
+        {
+          "name": "Jalen Hurts",
+          "pos": "QB",
+          "price": 25,
+          "pts": 254
+        }
+      ],
+      "finish": 4
+    },
+    {
+      "year": 2025,
+      "owner": "Crandall",
+      "points": 1573,
+      "top1": 79,
+      "top2": 125,
+      "top2Share": 63,
+      "unmatchedCost": 0,
+      "unmatchedNames": [],
+      "busts": [
+        {
+          "name": "Ja'Marr Chase",
+          "pos": "WR",
+          "price": 79,
+          "pts": 222
+        },
+        {
+          "name": "Brock Bowers",
+          "pos": "TE",
+          "price": 39,
+          "pts": 153
+        },
+        {
+          "name": "Jonathan Taylor",
+          "pos": "RB",
+          "price": 46,
+          "pts": 309
+        }
+      ],
+      "finish": 5
+    },
+    {
+      "year": 2025,
+      "owner": "Kevin",
+      "points": 1403,
+      "top1": 54,
+      "top2": 86,
+      "top2Share": 43,
+      "unmatchedCost": 0,
+      "unmatchedNames": [],
+      "busts": [
+        {
+          "name": "Joe Burrow",
+          "pos": "QB",
+          "price": 27,
+          "pts": 60
+        },
+        {
+          "name": "Christian McCaffrey",
+          "pos": "RB",
+          "price": 54,
+          "pts": 328
+        },
+        {
+          "name": "Davante Adams",
+          "pos": "WR",
+          "price": 32,
+          "pts": 212
+        }
+      ],
+      "finish": 11
+    },
+    {
+      "year": 2025,
+      "owner": "Bruce",
+      "points": 1685,
+      "top1": 71,
+      "top2": 130,
+      "top2Share": 65,
+      "unmatchedCost": 0,
+      "unmatchedNames": [],
+      "busts": [
+        {
+          "name": "Saquon Barkley",
+          "pos": "RB",
+          "price": 71,
+          "pts": 187
+        },
+        {
+          "name": "Amon Ra St. Brown",
+          "pos": "WR",
+          "price": 59,
+          "pts": 234
+        },
+        {
+          "name": "Josh Allen",
+          "pos": "QB",
+          "price": 33,
+          "pts": 320
+        }
+      ],
+      "finish": 2
+    },
+    {
+      "year": 2025,
+      "owner": "Garrett",
+      "points": 1529,
+      "top1": 74,
+      "top2": 134,
+      "top2Share": 67,
+      "unmatchedCost": 0,
+      "unmatchedNames": [],
+      "busts": [
+        {
+          "name": "Justin Jefferson",
+          "pos": "WR",
+          "price": 74,
+          "pts": 157
+        },
+        {
+          "name": "Ashton Jeanty",
+          "pos": "RB",
+          "price": 60,
+          "pts": 183
+        }
+      ],
+      "finish": 6
+    },
+    {
+      "year": 2025,
+      "owner": "Cross",
+      "points": 1096,
+      "top1": 77,
+      "top2": 121,
+      "top2Share": 61,
+      "unmatchedCost": 0,
+      "unmatchedNames": [],
+      "busts": [
+        {
+          "name": "CeeDee Lamb",
+          "pos": "WR",
+          "price": 77,
+          "pts": 162
+        },
+        {
+          "name": "Omarion Hampton",
+          "pos": "RB",
+          "price": 29,
+          "pts": 92
+        },
+        {
+          "name": "George Kittle",
+          "pos": "TE",
+          "price": 28,
+          "pts": 106
+        },
+        {
+          "name": "Chase Brown",
+          "pos": "RB",
+          "price": 44,
+          "pts": 186
+        }
+      ],
+      "finish": 12
+    },
+    {
+      "year": 2025,
+      "owner": "Shultz",
+      "points": 1528,
+      "top1": 53,
+      "top2": 93,
+      "top2Share": 47,
+      "unmatchedCost": 0,
+      "unmatchedNames": [],
+      "busts": [
+        {
+          "name": "Alvin Kamara",
+          "pos": "RB",
+          "price": 29,
+          "pts": 101
+        },
+        {
+          "name": "Derrick Henry",
+          "pos": "RB",
+          "price": 53,
+          "pts": 189
+        },
+        {
+          "name": "A.J. Brown",
+          "pos": "WR",
+          "price": 40,
+          "pts": 178
+        }
+      ],
+      "finish": 7
+    },
+    {
+      "year": 2025,
+      "owner": "Moe",
+      "points": 1440,
+      "top1": 71,
+      "top2": 129,
+      "top2Share": 65,
+      "unmatchedCost": 0,
+      "unmatchedNames": [],
+      "busts": [
+        {
+          "name": "Ladd McConkey",
+          "pos": "WR",
+          "price": 58,
+          "pts": 159
+        },
+        {
+          "name": "Jayden Daniels",
+          "pos": "QB",
+          "price": 31,
+          "pts": 117
+        },
+        {
+          "name": "Jahmyr Gibbs",
+          "pos": "RB",
+          "price": 71,
+          "pts": 308
+        }
+      ],
+      "finish": 10
+    },
+    {
+      "year": 2025,
+      "owner": "Robbie",
+      "points": 1706,
+      "top1": 43,
+      "top2": 83,
+      "top2Share": 42,
+      "unmatchedCost": 0,
+      "unmatchedNames": [],
+      "busts": [
+        {
+          "name": "Brian Thomas",
+          "pos": "WR",
+          "price": 43,
+          "pts": 102
+        },
+        {
+          "name": "Drake London",
+          "pos": "WR",
+          "price": 40,
+          "pts": 177
+        },
+        {
+          "name": "Kyren Williams",
+          "pos": "RB",
+          "price": 37,
+          "pts": 203
+        },
+        {
+          "name": "Jaxon Smith Njigba",
+          "pos": "WR",
+          "price": 30,
+          "pts": 287
+        }
+      ],
+      "finish": 1
+    },
+    {
+      "year": 2025,
+      "owner": "Danny",
+      "points": 1468,
+      "top1": 65,
+      "top2": 102,
+      "top2Share": 51,
+      "unmatchedCost": 0,
+      "unmatchedNames": [],
+      "busts": [
+        {
+          "name": "Tyreek Hill",
+          "pos": "WR",
+          "price": 36,
+          "pts": 54
+        },
+        {
+          "name": "Puka Nacua",
+          "pos": "WR",
+          "price": 65,
+          "pts": 259
+        },
+        {
+          "name": "Lamar Jackson",
+          "pos": "QB",
+          "price": 33,
+          "pts": 180
+        },
+        {
+          "name": "Josh Jacobs",
+          "pos": "RB",
+          "price": 37,
+          "pts": 208
+        }
+      ],
+      "finish": 9
+    }
+  ]
+}
