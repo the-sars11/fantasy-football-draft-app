@@ -236,13 +236,27 @@ const SOFT_AVOID_FACTOR = 0.5
  * has actually paid for this player's positional rank), so the simulated field
  * clears studs at ledger prices rather than national ceiling; their lean then
  * tilts appetite around that room price. Strength in (0,1]: 0 = pure room price (no
- * personality), 1 = the full historical lean. At 0.5 a WR-loving owner (lean 1.5)
- * values WRs at 1.25x room and a WR-averse owner (lean 0.5) at 0.75x room, so
+ * personality), 1 = the full historical lean. At 0.35 a WR-loving owner (lean 1.5)
+ * values WRs at ~1.18x room and a WR-averse owner (lean 0.5) at ~0.83x room, so
  * tendency still shows while the clearing price stays anchored to what the room
  * pays. This is what lets distinct strategies separate against a realistic market
  * instead of every seat overpaying to national ceiling.
+ *
+ * Trimmed 0.5 -> 0.35 (Joe, 2026-08-20): at 0.5 the high-lean tail slammed studs
+ * into the $88 cap; 0.35 lands hungry owners in the low-to-mid $80s naturally, so
+ * $85+ stays rare, matching the Nasties ledger (all-time high $85, next $81).
  */
-const OPPONENT_LEAN_STRENGTH = 0.5
+const OPPONENT_LEAN_STRENGTH = 0.35
+
+/**
+ * Hard clearing-price ceiling ($). The 4-draft Nasties ledger has NEVER cleared a
+ * player above $85 (McCaffrey 2024; next $81, a few $80s, tier-1 typically mid/low
+ * $70s). The room anchor + trimmed lean already sit the field there, but noise and
+ * second-price ties can push a contested stud over $90 in rare runs. This caps every
+ * clearing price a hair above the all-time high so the sim never invents a $90+ price
+ * the room has never paid, while $85 stays reachable. (Joe, 2026-08-20.)
+ */
+const LEAGUE_MAX_CLEAR = 88
 
 const POSITION_TO_DEDICATED: Record<BoardPlayer['position'], keyof SlotsRemaining> = {
   QB: 'qb',
@@ -455,7 +469,9 @@ export function runAuctionSim(
     const winner = bids[0].manager
     const top = bids[0].willing
     const second = bids.length > 1 ? bids[1].willing : 0
-    const price = Math.min(top, Math.max(1, second + 1))
+    // Second price + 1, floored at $1, then capped at the room's all-time ceiling
+    // so no run invents a price the Nasties have never actually paid (LEAGUE_MAX_CLEAR).
+    const price = Math.min(top, Math.max(1, second + 1), LEAGUE_MAX_CLEAR)
 
     // Award the player.
     winner.budget -= price

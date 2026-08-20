@@ -1,6 +1,6 @@
 # The Nasties - Draft Research Dataset
 
-Generated 2026-08-20T17:52:21.178Z. 12-team, $200 auction, full PPR, no kicker.
+Generated 2026-08-20T19:31:39.241Z. 12-team, $200 auction, full PPR, no kicker.
 Roster: QB1, RB1, WR1, TE1, FLEX3, DEF1, Bench5.
 Players: 1000. Cache last updated 2026-08-20T01:00:27.018+00:00 (stale=false).
 Sims: 400 Monte-Carlo runs per strategy, 14-game season, seed 42.
@@ -9,87 +9,87 @@ Sims: 400 Monte-Carlo runs per strategy, 14-game season, seed 42.
 
 | # | Strategy | Proj record | Modal record | Mean starter pts | Ceiling / Floor |
 |---|----------|-------------|--------------|------------------|-----------------|
-| 1 | Studs & Duds | 10.8-3.2 | 11-3 (24.8%) | 1944.3 | $88 / $64 |
-| 2 | Stars & Scrubs | 10.7-3.3 | 11-3 (25.3%) | 1939.1 | $90 / $66 |
-| 3 | Balanced Auction | 10.2-3.8 | 11-3 (21%) | 1910.8 | $83 / $69 |
+| 1 | Stars & Scrubs | 11-3 | 11-3 (25.5%) | 1965.9 | $90 / $66 |
+| 2 | Studs & Duds | 10.9-3.1 | 11-3 (26.8%) | 1953.2 | $88 / $64 |
+| 3 | Balanced Auction | 10.5-3.5 | 11-3 (25.5%) | 1930.3 | $83 / $69 |
 
-### 1. Studs & Duds  (studs-and-duds, aggressive risk)
-
-Pool-generated Studs & Duds: 8 anchors (RB/WR/QB/TE), rest at room price.
-
-- Projected record: 10.8-3.2 (best 14-0, worst 3-11).
-- Why: The board supports paying up for Jahmyr Gibbs (~$76), Zay Flowers (~$24), Garrett Wilson (~$23). RB runs COOL (0.84x room vs national). This shape spends $154 on anchors and keeps $46 to complete the roster at room prices.
-- Philosophy: Built from the live board: studs and duds shape emerged as a completable $200 roster given the current pool.
-- Budget split: QB 7%, RB 45%, WR 24%, TE 2%, DST 0%, K 0%, bench 22%.
-- Target prices (expect / walk-up to win): Jahmyr Gibbs $76 (win by $84), Zay Flowers $24 (win by $26), Garrett Wilson $23 (win by $25), Jalen Hurts $23 (win by $25), Quinshon Judkins $35 (win by $39).
-  Targets $181 + reserve $8 = $189 of $200 (completable).
-
-  Most common roster cores this strategy landed:
-  - 11.5% of drafts: Jahmyr Gibbs + Bijan Robinson - avg spend $200, avg record 11.3-2.7.
-  - 9.3% of drafts: Jahmyr Gibbs + Christian McCaffrey - avg spend $200, avg record 11.9-2.1.
-  - 5.5% of drafts: Jahmyr Gibbs + Bijan Robinson + Luther Burden III - avg spend $200, avg record 11-3.
-
-  Players you land most:
-  - Jahmyr Gibbs (RB): 93% of drafts, avg $96.
-  - Sam LaPorta (TE): 88.3% of drafts, avg $1.
-  - Courtland Sutton (WR): 85.3% of drafts, avg $1.
-  - Jameson Williams (WR): 85% of drafts, avg $1.
-  - Tony Pollard (RB): 75.5% of drafts, avg $1.
-  - Rhamondre Stevenson (RB): 74.5% of drafts, avg $1.
-  - Houston Texans (DEF): 65.3% of drafts, avg $1.
-  - Zach Charbonnet (RB): 64% of drafts, avg $1.
-
-### 2. Stars & Scrubs  (stars-and-scrubs, aggressive risk)
+### 1. Stars & Scrubs  (stars-and-scrubs, aggressive risk)
 
 Pool-generated Stars & Scrubs: 8 anchors (RB/WR/TE/QB), rest at room price.
 
-- Projected record: 10.7-3.3 (best 14-0, worst 5-9).
+- Projected record: 11-3 (best 14-0, worst 4-10).
 - Why: The board supports paying up for Jahmyr Gibbs (~$76), Puka Nacua (~$76), Jeremiyah Love (~$29). RB runs COOL (0.84x room vs national). This shape spends $191 on anchors and keeps $9 to complete the roster at room prices.
 - Philosophy: Built from the live board: stars and scrubs shape emerged as a completable $200 roster given the current pool.
 - Budget split: QB 2%, RB 53%, WR 39%, TE 2%, DST 0%, K 0%, bench 4%.
-- Target prices (expect / walk-up to win): Jahmyr Gibbs $76 (win by $84), Puka Nacua $79 (win by $87).
-  Targets $155 + reserve $11 = $166 of $200 (completable).
+- Target prices (expect / walk-up to win): Jahmyr Gibbs $76 (win by $84), Puka Nacua $76 (win by $84), Jeremiyah Love $29 (win by $32), George Kittle $4 (win by $4), Jaxson Dart $3 (win by $3).
+  Targets $188 + reserve $8 = $196 of $200 (completable).
 
   Most common roster cores this strategy landed:
-  - 13% of drafts: Puka Nacua + Jahmyr Gibbs - avg spend $200, avg record 11.2-2.8.
-  - 8% of drafts: Jahmyr Gibbs + Bijan Robinson - avg spend $200, avg record 11.4-2.6.
-  - 6.3% of drafts: Jahmyr Gibbs + Christian McCaffrey - avg spend $200, avg record 12-2.
+  - 10.5% of drafts: Jahmyr Gibbs + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 11.7-2.3.
+  - 9.8% of drafts: Puka Nacua + Jahmyr Gibbs + Luther Burden III - avg spend $200, avg record 11.1-2.9.
+  - 6.5% of drafts: Jahmyr Gibbs + Bijan Robinson + Luther Burden III - avg spend $200, avg record 11.1-2.9.
 
   Players you land most:
-  - Sam LaPorta (TE): 88.5% of drafts, avg $1.
-  - Courtland Sutton (WR): 86% of drafts, avg $1.
-  - Jameson Williams (WR): 84.8% of drafts, avg $1.
-  - Tony Pollard (RB): 77.5% of drafts, avg $1.
-  - Rhamondre Stevenson (RB): 75% of drafts, avg $1.
-  - Jahmyr Gibbs (RB): 67.5% of drafts, avg $96.
-  - Zach Charbonnet (RB): 66% of drafts, avg $1.
-  - Houston Texans (DEF): 63.8% of drafts, avg $1.
+  - Tony Pollard (RB): 84.8% of drafts, avg $1.
+  - Zach Charbonnet (RB): 83.5% of drafts, avg $1.
+  - Jameson Williams (WR): 82.5% of drafts, avg $1.
+  - Luther Burden (WR): 80.3% of drafts, avg $1.
+  - Jahmyr Gibbs (RB): 79.3% of drafts, avg $88.
+  - Courtland Sutton (WR): 71.8% of drafts, avg $1.
+  - Tee Higgins (WR): 65.5% of drafts, avg $1.
+  - Houston Texans (DEF): 65% of drafts, avg $1.
+
+### 2. Studs & Duds  (studs-and-duds, aggressive risk)
+
+Pool-generated Studs & Duds: 8 anchors (RB/WR/QB/TE), rest at room price.
+
+- Projected record: 10.9-3.1 (best 14-0, worst 3-11).
+- Why: The board supports paying up for Jahmyr Gibbs (~$76), Zay Flowers (~$24), Garrett Wilson (~$23). RB runs COOL (0.84x room vs national). This shape spends $154 on anchors and keeps $46 to complete the roster at room prices.
+- Philosophy: Built from the live board: studs and duds shape emerged as a completable $200 roster given the current pool.
+- Budget split: QB 7%, RB 45%, WR 24%, TE 2%, DST 0%, K 0%, bench 22%.
+- Target prices (expect / walk-up to win): Jahmyr Gibbs $76 (win by $84), Zay Flowers $24 (win by $26), Garrett Wilson $23 (win by $25), Jalen Hurts $13 (win by $14), Quinshon Judkins $12 (win by $13).
+  Targets $148 + reserve $8 = $156 of $200 (completable).
+
+  Most common roster cores this strategy landed:
+  - 18.8% of drafts: Jahmyr Gibbs + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 11.4-2.6.
+  - 15% of drafts: Jahmyr Gibbs + Bijan Robinson + Luther Burden III - avg spend $200, avg record 11.2-2.8.
+  - 4% of drafts: Ja'Marr Chase + Jahmyr Gibbs + Zay Flowers - avg spend $200, avg record 10.4-3.6.
+
+  Players you land most:
+  - Jahmyr Gibbs (RB): 91.3% of drafts, avg $88.
+  - Tony Pollard (RB): 83% of drafts, avg $1.
+  - Jameson Williams (WR): 82.3% of drafts, avg $1.
+  - Zach Charbonnet (RB): 81.3% of drafts, avg $1.
+  - Courtland Sutton (WR): 76% of drafts, avg $1.
+  - Luther Burden (WR): 75.3% of drafts, avg $1.
+  - Houston Texans (DEF): 62.5% of drafts, avg $1.
+  - Tee Higgins (WR): 60.3% of drafts, avg $1.
 
 ### 3. Balanced Auction  (balanced-auction, balanced risk)
 
 Pool-generated Balanced Auction: 8 anchors (RB/WR/TE/QB/DEF), rest at room price.
 
-- Projected record: 10.2-3.8 (best 14-0, worst 4-10).
+- Projected record: 10.5-3.5 (best 14-0, worst 2-12).
 - Why: The board supports paying up for Omarion Hampton (~$37), Josh Allen (~$36), Trey McBride (~$35). RB runs COOL (0.84x room vs national). This shape spends $194 on anchors and keeps $6 to complete the roster at room prices.
 - Philosophy: Built from the live board: balanced shape emerged as a completable $200 roster given the current pool.
 - Budget split: QB 18%, RB 33%, WR 24%, TE 20%, DST 3%, K 0%, bench 2%.
-- Target prices (expect / walk-up to win): Omarion Hampton $37 (win by $41), Josh Allen $36 (win by $40), Trey McBride $49 (win by $54), Jeremiyah Love $57 (win by $63).
-  Targets $179 + reserve $9 = $188 of $200 (completable).
+- Target prices (expect / walk-up to win): Omarion Hampton $37 (win by $41), Josh Allen $36 (win by $40), Trey McBride $35 (win by $39), Jeremiyah Love $29 (win by $32), Zay Flowers $24 (win by $26).
+  Targets $161 + reserve $8 = $169 of $200 (completable).
 
   Most common roster cores this strategy landed:
-  - 5.3% of drafts: Jahmyr Gibbs + Christian McCaffrey - avg spend $200, avg record 11.8-2.2.
-  - 4.8% of drafts: Jahmyr Gibbs + Bijan Robinson - avg spend $200, avg record 11-3.
-  - 4.5% of drafts: Jahmyr Gibbs + Bijan Robinson + Luther Burden III - avg spend $200, avg record 11.1-2.9.
+  - 13% of drafts: Jahmyr Gibbs + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 11.4-2.6.
+  - 9.3% of drafts: Jahmyr Gibbs + Bijan Robinson + Luther Burden III - avg spend $200, avg record 11.1-2.9.
+  - 3% of drafts: Bijan Robinson + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 10.8-3.2.
 
   Players you land most:
-  - Sam LaPorta (TE): 86.3% of drafts, avg $1.
-  - Courtland Sutton (WR): 80.5% of drafts, avg $1.
-  - Jameson Williams (WR): 76.8% of drafts, avg $1.
-  - Rhamondre Stevenson (RB): 70% of drafts, avg $1.
-  - Tony Pollard (RB): 67.8% of drafts, avg $1.
-  - Houston Texans (DEF): 62.5% of drafts, avg $1.
-  - Carnell Tate (WR): 58% of drafts, avg $1.
-  - Zach Charbonnet (RB): 55.8% of drafts, avg $1.
+  - Jameson Williams (WR): 81.3% of drafts, avg $1.
+  - Tony Pollard (RB): 81.3% of drafts, avg $1.
+  - Zach Charbonnet (RB): 78.5% of drafts, avg $1.
+  - Courtland Sutton (WR): 73% of drafts, avg $1.
+  - Luther Burden (WR): 71.8% of drafts, avg $1.
+  - Houston Texans (DEF): 62.3% of drafts, avg $1.
+  - Sam LaPorta (TE): 60.5% of drafts, avg $1.
+  - Jahmyr Gibbs (RB): 59% of drafts, avg $87.
 
 ## League intel (Nasties ledger)
 
@@ -121,7 +121,7 @@ Positional inflation (where the room over- or under-pays vs national):
   Target - worth ~$33, room pays ~$23. Win him at or under $28.  [+$10 POCKET]
 - **Bo Nix** (DEN, bye 10) - $28-$33 (base $31) league band, land odds 0%.
   Target - worth ~$33, room pays ~$28. Win him at or under $31.  [+$5 POCKET]
-- **Jayden Daniels** (WAS, bye 7) - $15-$26 (base $21) league band, land odds 6.3%.
+- **Jayden Daniels** (WAS, bye 7) - $15-$26 (base $21) league band, land odds 12.5%.
   Target - worth ~$26, room pays ~$15. Win him at or under $21.  [+$11 POCKET]
 
 ### RB
@@ -163,7 +163,7 @@ Positional inflation (where the room over- or under-pays vs national):
   Let him go - room pays ~$57 over his ~$49 worth here.  [-$8 TAX]
 - **A.J. Brown** (NE, bye 11) - $43-$54 (base $49) league band, land odds 18.8%.
   Let him go - room pays ~$54 over his ~$43 worth here.  [-$11 TAX]
-- **Drake London** (ATL, bye 11) - $41-$48 (base $45) league band, land odds 0%.
+- **Drake London** (ATL, bye 11) - $41-$48 (base $45) league band, land odds 6.3%.
   Let him go - room pays ~$48 over his ~$41 worth here.  [-$7 TAX]
 - **Zay Flowers** (BAL, bye 13) - $24-$41 (base $33) league band, land odds 6.3%.
   Target - worth ~$41, room pays ~$24. Win him at or under $33. Watch the injury tag - trim the bid.  [+$17 POCKET, INJ QUESTIONABLE]
@@ -172,11 +172,11 @@ Positional inflation (where the room over- or under-pays vs national):
 
 ### TE
 
-- **Brock Bowers** (LV, bye 13) - $49-$53 (base $51) league band, land odds 18.8%.
+- **Brock Bowers** (LV, bye 13) - $49-$53 (base $51) league band, land odds 12.5%.
   Target - worth ~$53, room pays ~$49. Win him at or under $51.  [+$4 POCKET]
 - **Trey McBride** (ARI, bye 14) - $40-$49 (base $45) league band, land odds 18.8%.
   Let him go - room pays ~$49 over his ~$40 worth here.  [-$9 TAX]
-- **Colston Loveland** (CHI, bye 10) - $28-$35 (base $32) league band, land odds 6.3%.
+- **Colston Loveland** (CHI, bye 10) - $28-$35 (base $32) league band, land odds 0%.
   Let him go - room pays ~$35 over his ~$28 worth here.  [-$7 TAX]
 - **Harold Fannin Jr.** (CLE, bye 11) - $24-$27 (base $26) league band, land odds 12.5%.
   Fair value ~$26 (band $24-$27).

@@ -2,6 +2,18 @@
 
 ---
 
+## 2026-08-20 / Sim price cap -- no clearing price above the room's all-time high
+
+**Class:** pipeline (Architecture + QA lenses). Joe: "Nobody is going above $90 for a player in my league. Highest EVER paid was $85 (McCaffrey 2024), next $81, a few $80s, tier-1 typically mid/low $70s." Even after the room anchor, contested studs still cleared ~$93 in-sim because the high-lean tail (`OPPONENT_LEAN_STRENGTH = 0.5`, `MAX_LEAN 2.5`) plus second-price ties pushed winning bids past $90. Joe approved: **$88 hard cap + lean 0.35**.
+
+- **Change (`src/lib/draft/sim-engine.ts`):** (1) `OPPONENT_LEAN_STRENGTH` **0.5 -> 0.35** so a hungry owner (lean 1.5) now bids ~1.18x room instead of 1.25x, landing the tail in the low-to-mid $80s naturally rather than getting slammed into the cap. (2) New `LEAGUE_MAX_CLEAR = 88` applied at the clearing step: `price = min(top, max(1, second + 1), LEAGUE_MAX_CLEAR)`. $88 is a hair above the ledger's all-time high ($85), so $85 stays reachable but no run ever invents a $90+ price the Nasties have never paid.
+- **Proof (regenerated `research-output/dataset.json`, real 2026 cache, 11 real ledger owners, 400 runs/strategy):** the GLOBAL max of every price/clearing field in the entire dataset is exactly **$88** -- zero players above $90. Joe's targeted anchors land at the cap (Gibbs $88, Nacua $88 -- `avgPrice` is exactly 88 across ~317 lands, so the cap binds on every win, confirming pre-cap bids ran past $90), McCaffrey/Bijan $86, Chase $75, everyone else well below.
+- **Known tension (surfaced to Joe, not hidden):** the two most-contested anchors sit AT the $88 cap, $3 above the $85 all-time high. That is the cap clipping genuine $90+ tails exactly as specified. If Joe wants anchors in the low $80s instead, the lever is a lower cap ($85) or trimming the me-seat target boost; he chose $88 knowingly.
+
+**Gate:** `npm run type-check` 0 errors. `npm run test:run` **555/555** (LR-1 lean-split still passes -- direction survives the strength trim; determinism tests re-baseline on the same seed). `npx eslint src/lib/draft/sim-engine.ts` exit 0. `research-output/` regenerated. Deterministic (SIM_SEED=42). No em/en-dashes.
+
+---
+
 ## 2026-08-20 / Wire room-price model into the LIVE app (both gaps closed)
 
 **Class:** pipeline (Architecture + QA lenses). The two fixes below (target prices + sim field on room price) were proven in the HEADLESS runner but were **inert in the actual app**. Joe's instruction: "make sure what was done will work inside the actual app itself when I go back to it." An in-app audit found two wiring gaps; both are now closed so the live Strategy and Simulate screens show the same room-anchored numbers as the headless report.
