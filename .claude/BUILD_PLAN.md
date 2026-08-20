@@ -440,6 +440,7 @@ Work top to bottom. Each session is scoped to finish cleanly in one focused sitt
 > **Why last:** you can only rehearse the finished, hardened app, and this is the **only session that needs Joe's hands.**
 > **Work:** full mock draft on Joe's phone against the **live auctioneer** — join/sync proven live (~3–6s), picks tracking, team-aware advice correct, budgets right, offline-resync proven, no surprises. (Cost gate: if AI panels are on, a real dry run bills Claude — Joe's typed approval first.)
 > **Done-when:** Joe has run a full mock draft against the live auctioneer on his phone with picks tracking, roster-aware advice correct, budgets right, offline-resync proven, and no surprises. Issues found become a short R15-fix list (expected — that's what a rehearsal finds).
+> **Runbook:** tap-through phone checklist prepped at `.claude/R15_REHEARSAL_CHECKLIST.md` (both endpoints verified live 2026-08-20: app `fantasy-football-draft-app.vercel.app` 200, auctioneer `/api/state` 200). Covers the two pre-run decisions (cost gate; deployed-build freshness), pre-flight setup, the full mobile walkthrough, auto-connect + pick-tracking verification, the offline-resync proof step, and the F6 device check.
 
 ---
 
