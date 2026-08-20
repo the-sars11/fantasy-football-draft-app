@@ -4,7 +4,7 @@
 **Step:** 1 of the dev-workflow-builder UX/UI universal process.
 **Created:** 2026-07-05 (after G0 approval "yes, go").
 **Starting state:** FULL-BUT-TRASH. Engine untouched; UI rebuilt screen-by-screen.
-**Global anchor (personality lead):** EA FC 25 + Linear. Per-screen anchors are assigned at G1.5 (Step 2 screen map), not here.
+**Global anchor (personality lead):** EA FC 25. Per-screen anchors are assigned at G1.5 (Step 2 screen map), not here.
 **Feeds:** `.claude/UX_DISCOVERY_AGENT_OUTPUTS.md` (Step 0 findings). Audit trail: `.claude/UX_REDESIGN_STATE.md`.
 
 ---
@@ -49,7 +49,7 @@ During a LIVE draft the cockpit is immersive and the bottom nav recedes (the dra
 | Settings | `/settings` | UTILITY | |
 | Auth (4 screens) | `/(auth)/*` | UTILITY | Token + primitive sweep only |
 
-HERO = full spec + mockup + two-session build cadence. SECONDARY = token + primitive + state sweep against Linear after the heroes land. UTILITY = token sweep only.
+HERO = full spec + mockup + two-session build cadence. SECONDARY = token + primitive + state sweep for density without noise after the heroes land. UTILITY = token sweep only.
 
 ---
 
@@ -78,7 +78,7 @@ Each move gets an approve / reject / revise vote. My recommendation is stated on
 **BM7 - Defer player-intel (`/prep/players`) out of the HERO set.** Its sentiment/tags are mocked (`intel/service.ts:46-58`, `getMockSystemTags()`). Keep it SECONDARY and redesign once the data is real.
 - *Recommend: APPROVE.* Designing a hero screen on fake data is a trap.
 
-**BM8 - Command palette on desktop prep/season surfaces only, not the phone cockpit.** Adds the one missing premium element (Cmd-K, Linear anchor) where it fits, and deliberately does not force it onto the touch-first draft cockpit.
+**BM8 - Command palette on desktop prep/season surfaces only, not the phone cockpit.** Adds the one missing premium element (Cmd-K anchor) where it fits, and deliberately does not force it onto the touch-first draft cockpit.
 - *Recommend: APPROVE.* Right tool, right surface; a Cmd-K on a phone at arm's length is theater.
 
 ---

@@ -295,7 +295,7 @@ Task tracking: `[ ]` not started · `[~]` in progress · `[x]` done · `[!]` blo
 - FF-315: offline resync + reconciliation — auctioneer is system of record; `reconcileWithAuctioneerPicks` in `state.ts` + corrections banner; 35 unit tests. Spec `.claude/OFFLINE_RESYNC_SPEC.md`. **Live-verified: pending → DR-7.3.**
 
 **UX-V2 — GRIDIRON redesign** `[x]` (UXV2-1..8, 2026-06-04 → 2026-08-09)
-- Direction: EA FC energy + Linear discipline; colorful-dark canvas, volt-green = the moment/value/action, electric blue = structure; Anton/Saira Condensed/JetBrains Mono; performant (no backdrop-filter stacks). No app-wide gold.
+- Direction: EA FC energy + dense-calm discipline; colorful-dark canvas, volt-green = the moment/value/action, electric blue = structure; Anton/Saira Condensed/JetBrains Mono; performant (no backdrop-filter stacks). No app-wide gold.
 - Motion system (`lib/motion.ts`, motion components). Prep hub, Draft Board, Player Pool, Review rebuilt to GRIDIRON.
 - UXV2-6: Live Auction Draft Room built — decision-first: status bar → On-the-Block hero with "What To Do" (`lib/draft/what-to-do.ts`, HOLD/BID/PUSH/PASS + cap + rationale) → awareness/budget/tier → My Team → bottom nav → block-picker + fix-a-pick sheets. Research-tab in-room view. Scoped `live-room/theme.ts` palette.
 - UXV2-7: reduced-motion DIAL-DOWN + perf/arm's-length pass (lean, no filter stack). UXV2-8: full-track VERIFY + DESIGN docs reconciled to v3.1.

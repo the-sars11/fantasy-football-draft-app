@@ -72,7 +72,7 @@ Draft app (the brains + what to redesign):
 - `src/app/(app)/draft/live/client.tsx` — the live cockpit (all the intel to preserve).
 - `src/app/(app)/prep/*`, `src/app/(app)/season/*`, `src/components/ui/*`, `src/components/layout/app-shell.tsx`.
 - `.claude/mockups/draft-room-phone-shot.png` + `real-prep-gridiron.png` — the current look (keep the info, fix the layout).
-- `.claude/BUILD_PLAN.md`, `.claude/UX_REDESIGN_STATE.md`, `.claude/UX_IA_PROPOSAL.md` — existing plan/IA (this overhaul supersedes the old "EA FC + Linear, no gold, new fonts" direction).
+- `.claude/BUILD_PLAN.md`, `.claude/UX_REDESIGN_STATE.md`, `.claude/UX_IA_PROPOSAL.md` — existing plan/IA (this overhaul supersedes the old "EA FC + dense-calm, no gold, new fonts" direction).
 
 Stack is identical in both: Next 16, React 19.2.4, Tailwind 4, framer-motion 12.38.0, lucide 0.577.0 —
 so the auctioneer CSS ports as plain CSS. Draft app also has shadcn-on-@base-ui primitives + an FFI CSS

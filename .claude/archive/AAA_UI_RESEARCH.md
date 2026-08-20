@@ -9,7 +9,7 @@ shipped. Personality and scope were chosen by Joe.
 - DFS leaders win on speed + clarity + a live pulse, not visual maximalism. Underdog reads as
   clean/low-friction; Sleeper as best-in-class flows; DraftKings leans on live in-game updates.
   ([CBS Sports](https://www.cbssports.com/betting/news/best-dfs-apps/), [FOX Sports](https://www.foxsports.com/stories/betting/best-dfs-apps))
-- The most-cited "expensive UI" decision across Stripe/Linear/Vercel is color-temperature
+- The most-cited "expensive UI" decision across top-tier design teams is color-temperature
   discipline (every surface and shadow shares one hue/temperature), one type family per role,
   six crafted button states, behavioral density over visual density, and designed motion curves
   (define your curves and durations, do not default them).
@@ -79,7 +79,7 @@ reduced-motion respected on every new animation, WCAG-minded (cyan and gold-on-g
 
 ## Sources
 
-CBS Sports DFS; FOX Sports DFS; Mantlr (Stripe/Linear/Vercel premium UI); Devouring Details;
+CBS Sports DFS; FOX Sports DFS; Mantlr (premium UI craft); Devouring Details;
 rauno.me; Apple Sports Live Activities (MacRumors); ESPN NFL Draft 2025 production (SVG);
 ESPN football graphics overhaul (NewscastStudio); View Transitions baseline (web.dev); MDN
 @property; Tailwind v4 OKLCH; caniuse scroll-driven animations; MDN Navigator.vibrate. Full URLs

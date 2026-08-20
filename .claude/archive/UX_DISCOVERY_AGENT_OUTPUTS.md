@@ -3,7 +3,7 @@
 **Step 0 of the dev-workflow-builder UX/UI universal process.**
 **Run date:** 2026-07-05.
 **Starting state:** FULL-BUT-TRASH (full working app, strong engine, GRIDIRON UI being discarded).
-**Anchor:** EA FC 25 + Linear ("EA FC cockpit"). Per-screen anchors required at G1.5.
+**Anchor:** EA FC 25 ("EA FC cockpit"). Per-screen anchors required at G1.5.
 **Purpose of this file:** resume-safe persistence of the raw discovery-agent findings that feed the Step 0 briefing and every downstream artifact. Append-only reference; do not edit prior sections.
 
 **Run note (process honesty):** The first pass dispatched 4 `general-purpose` discovery agents. Two of them (UI audit and backend) delegated to their own sub-agents in a cascade and returned placeholder stubs instead of findings. Recovery: the UI audit was re-driven inline to a full result; the auctioneer inventory was re-run with read-only Explore agents (no delegation possible); the backend Explore died twice on `FailedToOpenSocket` API errors but returned a full file:line audit on a third resume. All four domains are now backed by real findings. Lesson for future Step 0 runs: use read-only Explore agents for discovery so they cannot cascade.
@@ -160,7 +160,7 @@ No Track-2 artifacts (`UX_OVERHAUL_KICKOFF.md:9`): no personality lock, IA propo
 MISSING (all): `UX_PERSONALITY_LOCK.md`, `UX_IA_PROPOSAL.md`, `UX_REDESIGN_SCREEN_MAP.md`, `UX_REDESIGN_STATE.md`, `UX_DISCOVERY_AGENT_OUTPUTS.md` (this file is the first), the 5 per-app files (`product-brief.md`, `ux-flows.md`, `screen-inventory.md`, `design-system.md`, `ai-design-rules.md`), `LEARNED_UX_RULES.md`, per-screen `UX_REDESIGN_<SCREEN>_SPEC.md`, `docs/ux_redesign/*.html` (the directory does not exist). Matches the kickoff: FFDA has never been through the methodology.
 
 ### What EXISTS - pre-methodology, demoted to Reference Board input (Pit Lane treatment)
-- `.claude/DESIGN_SYSTEM.md` - GRIDIRON v3.0 (2026-06-04), self-declared "LOCKED" (volt/electric-blue, Anton/Saira, EA FC + Linear). Never locked under the methodology (no 8-section vote, no OKLCH, no per-screen anchor). Reference Board tile only.
+- `.claude/DESIGN_SYSTEM.md` - GRIDIRON v3.0 (2026-06-04), self-declared "LOCKED" (volt/electric-blue, Anton/Saira, EA FC energy). Never locked under the methodology (no 8-section vote, no OKLCH, no per-screen anchor). Reference Board tile only.
 - `.claude/UI_DESIGN_SPEC.md` - older "Tactical Hologram" HUD spec (2026-06-02), itself already superseded twice. Three directions deep; proves the pre-methodology process thrashed without ever locking. Reference Board input.
 - `.claude/UI_EVAL_2026.md` - April 2026 eval against ad hoc criteria, predates `UX_UI_EVAL_RUBRIC.md`. Historical only, not a valid G9 eval.
 - `.claude/mockups/*.html,*.png` (GRIDIRON set) - the only viewable recent design; the newer 2026-06-25 EA-FC direction is unrecoverable. Demoted Reference Board tiles.

@@ -48,7 +48,7 @@ Offline resync is handled by `reconcileWithAuctioneerPicks` in `state.ts` (spec:
 ## Design System
 
 **GRIDIRON** -- see `DESIGN_SYSTEM.md` v3.1 for the full spec.
-Direction: EA FC energy + Linear discipline.
+Direction: EA FC energy + dense-calm discipline.
 Palette: colorful-dark canvas, volt-green = the moment/value/action, electric blue = structure.
 Type: Anton / Saira Condensed / JetBrains Mono.
 Motion: `lib/motion.ts` (performant, no backdrop-filter stacks). Reduced-motion = dial-down (not strict-off).
