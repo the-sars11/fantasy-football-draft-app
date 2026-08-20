@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generatedAt": "2026-08-20T16:04:46.034Z",
+    "generatedAt": "2026-08-20T17:52:21.178Z",
     "league": "The Nasties",
     "playerCount": 1000,
     "simRunsPerStrategy": 400,
@@ -607,14 +607,14 @@
           "runs": 400,
           "games": 14,
           "numManagers": 12,
-          "meanStarterPoints": 1917.5,
+          "meanStarterPoints": 1939.1,
           "meanRank": 1.3,
-          "meanWins": 10.4,
-          "meanLosses": 3.6,
+          "meanWins": 10.7,
+          "meanLosses": 3.3,
           "modalRecord": {
             "wins": 11,
             "losses": 3,
-            "frequencyPct": 23.5
+            "frequencyPct": 25.3
           },
           "bestRecord": {
             "wins": 14,
@@ -628,555 +628,39 @@
         "topRosters": [
           {
             "coreIds": [
-              "36d658e4-e581-4119-b69d-3c4ba704011a",
-              "4150c2f0-ee05-4d80-878c-42c418fb7b4f"
-            ],
-            "coreNames": [
-              "Jahmyr Gibbs",
-              "Jeremiyah Love"
-            ],
-            "frequency": 21,
-            "frequencyPct": 5.3,
-            "representative": [
-              {
-                "id": "36d658e4-e581-4119-b69d-3c4ba704011a",
-                "name": "Jahmyr Gibbs",
-                "position": "RB",
-                "price": 129,
-                "ceiling": 96,
-                "projectedPoints": 374
-              },
-              {
-                "id": "4150c2f0-ee05-4d80-878c-42c418fb7b4f",
-                "name": "Jeremiyah Love",
-                "position": "RB",
-                "price": 59,
-                "ceiling": 44,
-                "projectedPoints": 269.6
-              },
-              {
-                "id": "62e862bf-a54f-4105-bc18-157f6be7ad93",
-                "name": "Terry McLaurin",
-                "position": "WR",
-                "price": 2,
-                "ceiling": 20,
-                "projectedPoints": 220.1
-              },
-              {
-                "id": "25528981-2fbf-4cd5-b008-d73dfda103c8",
-                "name": "Rome Odunze",
-                "position": "WR",
-                "price": 1,
-                "ceiling": 20,
-                "projectedPoints": 219.3
-              },
-              {
-                "id": "e2f638bf-8330-4f6a-b575-202eb0361ce0",
-                "name": "Rhamondre Stevenson",
-                "position": "RB",
-                "price": 1,
-                "ceiling": 18,
-                "projectedPoints": 215.8
-              },
-              {
-                "id": "ddc11a83-8b9a-4a5e-b996-fb480290ec91",
-                "name": "Sam LaPorta",
-                "position": "TE",
-                "price": 1,
-                "ceiling": 18,
-                "projectedPoints": 191.5
-              },
-              {
-                "id": "949064dd-2e73-4664-9024-799ea1f36420",
-                "name": "Jaxson Dart",
-                "position": "QB",
-                "price": 1,
-                "ceiling": 20,
-                "projectedPoints": 315.4
-              },
-              {
-                "id": "d17bf89d-761d-40e5-8be8-6c9f20ad599b",
-                "name": "Carnell Tate",
-                "position": "WR",
-                "price": 1,
-                "ceiling": 18,
-                "projectedPoints": 216.6
-              },
-              {
-                "id": "8ebf94d0-76d4-4d53-bf52-1075923e7eb8",
-                "name": "Tony Pollard",
-                "position": "RB",
-                "price": 1,
-                "ceiling": 16,
-                "projectedPoints": 211.8
-              },
-              {
-                "id": "9cb7794a-8354-4685-918d-b0f49aa4dfe4",
-                "name": "Zach Charbonnet",
-                "position": "RB",
-                "price": 1,
-                "ceiling": 16,
-                "projectedPoints": 213
-              },
-              {
-                "id": "75af0d4b-1dfd-4e73-8d8c-9eaa16b53dc0",
-                "name": "Jameson Williams",
-                "position": "WR",
-                "price": 1,
-                "ceiling": 16,
-                "projectedPoints": 211.5
-              },
-              {
-                "id": "9bc113cc-b30b-4eb2-bb79-5b74cf1ca73a",
-                "name": "Luther Burden",
-                "position": "WR",
-                "price": 1,
-                "ceiling": 16,
-                "projectedPoints": 212.3
-              },
-              {
-                "id": "46b2b736-6eac-427d-a203-9bd607d8d305",
-                "name": "Houston Texans",
-                "position": "DEF",
-                "price": 1,
-                "ceiling": 14,
-                "projectedPoints": 118.3
-              }
-            ],
-            "avgSpent": 200,
-            "avgStarterPoints": 1940.6,
-            "avgWins": 10.5
-          },
-          {
-            "coreIds": [
-              "36d658e4-e581-4119-b69d-3c4ba704011a",
-              "4150c2f0-ee05-4d80-878c-42c418fb7b4f",
-              "f4960ab2-d09e-4ec4-83c8-cc406000e47f"
-            ],
-            "coreNames": [
-              "Jahmyr Gibbs",
-              "Jeremiyah Love",
-              "Cam Skattebo"
-            ],
-            "frequency": 12,
-            "frequencyPct": 3,
-            "representative": [
-              {
-                "id": "36d658e4-e581-4119-b69d-3c4ba704011a",
-                "name": "Jahmyr Gibbs",
-                "position": "RB",
-                "price": 110,
-                "ceiling": 96,
-                "projectedPoints": 374
-              },
-              {
-                "id": "4150c2f0-ee05-4d80-878c-42c418fb7b4f",
-                "name": "Jeremiyah Love",
-                "position": "RB",
-                "price": 54,
-                "ceiling": 44,
-                "projectedPoints": 269.6
-              },
-              {
-                "id": "f4960ab2-d09e-4ec4-83c8-cc406000e47f",
-                "name": "Cam Skattebo",
-                "position": "RB",
-                "price": 25,
-                "ceiling": 28,
-                "projectedPoints": 236.7
-              },
-              {
-                "id": "62e862bf-a54f-4105-bc18-157f6be7ad93",
-                "name": "Terry McLaurin",
-                "position": "WR",
-                "price": 2,
-                "ceiling": 20,
-                "projectedPoints": 220.1
-              },
-              {
-                "id": "949064dd-2e73-4664-9024-799ea1f36420",
-                "name": "Jaxson Dart",
-                "position": "QB",
-                "price": 1,
-                "ceiling": 20,
-                "projectedPoints": 315.4
-              },
-              {
-                "id": "e2f638bf-8330-4f6a-b575-202eb0361ce0",
-                "name": "Rhamondre Stevenson",
-                "position": "RB",
-                "price": 1,
-                "ceiling": 18,
-                "projectedPoints": 215.8
-              },
-              {
-                "id": "f984cc2a-fe52-48e2-b5ea-40e48ef87ed6",
-                "name": "Ladd McConkey",
-                "position": "WR",
-                "price": 1,
-                "ceiling": 20,
-                "projectedPoints": 219.4
-              },
-              {
-                "id": "ddc11a83-8b9a-4a5e-b996-fb480290ec91",
-                "name": "Sam LaPorta",
-                "position": "TE",
-                "price": 1,
-                "ceiling": 18,
-                "projectedPoints": 191.5
-              },
-              {
-                "id": "d17bf89d-761d-40e5-8be8-6c9f20ad599b",
-                "name": "Carnell Tate",
-                "position": "WR",
-                "price": 1,
-                "ceiling": 18,
-                "projectedPoints": 216.6
-              },
-              {
-                "id": "a4e96d9c-381d-4804-becf-bbb95be38d6e",
-                "name": "Courtland Sutton",
-                "position": "WR",
-                "price": 1,
-                "ceiling": 18,
-                "projectedPoints": 215.6
-              },
-              {
-                "id": "8ebf94d0-76d4-4d53-bf52-1075923e7eb8",
-                "name": "Tony Pollard",
-                "position": "RB",
-                "price": 1,
-                "ceiling": 16,
-                "projectedPoints": 211.8
-              },
-              {
-                "id": "75af0d4b-1dfd-4e73-8d8c-9eaa16b53dc0",
-                "name": "Jameson Williams",
-                "position": "WR",
-                "price": 1,
-                "ceiling": 16,
-                "projectedPoints": 211.5
-              },
-              {
-                "id": "aefc429f-ec2a-45cc-99e9-51e2aec115e4",
-                "name": "Denver Broncos",
-                "position": "DEF",
-                "price": 1,
-                "ceiling": 14,
-                "projectedPoints": 117.5
-              }
-            ],
-            "avgSpent": 200,
-            "avgStarterPoints": 1942.9,
-            "avgWins": 10.5
-          },
-          {
-            "coreIds": [
-              "36d658e4-e581-4119-b69d-3c4ba704011a",
-              "4150c2f0-ee05-4d80-878c-42c418fb7b4f",
-              "b5af8842-3bce-4fc6-ad07-825fa47e0c2b"
-            ],
-            "coreNames": [
-              "Jahmyr Gibbs",
-              "Jeremiyah Love",
-              "Luther Burden III"
-            ],
-            "frequency": 12,
-            "frequencyPct": 3,
-            "representative": [
-              {
-                "id": "36d658e4-e581-4119-b69d-3c4ba704011a",
-                "name": "Jahmyr Gibbs",
-                "position": "RB",
-                "price": 121,
-                "ceiling": 96,
-                "projectedPoints": 374
-              },
-              {
-                "id": "4150c2f0-ee05-4d80-878c-42c418fb7b4f",
-                "name": "Jeremiyah Love",
-                "position": "RB",
-                "price": 50,
-                "ceiling": 44,
-                "projectedPoints": 269.6
-              },
-              {
-                "id": "b5af8842-3bce-4fc6-ad07-825fa47e0c2b",
-                "name": "Luther Burden III",
-                "position": "WR",
-                "price": 18,
-                "ceiling": 27,
-                "projectedPoints": 0
-              },
-              {
-                "id": "25528981-2fbf-4cd5-b008-d73dfda103c8",
-                "name": "Rome Odunze",
-                "position": "WR",
-                "price": 2,
-                "ceiling": 20,
-                "projectedPoints": 219.3
-              },
-              {
-                "id": "dbf87e2c-dfe3-4f92-a1ee-d7c7a5be6bf7",
-                "name": "D'Andre Swift",
-                "position": "RB",
-                "price": 1,
-                "ceiling": 20,
-                "projectedPoints": 220.7
-              },
-              {
-                "id": "62e862bf-a54f-4105-bc18-157f6be7ad93",
-                "name": "Terry McLaurin",
-                "position": "WR",
-                "price": 1,
-                "ceiling": 20,
-                "projectedPoints": 220.1
-              },
-              {
-                "id": "e2f638bf-8330-4f6a-b575-202eb0361ce0",
-                "name": "Rhamondre Stevenson",
-                "position": "RB",
-                "price": 1,
-                "ceiling": 18,
-                "projectedPoints": 215.8
-              },
-              {
-                "id": "949064dd-2e73-4664-9024-799ea1f36420",
-                "name": "Jaxson Dart",
-                "position": "QB",
-                "price": 1,
-                "ceiling": 20,
-                "projectedPoints": 315.4
-              },
-              {
-                "id": "a4e96d9c-381d-4804-becf-bbb95be38d6e",
-                "name": "Courtland Sutton",
-                "position": "WR",
-                "price": 1,
-                "ceiling": 18,
-                "projectedPoints": 215.6
-              },
-              {
-                "id": "ddc11a83-8b9a-4a5e-b996-fb480290ec91",
-                "name": "Sam LaPorta",
-                "position": "TE",
-                "price": 1,
-                "ceiling": 18,
-                "projectedPoints": 191.5
-              },
-              {
-                "id": "75af0d4b-1dfd-4e73-8d8c-9eaa16b53dc0",
-                "name": "Jameson Williams",
-                "position": "WR",
-                "price": 1,
-                "ceiling": 16,
-                "projectedPoints": 211.5
-              },
-              {
-                "id": "8ebf94d0-76d4-4d53-bf52-1075923e7eb8",
-                "name": "Tony Pollard",
-                "position": "RB",
-                "price": 1,
-                "ceiling": 16,
-                "projectedPoints": 211.8
-              },
-              {
-                "id": "46b2b736-6eac-427d-a203-9bd607d8d305",
-                "name": "Houston Texans",
-                "position": "DEF",
-                "price": 1,
-                "ceiling": 14,
-                "projectedPoints": 118.3
-              }
-            ],
-            "avgSpent": 200,
-            "avgStarterPoints": 1925.9,
-            "avgWins": 11.2
-          },
-          {
-            "coreIds": [
-              "36d658e4-e581-4119-b69d-3c4ba704011a",
-              "3cc9ef47-edaa-4ae8-a6d8-eedec892fc35",
-              "4150c2f0-ee05-4d80-878c-42c418fb7b4f"
-            ],
-            "coreNames": [
-              "Jahmyr Gibbs",
-              "Emeka Egbuka",
-              "Jeremiyah Love"
-            ],
-            "frequency": 11,
-            "frequencyPct": 2.8,
-            "representative": [
-              {
-                "id": "36d658e4-e581-4119-b69d-3c4ba704011a",
-                "name": "Jahmyr Gibbs",
-                "position": "RB",
-                "price": 122,
-                "ceiling": 96,
-                "projectedPoints": 374
-              },
-              {
-                "id": "4150c2f0-ee05-4d80-878c-42c418fb7b4f",
-                "name": "Jeremiyah Love",
-                "position": "RB",
-                "price": 52,
-                "ceiling": 44,
-                "projectedPoints": 269.6
-              },
-              {
-                "id": "3cc9ef47-edaa-4ae8-a6d8-eedec892fc35",
-                "name": "Emeka Egbuka",
-                "position": "WR",
-                "price": 16,
-                "ceiling": 26,
-                "projectedPoints": 231
-              },
-              {
-                "id": "a4bef8b8-d801-4f7e-b29c-06d7f6ec8e7a",
-                "name": "Harold Fannin Jr.",
-                "position": "TE",
-                "price": 1,
-                "ceiling": 24,
-                "projectedPoints": 202.9
-              },
-              {
-                "id": "25528981-2fbf-4cd5-b008-d73dfda103c8",
-                "name": "Rome Odunze",
-                "position": "WR",
-                "price": 1,
-                "ceiling": 20,
-                "projectedPoints": 219.3
-              },
-              {
-                "id": "62e862bf-a54f-4105-bc18-157f6be7ad93",
-                "name": "Terry McLaurin",
-                "position": "WR",
-                "price": 1,
-                "ceiling": 20,
-                "projectedPoints": 220.1
-              },
-              {
-                "id": "949064dd-2e73-4664-9024-799ea1f36420",
-                "name": "Jaxson Dart",
-                "position": "QB",
-                "price": 1,
-                "ceiling": 20,
-                "projectedPoints": 315.4
-              },
-              {
-                "id": "58dd4f76-4f35-415a-b5ff-d58215b061f7",
-                "name": "Jaylen Waddle",
-                "position": "WR",
-                "price": 1,
-                "ceiling": 22,
-                "projectedPoints": 223.8
-              },
-              {
-                "id": "e2f638bf-8330-4f6a-b575-202eb0361ce0",
-                "name": "Rhamondre Stevenson",
-                "position": "RB",
-                "price": 1,
-                "ceiling": 18,
-                "projectedPoints": 215.8
-              },
-              {
-                "id": "dbf87e2c-dfe3-4f92-a1ee-d7c7a5be6bf7",
-                "name": "D'Andre Swift",
-                "position": "RB",
-                "price": 1,
-                "ceiling": 20,
-                "projectedPoints": 220.7
-              },
-              {
-                "id": "a4e96d9c-381d-4804-becf-bbb95be38d6e",
-                "name": "Courtland Sutton",
-                "position": "WR",
-                "price": 1,
-                "ceiling": 18,
-                "projectedPoints": 215.6
-              },
-              {
-                "id": "d17bf89d-761d-40e5-8be8-6c9f20ad599b",
-                "name": "Carnell Tate",
-                "position": "WR",
-                "price": 1,
-                "ceiling": 18,
-                "projectedPoints": 216.6
-              },
-              {
-                "id": "46b2b736-6eac-427d-a203-9bd607d8d305",
-                "name": "Houston Texans",
-                "position": "DEF",
-                "price": 1,
-                "ceiling": 14,
-                "projectedPoints": 118.3
-              }
-            ],
-            "avgSpent": 200,
-            "avgStarterPoints": 1928.8,
-            "avgWins": 11
-          },
-          {
-            "coreIds": [
               "03967241-0303-4885-9234-deebf1217535",
-              "4150c2f0-ee05-4d80-878c-42c418fb7b4f",
-              "77888c52-9ca0-4bc7-a7e7-527c53f13707"
+              "36d658e4-e581-4119-b69d-3c4ba704011a"
             ],
             "coreNames": [
               "Puka Nacua",
-              "Jeremiyah Love",
-              "Breece Hall"
+              "Jahmyr Gibbs"
             ],
-            "frequency": 11,
-            "frequencyPct": 2.8,
+            "frequency": 52,
+            "frequencyPct": 13,
             "representative": [
               {
                 "id": "03967241-0303-4885-9234-deebf1217535",
                 "name": "Puka Nacua",
                 "position": "WR",
-                "price": 102,
+                "price": 94,
                 "ceiling": 86,
                 "projectedPoints": 352
               },
               {
-                "id": "4150c2f0-ee05-4d80-878c-42c418fb7b4f",
-                "name": "Jeremiyah Love",
+                "id": "36d658e4-e581-4119-b69d-3c4ba704011a",
+                "name": "Jahmyr Gibbs",
                 "position": "RB",
-                "price": 51,
-                "ceiling": 44,
-                "projectedPoints": 269.6
+                "price": 91,
+                "ceiling": 96,
+                "projectedPoints": 374
               },
               {
-                "id": "77888c52-9ca0-4bc7-a7e7-527c53f13707",
-                "name": "Breece Hall",
-                "position": "RB",
-                "price": 33,
-                "ceiling": 31,
-                "projectedPoints": 0
-              },
-              {
-                "id": "ed917420-f806-4bd3-860f-2eba9f6a5539",
-                "name": "George Pickens",
-                "position": "WR",
+                "id": "6613dab8-368f-4ea9-90b2-4422faf2d453",
+                "name": "Tyler Warren",
+                "position": "TE",
                 "price": 5,
                 "ceiling": 23,
-                "projectedPoints": 225.6
-              },
-              {
-                "id": "62e862bf-a54f-4105-bc18-157f6be7ad93",
-                "name": "Terry McLaurin",
-                "position": "WR",
-                "price": 1,
-                "ceiling": 20,
-                "projectedPoints": 220.1
-              },
-              {
-                "id": "d17bf89d-761d-40e5-8be8-6c9f20ad599b",
-                "name": "Carnell Tate",
-                "position": "WR",
-                "price": 1,
-                "ceiling": 18,
-                "projectedPoints": 216.6
+                "projectedPoints": 0
               },
               {
                 "id": "e2f638bf-8330-4f6a-b575-202eb0361ce0",
@@ -1227,6 +711,30 @@
                 "projectedPoints": 215.6
               },
               {
+                "id": "9cb7794a-8354-4685-918d-b0f49aa4dfe4",
+                "name": "Zach Charbonnet",
+                "position": "RB",
+                "price": 1,
+                "ceiling": 16,
+                "projectedPoints": 213
+              },
+              {
+                "id": "8ebf94d0-76d4-4d53-bf52-1075923e7eb8",
+                "name": "Tony Pollard",
+                "position": "RB",
+                "price": 1,
+                "ceiling": 16,
+                "projectedPoints": 211.8
+              },
+              {
+                "id": "05f8ce4d-6cd5-4853-8654-18999205c7eb",
+                "name": "TreVeyon Henderson",
+                "position": "RB",
+                "price": 1,
+                "ceiling": 15,
+                "projectedPoints": 209.9
+              },
+              {
                 "id": "46b2b736-6eac-427d-a203-9bd607d8d305",
                 "name": "Houston Texans",
                 "position": "DEF",
@@ -1236,8 +744,492 @@
               }
             ],
             "avgSpent": 200,
-            "avgStarterPoints": 1887.8,
-            "avgWins": 10.5
+            "avgStarterPoints": 1995.9,
+            "avgWins": 11.2
+          },
+          {
+            "coreIds": [
+              "36d658e4-e581-4119-b69d-3c4ba704011a",
+              "95713a6a-7cc9-4532-8cce-c5b2eeee0b43"
+            ],
+            "coreNames": [
+              "Jahmyr Gibbs",
+              "Bijan Robinson"
+            ],
+            "frequency": 32,
+            "frequencyPct": 8,
+            "representative": [
+              {
+                "id": "36d658e4-e581-4119-b69d-3c4ba704011a",
+                "name": "Jahmyr Gibbs",
+                "position": "RB",
+                "price": 96,
+                "ceiling": 96,
+                "projectedPoints": 374
+              },
+              {
+                "id": "95713a6a-7cc9-4532-8cce-c5b2eeee0b43",
+                "name": "Bijan Robinson",
+                "position": "RB",
+                "price": 89,
+                "ceiling": 80,
+                "projectedPoints": 341
+              },
+              {
+                "id": "63e881e4-91b5-4977-97d2-decde9630df7",
+                "name": "Davante Adams",
+                "position": "WR",
+                "price": 5,
+                "ceiling": 25,
+                "projectedPoints": 229.4
+              },
+              {
+                "id": "f984cc2a-fe52-48e2-b5ea-40e48ef87ed6",
+                "name": "Ladd McConkey",
+                "position": "WR",
+                "price": 1,
+                "ceiling": 20,
+                "projectedPoints": 219.4
+              },
+              {
+                "id": "d17bf89d-761d-40e5-8be8-6c9f20ad599b",
+                "name": "Carnell Tate",
+                "position": "WR",
+                "price": 1,
+                "ceiling": 18,
+                "projectedPoints": 216.6
+              },
+              {
+                "id": "62e862bf-a54f-4105-bc18-157f6be7ad93",
+                "name": "Terry McLaurin",
+                "position": "WR",
+                "price": 1,
+                "ceiling": 20,
+                "projectedPoints": 220.1
+              },
+              {
+                "id": "949064dd-2e73-4664-9024-799ea1f36420",
+                "name": "Jaxson Dart",
+                "position": "QB",
+                "price": 1,
+                "ceiling": 20,
+                "projectedPoints": 315.4
+              },
+              {
+                "id": "e2f638bf-8330-4f6a-b575-202eb0361ce0",
+                "name": "Rhamondre Stevenson",
+                "position": "RB",
+                "price": 1,
+                "ceiling": 18,
+                "projectedPoints": 215.8
+              },
+              {
+                "id": "a4e96d9c-381d-4804-becf-bbb95be38d6e",
+                "name": "Courtland Sutton",
+                "position": "WR",
+                "price": 1,
+                "ceiling": 18,
+                "projectedPoints": 215.6
+              },
+              {
+                "id": "8ebf94d0-76d4-4d53-bf52-1075923e7eb8",
+                "name": "Tony Pollard",
+                "position": "RB",
+                "price": 1,
+                "ceiling": 16,
+                "projectedPoints": 211.8
+              },
+              {
+                "id": "ddc11a83-8b9a-4a5e-b996-fb480290ec91",
+                "name": "Sam LaPorta",
+                "position": "TE",
+                "price": 1,
+                "ceiling": 18,
+                "projectedPoints": 191.5
+              },
+              {
+                "id": "9cb7794a-8354-4685-918d-b0f49aa4dfe4",
+                "name": "Zach Charbonnet",
+                "position": "RB",
+                "price": 1,
+                "ceiling": 16,
+                "projectedPoints": 213
+              },
+              {
+                "id": "aefc429f-ec2a-45cc-99e9-51e2aec115e4",
+                "name": "Denver Broncos",
+                "position": "DEF",
+                "price": 1,
+                "ceiling": 14,
+                "projectedPoints": 117.5
+              }
+            ],
+            "avgSpent": 200,
+            "avgStarterPoints": 1979.2,
+            "avgWins": 11.4
+          },
+          {
+            "coreIds": [
+              "36d658e4-e581-4119-b69d-3c4ba704011a",
+              "99500424-07a8-4cf6-af50-e582d6851a71"
+            ],
+            "coreNames": [
+              "Jahmyr Gibbs",
+              "Christian McCaffrey"
+            ],
+            "frequency": 25,
+            "frequencyPct": 6.3,
+            "representative": [
+              {
+                "id": "36d658e4-e581-4119-b69d-3c4ba704011a",
+                "name": "Jahmyr Gibbs",
+                "position": "RB",
+                "price": 98,
+                "ceiling": 96,
+                "projectedPoints": 374
+              },
+              {
+                "id": "99500424-07a8-4cf6-af50-e582d6851a71",
+                "name": "Christian McCaffrey",
+                "position": "RB",
+                "price": 90,
+                "ceiling": 83,
+                "projectedPoints": 346.5
+              },
+              {
+                "id": "d17bf89d-761d-40e5-8be8-6c9f20ad599b",
+                "name": "Carnell Tate",
+                "position": "WR",
+                "price": 2,
+                "ceiling": 18,
+                "projectedPoints": 216.6
+              },
+              {
+                "id": "a4e96d9c-381d-4804-becf-bbb95be38d6e",
+                "name": "Courtland Sutton",
+                "position": "WR",
+                "price": 1,
+                "ceiling": 18,
+                "projectedPoints": 215.6
+              },
+              {
+                "id": "e2f638bf-8330-4f6a-b575-202eb0361ce0",
+                "name": "Rhamondre Stevenson",
+                "position": "RB",
+                "price": 1,
+                "ceiling": 18,
+                "projectedPoints": 215.8
+              },
+              {
+                "id": "01ca1499-d7ba-4f4b-bec7-c6d265e2e6eb",
+                "name": "Javonte Williams",
+                "position": "RB",
+                "price": 1,
+                "ceiling": 23,
+                "projectedPoints": 226.9
+              },
+              {
+                "id": "75af0d4b-1dfd-4e73-8d8c-9eaa16b53dc0",
+                "name": "Jameson Williams",
+                "position": "WR",
+                "price": 1,
+                "ceiling": 16,
+                "projectedPoints": 211.5
+              },
+              {
+                "id": "9bc113cc-b30b-4eb2-bb79-5b74cf1ca73a",
+                "name": "Luther Burden",
+                "position": "WR",
+                "price": 1,
+                "ceiling": 16,
+                "projectedPoints": 212.3
+              },
+              {
+                "id": "9cb7794a-8354-4685-918d-b0f49aa4dfe4",
+                "name": "Zach Charbonnet",
+                "position": "RB",
+                "price": 1,
+                "ceiling": 16,
+                "projectedPoints": 213
+              },
+              {
+                "id": "05f8ce4d-6cd5-4853-8654-18999205c7eb",
+                "name": "TreVeyon Henderson",
+                "position": "RB",
+                "price": 1,
+                "ceiling": 15,
+                "projectedPoints": 209.9
+              },
+              {
+                "id": "46b2b736-6eac-427d-a203-9bd607d8d305",
+                "name": "Houston Texans",
+                "position": "DEF",
+                "price": 1,
+                "ceiling": 14,
+                "projectedPoints": 118.3
+              },
+              {
+                "id": "9e394d91-a663-4743-bc0d-caf601793578",
+                "name": "Dallas Goedert",
+                "position": "TE",
+                "price": 1,
+                "ceiling": 13,
+                "projectedPoints": 181.7
+              },
+              {
+                "id": "8b344d8f-484e-430a-9a59-92df7ce263bf",
+                "name": "Caleb Williams",
+                "position": "QB",
+                "price": 1,
+                "ceiling": 10,
+                "projectedPoints": 294.6
+              }
+            ],
+            "avgSpent": 200,
+            "avgStarterPoints": 1989.5,
+            "avgWins": 12
+          },
+          {
+            "coreIds": [
+              "03967241-0303-4885-9234-deebf1217535",
+              "95713a6a-7cc9-4532-8cce-c5b2eeee0b43"
+            ],
+            "coreNames": [
+              "Puka Nacua",
+              "Bijan Robinson"
+            ],
+            "frequency": 24,
+            "frequencyPct": 6,
+            "representative": [
+              {
+                "id": "03967241-0303-4885-9234-deebf1217535",
+                "name": "Puka Nacua",
+                "position": "WR",
+                "price": 101,
+                "ceiling": 86,
+                "projectedPoints": 352
+              },
+              {
+                "id": "95713a6a-7cc9-4532-8cce-c5b2eeee0b43",
+                "name": "Bijan Robinson",
+                "position": "RB",
+                "price": 82,
+                "ceiling": 80,
+                "projectedPoints": 341
+              },
+              {
+                "id": "2cb07a16-1cf1-4cf9-a524-ae61c97263bf",
+                "name": "Kyren Williams",
+                "position": "RB",
+                "price": 7,
+                "ceiling": 24,
+                "projectedPoints": 228.1
+              },
+              {
+                "id": "25528981-2fbf-4cd5-b008-d73dfda103c8",
+                "name": "Rome Odunze",
+                "position": "WR",
+                "price": 1,
+                "ceiling": 20,
+                "projectedPoints": 219.3
+              },
+              {
+                "id": "dbf87e2c-dfe3-4f92-a1ee-d7c7a5be6bf7",
+                "name": "D'Andre Swift",
+                "position": "RB",
+                "price": 1,
+                "ceiling": 20,
+                "projectedPoints": 220.7
+              },
+              {
+                "id": "d17bf89d-761d-40e5-8be8-6c9f20ad599b",
+                "name": "Carnell Tate",
+                "position": "WR",
+                "price": 1,
+                "ceiling": 18,
+                "projectedPoints": 216.6
+              },
+              {
+                "id": "e2f638bf-8330-4f6a-b575-202eb0361ce0",
+                "name": "Rhamondre Stevenson",
+                "position": "RB",
+                "price": 1,
+                "ceiling": 18,
+                "projectedPoints": 215.8
+              },
+              {
+                "id": "58dd4f76-4f35-415a-b5ff-d58215b061f7",
+                "name": "Jaylen Waddle",
+                "position": "WR",
+                "price": 1,
+                "ceiling": 22,
+                "projectedPoints": 223.8
+              },
+              {
+                "id": "a4e96d9c-381d-4804-becf-bbb95be38d6e",
+                "name": "Courtland Sutton",
+                "position": "WR",
+                "price": 1,
+                "ceiling": 18,
+                "projectedPoints": 215.6
+              },
+              {
+                "id": "75af0d4b-1dfd-4e73-8d8c-9eaa16b53dc0",
+                "name": "Jameson Williams",
+                "position": "WR",
+                "price": 1,
+                "ceiling": 16,
+                "projectedPoints": 211.5
+              },
+              {
+                "id": "ddc11a83-8b9a-4a5e-b996-fb480290ec91",
+                "name": "Sam LaPorta",
+                "position": "TE",
+                "price": 1,
+                "ceiling": 18,
+                "projectedPoints": 191.5
+              },
+              {
+                "id": "949064dd-2e73-4664-9024-799ea1f36420",
+                "name": "Jaxson Dart",
+                "position": "QB",
+                "price": 1,
+                "ceiling": 20,
+                "projectedPoints": 315.4
+              },
+              {
+                "id": "46b2b736-6eac-427d-a203-9bd607d8d305",
+                "name": "Houston Texans",
+                "position": "DEF",
+                "price": 1,
+                "ceiling": 14,
+                "projectedPoints": 118.3
+              }
+            ],
+            "avgSpent": 200,
+            "avgStarterPoints": 1955.2,
+            "avgWins": 10.4
+          },
+          {
+            "coreIds": [
+              "03967241-0303-4885-9234-deebf1217535",
+              "99500424-07a8-4cf6-af50-e582d6851a71"
+            ],
+            "coreNames": [
+              "Puka Nacua",
+              "Christian McCaffrey"
+            ],
+            "frequency": 16,
+            "frequencyPct": 4,
+            "representative": [
+              {
+                "id": "03967241-0303-4885-9234-deebf1217535",
+                "name": "Puka Nacua",
+                "position": "WR",
+                "price": 98,
+                "ceiling": 86,
+                "projectedPoints": 352
+              },
+              {
+                "id": "99500424-07a8-4cf6-af50-e582d6851a71",
+                "name": "Christian McCaffrey",
+                "position": "RB",
+                "price": 89,
+                "ceiling": 83,
+                "projectedPoints": 346.5
+              },
+              {
+                "id": "62e862bf-a54f-4105-bc18-157f6be7ad93",
+                "name": "Terry McLaurin",
+                "position": "WR",
+                "price": 3,
+                "ceiling": 20,
+                "projectedPoints": 220.1
+              },
+              {
+                "id": "25528981-2fbf-4cd5-b008-d73dfda103c8",
+                "name": "Rome Odunze",
+                "position": "WR",
+                "price": 1,
+                "ceiling": 20,
+                "projectedPoints": 219.3
+              },
+              {
+                "id": "949064dd-2e73-4664-9024-799ea1f36420",
+                "name": "Jaxson Dart",
+                "position": "QB",
+                "price": 1,
+                "ceiling": 20,
+                "projectedPoints": 315.4
+              },
+              {
+                "id": "ddc11a83-8b9a-4a5e-b996-fb480290ec91",
+                "name": "Sam LaPorta",
+                "position": "TE",
+                "price": 1,
+                "ceiling": 18,
+                "projectedPoints": 191.5
+              },
+              {
+                "id": "a4e96d9c-381d-4804-becf-bbb95be38d6e",
+                "name": "Courtland Sutton",
+                "position": "WR",
+                "price": 1,
+                "ceiling": 18,
+                "projectedPoints": 215.6
+              },
+              {
+                "id": "8ebf94d0-76d4-4d53-bf52-1075923e7eb8",
+                "name": "Tony Pollard",
+                "position": "RB",
+                "price": 1,
+                "ceiling": 16,
+                "projectedPoints": 211.8
+              },
+              {
+                "id": "75af0d4b-1dfd-4e73-8d8c-9eaa16b53dc0",
+                "name": "Jameson Williams",
+                "position": "WR",
+                "price": 1,
+                "ceiling": 16,
+                "projectedPoints": 211.5
+              },
+              {
+                "id": "9bc113cc-b30b-4eb2-bb79-5b74cf1ca73a",
+                "name": "Luther Burden",
+                "position": "WR",
+                "price": 1,
+                "ceiling": 16,
+                "projectedPoints": 212.3
+              },
+              {
+                "id": "9cb7794a-8354-4685-918d-b0f49aa4dfe4",
+                "name": "Zach Charbonnet",
+                "position": "RB",
+                "price": 1,
+                "ceiling": 16,
+                "projectedPoints": 213
+              },
+              {
+                "id": "b1474c9e-dc4f-4a01-9b97-4d34bfa3b60c",
+                "name": "Tee Higgins",
+                "position": "WR",
+                "price": 1,
+                "ceiling": 15,
+                "projectedPoints": 210.4
+              },
+              {
+                "id": "46b2b736-6eac-427d-a203-9bd607d8d305",
+                "name": "Houston Texans",
+                "position": "DEF",
+                "price": 1,
+                "ceiling": 14,
+                "projectedPoints": 118.3
+              }
+            ],
+            "avgSpent": 200,
+            "avgStarterPoints": 1953.1,
+            "avgWins": 11.1
           }
         ],
         "landed": [
@@ -1245,333 +1237,333 @@
             "id": "ddc11a83-8b9a-4a5e-b996-fb480290ec91",
             "name": "Sam LaPorta",
             "position": "TE",
-            "count": 364,
-            "landRate": 0.91,
-            "avgPrice": 1
-          },
-          {
-            "id": "e2f638bf-8330-4f6a-b575-202eb0361ce0",
-            "name": "Rhamondre Stevenson",
-            "position": "RB",
-            "count": 339,
-            "landRate": 0.8475,
-            "avgPrice": 1
-          },
-          {
-            "id": "d17bf89d-761d-40e5-8be8-6c9f20ad599b",
-            "name": "Carnell Tate",
-            "position": "WR",
-            "count": 337,
-            "landRate": 0.8425,
-            "avgPrice": 1
-          },
-          {
-            "id": "949064dd-2e73-4664-9024-799ea1f36420",
-            "name": "Jaxson Dart",
-            "position": "QB",
-            "count": 329,
-            "landRate": 0.8225,
+            "count": 354,
+            "landRate": 0.885,
             "avgPrice": 1
           },
           {
             "id": "a4e96d9c-381d-4804-becf-bbb95be38d6e",
             "name": "Courtland Sutton",
             "position": "WR",
-            "count": 304,
-            "landRate": 0.76,
-            "avgPrice": 1
-          },
-          {
-            "id": "46b2b736-6eac-427d-a203-9bd607d8d305",
-            "name": "Houston Texans",
-            "position": "DEF",
-            "count": 262,
-            "landRate": 0.655,
+            "count": 344,
+            "landRate": 0.86,
             "avgPrice": 1
           },
           {
             "id": "75af0d4b-1dfd-4e73-8d8c-9eaa16b53dc0",
             "name": "Jameson Williams",
             "position": "WR",
-            "count": 255,
-            "landRate": 0.6375,
+            "count": 339,
+            "landRate": 0.8475,
             "avgPrice": 1
-          },
-          {
-            "id": "dbf87e2c-dfe3-4f92-a1ee-d7c7a5be6bf7",
-            "name": "D'Andre Swift",
-            "position": "RB",
-            "count": 253,
-            "landRate": 0.6325,
-            "avgPrice": 1
-          },
-          {
-            "id": "4150c2f0-ee05-4d80-878c-42c418fb7b4f",
-            "name": "Jeremiyah Love",
-            "position": "RB",
-            "count": 243,
-            "landRate": 0.6075,
-            "avgPrice": 52
           },
           {
             "id": "8ebf94d0-76d4-4d53-bf52-1075923e7eb8",
             "name": "Tony Pollard",
             "position": "RB",
-            "count": 202,
-            "landRate": 0.505,
+            "count": 310,
+            "landRate": 0.775,
+            "avgPrice": 1
+          },
+          {
+            "id": "e2f638bf-8330-4f6a-b575-202eb0361ce0",
+            "name": "Rhamondre Stevenson",
+            "position": "RB",
+            "count": 300,
+            "landRate": 0.75,
             "avgPrice": 1
           },
           {
             "id": "36d658e4-e581-4119-b69d-3c4ba704011a",
             "name": "Jahmyr Gibbs",
             "position": "RB",
-            "count": 194,
-            "landRate": 0.485,
-            "avgPrice": 117
+            "count": 270,
+            "landRate": 0.675,
+            "avgPrice": 96
           },
           {
-            "id": "25528981-2fbf-4cd5-b008-d73dfda103c8",
-            "name": "Rome Odunze",
-            "position": "WR",
-            "count": 186,
-            "landRate": 0.465,
+            "id": "9cb7794a-8354-4685-918d-b0f49aa4dfe4",
+            "name": "Zach Charbonnet",
+            "position": "RB",
+            "count": 264,
+            "landRate": 0.66,
             "avgPrice": 1
           },
           {
-            "id": "62e862bf-a54f-4105-bc18-157f6be7ad93",
-            "name": "Terry McLaurin",
-            "position": "WR",
-            "count": 144,
-            "landRate": 0.36,
-            "avgPrice": 1
-          },
-          {
-            "id": "aefc429f-ec2a-45cc-99e9-51e2aec115e4",
-            "name": "Denver Broncos",
+            "id": "46b2b736-6eac-427d-a203-9bd607d8d305",
+            "name": "Houston Texans",
             "position": "DEF",
-            "count": 136,
-            "landRate": 0.34,
+            "count": 255,
+            "landRate": 0.6375,
+            "avgPrice": 1
+          },
+          {
+            "id": "d17bf89d-761d-40e5-8be8-6c9f20ad599b",
+            "name": "Carnell Tate",
+            "position": "WR",
+            "count": 241,
+            "landRate": 0.6025,
+            "avgPrice": 1
+          },
+          {
+            "id": "949064dd-2e73-4664-9024-799ea1f36420",
+            "name": "Jaxson Dart",
+            "position": "QB",
+            "count": 212,
+            "landRate": 0.53,
+            "avgPrice": 1
+          },
+          {
+            "id": "9bc113cc-b30b-4eb2-bb79-5b74cf1ca73a",
+            "name": "Luther Burden",
+            "position": "WR",
+            "count": 198,
+            "landRate": 0.495,
             "avgPrice": 1
           },
           {
             "id": "03967241-0303-4885-9234-deebf1217535",
             "name": "Puka Nacua",
             "position": "WR",
-            "count": 135,
-            "landRate": 0.3375,
-            "avgPrice": 107
+            "count": 171,
+            "landRate": 0.4275,
+            "avgPrice": 101
           },
           {
-            "id": "9cb7794a-8354-4685-918d-b0f49aa4dfe4",
-            "name": "Zach Charbonnet",
+            "id": "aefc429f-ec2a-45cc-99e9-51e2aec115e4",
+            "name": "Denver Broncos",
+            "position": "DEF",
+            "count": 147,
+            "landRate": 0.3675,
+            "avgPrice": 1
+          },
+          {
+            "id": "dbf87e2c-dfe3-4f92-a1ee-d7c7a5be6bf7",
+            "name": "D'Andre Swift",
             "position": "RB",
-            "count": 125,
-            "landRate": 0.3125,
+            "count": 141,
+            "landRate": 0.3525,
             "avgPrice": 1
           },
           {
-            "id": "f984cc2a-fe52-48e2-b5ea-40e48ef87ed6",
-            "name": "Ladd McConkey",
+            "id": "b1474c9e-dc4f-4a01-9b97-4d34bfa3b60c",
+            "name": "Tee Higgins",
             "position": "WR",
-            "count": 98,
-            "landRate": 0.245,
+            "count": 134,
+            "landRate": 0.335,
             "avgPrice": 1
+          },
+          {
+            "id": "6cefbadb-5fb4-424f-96ee-02d0037cf0da",
+            "name": "Brock Purdy",
+            "position": "QB",
+            "count": 123,
+            "landRate": 0.3075,
+            "avgPrice": 1
+          },
+          {
+            "id": "49cc05b0-c218-4651-a587-635945cf4f03",
+            "name": "Zay Flowers",
+            "position": "WR",
+            "count": 116,
+            "landRate": 0.29,
+            "avgPrice": 29
+          },
+          {
+            "id": "dd85893e-1fd8-4074-833d-07434e9168b6",
+            "name": "Garrett Wilson",
+            "position": "WR",
+            "count": 116,
+            "landRate": 0.29,
+            "avgPrice": 28
+          },
+          {
+            "id": "95713a6a-7cc9-4532-8cce-c5b2eeee0b43",
+            "name": "Bijan Robinson",
+            "position": "RB",
+            "count": 104,
+            "landRate": 0.26,
+            "avgPrice": 82
+          },
+          {
+            "id": "25528981-2fbf-4cd5-b008-d73dfda103c8",
+            "name": "Rome Odunze",
+            "position": "WR",
+            "count": 93,
+            "landRate": 0.2325,
+            "avgPrice": 1
+          },
+          {
+            "id": "62e862bf-a54f-4105-bc18-157f6be7ad93",
+            "name": "Terry McLaurin",
+            "position": "WR",
+            "count": 80,
+            "landRate": 0.2,
+            "avgPrice": 2
+          },
+          {
+            "id": "99500424-07a8-4cf6-af50-e582d6851a71",
+            "name": "Christian McCaffrey",
+            "position": "RB",
+            "count": 77,
+            "landRate": 0.1925,
+            "avgPrice": 85
+          },
+          {
+            "id": "05f8ce4d-6cd5-4853-8654-18999205c7eb",
+            "name": "TreVeyon Henderson",
+            "position": "RB",
+            "count": 67,
+            "landRate": 0.1675,
+            "avgPrice": 1
+          },
+          {
+            "id": "b5af8842-3bce-4fc6-ad07-825fa47e0c2b",
+            "name": "Luther Burden III",
+            "position": "WR",
+            "count": 63,
+            "landRate": 0.1575,
+            "avgPrice": 16
           },
           {
             "id": "58dd4f76-4f35-415a-b5ff-d58215b061f7",
             "name": "Jaylen Waddle",
             "position": "WR",
-            "count": 77,
-            "landRate": 0.1925,
-            "avgPrice": 2
+            "count": 58,
+            "landRate": 0.145,
+            "avgPrice": 3
           },
           {
-            "id": "43e44f03-f8e8-415a-b85d-83b055236cc7",
-            "name": "George Kittle",
-            "position": "TE",
-            "count": 65,
-            "landRate": 0.1625,
-            "avgPrice": 2
-          },
-          {
-            "id": "9bc113cc-b30b-4eb2-bb79-5b74cf1ca73a",
-            "name": "Luther Burden",
-            "position": "WR",
-            "count": 65,
-            "landRate": 0.1625,
+            "id": "8b344d8f-484e-430a-9a59-92df7ce263bf",
+            "name": "Caleb Williams",
+            "position": "QB",
+            "count": 56,
+            "landRate": 0.14,
             "avgPrice": 1
           },
           {
             "id": "6613dab8-368f-4ea9-90b2-4422faf2d453",
             "name": "Tyler Warren",
             "position": "TE",
-            "count": 59,
-            "landRate": 0.1475,
-            "avgPrice": 2
+            "count": 54,
+            "landRate": 0.135,
+            "avgPrice": 5
           },
           {
-            "id": "ed917420-f806-4bd3-860f-2eba9f6a5539",
-            "name": "George Pickens",
+            "id": "f984cc2a-fe52-48e2-b5ea-40e48ef87ed6",
+            "name": "Ladd McConkey",
             "position": "WR",
             "count": 50,
             "landRate": 0.125,
-            "avgPrice": 5
+            "avgPrice": 2
+          },
+          {
+            "id": "43e44f03-f8e8-415a-b85d-83b055236cc7",
+            "name": "George Kittle",
+            "position": "TE",
+            "count": 47,
+            "landRate": 0.1175,
+            "avgPrice": 4
           },
           {
             "id": "01ca1499-d7ba-4f4b-bec7-c6d265e2e6eb",
             "name": "Javonte Williams",
             "position": "RB",
-            "count": 45,
-            "landRate": 0.1125,
-            "avgPrice": 3
+            "count": 43,
+            "landRate": 0.1075,
+            "avgPrice": 6
           },
           {
-            "id": "6cefbadb-5fb4-424f-96ee-02d0037cf0da",
-            "name": "Brock Purdy",
-            "position": "QB",
-            "count": 41,
-            "landRate": 0.1025,
-            "avgPrice": 1
-          },
-          {
-            "id": "77888c52-9ca0-4bc7-a7e7-527c53f13707",
-            "name": "Breece Hall",
-            "position": "RB",
-            "count": 36,
-            "landRate": 0.09,
-            "avgPrice": 30
-          },
-          {
-            "id": "3cc9ef47-edaa-4ae8-a6d8-eedec892fc35",
-            "name": "Emeka Egbuka",
+            "id": "08135438-b9cf-4184-924d-84758d733ac4",
+            "name": "Ja'Marr Chase",
             "position": "WR",
-            "count": 36,
-            "landRate": 0.09,
-            "avgPrice": 18
-          },
-          {
-            "id": "f4960ab2-d09e-4ec4-83c8-cc406000e47f",
-            "name": "Cam Skattebo",
-            "position": "RB",
-            "count": 35,
-            "landRate": 0.0875,
-            "avgPrice": 23
-          },
-          {
-            "id": "a4bef8b8-d801-4f7e-b29c-06d7f6ec8e7a",
-            "name": "Harold Fannin Jr.",
-            "position": "TE",
-            "count": 35,
-            "landRate": 0.0875,
-            "avgPrice": 5
-          },
-          {
-            "id": "3a2efc4b-0e52-4818-9d9c-4933550ae930",
-            "name": "Travis Etienne",
-            "position": "RB",
-            "count": 34,
-            "landRate": 0.085,
-            "avgPrice": 27
+            "count": 42,
+            "landRate": 0.105,
+            "avgPrice": 76
           },
           {
             "id": "2cb07a16-1cf1-4cf9-a524-ae61c97263bf",
             "name": "Kyren Williams",
             "position": "RB",
-            "count": 34,
-            "landRate": 0.085,
+            "count": 33,
+            "landRate": 0.0825,
+            "avgPrice": 9
+          },
+          {
+            "id": "77888c52-9ca0-4bc7-a7e7-527c53f13707",
+            "name": "Breece Hall",
+            "position": "RB",
+            "count": 28,
+            "landRate": 0.07,
+            "avgPrice": 27
+          },
+          {
+            "id": "a4bef8b8-d801-4f7e-b29c-06d7f6ec8e7a",
+            "name": "Harold Fannin Jr.",
+            "position": "TE",
+            "count": 26,
+            "landRate": 0.065,
+            "avgPrice": 9
+          },
+          {
+            "id": "1486e8ae-b084-4b91-876b-61b8cc316873",
+            "name": "DJ Moore",
+            "position": "WR",
+            "count": 25,
+            "landRate": 0.0625,
+            "avgPrice": 1
+          },
+          {
+            "id": "ed917420-f806-4bd3-860f-2eba9f6a5539",
+            "name": "George Pickens",
+            "position": "WR",
+            "count": 23,
+            "landRate": 0.0575,
             "avgPrice": 6
           },
           {
-            "id": "b5af8842-3bce-4fc6-ad07-825fa47e0c2b",
-            "name": "Luther Burden III",
-            "position": "WR",
-            "count": 32,
-            "landRate": 0.08,
-            "avgPrice": 21
-          },
-          {
-            "id": "6f9982ec-4ec5-42a1-a2aa-0d4562b9aef1",
-            "name": "Jayden Daniels",
-            "position": "QB",
-            "count": 32,
-            "landRate": 0.08,
-            "avgPrice": 15
-          },
-          {
-            "id": "aec1e256-85f8-4c49-8c2c-495cac2cec40",
-            "name": "Kenneth Walker III",
-            "position": "RB",
-            "count": 31,
-            "landRate": 0.0775,
-            "avgPrice": 24
-          },
-          {
-            "id": "3f0225f8-fda2-4c1d-ba6f-78c4337d6105",
-            "name": "Quinshon Judkins",
-            "position": "RB",
-            "count": 30,
-            "landRate": 0.075,
-            "avgPrice": 34
-          },
-          {
-            "id": "63e881e4-91b5-4977-97d2-decde9630df7",
-            "name": "Davante Adams",
-            "position": "WR",
-            "count": 30,
-            "landRate": 0.075,
-            "avgPrice": 10
-          },
-          {
-            "id": "f8191906-20c3-468d-9d04-9d265d632b7c",
-            "name": "Tetairoa McMillan",
-            "position": "WR",
-            "count": 28,
-            "landRate": 0.07,
-            "avgPrice": 26
-          },
-          {
-            "id": "65e27a8a-1536-45c6-9366-6f27967f50f3",
-            "name": "Josh Jacobs",
-            "position": "RB",
-            "count": 27,
-            "landRate": 0.0675,
-            "avgPrice": 40
-          },
-          {
-            "id": "94f71551-9303-4751-845f-219f31a52b8b",
-            "name": "Omarion Hampton",
-            "position": "RB",
-            "count": 27,
-            "landRate": 0.0675,
-            "avgPrice": 39
-          },
-          {
-            "id": "40089705-bfce-4c60-8ea9-c8165873ca92",
-            "name": "Colston Loveland",
+            "id": "9e394d91-a663-4743-bc0d-caf601793578",
+            "name": "Dallas Goedert",
             "position": "TE",
-            "count": 27,
-            "landRate": 0.0675,
-            "avgPrice": 23
+            "count": 22,
+            "landRate": 0.055,
+            "avgPrice": 1
           },
           {
             "id": "c997f964-d4cd-418f-a7b6-a0aae4371d46",
             "name": "Derrick Henry",
             "position": "RB",
-            "count": 26,
-            "landRate": 0.065,
-            "avgPrice": 35
+            "count": 21,
+            "landRate": 0.0525,
+            "avgPrice": 33
+          },
+          {
+            "id": "be69ab0e-552e-49e8-88da-82d4f74feebb",
+            "name": "Travis Etienne Jr.",
+            "position": "RB",
+            "count": 21,
+            "landRate": 0.0525,
+            "avgPrice": 15
+          },
+          {
+            "id": "63e881e4-91b5-4977-97d2-decde9630df7",
+            "name": "Davante Adams",
+            "position": "WR",
+            "count": 20,
+            "landRate": 0.05,
+            "avgPrice": 9
           }
         ],
         "distribution": {
           "runs": 400,
           "myTotalCeiling": {
-            "min": 308,
-            "max": 378,
-            "mean": 344.4275,
-            "median": 345,
-            "p10": 330.9,
-            "p90": 358,
-            "stdev": 10.888055094919387
+            "min": 320,
+            "max": 394,
+            "mean": 363.405,
+            "median": 364,
+            "p10": 347.9,
+            "p90": 377,
+            "stdev": 11.440977886527008
           },
           "mySpend": {
             "min": 200,
@@ -1583,11 +1575,11 @@
             "stdev": 0
           },
           "myPositionMeans": {
-            "QB": 1.07,
-            "RB": 4.505,
-            "WR": 5.045,
-            "TE": 1.38,
-            "DEF": 1
+            "QB": 1.0375,
+            "RB": 4.3175,
+            "WR": 5.3725,
+            "TE": 1.265,
+            "DEF": 1.0075
           }
         }
       }
@@ -1689,14 +1681,14 @@
           "runs": 400,
           "games": 14,
           "numManagers": 12,
-          "meanStarterPoints": 1871.6,
-          "meanRank": 1.9,
-          "meanWins": 9.8,
-          "meanLosses": 4.2,
+          "meanStarterPoints": 1944.3,
+          "meanRank": 1.2,
+          "meanWins": 10.8,
+          "meanLosses": 3.2,
           "modalRecord": {
-            "wins": 10,
-            "losses": 4,
-            "frequencyPct": 21.3
+            "wins": 11,
+            "losses": 3,
+            "frequencyPct": 24.8
           },
           "bestRecord": {
             "wins": 14,
@@ -1711,417 +1703,38 @@
           {
             "coreIds": [
               "36d658e4-e581-4119-b69d-3c4ba704011a",
-              "49cc05b0-c218-4651-a587-635945cf4f03",
-              "f4960ab2-d09e-4ec4-83c8-cc406000e47f"
+              "95713a6a-7cc9-4532-8cce-c5b2eeee0b43"
             ],
             "coreNames": [
               "Jahmyr Gibbs",
-              "Zay Flowers",
-              "Cam Skattebo"
+              "Bijan Robinson"
             ],
-            "frequency": 11,
-            "frequencyPct": 2.8,
+            "frequency": 46,
+            "frequencyPct": 11.5,
             "representative": [
               {
                 "id": "36d658e4-e581-4119-b69d-3c4ba704011a",
                 "name": "Jahmyr Gibbs",
                 "position": "RB",
-                "price": 122,
+                "price": 96,
                 "ceiling": 96,
                 "projectedPoints": 374
               },
               {
-                "id": "49cc05b0-c218-4651-a587-635945cf4f03",
-                "name": "Zay Flowers",
-                "position": "WR",
-                "price": 45,
-                "ceiling": 41,
-                "projectedPoints": 0
-              },
-              {
-                "id": "f4960ab2-d09e-4ec4-83c8-cc406000e47f",
-                "name": "Cam Skattebo",
+                "id": "95713a6a-7cc9-4532-8cce-c5b2eeee0b43",
+                "name": "Bijan Robinson",
                 "position": "RB",
-                "price": 23,
-                "ceiling": 28,
-                "projectedPoints": 236.7
+                "price": 89,
+                "ceiling": 80,
+                "projectedPoints": 341
               },
               {
-                "id": "25528981-2fbf-4cd5-b008-d73dfda103c8",
-                "name": "Rome Odunze",
+                "id": "63e881e4-91b5-4977-97d2-decde9630df7",
+                "name": "Davante Adams",
                 "position": "WR",
-                "price": 1,
-                "ceiling": 20,
-                "projectedPoints": 219.3
-              },
-              {
-                "id": "62e862bf-a54f-4105-bc18-157f6be7ad93",
-                "name": "Terry McLaurin",
-                "position": "WR",
-                "price": 1,
-                "ceiling": 20,
-                "projectedPoints": 220.1
-              },
-              {
-                "id": "43e44f03-f8e8-415a-b85d-83b055236cc7",
-                "name": "George Kittle",
-                "position": "TE",
-                "price": 1,
-                "ceiling": 23,
-                "projectedPoints": 202.6
-              },
-              {
-                "id": "dbf87e2c-dfe3-4f92-a1ee-d7c7a5be6bf7",
-                "name": "D'Andre Swift",
-                "position": "RB",
-                "price": 1,
-                "ceiling": 20,
-                "projectedPoints": 220.7
-              },
-              {
-                "id": "d17bf89d-761d-40e5-8be8-6c9f20ad599b",
-                "name": "Carnell Tate",
-                "position": "WR",
-                "price": 1,
-                "ceiling": 18,
-                "projectedPoints": 216.6
-              },
-              {
-                "id": "949064dd-2e73-4664-9024-799ea1f36420",
-                "name": "Jaxson Dart",
-                "position": "QB",
-                "price": 1,
-                "ceiling": 20,
-                "projectedPoints": 315.4
-              },
-              {
-                "id": "e2f638bf-8330-4f6a-b575-202eb0361ce0",
-                "name": "Rhamondre Stevenson",
-                "position": "RB",
-                "price": 1,
-                "ceiling": 18,
-                "projectedPoints": 215.8
-              },
-              {
-                "id": "a4e96d9c-381d-4804-becf-bbb95be38d6e",
-                "name": "Courtland Sutton",
-                "position": "WR",
-                "price": 1,
-                "ceiling": 18,
-                "projectedPoints": 215.6
-              },
-              {
-                "id": "ddc11a83-8b9a-4a5e-b996-fb480290ec91",
-                "name": "Sam LaPorta",
-                "position": "TE",
-                "price": 1,
-                "ceiling": 18,
-                "projectedPoints": 191.5
-              },
-              {
-                "id": "46b2b736-6eac-427d-a203-9bd607d8d305",
-                "name": "Houston Texans",
-                "position": "DEF",
-                "price": 1,
-                "ceiling": 14,
-                "projectedPoints": 118.3
-              }
-            ],
-            "avgSpent": 200,
-            "avgStarterPoints": 1890.5,
-            "avgWins": 9.5
-          },
-          {
-            "coreIds": [
-              "36d658e4-e581-4119-b69d-3c4ba704011a",
-              "3a2efc4b-0e52-4818-9d9c-4933550ae930",
-              "49cc05b0-c218-4651-a587-635945cf4f03"
-            ],
-            "coreNames": [
-              "Jahmyr Gibbs",
-              "Travis Etienne",
-              "Zay Flowers"
-            ],
-            "frequency": 9,
-            "frequencyPct": 2.3,
-            "representative": [
-              {
-                "id": "36d658e4-e581-4119-b69d-3c4ba704011a",
-                "name": "Jahmyr Gibbs",
-                "position": "RB",
-                "price": 122,
-                "ceiling": 96,
-                "projectedPoints": 374
-              },
-              {
-                "id": "49cc05b0-c218-4651-a587-635945cf4f03",
-                "name": "Zay Flowers",
-                "position": "WR",
-                "price": 49,
-                "ceiling": 41,
-                "projectedPoints": 0
-              },
-              {
-                "id": "3a2efc4b-0e52-4818-9d9c-4933550ae930",
-                "name": "Travis Etienne",
-                "position": "RB",
-                "price": 15,
-                "ceiling": 30,
-                "projectedPoints": 239.8
-              },
-              {
-                "id": "6613dab8-368f-4ea9-90b2-4422faf2d453",
-                "name": "Tyler Warren",
-                "position": "TE",
-                "price": 4,
-                "ceiling": 23,
-                "projectedPoints": 0
-              },
-              {
-                "id": "a4bef8b8-d801-4f7e-b29c-06d7f6ec8e7a",
-                "name": "Harold Fannin Jr.",
-                "position": "TE",
-                "price": 2,
-                "ceiling": 24,
-                "projectedPoints": 202.9
-              },
-              {
-                "id": "62e862bf-a54f-4105-bc18-157f6be7ad93",
-                "name": "Terry McLaurin",
-                "position": "WR",
-                "price": 1,
-                "ceiling": 20,
-                "projectedPoints": 220.1
-              },
-              {
-                "id": "949064dd-2e73-4664-9024-799ea1f36420",
-                "name": "Jaxson Dart",
-                "position": "QB",
-                "price": 1,
-                "ceiling": 20,
-                "projectedPoints": 315.4
-              },
-              {
-                "id": "58dd4f76-4f35-415a-b5ff-d58215b061f7",
-                "name": "Jaylen Waddle",
-                "position": "WR",
-                "price": 1,
-                "ceiling": 22,
-                "projectedPoints": 223.8
-              },
-              {
-                "id": "e2f638bf-8330-4f6a-b575-202eb0361ce0",
-                "name": "Rhamondre Stevenson",
-                "position": "RB",
-                "price": 1,
-                "ceiling": 18,
-                "projectedPoints": 215.8
-              },
-              {
-                "id": "dbf87e2c-dfe3-4f92-a1ee-d7c7a5be6bf7",
-                "name": "D'Andre Swift",
-                "position": "RB",
-                "price": 1,
-                "ceiling": 20,
-                "projectedPoints": 220.7
-              },
-              {
-                "id": "a4e96d9c-381d-4804-becf-bbb95be38d6e",
-                "name": "Courtland Sutton",
-                "position": "WR",
-                "price": 1,
-                "ceiling": 18,
-                "projectedPoints": 215.6
-              },
-              {
-                "id": "d17bf89d-761d-40e5-8be8-6c9f20ad599b",
-                "name": "Carnell Tate",
-                "position": "WR",
-                "price": 1,
-                "ceiling": 18,
-                "projectedPoints": 216.6
-              },
-              {
-                "id": "46b2b736-6eac-427d-a203-9bd607d8d305",
-                "name": "Houston Texans",
-                "position": "DEF",
-                "price": 1,
-                "ceiling": 14,
-                "projectedPoints": 118.3
-              }
-            ],
-            "avgSpent": 200,
-            "avgStarterPoints": 1900.3,
-            "avgWins": 8.9
-          },
-          {
-            "coreIds": [
-              "36d658e4-e581-4119-b69d-3c4ba704011a",
-              "3cc9ef47-edaa-4ae8-a6d8-eedec892fc35",
-              "49cc05b0-c218-4651-a587-635945cf4f03"
-            ],
-            "coreNames": [
-              "Jahmyr Gibbs",
-              "Emeka Egbuka",
-              "Zay Flowers"
-            ],
-            "frequency": 9,
-            "frequencyPct": 2.3,
-            "representative": [
-              {
-                "id": "36d658e4-e581-4119-b69d-3c4ba704011a",
-                "name": "Jahmyr Gibbs",
-                "position": "RB",
-                "price": 122,
-                "ceiling": 96,
-                "projectedPoints": 374
-              },
-              {
-                "id": "49cc05b0-c218-4651-a587-635945cf4f03",
-                "name": "Zay Flowers",
-                "position": "WR",
-                "price": 47,
-                "ceiling": 41,
-                "projectedPoints": 0
-              },
-              {
-                "id": "3cc9ef47-edaa-4ae8-a6d8-eedec892fc35",
-                "name": "Emeka Egbuka",
-                "position": "WR",
-                "price": 20,
-                "ceiling": 26,
-                "projectedPoints": 231
-              },
-              {
-                "id": "58dd4f76-4f35-415a-b5ff-d58215b061f7",
-                "name": "Jaylen Waddle",
-                "position": "WR",
-                "price": 2,
-                "ceiling": 22,
-                "projectedPoints": 223.8
-              },
-              {
-                "id": "dbf87e2c-dfe3-4f92-a1ee-d7c7a5be6bf7",
-                "name": "D'Andre Swift",
-                "position": "RB",
-                "price": 1,
-                "ceiling": 20,
-                "projectedPoints": 220.7
-              },
-              {
-                "id": "e2f638bf-8330-4f6a-b575-202eb0361ce0",
-                "name": "Rhamondre Stevenson",
-                "position": "RB",
-                "price": 1,
-                "ceiling": 18,
-                "projectedPoints": 215.8
-              },
-              {
-                "id": "a4e96d9c-381d-4804-becf-bbb95be38d6e",
-                "name": "Courtland Sutton",
-                "position": "WR",
-                "price": 1,
-                "ceiling": 18,
-                "projectedPoints": 215.6
-              },
-              {
-                "id": "ddc11a83-8b9a-4a5e-b996-fb480290ec91",
-                "name": "Sam LaPorta",
-                "position": "TE",
-                "price": 1,
-                "ceiling": 18,
-                "projectedPoints": 191.5
-              },
-              {
-                "id": "75af0d4b-1dfd-4e73-8d8c-9eaa16b53dc0",
-                "name": "Jameson Williams",
-                "position": "WR",
-                "price": 1,
-                "ceiling": 16,
-                "projectedPoints": 211.5
-              },
-              {
-                "id": "8ebf94d0-76d4-4d53-bf52-1075923e7eb8",
-                "name": "Tony Pollard",
-                "position": "RB",
-                "price": 1,
-                "ceiling": 16,
-                "projectedPoints": 211.8
-              },
-              {
-                "id": "9cb7794a-8354-4685-918d-b0f49aa4dfe4",
-                "name": "Zach Charbonnet",
-                "position": "RB",
-                "price": 1,
-                "ceiling": 16,
-                "projectedPoints": 213
-              },
-              {
-                "id": "949064dd-2e73-4664-9024-799ea1f36420",
-                "name": "Jaxson Dart",
-                "position": "QB",
-                "price": 1,
-                "ceiling": 20,
-                "projectedPoints": 315.4
-              },
-              {
-                "id": "46b2b736-6eac-427d-a203-9bd607d8d305",
-                "name": "Houston Texans",
-                "position": "DEF",
-                "price": 1,
-                "ceiling": 14,
-                "projectedPoints": 118.3
-              }
-            ],
-            "avgSpent": 200,
-            "avgStarterPoints": 1889.4,
-            "avgWins": 9.6
-          },
-          {
-            "coreIds": [
-              "36d658e4-e581-4119-b69d-3c4ba704011a",
-              "49cc05b0-c218-4651-a587-635945cf4f03",
-              "b5af8842-3bce-4fc6-ad07-825fa47e0c2b"
-            ],
-            "coreNames": [
-              "Jahmyr Gibbs",
-              "Zay Flowers",
-              "Luther Burden III"
-            ],
-            "frequency": 9,
-            "frequencyPct": 2.3,
-            "representative": [
-              {
-                "id": "36d658e4-e581-4119-b69d-3c4ba704011a",
-                "name": "Jahmyr Gibbs",
-                "position": "RB",
-                "price": 120,
-                "ceiling": 96,
-                "projectedPoints": 374
-              },
-              {
-                "id": "49cc05b0-c218-4651-a587-635945cf4f03",
-                "name": "Zay Flowers",
-                "position": "WR",
-                "price": 49,
-                "ceiling": 41,
-                "projectedPoints": 0
-              },
-              {
-                "id": "b5af8842-3bce-4fc6-ad07-825fa47e0c2b",
-                "name": "Luther Burden III",
-                "position": "WR",
-                "price": 20,
-                "ceiling": 27,
-                "projectedPoints": 0
-              },
-              {
-                "id": "25528981-2fbf-4cd5-b008-d73dfda103c8",
-                "name": "Rome Odunze",
-                "position": "WR",
-                "price": 2,
-                "ceiling": 20,
-                "projectedPoints": 219.3
+                "price": 5,
+                "ceiling": 25,
+                "projectedPoints": 229.4
               },
               {
                 "id": "f984cc2a-fe52-48e2-b5ea-40e48ef87ed6",
@@ -2132,20 +1745,20 @@
                 "projectedPoints": 219.4
               },
               {
-                "id": "6613dab8-368f-4ea9-90b2-4422faf2d453",
-                "name": "Tyler Warren",
-                "position": "TE",
-                "price": 1,
-                "ceiling": 23,
-                "projectedPoints": 0
-              },
-              {
                 "id": "d17bf89d-761d-40e5-8be8-6c9f20ad599b",
                 "name": "Carnell Tate",
                 "position": "WR",
                 "price": 1,
                 "ceiling": 18,
                 "projectedPoints": 216.6
+              },
+              {
+                "id": "62e862bf-a54f-4105-bc18-157f6be7ad93",
+                "name": "Terry McLaurin",
+                "position": "WR",
+                "price": 1,
+                "ceiling": 20,
+                "projectedPoints": 220.1
               },
               {
                 "id": "949064dd-2e73-4664-9024-799ea1f36420",
@@ -2156,12 +1769,216 @@
                 "projectedPoints": 315.4
               },
               {
-                "id": "dbf87e2c-dfe3-4f92-a1ee-d7c7a5be6bf7",
-                "name": "D'Andre Swift",
+                "id": "e2f638bf-8330-4f6a-b575-202eb0361ce0",
+                "name": "Rhamondre Stevenson",
                 "position": "RB",
                 "price": 1,
+                "ceiling": 18,
+                "projectedPoints": 215.8
+              },
+              {
+                "id": "a4e96d9c-381d-4804-becf-bbb95be38d6e",
+                "name": "Courtland Sutton",
+                "position": "WR",
+                "price": 1,
+                "ceiling": 18,
+                "projectedPoints": 215.6
+              },
+              {
+                "id": "8ebf94d0-76d4-4d53-bf52-1075923e7eb8",
+                "name": "Tony Pollard",
+                "position": "RB",
+                "price": 1,
+                "ceiling": 16,
+                "projectedPoints": 211.8
+              },
+              {
+                "id": "ddc11a83-8b9a-4a5e-b996-fb480290ec91",
+                "name": "Sam LaPorta",
+                "position": "TE",
+                "price": 1,
+                "ceiling": 18,
+                "projectedPoints": 191.5
+              },
+              {
+                "id": "9cb7794a-8354-4685-918d-b0f49aa4dfe4",
+                "name": "Zach Charbonnet",
+                "position": "RB",
+                "price": 1,
+                "ceiling": 16,
+                "projectedPoints": 213
+              },
+              {
+                "id": "aefc429f-ec2a-45cc-99e9-51e2aec115e4",
+                "name": "Denver Broncos",
+                "position": "DEF",
+                "price": 1,
+                "ceiling": 14,
+                "projectedPoints": 117.5
+              }
+            ],
+            "avgSpent": 200,
+            "avgStarterPoints": 1987.8,
+            "avgWins": 11.3
+          },
+          {
+            "coreIds": [
+              "36d658e4-e581-4119-b69d-3c4ba704011a",
+              "99500424-07a8-4cf6-af50-e582d6851a71"
+            ],
+            "coreNames": [
+              "Jahmyr Gibbs",
+              "Christian McCaffrey"
+            ],
+            "frequency": 37,
+            "frequencyPct": 9.3,
+            "representative": [
+              {
+                "id": "36d658e4-e581-4119-b69d-3c4ba704011a",
+                "name": "Jahmyr Gibbs",
+                "position": "RB",
+                "price": 91,
+                "ceiling": 96,
+                "projectedPoints": 374
+              },
+              {
+                "id": "99500424-07a8-4cf6-af50-e582d6851a71",
+                "name": "Christian McCaffrey",
+                "position": "RB",
+                "price": 89,
+                "ceiling": 83,
+                "projectedPoints": 346.5
+              },
+              {
+                "id": "01ca1499-d7ba-4f4b-bec7-c6d265e2e6eb",
+                "name": "Javonte Williams",
+                "position": "RB",
+                "price": 8,
+                "ceiling": 23,
+                "projectedPoints": 226.9
+              },
+              {
+                "id": "f984cc2a-fe52-48e2-b5ea-40e48ef87ed6",
+                "name": "Ladd McConkey",
+                "position": "WR",
+                "price": 3,
                 "ceiling": 20,
-                "projectedPoints": 220.7
+                "projectedPoints": 219.4
+              },
+              {
+                "id": "e2f638bf-8330-4f6a-b575-202eb0361ce0",
+                "name": "Rhamondre Stevenson",
+                "position": "RB",
+                "price": 1,
+                "ceiling": 18,
+                "projectedPoints": 215.8
+              },
+              {
+                "id": "ddc11a83-8b9a-4a5e-b996-fb480290ec91",
+                "name": "Sam LaPorta",
+                "position": "TE",
+                "price": 1,
+                "ceiling": 18,
+                "projectedPoints": 191.5
+              },
+              {
+                "id": "43e44f03-f8e8-415a-b85d-83b055236cc7",
+                "name": "George Kittle",
+                "position": "TE",
+                "price": 1,
+                "ceiling": 23,
+                "projectedPoints": 202.6
+              },
+              {
+                "id": "75af0d4b-1dfd-4e73-8d8c-9eaa16b53dc0",
+                "name": "Jameson Williams",
+                "position": "WR",
+                "price": 1,
+                "ceiling": 16,
+                "projectedPoints": 211.5
+              },
+              {
+                "id": "949064dd-2e73-4664-9024-799ea1f36420",
+                "name": "Jaxson Dart",
+                "position": "QB",
+                "price": 1,
+                "ceiling": 20,
+                "projectedPoints": 315.4
+              },
+              {
+                "id": "a4e96d9c-381d-4804-becf-bbb95be38d6e",
+                "name": "Courtland Sutton",
+                "position": "WR",
+                "price": 1,
+                "ceiling": 18,
+                "projectedPoints": 215.6
+              },
+              {
+                "id": "9cb7794a-8354-4685-918d-b0f49aa4dfe4",
+                "name": "Zach Charbonnet",
+                "position": "RB",
+                "price": 1,
+                "ceiling": 16,
+                "projectedPoints": 213
+              },
+              {
+                "id": "8ebf94d0-76d4-4d53-bf52-1075923e7eb8",
+                "name": "Tony Pollard",
+                "position": "RB",
+                "price": 1,
+                "ceiling": 16,
+                "projectedPoints": 211.8
+              },
+              {
+                "id": "aefc429f-ec2a-45cc-99e9-51e2aec115e4",
+                "name": "Denver Broncos",
+                "position": "DEF",
+                "price": 1,
+                "ceiling": 14,
+                "projectedPoints": 117.5
+              }
+            ],
+            "avgSpent": 200,
+            "avgStarterPoints": 1992.5,
+            "avgWins": 11.9
+          },
+          {
+            "coreIds": [
+              "36d658e4-e581-4119-b69d-3c4ba704011a",
+              "95713a6a-7cc9-4532-8cce-c5b2eeee0b43",
+              "b5af8842-3bce-4fc6-ad07-825fa47e0c2b"
+            ],
+            "coreNames": [
+              "Jahmyr Gibbs",
+              "Bijan Robinson",
+              "Luther Burden III"
+            ],
+            "frequency": 22,
+            "frequencyPct": 5.5,
+            "representative": [
+              {
+                "id": "36d658e4-e581-4119-b69d-3c4ba704011a",
+                "name": "Jahmyr Gibbs",
+                "position": "RB",
+                "price": 88,
+                "ceiling": 96,
+                "projectedPoints": 374
+              },
+              {
+                "id": "95713a6a-7cc9-4532-8cce-c5b2eeee0b43",
+                "name": "Bijan Robinson",
+                "position": "RB",
+                "price": 87,
+                "ceiling": 80,
+                "projectedPoints": 341
+              },
+              {
+                "id": "b5af8842-3bce-4fc6-ad07-825fa47e0c2b",
+                "name": "Luther Burden III",
+                "position": "WR",
+                "price": 15,
+                "ceiling": 27,
+                "projectedPoints": 0
               },
               {
                 "id": "a4e96d9c-381d-4804-becf-bbb95be38d6e",
@@ -2178,6 +1995,179 @@
                 "price": 1,
                 "ceiling": 18,
                 "projectedPoints": 215.8
+              },
+              {
+                "id": "d17bf89d-761d-40e5-8be8-6c9f20ad599b",
+                "name": "Carnell Tate",
+                "position": "WR",
+                "price": 1,
+                "ceiling": 18,
+                "projectedPoints": 216.6
+              },
+              {
+                "id": "8ebf94d0-76d4-4d53-bf52-1075923e7eb8",
+                "name": "Tony Pollard",
+                "position": "RB",
+                "price": 1,
+                "ceiling": 16,
+                "projectedPoints": 211.8
+              },
+              {
+                "id": "9bc113cc-b30b-4eb2-bb79-5b74cf1ca73a",
+                "name": "Luther Burden",
+                "position": "WR",
+                "price": 1,
+                "ceiling": 16,
+                "projectedPoints": 212.3
+              },
+              {
+                "id": "9cb7794a-8354-4685-918d-b0f49aa4dfe4",
+                "name": "Zach Charbonnet",
+                "position": "RB",
+                "price": 1,
+                "ceiling": 16,
+                "projectedPoints": 213
+              },
+              {
+                "id": "05f8ce4d-6cd5-4853-8654-18999205c7eb",
+                "name": "TreVeyon Henderson",
+                "position": "RB",
+                "price": 1,
+                "ceiling": 15,
+                "projectedPoints": 209.9
+              },
+              {
+                "id": "46b2b736-6eac-427d-a203-9bd607d8d305",
+                "name": "Houston Texans",
+                "position": "DEF",
+                "price": 1,
+                "ceiling": 14,
+                "projectedPoints": 118.3
+              },
+              {
+                "id": "9e394d91-a663-4743-bc0d-caf601793578",
+                "name": "Dallas Goedert",
+                "position": "TE",
+                "price": 1,
+                "ceiling": 13,
+                "projectedPoints": 181.7
+              },
+              {
+                "id": "6cefbadb-5fb4-424f-96ee-02d0037cf0da",
+                "name": "Brock Purdy",
+                "position": "QB",
+                "price": 1,
+                "ceiling": 11,
+                "projectedPoints": 295.7
+              }
+            ],
+            "avgSpent": 200,
+            "avgStarterPoints": 1985.6,
+            "avgWins": 11
+          },
+          {
+            "coreIds": [
+              "36d658e4-e581-4119-b69d-3c4ba704011a",
+              "49cc05b0-c218-4651-a587-635945cf4f03",
+              "c997f964-d4cd-418f-a7b6-a0aae4371d46",
+              "dd85893e-1fd8-4074-833d-07434e9168b6"
+            ],
+            "coreNames": [
+              "Jahmyr Gibbs",
+              "Zay Flowers",
+              "Derrick Henry",
+              "Garrett Wilson"
+            ],
+            "frequency": 21,
+            "frequencyPct": 5.3,
+            "representative": [
+              {
+                "id": "36d658e4-e581-4119-b69d-3c4ba704011a",
+                "name": "Jahmyr Gibbs",
+                "position": "RB",
+                "price": 95,
+                "ceiling": 96,
+                "projectedPoints": 374
+              },
+              {
+                "id": "49cc05b0-c218-4651-a587-635945cf4f03",
+                "name": "Zay Flowers",
+                "position": "WR",
+                "price": 30,
+                "ceiling": 41,
+                "projectedPoints": 0
+              },
+              {
+                "id": "dd85893e-1fd8-4074-833d-07434e9168b6",
+                "name": "Garrett Wilson",
+                "position": "WR",
+                "price": 28,
+                "ceiling": 40,
+                "projectedPoints": 0
+              },
+              {
+                "id": "c997f964-d4cd-418f-a7b6-a0aae4371d46",
+                "name": "Derrick Henry",
+                "position": "RB",
+                "price": 36,
+                "ceiling": 34,
+                "projectedPoints": 0
+              },
+              {
+                "id": "949064dd-2e73-4664-9024-799ea1f36420",
+                "name": "Jaxson Dart",
+                "position": "QB",
+                "price": 3,
+                "ceiling": 20,
+                "projectedPoints": 315.4
+              },
+              {
+                "id": "d17bf89d-761d-40e5-8be8-6c9f20ad599b",
+                "name": "Carnell Tate",
+                "position": "WR",
+                "price": 1,
+                "ceiling": 18,
+                "projectedPoints": 216.6
+              },
+              {
+                "id": "43e44f03-f8e8-415a-b85d-83b055236cc7",
+                "name": "George Kittle",
+                "position": "TE",
+                "price": 1,
+                "ceiling": 23,
+                "projectedPoints": 202.6
+              },
+              {
+                "id": "a4e96d9c-381d-4804-becf-bbb95be38d6e",
+                "name": "Courtland Sutton",
+                "position": "WR",
+                "price": 1,
+                "ceiling": 18,
+                "projectedPoints": 215.6
+              },
+              {
+                "id": "9cb7794a-8354-4685-918d-b0f49aa4dfe4",
+                "name": "Zach Charbonnet",
+                "position": "RB",
+                "price": 1,
+                "ceiling": 16,
+                "projectedPoints": 213
+              },
+              {
+                "id": "8ebf94d0-76d4-4d53-bf52-1075923e7eb8",
+                "name": "Tony Pollard",
+                "position": "RB",
+                "price": 1,
+                "ceiling": 16,
+                "projectedPoints": 211.8
+              },
+              {
+                "id": "b1474c9e-dc4f-4a01-9b97-4d34bfa3b60c",
+                "name": "Tee Higgins",
+                "position": "WR",
+                "price": 1,
+                "ceiling": 15,
+                "projectedPoints": 210.4
               },
               {
                 "id": "75af0d4b-1dfd-4e73-8d8c-9eaa16b53dc0",
@@ -2197,86 +2187,70 @@
               }
             ],
             "avgSpent": 200,
-            "avgStarterPoints": 1850.2,
-            "avgWins": 10.1
+            "avgStarterPoints": 1864.6,
+            "avgWins": 9.7
           },
           {
             "coreIds": [
+              "08135438-b9cf-4184-924d-84758d733ac4",
               "36d658e4-e581-4119-b69d-3c4ba704011a",
-              "49cc05b0-c218-4651-a587-635945cf4f03",
-              "aec1e256-85f8-4c49-8c2c-495cac2cec40"
+              "b5af8842-3bce-4fc6-ad07-825fa47e0c2b"
             ],
             "coreNames": [
+              "Ja'Marr Chase",
               "Jahmyr Gibbs",
-              "Zay Flowers",
-              "Kenneth Walker III"
+              "Luther Burden III"
             ],
-            "frequency": 8,
-            "frequencyPct": 2,
+            "frequency": 18,
+            "frequencyPct": 4.5,
             "representative": [
               {
                 "id": "36d658e4-e581-4119-b69d-3c4ba704011a",
                 "name": "Jahmyr Gibbs",
                 "position": "RB",
-                "price": 112,
+                "price": 98,
                 "ceiling": 96,
                 "projectedPoints": 374
               },
               {
-                "id": "49cc05b0-c218-4651-a587-635945cf4f03",
-                "name": "Zay Flowers",
+                "id": "08135438-b9cf-4184-924d-84758d733ac4",
+                "name": "Ja'Marr Chase",
                 "position": "WR",
-                "price": 48,
-                "ceiling": 41,
+                "price": 72,
+                "ceiling": 72,
+                "projectedPoints": 323.8
+              },
+              {
+                "id": "b5af8842-3bce-4fc6-ad07-825fa47e0c2b",
+                "name": "Luther Burden III",
+                "position": "WR",
+                "price": 16,
+                "ceiling": 27,
                 "projectedPoints": 0
               },
               {
-                "id": "aec1e256-85f8-4c49-8c2c-495cac2cec40",
-                "name": "Kenneth Walker III",
-                "position": "RB",
-                "price": 29,
-                "ceiling": 28,
-                "projectedPoints": 235.9
-              },
-              {
-                "id": "63e881e4-91b5-4977-97d2-decde9630df7",
-                "name": "Davante Adams",
+                "id": "ed917420-f806-4bd3-860f-2eba9f6a5539",
+                "name": "George Pickens",
                 "position": "WR",
-                "price": 2,
-                "ceiling": 25,
-                "projectedPoints": 229.4
+                "price": 5,
+                "ceiling": 23,
+                "projectedPoints": 225.6
               },
               {
-                "id": "62e862bf-a54f-4105-bc18-157f6be7ad93",
-                "name": "Terry McLaurin",
+                "id": "f984cc2a-fe52-48e2-b5ea-40e48ef87ed6",
+                "name": "Ladd McConkey",
                 "position": "WR",
                 "price": 1,
                 "ceiling": 20,
-                "projectedPoints": 220.1
+                "projectedPoints": 219.4
               },
               {
-                "id": "949064dd-2e73-4664-9024-799ea1f36420",
-                "name": "Jaxson Dart",
-                "position": "QB",
-                "price": 1,
-                "ceiling": 20,
-                "projectedPoints": 315.4
-              },
-              {
-                "id": "dbf87e2c-dfe3-4f92-a1ee-d7c7a5be6bf7",
-                "name": "D'Andre Swift",
-                "position": "RB",
-                "price": 1,
-                "ceiling": 20,
-                "projectedPoints": 220.7
-              },
-              {
-                "id": "e2f638bf-8330-4f6a-b575-202eb0361ce0",
-                "name": "Rhamondre Stevenson",
-                "position": "RB",
+                "id": "d17bf89d-761d-40e5-8be8-6c9f20ad599b",
+                "name": "Carnell Tate",
+                "position": "WR",
                 "price": 1,
                 "ceiling": 18,
-                "projectedPoints": 215.8
+                "projectedPoints": 216.6
               },
               {
                 "id": "ddc11a83-8b9a-4a5e-b996-fb480290ec91",
@@ -2287,6 +2261,30 @@
                 "projectedPoints": 191.5
               },
               {
+                "id": "e2f638bf-8330-4f6a-b575-202eb0361ce0",
+                "name": "Rhamondre Stevenson",
+                "position": "RB",
+                "price": 1,
+                "ceiling": 18,
+                "projectedPoints": 215.8
+              },
+              {
+                "id": "75af0d4b-1dfd-4e73-8d8c-9eaa16b53dc0",
+                "name": "Jameson Williams",
+                "position": "WR",
+                "price": 1,
+                "ceiling": 16,
+                "projectedPoints": 211.5
+              },
+              {
+                "id": "dbf87e2c-dfe3-4f92-a1ee-d7c7a5be6bf7",
+                "name": "D'Andre Swift",
+                "position": "RB",
+                "price": 1,
+                "ceiling": 20,
+                "projectedPoints": 220.7
+              },
+              {
                 "id": "a4e96d9c-381d-4804-becf-bbb95be38d6e",
                 "name": "Courtland Sutton",
                 "position": "WR",
@@ -2295,367 +2293,359 @@
                 "projectedPoints": 215.6
               },
               {
-                "id": "58dd4f76-4f35-415a-b5ff-d58215b061f7",
-                "name": "Jaylen Waddle",
-                "position": "WR",
-                "price": 1,
-                "ceiling": 22,
-                "projectedPoints": 223.8
-              },
-              {
-                "id": "8ebf94d0-76d4-4d53-bf52-1075923e7eb8",
-                "name": "Tony Pollard",
-                "position": "RB",
-                "price": 1,
-                "ceiling": 16,
-                "projectedPoints": 211.8
-              },
-              {
                 "id": "46b2b736-6eac-427d-a203-9bd607d8d305",
                 "name": "Houston Texans",
                 "position": "DEF",
                 "price": 1,
                 "ceiling": 14,
                 "projectedPoints": 118.3
+              },
+              {
+                "id": "6cefbadb-5fb4-424f-96ee-02d0037cf0da",
+                "name": "Brock Purdy",
+                "position": "QB",
+                "price": 1,
+                "ceiling": 11,
+                "projectedPoints": 295.7
               }
             ],
             "avgSpent": 200,
-            "avgStarterPoints": 1896.2,
-            "avgWins": 10.8
+            "avgStarterPoints": 1955.9,
+            "avgWins": 10.9
           }
         ],
         "landed": [
           {
+            "id": "36d658e4-e581-4119-b69d-3c4ba704011a",
+            "name": "Jahmyr Gibbs",
+            "position": "RB",
+            "count": 372,
+            "landRate": 0.93,
+            "avgPrice": 96
+          },
+          {
             "id": "ddc11a83-8b9a-4a5e-b996-fb480290ec91",
             "name": "Sam LaPorta",
             "position": "TE",
-            "count": 361,
-            "landRate": 0.9025,
-            "avgPrice": 1
-          },
-          {
-            "id": "d17bf89d-761d-40e5-8be8-6c9f20ad599b",
-            "name": "Carnell Tate",
-            "position": "WR",
-            "count": 341,
-            "landRate": 0.8525,
-            "avgPrice": 1
-          },
-          {
-            "id": "e2f638bf-8330-4f6a-b575-202eb0361ce0",
-            "name": "Rhamondre Stevenson",
-            "position": "RB",
-            "count": 323,
-            "landRate": 0.8075,
-            "avgPrice": 1
-          },
-          {
-            "id": "949064dd-2e73-4664-9024-799ea1f36420",
-            "name": "Jaxson Dart",
-            "position": "QB",
-            "count": 320,
-            "landRate": 0.8,
+            "count": 353,
+            "landRate": 0.8825,
             "avgPrice": 1
           },
           {
             "id": "a4e96d9c-381d-4804-becf-bbb95be38d6e",
             "name": "Courtland Sutton",
             "position": "WR",
-            "count": 286,
-            "landRate": 0.715,
+            "count": 341,
+            "landRate": 0.8525,
             "avgPrice": 1
-          },
-          {
-            "id": "46b2b736-6eac-427d-a203-9bd607d8d305",
-            "name": "Houston Texans",
-            "position": "DEF",
-            "count": 267,
-            "landRate": 0.6675,
-            "avgPrice": 1
-          },
-          {
-            "id": "dbf87e2c-dfe3-4f92-a1ee-d7c7a5be6bf7",
-            "name": "D'Andre Swift",
-            "position": "RB",
-            "count": 257,
-            "landRate": 0.6425,
-            "avgPrice": 1
-          },
-          {
-            "id": "36d658e4-e581-4119-b69d-3c4ba704011a",
-            "name": "Jahmyr Gibbs",
-            "position": "RB",
-            "count": 247,
-            "landRate": 0.6175,
-            "avgPrice": 117
           },
           {
             "id": "75af0d4b-1dfd-4e73-8d8c-9eaa16b53dc0",
             "name": "Jameson Williams",
             "position": "WR",
-            "count": 233,
-            "landRate": 0.5825,
-            "avgPrice": 1
-          },
-          {
-            "id": "49cc05b0-c218-4651-a587-635945cf4f03",
-            "name": "Zay Flowers",
-            "position": "WR",
-            "count": 219,
-            "landRate": 0.5475,
-            "avgPrice": 48
-          },
-          {
-            "id": "25528981-2fbf-4cd5-b008-d73dfda103c8",
-            "name": "Rome Odunze",
-            "position": "WR",
-            "count": 185,
-            "landRate": 0.4625,
+            "count": 340,
+            "landRate": 0.85,
             "avgPrice": 1
           },
           {
             "id": "8ebf94d0-76d4-4d53-bf52-1075923e7eb8",
             "name": "Tony Pollard",
             "position": "RB",
-            "count": 179,
-            "landRate": 0.4475,
+            "count": 302,
+            "landRate": 0.755,
             "avgPrice": 1
           },
           {
-            "id": "dd85893e-1fd8-4074-833d-07434e9168b6",
-            "name": "Garrett Wilson",
-            "position": "WR",
-            "count": 160,
-            "landRate": 0.4,
-            "avgPrice": 46
-          },
-          {
-            "id": "62e862bf-a54f-4105-bc18-157f6be7ad93",
-            "name": "Terry McLaurin",
-            "position": "WR",
-            "count": 141,
-            "landRate": 0.3525,
+            "id": "e2f638bf-8330-4f6a-b575-202eb0361ce0",
+            "name": "Rhamondre Stevenson",
+            "position": "RB",
+            "count": 298,
+            "landRate": 0.745,
             "avgPrice": 1
           },
           {
-            "id": "aefc429f-ec2a-45cc-99e9-51e2aec115e4",
-            "name": "Denver Broncos",
+            "id": "46b2b736-6eac-427d-a203-9bd607d8d305",
+            "name": "Houston Texans",
             "position": "DEF",
-            "count": 129,
-            "landRate": 0.3225,
+            "count": 261,
+            "landRate": 0.6525,
             "avgPrice": 1
           },
           {
             "id": "9cb7794a-8354-4685-918d-b0f49aa4dfe4",
             "name": "Zach Charbonnet",
             "position": "RB",
-            "count": 110,
-            "landRate": 0.275,
+            "count": 256,
+            "landRate": 0.64,
             "avgPrice": 1
           },
           {
-            "id": "58dd4f76-4f35-415a-b5ff-d58215b061f7",
-            "name": "Jaylen Waddle",
+            "id": "d17bf89d-761d-40e5-8be8-6c9f20ad599b",
+            "name": "Carnell Tate",
             "position": "WR",
-            "count": 93,
-            "landRate": 0.2325,
-            "avgPrice": 2
-          },
-          {
-            "id": "f984cc2a-fe52-48e2-b5ea-40e48ef87ed6",
-            "name": "Ladd McConkey",
-            "position": "WR",
-            "count": 84,
-            "landRate": 0.21,
+            "count": 243,
+            "landRate": 0.6075,
             "avgPrice": 1
           },
           {
-            "id": "3f0225f8-fda2-4c1d-ba6f-78c4337d6105",
-            "name": "Quinshon Judkins",
-            "position": "RB",
-            "count": 75,
-            "landRate": 0.1875,
-            "avgPrice": 35
-          },
-          {
-            "id": "43e44f03-f8e8-415a-b85d-83b055236cc7",
-            "name": "George Kittle",
-            "position": "TE",
-            "count": 62,
-            "landRate": 0.155,
-            "avgPrice": 2
-          },
-          {
-            "id": "6613dab8-368f-4ea9-90b2-4422faf2d453",
-            "name": "Tyler Warren",
-            "position": "TE",
-            "count": 53,
-            "landRate": 0.1325,
-            "avgPrice": 2
+            "id": "949064dd-2e73-4664-9024-799ea1f36420",
+            "name": "Jaxson Dart",
+            "position": "QB",
+            "count": 204,
+            "landRate": 0.51,
+            "avgPrice": 1
           },
           {
             "id": "9bc113cc-b30b-4eb2-bb79-5b74cf1ca73a",
             "name": "Luther Burden",
             "position": "WR",
-            "count": 52,
-            "landRate": 0.13,
+            "count": 188,
+            "landRate": 0.47,
             "avgPrice": 1
           },
           {
-            "id": "01ca1499-d7ba-4f4b-bec7-c6d265e2e6eb",
-            "name": "Javonte Williams",
+            "id": "aefc429f-ec2a-45cc-99e9-51e2aec115e4",
+            "name": "Denver Broncos",
+            "position": "DEF",
+            "count": 143,
+            "landRate": 0.3575,
+            "avgPrice": 1
+          },
+          {
+            "id": "dd85893e-1fd8-4074-833d-07434e9168b6",
+            "name": "Garrett Wilson",
+            "position": "WR",
+            "count": 138,
+            "landRate": 0.345,
+            "avgPrice": 28
+          },
+          {
+            "id": "dbf87e2c-dfe3-4f92-a1ee-d7c7a5be6bf7",
+            "name": "D'Andre Swift",
             "position": "RB",
-            "count": 46,
-            "landRate": 0.115,
-            "avgPrice": 3
+            "count": 136,
+            "landRate": 0.34,
+            "avgPrice": 1
+          },
+          {
+            "id": "49cc05b0-c218-4651-a587-635945cf4f03",
+            "name": "Zay Flowers",
+            "position": "WR",
+            "count": 135,
+            "landRate": 0.3375,
+            "avgPrice": 29
           },
           {
             "id": "6cefbadb-5fb4-424f-96ee-02d0037cf0da",
             "name": "Brock Purdy",
             "position": "QB",
-            "count": 44,
-            "landRate": 0.11,
+            "count": 130,
+            "landRate": 0.325,
             "avgPrice": 1
           },
           {
-            "id": "63e881e4-91b5-4977-97d2-decde9630df7",
-            "name": "Davante Adams",
+            "id": "b1474c9e-dc4f-4a01-9b97-4d34bfa3b60c",
+            "name": "Tee Higgins",
             "position": "WR",
-            "count": 42,
-            "landRate": 0.105,
-            "avgPrice": 9
+            "count": 123,
+            "landRate": 0.3075,
+            "avgPrice": 1
           },
           {
-            "id": "3cc9ef47-edaa-4ae8-a6d8-eedec892fc35",
-            "name": "Emeka Egbuka",
-            "position": "WR",
-            "count": 40,
-            "landRate": 0.1,
-            "avgPrice": 18
+            "id": "95713a6a-7cc9-4532-8cce-c5b2eeee0b43",
+            "name": "Bijan Robinson",
+            "position": "RB",
+            "count": 111,
+            "landRate": 0.2775,
+            "avgPrice": 83
           },
           {
-            "id": "a4bef8b8-d801-4f7e-b29c-06d7f6ec8e7a",
-            "name": "Harold Fannin Jr.",
-            "position": "TE",
-            "count": 39,
-            "landRate": 0.0975,
-            "avgPrice": 5
+            "id": "25528981-2fbf-4cd5-b008-d73dfda103c8",
+            "name": "Rome Odunze",
+            "position": "WR",
+            "count": 95,
+            "landRate": 0.2375,
+            "avgPrice": 1
           },
           {
-            "id": "ed917420-f806-4bd3-860f-2eba9f6a5539",
-            "name": "George Pickens",
+            "id": "99500424-07a8-4cf6-af50-e582d6851a71",
+            "name": "Christian McCaffrey",
+            "position": "RB",
+            "count": 90,
+            "landRate": 0.225,
+            "avgPrice": 86
+          },
+          {
+            "id": "62e862bf-a54f-4105-bc18-157f6be7ad93",
+            "name": "Terry McLaurin",
             "position": "WR",
-            "count": 37,
-            "landRate": 0.0925,
-            "avgPrice": 4
+            "count": 75,
+            "landRate": 0.1875,
+            "avgPrice": 1
           },
           {
             "id": "b5af8842-3bce-4fc6-ad07-825fa47e0c2b",
             "name": "Luther Burden III",
             "position": "WR",
-            "count": 36,
-            "landRate": 0.09,
-            "avgPrice": 21
+            "count": 69,
+            "landRate": 0.1725,
+            "avgPrice": 16
           },
           {
-            "id": "c75cf91c-51b6-4aed-95ba-03ca23260810",
-            "name": "Nico Collins",
+            "id": "05f8ce4d-6cd5-4853-8654-18999205c7eb",
+            "name": "TreVeyon Henderson",
+            "position": "RB",
+            "count": 66,
+            "landRate": 0.165,
+            "avgPrice": 1
+          },
+          {
+            "id": "08135438-b9cf-4184-924d-84758d733ac4",
+            "name": "Ja'Marr Chase",
             "position": "WR",
-            "count": 34,
-            "landRate": 0.085,
-            "avgPrice": 10
+            "count": 59,
+            "landRate": 0.1475,
+            "avgPrice": 76
           },
           {
-            "id": "c32243ce-36a2-4335-a5d8-28533144155f",
-            "name": "Drake London",
+            "id": "58dd4f76-4f35-415a-b5ff-d58215b061f7",
+            "name": "Jaylen Waddle",
+            "position": "WR",
+            "count": 55,
+            "landRate": 0.1375,
+            "avgPrice": 3
+          },
+          {
+            "id": "43e44f03-f8e8-415a-b85d-83b055236cc7",
+            "name": "George Kittle",
+            "position": "TE",
+            "count": 53,
+            "landRate": 0.1325,
+            "avgPrice": 4
+          },
+          {
+            "id": "01ca1499-d7ba-4f4b-bec7-c6d265e2e6eb",
+            "name": "Javonte Williams",
+            "position": "RB",
+            "count": 47,
+            "landRate": 0.1175,
+            "avgPrice": 6
+          },
+          {
+            "id": "f984cc2a-fe52-48e2-b5ea-40e48ef87ed6",
+            "name": "Ladd McConkey",
+            "position": "WR",
+            "count": 47,
+            "landRate": 0.1175,
+            "avgPrice": 2
+          },
+          {
+            "id": "8b344d8f-484e-430a-9a59-92df7ce263bf",
+            "name": "Caleb Williams",
+            "position": "QB",
+            "count": 47,
+            "landRate": 0.1175,
+            "avgPrice": 1
+          },
+          {
+            "id": "6613dab8-368f-4ea9-90b2-4422faf2d453",
+            "name": "Tyler Warren",
+            "position": "TE",
+            "count": 42,
+            "landRate": 0.105,
+            "avgPrice": 4
+          },
+          {
+            "id": "ed917420-f806-4bd3-860f-2eba9f6a5539",
+            "name": "George Pickens",
             "position": "WR",
             "count": 33,
             "landRate": 0.0825,
-            "avgPrice": 45
+            "avgPrice": 7
           },
           {
-            "id": "458137dc-3fbc-4008-84cc-aba86815c1cb",
-            "name": "Chase Brown",
-            "position": "RB",
+            "id": "a4bef8b8-d801-4f7e-b29c-06d7f6ec8e7a",
+            "name": "Harold Fannin Jr.",
+            "position": "TE",
             "count": 32,
             "landRate": 0.08,
-            "avgPrice": 45
+            "avgPrice": 8
+          },
+          {
+            "id": "c997f964-d4cd-418f-a7b6-a0aae4371d46",
+            "name": "Derrick Henry",
+            "position": "RB",
+            "count": 28,
+            "landRate": 0.07,
+            "avgPrice": 33
+          },
+          {
+            "id": "1486e8ae-b084-4b91-876b-61b8cc316873",
+            "name": "DJ Moore",
+            "position": "WR",
+            "count": 25,
+            "landRate": 0.0625,
+            "avgPrice": 1
+          },
+          {
+            "id": "9615a977-b467-4b6b-b407-9819a0f34813",
+            "name": "Jalen Hurts",
+            "position": "QB",
+            "count": 22,
+            "landRate": 0.055,
+            "avgPrice": 36
+          },
+          {
+            "id": "63e881e4-91b5-4977-97d2-decde9630df7",
+            "name": "Davante Adams",
+            "position": "WR",
+            "count": 21,
+            "landRate": 0.0525,
+            "avgPrice": 9
           },
           {
             "id": "2cb07a16-1cf1-4cf9-a524-ae61c97263bf",
             "name": "Kyren Williams",
             "position": "RB",
-            "count": 32,
-            "landRate": 0.08,
-            "avgPrice": 6
+            "count": 21,
+            "landRate": 0.0525,
+            "avgPrice": 9
           },
           {
-            "id": "6f9982ec-4ec5-42a1-a2aa-0d4562b9aef1",
-            "name": "Jayden Daniels",
-            "position": "QB",
-            "count": 31,
-            "landRate": 0.0775,
-            "avgPrice": 14
-          },
-          {
-            "id": "ecdd8c1a-eb03-4f46-87f7-d90287115f5c",
-            "name": "CeeDee Lamb",
-            "position": "WR",
-            "count": 30,
-            "landRate": 0.075,
-            "avgPrice": 53
-          },
-          {
-            "id": "38159347-d80b-4ab4-8576-73d5a880f5a8",
-            "name": "A.J. Brown",
-            "position": "WR",
-            "count": 30,
-            "landRate": 0.075,
-            "avgPrice": 46
-          },
-          {
-            "id": "f4960ab2-d09e-4ec4-83c8-cc406000e47f",
-            "name": "Cam Skattebo",
-            "position": "RB",
-            "count": 30,
-            "landRate": 0.075,
-            "avgPrice": 22
-          },
-          {
-            "id": "be69ab0e-552e-49e8-88da-82d4f74feebb",
-            "name": "Travis Etienne Jr.",
-            "position": "RB",
-            "count": 29,
-            "landRate": 0.0725,
-            "avgPrice": 14
-          },
-          {
-            "id": "65e27a8a-1536-45c6-9366-6f27967f50f3",
-            "name": "Josh Jacobs",
-            "position": "RB",
-            "count": 27,
-            "landRate": 0.0675,
-            "avgPrice": 40
+            "id": "9e394d91-a663-4743-bc0d-caf601793578",
+            "name": "Dallas Goedert",
+            "position": "TE",
+            "count": 21,
+            "landRate": 0.0525,
+            "avgPrice": 1
           },
           {
             "id": "77888c52-9ca0-4bc7-a7e7-527c53f13707",
             "name": "Breece Hall",
             "position": "RB",
-            "count": 27,
-            "landRate": 0.0675,
-            "avgPrice": 30
+            "count": 20,
+            "landRate": 0.05,
+            "avgPrice": 26
+          },
+          {
+            "id": "03967241-0303-4885-9234-deebf1217535",
+            "name": "Puka Nacua",
+            "position": "WR",
+            "count": 19,
+            "landRate": 0.0475,
+            "avgPrice": 94
           }
         ],
         "distribution": {
           "runs": 400,
           "myTotalCeiling": {
-            "min": 312,
-            "max": 378,
-            "mean": 342.2875,
-            "median": 343,
-            "p10": 326,
-            "p90": 357,
-            "stdev": 12.277819177280628
+            "min": 342,
+            "max": 396,
+            "mean": 366.9775,
+            "median": 367,
+            "p10": 355,
+            "p90": 379,
+            "stdev": 9.28127112792208
           },
           "mySpend": {
             "min": 200,
@@ -2667,11 +2657,11 @@
             "stdev": 0
           },
           "myPositionMeans": {
-            "QB": 1.0925,
-            "RB": 4.065,
-            "WR": 5.52,
-            "TE": 1.3225,
-            "DEF": 1
+            "QB": 1.06,
+            "RB": 4.5375,
+            "WR": 5.125,
+            "TE": 1.2675,
+            "DEF": 1.01
           }
         }
       }
@@ -2766,14 +2756,14 @@
           "runs": 400,
           "games": 14,
           "numManagers": 12,
-          "meanStarterPoints": 1851.7,
-          "meanRank": 2.1,
-          "meanWins": 9.6,
-          "meanLosses": 4.4,
+          "meanStarterPoints": 1910.8,
+          "meanRank": 1.7,
+          "meanWins": 10.2,
+          "meanLosses": 3.8,
           "modalRecord": {
-            "wins": 9,
-            "losses": 5,
-            "frequencyPct": 23
+            "wins": 11,
+            "losses": 3,
+            "frequencyPct": 21
           },
           "bestRecord": {
             "wins": 14,
@@ -2787,59 +2777,71 @@
         "topRosters": [
           {
             "coreIds": [
-              "4150c2f0-ee05-4d80-878c-42c418fb7b4f",
-              "49cc05b0-c218-4651-a587-635945cf4f03",
-              "94f71551-9303-4751-845f-219f31a52b8b",
-              "c32243ce-36a2-4335-a5d8-28533144155f"
+              "36d658e4-e581-4119-b69d-3c4ba704011a",
+              "99500424-07a8-4cf6-af50-e582d6851a71"
             ],
             "coreNames": [
-              "Jeremiyah Love",
-              "Zay Flowers",
-              "Omarion Hampton",
-              "Drake London"
+              "Jahmyr Gibbs",
+              "Christian McCaffrey"
             ],
-            "frequency": 10,
-            "frequencyPct": 2.5,
+            "frequency": 21,
+            "frequencyPct": 5.3,
             "representative": [
               {
-                "id": "4150c2f0-ee05-4d80-878c-42c418fb7b4f",
-                "name": "Jeremiyah Love",
+                "id": "99500424-07a8-4cf6-af50-e582d6851a71",
+                "name": "Christian McCaffrey",
                 "position": "RB",
-                "price": 55,
-                "ceiling": 44,
-                "projectedPoints": 269.6
+                "price": 87,
+                "ceiling": 83,
+                "projectedPoints": 346.5
               },
               {
-                "id": "c32243ce-36a2-4335-a5d8-28533144155f",
-                "name": "Drake London",
-                "position": "WR",
-                "price": 45,
-                "ceiling": 41,
-                "projectedPoints": 262.9
-              },
-              {
-                "id": "49cc05b0-c218-4651-a587-635945cf4f03",
-                "name": "Zay Flowers",
-                "position": "WR",
-                "price": 44,
-                "ceiling": 41,
-                "projectedPoints": 0
-              },
-              {
-                "id": "94f71551-9303-4751-845f-219f31a52b8b",
-                "name": "Omarion Hampton",
+                "id": "36d658e4-e581-4119-b69d-3c4ba704011a",
+                "name": "Jahmyr Gibbs",
                 "position": "RB",
-                "price": 40,
-                "ceiling": 38,
-                "projectedPoints": 256.2
+                "price": 97,
+                "ceiling": 96,
+                "projectedPoints": 374
               },
               {
-                "id": "c75cf91c-51b6-4aed-95ba-03ca23260810",
-                "name": "Nico Collins",
+                "id": "ed917420-f806-4bd3-860f-2eba9f6a5539",
+                "name": "George Pickens",
                 "position": "WR",
-                "price": 8,
-                "ceiling": 25,
-                "projectedPoints": 229.7
+                "price": 5,
+                "ceiling": 23,
+                "projectedPoints": 225.6
+              },
+              {
+                "id": "a4bef8b8-d801-4f7e-b29c-06d7f6ec8e7a",
+                "name": "Harold Fannin Jr.",
+                "position": "TE",
+                "price": 2,
+                "ceiling": 24,
+                "projectedPoints": 202.9
+              },
+              {
+                "id": "58dd4f76-4f35-415a-b5ff-d58215b061f7",
+                "name": "Jaylen Waddle",
+                "position": "WR",
+                "price": 1,
+                "ceiling": 22,
+                "projectedPoints": 223.8
+              },
+              {
+                "id": "62e862bf-a54f-4105-bc18-157f6be7ad93",
+                "name": "Terry McLaurin",
+                "position": "WR",
+                "price": 1,
+                "ceiling": 20,
+                "projectedPoints": 220.1
+              },
+              {
+                "id": "dbf87e2c-dfe3-4f92-a1ee-d7c7a5be6bf7",
+                "name": "D'Andre Swift",
+                "position": "RB",
+                "price": 1,
+                "ceiling": 20,
+                "projectedPoints": 220.7
               },
               {
                 "id": "949064dd-2e73-4664-9024-799ea1f36420",
@@ -2858,12 +2860,109 @@
                 "projectedPoints": 216.6
               },
               {
+                "id": "e2f638bf-8330-4f6a-b575-202eb0361ce0",
+                "name": "Rhamondre Stevenson",
+                "position": "RB",
+                "price": 1,
+                "ceiling": 18,
+                "projectedPoints": 215.8
+              },
+              {
                 "id": "25528981-2fbf-4cd5-b008-d73dfda103c8",
                 "name": "Rome Odunze",
                 "position": "WR",
                 "price": 1,
                 "ceiling": 20,
                 "projectedPoints": 219.3
+              },
+              {
+                "id": "ddc11a83-8b9a-4a5e-b996-fb480290ec91",
+                "name": "Sam LaPorta",
+                "position": "TE",
+                "price": 1,
+                "ceiling": 18,
+                "projectedPoints": 191.5
+              },
+              {
+                "id": "aefc429f-ec2a-45cc-99e9-51e2aec115e4",
+                "name": "Denver Broncos",
+                "position": "DEF",
+                "price": 1,
+                "ceiling": 14,
+                "projectedPoints": 117.5
+              }
+            ],
+            "avgSpent": 200,
+            "avgStarterPoints": 1994.9,
+            "avgWins": 11.8
+          },
+          {
+            "coreIds": [
+              "36d658e4-e581-4119-b69d-3c4ba704011a",
+              "95713a6a-7cc9-4532-8cce-c5b2eeee0b43"
+            ],
+            "coreNames": [
+              "Jahmyr Gibbs",
+              "Bijan Robinson"
+            ],
+            "frequency": 19,
+            "frequencyPct": 4.8,
+            "representative": [
+              {
+                "id": "36d658e4-e581-4119-b69d-3c4ba704011a",
+                "name": "Jahmyr Gibbs",
+                "position": "RB",
+                "price": 96,
+                "ceiling": 96,
+                "projectedPoints": 374
+              },
+              {
+                "id": "95713a6a-7cc9-4532-8cce-c5b2eeee0b43",
+                "name": "Bijan Robinson",
+                "position": "RB",
+                "price": 89,
+                "ceiling": 80,
+                "projectedPoints": 341
+              },
+              {
+                "id": "63e881e4-91b5-4977-97d2-decde9630df7",
+                "name": "Davante Adams",
+                "position": "WR",
+                "price": 5,
+                "ceiling": 25,
+                "projectedPoints": 229.4
+              },
+              {
+                "id": "f984cc2a-fe52-48e2-b5ea-40e48ef87ed6",
+                "name": "Ladd McConkey",
+                "position": "WR",
+                "price": 1,
+                "ceiling": 20,
+                "projectedPoints": 219.4
+              },
+              {
+                "id": "d17bf89d-761d-40e5-8be8-6c9f20ad599b",
+                "name": "Carnell Tate",
+                "position": "WR",
+                "price": 1,
+                "ceiling": 18,
+                "projectedPoints": 216.6
+              },
+              {
+                "id": "62e862bf-a54f-4105-bc18-157f6be7ad93",
+                "name": "Terry McLaurin",
+                "position": "WR",
+                "price": 1,
+                "ceiling": 20,
+                "projectedPoints": 220.1
+              },
+              {
+                "id": "949064dd-2e73-4664-9024-799ea1f36420",
+                "name": "Jaxson Dart",
+                "position": "QB",
+                "price": 1,
+                "ceiling": 20,
+                "projectedPoints": 315.4
               },
               {
                 "id": "e2f638bf-8330-4f6a-b575-202eb0361ce0",
@@ -2882,12 +2981,12 @@
                 "projectedPoints": 215.6
               },
               {
-                "id": "dbf87e2c-dfe3-4f92-a1ee-d7c7a5be6bf7",
-                "name": "D'Andre Swift",
+                "id": "8ebf94d0-76d4-4d53-bf52-1075923e7eb8",
+                "name": "Tony Pollard",
                 "position": "RB",
                 "price": 1,
-                "ceiling": 20,
-                "projectedPoints": 220.7
+                "ceiling": 16,
+                "projectedPoints": 211.8
               },
               {
                 "id": "ddc11a83-8b9a-4a5e-b996-fb480290ec91",
@@ -2898,81 +2997,71 @@
                 "projectedPoints": 191.5
               },
               {
-                "id": "46b2b736-6eac-427d-a203-9bd607d8d305",
-                "name": "Houston Texans",
+                "id": "9cb7794a-8354-4685-918d-b0f49aa4dfe4",
+                "name": "Zach Charbonnet",
+                "position": "RB",
+                "price": 1,
+                "ceiling": 16,
+                "projectedPoints": 213
+              },
+              {
+                "id": "aefc429f-ec2a-45cc-99e9-51e2aec115e4",
+                "name": "Denver Broncos",
                 "position": "DEF",
                 "price": 1,
                 "ceiling": 14,
-                "projectedPoints": 118.3
+                "projectedPoints": 117.5
               }
             ],
             "avgSpent": 200,
-            "avgStarterPoints": 1860.4,
-            "avgWins": 8.7
+            "avgStarterPoints": 1980.9,
+            "avgWins": 11
           },
           {
             "coreIds": [
-              "4150c2f0-ee05-4d80-878c-42c418fb7b4f",
-              "458137dc-3fbc-4008-84cc-aba86815c1cb",
-              "49cc05b0-c218-4651-a587-635945cf4f03",
-              "94f71551-9303-4751-845f-219f31a52b8b"
+              "36d658e4-e581-4119-b69d-3c4ba704011a",
+              "95713a6a-7cc9-4532-8cce-c5b2eeee0b43",
+              "b5af8842-3bce-4fc6-ad07-825fa47e0c2b"
             ],
             "coreNames": [
-              "Jeremiyah Love",
-              "Chase Brown",
-              "Zay Flowers",
-              "Omarion Hampton"
+              "Jahmyr Gibbs",
+              "Bijan Robinson",
+              "Luther Burden III"
             ],
-            "frequency": 10,
-            "frequencyPct": 2.5,
+            "frequency": 18,
+            "frequencyPct": 4.5,
             "representative": [
               {
-                "id": "4150c2f0-ee05-4d80-878c-42c418fb7b4f",
-                "name": "Jeremiyah Love",
+                "id": "36d658e4-e581-4119-b69d-3c4ba704011a",
+                "name": "Jahmyr Gibbs",
                 "position": "RB",
-                "price": 59,
-                "ceiling": 44,
-                "projectedPoints": 269.6
+                "price": 88,
+                "ceiling": 96,
+                "projectedPoints": 374
               },
               {
-                "id": "458137dc-3fbc-4008-84cc-aba86815c1cb",
-                "name": "Chase Brown",
+                "id": "95713a6a-7cc9-4532-8cce-c5b2eeee0b43",
+                "name": "Bijan Robinson",
                 "position": "RB",
-                "price": 44,
-                "ceiling": 41,
-                "projectedPoints": 262.5
+                "price": 87,
+                "ceiling": 80,
+                "projectedPoints": 341
               },
               {
-                "id": "49cc05b0-c218-4651-a587-635945cf4f03",
-                "name": "Zay Flowers",
+                "id": "b5af8842-3bce-4fc6-ad07-825fa47e0c2b",
+                "name": "Luther Burden III",
                 "position": "WR",
-                "price": 41,
-                "ceiling": 41,
+                "price": 15,
+                "ceiling": 27,
                 "projectedPoints": 0
               },
               {
-                "id": "94f71551-9303-4751-845f-219f31a52b8b",
-                "name": "Omarion Hampton",
-                "position": "RB",
-                "price": 45,
-                "ceiling": 38,
-                "projectedPoints": 256.2
-              },
-              {
-                "id": "a4bef8b8-d801-4f7e-b29c-06d7f6ec8e7a",
-                "name": "Harold Fannin Jr.",
-                "position": "TE",
-                "price": 3,
-                "ceiling": 24,
-                "projectedPoints": 202.9
-              },
-              {
-                "id": "25528981-2fbf-4cd5-b008-d73dfda103c8",
-                "name": "Rome Odunze",
+                "id": "a4e96d9c-381d-4804-becf-bbb95be38d6e",
+                "name": "Courtland Sutton",
                 "position": "WR",
                 "price": 1,
-                "ceiling": 20,
-                "projectedPoints": 219.3
+                "ceiling": 18,
+                "projectedPoints": 215.6
               },
               {
                 "id": "e2f638bf-8330-4f6a-b575-202eb0361ce0",
@@ -2981,22 +3070,6 @@
                 "price": 1,
                 "ceiling": 18,
                 "projectedPoints": 215.8
-              },
-              {
-                "id": "ddc11a83-8b9a-4a5e-b996-fb480290ec91",
-                "name": "Sam LaPorta",
-                "position": "TE",
-                "price": 1,
-                "ceiling": 18,
-                "projectedPoints": 191.5
-              },
-              {
-                "id": "949064dd-2e73-4664-9024-799ea1f36420",
-                "name": "Jaxson Dart",
-                "position": "QB",
-                "price": 1,
-                "ceiling": 20,
-                "projectedPoints": 315.4
               },
               {
                 "id": "d17bf89d-761d-40e5-8be8-6c9f20ad599b",
@@ -3015,6 +3088,14 @@
                 "projectedPoints": 211.8
               },
               {
+                "id": "9bc113cc-b30b-4eb2-bb79-5b74cf1ca73a",
+                "name": "Luther Burden",
+                "position": "WR",
+                "price": 1,
+                "ceiling": 16,
+                "projectedPoints": 212.3
+              },
+              {
                 "id": "9cb7794a-8354-4685-918d-b0f49aa4dfe4",
                 "name": "Zach Charbonnet",
                 "position": "RB",
@@ -3023,81 +3104,87 @@
                 "projectedPoints": 213
               },
               {
+                "id": "05f8ce4d-6cd5-4853-8654-18999205c7eb",
+                "name": "TreVeyon Henderson",
+                "position": "RB",
+                "price": 1,
+                "ceiling": 15,
+                "projectedPoints": 209.9
+              },
+              {
                 "id": "46b2b736-6eac-427d-a203-9bd607d8d305",
                 "name": "Houston Texans",
                 "position": "DEF",
                 "price": 1,
                 "ceiling": 14,
                 "projectedPoints": 118.3
+              },
+              {
+                "id": "9e394d91-a663-4743-bc0d-caf601793578",
+                "name": "Dallas Goedert",
+                "position": "TE",
+                "price": 1,
+                "ceiling": 13,
+                "projectedPoints": 181.7
+              },
+              {
+                "id": "6cefbadb-5fb4-424f-96ee-02d0037cf0da",
+                "name": "Brock Purdy",
+                "position": "QB",
+                "price": 1,
+                "ceiling": 11,
+                "projectedPoints": 295.7
               }
             ],
             "avgSpent": 200,
-            "avgStarterPoints": 1855.7,
-            "avgWins": 9
+            "avgStarterPoints": 1985.4,
+            "avgWins": 11.1
           },
           {
             "coreIds": [
-              "4150c2f0-ee05-4d80-878c-42c418fb7b4f",
+              "08135438-b9cf-4184-924d-84758d733ac4",
               "49cc05b0-c218-4651-a587-635945cf4f03",
-              "94f71551-9303-4751-845f-219f31a52b8b",
-              "ce5dd92e-054b-4078-921c-ef47a5181ad7"
+              "95713a6a-7cc9-4532-8cce-c5b2eeee0b43"
             ],
             "coreNames": [
-              "Jeremiyah Love",
+              "Ja'Marr Chase",
               "Zay Flowers",
-              "Omarion Hampton",
-              "De'Von Achane"
+              "Bijan Robinson"
             ],
-            "frequency": 8,
-            "frequencyPct": 2,
+            "frequency": 11,
+            "frequencyPct": 2.8,
             "representative": [
               {
-                "id": "4150c2f0-ee05-4d80-878c-42c418fb7b4f",
-                "name": "Jeremiyah Love",
+                "id": "95713a6a-7cc9-4532-8cce-c5b2eeee0b43",
+                "name": "Bijan Robinson",
                 "position": "RB",
-                "price": 52,
-                "ceiling": 44,
-                "projectedPoints": 269.6
+                "price": 80,
+                "ceiling": 80,
+                "projectedPoints": 341
+              },
+              {
+                "id": "08135438-b9cf-4184-924d-84758d733ac4",
+                "name": "Ja'Marr Chase",
+                "position": "WR",
+                "price": 75,
+                "ceiling": 72,
+                "projectedPoints": 323.8
               },
               {
                 "id": "49cc05b0-c218-4651-a587-635945cf4f03",
                 "name": "Zay Flowers",
                 "position": "WR",
-                "price": 49,
+                "price": 29,
                 "ceiling": 41,
                 "projectedPoints": 0
               },
               {
-                "id": "ce5dd92e-054b-4078-921c-ef47a5181ad7",
-                "name": "De'Von Achane",
-                "position": "RB",
-                "price": 44,
-                "ceiling": 39,
-                "projectedPoints": 259.4
-              },
-              {
-                "id": "94f71551-9303-4751-845f-219f31a52b8b",
-                "name": "Omarion Hampton",
-                "position": "RB",
-                "price": 41,
-                "ceiling": 38,
-                "projectedPoints": 256.2
-              },
-              {
-                "id": "6f9982ec-4ec5-42a1-a2aa-0d4562b9aef1",
-                "name": "Jayden Daniels",
-                "position": "QB",
-                "price": 6,
-                "ceiling": 26,
-                "projectedPoints": 327.2
-              },
-              {
-                "id": "01ca1499-d7ba-4f4b-bec7-c6d265e2e6eb",
-                "name": "Javonte Williams",
-                "position": "RB",
-                "price": 1,
-                "ceiling": 23,
-                "projectedPoints": 226.9
+                "id": "58dd4f76-4f35-415a-b5ff-d58215b061f7",
+                "name": "Jaylen Waddle",
+                "position": "WR",
+                "price": 7,
+                "ceiling": 22,
+                "projectedPoints": 223.8
               },
               {
                 "id": "949064dd-2e73-4664-9024-799ea1f36420",
@@ -3148,105 +3235,71 @@
                 "projectedPoints": 213
               },
               {
-                "id": "aefc429f-ec2a-45cc-99e9-51e2aec115e4",
-                "name": "Denver Broncos",
+                "id": "b1474c9e-dc4f-4a01-9b97-4d34bfa3b60c",
+                "name": "Tee Higgins",
+                "position": "WR",
+                "price": 1,
+                "ceiling": 15,
+                "projectedPoints": 210.4
+              },
+              {
+                "id": "e2f638bf-8330-4f6a-b575-202eb0361ce0",
+                "name": "Rhamondre Stevenson",
+                "position": "RB",
+                "price": 1,
+                "ceiling": 18,
+                "projectedPoints": 215.8
+              },
+              {
+                "id": "46b2b736-6eac-427d-a203-9bd607d8d305",
+                "name": "Houston Texans",
                 "position": "DEF",
                 "price": 1,
                 "ceiling": 14,
-                "projectedPoints": 117.5
+                "projectedPoints": 118.3
               }
             ],
             "avgSpent": 200,
-            "avgStarterPoints": 1856.8,
-            "avgWins": 8.4
+            "avgStarterPoints": 1920.1,
+            "avgWins": 10.5
           },
           {
             "coreIds": [
-              "4150c2f0-ee05-4d80-878c-42c418fb7b4f",
-              "49cc05b0-c218-4651-a587-635945cf4f03",
-              "6c2c2bd4-0cd3-4e20-8989-afeeab1f6a2c",
-              "94f71551-9303-4751-845f-219f31a52b8b"
+              "08135438-b9cf-4184-924d-84758d733ac4",
+              "36d658e4-e581-4119-b69d-3c4ba704011a",
+              "b5af8842-3bce-4fc6-ad07-825fa47e0c2b"
             ],
             "coreNames": [
-              "Jeremiyah Love",
-              "Zay Flowers",
-              "Rashee Rice",
-              "Omarion Hampton"
+              "Ja'Marr Chase",
+              "Jahmyr Gibbs",
+              "Luther Burden III"
             ],
-            "frequency": 8,
-            "frequencyPct": 2,
+            "frequency": 10,
+            "frequencyPct": 2.5,
             "representative": [
               {
-                "id": "4150c2f0-ee05-4d80-878c-42c418fb7b4f",
-                "name": "Jeremiyah Love",
+                "id": "36d658e4-e581-4119-b69d-3c4ba704011a",
+                "name": "Jahmyr Gibbs",
                 "position": "RB",
-                "price": 53,
-                "ceiling": 44,
-                "projectedPoints": 269.6
+                "price": 98,
+                "ceiling": 96,
+                "projectedPoints": 374
               },
               {
-                "id": "49cc05b0-c218-4651-a587-635945cf4f03",
-                "name": "Zay Flowers",
+                "id": "08135438-b9cf-4184-924d-84758d733ac4",
+                "name": "Ja'Marr Chase",
                 "position": "WR",
-                "price": 47,
-                "ceiling": 41,
+                "price": 76,
+                "ceiling": 72,
+                "projectedPoints": 323.8
+              },
+              {
+                "id": "b5af8842-3bce-4fc6-ad07-825fa47e0c2b",
+                "name": "Luther Burden III",
+                "position": "WR",
+                "price": 16,
+                "ceiling": 27,
                 "projectedPoints": 0
-              },
-              {
-                "id": "6c2c2bd4-0cd3-4e20-8989-afeeab1f6a2c",
-                "name": "Rashee Rice",
-                "position": "WR",
-                "price": 43,
-                "ceiling": 38,
-                "projectedPoints": 255.9
-              },
-              {
-                "id": "94f71551-9303-4751-845f-219f31a52b8b",
-                "name": "Omarion Hampton",
-                "position": "RB",
-                "price": 43,
-                "ceiling": 38,
-                "projectedPoints": 256.2
-              },
-              {
-                "id": "ed917420-f806-4bd3-860f-2eba9f6a5539",
-                "name": "George Pickens",
-                "position": "WR",
-                "price": 3,
-                "ceiling": 23,
-                "projectedPoints": 225.6
-              },
-              {
-                "id": "6613dab8-368f-4ea9-90b2-4422faf2d453",
-                "name": "Tyler Warren",
-                "position": "TE",
-                "price": 3,
-                "ceiling": 23,
-                "projectedPoints": 0
-              },
-              {
-                "id": "43e44f03-f8e8-415a-b85d-83b055236cc7",
-                "name": "George Kittle",
-                "position": "TE",
-                "price": 2,
-                "ceiling": 23,
-                "projectedPoints": 202.6
-              },
-              {
-                "id": "62e862bf-a54f-4105-bc18-157f6be7ad93",
-                "name": "Terry McLaurin",
-                "position": "WR",
-                "price": 1,
-                "ceiling": 20,
-                "projectedPoints": 220.1
-              },
-              {
-                "id": "d17bf89d-761d-40e5-8be8-6c9f20ad599b",
-                "name": "Carnell Tate",
-                "position": "WR",
-                "price": 1,
-                "ceiling": 18,
-                "projectedPoints": 216.6
               },
               {
                 "id": "dbf87e2c-dfe3-4f92-a1ee-d7c7a5be6bf7",
@@ -3257,129 +3310,12 @@
                 "projectedPoints": 220.7
               },
               {
-                "id": "949064dd-2e73-4664-9024-799ea1f36420",
-                "name": "Jaxson Dart",
-                "position": "QB",
-                "price": 1,
-                "ceiling": 20,
-                "projectedPoints": 315.4
-              },
-              {
-                "id": "a4e96d9c-381d-4804-becf-bbb95be38d6e",
-                "name": "Courtland Sutton",
-                "position": "WR",
+                "id": "e2f638bf-8330-4f6a-b575-202eb0361ce0",
+                "name": "Rhamondre Stevenson",
+                "position": "RB",
                 "price": 1,
                 "ceiling": 18,
-                "projectedPoints": 215.6
-              },
-              {
-                "id": "aefc429f-ec2a-45cc-99e9-51e2aec115e4",
-                "name": "Denver Broncos",
-                "position": "DEF",
-                "price": 1,
-                "ceiling": 14,
-                "projectedPoints": 117.5
-              }
-            ],
-            "avgSpent": 200,
-            "avgStarterPoints": 1849.8,
-            "avgWins": 10
-          },
-          {
-            "coreIds": [
-              "4150c2f0-ee05-4d80-878c-42c418fb7b4f",
-              "49cc05b0-c218-4651-a587-635945cf4f03",
-              "65e27a8a-1536-45c6-9366-6f27967f50f3",
-              "94f71551-9303-4751-845f-219f31a52b8b"
-            ],
-            "coreNames": [
-              "Jeremiyah Love",
-              "Zay Flowers",
-              "Josh Jacobs",
-              "Omarion Hampton"
-            ],
-            "frequency": 7,
-            "frequencyPct": 1.8,
-            "representative": [
-              {
-                "id": "4150c2f0-ee05-4d80-878c-42c418fb7b4f",
-                "name": "Jeremiyah Love",
-                "position": "RB",
-                "price": 49,
-                "ceiling": 44,
-                "projectedPoints": 269.6
-              },
-              {
-                "id": "49cc05b0-c218-4651-a587-635945cf4f03",
-                "name": "Zay Flowers",
-                "position": "WR",
-                "price": 44,
-                "ceiling": 41,
-                "projectedPoints": 0
-              },
-              {
-                "id": "65e27a8a-1536-45c6-9366-6f27967f50f3",
-                "name": "Josh Jacobs",
-                "position": "RB",
-                "price": 41,
-                "ceiling": 38,
-                "projectedPoints": 256.5
-              },
-              {
-                "id": "94f71551-9303-4751-845f-219f31a52b8b",
-                "name": "Omarion Hampton",
-                "position": "RB",
-                "price": 41,
-                "ceiling": 38,
-                "projectedPoints": 256.2
-              },
-              {
-                "id": "6f9982ec-4ec5-42a1-a2aa-0d4562b9aef1",
-                "name": "Jayden Daniels",
-                "position": "QB",
-                "price": 7,
-                "ceiling": 26,
-                "projectedPoints": 327.2
-              },
-              {
-                "id": "63e881e4-91b5-4977-97d2-decde9630df7",
-                "name": "Davante Adams",
-                "position": "WR",
-                "price": 7,
-                "ceiling": 25,
-                "projectedPoints": 229.4
-              },
-              {
-                "id": "ed917420-f806-4bd3-860f-2eba9f6a5539",
-                "name": "George Pickens",
-                "position": "WR",
-                "price": 5,
-                "ceiling": 23,
-                "projectedPoints": 225.6
-              },
-              {
-                "id": "949064dd-2e73-4664-9024-799ea1f36420",
-                "name": "Jaxson Dart",
-                "position": "QB",
-                "price": 1,
-                "ceiling": 20,
-                "projectedPoints": 315.4
-              },
-              {
-                "id": "58dd4f76-4f35-415a-b5ff-d58215b061f7",
-                "name": "Jaylen Waddle",
-                "position": "WR",
-                "price": 1,
-                "ceiling": 22,
-                "projectedPoints": 223.8
-              },
-              {
-                "id": "ddc11a83-8b9a-4a5e-b996-fb480290ec91",
-                "name": "Sam LaPorta",
-                "position": "TE",
-                "price": 1,
-                "ceiling": 18,
-                "projectedPoints": 191.5
+                "projectedPoints": 215.8
               },
               {
                 "id": "d17bf89d-761d-40e5-8be8-6c9f20ad599b",
@@ -3398,17 +3334,57 @@
                 "projectedPoints": 215.6
               },
               {
-                "id": "aefc429f-ec2a-45cc-99e9-51e2aec115e4",
-                "name": "Denver Broncos",
+                "id": "8ebf94d0-76d4-4d53-bf52-1075923e7eb8",
+                "name": "Tony Pollard",
+                "position": "RB",
+                "price": 1,
+                "ceiling": 16,
+                "projectedPoints": 211.8
+              },
+              {
+                "id": "9cb7794a-8354-4685-918d-b0f49aa4dfe4",
+                "name": "Zach Charbonnet",
+                "position": "RB",
+                "price": 1,
+                "ceiling": 16,
+                "projectedPoints": 213
+              },
+              {
+                "id": "75af0d4b-1dfd-4e73-8d8c-9eaa16b53dc0",
+                "name": "Jameson Williams",
+                "position": "WR",
+                "price": 1,
+                "ceiling": 16,
+                "projectedPoints": 211.5
+              },
+              {
+                "id": "46b2b736-6eac-427d-a203-9bd607d8d305",
+                "name": "Houston Texans",
                 "position": "DEF",
                 "price": 1,
                 "ceiling": 14,
-                "projectedPoints": 117.5
+                "projectedPoints": 118.3
+              },
+              {
+                "id": "ddc11a83-8b9a-4a5e-b996-fb480290ec91",
+                "name": "Sam LaPorta",
+                "position": "TE",
+                "price": 1,
+                "ceiling": 18,
+                "projectedPoints": 191.5
+              },
+              {
+                "id": "6cefbadb-5fb4-424f-96ee-02d0037cf0da",
+                "name": "Brock Purdy",
+                "position": "QB",
+                "price": 1,
+                "ceiling": 11,
+                "projectedPoints": 295.7
               }
             ],
             "avgSpent": 200,
-            "avgStarterPoints": 1822.5,
-            "avgWins": 9.6
+            "avgStarterPoints": 1969.6,
+            "avgWins": 11
           }
         ],
         "landed": [
@@ -3416,297 +3392,265 @@
             "id": "ddc11a83-8b9a-4a5e-b996-fb480290ec91",
             "name": "Sam LaPorta",
             "position": "TE",
-            "count": 357,
-            "landRate": 0.8925,
-            "avgPrice": 1
-          },
-          {
-            "id": "d17bf89d-761d-40e5-8be8-6c9f20ad599b",
-            "name": "Carnell Tate",
-            "position": "WR",
-            "count": 334,
-            "landRate": 0.835,
-            "avgPrice": 1
-          },
-          {
-            "id": "949064dd-2e73-4664-9024-799ea1f36420",
-            "name": "Jaxson Dart",
-            "position": "QB",
-            "count": 315,
-            "landRate": 0.7875,
-            "avgPrice": 1
-          },
-          {
-            "id": "49cc05b0-c218-4651-a587-635945cf4f03",
-            "name": "Zay Flowers",
-            "position": "WR",
-            "count": 304,
-            "landRate": 0.76,
-            "avgPrice": 47
-          },
-          {
-            "id": "e2f638bf-8330-4f6a-b575-202eb0361ce0",
-            "name": "Rhamondre Stevenson",
-            "position": "RB",
-            "count": 300,
-            "landRate": 0.75,
-            "avgPrice": 1
-          },
-          {
-            "id": "4150c2f0-ee05-4d80-878c-42c418fb7b4f",
-            "name": "Jeremiyah Love",
-            "position": "RB",
-            "count": 296,
-            "landRate": 0.74,
-            "avgPrice": 52
-          },
-          {
-            "id": "46b2b736-6eac-427d-a203-9bd607d8d305",
-            "name": "Houston Texans",
-            "position": "DEF",
-            "count": 260,
-            "landRate": 0.65,
+            "count": 345,
+            "landRate": 0.8625,
             "avgPrice": 1
           },
           {
             "id": "a4e96d9c-381d-4804-becf-bbb95be38d6e",
             "name": "Courtland Sutton",
             "position": "WR",
-            "count": 246,
-            "landRate": 0.615,
+            "count": 322,
+            "landRate": 0.805,
             "avgPrice": 1
-          },
-          {
-            "id": "dbf87e2c-dfe3-4f92-a1ee-d7c7a5be6bf7",
-            "name": "D'Andre Swift",
-            "position": "RB",
-            "count": 233,
-            "landRate": 0.5825,
-            "avgPrice": 1
-          },
-          {
-            "id": "94f71551-9303-4751-845f-219f31a52b8b",
-            "name": "Omarion Hampton",
-            "position": "RB",
-            "count": 227,
-            "landRate": 0.5675,
-            "avgPrice": 42
           },
           {
             "id": "75af0d4b-1dfd-4e73-8d8c-9eaa16b53dc0",
             "name": "Jameson Williams",
             "position": "WR",
-            "count": 184,
-            "landRate": 0.46,
+            "count": 307,
+            "landRate": 0.7675,
             "avgPrice": 1
           },
           {
-            "id": "25528981-2fbf-4cd5-b008-d73dfda103c8",
-            "name": "Rome Odunze",
-            "position": "WR",
-            "count": 164,
-            "landRate": 0.41,
-            "avgPrice": 1
-          },
-          {
-            "id": "aefc429f-ec2a-45cc-99e9-51e2aec115e4",
-            "name": "Denver Broncos",
-            "position": "DEF",
-            "count": 140,
-            "landRate": 0.35,
-            "avgPrice": 1
-          },
-          {
-            "id": "62e862bf-a54f-4105-bc18-157f6be7ad93",
-            "name": "Terry McLaurin",
-            "position": "WR",
-            "count": 124,
-            "landRate": 0.31,
+            "id": "e2f638bf-8330-4f6a-b575-202eb0361ce0",
+            "name": "Rhamondre Stevenson",
+            "position": "RB",
+            "count": 280,
+            "landRate": 0.7,
             "avgPrice": 1
           },
           {
             "id": "8ebf94d0-76d4-4d53-bf52-1075923e7eb8",
             "name": "Tony Pollard",
             "position": "RB",
-            "count": 119,
-            "landRate": 0.2975,
+            "count": 271,
+            "landRate": 0.6775,
             "avgPrice": 1
           },
           {
-            "id": "f984cc2a-fe52-48e2-b5ea-40e48ef87ed6",
-            "name": "Ladd McConkey",
+            "id": "46b2b736-6eac-427d-a203-9bd607d8d305",
+            "name": "Houston Texans",
+            "position": "DEF",
+            "count": 250,
+            "landRate": 0.625,
+            "avgPrice": 1
+          },
+          {
+            "id": "d17bf89d-761d-40e5-8be8-6c9f20ad599b",
+            "name": "Carnell Tate",
             "position": "WR",
-            "count": 93,
-            "landRate": 0.2325,
+            "count": 232,
+            "landRate": 0.58,
+            "avgPrice": 1
+          },
+          {
+            "id": "9cb7794a-8354-4685-918d-b0f49aa4dfe4",
+            "name": "Zach Charbonnet",
+            "position": "RB",
+            "count": 223,
+            "landRate": 0.5575,
+            "avgPrice": 1
+          },
+          {
+            "id": "49cc05b0-c218-4651-a587-635945cf4f03",
+            "name": "Zay Flowers",
+            "position": "WR",
+            "count": 206,
+            "landRate": 0.515,
+            "avgPrice": 29
+          },
+          {
+            "id": "36d658e4-e581-4119-b69d-3c4ba704011a",
+            "name": "Jahmyr Gibbs",
+            "position": "RB",
+            "count": 200,
+            "landRate": 0.5,
+            "avgPrice": 94
+          },
+          {
+            "id": "949064dd-2e73-4664-9024-799ea1f36420",
+            "name": "Jaxson Dart",
+            "position": "QB",
+            "count": 195,
+            "landRate": 0.4875,
+            "avgPrice": 1
+          },
+          {
+            "id": "dd85893e-1fd8-4074-833d-07434e9168b6",
+            "name": "Garrett Wilson",
+            "position": "WR",
+            "count": 188,
+            "landRate": 0.47,
+            "avgPrice": 28
+          },
+          {
+            "id": "aefc429f-ec2a-45cc-99e9-51e2aec115e4",
+            "name": "Denver Broncos",
+            "position": "DEF",
+            "count": 154,
+            "landRate": 0.385,
+            "avgPrice": 1
+          },
+          {
+            "id": "9bc113cc-b30b-4eb2-bb79-5b74cf1ca73a",
+            "name": "Luther Burden",
+            "position": "WR",
+            "count": 152,
+            "landRate": 0.38,
+            "avgPrice": 1
+          },
+          {
+            "id": "dbf87e2c-dfe3-4f92-a1ee-d7c7a5be6bf7",
+            "name": "D'Andre Swift",
+            "position": "RB",
+            "count": 131,
+            "landRate": 0.3275,
+            "avgPrice": 1
+          },
+          {
+            "id": "95713a6a-7cc9-4532-8cce-c5b2eeee0b43",
+            "name": "Bijan Robinson",
+            "position": "RB",
+            "count": 130,
+            "landRate": 0.325,
+            "avgPrice": 82
+          },
+          {
+            "id": "6cefbadb-5fb4-424f-96ee-02d0037cf0da",
+            "name": "Brock Purdy",
+            "position": "QB",
+            "count": 115,
+            "landRate": 0.2875,
+            "avgPrice": 1
+          },
+          {
+            "id": "99500424-07a8-4cf6-af50-e582d6851a71",
+            "name": "Christian McCaffrey",
+            "position": "RB",
+            "count": 110,
+            "landRate": 0.275,
+            "avgPrice": 86
+          },
+          {
+            "id": "b5af8842-3bce-4fc6-ad07-825fa47e0c2b",
+            "name": "Luther Burden III",
+            "position": "WR",
+            "count": 105,
+            "landRate": 0.2625,
+            "avgPrice": 16
+          },
+          {
+            "id": "94f71551-9303-4751-845f-219f31a52b8b",
+            "name": "Omarion Hampton",
+            "position": "RB",
+            "count": 102,
+            "landRate": 0.255,
+            "avgPrice": 42
+          },
+          {
+            "id": "25528981-2fbf-4cd5-b008-d73dfda103c8",
+            "name": "Rome Odunze",
+            "position": "WR",
+            "count": 102,
+            "landRate": 0.255,
+            "avgPrice": 1
+          },
+          {
+            "id": "b1474c9e-dc4f-4a01-9b97-4d34bfa3b60c",
+            "name": "Tee Higgins",
+            "position": "WR",
+            "count": 102,
+            "landRate": 0.255,
+            "avgPrice": 1
+          },
+          {
+            "id": "62e862bf-a54f-4105-bc18-157f6be7ad93",
+            "name": "Terry McLaurin",
+            "position": "WR",
+            "count": 72,
+            "landRate": 0.18,
+            "avgPrice": 2
+          },
+          {
+            "id": "08135438-b9cf-4184-924d-84758d733ac4",
+            "name": "Ja'Marr Chase",
+            "position": "WR",
+            "count": 71,
+            "landRate": 0.1775,
+            "avgPrice": 75
+          },
+          {
+            "id": "8b344d8f-484e-430a-9a59-92df7ce263bf",
+            "name": "Caleb Williams",
+            "position": "QB",
+            "count": 59,
+            "landRate": 0.1475,
             "avgPrice": 1
           },
           {
             "id": "58dd4f76-4f35-415a-b5ff-d58215b061f7",
             "name": "Jaylen Waddle",
             "position": "WR",
-            "count": 80,
-            "landRate": 0.2,
-            "avgPrice": 2
-          },
-          {
-            "id": "43e44f03-f8e8-415a-b85d-83b055236cc7",
-            "name": "George Kittle",
-            "position": "TE",
-            "count": 68,
-            "landRate": 0.17,
-            "avgPrice": 2
-          },
-          {
-            "id": "9cb7794a-8354-4685-918d-b0f49aa4dfe4",
-            "name": "Zach Charbonnet",
-            "position": "RB",
             "count": 57,
             "landRate": 0.1425,
-            "avgPrice": 1
-          },
-          {
-            "id": "ce5dd92e-054b-4078-921c-ef47a5181ad7",
-            "name": "De'Von Achane",
-            "position": "RB",
-            "count": 56,
-            "landRate": 0.14,
-            "avgPrice": 42
+            "avgPrice": 3
           },
           {
             "id": "01ca1499-d7ba-4f4b-bec7-c6d265e2e6eb",
             "name": "Javonte Williams",
             "position": "RB",
-            "count": 53,
-            "landRate": 0.1325,
-            "avgPrice": 4
+            "count": 55,
+            "landRate": 0.1375,
+            "avgPrice": 6
           },
           {
-            "id": "6cefbadb-5fb4-424f-96ee-02d0037cf0da",
-            "name": "Brock Purdy",
-            "position": "QB",
+            "id": "05f8ce4d-6cd5-4853-8654-18999205c7eb",
+            "name": "TreVeyon Henderson",
+            "position": "RB",
             "count": 52,
             "landRate": 0.13,
             "avgPrice": 1
           },
           {
-            "id": "65e27a8a-1536-45c6-9366-6f27967f50f3",
-            "name": "Josh Jacobs",
-            "position": "RB",
-            "count": 50,
-            "landRate": 0.125,
-            "avgPrice": 40
+            "id": "43e44f03-f8e8-415a-b85d-83b055236cc7",
+            "name": "George Kittle",
+            "position": "TE",
+            "count": 46,
+            "landRate": 0.115,
+            "avgPrice": 4
           },
           {
-            "id": "ed917420-f806-4bd3-860f-2eba9f6a5539",
-            "name": "George Pickens",
+            "id": "f984cc2a-fe52-48e2-b5ea-40e48ef87ed6",
+            "name": "Ladd McConkey",
             "position": "WR",
-            "count": 50,
-            "landRate": 0.125,
-            "avgPrice": 5
+            "count": 42,
+            "landRate": 0.105,
+            "avgPrice": 2
+          },
+          {
+            "id": "c997f964-d4cd-418f-a7b6-a0aae4371d46",
+            "name": "Derrick Henry",
+            "position": "RB",
+            "count": 40,
+            "landRate": 0.1,
+            "avgPrice": 33
           },
           {
             "id": "6613dab8-368f-4ea9-90b2-4422faf2d453",
             "name": "Tyler Warren",
             "position": "TE",
-            "count": 48,
-            "landRate": 0.12,
-            "avgPrice": 2
+            "count": 35,
+            "landRate": 0.0875,
+            "avgPrice": 4
           },
           {
-            "id": "aca51ba8-e685-4a6b-ba17-8e92861e47e9",
-            "name": "James Cook III",
-            "position": "RB",
-            "count": 46,
-            "landRate": 0.115,
-            "avgPrice": 46
-          },
-          {
-            "id": "458137dc-3fbc-4008-84cc-aba86815c1cb",
-            "name": "Chase Brown",
-            "position": "RB",
-            "count": 46,
-            "landRate": 0.115,
-            "avgPrice": 45
-          },
-          {
-            "id": "a4bef8b8-d801-4f7e-b29c-06d7f6ec8e7a",
-            "name": "Harold Fannin Jr.",
-            "position": "TE",
-            "count": 42,
-            "landRate": 0.105,
-            "avgPrice": 6
-          },
-          {
-            "id": "c32243ce-36a2-4335-a5d8-28533144155f",
-            "name": "Drake London",
+            "id": "ed917420-f806-4bd3-860f-2eba9f6a5539",
+            "name": "George Pickens",
             "position": "WR",
-            "count": 41,
-            "landRate": 0.1025,
-            "avgPrice": 45
-          },
-          {
-            "id": "dd85893e-1fd8-4074-833d-07434e9168b6",
-            "name": "Garrett Wilson",
-            "position": "WR",
-            "count": 39,
-            "landRate": 0.0975,
-            "avgPrice": 43
-          },
-          {
-            "id": "63e881e4-91b5-4977-97d2-decde9630df7",
-            "name": "Davante Adams",
-            "position": "WR",
-            "count": 39,
-            "landRate": 0.0975,
-            "avgPrice": 10
-          },
-          {
-            "id": "2cb07a16-1cf1-4cf9-a524-ae61c97263bf",
-            "name": "Kyren Williams",
-            "position": "RB",
-            "count": 39,
-            "landRate": 0.0975,
+            "count": 34,
+            "landRate": 0.085,
             "avgPrice": 7
-          },
-          {
-            "id": "6c2c2bd4-0cd3-4e20-8989-afeeab1f6a2c",
-            "name": "Rashee Rice",
-            "position": "WR",
-            "count": 36,
-            "landRate": 0.09,
-            "avgPrice": 41
-          },
-          {
-            "id": "ecdd8c1a-eb03-4f46-87f7-d90287115f5c",
-            "name": "CeeDee Lamb",
-            "position": "WR",
-            "count": 35,
-            "landRate": 0.0875,
-            "avgPrice": 53
-          },
-          {
-            "id": "c75cf91c-51b6-4aed-95ba-03ca23260810",
-            "name": "Nico Collins",
-            "position": "WR",
-            "count": 35,
-            "landRate": 0.0875,
-            "avgPrice": 10
-          },
-          {
-            "id": "38159347-d80b-4ab4-8576-73d5a880f5a8",
-            "name": "A.J. Brown",
-            "position": "WR",
-            "count": 33,
-            "landRate": 0.0825,
-            "avgPrice": 46
-          },
-          {
-            "id": "1b0bcb3e-f7fa-44a7-959f-0e565b4e954e",
-            "name": "DeVonta Smith",
-            "position": "WR",
-            "count": 33,
-            "landRate": 0.0825,
-            "avgPrice": 34
           },
           {
             "id": "77888c52-9ca0-4bc7-a7e7-527c53f13707",
@@ -3714,35 +3658,67 @@
             "position": "RB",
             "count": 33,
             "landRate": 0.0825,
-            "avgPrice": 30
+            "avgPrice": 28
           },
           {
-            "id": "d6995dd4-8cd1-4077-921a-6a51c598de6f",
-            "name": "Malik Nabers",
+            "id": "a4bef8b8-d801-4f7e-b29c-06d7f6ec8e7a",
+            "name": "Harold Fannin Jr.",
+            "position": "TE",
+            "count": 33,
+            "landRate": 0.0825,
+            "avgPrice": 8
+          },
+          {
+            "id": "03967241-0303-4885-9234-deebf1217535",
+            "name": "Puka Nacua",
             "position": "WR",
-            "count": 32,
-            "landRate": 0.08,
-            "avgPrice": 38
+            "count": 30,
+            "landRate": 0.075,
+            "avgPrice": 94
           },
           {
-            "id": "c997f964-d4cd-418f-a7b6-a0aae4371d46",
-            "name": "Derrick Henry",
+            "id": "6f9982ec-4ec5-42a1-a2aa-0d4562b9aef1",
+            "name": "Jayden Daniels",
+            "position": "QB",
+            "count": 26,
+            "landRate": 0.065,
+            "avgPrice": 13
+          },
+          {
+            "id": "2cb07a16-1cf1-4cf9-a524-ae61c97263bf",
+            "name": "Kyren Williams",
             "position": "RB",
-            "count": 31,
-            "landRate": 0.0775,
-            "avgPrice": 36
+            "count": 25,
+            "landRate": 0.0625,
+            "avgPrice": 9
+          },
+          {
+            "id": "63e881e4-91b5-4977-97d2-decde9630df7",
+            "name": "Davante Adams",
+            "position": "WR",
+            "count": 23,
+            "landRate": 0.0575,
+            "avgPrice": 9
+          },
+          {
+            "id": "9e394d91-a663-4743-bc0d-caf601793578",
+            "name": "Dallas Goedert",
+            "position": "TE",
+            "count": 22,
+            "landRate": 0.055,
+            "avgPrice": 1
           }
         ],
         "distribution": {
           "runs": 400,
           "myTotalCeiling": {
-            "min": 309,
-            "max": 366,
-            "mean": 332.49,
-            "median": 332,
-            "p10": 321,
-            "p90": 346,
-            "stdev": 9.434505816416683
+            "min": 316,
+            "max": 396,
+            "mean": 361.2775,
+            "median": 363,
+            "p10": 342.9,
+            "p90": 377,
+            "stdev": 12.967092725433876
           },
           "mySpend": {
             "min": 200,
@@ -3754,11 +3730,11 @@
             "stdev": 0
           },
           "myPositionMeans": {
-            "QB": 1.0875,
-            "RB": 4.4025,
-            "WR": 5.2,
-            "TE": 1.31,
-            "DEF": 1
+            "QB": 1.08,
+            "RB": 4.3675,
+            "WR": 5.32,
+            "TE": 1.2225,
+            "DEF": 1.01
           }
         }
       }

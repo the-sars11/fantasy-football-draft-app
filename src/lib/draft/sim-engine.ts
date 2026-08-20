@@ -94,9 +94,11 @@ export interface SimEngineInput {
   /** Base RNG seed; run i uses seed + i. Default 1. */
   seed?: number
   /**
-   * Valuation noise as a fraction of ceiling. A manager values a nominated player
-   * at ceiling × (1 ± noisePct). Default 0.15. This is the only source of
-   * run-to-run variance, so 0 collapses the distribution to a single outcome.
+   * Valuation noise as a fraction of the seat's base valuation. Each manager
+   * values a nominated player at base × (1 ± noisePct), where base is the national
+   * ceiling for the me-seat and unprofiled opponents, or the room price
+   * (expectedCost) for profiled opponents. Default 0.15. This is the only source
+   * of run-to-run variance, so 0 collapses the distribution to a single outcome.
    */
   noisePct?: number
   /** Seat index that is "me" (Joe). Default 0. */
@@ -227,16 +229,18 @@ const TARGET_MAX_BOOST = 0.35
 /** Soft-avoid valuation multiplier: me only takes the player at a real discount. */
 const SOFT_AVOID_FACTOR = 0.5
 
-// ─── LR-1 opponent "ceiling drive" ───────────────────────────────────────────
+// ─── LR-1 opponent "room-price drive" ────────────────────────────────────────
 /**
  * How strongly a profiled opponent's historical positional lean tilts their
- * valuation. Opponents anchor on the player's TRUE worth (national ceiling) so the
- * room is a real value market that contests underpriced studs; their lean then
- * tilts appetite around that value. Strength in (0,1]: 0 = pure value (no
+ * valuation. Opponents anchor on the ROOM price (expectedCost = what Joe's league
+ * has actually paid for this player's positional rank), so the simulated field
+ * clears studs at ledger prices rather than national ceiling; their lean then
+ * tilts appetite around that room price. Strength in (0,1]: 0 = pure room price (no
  * personality), 1 = the full historical lean. At 0.5 a WR-loving owner (lean 1.5)
- * values WRs at 1.25x worth and a WR-averse owner (lean 0.5) at 0.75x, so tendency
- * still shows without any seat sleeping on value. This is what lets distinct
- * strategies separate instead of every seat converging on one value-swept roster.
+ * values WRs at 1.25x room and a WR-averse owner (lean 0.5) at 0.75x room, so
+ * tendency still shows while the clearing price stays anchored to what the room
+ * pays. This is what lets distinct strategies separate against a realistic market
+ * instead of every seat overpaying to national ceiling.
  */
 const OPPONENT_LEAN_STRENGTH = 0.5
 
@@ -375,20 +379,25 @@ export function runAuctionSim(
 
       // Base valuation depends on the seat:
       //   - me: the player's TRUE worth (national VORP ceiling), so I chase value
-      //     against a room that pays historical prices.
-      //   - a profiled opponent (LR-1): the player's TRUE worth (national ceiling)
-      //     tilted by that owner's positional lean (softened toward 1.0), so the
-      //     seat competes for value like a real drafter while still showing its
-      //     historical tendency. This makes the room a genuine value market.
+      //     against a room that pays historical prices. If I want a stud I pay the
+      //     room's price to win him (second price + $1), which IS the walk-up.
+      //   - a profiled opponent (LR-1): the ROOM price (expectedCost) tilted by
+      //     that owner's positional lean (softened toward 1.0), so each seat pays
+      //     what Joe's league actually pays for that rank while still showing its
+      //     historical tendency. This makes the field clear studs at ledger prices.
       //   - an unprofiled opponent: the generic ceiling model (pure R10a).
       const profile = profileForSeat(m.index)
       let valuation: number
       if (profile) {
         const lean = profile.leanByPos[nominated.position] ?? 1
-        // Soften the historical lean toward 1.0 so no seat sleeps on value at any
-        // position, then anchor on true worth. tilt in [1-s, 1+s(leanMax-1)].
+        // Anchor on the ROOM price (expectedCost = the ledger's expectedRoomPrice
+        // for this player's positional rank), then tilt by the owner's historical
+        // lean softened toward 1.0. A neutral owner (lean 1) pays exactly room
+        // price; a pos-hungry owner pays a bounded premium, a pos-averse one a
+        // bounded discount. tilt in [1-s, 1+s(leanMax-1)]. This makes the field
+        // clear studs at what Joe's league actually pays, not national ceiling.
         const tilt = 1 + OPPONENT_LEAN_STRENGTH * (lean - 1)
-        valuation = Math.max(1, Math.round(nominated.ceiling * tilt * noise))
+        valuation = Math.max(1, Math.round(nominated.expectedCost * tilt * noise))
       } else {
         valuation = Math.max(1, Math.round(nominated.ceiling * noise))
       }
