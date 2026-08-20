@@ -2,6 +2,20 @@
 
 ---
 
+## 2026-08-20 / Headless engine -- target prices anchored on real room prices (Joe-caught bug)
+
+**Class:** pipeline (Architecture + QA lenses). Joe challenged the report: "I will NEVER get a star RB for $53 or a star WR for $39 in my league." He was right.
+
+- **Root cause (diagnosed with his real numbers):** `assignTargetPrices` computed each key target's price from the NATIONAL `consensusAuctionValue`, tilted by an archetype "emphasis" multiplier, then scaled the whole set DOWN to force five studs to fit $200. It never read `expectedRoomPrice`. So the anchor SELECTION step spent the real room price ($76 for Gibbs) but the REPORTED target told Joe to bid a fictional lowball ($56) -- internally inconsistent, and a number that would lose the player.
+- **Fix (`src/lib/research/strategy/target-pricing.ts`):** a target's price is now its **expected room price** (`expectedRoomPrice`, from the 4-draft Nasties ledger), with a national-value fallback only when the ledger has no room price. Added a **walk-up** price = room price + 10% (locked with Joe: "show both: expect + walk-up", ~10%) so a contested bid actually wins rather than ties the room average. The archetype emphasis multiplier and the max-bid-% cap are **removed** (they were the machinery that produced the lowball); a single unaffordable stud is capped at the roster-solvency ceiling instead. When named targets overflow the budget at real room prices, the **cheapest are dropped** until the set fits -- surfacing the honest "$200 buys ~2 studs" truth instead of shrinking every stud below its real cost. `expectedRoomPrice` reaches the pricer structurally via `Player` (no call-site change).
+- **Result:** Stars & Scrubs now reads **Gibbs $76 (win by $84), Nacua $79 (win by $87)** -- two real anchors, not five fictional discounts. Studs & Duds and Balanced likewise price every target at its real room cost. Report renderer shows "expect / walk-up to win" per target.
+- **OPEN DECISION surfaced, NOT yet acted on (scope halt):** the Monte-Carlo sim's opponents anchor on each player's NATIONAL ceiling/upside (`nominated.ceiling`), so contested studs clear ABOVE the room ledger in-sim (e.g. Studs & Duds lands Gibbs at sim-avg **$117** vs his $76 room price). This is the same national-vs-room split, now on the opponent-bid side: the sim is currently a *harsher* market than Joe's real room. `league-opponents.ts`'s own header says opponents *should* bid off room price (`expectedCost x vsRoom`), but `sim-engine.ts` uses `ceiling x tilt`. Recommendation on the table: align sim opponents to room price so the simulated market matches the ledger and the new advice. Awaiting Joe's call before touching the sim (changes every win-rate).
+- **Cosmetic follow-up:** the strategy "Why" narrative (from `generate.ts`) rounds a couple of anchor prices slightly differently from the target-price table (e.g. Nacua "~$76" in prose vs $79 in the table). Narrative text only; the target-price table is the authority.
+
+**Gate:** `npm run type-check` 0 errors. `npm run test:run` **555/555** (target-pricing suite rewritten to the room-price contract: +room-price anchoring, +walk-up, +overflow-drop, +solvency-cap; component card test updated to prove the badge no longer moves with archetype tilt). `npx eslint` on all touched files exit 0. `npm run research:verify` 44/44 (11 real Nasties owners replicated as opponents). Deterministic (SIM_SEED=42). No em/en-dashes.
+
+---
+
 ## 2026-08-20 / Headless engine -- budget-balanced strategy policy + em-dash sweep
 
 **Class:** pipeline (Architecture + QA lenses). Follow-up to the headless research pipeline (`c6a4f7f`). Joe asked why the balanced strategy never surfaced, then approved building a budget-balanced policy.

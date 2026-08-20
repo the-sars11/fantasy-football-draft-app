@@ -366,8 +366,8 @@ function buildReport(
     // Target prices (solver-fit so the full roster completes within $200).
     const tp = p.target_pricing
     if (tp && tp.prices.length > 0) {
-      const line = tp.prices.map((t) => `${t.name} $${t.price}`).join(', ')
-      L.push(`- Target prices: ${line}.`)
+      const line = tp.prices.map((t) => `${t.name} $${t.price} (win by $${t.walkUp})`).join(', ')
+      L.push(`- Target prices (expect / walk-up to win): ${line}.`)
       L.push(`  Targets $${tp.targetTotal} + reserve $${tp.reserve} = $${tp.total} of $${tp.budget} (${tp.fits ? 'completable' : 'OVER BUDGET'}).`)
     } else if (p.key_targets?.length) {
       L.push(`- Key targets: ${p.key_targets.join(', ')}.`)

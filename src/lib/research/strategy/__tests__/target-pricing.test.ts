@@ -1,18 +1,26 @@
 /**
  * target-pricing.test.ts — R6: solver-fit strategy target prices.
  *
- * Proves the two done-when conditions:
+ * Proves the done-when conditions:
  *   1. Every strategy's target prices + the $1-per-slot completion reserve sum
  *      to a completable $200 roster (sum invariant).
- *   2. Swapping the archetype's budget emphasis re-allocates the money.
+ *   2. Each target is priced at its expected ROOM price (what Joe's room pays),
+ *      with a walk-up = room price + 10% to actually win a contested bid.
+ *   3. When named targets overflow the budget at room prices, the cheapest are
+ *      dropped (the honest "only a couple studs fit") rather than shrunk below room.
  * Pure, $0 — no Claude.
  */
 
 import { describe, it, expect } from 'vitest'
 import { assignTargetPrices } from '../target-pricing'
-import type { AssignTargetPricesInput } from '../target-pricing'
+import type { AssignTargetPricesInput, TargetPricingPlayer } from '../target-pricing'
 import type { ConsensusPlayer } from '@/lib/research/normalize'
-import type { RosterSlots } from '@/lib/players/types'
+import type { Position, RosterSlots } from '@/lib/players/types'
+
+/** Minimal target carrying a real room price (what the ledger says Joe's room pays). */
+function roomPlayer(name: string, position: Position, expectedRoomPrice: number): TargetPricingPlayer {
+  return { name, position, expectedRoomPrice }
+}
 
 // Joe's Nasties: QB1 RB1 WR1 TE1 FLEX3 DEF1 Bench5 = 13 draftable slots.
 const NASTIES_SLOTS: RosterSlots = {
@@ -121,32 +129,63 @@ describe('assignTargetPrices - sum invariant (completable $200 roster)', () => {
   })
 })
 
-describe('assignTargetPrices - archetype re-allocation', () => {
-  it('shifts money to RB under an RB-heavy allocation vs a WR-heavy one', () => {
-    // Same targets/bases; only the budget emphasis changes. Allocations are kept
-    // inside the unclipped emphasis band (pct 10.5-27 -> 0.7x-1.8x) so the tilt
-    // is visible rather than both positions pinning to the cap.
-    const RB_TILT = { QB: 8, RB: 24, WR: 12, TE: 8, K: 1, DST: 1, bench: 46 }
-    const WR_TILT = { QB: 8, RB: 12, WR: 24, TE: 8, K: 1, DST: 1, bench: 46 }
-    const equalPool: ConsensusPlayer[] = [
-      makePlayer({ name: 'RB One', position: 'RB', consensusAuctionValue: 20 }),
-      makePlayer({ name: 'WR One', position: 'WR', consensusAuctionValue: 20 }),
-    ]
+describe('assignTargetPrices - room-price anchoring (the honest number)', () => {
+  it('prices a target at its expected room price, not a national value scaled to fit', () => {
+    // Gibbs: national auction ~$96, but the room pays $76. The plan must say $76.
+    const gibbs = roomPlayer('Jahmyr Gibbs', 'RB', 76)
+    const withNationalNoise = { ...gibbs, consensusAuctionValue: 96 }
+    const r = assignTargetPrices(
+      baseInput({ targetNames: ['Jahmyr Gibbs'], players: [withNationalNoise] })
+    )
+    expect(r.prices).toHaveLength(1)
+    // Expect = room price ($76), never the $96 national value or a crushed-down number.
+    expect(r.prices[0].price).toBe(76)
+    expect(r.prices[0].baseValue).toBe(76)
+  })
+
+  it('sets walk-up = room price + 10% so a contested bid actually wins', () => {
+    const nacua = roomPlayer('Puka Nacua', 'WR', 79)
+    const r = assignTargetPrices(baseInput({ targetNames: ['Puka Nacua'], players: [nacua] }))
+    // 79 * 1.10 = 86.9 -> 87.
+    expect(r.prices[0].walkUp).toBe(87)
+    expect(r.prices[0].walkUp).toBeGreaterThan(r.prices[0].price)
+  })
+
+  it('is unaffected by the archetype budget allocation (room price is the anchor)', () => {
+    const rb = roomPlayer('Room RB', 'RB', 50)
+    const wr = roomPlayer('Room WR', 'WR', 50)
+    const RB_TILT = { QB: 8, RB: 40, WR: 8, TE: 8, K: 1, DST: 1, bench: 34 }
+    const WR_TILT = { QB: 8, RB: 8, WR: 40, TE: 8, K: 1, DST: 1, bench: 34 }
     const rbHeavy = assignTargetPrices(
-      baseInput({ targetNames: ['RB One', 'WR One'], players: equalPool, budgetAllocation: RB_TILT })
+      baseInput({ targetNames: ['Room RB', 'Room WR'], players: [rb, wr], budgetAllocation: RB_TILT })
     )
     const wrHeavy = assignTargetPrices(
-      baseInput({ targetNames: ['RB One', 'WR One'], players: equalPool, budgetAllocation: WR_TILT })
+      baseInput({ targetNames: ['Room RB', 'Room WR'], players: [rb, wr], budgetAllocation: WR_TILT })
     )
+    // Same room prices regardless of archetype tilt: $50 is $50.
+    expect(rbHeavy.prices.find((p) => p.name === 'Room RB')!.price).toBe(50)
+    expect(wrHeavy.prices.find((p) => p.name === 'Room RB')!.price).toBe(50)
+    expect(rbHeavy.prices.find((p) => p.name === 'Room WR')!.price).toBe(50)
+    expect(wrHeavy.prices.find((p) => p.name === 'Room WR')!.price).toBe(50)
+  })
 
-    const rbPriceHeavy = rbHeavy.prices.find((p) => p.name === 'RB One')!.price
-    const rbPriceWr = wrHeavy.prices.find((p) => p.name === 'RB One')!.price
-    const wrPriceHeavy = rbHeavy.prices.find((p) => p.name === 'WR One')!.price
-    const wrPriceWr = wrHeavy.prices.find((p) => p.name === 'WR One')!.price
-
-    // RB-heavy pays more for the RB; WR-heavy pays more for the WR.
-    expect(rbPriceHeavy).toBeGreaterThan(rbPriceWr)
-    expect(wrPriceWr).toBeGreaterThan(wrPriceHeavy)
+  it('drops the cheapest targets when room prices overflow the budget', () => {
+    // Three real studs at room prices: 76 + 79 + 67 = 222 > $200. Only two fit.
+    const studs = [
+      roomPlayer('Stud RB', 'RB', 76),
+      roomPlayer('Stud WR', 'WR', 79),
+      roomPlayer('Third Stud', 'RB', 67),
+    ]
+    const r = assignTargetPrices(
+      baseInput({ targetNames: ['Stud RB', 'Stud WR', 'Third Stud'], players: studs })
+    )
+    // The two priciest survive at their true room prices; the cheapest is dropped.
+    const names = r.prices.map((p) => p.name)
+    expect(names).toContain('Stud RB')
+    expect(names).toContain('Stud WR')
+    expect(names).not.toContain('Third Stud')
+    for (const p of r.prices) expect(p.price).toBe(p.baseValue) // never shrunk below room
+    expect(r.fits).toBe(true)
   })
 
   it('different targets produce a different reserve and total', () => {
@@ -175,15 +214,15 @@ describe('assignTargetPrices - resolution rules', () => {
     expect(r.prices).toHaveLength(2)
   })
 
-  it('caps a target at the strategy max single bid', () => {
-    const bigPool: ConsensusPlayer[] = [
-      makePlayer({ name: 'Overpriced', position: 'RB', consensusAuctionValue: 190 }),
-    ]
-    const r = assignTargetPrices(
-      baseInput({ targetNames: ['Overpriced'], players: bigPool, maxBidPercentage: 30 })
-    )
-    // 30% of $200 = $60 cap.
-    expect(r.prices[0].price).toBeLessThanOrEqual(60)
+  it('caps a single unaffordable stud at the solvency ceiling (roster stays completable)', () => {
+    // A $190 room price cannot coexist with 12 other $1 slots in a $200 league.
+    // The solvency ceiling is budget - (13 slots - 1) = $188: buy him, fill the rest at $1.
+    const bigPool = [roomPlayer('Overpriced', 'RB', 190)]
+    const r = assignTargetPrices(baseInput({ targetNames: ['Overpriced'], players: bigPool }))
+    expect(r.prices).toHaveLength(1)
+    expect(r.prices[0].price).toBe(BUDGET - (TOTAL_SLOTS - 1)) // $188
+    expect(r.total).toBeLessThanOrEqual(BUDGET)
+    expect(r.fits).toBe(true)
   })
 
   it('returns an empty, fitting result when no targets resolve', () => {

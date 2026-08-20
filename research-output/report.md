@@ -1,6 +1,6 @@
 # The Nasties - Draft Research Dataset
 
-Generated 2026-08-20T14:03:43.979Z. 12-team, $200 auction, full PPR, no kicker.
+Generated 2026-08-20T16:04:46.034Z. 12-team, $200 auction, full PPR, no kicker.
 Roster: QB1, RB1, WR1, TE1, FLEX3, DEF1, Bench5.
 Players: 1000. Cache last updated 2026-08-20T01:00:27.018+00:00 (stale=false).
 Sims: 400 Monte-Carlo runs per strategy, 14-game season, seed 42.
@@ -21,8 +21,8 @@ Pool-generated Stars & Scrubs: 8 anchors (RB/WR/TE/QB), rest at room price.
 - Why: The board supports paying up for Jahmyr Gibbs (~$76), Puka Nacua (~$76), Jeremiyah Love (~$29). RB runs COOL (0.84x room vs national). This shape spends $191 on anchors and keeps $9 to complete the roster at room prices.
 - Philosophy: Built from the live board: stars and scrubs shape emerged as a completable $200 roster given the current pool.
 - Budget split: QB 2%, RB 53%, WR 39%, TE 2%, DST 0%, K 0%, bench 4%.
-- Target prices: Jahmyr Gibbs $56, Puka Nacua $57, Jeremiyah Love $57, George Kittle $12, Jaxson Dart $10.
-  Targets $192 + reserve $8 = $200 of $200 (completable).
+- Target prices (expect / walk-up to win): Jahmyr Gibbs $76 (win by $84), Puka Nacua $79 (win by $87).
+  Targets $155 + reserve $11 = $166 of $200 (completable).
 
   Most common roster cores this strategy landed:
   - 5.3% of drafts: Jahmyr Gibbs + Jeremiyah Love - avg spend $200, avg record 10.5-3.5.
@@ -47,8 +47,8 @@ Pool-generated Studs & Duds: 8 anchors (RB/WR/QB/TE), rest at room price.
 - Why: The board supports paying up for Jahmyr Gibbs (~$76), Zay Flowers (~$24), Garrett Wilson (~$23). RB runs COOL (0.84x room vs national). This shape spends $154 on anchors and keeps $46 to complete the roster at room prices.
 - Philosophy: Built from the live board: studs and duds shape emerged as a completable $200 roster given the current pool.
 - Budget split: QB 7%, RB 45%, WR 24%, TE 2%, DST 0%, K 0%, bench 22%.
-- Target prices: Jahmyr Gibbs $51, Zay Flowers $44, Garrett Wilson $43, Jalen Hurts $15, Quinshon Judkins $39.
-  Targets $192 + reserve $8 = $200 of $200 (completable).
+- Target prices (expect / walk-up to win): Jahmyr Gibbs $76 (win by $84), Zay Flowers $24 (win by $26), Garrett Wilson $23 (win by $25), Jalen Hurts $23 (win by $25), Quinshon Judkins $35 (win by $39).
+  Targets $181 + reserve $8 = $189 of $200 (completable).
 
   Most common roster cores this strategy landed:
   - 2.8% of drafts: Jahmyr Gibbs + Zay Flowers + Cam Skattebo - avg spend $200, avg record 9.5-4.5.
@@ -73,8 +73,8 @@ Pool-generated Balanced Auction: 8 anchors (RB/WR/TE/QB/DEF), rest at room price
 - Why: The board supports paying up for Omarion Hampton (~$37), Josh Allen (~$36), Trey McBride (~$35). RB runs COOL (0.84x room vs national). This shape spends $194 on anchors and keeps $6 to complete the roster at room prices.
 - Philosophy: Built from the live board: balanced shape emerged as a completable $200 roster given the current pool.
 - Budget split: QB 18%, RB 33%, WR 24%, TE 20%, DST 3%, K 0%, bench 2%.
-- Target prices: Omarion Hampton $38, Josh Allen $38, Trey McBride $38, Jeremiyah Love $38, Zay Flowers $38.
-  Targets $190 + reserve $8 = $198 of $200 (completable).
+- Target prices (expect / walk-up to win): Omarion Hampton $37 (win by $41), Josh Allen $36 (win by $40), Trey McBride $49 (win by $54), Jeremiyah Love $57 (win by $63).
+  Targets $179 + reserve $9 = $188 of $200 (completable).
 
   Most common roster cores this strategy landed:
   - 2.5% of drafts: Jeremiyah Love + Zay Flowers + Omarion Hampton + Drake London - avg spend $200, avg record 8.7-5.3.

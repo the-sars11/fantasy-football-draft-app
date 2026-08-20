@@ -9,7 +9,7 @@
  * visible in the DOM:
  *   1. The card shows target prices + the $1-per-slot reserve summing to a
  *      completable $200 roster ("Completes a full roster").
- *   2. Swapping the archetype's budget emphasis re-allocates the money on screen.
+ *   2. Target badges show the room-price anchor, unchanged by the archetype tilt.
  */
 
 import '@testing-library/jest-dom'
@@ -115,27 +115,19 @@ describe('StrategyProposalCard - R6 solver-fit prices reach the screen', () => {
     }
   })
 
-  it('re-allocates money on screen when the archetype budget emphasis changes', () => {
-    // Two equal-value targets; only the budget tilt differs. Kept inside the
-    // unclipped emphasis band so the shift is visible rather than cap-pinned.
+  it('shows the same room-price badge regardless of the archetype budget tilt', () => {
+    // The badge reflects the player's room price, NOT a national value scaled by
+    // the archetype emphasis (the old, since-fixed bug). Same target => same badge
+    // whether the strategy tilts RB-heavy or WR-heavy.
     const equalTargets = ['RB One', 'WR One']
     const equalPool: ConsensusPlayer[] = [
       makePlayer({ name: 'RB One', position: 'RB', consensusAuctionValue: 20 }),
       makePlayer({ name: 'WR One', position: 'WR', consensusAuctionValue: 20 }),
     ]
-    const priceFor = (alloc: Record<string, number>, name: string) =>
-      assignTargetPrices({
-        targetNames: equalTargets, budgetAllocation: alloc,
-        maxBidPercentage: 40, players: equalPool,
-        rosterSlots: NASTIES_SLOTS, budget: BUDGET,
-      }).prices.find((p) => p.name === name)!.price
-
-    const RB_TILT = { QB: 8, RB: 24, WR: 12, TE: 8, K: 1, DST: 1, bench: 46 }
-    const WR_TILT = { QB: 8, RB: 12, WR: 24, TE: 8, K: 1, DST: 1, bench: 46 }
-    const rbOneUnderRbTilt = priceFor(RB_TILT, 'RB One')
-    const rbOneUnderWrTilt = priceFor(WR_TILT, 'RB One')
-    // Sanity: the tilt genuinely moves the money before we assert on the DOM.
-    expect(rbOneUnderRbTilt).toBeGreaterThan(rbOneUnderWrTilt)
+    const rbOnePrice = assignTargetPrices({
+      targetNames: equalTargets, players: equalPool,
+      rosterSlots: NASTIES_SLOTS, budget: BUDGET,
+    }).prices.find((p) => p.name === 'RB One')!.price
 
     // Locate RB One's own target badge (text is "RB One$<price>") so the
     // symmetric WR price on the same card can't be mistaken for it.
@@ -146,14 +138,16 @@ describe('StrategyProposalCard - R6 solver-fit prices reach the screen', () => {
       return badge?.textContent ?? ''
     }
 
+    const RB_TILT = { QB: 8, RB: 24, WR: 12, TE: 8, K: 1, DST: 1, bench: 46 }
+    const WR_TILT = { QB: 8, RB: 12, WR: 24, TE: 8, K: 1, DST: 1, bench: 46 }
+
     const rbTiltCard = render(
       <StrategyProposalCard
         proposal={makeProposal({ key_targets: equalTargets, budget_allocation: RB_TILT }, equalPool)}
         format="auction"
       />
     )
-    // The RB-tilt card shows RB One priced higher than under the WR tilt.
-    expect(rbOneBadgeText(rbTiltCard.container)).toBe(`RB One$${rbOneUnderRbTilt}`)
+    expect(rbOneBadgeText(rbTiltCard.container)).toBe(`RB One$${rbOnePrice}`)
     rbTiltCard.unmount()
 
     const wrTiltCard = render(
@@ -162,6 +156,7 @@ describe('StrategyProposalCard - R6 solver-fit prices reach the screen', () => {
         format="auction"
       />
     )
-    expect(rbOneBadgeText(wrTiltCard.container)).toBe(`RB One$${rbOneUnderWrTilt}`)
+    // Identical badge: the archetype tilt no longer moves the price.
+    expect(rbOneBadgeText(wrTiltCard.container)).toBe(`RB One$${rbOnePrice}`)
   })
 })

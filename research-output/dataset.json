@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generatedAt": "2026-08-20T14:03:43.979Z",
+    "generatedAt": "2026-08-20T16:04:46.034Z",
     "league": "The Nasties",
     "playerCount": 1000,
     "simRunsPerStrategy": 400,
@@ -574,37 +574,21 @@
             {
               "name": "Jahmyr Gibbs",
               "position": "RB",
-              "price": 56,
-              "baseValue": 96
+              "price": 76,
+              "walkUp": 84,
+              "baseValue": 76
             },
             {
               "name": "Puka Nacua",
               "position": "WR",
-              "price": 57,
-              "baseValue": 86
-            },
-            {
-              "name": "Jeremiyah Love",
-              "position": "RB",
-              "price": 57,
-              "baseValue": 44
-            },
-            {
-              "name": "George Kittle",
-              "position": "TE",
-              "price": 12,
-              "baseValue": 23
-            },
-            {
-              "name": "Jaxson Dart",
-              "position": "QB",
-              "price": 10,
-              "baseValue": 20
+              "price": 79,
+              "walkUp": 87,
+              "baseValue": 79
             }
           ],
-          "targetTotal": 192,
-          "reserve": 8,
-          "total": 200,
+          "targetTotal": 155,
+          "reserve": 11,
+          "total": 166,
           "fits": true
         }
       },
@@ -1651,37 +1635,42 @@
             {
               "name": "Jahmyr Gibbs",
               "position": "RB",
-              "price": 51,
-              "baseValue": 96
+              "price": 76,
+              "walkUp": 84,
+              "baseValue": 76
             },
             {
               "name": "Zay Flowers",
               "position": "WR",
-              "price": 44,
-              "baseValue": 41
+              "price": 24,
+              "walkUp": 26,
+              "baseValue": 24
             },
             {
               "name": "Garrett Wilson",
               "position": "WR",
-              "price": 43,
-              "baseValue": 40
+              "price": 23,
+              "walkUp": 25,
+              "baseValue": 23
             },
             {
               "name": "Jalen Hurts",
               "position": "QB",
-              "price": 15,
-              "baseValue": 33
+              "price": 23,
+              "walkUp": 25,
+              "baseValue": 23
             },
             {
               "name": "Quinshon Judkins",
               "position": "RB",
-              "price": 39,
-              "baseValue": 33
+              "price": 35,
+              "walkUp": 39,
+              "baseValue": 35
             }
           ],
-          "targetTotal": 192,
+          "targetTotal": 181,
           "reserve": 8,
-          "total": 200,
+          "total": 189,
           "fits": true
         }
       },
@@ -2730,37 +2719,35 @@
             {
               "name": "Omarion Hampton",
               "position": "RB",
-              "price": 38,
-              "baseValue": 38
+              "price": 37,
+              "walkUp": 41,
+              "baseValue": 37
             },
             {
               "name": "Josh Allen",
               "position": "QB",
-              "price": 38,
-              "baseValue": 39
+              "price": 36,
+              "walkUp": 40,
+              "baseValue": 36
             },
             {
               "name": "Trey McBride",
               "position": "TE",
-              "price": 38,
-              "baseValue": 40
+              "price": 49,
+              "walkUp": 54,
+              "baseValue": 49
             },
             {
               "name": "Jeremiyah Love",
               "position": "RB",
-              "price": 38,
-              "baseValue": 44
-            },
-            {
-              "name": "Zay Flowers",
-              "position": "WR",
-              "price": 38,
-              "baseValue": 41
+              "price": 57,
+              "walkUp": 63,
+              "baseValue": 57
             }
           ],
-          "targetTotal": 190,
-          "reserve": 8,
-          "total": 198,
+          "targetTotal": 179,
+          "reserve": 9,
+          "total": 188,
           "fits": true
         }
       },
