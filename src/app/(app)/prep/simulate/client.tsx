@@ -32,6 +32,7 @@ import {
 import { cacheToPlayers } from '@/lib/players/convert'
 import { buildBoardPlayers } from '@/lib/draft/solver-bridge'
 import { buildSimSummary, buildMyBiasFromTags, toPersistedSim } from '@/lib/draft/sim-results'
+import { buildOpponentProfiles } from '@/lib/draft/league-opponents'
 import type { PersistedSimResults, SimSummary } from '@/lib/draft/sim-results'
 import type { SimRosterConfig } from '@/lib/draft/sim-engine'
 import { useUserTags } from '@/hooks/use-user-tags'
@@ -156,15 +157,25 @@ export function SimulateClient() {
           .sort((a, b) => b.ceiling - a.ceiling)
           .slice(0, BOARD_DEPTH)
         const myBias = buildMyBiasFromTags(userTagsMap)
+        const numManagers = Math.max(2, selectedLeague.team_count || 12)
+        // Replicate the real Nasties opponents from the ledger so the sim field
+        // bids off ROOM price (expectedCost × each owner's positional lean),
+        // matching the headless engine. Without this the opponents fall through
+        // to the national-ceiling branch and clear studs ~$15-20 too high.
+        const { profiles: opponentProfiles } = buildOpponentProfiles({
+          count: numManagers - 1,
+          meOwner: 'Rasar',
+        })
         const result = buildSimSummary({
           board,
           rosterConfig: NASTIES_ROSTER,
-          numManagers: Math.max(2, selectedLeague.team_count || 12),
+          numManagers,
           budget: selectedLeague.budget ?? 200,
           runs: SIM_RUNS,
           seed: 1,
           myManagerIndex: 0,
           myBias,
+          opponentProfiles,
         })
         setSummary(result)
       } catch (e) {

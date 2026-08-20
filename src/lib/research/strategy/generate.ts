@@ -561,6 +561,20 @@ export function generateStrategiesFromPool(
 
   const rawProposals = generateAnchorStrategies({ board, slots, budget })
 
+  // Room price is the single source of truth from priceBoard (expectedCost =
+  // expectedRoomPrice(pos, posRank)). We feed THAT into target-pricing instead
+  // of relying on the input player objects to carry `expectedRoomPrice`. The
+  // headless path passes real Player[] (which do carry it), but the live
+  // /strategies/propose route passes ConsensusPlayer[] (which do NOT) — so
+  // deriving room price here keeps both paths room-anchored and consistent.
+  const roomByName = new Map(board.map((b) => [b.name.toLowerCase(), b.expectedCost]))
+  const pricedPlayers = available.map((p) => ({
+    name: p.name,
+    position: p.position,
+    expectedRoomPrice: roomByName.get(p.name.toLowerCase()) ?? null,
+    consensusAuctionValue: p.consensusAuctionValue ?? null,
+  }))
+
   // Attach solver-fit target prices (R6) so each strategy's targets sum to a
   // completable $200 roster.
   const proposals = rawProposals.map((p) => ({
@@ -569,7 +583,7 @@ export function generateStrategiesFromPool(
       targetNames: p.key_targets,
       budgetAllocation: p.budget_allocation,
       maxBidPercentage: p.max_bid_percentage,
-      players: available,
+      players: pricedPlayers,
       rosterSlots: league.rosterSlots,
       budget,
     }),

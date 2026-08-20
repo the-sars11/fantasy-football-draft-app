@@ -2,6 +2,21 @@
 
 ---
 
+## 2026-08-20 / Wire room-price model into the LIVE app (both gaps closed)
+
+**Class:** pipeline (Architecture + QA lenses). The two fixes below (target prices + sim field on room price) were proven in the HEADLESS runner but were **inert in the actual app**. Joe's instruction: "make sure what was done will work inside the actual app itself when I go back to it." An in-app audit found two wiring gaps; both are now closed so the live Strategy and Simulate screens show the same room-anchored numbers as the headless report.
+
+- **Gap 1 -- live Strategy route priced off NATIONAL value.** The headless path passes real `Player[]` (which carry `expectedRoomPrice`), but the live `/api/strategies/propose` route builds players via `cacheRowToConsensusPlayer` -> `ConsensusPlayer[]`, and `convert.ts` is the ONLY module that ever populates `expectedRoomPrice`. So in-app, `assignTargetPrices` fell back to `consensusAuctionValue` and told Joe to bid the national number ($96 Gibbs) instead of the room price ($76).
+  - **Fix (`src/lib/research/strategy/generate.ts`):** `generateStrategiesFromPool` now derives room price from `priceBoard` (which already computes `expectedCost = expectedRoomPrice(pos, posRank)` for every player) and feeds THAT into `assignTargetPrices`, instead of depending on the input objects to carry the field. `priceBoard` is now the single source of truth for room price, so BOTH paths (headless `Player[]` and live `ConsensusPlayer[]`) are room-anchored and identical.
+  - **Proof (live-shaped input: `ConsensusPlayer` with NO `expectedRoomPrice`):** Gibbs target **$76** (room RB1), `baseValue: 76`, walk-up $84 -- NOT $96 (national). Bijan **$70** (room RB2), walk-up $77. Matches the verified headless numbers exactly, so the headless output did not regress (both read the same room curve).
+- **Gap 2 -- live Simulate screen ran opponents off NATIONAL ceiling.** `src/app/(app)/prep/simulate/client.tsx` called `buildSimSummary(...)` WITHOUT `opponentProfiles`, so every opponent fell through to the generic national-ceiling bid branch -- the room-price sim anchor (committed `a782013`) was doing nothing in-app.
+  - **Fix:** the live client now calls `buildOpponentProfiles({ count: numManagers - 1, meOwner: 'Rasar' })` and passes `opponentProfiles` into `buildSimSummary`, identical to the headless `research-run.ts`. Same engine + same room-priced board (`cacheToPlayers` already carries room prices) + same profiles -> the live sim now clears studs off the room curve (the A/B-proven Gibbs $111->$93 drop applies in-app).
+- **Result:** the live Strategy target prices, the live Simulate clearing prices, and the headless `report.md` all price every stud off the same 4-draft Nasties room curve. What Joe sees when he opens the app matches what the headless engine produces.
+
+**Gate:** `npm run type-check` 0 errors. `npm run test:run` **555/555** (no test changes needed -- the wiring reuses already-tested engine functions; `generate.ts` still passes the same `TargetPricingPlayer` contract). Live-input proof pasted above (non-committed diagnostic). Deterministic. No em/en-dashes. **Still open (Joe's next tweak):** studs still clear ~$93 in-sim, above the real-room ceiling (all-time high $85 McCaffrey 2024, next $81, tier-1 typically mid/low $70s) -- price-cap recalibration is the next task.
+
+---
+
 ## 2026-08-20 / Headless engine -- sim field anchored on room price (Joe-approved)
 
 **Class:** pipeline (Architecture + QA lenses). Direct follow-on to the target-pricing fix below. Joe: "make sure this sim/model is going to run adversarial strategies against me... I will NEVER get a star RB for $53." The sim WAS adversarial (11 real ledger owners, second-price clearing, no passive bots) but it priced studs off national ceiling, so contested studs cleared ABOVE his room ledger -- the same national-vs-room split as the target-pricing bug, on the opponent-bid side. Joe approved aligning the field to room price.
