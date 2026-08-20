@@ -21,6 +21,7 @@
 
 import { mulberry32 } from './sim-engine'
 import type { SimRun, SimWonPlayer, SimRosterConfig } from './sim-engine'
+import riskModelJson from '../../data/risk-model.json'
 
 // ─── Starting-lineup scoring ─────────────────────────────────────────────────
 
@@ -191,13 +192,159 @@ function weeklyAvailablePoints(
   return bestLineupPoints(available, lineup)
 }
 
+// ─── Data-driven RISK model (real Sleeper actuals) ───────────────────────────
+
+/**
+ * The measured risk model, loaded from src/data/risk-model.json (derived by
+ * scripts/derive-risk-model.mjs from 15 seasons of real Sleeper weekly PPR
+ * actuals). Two separated, measured layers:
+ *   - durability: real per-player games-played rate (position baseline fallback).
+ *   - outcome:    per-game bust/breakout multiplier distribution by prior-year
+ *                 positional tier, stored as a non-parametric empirical CDF ladder.
+ * This supersedes the flat WEEKLY_INJURY_OUT_RATE guesswork above: when a run is
+ * graded with `risk`, each player's OWN durability and his tier's REAL bust/breakout
+ * odds drive the season, so concentrating on an elite RB (53% historical bust,
+ * median x0.74) carries the downside the flat model could never see.
+ */
+export interface RiskModel {
+  durability: {
+    baseline: Record<string, number>
+    byPlayer: Record<string, { gpRate: number; pos?: string; seasons?: number }>
+  }
+  /** outcome[pos][tierKey] carries a 21-point empirical CDF ladder when the sample is thick. */
+  outcome: Record<string, Record<string, { n: number; cdf?: number[] }>>
+}
+
+/** The measured model used by the real sim path (buildSimSummary). */
+export const DEFAULT_RISK_MODEL: RiskModel = riskModelJson as unknown as RiskModel
+
+/** Salt so the season-outcome PRNG is independent of the weekly PRNG at the same seed. */
+const OUTCOME_SEED_SALT = 0x85ebca6b
+
+/** Cap a weekly out-rate so no single player is absent more than ~half the year. */
+const MAX_WEEKLY_OUT = 0.5
+
+/** Prior-year positional tiers, aligned to the derivation script. rank > 48 uses the last tier. */
+const RISK_TIERS: { key: string; lo: number; hi: number }[] = [
+  { key: '1-3', lo: 1, hi: 3 },
+  { key: '4-6', lo: 4, hi: 6 },
+  { key: '7-12', lo: 7, hi: 12 },
+  { key: '13-24', lo: 13, hi: 24 },
+  { key: '25-48', lo: 25, hi: 999 },
+]
+
+function tierOf(rank: number): string {
+  return (RISK_TIERS.find(t => rank >= t.lo && rank <= t.hi) ?? RISK_TIERS[RISK_TIERS.length - 1]).key
+}
+
+/**
+ * Rank every skill player by projected points WITHIN his position across all rosters
+ * in the run. This projected positional rank (RB1, RB2, ...) is the sim-time analogue
+ * of the prior-year finish the outcome tiers were measured on. DEF is not tiered.
+ */
+function positionalRanks(run: SimRun): Map<string, number> {
+  const byPos: Record<string, SimWonPlayer[]> = { QB: [], RB: [], WR: [], TE: [] }
+  for (const r of run.rosters) {
+    for (const p of r.players) {
+      if (byPos[p.position]) byPos[p.position].push(p)
+    }
+  }
+  const ranks = new Map<string, number>()
+  for (const pos of Object.keys(byPos)) {
+    byPos[pos].sort(byPointsDesc).forEach((p, i) => ranks.set(p.id, i + 1))
+  }
+  return ranks
+}
+
+/** Find the empirical CDF for a position+tier, walking to the nearest thick tier if needed. */
+function tierCdf(model: RiskModel, pos: string, tierKey: string): number[] | null {
+  const posTiers = model.outcome[pos]
+  if (!posTiers) return null
+  const direct = posTiers[tierKey]?.cdf
+  if (direct && direct.length > 1) return direct
+  // Walk outward from the requested tier to the nearest tier that has a real ladder.
+  const order = RISK_TIERS.map(t => t.key)
+  const idx = order.indexOf(tierKey)
+  for (let d = 1; d < order.length; d++) {
+    for (const j of [idx - d, idx + d]) {
+      const cdf = order[j] ? posTiers[order[j]]?.cdf : undefined
+      if (cdf && cdf.length > 1) return cdf
+    }
+  }
+  return null
+}
+
+/** Interpolate a season per-game multiplier from a 21-point empirical CDF ladder at u in [0,1). */
+function drawMultiplier(cdf: number[], u: number): number {
+  const x = Math.min(0.999999, Math.max(0, u)) * (cdf.length - 1)
+  const lo = Math.floor(x)
+  const hi = Math.min(cdf.length - 1, lo + 1)
+  return cdf[lo] + (cdf[hi] - cdf[lo]) * (x - lo)
+}
+
+/**
+ * Apply the measured risk model to one run: draw each player's season bust/breakout
+ * multiplier (once per run, from his tier's real distribution) into a shadow roster
+ * with scaled projected points, and precompute each player's weekly OUT rate from his
+ * real durability. Deterministic: the outcome draws flow from a seed-salted PRNG that
+ * is independent of the weekly PRNG, so adding this never disturbs the weekly stream.
+ */
+function applyRiskModel(
+  run: SimRun,
+  model: RiskModel,
+): { effRosters: SimWonPlayer[][]; outRateById: Map<string, number> } {
+  const ranks = positionalRanks(run)
+  const outcomeRng = mulberry32((run.seed ^ OUTCOME_SEED_SALT) >>> 0)
+  const outRateById = new Map<string, number>()
+  const effRosters = run.rosters.map(r =>
+    r.players.map(p => {
+      // Durability: weekly out-rate = 1 - real games-played rate (per player, else baseline).
+      const gpRate =
+        p.position === 'DEF'
+          ? 1
+          : model.durability.byPlayer[p.id]?.gpRate ?? model.durability.baseline[p.position] ?? 1
+      outRateById.set(p.id, Math.min(MAX_WEEKLY_OUT, Math.max(0, 1 - gpRate)))
+
+      // Outcome: one season multiplier drawn from this player's tier's REAL distribution.
+      let mult = 1
+      if (p.position !== 'DEF') {
+        const cdf = tierCdf(model, p.position, tierOf(ranks.get(p.id) ?? 999))
+        if (cdf) mult = drawMultiplier(cdf, outcomeRng())
+      }
+      return { ...p, projectedPoints: Math.round(p.projectedPoints * mult * 10) / 10 }
+    }),
+  )
+  return { effRosters, outRateById }
+}
+
+/** Best available lineup for one week using per-PLAYER out-rates (real durability path). */
+function weeklyAvailablePointsByPlayer(
+  players: SimWonPlayer[],
+  lineup: StarterConfig,
+  outRateById: Map<string, number>,
+  rng: () => number,
+): number {
+  const available: SimWonPlayer[] = []
+  for (const p of players) {
+    const out = rng() < (outRateById.get(p.id) ?? 0)
+    if (!out) available.push(p)
+  }
+  return bestLineupPoints(available, lineup)
+}
+
 export interface GradeRunOptions {
   /**
-   * Injury/availability model to apply during the weekly season sim. Omit or pass
-   * false for the legacy behavior (studs never miss a game, team-level noise only).
-   * buildSimSummary passes DEFAULT_INJURY_MODEL so the real product accounts for it.
+   * Flat injury/availability model (positional out-rates only). Kept for focused unit
+   * tests; the real product uses `risk` instead. Omit or false = studs never miss.
    */
   injury?: InjuryModel | false
+  /**
+   * Measured risk model (real per-player durability + tier bust/breakout). When set,
+   * this supersedes `injury`: each player faces his OWN games-missed rate and a season
+   * outcome draw from his tier's real distribution. buildSimSummary passes
+   * DEFAULT_RISK_MODEL so the shipped grades reflect real concentration risk.
+   */
+  risk?: RiskModel | false
 }
 
 /**
@@ -241,16 +388,25 @@ export function gradeRun(
   const sd = Math.max(0.5, WEEKLY_SD_FRACTION * leagueAvgWeekly)
 
   const injury = opts.injury === false ? null : (opts.injury ?? null)
+  const risk = opts.risk === false ? null : (opts.risk ?? null)
+
+  // The real model (risk) supersedes the flat one: draw each player's season
+  // bust/breakout multiplier and per-player durability once for this run.
+  const applied = risk ? applyRiskModel(run, risk) : null
 
   const rng = mulberry32((run.seed ^ WEEKLY_SEED_SALT) >>> 0)
   let wins = 0
   for (let wk = 0; wk < games; wk++) {
-    // Weekly base points: with an injury model, redraw each seat's best AVAILABLE
-    // lineup this week (thin benches pay here); without one, use the fixed
-    // healthy per-week mean (legacy behavior, byte-identical for a given seed).
-    const myBase = injury
-      ? weeklyAvailablePoints(run.rosters[myIndex].players, lineup, injury.outRate, rng) / games
-      : perWeek[myIndex]
+    // Weekly base points, in priority order:
+    //   risk   -> best AVAILABLE lineup of the bust/breakout-adjusted roster, each
+    //             player out at his OWN real games-missed rate (thin benches pay most).
+    //   injury -> flat positional out-rates on healthy points (unit-test path).
+    //   none   -> fixed healthy per-week mean (legacy, byte-identical for a seed).
+    const myBase = applied
+      ? weeklyAvailablePointsByPlayer(applied.effRosters[myIndex], lineup, applied.outRateById, rng) / games
+      : injury
+        ? weeklyAvailablePoints(run.rosters[myIndex].players, lineup, injury.outRate, rng) / games
+        : perWeek[myIndex]
     const myScore = myBase + standardNormal(rng) * sd
 
     // Face a random other seat this week (schedule luck included).
@@ -260,9 +416,11 @@ export function gradeRun(
         opp = Math.floor(rng() * seats)
       } while (opp === myIndex)
     }
-    const oppBase = injury
-      ? weeklyAvailablePoints(run.rosters[opp].players, lineup, injury.outRate, rng) / games
-      : perWeek[opp]
+    const oppBase = applied
+      ? weeklyAvailablePointsByPlayer(applied.effRosters[opp], lineup, applied.outRateById, rng) / games
+      : injury
+        ? weeklyAvailablePoints(run.rosters[opp].players, lineup, injury.outRate, rng) / games
+        : perWeek[opp]
     const oppScore = oppBase + standardNormal(rng) * sd
     if (myScore > oppScore) wins++
   }

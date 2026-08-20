@@ -17,6 +17,7 @@ import {
   playersYouLandMost,
   starterConfigOf,
   DEFAULT_INJURY_MODEL,
+  DEFAULT_RISK_MODEL,
   type StarterConfig,
 } from '../sim-grade'
 import type { SimRun, SimManagerRoster, SimWonPlayer, SimRosterConfig } from '../sim-engine'
@@ -238,6 +239,87 @@ describe('gradeRun injury/availability model', () => {
     // ...and cost it markedly more than the deep roster. A large, stable margin
     // so this never flakes on rng noise.
     expect(concPenalty).toBeGreaterThan(deepPenalty + 100)
+  })
+})
+
+// ─── (1c) MEASURED RISK MODEL (real Sleeper data: durability + bust/breakout) ──
+
+describe('gradeRun measured risk model (real data)', () => {
+  // Two rosters with IDENTICAL healthy best-lineup points (750). They differ only
+  // in WHERE the elite production sits: roster A stacks it on two RBs, roster B on
+  // a QB + WR. The shipped risk-model.json (15 seasons of Sleeper actuals) measures
+  // elite RBs (tier 1-3) busting 52.8% of the time at a median x0.74, versus elite
+  // QBs busting 22.9% (x0.86). So equal paper strength, but the RB stack should
+  // grade out to fewer wins once the measured outcome variance is applied. This is
+  // the whole point: the sim now knows a two-elite-RB build is riskier than its
+  // projection suggests, which a "healthy every week" grader could never see.
+  const RB_STACK = () => [
+    won('a_rb1', 'RB', 320, 90), // league RB1 -> tier 1-3
+    won('a_rb2', 'RB', 300, 80), // league RB2 -> tier 1-3
+    won('a_qb', 'QB', 40, 2),
+    won('a_wr', 'WR', 40, 2),
+    won('a_te', 'TE', 40, 2),
+    won('a_def', 'DEF', 10, 1),
+  ]
+  const QB_WR_STACK = () => [
+    won('b_qb', 'QB', 320, 90), // league QB1 -> tier 1-3
+    won('b_wr', 'WR', 300, 80), // league WR1 -> tier 1-3
+    won('b_rb1', 'RB', 40, 2),
+    won('b_rb2', 'RB', 40, 2),
+    won('b_te', 'TE', 40, 2),
+    won('b_def', 'DEF', 10, 1),
+  ]
+  // Competitive opponents whose skill players all rank well below my studs, so my
+  // studs land in tier 1-3 and the opponents' own tiers are identical across both
+  // matchups (they wash out of the comparison).
+  const OPPONENTS = () => [
+    roster(1, false, [
+      won('o1_qb', 'QB', 55, 12),
+      won('o1_rb1', 'RB', 140, 40),
+      won('o1_rb2', 'RB', 130, 30),
+      won('o1_wr1', 'WR', 140, 40),
+      won('o1_wr2', 'WR', 130, 30),
+      won('o1_te', 'TE', 95, 12),
+      won('o1_def', 'DEF', 15, 1),
+    ]),
+    roster(2, false, [
+      won('o2_qb', 'QB', 50, 10),
+      won('o2_rb1', 'RB', 145, 40),
+      won('o2_rb2', 'RB', 135, 30),
+      won('o2_wr1', 'WR', 140, 40),
+      won('o2_wr2', 'WR', 120, 28),
+      won('o2_te', 'TE', 100, 14),
+      won('o2_def', 'DEF', 15, 1),
+    ]),
+  ]
+
+  it('grades the two stacks as equally strong when perfectly healthy', () => {
+    expect(bestLineupPoints(RB_STACK(), LINEUP)).toBe(750)
+    expect(bestLineupPoints(QB_WR_STACK(), LINEUP)).toBe(750)
+  })
+
+  it('is deterministic with the risk model on (same seed => same record)', () => {
+    const seats = [roster(0, true, RB_STACK()), ...OPPONENTS()]
+    const a = gradeRun(run(11, seats), LINEUP, 3, 14, { risk: DEFAULT_RISK_MODEL })
+    const b = gradeRun(run(11, seats), LINEUP, 3, 14, { risk: DEFAULT_RISK_MODEL })
+    expect(a.wins).toBe(b.wins)
+    expect(a.losses).toBe(b.losses)
+  })
+
+  it('measured bust risk costs the two-elite-RB build real wins vs an equal QB+WR build', () => {
+    const SEEDS = 300
+    let rbWins = 0
+    let qbWins = 0
+    for (let seed = 1; seed <= SEEDS; seed++) {
+      const rbSeats = [roster(0, true, RB_STACK()), ...OPPONENTS()]
+      const qbSeats = [roster(0, true, QB_WR_STACK()), ...OPPONENTS()]
+      rbWins += gradeRun(run(seed, rbSeats), LINEUP, 3, 14, { risk: DEFAULT_RISK_MODEL }).wins
+      qbWins += gradeRun(run(seed, qbSeats), LINEUP, 3, 14, { risk: DEFAULT_RISK_MODEL }).wins
+    }
+    // Same healthy strength, but the RB stack's measured 52.8% elite-bust rate drags
+    // its record below the QB+WR stack's. Observed gap ~485 wins across 300 seeds;
+    // the +200 margin sits well inside that so it never flakes on rng.
+    expect(qbWins).toBeGreaterThan(rbWins + 200)
   })
 })
 

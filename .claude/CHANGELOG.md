@@ -2,6 +2,19 @@
 
 ---
 
+## 2026-08-20 / Measured risk model wired into the sim -- real durability + bust/breakout by tier
+
+**Class:** pipeline (Architecture + QA lenses). Supersedes the flat injury layer below with a data-driven model derived from 15 seasons of Sleeper weekly PPR actuals (`scripts/derive-risk-model.mjs` -> `src/data/risk-model.json`, committed 693e6cb). Answers Joe's four questions honestly: risk is now PER-PLAYER (not flat), MEASURED (not assumed), and it models bust AND breakout, not just injury. McCaffrey carries his real games-played history; an elite RB carries the real 52.8% bust rate its tier has shown.
+
+- **Two separated layers (no double-count):** (1) DURABILITY -- per-player weekly OUT rate from real games played (`gpRate` over >=2 real seasons; fallback = position baseline QB .952 / RB .947 / WR .973 / TE .942 / DEF 1). (2) OUTCOME -- a season-level per-game multiplier drawn from the real empirical CDF for the player's prior-year positional tier (tiers 1-3, 4-6, 7-12, 13-24, 25-48), so performance variance is separate from availability.
+- **Change (`src/lib/draft/sim-grade.ts`):** new `RiskModel`/`DEFAULT_RISK_MODEL` (imports the JSON), `applyRiskModel` (draws one outcome multiplier per player off a seed-salted PRNG `OUTCOME_SEED_SALT` so the weekly rng stream is undisturbed and determinism holds), `weeklyAvailablePointsByPlayer`, and tier helpers (`tierOf`, `tierCdf` walks to the nearest thick tier, `drawMultiplier` interpolates the 21-point ladder, `positionalRanks`). `gradeRun` priority: risk supersedes flat injury supersedes legacy. Bust/breakout is applied to OPPONENTS too, so Joe's projected record is not unfairly biased down. `myRank` stays on raw healthy points (structural label); only the record moves.
+- **Wired into the real product (`src/lib/draft/sim-results.ts`):** `buildSimSummary` now defaults `risk` to `DEFAULT_RISK_MODEL` (opt-out via `{ risk: false }`) in place of the flat injury default, so the headless runner and the live Simulate screen both grade with measured risk on.
+- **Proof (`src/lib/draft/__tests__/sim-grade.test.ts`, 3 new tests):** (1) two stacks built to EQUAL healthy best-lineup points (750) -- one two-elite-RB, one elite QB+WR -- so tier is the only variable; (2) determinism holds with the risk model on; (3) across 300 fixed seeds vs identical opponents, the RB stack (measured 52.8% elite-bust) wins **485 fewer** games than the QB+WR stack (22.9% bust): 2606 vs 3091, ~8.7 vs 10.3 wins/season on identical paper strength. The elite-RB cliff the flat layer could not see now shows up in the graded record.
+
+**Gate:** `npm run type-check` 0 errors. `npm run test:run` **561/561** (was 558; +3 risk tests). `npx eslint` on the 3 touched files exit 0 (43 repo-wide errors all pre-existing in `research/`/`supabase/`/`sources/`, none in touched files). Deterministic. $0 (Sleeper free/keyless, local compute). No em/en-dashes. Follow-up flagged: `derive-risk-model.mjs` reads the ephemeral scratchpad cache; regeneration needs a free Sleeper re-pull step (the runtime `risk-model.json` is permanent and versioned).
+
+---
+
 ## 2026-08-20 / Injury/availability layer -- concentrated rosters now carry real weekly bust risk
 
 **Class:** pipeline (Architecture + QA lenses). Joe's finding from the as-drafted backtest: the sim declared "spend on two top guys" the overwhelming winner because a graded roster's studs never missed a game. Real leagues punish thin benches when a stud sits. This adds a per-player weekly availability draw so the projected RECORD reflects depth, closing the gap the backtest exposed (in 13 clean Nasties years, concentration finishes slightly WORSE, corr +0.123).
