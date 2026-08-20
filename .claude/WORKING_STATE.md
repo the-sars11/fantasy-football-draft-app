@@ -25,9 +25,11 @@ The prior plan (S1–S8 / P2 DR / P3 VAL) marked the app "done" while it (a) pri
 
 ## Next open item
 
-### ▶ SP-track added 2026-08-18 -- SHIELD Screen-Parity Sprint is the new active focus
+### ▶ ACTIVE FOCUS 2026-08-19 -- functionality first; SP-track PAUSED
 
-Joe flagged that the SHIELD rollout was a token-VALUE repaint, not a per-screen redesign: only D2-D6 got a real craft pass; every other screen still wears GRIDIRON-era structure + stale off-token literals. A 13-item SP-track (SP-0..SP-7 + OTHER_FAMILY validators) was authored to rebuild them all to the true SHIELD bar. See `BUILD_PLAN.md` "SP-track" section; plan of record `C:\Users\jrasa\.claude\plans\cozy-waddling-creek.md`.
+Joe's order: pause the SHIELD screen reskin, sequence functionality before pixels, KEEP the SP-track on the plan (do not delete). Active queue, in order: **Phase 1** line-517 strategy re-flow fix -> **R14** usability walkthrough (`BUILD_PLAN.md:411`) -> **R15** rehearsal gate (`:419`). Only after those close does the SP-track resume.
+
+The SP-track (SHIELD Screen-Parity Sprint, SP-0..SP-7 + OTHER_FAMILY validators) is retained but **PAUSED** behind the three gates above. Joe flagged the SHIELD rollout was a token-VALUE repaint, not a per-screen redesign: only D2-D6 got a real craft pass; every other screen still wears GRIDIRON-era structure + stale off-token literals. See `BUILD_PLAN.md` "SP-track" section. **One plan of record = `.claude/BUILD_PLAN.md`**; the scratch plans `cozy-waddling-creek.md` and `atomic-spindle.md` are SUPERSEDED.
 
 **✅ SP-2 DONE (Joe-approved 2026-08-18, Opus):** SHIELD design mockups for all 5 screens (setup, configure, runs, settings, auth) shipped as `UI/mockup-SHIELD-screens.html` (artifact `aa36d1ca-4dd2-4669-94ec-62ce90624634`), rebuilt on the real SHIELD texture stack (`.stadium-atmos` + `.atmos-grain` grain + `.ffi-hero`/`.ffi-card-interactive` sheen + inset-lit `.ffi-btn-hero`), each screen naming its reused primitives, zero em/en-dashes. Joe signed off the look -> **SP-3..SP-7 build is now UNBLOCKED.**
 
