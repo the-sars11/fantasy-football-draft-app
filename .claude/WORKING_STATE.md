@@ -33,6 +33,7 @@ Joe's draft-prep thread (headless engine + in-app parity). Done + committed this
 3. **Wired both into the LIVE app** (`generate.ts` + `simulate/client.tsx`): live Strategy route now prices off the room curve via `priceBoard` (was falling back to national because `cacheRowToConsensusPlayer` never sets `expectedRoomPrice`); live Simulate now passes `opponentProfiles` (was inert). Live screens now match the headless `report.md`. See CHANGELOG 2026-08-20 "Wire room-price model into the LIVE app".
 
 4. **Sim price cap** (`sim-engine.ts`): `LEAGUE_MAX_CLEAR = 88` + `OPPONENT_LEAN_STRENGTH 0.5 -> 0.35`. Global max clearing price in the regenerated dataset is now exactly $88 (zero $90+). Joe-approved $88 + lean 0.35. See CHANGELOG 2026-08-20 "Sim price cap".
+5. **Injury/availability layer** (`sim-grade.ts` + `sim-results.ts`): per-player weekly OUT draws (RB .12, WR .09, TE .10, QB .06) so concentrated two-stud rosters carry real bust risk and the sim stops over-rewarding concentration. Default ON in `buildSimSummary`; legacy path byte-identical when off. 3 new tests prove the depth asymmetry (>100-win penalty gap over 300 seeds). Backs the as-drafted backtest finding (concentration finishes slightly worse, corr +0.123 over 13 clean Nasties years). See CHANGELOG 2026-08-20 "Injury/availability layer".
 
 **▶ OPEN (Joe's call, optional):** the two most-contested anchors (Gibbs/Nacua) land AT the $88 cap, $3 above the $85 all-time high. If Joe wants anchors in the low $80s, lower the cap to $85 or trim the me-seat target boost. He chose $88 knowingly.
 

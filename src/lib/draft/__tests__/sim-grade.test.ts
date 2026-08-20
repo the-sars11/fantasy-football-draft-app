@@ -16,6 +16,7 @@ import {
   topModalRosters,
   playersYouLandMost,
   starterConfigOf,
+  DEFAULT_INJURY_MODEL,
   type StarterConfig,
 } from '../sim-grade'
 import type { SimRun, SimManagerRoster, SimWonPlayer, SimRosterConfig } from '../sim-engine'
@@ -142,6 +143,101 @@ describe('gradeRun projected record (weekly-variance season)', () => {
     const a = gradeRun(run(1, seats), QB_ONLY, 3, 14)
     const b = gradeRun(run(1, seats), QB_ONLY, 3, 14)
     expect(a.wins).toBe(b.wins)
+  })
+})
+
+// ─── (1b) INJURY / AVAILABILITY MODEL ────────────────────────────────────────
+
+describe('gradeRun injury/availability model', () => {
+  // A concentrated roster: two studs carry it, the rest are $1 replacement-level.
+  // Equal healthy best-lineup points to the balanced roster below (618), so the
+  // ONLY difference the sim can see is depth. When a stud misses a week the slot
+  // (and the FLEX behind it) craters to replacement level.
+  const CONCENTRATED = () => [
+    won('c_qb', 'QB', 40, 2),
+    won('c_rb1', 'RB', 320, 90), // stud
+    won('c_wr1', 'WR', 200, 80), // stud
+    won('c_te', 'TE', 40, 2),
+    won('c_def', 'DEF', 10, 1),
+    won('c_flex', 'RB', 8, 1), // $1 bench-tier FLEX filler
+  ]
+  // A balanced roster: same healthy best lineup (618) but real depth behind every
+  // slot, so one player missing barely dents the weekly score.
+  const BALANCED = () => [
+    won('b_qb', 'QB', 40, 12),
+    won('b_rb1', 'RB', 150, 40),
+    won('b_rb2', 'RB', 148, 38), // durable backup + FLEX
+    won('b_rb3', 'RB', 145, 36),
+    won('b_wr1', 'WR', 150, 40),
+    won('b_wr2', 'WR', 148, 38),
+    won('b_te1', 'TE', 120, 20),
+    won('b_te2', 'TE', 100, 8),
+    won('b_def', 'DEF', 10, 1),
+  ]
+  // Fixed, competitive opponents so injuries actually swing games (not pinned at
+  // 0 or 14 wins). Same objects reused across every scenario.
+  const OPPONENTS = () => [
+    roster(1, false, [
+      won('o1_qb', 'QB', 55, 12),
+      won('o1_rb1', 'RB', 140, 40),
+      won('o1_rb2', 'RB', 130, 30),
+      won('o1_wr1', 'WR', 140, 40),
+      won('o1_wr2', 'WR', 130, 30),
+      won('o1_te', 'TE', 95, 12),
+      won('o1_def', 'DEF', 15, 1),
+    ]),
+    roster(2, false, [
+      won('o2_qb', 'QB', 50, 10),
+      won('o2_rb1', 'RB', 145, 40),
+      won('o2_rb2', 'RB', 135, 30),
+      won('o2_wr1', 'WR', 140, 40),
+      won('o2_wr2', 'WR', 120, 28),
+      won('o2_te', 'TE', 100, 14),
+      won('o2_def', 'DEF', 15, 1),
+    ]),
+  ]
+
+  it('grades the two rosters as equally strong when perfectly healthy', () => {
+    // Fair test: the depth difference is the only variable, not raw strength.
+    expect(bestLineupPoints(CONCENTRATED(), LINEUP)).toBe(618)
+    expect(bestLineupPoints(BALANCED(), LINEUP)).toBe(618)
+  })
+
+  it('is deterministic with the injury model on (same seed => same record)', () => {
+    const seats = [roster(0, true, CONCENTRATED()), ...OPPONENTS()]
+    const a = gradeRun(run(7, seats), LINEUP, 3, 14, { injury: DEFAULT_INJURY_MODEL })
+    const b = gradeRun(run(7, seats), LINEUP, 3, 14, { injury: DEFAULT_INJURY_MODEL })
+    expect(a.wins).toBe(b.wins)
+    expect(a.losses).toBe(b.losses)
+  })
+
+  it('injuries punish a concentrated roster far harder than a deep one of equal healthy strength', () => {
+    // Sum wins across many fixed seeds; compare each roster to its own no-injury
+    // baseline. Equal healthy points, same opponents => any gap in the injury
+    // penalty is attributable to bench depth alone.
+    const SEEDS = 300
+    let concOff = 0
+    let concOn = 0
+    let deepOff = 0
+    let deepOn = 0
+
+    for (let seed = 1; seed <= SEEDS; seed++) {
+      const concSeats = [roster(0, true, CONCENTRATED()), ...OPPONENTS()]
+      const deepSeats = [roster(0, true, BALANCED()), ...OPPONENTS()]
+      concOff += gradeRun(run(seed, concSeats), LINEUP, 3, 14, { injury: false }).wins
+      concOn += gradeRun(run(seed, concSeats), LINEUP, 3, 14, { injury: DEFAULT_INJURY_MODEL }).wins
+      deepOff += gradeRun(run(seed, deepSeats), LINEUP, 3, 14, { injury: false }).wins
+      deepOn += gradeRun(run(seed, deepSeats), LINEUP, 3, 14, { injury: DEFAULT_INJURY_MODEL }).wins
+    }
+
+    const concPenalty = concOff - concOn // wins lost to injuries, concentrated
+    const deepPenalty = deepOff - deepOn // wins lost to injuries, deep
+
+    // Injuries cost the thin roster real wins...
+    expect(concPenalty).toBeGreaterThan(0)
+    // ...and cost it markedly more than the deep roster. A large, stable margin
+    // so this never flakes on rng noise.
+    expect(concPenalty).toBeGreaterThan(deepPenalty + 100)
   })
 })
 

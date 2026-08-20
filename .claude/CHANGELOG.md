@@ -2,6 +2,19 @@
 
 ---
 
+## 2026-08-20 / Injury/availability layer -- concentrated rosters now carry real weekly bust risk
+
+**Class:** pipeline (Architecture + QA lenses). Joe's finding from the as-drafted backtest: the sim declared "spend on two top guys" the overwhelming winner because a graded roster's studs never missed a game. Real leagues punish thin benches when a stud sits. This adds a per-player weekly availability draw so the projected RECORD reflects depth, closing the gap the backtest exposed (in 13 clean Nasties years, concentration finishes slightly WORSE, corr +0.123).
+
+- **Change (`src/lib/draft/sim-grade.ts`):** new `WEEKLY_INJURY_OUT_RATE` (QB .06 / RB .12 / WR .09 / TE .10 / DEF .00), `InjuryModel`/`DEFAULT_INJURY_MODEL`, and `weeklyAvailablePoints()` -- each week every player is independently OUT at his position's rate (one rng draw per player, roster order), OUT players are dropped from the pool, and the normal best-legal-lineup optimizer refills every slot from who's left. The injured man's slot falls to the next-best AVAILABLE body: a concentrated roster's next man up is a $1 scrub (craters), a deep roster barely dips. `gradeRun` takes a new 5th `opts: GradeRunOptions` arg; `myRank` stays HEALTHY-roster season points (structural clustering label), only the projected record moves.
+- **Byte-identical legacy path:** with `injury` null/false, `gradeRun` uses the fixed healthy per-week mean and consumes ZERO extra rng, so the draw sequence is unchanged -- the 20 pre-existing sim tests pass without edits.
+- **Wired into the real product (`src/lib/draft/sim-results.ts`):** `buildSimSummary` defaults `injury` to `DEFAULT_INJURY_MODEL` (opt-out via `{ injury: false }`), so both the headless runner and the live Simulate screen now grade with injury risk on.
+- **Proof (`src/lib/draft/__tests__/sim-grade.test.ts`, 3 new tests):** (1) two rosters built to EQUAL healthy best-lineup points (618) -- one concentrated (two studs + $1 bench), one deep -- so depth is the only variable; (2) determinism holds with the model on (same seed => same record); (3) across 300 fixed seeds vs identical opponents, the concentrated roster's injury win-penalty exceeds the deep roster's by >100 wins. The asymmetry is real and stable.
+
+**Gate:** `npm run type-check` 0 errors. `npm run test:run` **558/558** (was 555; +3 injury tests). `npx eslint` on the two touched source files exit 0 (43 repo-wide errors are all pre-existing in `research/`/`supabase/`/`sources/`, none in touched files). Deterministic. $0. No em/en-dashes.
+
+---
+
 ## 2026-08-20 / Sim price cap -- no clearing price above the room's all-time high
 
 **Class:** pipeline (Architecture + QA lenses). Joe: "Nobody is going above $90 for a player in my league. Highest EVER paid was $85 (McCaffrey 2024), next $81, a few $80s, tier-1 typically mid/low $70s." Even after the room anchor, contested studs still cleared ~$93 in-sim because the high-lean tail (`OPPONENT_LEAN_STRENGTH = 0.5`, `MAX_LEAN 2.5`) plus second-price ties pushed winning bids past $90. Joe approved: **$88 hard cap + lean 0.35**.

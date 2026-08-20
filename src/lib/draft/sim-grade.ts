@@ -131,6 +131,75 @@ function standardNormal(rng: () => number): number {
   return Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2)
 }
 
+// ─── Injury / weekly-availability model ──────────────────────────────────────
+
+/**
+ * Weekly probability a player at each position is OUT (injured or inactive) for a
+ * given week. A STATED MODEL PARAMETER, tunable here, exactly the same status as
+ * WEEKLY_SD_FRACTION above — not a measured constant, a documented assumption.
+ *
+ * Grounded in the real, well-known shape of NFL games-missed by position: running
+ * backs miss the most games (highest contact load), quarterbacks the fewest, wide
+ * receivers and tight ends in between, and a DEF is a team unit that is never
+ * "injured" as a whole. Values are per-week per-player out-rates that imply a
+ * healthy full-season games-played roughly in line with those positional norms
+ * (e.g. RB ~0.12/week ≈ misses ~1.7 of 14 weeks).
+ *
+ * Why this exists: without it, the best-lineup optimizer plays every stud at full
+ * projection every week, so a two-stud / dollar-bench roster is scored as if its
+ * anchors never get hurt. With it, an OUT player is dropped from the weekly pool
+ * and his slot falls to the next-best AVAILABLE player. A concentrated roster's
+ * next man up is a $1 scrub, so it craters on the weeks a stud sits; a balanced
+ * roster barely dips. That asymmetric downside is the real cost of concentration
+ * the sim was missing.
+ */
+export const WEEKLY_INJURY_OUT_RATE: Record<SimWonPlayer['position'], number> = {
+  QB: 0.06,
+  RB: 0.12,
+  WR: 0.09,
+  TE: 0.1,
+  DEF: 0.0,
+}
+
+export interface InjuryModel {
+  /** Weekly out-probability by position. */
+  outRate: Record<SimWonPlayer['position'], number>
+}
+
+/** The default injury model used by the real sim path (buildSimSummary). */
+export const DEFAULT_INJURY_MODEL: InjuryModel = { outRate: WEEKLY_INJURY_OUT_RATE }
+
+/**
+ * Best starting-lineup points for ONE week under an injury draw. Each player is
+ * independently OUT with his position's weekly out-rate (one rng draw per player,
+ * in roster order, so it stays deterministic for a fixed seed). OUT players are
+ * removed from the pool, then the normal best-legal-lineup optimizer fills every
+ * slot from whoever is left — the injured man's slot naturally falls to the
+ * next-best available body, which is where a thin bench gets punished.
+ */
+function weeklyAvailablePoints(
+  players: SimWonPlayer[],
+  lineup: StarterConfig,
+  outRate: Record<SimWonPlayer['position'], number>,
+  rng: () => number,
+): number {
+  const available: SimWonPlayer[] = []
+  for (const p of players) {
+    const out = rng() < (outRate[p.position] ?? 0)
+    if (!out) available.push(p)
+  }
+  return bestLineupPoints(available, lineup)
+}
+
+export interface GradeRunOptions {
+  /**
+   * Injury/availability model to apply during the weekly season sim. Omit or pass
+   * false for the legacy behavior (studs never miss a game, team-level noise only).
+   * buildSimSummary passes DEFAULT_INJURY_MODEL so the real product accounts for it.
+   */
+  injury?: InjuryModel | false
+}
+
 /**
  * Grade one simulated draft into a projected regular-season record by SIMULATING
  * THE SEASON with weekly variance. Each seat is scored on its best starting
@@ -150,12 +219,15 @@ export function gradeRun(
   lineup: StarterConfig,
   numManagers: number,
   games: number,
+  opts: GradeRunOptions = {},
 ): RunGrade {
   const leagueStarterPoints = run.rosters.map(r => bestLineupPoints(r.players, lineup))
   const myIndex = run.myRoster.managerIndex
   const myStarterPoints = leagueStarterPoints[myIndex]
 
   // Rank: 1 = highest points. Count teams strictly better, +1. (Deterministic.)
+  // Rank is HEALTHY-roster season points, a structural label for clustering; the
+  // injury model changes the projected RECORD, not the paper-strength ranking.
   let rank = 1
   for (let i = 0; i < leagueStarterPoints.length; i++) {
     if (i === myIndex) continue
@@ -168,10 +240,19 @@ export function gradeRun(
     perWeek.reduce((s, v) => s + v, 0) / (perWeek.length || 1)
   const sd = Math.max(0.5, WEEKLY_SD_FRACTION * leagueAvgWeekly)
 
+  const injury = opts.injury === false ? null : (opts.injury ?? null)
+
   const rng = mulberry32((run.seed ^ WEEKLY_SEED_SALT) >>> 0)
   let wins = 0
   for (let wk = 0; wk < games; wk++) {
-    const myScore = perWeek[myIndex] + standardNormal(rng) * sd
+    // Weekly base points: with an injury model, redraw each seat's best AVAILABLE
+    // lineup this week (thin benches pay here); without one, use the fixed
+    // healthy per-week mean (legacy behavior, byte-identical for a given seed).
+    const myBase = injury
+      ? weeklyAvailablePoints(run.rosters[myIndex].players, lineup, injury.outRate, rng) / games
+      : perWeek[myIndex]
+    const myScore = myBase + standardNormal(rng) * sd
+
     // Face a random other seat this week (schedule luck included).
     let opp = myIndex
     if (seats > 1) {
@@ -179,7 +260,10 @@ export function gradeRun(
         opp = Math.floor(rng() * seats)
       } while (opp === myIndex)
     }
-    const oppScore = perWeek[opp] + standardNormal(rng) * sd
+    const oppBase = injury
+      ? weeklyAvailablePoints(run.rosters[opp].players, lineup, injury.outRate, rng) / games
+      : perWeek[opp]
+    const oppScore = oppBase + standardNormal(rng) * sd
     if (myScore > oppScore) wins++
   }
 

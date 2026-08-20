@@ -23,10 +23,12 @@ import {
   topModalRosters,
   playersYouLandMost,
   DEFAULT_STUD_THRESHOLD,
+  DEFAULT_INJURY_MODEL,
   type GradeSummary,
   type ModalRoster,
   type LandedPlayer,
   type RunGrade,
+  type InjuryModel,
 } from './sim-grade'
 
 /** Nasties regular season length (H2H). Assumption, stated, not fabricated. */
@@ -93,6 +95,12 @@ export interface SimSummary {
 export interface BuildSimSummaryOptions {
   games?: number
   studThreshold?: number
+  /**
+   * Injury/availability model for grading. Defaults to DEFAULT_INJURY_MODEL so
+   * concentrated rosters carry real weekly bust risk. Pass false to grade on the
+   * legacy "studs never miss a game" basis (mainly for comparison/tests).
+   */
+  injury?: InjuryModel | false
 }
 
 /** Run the Monte-Carlo sim and grade it into one screen-ready summary. */
@@ -102,13 +110,14 @@ export function buildSimSummary(
 ): SimSummary {
   const games = opts.games ?? DEFAULT_REGULAR_SEASON_GAMES
   const studThreshold = opts.studThreshold ?? DEFAULT_STUD_THRESHOLD
+  const injury = opts.injury ?? DEFAULT_INJURY_MODEL
 
   const result = runMonteCarlo(input)
   const lineup = starterConfigOf(input.rosterConfig)
   const numManagers = input.numManagers
 
   const runGrades = result.runs.map(run =>
-    gradeRun(run, lineup, numManagers, games),
+    gradeRun(run, lineup, numManagers, games, { injury }),
   )
   const grade = summarizeGrades(runGrades, games, numManagers)
   const topRosters = topModalRosters(result.runs, runGrades, lineup, { studThreshold })
