@@ -171,6 +171,44 @@ describe('generateAnchorStrategies - pool-driven targets + dedupe', () => {
   })
 })
 
+// ── Core: budget-balanced policy ─────────────────────────────────────────────
+
+describe('generateAnchorStrategies - budget-balanced policy', () => {
+  it('surfaces a distinct balanced-auction shape from a board with mid-tier depth', () => {
+    // The board has affordable starters at every position under the 20% cap, so
+    // the budget-balanced policy can spread instead of front-loading two studs.
+    const strategies = generateAnchorStrategies({ board: fullBoard(), slots: NASTIES_SLOTS, budget: 200 })
+    const balanced = strategies.find((s) => s.archetype === 'balanced-auction')
+    expect(balanced).toBeDefined()
+
+    // "Balanced" means no single position dominates the anchor spend.
+    const alloc = balanced!.budget_allocation ?? {}
+    const maxPosShare = Math.max(
+      alloc.QB ?? 0, alloc.RB ?? 0, alloc.WR ?? 0, alloc.TE ?? 0, alloc.DST ?? 0,
+    )
+    expect(maxPosShare).toBeLessThanOrEqual(40)
+  })
+
+  it('anchors only one starter QB, never pays up for a bench backup', () => {
+    // Two premium QBs, both under the 20% cap. A single-QB roster has exactly one
+    // startable QB slot: the balanced policy must anchor at most one and leave the
+    // second to a $1 bench fill, never buy a premium backup into a wasted slot.
+    const twoQbBoard: PricedBoardPlayer[] = [
+      bp('qb-a', 'QB', 40, 36, 1),
+      bp('qb-b', 'QB', 38, 34, 2),
+      ...fullBoard().filter((p) => p.position !== 'QB'),
+    ]
+    const strategies = generateAnchorStrategies({ board: twoQbBoard, slots: NASTIES_SLOTS, budget: 200 })
+    const balanced = strategies.find((s) => s.archetype === 'balanced-auction')
+    expect(balanced).toBeDefined()
+
+    // At most one QB name reaches the key targets, and QB never eats a double share.
+    const qbTargets = balanced!.key_targets.filter((n) => n.includes('qb-'))
+    expect(qbTargets.length).toBeLessThanOrEqual(1)
+    expect(balanced!.budget_allocation?.QB ?? 0).toBeLessThan(25)
+  })
+})
+
 // ── priceBoard ───────────────────────────────────────────────────────────────
 
 function cp(overrides: Partial<ConsensusPlayer> & { name: string; position: Position }): ConsensusPlayer {

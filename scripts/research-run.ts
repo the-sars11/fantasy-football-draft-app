@@ -1,5 +1,5 @@
 /**
- * research-run.ts — headless draft-prep orchestrator (the missing glue).
+ * research-run.ts - headless draft-prep orchestrator (the missing glue).
  *
  * Runs the ENTIRE research machinery once, with zero UI, and dumps one cohesive,
  * data-backed dataset Joe (or any LLM) can interrogate. It imports the same pure,
@@ -67,7 +67,7 @@ function loadEnvLocal(): void {
       if (k && !(k in process.env)) process.env[k] = v
     }
   } catch {
-    /* no .env.local — rely on the ambient environment */
+    /* no .env.local - rely on the ambient environment */
   }
 }
 loadEnvLocal()
@@ -77,12 +77,12 @@ loadEnvLocal()
 const NUM_MANAGERS = 12
 const BUDGET = 200
 const REGULAR_SEASON_GAMES = 14
-const SIM_RUNS = 400 // Monte-Carlo runs per strategy — stable record, quick batch.
+const SIM_RUNS = 400 // Monte-Carlo runs per strategy - stable record, quick batch.
 const SIM_SEED = 42 // fixed seed -> byte-identical reruns (engine determinism).
 const LANDPROB_SEED = 7
 const LANDPROB_POOL_SIZE = 120 // only the draft-relevant top of the board.
 const BOARD_DEPTH = 240 // top-N by ceiling the sim bids on (12 rosters x ~18 = 216 + slack).
-const ME_OWNER = 'Rasar' // my seat in the ledger — excluded from the opponent pool.
+const ME_OWNER = 'Rasar' // my seat in the ledger - excluded from the opponent pool.
 
 const NASTIES_LEAGUE: League = {
   id: 'nasties-2026',
@@ -160,12 +160,12 @@ async function main(): Promise<void> {
   console.log(
     `[research-run] ${players.length} players (cache last updated ${status.lastUpdated ?? 'unknown'}, stale=${status.isStale})`,
   )
-  if (players.length === 0) throw new Error('players_cache is empty — run npm run data:pull first')
+  if (players.length === 0) throw new Error('players_cache is empty - run npm run data:pull first')
 
   const byName = new Map<string, Player>()
   for (const p of players) byName.set(p.name.toLowerCase(), p)
 
-  // 1) STRATEGIES — solver-enumerated anchor strategies off the real board ($0).
+  // 1) STRATEGIES - solver-enumerated anchor strategies off the real board ($0).
   console.log('[research-run] generating strategies ...')
   const stratResult = generateStrategiesFromPool({
     league: NASTIES_LEAGUE,
@@ -173,14 +173,14 @@ async function main(): Promise<void> {
   })
   console.log(`[research-run] ${stratResult.proposals.length} strategies`)
 
-  // 2) SIMS — Monte-Carlo record + modal rosters + landed, biased to each strategy.
+  // 2) SIMS - Monte-Carlo record + modal rosters + landed, biased to each strategy.
   // Trim to the draft-relevant top of the board (by national ceiling) so the room
   // bids on studs, not the deep bench, and so opponent seats fill realistic rosters.
   const board = buildBoardPlayers(players, new Set<string>())
     .sort((a, b) => b.ceiling - a.ceiling)
     .slice(0, BOARD_DEPTH)
 
-  // LEAGUE REPLICATION — the other 11 seats draft like the real Nasties owners
+  // LEAGUE REPLICATION - the other 11 seats draft like the real Nasties owners
   // (each bids off the room price for the player's positional rank, scaled by that
   // owner's historical positional lean). Deterministic, $0, sourced from the ledger.
   const { profiles: opponentProfiles, ownerOrder } = buildOpponentProfiles({
@@ -213,7 +213,7 @@ async function main(): Promise<void> {
     return { proposal, sim: summary }
   })
 
-  // 3) LAND PROBABILITY — top of the board only, full board models the scarcity.
+  // 3) LAND PROBABILITY - top of the board only, full board models the scarcity.
   console.log(`[research-run] land probability for top ${LANDPROB_POOL_SIZE} ...`)
   const landPool = [...players]
     .filter((p) => p.position !== 'K')
@@ -234,7 +234,7 @@ async function main(): Promise<void> {
     if (res) landMap.set(onBlock.id, res.probability)
   }
 
-  // 4) PER-PLAYER ENRICHMENT — band, tags, the "read", land odds.
+  // 4) PER-PLAYER ENRICHMENT - band, tags, the "read", land odds.
   const enriched = players.map((p) => ({
     id: p.id,
     name: p.name,
@@ -258,13 +258,13 @@ async function main(): Promise<void> {
     landProbability: landMap.has(p.id) ? landMap.get(p.id)! : null,
   }))
 
-  // 5) LEAGUE INTEL — the Nasties ledger that grounds the advice.
+  // 5) LEAGUE INTEL - the Nasties ledger that grounds the advice.
   const leagueIntel = {
     era: CALIBRATION_ERA,
     draftsUsed: CALIBRATION_DRAFTS_USED,
     positionalInflation: allPositionalInflation(),
     ownerLeans: allOwnerLeans(),
-    // The 11 simulated opponents, in seat order — each a real ledger owner whose
+    // The 11 simulated opponents, in seat order - each a real ledger owner whose
     // positional leans drove their bids in every strategy sim above.
     replicatedOpponents: ownerOrder,
   }
@@ -324,7 +324,7 @@ function buildReport(
   const L: string[] = []
   const meta = dataset.meta as Record<string, string | number | boolean>
 
-  L.push('# The Nasties — Draft Research Dataset')
+  L.push('# The Nasties - Draft Research Dataset')
   L.push('')
   L.push(`Generated ${meta.generatedAt}. 12-team, $${BUDGET} auction, full PPR, no kicker.`)
   L.push(`Roster: QB1, RB1, WR1, TE1, FLEX3, DEF1, Bench5.`)
@@ -380,7 +380,7 @@ function buildReport(
       L.push('  Most common roster cores this strategy landed:')
       s.sim.topRosters.slice(0, 3).forEach((tr) => {
         const core = tr.coreNames.length ? tr.coreNames.join(' + ') : '(all cheap, no stud core)'
-        L.push(`  - ${tr.frequencyPct}% of drafts: ${core} — avg spend $${tr.avgSpent}, avg record ${r1(tr.avgWins)}-${r1(REGULAR_SEASON_GAMES - tr.avgWins)}.`)
+        L.push(`  - ${tr.frequencyPct}% of drafts: ${core} - avg spend $${tr.avgSpent}, avg record ${r1(tr.avgWins)}-${r1(REGULAR_SEASON_GAMES - tr.avgWins)}.`)
       })
     }
     // Players this strategy lands most often.
@@ -431,7 +431,7 @@ function buildReport(
       const tags = p.tags.map((t) => t.label).join(', ')
       const land = p.landProbability != null ? `, land odds ${pct(p.landProbability)}` : ''
       const bandSrc = band.source === 'league' ? 'league band' : band.source === 'national' ? 'national band' : 'point'
-      L.push(`- **${p.name}** (${p.team}, bye ${p.byeWeek}) — ${bandStr} ${bandSrc}${land}.`)
+      L.push(`- **${p.name}** (${p.team}, bye ${p.byeWeek}) - ${bandStr} ${bandSrc}${land}.`)
       L.push(`  ${p.read.line}${tags ? `  [${tags}]` : ''}`)
     }
     L.push('')
@@ -446,7 +446,7 @@ function buildReport(
   if (pockets.length === 0) L.push('_None flagged._')
   for (const p of pockets.slice(0, 25)) {
     const tags = p.tags.map((t) => t.label).join(', ')
-    L.push(`- **${p.name}** (${p.position}, ${p.team}) — ${p.read.line}  [${tags}]`)
+    L.push(`- **${p.name}** (${p.position}, ${p.team}) - ${p.read.line}  [${tags}]`)
   }
   L.push('')
 
@@ -458,7 +458,7 @@ function buildReport(
   L.push('')
   if (taxes.length === 0) L.push('_None flagged._')
   for (const p of taxes.slice(0, 20)) {
-    L.push(`- **${p.name}** (${p.position}, ${p.team}) — ${p.read.line}`)
+    L.push(`- **${p.name}** (${p.position}, ${p.team}) - ${p.read.line}`)
   }
   L.push('')
 

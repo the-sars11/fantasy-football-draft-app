@@ -2,6 +2,19 @@
 
 ---
 
+## 2026-08-20 / Headless engine -- budget-balanced strategy policy + em-dash sweep
+
+**Class:** pipeline (Architecture + QA lenses). Follow-up to the headless research pipeline (`c6a4f7f`). Joe asked why the balanced strategy never surfaced, then approved building a budget-balanced policy.
+
+- **Root cause (diagnosed empirically):** the 4 anchor policies (`ceiling`, `value`, `scarcity`, `spread`) all front-load the same two ~$76 studs, so `classifyArchetype` tagged them all `stars-and-scrubs`/`studs-and-duds` (the `top2Share >= 0.55` gate fires first) and dedupe collapsed them to 2 shapes. No policy ever spread the budget, so a genuinely balanced roster was never proposed.
+- **Fix (`src/lib/research/strategy/generate.ts`):** added a 5th `balanced` policy plus a `PolicyContext` (budget, spent, remaining slots) threaded into every policy's `select`. The balanced policy caps any single anchor at 20% of budget and picks the highest-ceiling *starter-eligible* player from the least-anchored position. A `canClaimStarter` helper restricts anchors to players who can fill an open dedicated-or-flex starter slot, so the policy never pays up for a bench backup (first cut rostered two QBs; the helper is the fix).
+- **Result:** the pipeline now emits 3 honest, distinct archetypes -- Stars & Scrubs (10.4-3.6), Studs & Duds (9.8-4.2), Balanced Auction (9.6-4.4, one QB/RB/WR/TE/DEF anchor, no position over 40% of budget). The balanced build honestly *loses* to the two-stud build in the Nasties room; that gap is the finding, not a fabricated "balanced is best."
+- **Em-dash sweep (`scripts/research-run.ts`):** the committed pipeline runner carried 17 en/em-dashes (6 in report-output strings flagged by lint, the rest in comments), a violation of the global no-dash rule. Replaced all with hyphens; regenerated `research-output/` so `dataset.json` + `report.md` are dash-free (verified 0 occurrences).
+
+**Gate:** `npm run type-check` 0 errors. `npm run test:run` **552/552** (+2 balanced-policy tests locking the `balanced-auction` archetype and the no-backup-QB invariant). `npx eslint` on all touched files exit 0 (0 errors; 3 pre-existing unused-var warnings in research-run.ts). `npm run research:verify` 44/44. Deterministic (SIM_SEED=42). No em/en-dashes anywhere. Artifacts `research-output/dataset.json` (860K) + `report.md` (17K) committed as the versioned deliverable Joe interrogates.
+
+---
+
 ## 2026-08-20 / R14 findings #2 + #3 -- /prep hub + board copy contradictions
 
 **Class:** output/bugfix (Design + QA lenses). The two P3 items from the R14 walkthrough, fixed after Joe said go.

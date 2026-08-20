@@ -91,6 +91,13 @@ function canClaim(position: GenPosition, slots: AnchorSlots): boolean {
   return slots.bench > 0
 }
 
+/** True if `position` can fill an open STARTER slot (dedicated or FLEX, not bench). */
+function canClaimStarter(position: GenPosition, slots: AnchorSlots): boolean {
+  const dedicated = POSITION_TO_SLOT[position]
+  if ((slots[dedicated] ?? 0) > 0) return true
+  return FLEX_ELIGIBLE.has(position) && slots.flex > 0
+}
+
 /** Claim the slot `position` fills (dedicated -> FLEX -> bench), or null if full. */
 function claimSlot(position: GenPosition, slots: AnchorSlots): AnchorSlots | null {
   const dedicated = POSITION_TO_SLOT[position]
@@ -159,6 +166,15 @@ function positionCliffs(board: PricedBoardPlayer[]): Record<GenPosition, number>
 
 // ─── Budget-shape policies ─────────────────────────────────────────────────────
 
+/** Budget context passed to a policy so it can pace spend across the roster. */
+interface PolicyContext {
+  budget: number
+  maxAnchors: number
+  spent: number
+  /** Roster slots still open at this pick (dedicated + flex + bench remaining). */
+  slots: AnchorSlots
+}
+
 /** Given the affordable candidates and what is already chosen, pick the next anchor. */
 type Policy = {
   key: string
@@ -167,8 +183,14 @@ type Policy = {
     chosen: PricedBoardPlayer[],
     cliffs: Record<GenPosition, number>,
     maxCliff: number,
+    ctx: PolicyContext,
   ) => PricedBoardPlayer | null
 }
+
+// Balanced policy: cap any single anchor at this share of the budget so no stud
+// eats the room. 0.20 of $200 = $40, which excludes the ~$76 top studs and forces
+// spend across mid-tier players -> a genuine even-dollar (balanced) roster.
+const BALANCED_ANCHOR_CAP_FRACTION = 0.2
 
 function bestBy(
   candidates: PricedBoardPlayer[],
@@ -209,6 +231,29 @@ const POLICIES: Policy[] = [
       const anchoredCount = (pos: GenPosition) => chosen.filter((c) => c.position === pos).length
       const minCount = Math.min(...aff.map((p) => anchoredCount(p.position)))
       const leastAnchored = aff.filter((p) => anchoredCount(p.position) === minCount)
+      return bestBy(leastAnchored, (p) => p.ceiling)
+    },
+  },
+  // Budget-balanced: cap each anchor near a share of the budget so no stud eats
+  // the room, then spread the capped spend across the least-anchored positions.
+  // This is the only policy that avoids front-loading the two priciest studs, so
+  // it is the one that actually builds an even-dollar (balanced-auction) roster.
+  {
+    key: 'balanced',
+    select: (aff, chosen, _cliffs, _maxCliff, ctx) => {
+      const cap = ctx.budget * BALANCED_ANCHOR_CAP_FRACTION
+      // Anchor into open STARTER slots only, so the budget builds a starting
+      // lineup instead of paying up for a bench backup (e.g. a 2nd QB you can
+      // never start). Bench fills at $1 replacement outside the anchor pass.
+      const starters = aff.filter((p) => canClaimStarter(p.position, ctx.slots))
+      const eligible = starters.length > 0 ? starters : aff
+      const underCap = eligible.filter((p) => p.expectedCost <= cap)
+      // If nothing sits under the cap (only studs left), fall back to the eligible
+      // set so the roster still completes rather than stalling.
+      const pool = underCap.length > 0 ? underCap : eligible
+      const anchoredCount = (pos: GenPosition) => chosen.filter((c) => c.position === pos).length
+      const minCount = Math.min(...pool.map((p) => anchoredCount(p.position)))
+      const leastAnchored = pool.filter((p) => anchoredCount(p.position) === minCount)
       return bestBy(leastAnchored, (p) => p.ceiling)
     },
   },
@@ -256,7 +301,7 @@ function fillPlan(
     )
     if (affordable.length === 0) break
 
-    const pick = policy.select(affordable, chosen, cliffs, maxCliff)
+    const pick = policy.select(affordable, chosen, cliffs, maxCliff, { budget, maxAnchors, spent, slots })
     if (!pick) break
 
     const nextSlots = claimSlot(pick.position, slots)

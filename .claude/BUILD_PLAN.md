@@ -240,6 +240,14 @@ Every item below was confirmed against code. `RV-#` = review finding. Severity i
 
 ---
 
+## 🧪 HEADLESS ENGINE track (parallel to the R/D/SP tracks) — 2026-08-20
+
+Joe's separate direction: stop fighting the UI, run the research machinery headless, and produce one cohesive data-backed dataset he interrogates with an LLM in-chat. Independent of R14/R15/SP.
+
+- **[x] Phase 0/1 — orchestrator + verifier + Phase 2 tests · DONE 2026-08-20 · commit `c6a4f7f`.** `scripts/research-run.ts` reads `players_cache`, runs the existing pure engine (generate strategies -> per-strategy Monte Carlo -> per-player value bands / tags / reads / land-probability -> league intel) and writes `research-output/dataset.json` + `report.md`. `scripts/research-verify.ts` asserts 44 dataset invariants (no free ranked players, completable rosters, odds in [0,1], win-loss = season length, board sane). New unit tests on the untested load-bearing ingest modules (normalize / scoring / league-calibration). Whole pipeline is $0 (Supabase read only). Deterministic (SIM_SEED=42).
+- **[x] Balanced-strategy refinement · DONE 2026-08-20.** Diagnosed why only 2 archetypes surfaced (all 4 policies front-load the same studs -> `top2Share` gate collapses them) and added a 5th budget-`balanced` anchor policy (20% single-anchor cap, starter-eligible only via `canClaimStarter`, least-anchored fill). Generator now emits 3 honest distinct archetypes (Stars & Scrubs / Studs & Duds / Balanced Auction). +2 tests lock the `balanced-auction` archetype and the no-backup-QB invariant. Also swept 17 em-dashes out of `research-run.ts`. Gate: type-check 0, test:run 552/552, verify 44/44, eslint 0 errors on touched files. See CHANGELOG 2026-08-20.
+- **Deferred (not approved):** the `scarcity` RB-mono build ("Robust RB", ~95% one position) is still mislabeled `stars-and-scrubs` and lost in dedupe; refining `classifyArchetype` so it survives as a 4th archetype is pending Joe's go-ahead.
+
 ## 🏗️ THE REBUILD — ordered, model-bound sessions
 
 Work top to bottom. Each session is scoped to finish cleanly in one focused sitting on the stated model, with its own gate. Dependencies are stated; the order respects them.
