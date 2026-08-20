@@ -108,10 +108,9 @@ export function useLiveDraftData({
 
     async function load() {
       try {
-        const [sessionRes, playersRes, stratRes] = await Promise.all([
+        const [sessionRes, playersRes] = await Promise.all([
           fetch(`/api/draft/sessions/${id}`),
           fetch('/api/players'),
-          fetch('/api/strategies'),
         ])
 
         const sessionData = await sessionRes.json()
@@ -129,14 +128,27 @@ export function useLiveDraftData({
           setPlayers(playersData.players)
         }
 
-        const stratData = await stratRes.json()
-        if (stratRes.ok && stratData.strategies) {
-          const leagueStrats = stratData.strategies.filter(
-            (s: DbStrategy) => s.league_id === sessionData.session.league_id
-          )
-          setAllStrategies(leagueStrats)
-          const active = leagueStrats.find((s: DbStrategy) => s.is_active)
-          if (active) setStrategy(active)
+        // Strategies require leagueId -- GET /api/strategies 400s ("leagueId is
+        // required") without it, so this could NOT ride in the Promise.all above
+        // (the id only exists once the session resolves). Fetching it paramless
+        // silently killed the room's strategy-awareness: the active plan never
+        // loaded, so the advisor fell back to "No strategy set". The route
+        // filters by league server-side, so no client-side league filter is
+        // needed. Guarded so a transient strategy failure never blanks an
+        // already-loaded session.
+        const leagueId: string | undefined = sessionData.session?.league_id
+        if (leagueId) {
+          try {
+            const stratRes = await fetch(`/api/strategies?leagueId=${leagueId}`)
+            const stratData = await stratRes.json()
+            if (stratRes.ok && stratData.strategies) {
+              setAllStrategies(stratData.strategies)
+              const active = stratData.strategies.find((s: DbStrategy) => s.is_active)
+              if (active) setStrategy(active)
+            }
+          } catch {
+            // Strategies are non-critical for rendering the room; ignore.
+          }
         }
       } catch (err) {
         // R11a: a network-level failure (offline, server unreachable -- `fetch`

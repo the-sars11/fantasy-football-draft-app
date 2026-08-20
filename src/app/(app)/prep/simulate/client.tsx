@@ -242,7 +242,12 @@ export function SimulateClient() {
         <div className="flex flex-wrap items-center gap-3">
           <Select value={selectedLeagueId ?? ''} onValueChange={setSelectedLeagueId}>
             <SelectTrigger className="w-[220px]">
-              <SelectValue placeholder="Select a league" />
+              {/* Render the league NAME explicitly. Radix SelectValue auto-text
+                  fails when the value is set programmatically on load (before the
+                  items register), leaking the raw league uuid into the trigger. */}
+              <SelectValue placeholder="Select a league">
+                {selectedLeague?.name ?? undefined}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
               {leagues.map((l) => (
