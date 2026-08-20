@@ -2,6 +2,21 @@
 
 ---
 
+## 2026-08-20 / R14 findings #2 + #3 -- /prep hub + board copy contradictions
+
+**Class:** output/bugfix (Design + QA lenses). The two P3 items from the R14 walkthrough, fixed after Joe said go.
+
+- **F2 [P3] -- /prep hub button contradicted its own freshness badge.** The Player Pull button read "Run first pull" while the data strip said "3,150 players · FRESH". The label keyed off `latestRun` (a saved `research_run`) but the badge and count key off `cache` (the players_cache pool); a fresh pool with no saved analysis run showed both at once.
+  - **Fix (`src/app/(app)/prep/page.tsx`):** label now keys off `cache` -- "Pull fresh data" when a pool exists, "Run first pull" only when there is genuinely none ("No pool yet"). Removed the now-dead `latestRun`/`setLatestRun` state (the `latest` local is still used for the run detail fetch).
+  - **Live proof (:3141):** hub reads "PULL FRESH DATA" beside "3,150 players · updated Aug 19 · FRESH".
+- **F3 [P3] -- stray "K" filter tab on a no-kicker league.** The tab was on `/prep/board`, not `/prep/players` (players already omits K by design). `POSITIONS` on the board still listed `'K'`, and the board never filtered kickers from its pool.
+  - **Fix (`src/app/(app)/prep/board/client.tsx`):** removed `'K'` from `POSITIONS` and added `.filter((sp) => sp.player.position !== 'K')` to the base pool, mirroring `/prep/players`. So the ALL view and any sort also stop surfacing kickers, not just the tab.
+  - **Live proof (:3141):** board BY POSITION row = ALL / QB / RB / WR / TE / DEF, no K.
+
+**Gate:** `npm run type-check` 0 errors. `npm run test:run` 550/550 (concurrent session added tests; all green). `npx eslint` on the 2 touched files exit 0 (0 problems). `npm run build` clean, all `/prep/*` routes prerendered. No em/en-dashes. Commit `873f0eb`. Repo-wide lint shows a +1 error/warning vs the session baseline, both in `use-draft-state.ts` / sim files the concurrent session is editing -- not in my files.
+
+---
+
 ## 2026-08-19 / R14 findings #4 + #5 -- live-room + simulate leagueId plumbing
 
 **Class:** shared/bugfix (Architecture + QA lenses). Found during the Phase 2 R14 usability walkthrough (live probes against a `next start` server on 3141 + DEV_MODE).
