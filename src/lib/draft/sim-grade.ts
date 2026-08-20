@@ -19,6 +19,7 @@
  * Copy rule (Joe): plain English, NO em/en dashes anywhere in surfaced strings.
  */
 
+import { mulberry32 } from './sim-engine'
 import type { SimRun, SimWonPlayer, SimRosterConfig } from './sim-engine'
 
 // ─── Starting-lineup scoring ─────────────────────────────────────────────────
@@ -110,11 +111,39 @@ export interface RunGrade {
 }
 
 /**
- * Grade one simulated draft. Model: each seat is scored on its best starting
- * lineup's projected season points. My win probability against a random opponent
- * is (numManagers - myRank) / (numManagers - 1) — i.e. the share of the other
- * teams I outproject. Projected wins = round(games * that probability). This is a
- * transparent rank-vs-league model on real projections, not weekly variance.
+ * Weekly scoring noise as a fraction of the league-average weekly lineup points.
+ * Fantasy team scores swing hard week to week; ~0.16 reproduces believable records
+ * — the best paper roster lands around 9-5 to 11-3, not a deterministic 14-0, and
+ * the worst still steals a couple of games. Tunable in one place.
+ */
+const WEEKLY_SD_FRACTION = 0.16
+
+/** Salt so the grading PRNG is independent of the auction PRNG at the same seed. */
+const WEEKLY_SEED_SALT = 0x9e3779b9
+
+/**
+ * One standard-normal draw via Box-Muller from a seeded uniform PRNG. Deterministic
+ * for a given rng state, so a fixed run seed yields a fixed season.
+ */
+function standardNormal(rng: () => number): number {
+  const u1 = Math.max(rng(), 1e-9)
+  const u2 = rng()
+  return Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2)
+}
+
+/**
+ * Grade one simulated draft into a projected regular-season record by SIMULATING
+ * THE SEASON with weekly variance. Each seat is scored on its best starting
+ * lineup's projected season points, converted to a per-week mean. Then for each of
+ * `games` weeks, my lineup scores its mean plus gaussian noise and faces a random
+ * opponent doing the same; I bank a win when I outscore them. Counting wins over
+ * the season turns roster strength into a BELIEVABLE record — a strong roster still
+ * drops games to variance, a weak one still steals a few — instead of the old
+ * deterministic rank→record map that sent every top roster straight to 14-0.
+ *
+ * Deterministic: all noise flows from mulberry32(run.seed ^ salt), so byte-identical
+ * reruns still produce byte-identical records. myRank (by season points) is kept for
+ * roster clustering and labels.
  */
 export function gradeRun(
   run: SimRun,
@@ -123,18 +152,36 @@ export function gradeRun(
   games: number,
 ): RunGrade {
   const leagueStarterPoints = run.rosters.map(r => bestLineupPoints(r.players, lineup))
-  const myStarterPoints = bestLineupPoints(run.myRoster.players, lineup)
+  const myIndex = run.myRoster.managerIndex
+  const myStarterPoints = leagueStarterPoints[myIndex]
 
-  // Rank: 1 = highest points. Count teams strictly better, +1.
+  // Rank: 1 = highest points. Count teams strictly better, +1. (Deterministic.)
   let rank = 1
   for (let i = 0; i < leagueStarterPoints.length; i++) {
-    if (i === run.myRoster.managerIndex) continue
+    if (i === myIndex) continue
     if (leagueStarterPoints[i] > myStarterPoints) rank++
   }
 
-  const winProb =
-    numManagers > 1 ? (numManagers - rank) / (numManagers - 1) : 0
-  const wins = Math.round(games * winProb)
+  const seats = leagueStarterPoints.length
+  const perWeek = leagueStarterPoints.map(p => p / games)
+  const leagueAvgWeekly =
+    perWeek.reduce((s, v) => s + v, 0) / (perWeek.length || 1)
+  const sd = Math.max(0.5, WEEKLY_SD_FRACTION * leagueAvgWeekly)
+
+  const rng = mulberry32((run.seed ^ WEEKLY_SEED_SALT) >>> 0)
+  let wins = 0
+  for (let wk = 0; wk < games; wk++) {
+    const myScore = perWeek[myIndex] + standardNormal(rng) * sd
+    // Face a random other seat this week (schedule luck included).
+    let opp = myIndex
+    if (seats > 1) {
+      do {
+        opp = Math.floor(rng() * seats)
+      } while (opp === myIndex)
+    }
+    const oppScore = perWeek[opp] + standardNormal(rng) * sd
+    if (myScore > oppScore) wins++
+  }
 
   return {
     seed: run.seed,

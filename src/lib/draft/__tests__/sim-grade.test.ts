@@ -97,8 +97,8 @@ describe('bestLineupPoints', () => {
   })
 })
 
-describe('gradeRun projected record', () => {
-  it('best team in a 3-team league projects to win every game', () => {
+describe('gradeRun projected record (weekly-variance season)', () => {
+  it('a dominant roster wins most weeks but need not sweep', () => {
     const r = run(1, [
       roster(0, true, [won('me', 'QB', 300)]),
       roster(1, false, [won('o1', 'QB', 200)]),
@@ -106,11 +106,11 @@ describe('gradeRun projected record', () => {
     ])
     const g = gradeRun(r, QB_ONLY, 3, 12)
     expect(g.myRank).toBe(1)
-    expect(g.wins).toBe(12)
-    expect(g.losses).toBe(0)
+    expect(g.wins).toBeGreaterThanOrEqual(9)
+    expect(g.wins + g.losses).toBe(12)
   })
 
-  it('worst team projects to lose every game', () => {
+  it('a clearly worst roster loses most weeks', () => {
     const r = run(1, [
       roster(0, true, [won('me', 'QB', 50)]),
       roster(1, false, [won('o1', 'QB', 200)]),
@@ -118,10 +118,10 @@ describe('gradeRun projected record', () => {
     ])
     const g = gradeRun(r, QB_ONLY, 3, 12)
     expect(g.myRank).toBe(3)
-    expect(g.wins).toBe(0)
+    expect(g.wins).toBeLessThanOrEqual(3)
   })
 
-  it('middle team projects to a .500-ish record', () => {
+  it('a middle roster projects to a roughly .500 record', () => {
     const r = run(1, [
       roster(0, true, [won('me', 'QB', 150)]),
       roster(1, false, [won('o1', 'QB', 200)]),
@@ -129,7 +129,19 @@ describe('gradeRun projected record', () => {
     ])
     const g = gradeRun(r, QB_ONLY, 3, 12)
     expect(g.myRank).toBe(2)
-    expect(g.wins).toBe(6) // (3-2)/(3-1) = 0.5 * 12
+    expect(g.wins).toBeGreaterThanOrEqual(3)
+    expect(g.wins).toBeLessThanOrEqual(9)
+  })
+
+  it('is deterministic under a fixed run seed', () => {
+    const seats = [
+      roster(0, true, [won('me', 'QB', 180)]),
+      roster(1, false, [won('o1', 'QB', 160)]),
+      roster(2, false, [won('o2', 'QB', 120)]),
+    ]
+    const a = gradeRun(run(1, seats), QB_ONLY, 3, 14)
+    const b = gradeRun(run(1, seats), QB_ONLY, 3, 14)
+    expect(a.wins).toBe(b.wins)
   })
 })
 

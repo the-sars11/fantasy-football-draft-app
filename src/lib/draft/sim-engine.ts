@@ -21,9 +21,19 @@
  *   1. A manager nominates a player (round-robin nominator; nomination jitters
  *      among the top few remaining by ceiling so runs diverge -> a distribution).
  *   2. Every manager with an open slot for that position computes a willingness
- *      to pay = min(noisy valuation of the player, roster-constrained max-bid from
- *      the solver). The solver max-bid already reserves $1 for every other unfilled
- *      slot, so a bid can never strand a manager's roster.
+ *      to pay = min(noisy valuation of the player, solvency floor). The solvency
+ *      floor reserves $1 for every OTHER unfilled slot (budget − $1×otherSlots),
+ *      so a bid can never strand a manager's roster.
+ *
+ *      NOTE (bid model — deliberate, see git history): willingness is capped by
+ *      this flat $1/slot solvency floor, NOT by the R4 solver's roster-constrained
+ *      max-bid. The solver reserves the cost of the BEST AFFORDABLE rest-of-roster,
+ *      which from an empty roster on a stud-rich board is ~the entire budget — so
+ *      every seat's max-bid collapses to $1, every stud ties at $1, and the
+ *      lowest-index seat (me) sweeps them all. That is correct, conservative advice
+ *      for the LIVE max-bid advisor (auction-advisor.ts) but wrong as an opponent
+ *      bidding model here, where studs must clear near market value. The solver is
+ *      intentionally left untouched; only this sim's bid cap uses the solvency floor.
  *   3. Winner = highest willingness. Sale price = second-highest willingness + 1,
  *      floored at $1 and capped at the winner's willingness (classic ascending /
  *      second-price English-auction clearing). One bidder -> $1 (an uncontested
@@ -33,11 +43,8 @@
  */
 
 import {
-  computeRosterConstrainedMaxBid,
   type BoardPlayer,
   type SlotsRemaining,
-  type ReplacementCosts,
-  type SolverInput,
 } from './roster-solver'
 
 // ─── PRNG ───────────────────────────────────────────────────────────────────
@@ -102,6 +109,27 @@ export interface SimEngineInput {
    * target can never blow the roster. Absent => no bias (pure R10a behavior).
    */
   myBias?: SimMyBias
+  /**
+   * LEAGUE-REPLICATION (LR-1): per-seat opponent profiles derived from the real
+   * Nasties ledger. When present, each opponent seat bids off the ROOM price
+   * (BoardPlayer.expectedCost) tilted by that owner's positional lean, instead of
+   * the generic national-ceiling model — so the simulated room drafts like the
+   * actual league. Index-aligned to the opponent seats in ascending manager order
+   * (every seat except `myManagerIndex`); a short/empty array leaves the remaining
+   * opponents on the generic model. The me-seat is never affected. Absent => pure
+   * generic opponents (backwards-compatible with every existing sim test).
+   */
+  opponentProfiles?: OpponentProfile[]
+}
+
+/**
+ * LR-1: one opponent seat's draft personality, built from league-calibration.
+ * `leanByPos` is the owner's spend-share vs the room for each position (vsRoom,
+ * centered ~1.0: >1 pays up, <1 lays off). `name` is carried for reporting only.
+ */
+export interface OpponentProfile {
+  name?: string
+  leanByPos: Record<BoardPlayer['position'], number>
 }
 
 /** One graded lean for the me-seat. Targets use weight; avoids use severity. */
@@ -199,17 +227,25 @@ const TARGET_MAX_BOOST = 0.35
 /** Soft-avoid valuation multiplier: me only takes the player at a real discount. */
 const SOFT_AVOID_FACTOR = 0.5
 
+// ─── LR-1 opponent "ceiling drive" ───────────────────────────────────────────
+/**
+ * How strongly a profiled opponent's historical positional lean tilts their
+ * valuation. Opponents anchor on the player's TRUE worth (national ceiling) so the
+ * room is a real value market that contests underpriced studs; their lean then
+ * tilts appetite around that value. Strength in (0,1]: 0 = pure value (no
+ * personality), 1 = the full historical lean. At 0.5 a WR-loving owner (lean 1.5)
+ * values WRs at 1.25x worth and a WR-averse owner (lean 0.5) at 0.75x, so tendency
+ * still shows without any seat sleeping on value. This is what lets distinct
+ * strategies separate instead of every seat converging on one value-swept roster.
+ */
+const OPPONENT_LEAN_STRENGTH = 0.5
+
 const POSITION_TO_DEDICATED: Record<BoardPlayer['position'], keyof SlotsRemaining> = {
   QB: 'qb',
   RB: 'rb',
   WR: 'wr',
   TE: 'te',
   DEF: 'dst',
-}
-
-/** Flat $1 reserve per empty slot — same roster-completion floor the live bridge uses. */
-const FLAT_REPLACEMENT: ReplacementCosts = {
-  qb: 1, rb: 1, wr: 1, te: 1, dst: 1, bench: 1,
 }
 
 /** Build a manager's initial SlotsRemaining from the roster config (IR folds into bench). */
@@ -283,9 +319,22 @@ export function runAuctionSim(
     budget,
     myManagerIndex = 0,
     myBias,
+    opponentProfiles,
   } = input
   const noisePct = input.noisePct ?? 0.15
   const rng = mulberry32(seed)
+
+  /**
+   * LR-1: map an opponent seat index to its owner profile. Opponent seats are
+   * every manager except `myManagerIndex`, numbered ascending; seat `i` past the
+   * me-seat shifts down one so the profile array stays 0-based over opponents.
+   * Returns undefined when no profile is supplied for that seat (generic bidder).
+   */
+  function profileForSeat(index: number): OpponentProfile | undefined {
+    if (!opponentProfiles || index === myManagerIndex) return undefined
+    const opponentSlot = index < myManagerIndex ? index : index - 1
+    return opponentProfiles[opponentSlot]
+  }
 
   // Live copy of the board; players are spliced out as they sell/go unsold.
   const remaining: BoardPlayer[] = board.map(p => ({ ...p }))
@@ -319,13 +368,34 @@ export function runAuctionSim(
       if (m.budget < 1) continue
       if (!hasOpenSlotFor(m.slots, nominated.position)) continue
 
-      // Noisy private valuation of this player (bounded worth this manager sees).
+      // Noisy multiplier for this manager's private valuation (the only source of
+      // run-to-run variance). Drawn once per bidder per lot so me and opponents
+      // stay directly comparable within a lot.
       const noise = 1 + (rng() * 2 - 1) * noisePct
-      let valuation = Math.max(1, Math.round(nominated.ceiling * noise))
+
+      // Base valuation depends on the seat:
+      //   - me: the player's TRUE worth (national VORP ceiling), so I chase value
+      //     against a room that pays historical prices.
+      //   - a profiled opponent (LR-1): the player's TRUE worth (national ceiling)
+      //     tilted by that owner's positional lean (softened toward 1.0), so the
+      //     seat competes for value like a real drafter while still showing its
+      //     historical tendency. This makes the room a genuine value market.
+      //   - an unprofiled opponent: the generic ceiling model (pure R10a).
+      const profile = profileForSeat(m.index)
+      let valuation: number
+      if (profile) {
+        const lean = profile.leanByPos[nominated.position] ?? 1
+        // Soften the historical lean toward 1.0 so no seat sleeps on value at any
+        // position, then anchor on true worth. tilt in [1-s, 1+s(leanMax-1)].
+        const tilt = 1 + OPPONENT_LEAN_STRENGTH * (lean - 1)
+        valuation = Math.max(1, Math.round(nominated.ceiling * tilt * noise))
+      } else {
+        valuation = Math.max(1, Math.round(nominated.ceiling * noise))
+      }
 
       // DEC-1 (BIAS): only the "me" seat leans toward Joe's graded targets/avoids,
       // and only its valuation is nudged (the roster max-bid below still caps it).
-      // Opponents fall straight through with the generic valuation above.
+      // Opponents fall straight through with the valuation above.
       if (m.index === myManagerIndex && myBias) {
         const bias = myBias[nominated.id]
         if (bias) {
@@ -345,21 +415,21 @@ export function runAuctionSim(
         }
       }
 
-      // Roster-constrained max-bid via the R4 solver: the most this manager can
-      // pay and still complete the best affordable rest-of-roster at $1 reserve.
-      const solverInput: SolverInput = {
-        budgetRemaining: m.budget,
-        slotsRemaining: m.slots,
-        availablePlayers: remaining, // includes `nominated`; solver removes it
-        replacementCosts: FLAT_REPLACEMENT,
-        minPerSlot: 1,
-      }
-      const rc = computeRosterConstrainedMaxBid(nominated, solverInput)
+      // Solvency floor: the most a manager can commit to THIS player and still
+      // keep $1 for every OTHER slot they must fill. `hasOpenSlotFor` already
+      // guaranteed an open slot, so openSlotCount(m.slots) >= 1 and slotsAfterThis
+      // >= 0. This is the roster-completion reserve the engine documents ($1 per
+      // other unfilled slot) — NOT the solver's best-affordable-rest-of-roster
+      // cost, which from an empty roster reserves ~the whole budget and collapses
+      // every bid to $1 (see the bid-model note in the module header).
+      const slotsAfterThis = openSlotCount(m.slots) - 1
+      const maxAffordable = Math.max(1, m.budget - slotsAfterThis)
 
       // Willing to pay up to the lesser of what they think it's worth and what
-      // their roster math allows. maxBid is always >= 1, so a manager with a slot
-      // and >= $1 always bids at least $1 (end-of-draft dollar grabs).
-      const willing = Math.max(1, Math.min(valuation, rc.maxBid))
+      // their budget allows while keeping the roster completable. maxAffordable
+      // is always >= 1, so a manager with a slot and >= $1 always bids at least $1
+      // (end-of-draft dollar grabs).
+      const willing = Math.max(1, Math.min(valuation, maxAffordable))
       bids.push({ manager: m, willing })
     }
 
@@ -504,6 +574,7 @@ export function runMonteCarlo(input: SimEngineInput): SimEngineResult {
       noisePct,
       myManagerIndex,
       myBias: input.myBias ?? {},
+      opponentProfiles: input.opponentProfiles ?? [],
       rosterConfig: input.rosterConfig,
     },
   }

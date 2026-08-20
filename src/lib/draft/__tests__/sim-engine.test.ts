@@ -370,3 +370,63 @@ describe('DEC-1 me-seat bias', () => {
     }
   })
 })
+
+// ─── (4) LR-1 league-replication: per-owner opponent profiles ────────────────
+
+describe('LR-1 league-realistic opponents (opponentProfiles)', () => {
+  // A board with equally-priced WR and RB studs so the ONLY thing steering who
+  // buys what is each seat's positional lean, not price or ceiling asymmetry.
+  function balancedBoard(): BoardPlayer[] {
+    const board: BoardPlayer[] = []
+    for (let i = 0; i < 20; i++) {
+      const ceiling = Math.max(1, 40 - i)
+      board.push(p(`WR${i + 1}`, 'WR', ceiling, ceiling)) // expectedCost == ceiling
+      board.push(p(`RB${i + 1}`, 'RB', ceiling, ceiling))
+    }
+    return board
+  }
+
+  // Two opponent seats with mirror-image leans; me-seat (index 0) has no profile.
+  const wrHeavy = { name: 'WRguy', leanByPos: { QB: 1, RB: 0.5, WR: 2, TE: 1, DEF: 1 } }
+  const rbHeavy = { name: 'RBguy', leanByPos: { QB: 1, RB: 2, WR: 0.5, TE: 1, DEF: 1 } }
+
+  function wrRbSpend(roster: { players: { position: string; price: number }[] }) {
+    let wr = 0
+    let rb = 0
+    for (const pl of roster.players) {
+      if (pl.position === 'WR') wr += pl.price
+      if (pl.position === 'RB') rb += pl.price
+    }
+    return { wr, rb }
+  }
+
+  it('a WR-leaning owner outspends an RB-leaning owner on WR (and vice versa)', () => {
+    const input: SimEngineInput = {
+      board: balancedBoard(),
+      rosterConfig: { qb: 0, rb: 2, wr: 2, te: 0, flex: 0, dst: 0, bench: 0 },
+      numManagers: 3, // seat 0 = me (no profile), seats 1 & 2 = the two owners
+      budget: 60,
+      runs: 1,
+      seed: 11,
+      opponentProfiles: [wrHeavy, rbHeavy],
+    }
+    const run = runAuctionSim(input, 11)
+    const wrGuy = wrRbSpend(run.rosters[1]) // opponent seat 0 -> wrHeavy
+    const rbGuy = wrRbSpend(run.rosters[2]) // opponent seat 1 -> rbHeavy
+    expect(wrGuy.wr).toBeGreaterThan(rbGuy.wr)
+    expect(rbGuy.rb).toBeGreaterThan(wrGuy.rb)
+  })
+
+  it('leaves the generic path byte-identical when no profiles are supplied', () => {
+    const base = runMonteCarlo(nastiesInput({ runs: 4 }))
+    const withEmpty = runMonteCarlo(nastiesInput({ runs: 4, opponentProfiles: [] }))
+    expect(withEmpty.runs).toEqual(base.runs)
+  })
+
+  it('is deterministic under seed with opponent profiles applied', () => {
+    const opts = { opponentProfiles: [wrHeavy, rbHeavy, wrHeavy] }
+    const a = runMonteCarlo(nastiesInput(opts))
+    const b = runMonteCarlo(nastiesInput(opts))
+    expect(a.runs).toEqual(b.runs)
+  })
+})
