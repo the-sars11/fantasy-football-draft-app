@@ -1,6 +1,6 @@
 # The Nasties - Draft Research Dataset
 
-Generated 2026-08-20T19:31:39.241Z. 12-team, $200 auction, full PPR, no kicker.
+Generated 2026-08-20T21:52:37.989Z. 12-team, $200 auction, full PPR, no kicker.
 Roster: QB1, RB1, WR1, TE1, FLEX3, DEF1, Bench5.
 Players: 1000. Cache last updated 2026-08-20T01:00:27.018+00:00 (stale=false).
 Sims: 400 Monte-Carlo runs per strategy, 14-game season, seed 42.
@@ -9,15 +9,35 @@ Sims: 400 Monte-Carlo runs per strategy, 14-game season, seed 42.
 
 | # | Strategy | Proj record | Modal record | Mean starter pts | Ceiling / Floor |
 |---|----------|-------------|--------------|------------------|-----------------|
-| 1 | Stars & Scrubs | 11-3 | 11-3 (25.5%) | 1965.9 | $90 / $66 |
-| 2 | Studs & Duds | 10.9-3.1 | 11-3 (26.8%) | 1953.2 | $88 / $64 |
-| 3 | Balanced Auction | 10.5-3.5 | 11-3 (25.5%) | 1930.3 | $83 / $69 |
+| 1 | Stars & Scrubs | 9.9-4.1 | 12-2 (18%) | 1965.9 | $90 / $66 |
+| 2 | Studs & Duds | 9.7-4.3 | 12-2 (16.5%) | 1953.2 | $88 / $64 |
+| 3 | Balanced Auction | 9.5-4.5 | 11-3 (15.8%) | 1930.3 | $83 / $69 |
+
+_Records above are graded with the measured risk model ON (real per-player
+durability + tier bust/breakout from 15 seasons of Sleeper actuals)._
+
+## Before/after: what the risk model did to each strategy
+
+BEFORE grades every drafted player as if he plays all 14 games at his full
+projection (the old basis that made "spend on two studs" look unbeatable).
+AFTER applies the measured model. A bigger drop = a strategy the old grader
+flattered because it never priced in that studs bust or miss time.
+
+| # | Strategy | Before (healthy) | After (risk on) | Wins lost to risk |
+|---|----------|------------------|-----------------|-------------------|
+| 1 | Stars & Scrubs | 11-3 | 9.9-4.1 | -1.1 |
+| 2 | Studs & Duds | 10.9-3.1 | 9.7-4.3 | -1.2 |
+| 3 | Balanced Auction | 10.5-3.5 | 9.5-4.5 | -1 |
+
+Healthy-basis winner: **Stars & Scrubs** (11 wins).
+Risk-adjusted winner: **Stars & Scrubs** (9.9 wins).
+The top strategy is unchanged once risk is priced in.
 
 ### 1. Stars & Scrubs  (stars-and-scrubs, aggressive risk)
 
 Pool-generated Stars & Scrubs: 8 anchors (RB/WR/TE/QB), rest at room price.
 
-- Projected record: 11-3 (best 14-0, worst 4-10).
+- Projected record: 9.9-4.1 (best 14-0, worst 1-13).
 - Why: The board supports paying up for Jahmyr Gibbs (~$76), Puka Nacua (~$76), Jeremiyah Love (~$29). RB runs COOL (0.84x room vs national). This shape spends $191 on anchors and keeps $9 to complete the roster at room prices.
 - Philosophy: Built from the live board: stars and scrubs shape emerged as a completable $200 roster given the current pool.
 - Budget split: QB 2%, RB 53%, WR 39%, TE 2%, DST 0%, K 0%, bench 4%.
@@ -25,9 +45,9 @@ Pool-generated Stars & Scrubs: 8 anchors (RB/WR/TE/QB), rest at room price.
   Targets $188 + reserve $8 = $196 of $200 (completable).
 
   Most common roster cores this strategy landed:
-  - 10.5% of drafts: Jahmyr Gibbs + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 11.7-2.3.
-  - 9.8% of drafts: Puka Nacua + Jahmyr Gibbs + Luther Burden III - avg spend $200, avg record 11.1-2.9.
-  - 6.5% of drafts: Jahmyr Gibbs + Bijan Robinson + Luther Burden III - avg spend $200, avg record 11.1-2.9.
+  - 10.5% of drafts: Jahmyr Gibbs + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 9.7-4.3.
+  - 9.8% of drafts: Puka Nacua + Jahmyr Gibbs + Luther Burden III - avg spend $200, avg record 10.4-3.6.
+  - 6.5% of drafts: Jahmyr Gibbs + Bijan Robinson + Luther Burden III - avg spend $200, avg record 8.8-5.2.
 
   Players you land most:
   - Tony Pollard (RB): 84.8% of drafts, avg $1.
@@ -43,7 +63,7 @@ Pool-generated Stars & Scrubs: 8 anchors (RB/WR/TE/QB), rest at room price.
 
 Pool-generated Studs & Duds: 8 anchors (RB/WR/QB/TE), rest at room price.
 
-- Projected record: 10.9-3.1 (best 14-0, worst 3-11).
+- Projected record: 9.7-4.3 (best 14-0, worst 1-13).
 - Why: The board supports paying up for Jahmyr Gibbs (~$76), Zay Flowers (~$24), Garrett Wilson (~$23). RB runs COOL (0.84x room vs national). This shape spends $154 on anchors and keeps $46 to complete the roster at room prices.
 - Philosophy: Built from the live board: studs and duds shape emerged as a completable $200 roster given the current pool.
 - Budget split: QB 7%, RB 45%, WR 24%, TE 2%, DST 0%, K 0%, bench 22%.
@@ -51,9 +71,9 @@ Pool-generated Studs & Duds: 8 anchors (RB/WR/QB/TE), rest at room price.
   Targets $148 + reserve $8 = $156 of $200 (completable).
 
   Most common roster cores this strategy landed:
-  - 18.8% of drafts: Jahmyr Gibbs + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 11.4-2.6.
-  - 15% of drafts: Jahmyr Gibbs + Bijan Robinson + Luther Burden III - avg spend $200, avg record 11.2-2.8.
-  - 4% of drafts: Ja'Marr Chase + Jahmyr Gibbs + Zay Flowers - avg spend $200, avg record 10.4-3.6.
+  - 18.8% of drafts: Jahmyr Gibbs + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 9.8-4.2.
+  - 15% of drafts: Jahmyr Gibbs + Bijan Robinson + Luther Burden III - avg spend $200, avg record 9.8-4.2.
+  - 4% of drafts: Ja'Marr Chase + Jahmyr Gibbs + Zay Flowers - avg spend $200, avg record 10.8-3.2.
 
   Players you land most:
   - Jahmyr Gibbs (RB): 91.3% of drafts, avg $88.
@@ -69,7 +89,7 @@ Pool-generated Studs & Duds: 8 anchors (RB/WR/QB/TE), rest at room price.
 
 Pool-generated Balanced Auction: 8 anchors (RB/WR/TE/QB/DEF), rest at room price.
 
-- Projected record: 10.5-3.5 (best 14-0, worst 2-12).
+- Projected record: 9.5-4.5 (best 14-0, worst 1-13).
 - Why: The board supports paying up for Omarion Hampton (~$37), Josh Allen (~$36), Trey McBride (~$35). RB runs COOL (0.84x room vs national). This shape spends $194 on anchors and keeps $6 to complete the roster at room prices.
 - Philosophy: Built from the live board: balanced shape emerged as a completable $200 roster given the current pool.
 - Budget split: QB 18%, RB 33%, WR 24%, TE 20%, DST 3%, K 0%, bench 2%.
@@ -77,9 +97,9 @@ Pool-generated Balanced Auction: 8 anchors (RB/WR/TE/QB/DEF), rest at room price
   Targets $161 + reserve $8 = $169 of $200 (completable).
 
   Most common roster cores this strategy landed:
-  - 13% of drafts: Jahmyr Gibbs + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 11.4-2.6.
-  - 9.3% of drafts: Jahmyr Gibbs + Bijan Robinson + Luther Burden III - avg spend $200, avg record 11.1-2.9.
-  - 3% of drafts: Bijan Robinson + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 10.8-3.2.
+  - 13% of drafts: Jahmyr Gibbs + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 9.6-4.4.
+  - 9.3% of drafts: Jahmyr Gibbs + Bijan Robinson + Luther Burden III - avg spend $200, avg record 10-4.
+  - 3% of drafts: Bijan Robinson + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 8.6-5.4.
 
   Players you land most:
   - Jameson Williams (WR): 81.3% of drafts, avg $1.

@@ -196,21 +196,26 @@ async function main(): Promise<void> {
     console.log(
       `[research-run]   sim ${i + 1}/${stratResult.proposals.length}: ${proposal.name} (${SIM_RUNS} runs)`,
     )
-    const summary: SimSummary = buildSimSummary(
-      {
-        board,
-        rosterConfig: SIM_ROSTER,
-        numManagers: NUM_MANAGERS,
-        budget: BUDGET,
-        runs: SIM_RUNS,
-        seed: SIM_SEED,
-        myManagerIndex: 0,
-        myBias: bias,
-        opponentProfiles,
-      },
-      { games: REGULAR_SEASON_GAMES },
-    )
-    return { proposal, sim: summary }
+    const simInput = {
+      board,
+      rosterConfig: SIM_ROSTER,
+      numManagers: NUM_MANAGERS,
+      budget: BUDGET,
+      runs: SIM_RUNS,
+      seed: SIM_SEED,
+      myManagerIndex: 0,
+      myBias: bias,
+      opponentProfiles,
+    }
+    // AFTER: graded with the measured risk model on (durability + tier bust/breakout).
+    const summary: SimSummary = buildSimSummary(simInput, { games: REGULAR_SEASON_GAMES })
+    // BEFORE: same board/seed graded on the old "every stud plays every game at full
+    // projection" basis, so the report can show exactly what the risk model changed.
+    const summaryHealthy: SimSummary = buildSimSummary(simInput, {
+      games: REGULAR_SEASON_GAMES,
+      risk: false,
+    })
+    return { proposal, sim: summary, simHealthy: summaryHealthy }
   })
 
   // 3) LAND PROBABILITY - top of the board only, full board models the scarcity.
@@ -319,7 +324,7 @@ function buildEnrichedType() {
 function buildReport(
   dataset: { meta: Record<string, unknown>; leagueIntel: ReturnType<typeof buildIntelType> },
   players: Enriched[],
-  strategies: Array<{ proposal: StrategyProposal; sim: SimSummary }>,
+  strategies: Array<{ proposal: StrategyProposal; sim: SimSummary; simHealthy: SimSummary }>,
 ): string {
   const L: string[] = []
   const meta = dataset.meta as Record<string, string | number | boolean>
@@ -345,6 +350,42 @@ function buildReport(
     )
   })
   L.push('')
+  L.push('_Records above are graded with the measured risk model ON (real per-player')
+  L.push('durability + tier bust/breakout from 15 seasons of Sleeper actuals)._')
+  L.push('')
+
+  // ── Before/after: what the risk model changed ────────────────────────────────
+  L.push('## Before/after: what the risk model did to each strategy')
+  L.push('')
+  L.push('BEFORE grades every drafted player as if he plays all 14 games at his full')
+  L.push('projection (the old basis that made "spend on two studs" look unbeatable).')
+  L.push('AFTER applies the measured model. A bigger drop = a strategy the old grader')
+  L.push('flattered because it never priced in that studs bust or miss time.')
+  L.push('')
+  const risked = [...strategies].sort((a, b) => b.sim.grade.meanWins - a.sim.grade.meanWins)
+  L.push('| # | Strategy | Before (healthy) | After (risk on) | Wins lost to risk |')
+  L.push('|---|----------|------------------|-----------------|-------------------|')
+  risked.forEach((s, i) => {
+    const before = s.simHealthy.grade
+    const after = s.sim.grade
+    const delta = before.meanWins - after.meanWins
+    L.push(
+      `| ${i + 1} | ${s.proposal.name} | ${r1(before.meanWins)}-${r1(before.meanLosses)} | ${r1(after.meanWins)}-${r1(after.meanLosses)} | ${delta >= 0 ? '-' : '+'}${r1(Math.abs(delta))} |`,
+    )
+  })
+  L.push('')
+  {
+    const before = [...strategies].sort((a, b) => b.simHealthy.grade.meanWins - a.simHealthy.grade.meanWins)
+    const after = [...strategies].sort((a, b) => b.sim.grade.meanWins - a.sim.grade.meanWins)
+    L.push(`Healthy-basis winner: **${before[0].proposal.name}** (${r1(before[0].simHealthy.grade.meanWins)} wins).`)
+    L.push(`Risk-adjusted winner: **${after[0].proposal.name}** (${r1(after[0].sim.grade.meanWins)} wins).`)
+    L.push(
+      before[0].proposal.name === after[0].proposal.name
+        ? `The top strategy is unchanged once risk is priced in.`
+        : `The top strategy CHANGES once risk is priced in: "${before[0].proposal.name}" no longer leads.`,
+    )
+    L.push('')
+  }
 
   // ── Per-strategy detail ─────────────────────────────────────────────────────
   ranked.forEach((s, i) => {
