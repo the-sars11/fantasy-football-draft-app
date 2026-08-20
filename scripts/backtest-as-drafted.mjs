@@ -11,7 +11,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const REPO = path.resolve(__dirname, '..')
 const CACHE = 'C:/Users/jrasa/AppData/Local/Temp/claude/C--Users-jrasa-AI-Projects/ef908f98-9fc2-47d5-b134-6d57228db2bf/scratchpad'
 
-const YEARS = [2022, 2023, 2024, 2025]
+// All Nasties drafts present in bundle.json (2016 is absent from the archive).
+const YEARS = [2010, 2011, 2012, 2013, 2014, 2015, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025]
 const WEEKS = 14 // fantasy regular season (ESPN 12-team default: wks 1-14)
 // Nasties starting lineup: QB1 RB1 WR1 TE1 FLEX3(RB/WR/TE) DEF1 = 8 starters
 const FLEX_ELIGIBLE = new Set(['RB', 'WR', 'TE'])
@@ -23,7 +24,8 @@ const norm = (s) =>
   (s || '')
     .toLowerCase()
     .replace(/d\/st|dst|defense/g, '')
-    .replace(/[.'`,\-]/g, '')
+    .replace(/-/g, ' ')
+    .replace(/[.'`,]/g, '')
     .replace(/\b(jr|sr|ii|iii|iv|v)\b/g, '')
     .replace(/\s+/g, ' ')
     .trim()
@@ -106,6 +108,30 @@ const ALIAS = {
   'j warren': 'Jaylen Warren',
   'd cook': 'Dalvin Cook',
   'mike deseke': 'Mike Gesicki',
+  // older-era nicknames / typos (2013-2021)
+  mcaffrey: 'Christian McCaffrey',
+  obj: 'Odell Beckham',
+  odb: 'Odell Beckham',
+  gronk: 'Rob Gronkowski',
+  megatron: 'Calvin Johnson',
+  'reshard medenhall': 'Rashard Mendenhall',
+  montyball: 'Montee Ball',
+  rg3: 'Robert Griffin',
+  'ben rothensumtin': 'Ben Roethlisberger',
+  'jonnie taylor': 'Jonathan Taylor',
+  'the ju ju': 'JuJu Smith-Schuster',
+  'marlon mack daddy': 'Marlon Mack',
+  'jjacobs': 'Josh Jacobs',
+  'david wilsonn': 'David Wilson',
+  'sony m': 'Sony Michel',
+  'larry fitz': 'Larry Fitzgerald',
+  'jermichael finley': 'Jermichael Finley',
+  'easy e': 'Ezekiel Elliott', // 2017 only
+  garsone: 'Pierre Garcon',
+  'golden fag': 'Golden Tate',
+  'b marsh': 'Brandon Marshall', // 2014
+  aj: 'A.J. Green', // 2014
+  ingrum: 'Mark Ingram',
 }
 
 const skillByName = new Map() // normName -> {id, pos}
@@ -148,7 +174,22 @@ function matchDef(name) {
 }
 
 function matchSkill(name, yr) {
-  let key = norm(name)
+  // 2019 archive used inconsistent comma formats ("Johnson,David", "R,Woods", "Sony,M").
+  // Try both token orders and take the first that resolves.
+  if ((name || '').includes(',')) {
+    const parts = name.split(',').map((s) => norm(s)).filter(Boolean)
+    if (parts.length >= 2) {
+      const swapped = resolveOne(parts.slice().reverse().join(' '), yr) // First Last
+      if (swapped) return swapped
+      const asIs = resolveOne(parts.join(' '), yr) // Last First
+      if (asIs) return asIs
+    }
+  }
+  return resolveOne(norm(name), yr)
+}
+
+function resolveOne(rawKey, yr) {
+  let key = rawKey
   if (ALIAS[key]) key = norm(ALIAS[key])
   // 1) exact
   if (skillByName.has(key)) return skillByName.get(key)
@@ -341,8 +382,36 @@ for (const yr of YEARS) {
   })
 }
 
+// ---------- MATCH-QUALITY PER YEAR + CLEAN-SAMPLE GATE ----------
+// Sleeper's player map drops players who retired before ~2012, so 2010-2011
+// lose real studs (Randy Moss, Michael Turner, T.O., etc.) that cannot be
+// recovered by any name-join. Those years are reported for standings context
+// but EXCLUDED from the concentration correlation so the signal stays honest.
+const UNMATCH_THRESHOLD = 100 // $ of unmatched draft capital per year that flips a year to low-confidence
+const yearQuality = YEARS.map((yr) => {
+  const yrRows = rows.filter((r) => r.year === yr)
+  const unmatched = yrRows.reduce((s, r) => s + r.unmatchedCost, 0)
+  return { year: yr, unmatched, clean: unmatched <= UNMATCH_THRESHOLD }
+})
+const CLEAN_YEARS = yearQuality.filter((q) => q.clean).map((q) => q.year)
+const EXCLUDED_YEARS = yearQuality.filter((q) => !q.clean).map((q) => q.year)
+const cleanRows = rows.filter((r) => CLEAN_YEARS.includes(r.year))
+// tag each row with its year's confidence for the JSON consumers
+const qualByYear = new Map(yearQuality.map((q) => [q.year, q]))
+for (const r of rows) r.dataConfidence = qualByYear.get(r.year).clean ? 'clean' : 'low'
+
 // ---------- OUTPUT ----------
-const out = { years: YEARS, weeks: WEEKS, generatedFor: 'Nasties as-drafted backtest', rows }
+const out = {
+  years: YEARS,
+  weeks: WEEKS,
+  generatedFor: 'Nasties as-drafted backtest',
+  cleanYears: CLEAN_YEARS,
+  excludedYears: EXCLUDED_YEARS,
+  excludedReason:
+    'Sleeper NFL player map omits players who retired before ~2012, so pre-2012 drafts lose real studs that cannot be name-joined. These years appear in standings for context but are excluded from the concentration correlation.',
+  yearQuality,
+  rows,
+}
 fs.writeFileSync(path.join(REPO, 'research-output/backtest-as-drafted.json'), JSON.stringify(out, null, 2))
 
 // console report
@@ -374,10 +443,12 @@ for (const yr of YEARS) {
 
 // KEY QUESTION: does concentration (top-2 spend) correlate with finish?
 line(`\n${'='.repeat(70)}`)
-line('DOES SPENDING BIG ON TWO GUYS WIN?  (all team-years pooled)')
+line('DOES SPENDING BIG ON TWO GUYS WIN?  (clean-join years only)')
 line('='.repeat(70))
+line(`Excluded (Sleeper map gaps, unmatched > $${UNMATCH_THRESHOLD}): ${EXCLUDED_YEARS.join(', ') || 'none'}`)
+line(`Clean years used: ${CLEAN_YEARS.join(', ')} (${cleanRows.length} team-seasons)`)
 // split by concentration tercile
-const sorted = [...rows].sort((a, b) => b.top2Share - a.top2Share)
+const sorted = [...cleanRows].sort((a, b) => b.top2Share - a.top2Share)
 const n = sorted.length
 const third = Math.floor(n / 3)
 const highConc = sorted.slice(0, third)
@@ -405,7 +476,7 @@ function pearson(xs, ys) {
   }
   return num / Math.sqrt(dx * dy)
 }
-const r = pearson(rows.map((x) => x.top2Share), rows.map((x) => x.finish))
+const r = pearson(cleanRows.map((x) => x.top2Share), cleanRows.map((x) => x.finish))
 line(`\nCorrelation(top-2 spend %, finish rank) = ${r.toFixed(3)}`)
 line(`  (negative = concentration tends to finish BETTER; positive = concentration finishes WORSE)`)
 
@@ -436,13 +507,16 @@ md.push('# Nasties Backtest — Draft Quality on Actual Points\n')
 md.push(
   `Each team scored **as drafted** (exact picks, no waivers/trades) on that season's **actual weekly PPR points**, best legal lineup each week (QB1/RB1/WR1/TE1/FLEX3/DEF1), weeks 1-${WEEKS}. Data: local draft bundle + Sleeper historical stats. Injuries are baked in via real games played. Ranking = total points within the year (schedule luck removed).\n`,
 )
-md.push(`Years: ${YEARS.join(', ')}. Unmatched draft $ across all team-years: $${totalUnmatched} (bench darts only).\n`)
+md.push(`Years attempted: ${YEARS.join(', ')}.\n`)
+md.push(
+  `\n**Data confidence:** ${EXCLUDED_YEARS.length ? EXCLUDED_YEARS.join(', ') + ' are EXCLUDED from the concentration analysis' : 'all years used'} — Sleeper's NFL player map omits players who retired before ~2012, so those drafts lose real studs that cannot be name-joined (unmatched > $${UNMATCH_THRESHOLD}). Clean years used: ${CLEAN_YEARS.join(', ')}. Per-year unmatched $: ${yearQuality.map((q) => q.year + '=$' + q.unmatched).join(', ')}. Real end-of-season finishes for every year live in \`src/data/league-history/nasties-standings.json\`.\n`,
+)
 md.push('\n## The question: does spending big on two players win?\n')
 md.push('| Group | avg top-2 spend | avg as-drafted finish | made top-6 |')
 md.push('|---|---|---|---|')
 md.push(`| HIGH concentration (top third) | ${avgTop2(highConc)}% of budget | ${avgFinish(highConc)} / 12 | ${topHalf(highConc)}% |`)
 md.push(`| LOW concentration (bottom third) | ${avgTop2(lowConc)}% of budget | ${avgFinish(lowConc)} / 12 | ${topHalf(lowConc)}% |`)
-md.push(`\nCorrelation(top-2 spend %, finish rank) = **${r.toFixed(3)}** (positive = concentration finishes worse). Small sample (${rows.length} team-seasons); directional, not conclusive.\n`)
+md.push(`\nCorrelation(top-2 spend %, finish rank) = **${r.toFixed(3)}** (positive = concentration finishes worse). Sample: ${cleanRows.length} team-seasons across ${CLEAN_YEARS.length} clean years; directional, not conclusive.\n`)
 md.push('\n## Rasar (you) — as-drafted finishes\n')
 md.push('| Year | As-drafted finish | Total pts | Top-2 spend |')
 md.push('|---|---|---|---|')
