@@ -2,6 +2,20 @@
 
 ---
 
+## 2026-08-19 / R14 finding #1 -- batch user-tags 500 on null leagueId (/prep/board, /prep/simulate)
+
+**Class:** bugfix (QA lens). Found during the Phase 2 R14 usability walkthrough (live probes against a `next start` server on 3141 + DEV_MODE).
+
+- **What / why:** `POST /api/user-tags/batch` 500'd with `invalid input syntax for type uuid: "null"` whenever a caller passed `leagueId: null` with `includeGlobal` (the default true). `/prep/board` (`selectedLeagueId`) and `/prep/simulate` (`selectedLeagueId`) both pass `leagueId=null` before a league finishes loading, so their TARGET/AVOID tag load crashed in that window. `player_cache_id` and `league_id` are uuid columns; the route's branch order checked `includeGlobal` first and interpolated null into `.or('league_id.eq.null,league_id.is.null')`, sending the literal string `"null"` to Postgres (22P02).
+- **Root cause:** branch order. The GET route guards with `if (leagueId)` (truthy) so null is safe there; the batch route used `if (leagueId !== undefined)` and let null fall into the `includeGlobal` `.eq` interpolation.
+- **Fix (`src/app/api/user-tags/batch/route.ts`):** handle `leagueId === null` FIRST -> `.is('league_id', null)` (global tags only), before the `!== undefined` / `includeGlobal` branch. `undefined` (players-page path, no league filter) and real-uuid paths are unchanged.
+- **Live proof (fresh build on :3141):** null-league path `56a45574-...` went **HTTP 500 -> HTTP 200** `{"userTagsMap":{},"count":0}`; players path (no leagueId) held **HTTP 200**.
+- **Tests (+3):** `src/app/api/user-tags/__tests__/batch-null-league.test.ts` -- null leagueId uses `.is` never `.or`/`.eq`; real leagueId still uses `.or`; omitted leagueId applies no league filter.
+
+**Gate:** `npm run type-check` 0 errors. `npm run test:run` 507/507 across 41 files (was 504/40; +3). `npm run lint` 45 errors / 111 warnings = the pre-existing baseline, 0 in the 2 touched files (0 new). `npm run build` clean, all routes prerendered. No em/en-dashes.
+
+---
+
 ## 2026-08-19 / Phase 1 -- Player Pull re-flows strategy proposals (close BUILD_PLAN:517 gap)
 
 **Class:** shared/bugfix (Architecture + QA lenses). Functionality-first sequencing after the SP-track was paused.

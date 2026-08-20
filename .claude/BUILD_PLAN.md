@@ -415,6 +415,11 @@ Work top to bottom. Each session is scoped to finish cleanly in one focused sitt
 > **Why:** Joe's phone rehearsal (R15) must not be the first human click-through.
 > **How:** load the app at **mobile viewport, arm's-length**, and walk **every** real flow end-to-end as a first-time user: Research → pull players → read a player card (tags/range/sources/fit) → set graded targets/avoids → strategies → Cheat Sheet/construction board → enter the live room → join → track picks → budget/pace/roster fit → Post Draft. Catalog every dead-end, "how do I get back," confusing label, jank, or cheap-looking moment. Screenshot each.
 > **Done-when:** a written findings list (each with a screenshot), every P1/P2 issue fixed and re-shot, and a clean full-walkthrough screenshot set. This is the "ready for Joe's hands" sign-off.
+>
+> **R14 findings log (in progress 2026-08-19):**
+> - **F1 [P1, FIXED]** `POST /api/user-tags/batch` 500'd (`invalid input syntax for type uuid: "null"`) when `leagueId=null` + `includeGlobal` — the state `/prep/board` and `/prep/simulate` pass before a league loads, crashing their TARGET/AVOID tag load. Branch-order bug; fixed to handle null before the `.eq` interpolation (mirror the GET route's `if (leagueId)` guard). Live proof 500->200; +3 tests; gate green. See CHANGELOG 2026-08-19 / R14 finding #1.
+> - **F2 [P3, observed]** `/prep` shows a "RUN FIRST PULL" call-to-action while simultaneously reporting `3,150 players · FRESH` — contradictory copy for a hub that already has fresh data. Logged for a copy pass (not a crash).
+> - **Screenshot half BLOCKED:** the in-sandbox Browser pane does not composite frames, so the pixel screenshot set in this card's done-when cannot be produced here (same constraint documented on every prior D/SP card). Functional/structural half is being run via DOM + live endpoint probes. Recommendation: fold the visual sign-off into R15 (Joe's real device) rather than block R14 on a screenshot the sandbox cannot take.
 
 ### R15 — Rehearsal GATE `[Sonnet + Joe]` · class: pipeline — **THE GATE**
 > - Class: WORKHORSE

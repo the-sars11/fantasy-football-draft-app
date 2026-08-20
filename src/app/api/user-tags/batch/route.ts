@@ -80,12 +80,18 @@ export async function POST(req: NextRequest) {
       .select('*')
       .in('player_cache_id', playerCacheIds)
 
-    // Apply league filter
-    if (leagueId !== undefined) {
+    // Apply league filter.
+    // A null leagueId means "global tags only" and must be handled BEFORE the
+    // includeGlobal branch: league_id is a uuid column, so interpolating null
+    // into `.eq.${leagueId}` sends the literal string "null" and Postgres
+    // throws 22P02 (invalid input syntax for type uuid). This mirrors the GET
+    // route's `if (leagueId)` guard so /prep/board and /prep/simulate (which
+    // pass leagueId=null before a league loads) no longer 500.
+    if (leagueId === null) {
+      query = query.is('league_id', null)
+    } else if (leagueId !== undefined) {
       if (includeGlobal) {
         query = query.or(`league_id.eq.${leagueId},league_id.is.null`)
-      } else if (leagueId === null) {
-        query = query.is('league_id', null)
       } else {
         query = query.eq('league_id', leagueId)
       }
