@@ -1,0 +1,2985 @@
+{
+  "league": "The Nasties",
+  "source": "ESPN season history .docx exports (src/data/league-history/source-docx/)",
+  "note": "RK is final end-of-season rank (playoffs included). RK=1 = champion. Authoritative real finishes.",
+  "yearsCovered": [
+    2008,
+    2009,
+    2010,
+    2011,
+    2012,
+    2013,
+    2014,
+    2015,
+    2016,
+    2017,
+    2018,
+    2019,
+    2020,
+    2021,
+    2022,
+    2023,
+    2024
+  ],
+  "championshipCounts": [
+    {
+      "ownerId": "leems",
+      "owner": "Matt Lehman",
+      "titles": 4,
+      "years": [
+        2015,
+        2016,
+        2018,
+        2020
+      ]
+    },
+    {
+      "ownerId": "reggie",
+      "owner": "rey salinas",
+      "titles": 3,
+      "years": [
+        2010,
+        2011,
+        2023
+      ]
+    },
+    {
+      "ownerId": "garrett",
+      "owner": "Garrett Hanstead",
+      "titles": 2,
+      "years": [
+        2009,
+        2017
+      ]
+    },
+    {
+      "ownerId": "rasar",
+      "owner": "Joe Rasar",
+      "titles": 2,
+      "years": [
+        2008,
+        2014
+      ]
+    },
+    {
+      "ownerId": "shultz",
+      "owner": "John Shultz",
+      "titles": 2,
+      "years": [
+        2012,
+        2021
+      ]
+    },
+    {
+      "ownerId": "cross",
+      "owner": "Andy Cross",
+      "titles": 1,
+      "years": [
+        2022
+      ]
+    },
+    {
+      "ownerId": "kevin",
+      "owner": "Kevin Roth",
+      "titles": 1,
+      "years": [
+        2024
+      ]
+    },
+    {
+      "ownerId": "wuellner",
+      "owner": "Wuellner Wuellner",
+      "titles": 1,
+      "years": [
+        2013
+      ]
+    },
+    {
+      "ownerId": "moe",
+      "owner": "jason moe",
+      "titles": 1,
+      "years": [
+        2019
+      ]
+    }
+  ],
+  "seasons": [
+    {
+      "year": 2008,
+      "teams": 10,
+      "columns": [
+        "RK",
+        "Team",
+        "REC",
+        "PF",
+        "PA",
+        "PF/G",
+        "PA/G",
+        "DIFF",
+        "MOVES"
+      ],
+      "champion": {
+        "owner": "Joe Rasar",
+        "ownerId": "rasar",
+        "team": "Team Sars"
+      },
+      "runnerUp": {
+        "owner": "John Shultz",
+        "ownerId": "shultz",
+        "team": "Team Sergeant Shultz"
+      },
+      "standings": [
+        {
+          "rank": 1,
+          "team": "Team Sars",
+          "owner": "Joe Rasar",
+          "ownerId": "rasar",
+          "record": "9-3-0",
+          "pf": 1458.0,
+          "pa": 1208.5,
+          "pfg": 121.5,
+          "pag": 100.7,
+          "diff": 20.8
+        },
+        {
+          "rank": 2,
+          "team": "Team Sergeant Shultz",
+          "owner": "John Shultz",
+          "ownerId": "shultz",
+          "record": "8-4-0",
+          "pf": 1500.5,
+          "pa": 1321.0,
+          "pfg": 125.0,
+          "pag": 110.1,
+          "diff": 15.0
+        },
+        {
+          "rank": 3,
+          "team": "Team REGGIE JACKSON",
+          "owner": "rey salinas",
+          "ownerId": "reggie",
+          "record": "7-5-0",
+          "pf": 1291.0,
+          "pa": 1195.0,
+          "pfg": 107.6,
+          "pag": 99.6,
+          "diff": 8.0
+        },
+        {
+          "rank": 4,
+          "team": "Team funk",
+          "owner": "Garrett Hanstead",
+          "ownerId": "garrett",
+          "record": "7-5-0",
+          "pf": 1340.0,
+          "pa": 1197.0,
+          "pfg": 111.7,
+          "pag": 99.8,
+          "diff": 11.9
+        },
+        {
+          "rank": 5,
+          "team": "Team Muhammad Ah Lehman",
+          "owner": "Matt Lehman",
+          "ownerId": "leems",
+          "record": "6-6-0",
+          "pf": 1269.0,
+          "pa": 1234.5,
+          "pfg": 105.8,
+          "pag": 102.9,
+          "diff": 2.9
+        },
+        {
+          "rank": 6,
+          "team": "Team Weazel",
+          "owner": "mario manrique",
+          "ownerId": "manrique",
+          "record": "5-7-0",
+          "pf": 1194.0,
+          "pa": 1165.0,
+          "pfg": 99.5,
+          "pag": 97.1,
+          "diff": 2.4
+        },
+        {
+          "rank": 7,
+          "team": "Team moe",
+          "owner": "jason moe",
+          "ownerId": "moe",
+          "record": "6-6-0",
+          "pf": 1149.5,
+          "pa": 1178.5,
+          "pfg": 95.8,
+          "pag": 98.2,
+          "diff": -2.4
+        },
+        {
+          "rank": 8,
+          "team": "Team crandall",
+          "owner": "nick crandall",
+          "ownerId": "crandall",
+          "record": "4-8-0",
+          "pf": 1346.5,
+          "pa": 1367.5,
+          "pfg": 112.2,
+          "pag": 114.0,
+          "diff": -1.8
+        },
+        {
+          "rank": 9,
+          "team": "Team LIGHTNING",
+          "owner": "Bruce Lehman",
+          "ownerId": "bruce",
+          "record": "3-9-0",
+          "pf": 1058.0,
+          "pa": 1437.0,
+          "pfg": 88.2,
+          "pag": 119.8,
+          "diff": -31.6
+        },
+        {
+          "rank": 10,
+          "team": "Team Johnson",
+          "owner": "Robbie Johnson",
+          "ownerId": "robbie",
+          "record": "5-7-0",
+          "pf": 1183.0,
+          "pa": 1485.5,
+          "pfg": 98.6,
+          "pag": 123.8,
+          "diff": -25.2
+        }
+      ]
+    },
+    {
+      "year": 2009,
+      "teams": 12,
+      "columns": [
+        "RK",
+        "Team",
+        "REC",
+        "PF",
+        "PA",
+        "PF/G",
+        "PA/G",
+        "DIFF",
+        "MOVES"
+      ],
+      "champion": {
+        "owner": "Garrett Hanstead",
+        "ownerId": "garrett",
+        "team": "FUNK Crandall UP"
+      },
+      "runnerUp": {
+        "owner": "nick crandall",
+        "ownerId": "crandall",
+        "team": "Team crandall"
+      },
+      "standings": [
+        {
+          "rank": 1,
+          "team": "FUNK Crandall UP",
+          "owner": "Garrett Hanstead",
+          "ownerId": "garrett",
+          "record": "8-5-0",
+          "pf": 1803.6,
+          "pa": 1654.4,
+          "pfg": 138.7,
+          "pag": 127.3,
+          "diff": 11.5
+        },
+        {
+          "rank": 2,
+          "team": "Team crandall",
+          "owner": "nick crandall",
+          "ownerId": "crandall",
+          "record": "7-6-0",
+          "pf": 1720.1,
+          "pa": 1633.5,
+          "pfg": 132.3,
+          "pag": 125.7,
+          "diff": 6.7
+        },
+        {
+          "rank": 3,
+          "team": "Miracle CREW",
+          "owner": "Aaron Hendrickson",
+          "ownerId": "hendrickson",
+          "record": "7-6-0",
+          "pf": 1703.9,
+          "pa": 1710.6,
+          "pfg": 131.1,
+          "pag": 131.6,
+          "diff": -0.5
+        },
+        {
+          "rank": 4,
+          "team": "Team Cinderalla Man",
+          "owner": "Robbie Johnson",
+          "ownerId": "robbie",
+          "record": "6-7-0",
+          "pf": 1609.2,
+          "pa": 1748.3,
+          "pfg": 123.8,
+          "pag": 134.5,
+          "diff": -10.7
+        },
+        {
+          "rank": 5,
+          "team": "Team Sars",
+          "owner": "James Rasar",
+          "ownerId": "james-rasar",
+          "record": "6-7-0",
+          "pf": 1772.6,
+          "pa": 1757.0,
+          "pfg": 136.4,
+          "pag": 135.2,
+          "diff": 1.2
+        },
+        {
+          "rank": 6,
+          "team": "Team LIGHTNING",
+          "owner": "Bruce Lehman",
+          "ownerId": "bruce",
+          "record": "10-3-0",
+          "pf": 1699.1,
+          "pa": 1493.1,
+          "pfg": 130.7,
+          "pag": 114.9,
+          "diff": 15.8
+        },
+        {
+          "rank": 7,
+          "team": "THE LEEMS",
+          "owner": "Matt Lehman",
+          "ownerId": "leems",
+          "record": "8-5-0",
+          "pf": 1922.8,
+          "pa": 1714.8,
+          "pfg": 147.9,
+          "pag": 131.9,
+          "diff": 16.0
+        },
+        {
+          "rank": 8,
+          "team": "Team REGGIE JACKSON",
+          "owner": "rey salinas",
+          "ownerId": "reggie",
+          "record": "7-6-0",
+          "pf": 1742.2,
+          "pa": 1691.2,
+          "pfg": 134.0,
+          "pag": 130.1,
+          "diff": 3.9
+        },
+        {
+          "rank": 9,
+          "team": "Team Sergeant Shultz",
+          "owner": "John Shultz",
+          "ownerId": "shultz",
+          "record": "4-9-0",
+          "pf": 1641.1,
+          "pa": 1724.0,
+          "pfg": 126.2,
+          "pag": 132.6,
+          "diff": -6.4
+        },
+        {
+          "rank": 10,
+          "team": "Team Weazel",
+          "owner": "mario manrique",
+          "ownerId": "manrique",
+          "record": "4-9-0",
+          "pf": 1467.1,
+          "pa": 1660.0,
+          "pfg": 112.9,
+          "pag": 127.7,
+          "diff": -14.8
+        },
+        {
+          "rank": 11,
+          "team": "Team moe",
+          "owner": "jason moe",
+          "ownerId": "moe",
+          "record": "6-7-0",
+          "pf": 1607.3,
+          "pa": 1685.1,
+          "pfg": 123.6,
+          "pag": 129.6,
+          "diff": -6.0
+        },
+        {
+          "rank": 12,
+          "team": "Team Cross",
+          "owner": "Andy Cross",
+          "ownerId": "cross",
+          "record": "5-8-0",
+          "pf": 1462.7,
+          "pa": 1679.7,
+          "pfg": 112.5,
+          "pag": 129.2,
+          "diff": -16.7
+        }
+      ]
+    },
+    {
+      "year": 2010,
+      "teams": 12,
+      "columns": [
+        "RK",
+        "Team",
+        "REC",
+        "PF",
+        "PA",
+        "PF/G",
+        "PA/G",
+        "DIFF",
+        "MOVES"
+      ],
+      "champion": {
+        "owner": "rey salinas",
+        "ownerId": "reggie",
+        "team": "Team REAPER"
+      },
+      "runnerUp": {
+        "owner": "Garrett Hanstead",
+        "ownerId": "garrett",
+        "team": "FUNK IT"
+      },
+      "standings": [
+        {
+          "rank": 1,
+          "team": "Team REAPER",
+          "owner": "rey salinas",
+          "ownerId": "reggie",
+          "record": "7-6-0",
+          "pf": 1640.6,
+          "pa": 1498.4,
+          "pfg": 126.2,
+          "pag": 115.3,
+          "diff": 10.9
+        },
+        {
+          "rank": 2,
+          "team": "FUNK IT",
+          "owner": "Garrett Hanstead",
+          "ownerId": "garrett",
+          "record": "8-5-0",
+          "pf": 1715.3,
+          "pa": 1444.6,
+          "pfg": 131.9,
+          "pag": 111.1,
+          "diff": 20.8
+        },
+        {
+          "rank": 3,
+          "team": "Team Cross",
+          "owner": "Andy Cross",
+          "ownerId": "cross",
+          "record": "7-6-0",
+          "pf": 1513.5,
+          "pa": 1614.7,
+          "pfg": 116.4,
+          "pag": 124.2,
+          "diff": -7.8
+        },
+        {
+          "rank": 4,
+          "team": "Team Moe",
+          "owner": "jason moe",
+          "ownerId": "moe",
+          "record": "10-3-0",
+          "pf": 1636.3,
+          "pa": 1441.1,
+          "pfg": 125.9,
+          "pag": 110.9,
+          "diff": 15.0
+        },
+        {
+          "rank": 5,
+          "team": "ARIAN'S NATION",
+          "owner": "Matt Lehman",
+          "ownerId": "leems",
+          "record": "7-6-0",
+          "pf": 1544.3,
+          "pa": 1580.2,
+          "pfg": 118.8,
+          "pag": 121.6,
+          "diff": -2.8
+        },
+        {
+          "rank": 6,
+          "team": "THE LIGHTNING",
+          "owner": "Bruce Lehman",
+          "ownerId": "bruce",
+          "record": "6-7-0",
+          "pf": 1564.8,
+          "pa": 1608.3,
+          "pfg": 120.4,
+          "pag": 123.7,
+          "diff": -3.3
+        },
+        {
+          "rank": 7,
+          "team": "Team MidnightExpress",
+          "owner": "Robbie Johnson",
+          "ownerId": "robbie",
+          "record": "8-5-0",
+          "pf": 1633.4,
+          "pa": 1531.9,
+          "pfg": 125.6,
+          "pag": 117.8,
+          "diff": 7.8
+        },
+        {
+          "rank": 8,
+          "team": "Kill 'Em All",
+          "owner": "Joe Rasar",
+          "ownerId": "rasar",
+          "record": "6-7-0",
+          "pf": 1568.0,
+          "pa": 1590.0,
+          "pfg": 120.6,
+          "pag": 122.3,
+          "diff": -1.7
+        },
+        {
+          "rank": 9,
+          "team": "The Serg",
+          "owner": "John Shultz",
+          "ownerId": "shultz",
+          "record": "6-7-0",
+          "pf": 1562.7,
+          "pa": 1554.1,
+          "pfg": 120.2,
+          "pag": 119.5,
+          "diff": 0.7
+        },
+        {
+          "rank": 10,
+          "team": "Team crandall",
+          "owner": "nick crandall",
+          "ownerId": "crandall",
+          "record": "5-8-0",
+          "pf": 1382.5,
+          "pa": 1602.1,
+          "pfg": 106.3,
+          "pag": 123.2,
+          "diff": -16.9
+        },
+        {
+          "rank": 11,
+          "team": "The CREW",
+          "owner": "Aaron Hendrickson",
+          "ownerId": "hendrickson",
+          "record": "5-8-0",
+          "pf": 1415.5,
+          "pa": 1510.9,
+          "pfg": 108.9,
+          "pag": 116.2,
+          "diff": -7.3
+        },
+        {
+          "rank": 12,
+          "team": "Wilbur's Wonders",
+          "owner": "Joe Wilbur",
+          "ownerId": "wilbur",
+          "record": "3-10-0",
+          "pf": 1464.2,
+          "pa": 1664.8,
+          "pfg": 112.6,
+          "pag": 128.1,
+          "diff": -15.4
+        }
+      ]
+    },
+    {
+      "year": 2011,
+      "teams": 12,
+      "columns": [
+        "RK",
+        "Team",
+        "REC",
+        "PF",
+        "PA",
+        "PF/G",
+        "PA/G",
+        "DIFF",
+        "MOVES"
+      ],
+      "champion": {
+        "owner": "rey salinas",
+        "ownerId": "reggie",
+        "team": "Team REAPER"
+      },
+      "runnerUp": {
+        "owner": "Robbie Johnson",
+        "ownerId": "robbie",
+        "team": "Team CinderellaMan"
+      },
+      "standings": [
+        {
+          "rank": 1,
+          "team": "Team REAPER",
+          "owner": "rey salinas",
+          "ownerId": "reggie",
+          "record": "12-1-0",
+          "pf": 1924.8,
+          "pa": 1462.0,
+          "pfg": 148.1,
+          "pag": 112.5,
+          "diff": 35.6
+        },
+        {
+          "rank": 2,
+          "team": "Team CinderellaMan",
+          "owner": "Robbie Johnson",
+          "ownerId": "robbie",
+          "record": "7-6-0",
+          "pf": 1630.3,
+          "pa": 1643.1,
+          "pfg": 125.4,
+          "pag": 126.4,
+          "diff": -1.0
+        },
+        {
+          "rank": 3,
+          "team": "Wilbur's Wounded",
+          "owner": "Joe Wilbur",
+          "ownerId": "wilbur",
+          "record": "10-3-0",
+          "pf": 1604.8,
+          "pa": 1468.3,
+          "pfg": 123.4,
+          "pag": 112.9,
+          "diff": 10.5
+        },
+        {
+          "rank": 4,
+          "team": "King of the PBR",
+          "owner": "John Shultz",
+          "ownerId": "shultz",
+          "record": "5-8-0",
+          "pf": 1574.5,
+          "pa": 1583.9,
+          "pfg": 121.1,
+          "pag": 121.8,
+          "diff": -0.7
+        },
+        {
+          "rank": 5,
+          "team": "G FUNK",
+          "owner": "Garrett Hanstead",
+          "ownerId": "garrett",
+          "record": "8-5-0",
+          "pf": 1787.1,
+          "pa": 1604.2,
+          "pfg": 137.5,
+          "pag": 123.4,
+          "diff": 14.1
+        },
+        {
+          "rank": 6,
+          "team": "Team Thunderstick",
+          "owner": "Joe Rasar",
+          "ownerId": "rasar",
+          "record": "7-6-0",
+          "pf": 1701.6,
+          "pa": 1587.7,
+          "pfg": 130.9,
+          "pag": 122.1,
+          "diff": 8.8
+        },
+        {
+          "rank": 7,
+          "team": "The Spoiler",
+          "owner": "Bruce Lehman",
+          "ownerId": "bruce",
+          "record": "2-11-0",
+          "pf": 1534.5,
+          "pa": 1677.2,
+          "pfg": 118.0,
+          "pag": 129.0,
+          "diff": -11.0
+        },
+        {
+          "rank": 8,
+          "team": "LEHMAN'S LEGENDS",
+          "owner": "Matt Lehman",
+          "ownerId": "leems",
+          "record": "5-8-0",
+          "pf": 1479.9,
+          "pa": 1665.6,
+          "pfg": 113.8,
+          "pag": 128.1,
+          "diff": -14.3
+        },
+        {
+          "rank": 9,
+          "team": "The CREW",
+          "owner": "Aaron Hendrickson",
+          "ownerId": "hendrickson",
+          "record": "7-6-0",
+          "pf": 1503.8,
+          "pa": 1579.2,
+          "pfg": 115.7,
+          "pag": 121.5,
+          "diff": -5.8
+        },
+        {
+          "rank": 10,
+          "team": "team moe",
+          "owner": "jason moe",
+          "ownerId": "moe",
+          "record": "2-11-0",
+          "pf": 1389.7,
+          "pa": 1772.0,
+          "pfg": 106.9,
+          "pag": 136.3,
+          "diff": -29.4
+        },
+        {
+          "rank": 11,
+          "team": "Team Cross",
+          "owner": "Andy Cross",
+          "ownerId": "cross",
+          "record": "6-7-0",
+          "pf": 1521.5,
+          "pa": 1611.5,
+          "pfg": 117.0,
+          "pag": 124.0,
+          "diff": -6.9
+        },
+        {
+          "rank": 12,
+          "team": "Team Crandall",
+          "owner": "nick crandall",
+          "ownerId": "crandall",
+          "record": "7-6-0",
+          "pf": 1500.0,
+          "pa": 1497.8,
+          "pfg": 115.4,
+          "pag": 115.2,
+          "diff": 0.2
+        }
+      ]
+    },
+    {
+      "year": 2012,
+      "teams": 12,
+      "columns": [
+        "RK",
+        "Team",
+        "REC",
+        "PF",
+        "PA",
+        "PF/G",
+        "PA/G",
+        "DIFF",
+        "MOVES"
+      ],
+      "champion": {
+        "owner": "John Shultz",
+        "ownerId": "shultz",
+        "team": "Sergeant Shultz"
+      },
+      "runnerUp": {
+        "owner": "Matt Lehman",
+        "ownerId": "leems",
+        "team": "BELICHICK YO' SELF"
+      },
+      "standings": [
+        {
+          "rank": 1,
+          "team": "Sergeant Shultz",
+          "owner": "John Shultz",
+          "ownerId": "shultz",
+          "record": "8-5-0",
+          "pf": 1699.7,
+          "pa": 1582.7,
+          "pfg": 130.7,
+          "pag": 121.7,
+          "diff": 9.0
+        },
+        {
+          "rank": 2,
+          "team": "BELICHICK YO' SELF",
+          "owner": "Matt Lehman",
+          "ownerId": "leems",
+          "record": "7-6-0",
+          "pf": 1726.8,
+          "pa": 1605.2,
+          "pfg": 132.8,
+          "pag": 123.5,
+          "diff": 9.4
+        },
+        {
+          "rank": 3,
+          "team": "Better Lucky Than Good",
+          "owner": "jason moe",
+          "ownerId": "moe",
+          "record": "8-5-0",
+          "pf": 1574.2,
+          "pa": 1517.4,
+          "pfg": 121.1,
+          "pag": 116.7,
+          "diff": 4.4
+        },
+        {
+          "rank": 4,
+          "team": "The CREW",
+          "owner": "Aaron Hendrickson",
+          "ownerId": "hendrickson",
+          "record": "8-5-0",
+          "pf": 1732.4,
+          "pa": 1572.1,
+          "pfg": 133.3,
+          "pag": 120.9,
+          "diff": 12.3
+        },
+        {
+          "rank": 5,
+          "team": "Team REAPER",
+          "owner": "rey salinas",
+          "ownerId": "reggie",
+          "record": "8-5-0",
+          "pf": 1704.7,
+          "pa": 1694.4,
+          "pfg": 131.1,
+          "pag": 130.3,
+          "diff": 0.8
+        },
+        {
+          "rank": 6,
+          "team": "Team Bootstoasses",
+          "owner": "Andy Cross",
+          "ownerId": "cross",
+          "record": "8-5-0",
+          "pf": 1642.5,
+          "pa": 1562.2,
+          "pfg": 126.3,
+          "pag": 120.2,
+          "diff": 6.2
+        },
+        {
+          "rank": 7,
+          "team": "G FUNK",
+          "owner": "Garrett Hanstead",
+          "ownerId": "garrett",
+          "record": "7-6-0",
+          "pf": 1571.9,
+          "pa": 1654.0,
+          "pfg": 120.9,
+          "pag": 127.2,
+          "diff": -6.3
+        },
+        {
+          "rank": 8,
+          "team": "Team JustWinBaby",
+          "owner": "Bruce Lehman",
+          "ownerId": "bruce",
+          "record": "4-9-0",
+          "pf": 1509.7,
+          "pa": 1578.5,
+          "pfg": 116.1,
+          "pag": 121.4,
+          "diff": -5.3
+        },
+        {
+          "rank": 9,
+          "team": "I Need A Miracle",
+          "owner": "Joe Wilbur",
+          "ownerId": "wilbur",
+          "record": "5-8-0",
+          "pf": 1613.3,
+          "pa": 1673.3,
+          "pfg": 124.1,
+          "pag": 128.7,
+          "diff": -4.6
+        },
+        {
+          "rank": 10,
+          "team": "Romo is My Boyfriend",
+          "owner": "Joe Rasar",
+          "ownerId": "rasar",
+          "record": "5-8-0",
+          "pf": 1601.8,
+          "pa": 1625.2,
+          "pfg": 123.2,
+          "pag": 125.0,
+          "diff": -1.8
+        },
+        {
+          "rank": 11,
+          "team": "... nick",
+          "owner": "nick crandall",
+          "ownerId": "crandall",
+          "record": "7-6-0",
+          "pf": 1504.3,
+          "pa": 1583.5,
+          "pfg": 115.7,
+          "pag": 121.8,
+          "diff": -6.1
+        },
+        {
+          "rank": 12,
+          "team": "Team Next Year",
+          "owner": "Robbie Johnson",
+          "ownerId": "robbie",
+          "record": "3-10-0",
+          "pf": 1422.3,
+          "pa": 1655.1,
+          "pfg": 109.4,
+          "pag": 127.3,
+          "diff": -17.9
+        }
+      ]
+    },
+    {
+      "year": 2013,
+      "teams": 12,
+      "columns": [
+        "RK",
+        "Team",
+        "REC",
+        "PF",
+        "PA",
+        "PF/G",
+        "PA/G",
+        "DIFF",
+        "MOVES"
+      ],
+      "champion": {
+        "owner": "Wuellner Wuellner",
+        "ownerId": "wuellner",
+        "team": "Team Wuellner"
+      },
+      "runnerUp": {
+        "owner": "John Shultz",
+        "ownerId": "shultz",
+        "team": "Sergeant Shultz"
+      },
+      "standings": [
+        {
+          "rank": 1,
+          "team": "Team Wuellner",
+          "owner": "Wuellner Wuellner",
+          "ownerId": "wuellner",
+          "record": "8-5-0",
+          "pf": 1621.0,
+          "pa": 1592.4,
+          "pfg": 124.7,
+          "pag": 122.5,
+          "diff": 2.2
+        },
+        {
+          "rank": 2,
+          "team": "Sergeant Shultz",
+          "owner": "John Shultz",
+          "ownerId": "shultz",
+          "record": "9-4-0",
+          "pf": 1800.2,
+          "pa": 1628.5,
+          "pfg": 138.5,
+          "pag": 125.3,
+          "diff": 13.2
+        },
+        {
+          "rank": 3,
+          "team": "Drunk Drafter",
+          "owner": "jason moe",
+          "ownerId": "moe",
+          "record": "5-8-0",
+          "pf": 1616.0,
+          "pa": 1651.9,
+          "pfg": 124.3,
+          "pag": 127.1,
+          "diff": -2.8
+        },
+        {
+          "rank": 4,
+          "team": "UNCLE RICO",
+          "owner": "Matt Lehman",
+          "ownerId": "leems",
+          "record": "8-5-0",
+          "pf": 1713.9,
+          "pa": 1652.2,
+          "pfg": 131.8,
+          "pag": 127.1,
+          "diff": 4.7
+        },
+        {
+          "rank": 5,
+          "team": "Team Roberta",
+          "owner": "Robbie Johnson",
+          "ownerId": "robbie",
+          "record": "8-5-0",
+          "pf": 1768.2,
+          "pa": 1551.1,
+          "pfg": 136.0,
+          "pag": 119.3,
+          "diff": 16.7
+        },
+        {
+          "rank": 6,
+          "team": "... Nick",
+          "owner": "nick crandall",
+          "ownerId": "crandall",
+          "record": "8-5-0",
+          "pf": 1554.8,
+          "pa": 1491.8,
+          "pfg": 119.6,
+          "pag": 114.8,
+          "diff": 4.8
+        },
+        {
+          "rank": 7,
+          "team": "Team REAPER",
+          "owner": "rey salinas",
+          "ownerId": "reggie",
+          "record": "7-6-0",
+          "pf": 1642.5,
+          "pa": 1452.9,
+          "pfg": 126.3,
+          "pag": 111.8,
+          "diff": 14.6
+        },
+        {
+          "rank": 8,
+          "team": "Team Bootstoasses",
+          "owner": "Andy Cross",
+          "ownerId": "cross",
+          "record": "7-6-0",
+          "pf": 1625.8,
+          "pa": 1607.9,
+          "pfg": 125.1,
+          "pag": 123.7,
+          "diff": 1.4
+        },
+        {
+          "rank": 9,
+          "team": "The Slot Machines",
+          "owner": "Bruce Lehman",
+          "ownerId": "bruce",
+          "record": "1-12-0",
+          "pf": 1368.3,
+          "pa": 1788.5,
+          "pfg": 105.3,
+          "pag": 137.6,
+          "diff": -32.3
+        },
+        {
+          "rank": 10,
+          "team": "G FUNK",
+          "owner": "Garrett Hanstead",
+          "ownerId": "garrett",
+          "record": "7-6-0",
+          "pf": 1550.7,
+          "pa": 1528.5,
+          "pfg": 119.3,
+          "pag": 117.6,
+          "diff": 1.7
+        },
+        {
+          "rank": 11,
+          "team": "The CREW",
+          "owner": "Aaron Hendrickson",
+          "ownerId": "hendrickson",
+          "record": "4-9-0",
+          "pf": 1471.4,
+          "pa": 1738.8,
+          "pfg": 113.2,
+          "pag": 133.8,
+          "diff": -20.6
+        },
+        {
+          "rank": 12,
+          "team": "Thunder Nuts",
+          "owner": "Joe Rasar",
+          "ownerId": "rasar",
+          "record": "6-7-0",
+          "pf": 1503.0,
+          "pa": 1551.3,
+          "pfg": 115.6,
+          "pag": 119.3,
+          "diff": -3.7
+        }
+      ]
+    },
+    {
+      "year": 2014,
+      "teams": 12,
+      "columns": [
+        "RK",
+        "Team",
+        "REC",
+        "PF",
+        "PA",
+        "PF/G",
+        "PA/G",
+        "DIFF",
+        "MOVES"
+      ],
+      "champion": {
+        "owner": "Joe Rasar",
+        "ownerId": "rasar",
+        "team": "Championship Dez-tiny"
+      },
+      "runnerUp": {
+        "owner": "John Shultz",
+        "ownerId": "shultz",
+        "team": "Sergeant Shultz"
+      },
+      "standings": [
+        {
+          "rank": 1,
+          "team": "Championship Dez-tiny",
+          "owner": "Joe Rasar",
+          "ownerId": "rasar",
+          "record": "9-4-0",
+          "pf": 1785.1,
+          "pa": 1466.6,
+          "pfg": 137.3,
+          "pag": 112.8,
+          "diff": 24.5
+        },
+        {
+          "rank": 2,
+          "team": "Sergeant Shultz",
+          "owner": "John Shultz",
+          "ownerId": "shultz",
+          "record": "8-5-0",
+          "pf": 1544.9,
+          "pa": 1601.1,
+          "pfg": 118.8,
+          "pag": 123.2,
+          "diff": -4.3
+        },
+        {
+          "rank": 3,
+          "team": "Team boutdataction",
+          "owner": "Andy Cross",
+          "ownerId": "cross",
+          "record": "8-5-0",
+          "pf": 1677.6,
+          "pa": 1590.4,
+          "pfg": 129.0,
+          "pag": 122.3,
+          "diff": 6.7
+        },
+        {
+          "rank": 4,
+          "team": "Vegas Wing Man",
+          "owner": "Wuellner Wuellner",
+          "ownerId": "wuellner",
+          "record": "8-5-0",
+          "pf": 1746.0,
+          "pa": 1662.0,
+          "pfg": 134.3,
+          "pag": 127.8,
+          "diff": 6.5
+        },
+        {
+          "rank": 5,
+          "team": "Team REAPER",
+          "owner": "rey salinas",
+          "ownerId": "reggie",
+          "record": "7-6-0",
+          "pf": 1589.0,
+          "pa": 1572.8,
+          "pfg": 122.2,
+          "pag": 121.0,
+          "diff": 1.2
+        },
+        {
+          "rank": 6,
+          "team": "The Himalaya Playas",
+          "owner": "Aaron Hendrickson",
+          "ownerId": "hendrickson",
+          "record": "8-5-0",
+          "pf": 1641.7,
+          "pa": 1501.1,
+          "pfg": 126.3,
+          "pag": 115.5,
+          "diff": 10.8
+        },
+        {
+          "rank": 7,
+          "team": "UNCLE RICO",
+          "owner": "Matt Lehman",
+          "ownerId": "leems",
+          "record": "6-7-0",
+          "pf": 1504.1,
+          "pa": 1557.7,
+          "pfg": 115.7,
+          "pag": 119.8,
+          "diff": -4.1
+        },
+        {
+          "rank": 8,
+          "team": "Team Moe",
+          "owner": "jason moe",
+          "ownerId": "moe",
+          "record": "5-8-0",
+          "pf": 1517.6,
+          "pa": 1696.5,
+          "pfg": 116.7,
+          "pag": 130.5,
+          "diff": -13.8
+        },
+        {
+          "rank": 9,
+          "team": "THE FULL NELSON!!!!",
+          "owner": "Bruce Lehman",
+          "ownerId": "bruce",
+          "record": "5-8-0",
+          "pf": 1452.9,
+          "pa": 1600.5,
+          "pfg": 111.8,
+          "pag": 123.1,
+          "diff": -11.4
+        },
+        {
+          "rank": 10,
+          "team": "Team MidnightExpress",
+          "owner": "Robbie Johnson",
+          "ownerId": "robbie",
+          "record": "6-7-0",
+          "pf": 1591.4,
+          "pa": 1507.6,
+          "pfg": 122.4,
+          "pag": 116.0,
+          "diff": 6.4
+        },
+        {
+          "rank": 11,
+          "team": "... Fuck AP",
+          "owner": "nick crandall",
+          "ownerId": "crandall",
+          "record": "5-8-0",
+          "pf": 1503.0,
+          "pa": 1693.8,
+          "pfg": 115.6,
+          "pag": 130.3,
+          "diff": -14.7
+        },
+        {
+          "rank": 12,
+          "team": "Team BedonkaGronk",
+          "owner": "Garrett Hanstead",
+          "ownerId": "garrett",
+          "record": "3-10-0",
+          "pf": 1576.5,
+          "pa": 1679.7,
+          "pfg": 121.3,
+          "pag": 129.2,
+          "diff": -7.9
+        }
+      ]
+    },
+    {
+      "year": 2015,
+      "teams": 12,
+      "columns": [
+        "RK",
+        "Team",
+        "REC",
+        "PF",
+        "PA",
+        "PF/G",
+        "PA/G",
+        "DIFF",
+        "MOVES"
+      ],
+      "champion": {
+        "owner": "Matt Lehman",
+        "ownerId": "leems",
+        "team": "UNCLE RICO"
+      },
+      "runnerUp": {
+        "owner": "John Shultz",
+        "ownerId": "shultz",
+        "team": "Sergeant Shultz"
+      },
+      "standings": [
+        {
+          "rank": 1,
+          "team": "UNCLE RICO",
+          "owner": "Matt Lehman",
+          "ownerId": "leems",
+          "record": "10-3-0",
+          "pf": 1598.9,
+          "pa": 1395.1,
+          "pfg": 123.0,
+          "pag": 107.3,
+          "diff": 15.7
+        },
+        {
+          "rank": 2,
+          "team": "Sergeant Shultz",
+          "owner": "John Shultz",
+          "ownerId": "shultz",
+          "record": "7-6-0",
+          "pf": 1710.5,
+          "pa": 1692.9,
+          "pfg": 131.6,
+          "pag": 130.2,
+          "diff": 1.4
+        },
+        {
+          "rank": 3,
+          "team": "Team SQUISHY BALLS",
+          "owner": "Bruce Lehman",
+          "ownerId": "bruce",
+          "record": "11-2-0",
+          "pf": 1752.2,
+          "pa": 1402.9,
+          "pfg": 134.8,
+          "pag": 107.9,
+          "diff": 26.9
+        },
+        {
+          "rank": 4,
+          "team": "Garbage Time",
+          "owner": "Wuellner Wuellner",
+          "ownerId": "wuellner",
+          "record": "8-5-0",
+          "pf": 1592.6,
+          "pa": 1604.9,
+          "pfg": 122.5,
+          "pag": 123.5,
+          "diff": -0.9
+        },
+        {
+          "rank": 5,
+          "team": "Monday Night Miracle",
+          "owner": "jason moe",
+          "ownerId": "moe",
+          "record": "6-7-0",
+          "pf": 1659.5,
+          "pa": 1493.2,
+          "pfg": 127.7,
+          "pag": 114.9,
+          "diff": 12.8
+        },
+        {
+          "rank": 6,
+          "team": "Gronk Smash",
+          "owner": "Joe Rasar",
+          "ownerId": "rasar",
+          "record": "6-7-0",
+          "pf": 1600.3,
+          "pa": 1509.5,
+          "pfg": 123.1,
+          "pag": 116.1,
+          "diff": 7.0
+        },
+        {
+          "rank": 7,
+          "team": "Robbie Johnson",
+          "owner": "Robbie Johnson",
+          "ownerId": "robbie",
+          "record": "7-6-0",
+          "pf": 1590.2,
+          "pa": 1676.0,
+          "pfg": 122.3,
+          "pag": 128.9,
+          "diff": -6.6
+        },
+        {
+          "rank": 8,
+          "team": "Julio! Get the stretch",
+          "owner": "Garrett Hanstead",
+          "ownerId": "garrett",
+          "record": "5-8-0",
+          "pf": 1590.1,
+          "pa": 1634.1,
+          "pfg": 122.3,
+          "pag": 125.7,
+          "diff": -3.4
+        },
+        {
+          "rank": 9,
+          "team": "Himalaya Playas",
+          "owner": "Aaron Hendrickson",
+          "ownerId": "hendrickson",
+          "record": "3-10-0",
+          "pf": 1324.8,
+          "pa": 1657.3,
+          "pfg": 101.9,
+          "pag": 127.5,
+          "diff": -25.6
+        },
+        {
+          "rank": 10,
+          "team": "REAPER",
+          "owner": "rey salinas",
+          "ownerId": "reggie",
+          "record": "5-8-0",
+          "pf": 1642.8,
+          "pa": 1659.8,
+          "pfg": 126.4,
+          "pag": 127.7,
+          "diff": -1.3
+        },
+        {
+          "rank": 11,
+          "team": "NO Dress for me",
+          "owner": "nick crandall",
+          "ownerId": "crandall",
+          "record": "5-8-0",
+          "pf": 1356.1,
+          "pa": 1555.5,
+          "pfg": 104.3,
+          "pag": 119.7,
+          "diff": -15.3
+        },
+        {
+          "rank": 12,
+          "team": "$$ Hausch Money",
+          "owner": "Andy Cross",
+          "ownerId": "cross",
+          "record": "5-8-0",
+          "pf": 1509.6,
+          "pa": 1646.4,
+          "pfg": 116.1,
+          "pag": 126.6,
+          "diff": -10.5
+        }
+      ]
+    },
+    {
+      "year": 2016,
+      "teams": 12,
+      "columns": [
+        "RK",
+        "Team",
+        "REC",
+        "PF",
+        "PA",
+        "PF/G",
+        "PA/G",
+        "DIFF",
+        "MOVES"
+      ],
+      "champion": {
+        "owner": "Matt Lehman",
+        "ownerId": "leems",
+        "team": "UNCLE RICO"
+      },
+      "runnerUp": {
+        "owner": "Joe Rasar",
+        "ownerId": "rasar",
+        "team": "Tae Kwon Joe"
+      },
+      "standings": [
+        {
+          "rank": 1,
+          "team": "UNCLE RICO",
+          "owner": "Matt Lehman",
+          "ownerId": "leems",
+          "record": "9-4-0",
+          "pf": 1637.4,
+          "pa": 1472.1,
+          "pfg": 126.0,
+          "pag": 113.2,
+          "diff": 12.7
+        },
+        {
+          "rank": 2,
+          "team": "Tae Kwon Joe",
+          "owner": "Joe Rasar",
+          "ownerId": "rasar",
+          "record": "9-4-0",
+          "pf": 1686.4,
+          "pa": 1508.3,
+          "pfg": 129.7,
+          "pag": 116.0,
+          "diff": 13.7
+        },
+        {
+          "rank": 3,
+          "team": "Sergeant Shultz",
+          "owner": "John Shultz",
+          "ownerId": "shultz",
+          "record": "9-4-0",
+          "pf": 1671.1,
+          "pa": 1503.8,
+          "pfg": 128.5,
+          "pag": 115.7,
+          "diff": 12.9
+        },
+        {
+          "rank": 4,
+          "team": "Lucky Moe Fo",
+          "owner": "jason moe",
+          "ownerId": "moe",
+          "record": "8-5-0",
+          "pf": 1598.8,
+          "pa": 1564.8,
+          "pfg": 123.0,
+          "pag": 120.4,
+          "diff": 2.6
+        },
+        {
+          "rank": 5,
+          "team": "THE REAPER",
+          "owner": "rey salinas",
+          "ownerId": "reggie",
+          "record": "8-5-0",
+          "pf": 1610.7,
+          "pa": 1495.7,
+          "pfg": 123.9,
+          "pag": 115.1,
+          "diff": 8.8
+        },
+        {
+          "rank": 6,
+          "team": "GARBAGE TIME",
+          "owner": "Wuellner Wuellner",
+          "ownerId": "wuellner",
+          "record": "8-5-0",
+          "pf": 1605.6,
+          "pa": 1564.8,
+          "pfg": 123.5,
+          "pag": 120.4,
+          "diff": 3.1
+        },
+        {
+          "rank": 7,
+          "team": "Best Friend DOUG",
+          "owner": "Bruce Lehman",
+          "ownerId": "bruce",
+          "record": "6-7-0",
+          "pf": 1578.3,
+          "pa": 1637.4,
+          "pfg": 121.4,
+          "pag": 126.0,
+          "diff": -4.5
+        },
+        {
+          "rank": 8,
+          "team": "KWISATZ HADERACH",
+          "owner": "Kevin Roth",
+          "ownerId": "kevin",
+          "record": "3-10-0",
+          "pf": 1507.9,
+          "pa": 1658.6,
+          "pfg": 116.0,
+          "pag": 127.6,
+          "diff": -11.6
+        },
+        {
+          "rank": 9,
+          "team": "Kenny powers Bitches",
+          "owner": "nick crandall",
+          "ownerId": "crandall",
+          "record": "3-10-0",
+          "pf": 1560.4,
+          "pa": 1715.6,
+          "pfg": 120.0,
+          "pag": 132.0,
+          "diff": -11.9
+        },
+        {
+          "rank": 10,
+          "team": "I got a Thielen",
+          "owner": "Garrett Hanstead",
+          "ownerId": "garrett",
+          "record": "3-10-0",
+          "pf": 1476.2,
+          "pa": 1749.8,
+          "pfg": 113.6,
+          "pag": 134.6,
+          "diff": -21.0
+        },
+        {
+          "rank": 11,
+          "team": "my jimmy in your mouth",
+          "owner": "Andy Cross",
+          "ownerId": "cross",
+          "record": "7-6-0",
+          "pf": 1605.3,
+          "pa": 1541.9,
+          "pfg": 123.5,
+          "pag": 118.6,
+          "diff": 4.9
+        },
+        {
+          "rank": 12,
+          "team": "The JOHNSON",
+          "owner": "Robbie Johnson",
+          "ownerId": "robbie",
+          "record": "5-8-0",
+          "pf": 1437.6,
+          "pa": 1562.9,
+          "pfg": 110.6,
+          "pag": 120.2,
+          "diff": -9.6
+        }
+      ]
+    },
+    {
+      "year": 2017,
+      "teams": 12,
+      "columns": [
+        "RK",
+        "Team",
+        "REC",
+        "PF",
+        "PA",
+        "PF/G",
+        "PA/G",
+        "DIFF",
+        "MOVES"
+      ],
+      "champion": {
+        "owner": "Garrett Hanstead",
+        "ownerId": "garrett",
+        "team": "Team Kareemin"
+      },
+      "runnerUp": {
+        "owner": "Matt Lehman",
+        "ownerId": "leems",
+        "team": "UNCLE RICO"
+      },
+      "standings": [
+        {
+          "rank": 1,
+          "team": "Team Kareemin",
+          "owner": "Garrett Hanstead",
+          "ownerId": "garrett",
+          "record": "10-3-0",
+          "pf": 1855.6,
+          "pa": 1498.3,
+          "pfg": 142.7,
+          "pag": 115.3,
+          "diff": 27.5
+        },
+        {
+          "rank": 2,
+          "team": "UNCLE RICO",
+          "owner": "Matt Lehman",
+          "ownerId": "leems",
+          "record": "7-6-0",
+          "pf": 1533.7,
+          "pa": 1454.9,
+          "pfg": 118.0,
+          "pag": 111.9,
+          "diff": 6.1
+        },
+        {
+          "rank": 3,
+          "team": "THE REAPER",
+          "owner": "rey salinas",
+          "ownerId": "reggie",
+          "record": "10-3-0",
+          "pf": 1665.1,
+          "pa": 1317.3,
+          "pfg": 128.1,
+          "pag": 101.3,
+          "diff": 26.8
+        },
+        {
+          "rank": 4,
+          "team": "Jackin it to Fourn",
+          "owner": "Wuellner Wuellner",
+          "ownerId": "wuellner",
+          "record": "6-7-0",
+          "pf": 1613.4,
+          "pa": 1602.7,
+          "pfg": 124.1,
+          "pag": 123.3,
+          "diff": 0.8
+        },
+        {
+          "rank": 5,
+          "team": "Sergeant Shultz",
+          "owner": "John Shultz",
+          "ownerId": "shultz",
+          "record": "8-5-0",
+          "pf": 1622.2,
+          "pa": 1575.9,
+          "pfg": 124.8,
+          "pag": 121.2,
+          "diff": 3.6
+        },
+        {
+          "rank": 6,
+          "team": "Team Moe",
+          "owner": "jason moe",
+          "ownerId": "moe",
+          "record": "9-4-0",
+          "pf": 1495.2,
+          "pa": 1306.0,
+          "pfg": 115.0,
+          "pag": 100.5,
+          "diff": 14.6
+        },
+        {
+          "rank": 7,
+          "team": "The Johnson",
+          "owner": "Robbie Johnson",
+          "ownerId": "robbie",
+          "record": "5-8-0",
+          "pf": 1467.0,
+          "pa": 1438.2,
+          "pfg": 112.8,
+          "pag": 110.6,
+          "diff": 2.2
+        },
+        {
+          "rank": 8,
+          "team": "Kenny Powers Bitches",
+          "owner": "nick crandall",
+          "ownerId": "crandall",
+          "record": "3-10-0",
+          "pf": 1458.3,
+          "pa": 1615.2,
+          "pfg": 112.2,
+          "pag": 124.2,
+          "diff": -12.1
+        },
+        {
+          "rank": 9,
+          "team": "Team Baldwin-ning",
+          "owner": "Joe Rasar",
+          "ownerId": "rasar",
+          "record": "6-7-0",
+          "pf": 1394.8,
+          "pa": 1499.7,
+          "pfg": 107.3,
+          "pag": 115.4,
+          "diff": -8.1
+        },
+        {
+          "rank": 10,
+          "team": "fuckin' kearsed",
+          "owner": "Andy Cross",
+          "ownerId": "cross",
+          "record": "4-9-0",
+          "pf": 1309.0,
+          "pa": 1611.1,
+          "pfg": 100.7,
+          "pag": 123.9,
+          "diff": -23.2
+        },
+        {
+          "rank": 11,
+          "team": "Under Achievers",
+          "owner": "Kevin Roth",
+          "ownerId": "kevin",
+          "record": "4-9-0",
+          "pf": 1307.5,
+          "pa": 1523.3,
+          "pfg": 100.6,
+          "pag": 117.2,
+          "diff": -16.6
+        },
+        {
+          "rank": 12,
+          "team": "GOLDEN LIKE A SHOWER!!!!!",
+          "owner": "Bruce Lehman",
+          "ownerId": "bruce",
+          "record": "6-7-0",
+          "pf": 1274.3,
+          "pa": 1553.5,
+          "pfg": 98.0,
+          "pag": 119.5,
+          "diff": -21.5
+        }
+      ]
+    },
+    {
+      "year": 2018,
+      "teams": 12,
+      "columns": [
+        "RK",
+        "Team",
+        "REC",
+        "PF",
+        "PA",
+        "PF/G",
+        "PA/G",
+        "DIFF",
+        "MOVES"
+      ],
+      "champion": {
+        "owner": "Matt Lehman",
+        "ownerId": "leems",
+        "team": "UNCLE RICO"
+      },
+      "runnerUp": {
+        "owner": "John Shultz",
+        "ownerId": "shultz",
+        "team": "Sergeant Shultz"
+      },
+      "standings": [
+        {
+          "rank": 1,
+          "team": "UNCLE RICO",
+          "owner": "Matt Lehman",
+          "ownerId": "leems",
+          "record": "8-5-0",
+          "pf": 1616.7,
+          "pa": 1659.4,
+          "pfg": 124.4,
+          "pag": 127.6,
+          "diff": -3.3
+        },
+        {
+          "rank": 2,
+          "team": "Sergeant Shultz",
+          "owner": "John Shultz",
+          "ownerId": "shultz",
+          "record": "9-4-0",
+          "pf": 1868.3,
+          "pa": 1785.4,
+          "pfg": 143.7,
+          "pag": 137.3,
+          "diff": 6.4
+        },
+        {
+          "rank": 3,
+          "team": "\"Mahomes, smell ya later\"",
+          "owner": "Garrett Hanstead",
+          "ownerId": "garrett",
+          "record": "10-3-0",
+          "pf": 1834.1,
+          "pa": 1519.1,
+          "pfg": 141.1,
+          "pag": 116.9,
+          "diff": 24.2
+        },
+        {
+          "rank": 4,
+          "team": "* Zeb",
+          "owner": "jason moe",
+          "ownerId": "moe",
+          "record": "8-5-0",
+          "pf": 1726.1,
+          "pa": 1620.9,
+          "pfg": 132.8,
+          "pag": 124.7,
+          "diff": 8.1
+        },
+        {
+          "rank": 5,
+          "team": "Kenny Powers Bitches",
+          "owner": "nick crandall",
+          "ownerId": "crandall",
+          "record": "8-5-0",
+          "pf": 1712.1,
+          "pa": 1720.6,
+          "pfg": 131.7,
+          "pag": 132.4,
+          "diff": -0.7
+        },
+        {
+          "rank": 6,
+          "team": "THE REAPER",
+          "owner": "rey salinas",
+          "ownerId": "reggie",
+          "record": "9-4-0",
+          "pf": 1802.4,
+          "pa": 1594.2,
+          "pfg": 138.6,
+          "pag": 122.6,
+          "diff": 16.0
+        },
+        {
+          "rank": 7,
+          "team": "Hyde Yo Wives !!!!!!",
+          "owner": "Bruce Lehman",
+          "ownerId": "bruce",
+          "record": "3-10-0",
+          "pf": 1471.6,
+          "pa": 1722.0,
+          "pfg": 113.2,
+          "pag": 132.5,
+          "diff": -19.3
+        },
+        {
+          "rank": 8,
+          "team": "You Like That?!",
+          "owner": "Andy Cross",
+          "ownerId": "cross",
+          "record": "5-8-0",
+          "pf": 1717.3,
+          "pa": 1780.0,
+          "pfg": 132.1,
+          "pag": 136.9,
+          "diff": -4.8
+        },
+        {
+          "rank": 9,
+          "team": "Watson U Talk'n Bout Willis",
+          "owner": "Kevin Roth",
+          "ownerId": "kevin",
+          "record": "6-7-0",
+          "pf": 1683.0,
+          "pa": 1630.4,
+          "pfg": 129.5,
+          "pag": 125.4,
+          "diff": 4.0
+        },
+        {
+          "rank": 10,
+          "team": "The Johnson",
+          "owner": "Robbie Johnson",
+          "ownerId": "robbie",
+          "record": "3-10-0",
+          "pf": 1559.7,
+          "pa": 1698.0,
+          "pfg": 120.0,
+          "pag": 130.6,
+          "diff": -10.6
+        },
+        {
+          "rank": 11,
+          "team": "Folding Landry",
+          "owner": "Wuellner Wuellner",
+          "ownerId": "wuellner",
+          "record": "6-7-0",
+          "pf": 1616.9,
+          "pa": 1608.9,
+          "pfg": 124.4,
+          "pag": 123.8,
+          "diff": 0.6
+        },
+        {
+          "rank": 12,
+          "team": "Leveon Ruined My Season",
+          "owner": "Joe Rasar",
+          "ownerId": "rasar",
+          "record": "3-10-0",
+          "pf": 1498.0,
+          "pa": 1767.3,
+          "pfg": 115.2,
+          "pag": 135.9,
+          "diff": -20.7
+        }
+      ]
+    },
+    {
+      "year": 2019,
+      "teams": 12,
+      "columns": [
+        "RK",
+        "Team",
+        "REC",
+        "PF",
+        "PA",
+        "PF/G",
+        "PA/G",
+        "DIFF"
+      ],
+      "champion": {
+        "owner": "jason moe",
+        "ownerId": "moe",
+        "team": "Team Moe"
+      },
+      "runnerUp": {
+        "owner": "nick crandall",
+        "ownerId": "crandall",
+        "team": "Kenny Powers Bitches"
+      },
+      "standings": [
+        {
+          "rank": 1,
+          "team": "Team Moe",
+          "owner": "jason moe",
+          "ownerId": "moe",
+          "record": "8-5-0",
+          "pf": 1666.1,
+          "pa": 1569.7,
+          "pfg": 128.2,
+          "pag": 120.7,
+          "diff": 7.4
+        },
+        {
+          "rank": 2,
+          "team": "Kenny Powers Bitches",
+          "owner": "nick crandall",
+          "ownerId": "crandall",
+          "record": "8-5-0",
+          "pf": 1591.3,
+          "pa": 1568.6,
+          "pfg": 122.4,
+          "pag": 120.7,
+          "diff": 1.7
+        },
+        {
+          "rank": 3,
+          "team": "THE REAPER",
+          "owner": "rey salinas",
+          "ownerId": "reggie",
+          "record": "10-3-0",
+          "pf": 1664.3,
+          "pa": 1532.8,
+          "pfg": 128.0,
+          "pag": 117.9,
+          "diff": 10.1
+        },
+        {
+          "rank": 4,
+          "team": "UNCLE RICO",
+          "owner": "Matt Lehman",
+          "ownerId": "leems",
+          "record": "8-5-0",
+          "pf": 1682.7,
+          "pa": 1623.0,
+          "pfg": 129.4,
+          "pag": 124.8,
+          "diff": 4.6
+        },
+        {
+          "rank": 5,
+          "team": "Born Again Christian !!!",
+          "owner": "Bruce Lehman",
+          "ownerId": "bruce",
+          "record": "7-6-0",
+          "pf": 1884.4,
+          "pa": 1681.2,
+          "pfg": 145.0,
+          "pag": 129.3,
+          "diff": 15.6
+        },
+        {
+          "rank": 6,
+          "team": "It's the Golladay season",
+          "owner": "Andy Cross",
+          "ownerId": "cross",
+          "record": "7-6-0",
+          "pf": 1628.0,
+          "pa": 1566.4,
+          "pfg": 125.2,
+          "pag": 120.5,
+          "diff": 4.7
+        },
+        {
+          "rank": 7,
+          "team": "2 Texans, 1 Kupp",
+          "owner": "Joe Rasar",
+          "ownerId": "rasar",
+          "record": "5-8-0",
+          "pf": 1658.6,
+          "pa": 1773.1,
+          "pfg": 127.6,
+          "pag": 136.4,
+          "diff": -8.8
+        },
+        {
+          "rank": 8,
+          "team": "Gurley Deez Nutz",
+          "owner": "Kevin Roth",
+          "ownerId": "kevin",
+          "record": "7-6-0",
+          "pf": 1532.7,
+          "pa": 1528.3,
+          "pfg": 117.9,
+          "pag": 117.6,
+          "diff": 0.3
+        },
+        {
+          "rank": 9,
+          "team": "Sergeant Shultz",
+          "owner": "John Shultz",
+          "ownerId": "shultz",
+          "record": "6-7-0",
+          "pf": 1539.3,
+          "pa": 1673.6,
+          "pfg": 118.4,
+          "pag": 128.7,
+          "diff": -10.3
+        },
+        {
+          "rank": 10,
+          "team": "\"Mahomes, smell ya later\"",
+          "owner": "Garrett Hanstead",
+          "ownerId": "garrett",
+          "record": "5-8-0",
+          "pf": 1525.6,
+          "pa": 1691.6,
+          "pfg": 117.4,
+          "pag": 130.1,
+          "diff": -12.8
+        },
+        {
+          "rank": 11,
+          "team": "Some Luck",
+          "owner": "Robbie Johnson",
+          "ownerId": "robbie",
+          "record": "5-8-0",
+          "pf": 1604.4,
+          "pa": 1508.0,
+          "pfg": 123.4,
+          "pag": 116.0,
+          "diff": 7.4
+        },
+        {
+          "rank": 12,
+          "team": "Im Probably A Size 14",
+          "owner": "Wuellner Wuellner",
+          "ownerId": "wuellner",
+          "record": "2-11-0",
+          "pf": 1442.8,
+          "pa": 1703.9,
+          "pfg": 111.0,
+          "pag": 131.1,
+          "diff": -20.1
+        }
+      ]
+    },
+    {
+      "year": 2020,
+      "teams": 12,
+      "columns": [
+        "RK",
+        "Team",
+        "REC",
+        "PF",
+        "PA",
+        "PF/G",
+        "PA/G",
+        "DIFF"
+      ],
+      "champion": {
+        "owner": "Matt Lehman",
+        "ownerId": "leems",
+        "team": "UNCLE RICO"
+      },
+      "runnerUp": {
+        "owner": "jason moe",
+        "ownerId": "moe",
+        "team": "Team Moe"
+      },
+      "standings": [
+        {
+          "rank": 1,
+          "team": "UNCLE RICO",
+          "owner": "Matt Lehman",
+          "ownerId": "leems",
+          "record": "10-3-0",
+          "pf": 1881.4,
+          "pa": 1600.6,
+          "pfg": 144.7,
+          "pag": 123.1,
+          "diff": 21.6
+        },
+        {
+          "rank": 2,
+          "team": "Team Moe",
+          "owner": "jason moe",
+          "ownerId": "moe",
+          "record": "8-5-0",
+          "pf": 1728.0,
+          "pa": 1475.5,
+          "pfg": 132.9,
+          "pag": 113.5,
+          "diff": 19.4
+        },
+        {
+          "rank": 3,
+          "team": "Chef Russell",
+          "owner": "Andy Cross",
+          "ownerId": "cross",
+          "record": "9-4-0",
+          "pf": 1771.2,
+          "pa": 1592.7,
+          "pfg": 136.2,
+          "pag": 122.5,
+          "diff": 13.7
+        },
+        {
+          "rank": 4,
+          "team": "Kenny Powers Bitches",
+          "owner": "nick crandall",
+          "ownerId": "crandall",
+          "record": "8-5-0",
+          "pf": 1696.6,
+          "pa": 1708.2,
+          "pfg": 130.5,
+          "pag": 131.4,
+          "diff": -0.9
+        },
+        {
+          "rank": 5,
+          "team": "Dr Sars",
+          "owner": "Joe Rasar",
+          "ownerId": "rasar",
+          "record": "9-4-0",
+          "pf": 1753.0,
+          "pa": 1486.7,
+          "pfg": 134.8,
+          "pag": 114.4,
+          "diff": 20.5
+        },
+        {
+          "rank": 6,
+          "team": "DRAFT DODGER",
+          "owner": "Tom Wuellner",
+          "ownerId": "wuellner",
+          "record": "6-7-0",
+          "pf": 1377.5,
+          "pa": 1446.8,
+          "pfg": 106.0,
+          "pag": 111.3,
+          "diff": -5.3
+        },
+        {
+          "rank": 7,
+          "team": "Team TrumpBo",
+          "owner": "Bruce Lehman",
+          "ownerId": "bruce",
+          "record": "6-7-0",
+          "pf": 1664.5,
+          "pa": 1522.5,
+          "pfg": 128.0,
+          "pag": 117.1,
+          "diff": 10.9
+        },
+        {
+          "rank": 8,
+          "team": "THE REAPER",
+          "owner": "rey salinas",
+          "ownerId": "reggie",
+          "record": "5-8-0",
+          "pf": 1446.6,
+          "pa": 1573.1,
+          "pfg": 111.3,
+          "pag": 121.0,
+          "diff": -9.7
+        },
+        {
+          "rank": 9,
+          "team": "Sleepy Rob",
+          "owner": "Robbie Johnson",
+          "ownerId": "robbie",
+          "record": "6-7-0",
+          "pf": 1577.1,
+          "pa": 1702.7,
+          "pfg": 121.3,
+          "pag": 131.0,
+          "diff": -9.7
+        },
+        {
+          "rank": 10,
+          "team": "Sergeant Shultz",
+          "owner": "John Shultz",
+          "ownerId": "shultz",
+          "record": "4-9-0",
+          "pf": 1463.8,
+          "pa": 1724.6,
+          "pfg": 112.6,
+          "pag": 132.7,
+          "diff": -20.1
+        },
+        {
+          "rank": 11,
+          "team": "\"Mahomes, smell ya later\"",
+          "owner": "Garrett Hanstead",
+          "ownerId": "garrett",
+          "record": "3-10-0",
+          "pf": 1294.9,
+          "pa": 1724.1,
+          "pfg": 99.6,
+          "pag": 132.6,
+          "diff": -33.0
+        },
+        {
+          "rank": 12,
+          "team": "#1 Oohhh Yeeaahhh",
+          "owner": "Kevin Roth",
+          "ownerId": "kevin",
+          "record": "4-9-0",
+          "pf": 1558.5,
+          "pa": 1655.6,
+          "pfg": 119.9,
+          "pag": 127.4,
+          "diff": -7.5
+        }
+      ]
+    },
+    {
+      "year": 2021,
+      "teams": 12,
+      "columns": [
+        "RK",
+        "Team",
+        "REC",
+        "PF",
+        "PA",
+        "PF/G",
+        "PA/G",
+        "DIFF"
+      ],
+      "champion": {
+        "owner": "John Shultz",
+        "ownerId": "shultz",
+        "team": "Sergeant Shultz"
+      },
+      "runnerUp": {
+        "owner": "jason moe",
+        "ownerId": "moe",
+        "team": "Team Moeter Mouth"
+      },
+      "standings": [
+        {
+          "rank": 1,
+          "team": "Sergeant Shultz",
+          "owner": "John Shultz",
+          "ownerId": "shultz",
+          "record": "10-4-0",
+          "pf": 1759.4,
+          "pa": 1641.7,
+          "pfg": 125.7,
+          "pag": 117.3,
+          "diff": 8.4
+        },
+        {
+          "rank": 2,
+          "team": "Team Moeter Mouth",
+          "owner": "jason moe",
+          "ownerId": "moe",
+          "record": "10-4-0",
+          "pf": 1958.6,
+          "pa": 1699.9,
+          "pfg": 139.9,
+          "pag": 121.4,
+          "diff": 18.5
+        },
+        {
+          "rank": 3,
+          "team": "Sleepy Rob",
+          "owner": "Robbie Johnson",
+          "ownerId": "robbie",
+          "record": "7-7-0",
+          "pf": 1895.6,
+          "pa": 1820.3,
+          "pfg": 135.4,
+          "pag": 130.0,
+          "diff": 5.4
+        },
+        {
+          "rank": 4,
+          "team": "Kupp my Waddles",
+          "owner": "Kevin Roth",
+          "ownerId": "kevin",
+          "record": "8-6-0",
+          "pf": 1710.7,
+          "pa": 1825.4,
+          "pfg": 122.2,
+          "pag": 130.4,
+          "diff": -8.2
+        },
+        {
+          "rank": 5,
+          "team": "Team Shooter",
+          "owner": "Andy Cross",
+          "ownerId": "cross",
+          "record": "9-5-0",
+          "pf": 1718.9,
+          "pa": 1633.9,
+          "pfg": 122.8,
+          "pag": 116.7,
+          "diff": 6.1
+        },
+        {
+          "rank": 6,
+          "team": "Silenced By The Lamb",
+          "owner": "Garrett Hanstead",
+          "ownerId": "garrett",
+          "record": "8-6-0",
+          "pf": 1857.4,
+          "pa": 1805.2,
+          "pfg": 132.7,
+          "pag": 128.9,
+          "diff": 3.7
+        },
+        {
+          "rank": 7,
+          "team": "Brittle Kittle and McInjury",
+          "owner": "Joe Rasar",
+          "ownerId": "rasar",
+          "record": "7-7-0",
+          "pf": 1723.8,
+          "pa": 1670.5,
+          "pfg": 123.1,
+          "pag": 119.3,
+          "diff": 3.8
+        },
+        {
+          "rank": 8,
+          "team": "THE TYREAPER HILL",
+          "owner": "rey salinas",
+          "ownerId": "reggie",
+          "record": "7-7-0",
+          "pf": 1742.8,
+          "pa": 1711.9,
+          "pfg": 124.5,
+          "pag": 122.3,
+          "diff": 2.2
+        },
+        {
+          "rank": 9,
+          "team": "Hot Chubb Time Machine",
+          "owner": "Daniel Oliver",
+          "ownerId": "oliver",
+          "record": "5-9-0",
+          "pf": 1584.3,
+          "pa": 1733.5,
+          "pfg": 113.2,
+          "pag": 123.8,
+          "diff": -10.7
+        },
+        {
+          "rank": 10,
+          "team": "... BIG COUNTRY",
+          "owner": "nick crandall",
+          "ownerId": "crandall",
+          "record": "4-10-0",
+          "pf": 1626.0,
+          "pa": 1821.3,
+          "pfg": 116.1,
+          "pag": 130.1,
+          "diff": -14.0
+        },
+        {
+          "rank": 11,
+          "team": "UNCLE RICO",
+          "owner": "Matt Lehman",
+          "ownerId": "leems",
+          "record": "4-10-0",
+          "pf": 1574.3,
+          "pa": 1852.0,
+          "pfg": 112.5,
+          "pag": 132.3,
+          "diff": -19.8
+        },
+        {
+          "rank": 12,
+          "team": "Team TrumpBo",
+          "owner": "Bruce Lehman",
+          "ownerId": "bruce",
+          "record": "5-9-0",
+          "pf": 1841.7,
+          "pa": 1777.9,
+          "pfg": 131.6,
+          "pag": 127.0,
+          "diff": 4.6
+        }
+      ]
+    },
+    {
+      "year": 2022,
+      "teams": 12,
+      "columns": [
+        "RK",
+        "Team",
+        "REC",
+        "PF",
+        "PA",
+        "PF/G",
+        "PA/G",
+        "DIFF"
+      ],
+      "champion": {
+        "owner": "Andy Cross",
+        "ownerId": "cross",
+        "team": "Team Cross"
+      },
+      "runnerUp": {
+        "owner": "rey salinas",
+        "ownerId": "reggie",
+        "team": "Team REAPER"
+      },
+      "standings": [
+        {
+          "rank": 1,
+          "team": "Team Cross",
+          "owner": "Andy Cross",
+          "ownerId": "cross",
+          "record": "10-4-0",
+          "pf": 1652.1,
+          "pa": 1395.2,
+          "pfg": 118.0,
+          "pag": 99.7,
+          "diff": 18.3
+        },
+        {
+          "rank": 2,
+          "team": "Team REAPER",
+          "owner": "rey salinas",
+          "ownerId": "reggie",
+          "record": "11-3-0",
+          "pf": 1698.7,
+          "pa": 1542.9,
+          "pfg": 121.3,
+          "pag": 110.2,
+          "diff": 11.1
+        },
+        {
+          "rank": 3,
+          "team": "Jiggle My Iggles",
+          "owner": "Joe Rasar",
+          "ownerId": "rasar",
+          "record": "10-4-0",
+          "pf": 1562.3,
+          "pa": 1474.5,
+          "pfg": 111.6,
+          "pag": 105.3,
+          "diff": 6.3
+        },
+        {
+          "rank": 4,
+          "team": "Team Johnson",
+          "owner": "Robbie Johnson",
+          "ownerId": "robbie",
+          "record": "7-7-0",
+          "pf": 1564.4,
+          "pa": 1534.9,
+          "pfg": 111.7,
+          "pag": 109.6,
+          "diff": 2.1
+        },
+        {
+          "rank": 5,
+          "team": "UNCLE RICO",
+          "owner": "Matt Lehman",
+          "ownerId": "leems",
+          "record": "8-6-0",
+          "pf": 1651.3,
+          "pa": 1462.5,
+          "pfg": 118.0,
+          "pag": 104.5,
+          "diff": 13.5
+        },
+        {
+          "rank": 6,
+          "team": "Nuclear Ultra MAGA Bruce",
+          "owner": "Bruce Lehman",
+          "ownerId": "bruce",
+          "record": "7-7-0",
+          "pf": 1592.0,
+          "pa": 1590.3,
+          "pfg": 113.7,
+          "pag": 113.6,
+          "diff": 0.1
+        },
+        {
+          "rank": 7,
+          "team": "Sergeant Shultz",
+          "owner": "John Shultz",
+          "ownerId": "shultz",
+          "record": "5-9-0",
+          "pf": 1506.9,
+          "pa": 1621.7,
+          "pfg": 107.6,
+          "pag": 115.8,
+          "diff": -8.2
+        },
+        {
+          "rank": 8,
+          "team": "Team Oliver",
+          "owner": "Daniel Oliver",
+          "ownerId": "oliver",
+          "record": "5-9-0",
+          "pf": 1483.1,
+          "pa": 1631.0,
+          "pfg": 105.9,
+          "pag": 116.5,
+          "diff": -10.6
+        },
+        {
+          "rank": 9,
+          "team": "# Neverlast",
+          "owner": "Kevin Roth",
+          "ownerId": "kevin",
+          "record": "5-9-0",
+          "pf": 1469.1,
+          "pa": 1611.2,
+          "pfg": 104.9,
+          "pag": 115.1,
+          "diff": -10.1
+        },
+        {
+          "rank": 10,
+          "team": "Team Hanstead",
+          "owner": "Garrett Hanstead",
+          "ownerId": "garrett",
+          "record": "6-8-0",
+          "pf": 1475.6,
+          "pa": 1459.6,
+          "pfg": 105.4,
+          "pag": 104.3,
+          "diff": 1.1
+        },
+        {
+          "rank": 11,
+          "team": "Team Moe",
+          "owner": "jason moe",
+          "ownerId": "moe",
+          "record": "5-9-0",
+          "pf": 1429.8,
+          "pa": 1596.0,
+          "pfg": 102.1,
+          "pag": 114.0,
+          "diff": -11.9
+        },
+        {
+          "rank": 12,
+          "team": "Team Crandall",
+          "owner": "nick crandall",
+          "ownerId": "crandall",
+          "record": "5-9-0",
+          "pf": 1466.6,
+          "pa": 1632.1,
+          "pfg": 104.8,
+          "pag": 116.6,
+          "diff": -11.8
+        }
+      ]
+    },
+    {
+      "year": 2023,
+      "teams": 12,
+      "columns": [
+        "RK",
+        "Team",
+        "REC",
+        "PF",
+        "PA",
+        "PF/G",
+        "PA/G",
+        "DIFF"
+      ],
+      "champion": {
+        "owner": "rey salinas",
+        "ownerId": "reggie",
+        "team": "REAPER"
+      },
+      "runnerUp": {
+        "owner": "John Shultz",
+        "ownerId": "shultz",
+        "team": "Sergeant Shultz"
+      },
+      "standings": [
+        {
+          "rank": 1,
+          "team": "REAPER",
+          "owner": "rey salinas",
+          "ownerId": "reggie",
+          "record": "7-7-0",
+          "pf": 1649.9,
+          "pa": 1644.2,
+          "pfg": 117.9,
+          "pag": 117.4,
+          "diff": 0.4
+        },
+        {
+          "rank": 2,
+          "team": "Sergeant Shultz",
+          "owner": "John Shultz",
+          "ownerId": "shultz",
+          "record": "8-6-0",
+          "pf": 1645.9,
+          "pa": 1591.1,
+          "pfg": 117.6,
+          "pag": 113.6,
+          "diff": 3.9
+        },
+        {
+          "rank": 3,
+          "team": "Etienne Your Lunch",
+          "owner": "Joe Rasar",
+          "ownerId": "rasar",
+          "record": "11-3-0",
+          "pf": 1863.0,
+          "pa": 1458.3,
+          "pfg": 133.1,
+          "pag": 104.2,
+          "diff": 28.9
+        },
+        {
+          "rank": 4,
+          "team": "Team Hanstead",
+          "owner": "Garrett Hanstead",
+          "ownerId": "garrett",
+          "record": "11-3-0",
+          "pf": 1676.7,
+          "pa": 1550.2,
+          "pfg": 119.8,
+          "pag": 110.7,
+          "diff": 9.0
+        },
+        {
+          "rank": 5,
+          "team": "Aint very purdy",
+          "owner": "Andy Cross",
+          "ownerId": "cross",
+          "record": "8-6-0",
+          "pf": 1592.8,
+          "pa": 1589.9,
+          "pfg": 113.8,
+          "pag": 113.6,
+          "diff": 0.2
+        },
+        {
+          "rank": 6,
+          "team": "Team Moe",
+          "owner": "jason moe",
+          "ownerId": "moe",
+          "record": "10-4-0",
+          "pf": 1528.0,
+          "pa": 1445.8,
+          "pfg": 109.1,
+          "pag": 103.3,
+          "diff": 5.9
+        },
+        {
+          "rank": 7,
+          "team": "UNCLE RICO",
+          "owner": "Matt Lehman",
+          "ownerId": "leems",
+          "record": "5-9-0",
+          "pf": 1491.2,
+          "pa": 1541.8,
+          "pfg": 106.5,
+          "pag": 110.1,
+          "diff": -3.6
+        },
+        {
+          "rank": 8,
+          "team": "Team Oliver",
+          "owner": "Daniel Oliver",
+          "ownerId": "oliver",
+          "record": "4-10-0",
+          "pf": 1495.0,
+          "pa": 1671.1,
+          "pfg": 106.8,
+          "pag": 119.4,
+          "diff": -12.6
+        },
+        {
+          "rank": 9,
+          "team": "Nuclear Ultra MAGA Bruce",
+          "owner": "Bruce Lehman",
+          "ownerId": "bruce",
+          "record": "7-7-0",
+          "pf": 1605.4,
+          "pa": 1592.9,
+          "pfg": 114.7,
+          "pag": 113.8,
+          "diff": 0.9
+        },
+        {
+          "rank": 10,
+          "team": "Get Ridley of Hope",
+          "owner": "Kevin Roth",
+          "ownerId": "kevin",
+          "record": "5-9-0",
+          "pf": 1559.0,
+          "pa": 1708.9,
+          "pfg": 111.4,
+          "pag": 122.1,
+          "diff": -10.7
+        },
+        {
+          "rank": 11,
+          "team": "Team Crandall",
+          "owner": "nick crandall",
+          "ownerId": "crandall",
+          "record": "6-8-0",
+          "pf": 1511.6,
+          "pa": 1577.1,
+          "pfg": 108.0,
+          "pag": 112.7,
+          "diff": -4.7
+        },
+        {
+          "rank": 12,
+          "team": "Team Johnson",
+          "owner": "Robbie Johnson",
+          "ownerId": "robbie",
+          "record": "2-12-0",
+          "pf": 1409.8,
+          "pa": 1657.0,
+          "pfg": 100.7,
+          "pag": 118.4,
+          "diff": -17.7
+        }
+      ]
+    },
+    {
+      "year": 2024,
+      "teams": 12,
+      "columns": [
+        "RK",
+        "Team",
+        "REC",
+        "PF",
+        "PA",
+        "PF/G",
+        "PA/G",
+        "DIFF"
+      ],
+      "champion": {
+        "owner": "Kevin Roth",
+        "ownerId": "kevin",
+        "team": "Jacobim Mugatu"
+      },
+      "runnerUp": {
+        "owner": "Joe Rasar",
+        "ownerId": "rasar",
+        "team": "Pickens Some Flowers"
+      },
+      "standings": [
+        {
+          "rank": 1,
+          "team": "Jacobim Mugatu",
+          "owner": "Kevin Roth",
+          "ownerId": "kevin",
+          "record": "10-4-0",
+          "pf": 1779.3,
+          "pa": 1437.5,
+          "pfg": 127.1,
+          "pag": 102.7,
+          "diff": 24.4
+        },
+        {
+          "rank": 2,
+          "team": "Pickens Some Flowers",
+          "owner": "Joe Rasar",
+          "ownerId": "rasar",
+          "record": "8-6-0",
+          "pf": 1603.3,
+          "pa": 1574.9,
+          "pfg": 114.5,
+          "pag": 112.5,
+          "diff": 2.0
+        },
+        {
+          "rank": 3,
+          "team": "Sergeant Shultz",
+          "owner": "John Shultz",
+          "ownerId": "shultz",
+          "record": "12-2-0",
+          "pf": 1671.6,
+          "pa": 1491.6,
+          "pfg": 119.4,
+          "pag": 106.5,
+          "diff": 12.9
+        },
+        {
+          "rank": 4,
+          "team": "Team Moe",
+          "owner": "jason moe",
+          "ownerId": "moe",
+          "record": "7-7-0",
+          "pf": 1601.4,
+          "pa": 1588.3,
+          "pfg": 114.4,
+          "pag": 113.5,
+          "diff": 0.9
+        },
+        {
+          "rank": 5,
+          "team": "Still Ain't Purdy",
+          "owner": "Andy Cross",
+          "ownerId": "cross",
+          "record": "10-4-0",
+          "pf": 1720.0,
+          "pa": 1502.9,
+          "pfg": 122.9,
+          "pag": 107.4,
+          "diff": 15.5
+        },
+        {
+          "rank": 6,
+          "team": "REAPER",
+          "owner": "rey salinas",
+          "ownerId": "reggie",
+          "record": "8-6-0",
+          "pf": 1461.0,
+          "pa": 1562.2,
+          "pfg": 104.4,
+          "pag": 111.6,
+          "diff": -7.2
+        },
+        {
+          "rank": 7,
+          "team": "Marvin got me starvin",
+          "owner": "Garrett Hanstead",
+          "ownerId": "garrett",
+          "record": "6-8-0",
+          "pf": 1576.4,
+          "pa": 1590.0,
+          "pfg": 112.6,
+          "pag": 113.6,
+          "diff": -1.0
+        },
+        {
+          "rank": 8,
+          "team": "Team Crandall",
+          "owner": "nick crandall",
+          "ownerId": "crandall",
+          "record": "3-11-0",
+          "pf": 1443.5,
+          "pa": 1649.4,
+          "pfg": 103.1,
+          "pag": 117.8,
+          "diff": -14.7
+        },
+        {
+          "rank": 9,
+          "team": "UNCLE RICO",
+          "owner": "Matt Lehman",
+          "ownerId": "leems",
+          "record": "4-10-0",
+          "pf": 1547.7,
+          "pa": 1704.5,
+          "pfg": 110.6,
+          "pag": 121.8,
+          "diff": -11.2
+        },
+        {
+          "rank": 10,
+          "team": "Team Johnson",
+          "owner": "Robbie Johnson",
+          "ownerId": "robbie",
+          "record": "6-8-0",
+          "pf": 1536.3,
+          "pa": 1597.8,
+          "pfg": 109.7,
+          "pag": 114.1,
+          "diff": -4.4
+        },
+        {
+          "rank": 11,
+          "team": "Team Oliver",
+          "owner": "Daniel Oliver",
+          "ownerId": "oliver",
+          "record": "6-8-0",
+          "pf": 1545.4,
+          "pa": 1589.7,
+          "pfg": 110.4,
+          "pag": 113.6,
+          "diff": -3.2
+        },
+        {
+          "rank": 12,
+          "team": "Ultra MAGA Bruce",
+          "owner": "Bruce Lehman",
+          "ownerId": "bruce",
+          "record": "4-10-0",
+          "pf": 1410.9,
+          "pa": 1608.0,
+          "pfg": 100.8,
+          "pag": 114.9,
+          "diff": -14.1
+        }
+      ]
+    }
+  ]
+}

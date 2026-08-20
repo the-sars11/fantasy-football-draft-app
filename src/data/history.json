@@ -1,12 +1,12 @@
 {
   "league": "The Nasties",
-  "founded": 2011,
-  "seasons": [2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025],
+  "founded": 2008,
+  "seasons": [2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025],
   "owners": {
     "rasar": {
       "id": "rasar",
       "aliases": ["Rasar", "Joe", "Joe Rasar"],
-      "championships": [],
+      "championships": [2008, 2014],
       "worst_seasons": [
         {
           "year": 2018,
@@ -40,7 +40,7 @@
       "patterns": [
         "Tends to overpay at RB1 in panic moments",
         "Historically great at spotting late WR value",
-        "No championships despite several competitive seasons"
+        "Two championships (2008, 2014); the 2014 team was literally named Championship Dez-tiny"
       ],
       "roast_ammo": "Rasar paid $73 for Le'Veon Bell in 2018 and got 0.0 fantasy points when Bell held out. He finished last. He also somehow drafted Justin Jefferson for $1 and Ja'Marr Chase for $2 in back-to-back years. The man is capable of brilliance and total catastrophe with equal confidence."
     },
@@ -83,8 +83,8 @@
     },
     "garrett": {
       "id": "garrett",
-      "aliases": ["Garrett"],
-      "championships": [],
+      "aliases": ["Garrett", "Garrett Hanstead"],
+      "championships": [2009, 2017],
       "worst_seasons": [
         {
           "year": 2020,
@@ -131,8 +131,8 @@
     },
     "cross": {
       "id": "cross",
-      "aliases": ["Cross"],
-      "championships": [],
+      "aliases": ["Cross", "Andy Cross"],
+      "championships": [2022],
       "worst_seasons": [],
       "signature_moments": [
         {
@@ -178,8 +178,8 @@
     },
     "reggie": {
       "id": "reggie",
-      "aliases": ["Reggie", "Rey", "Rey Reggie"],
-      "championships": [],
+      "aliases": ["Reggie", "Rey", "Rey Reggie", "rey salinas", "REAPER"],
+      "championships": [2010, 2011, 2023],
       "worst_seasons": [],
       "signature_moments": [
         {
@@ -202,8 +202,8 @@
     },
     "moe": {
       "id": "moe",
-      "aliases": ["Moe"],
-      "championships": [],
+      "aliases": ["Moe", "jason moe"],
+      "championships": [2019],
       "worst_seasons": [],
       "signature_moments": [
         {
@@ -271,8 +271,8 @@
     },
     "leems": {
       "id": "leems",
-      "aliases": ["Leems"],
-      "championships": [],
+      "aliases": ["Leems", "Matt Lehman", "UNCLE RICO"],
+      "championships": [2015, 2016, 2018, 2020],
       "worst_seasons": [],
       "signature_moments": [
         {
@@ -298,11 +298,12 @@
         }
       ],
       "patterns": [
+        "Winningest owner in league history: 4 championships (2015, 2016, 2018, 2020), more than anyone else",
         "Top-heavy every year: MJD $74 (2010), David Johnson $78 (2017), Antonio Brown $74 (2018), CMC $84 (2020), Tyreek $75 (2024)",
         "Buys two or three studs and lets the back half of the roster go for $1",
         "League member since the beginning (2010)"
       ],
-      "roast_ammo": "Leems has spent $74 or more on a single player in at least four different drafts, topping out at $84 for Christian McCaffrey in 2020, the richest single price in recorded Nasties history. He builds the same team every year: a couple of studs and a bench full of guys making the minimum."
+      "roast_ammo": "Leems has spent $74 or more on a single player in at least four different drafts, topping out at $84 for Christian McCaffrey in 2020, the richest single price in recorded Nasties history. He builds the same team every year: a couple of studs and a bench full of guys making the minimum. Annoyingly, it works: 4 championships (2015, 2016, 2018, 2020), the most anyone has won."
     },
     "crandall": {
       "id": "crandall",
@@ -341,8 +342,8 @@
     },
     "shultz": {
       "id": "shultz",
-      "aliases": ["Shultz"],
-      "championships": [],
+      "aliases": ["Shultz", "John Shultz", "Sergeant Shultz"],
+      "championships": [2012, 2021],
       "worst_seasons": [],
       "signature_moments": [
         {
