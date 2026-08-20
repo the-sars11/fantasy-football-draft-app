@@ -331,11 +331,30 @@
 .font-label { font-family: var(--font-saira-cond), ui-sans-serif, system-ui, sans-serif; }
 .font-cond { font-family: var(--font-saira-cond), ui-sans-serif, system-ui, sans-serif; }
 
-/* ── Header title treatment (Joe pick, 2026-08-15): Oswald, SOLID brick-red.
-   No emboss, no gradient, no text-shadow. Emboss/silver-bevel was rejected. */
+/* ── Title treatments — RECOVERED from the D0-locked SHIELD screen
+   (optionB_shield, Joe D0 GATE CLOSED 2026-08-14). Kanit broadcast display.
+   The 2026-08-15 flat-Oswald detour is superseded here.
+   .ffi-title-red   = hero page titles ("Research")  — deep muted-red bevel.
+   .ffi-title-chrome = card / destination titles       — chrome-silver bevel. */
 .ffi-title-red {
-  font-family: var(--font-oswald), ui-sans-serif, sans-serif;
-  color: #c25a5e;
+  font-family: var(--font-anton), ui-sans-serif, sans-serif;
+  font-weight: 700;
+  background: linear-gradient(180deg, #d06b6e 0%, #a63c41 52%, #6e2225 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  text-shadow: 0 1px 0 rgba(60, 10, 12, 0.8), 0 3px 6px rgba(0, 0, 0, 0.55);
+}
+.ffi-title-chrome {
+  font-family: var(--font-anton), ui-sans-serif, sans-serif;
+  font-weight: 700;
+  background: linear-gradient(180deg, #ffffff 0%, #eff4fa 55%, #d3deea 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.3);
 }
 
 /* ========================================
@@ -353,6 +372,31 @@
 .glass-panel {
   background: rgba(17, 26, 46, 0.92);
   border: 1px solid var(--ffi-hairline);
+}
+
+/* ── SHIELD glass — brushed-steel header/nav with a red edge-light.
+   Recovered from optionB_shield (.glass-panel in the locked mockup).
+   Use .shield-glass--top for the bottom nav (red light on the TOP inner edge),
+   .shield-glass--bottom for the header (red light on the BOTTOM inner edge). */
+.shield-glass {
+  background: linear-gradient(180deg, rgba(17, 24, 36, 0.9), rgba(9, 14, 22, 0.82));
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 8px 22px rgba(0, 0, 0, 0.5);
+}
+.shield-glass--bottom {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    inset 0 -2px 0 rgba(166, 60, 65, 0.5),
+    0 8px 22px rgba(0, 0, 0, 0.5);
+}
+.shield-glass--top {
+  box-shadow:
+    inset 0 2px 0 rgba(166, 60, 65, 0.5),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.4),
+    0 -8px 22px rgba(0, 0, 0, 0.5);
 }
 .glass-interactive {
   background: var(--ffi-surface-2);
@@ -414,6 +458,121 @@ body.ffi-on-the-clock .stadium-atmos {
 @keyframes atmos-clock-pulse {
   0%, 100% { filter: brightness(1); }
   50% { filter: brightness(1.12); }
+}
+
+/* ========================================
+   SHIELD — recovered from the D0-locked optionB_shield screen
+   (Joe D0 GATE CLOSED 2026-08-14). Blacked-out shield photo field +
+   veil, and the gunmetal nameplate card. These are the ANCHOR.
+   ======================================== */
+
+/* Base field gradient (behind the photo) */
+.shield-field {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(120% 55% at 50% -6%, rgba(95, 168, 224, 0.14), transparent 55%),
+    radial-gradient(90% 42% at 50% 104%, rgba(166, 60, 65, 0.08), transparent 60%),
+    linear-gradient(180deg, #0c1524 0%, #08101c 46%, #05070c 100%);
+  transform: translateZ(0);
+}
+
+/* Blacked-out shield photo */
+.shield-photo {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: url("/shield-bg.png") center top / cover no-repeat;
+  opacity: 0.5;
+  transform: translateZ(0);
+}
+
+/* Veil — strongest at the bottom so content stays legible as it scrolls up */
+.shield-veil {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgba(5, 7, 12, 0.3) 0%,
+    rgba(5, 7, 12, 0.45) 42%,
+    rgba(5, 7, 12, 0.8) 78%,
+    rgba(5, 7, 12, 0.92) 100%
+  );
+  transform: translateZ(0);
+}
+
+/* THE approved card — gunmetal nameplate with a brushed-steel gradient edge.
+   Gradient border drawn with a mask ring so it survives any stacking context. */
+.ffi-nameplate {
+  position: relative;
+  border-radius: 14px;
+  background:
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.028) 0 1px, rgba(255, 255, 255, 0) 1px 3px),
+    linear-gradient(180deg, #26364e 0%, #1a2637 100%);
+  border: 1px solid transparent;
+  box-shadow:
+    0 14px 34px -10px rgba(0, 0, 0, 0.72),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.45);
+}
+.ffi-nameplate::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(180deg, #54697f 0%, #33475e 52%, #1b2838 100%);
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+}
+.ffi-nameplate-interactive {
+  transition:
+    transform 0.2s var(--ease-standard),
+    box-shadow 0.2s ease;
+}
+.ffi-nameplate-interactive:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 20px 42px -12px rgba(0, 0, 0, 0.8),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.45);
+}
+
+/* Nameplate material tuned for dense list rows — same gunmetal light-catch as
+   .ffi-nameplate but a lighter shadow and NO steel edge-ring, so the row's own
+   semantic border (target blue / avoid coral / hairline) reads cleanly on top.
+   Used by the player intel rows and any other dense scannable list. */
+.ffi-plate-row {
+  background:
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.025) 0 1px, rgba(255, 255, 255, 0) 1px 3px),
+    linear-gradient(180deg, var(--ffi-surface-3) 0%, var(--ffi-surface-2) 100%);
+  box-shadow:
+    0 10px 24px -12px rgba(0, 0, 0, 0.7),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.4);
+}
+
+/* Duotone icon chip — red plate + white glyph (locked icon treatment) */
+.ffi-icon-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: rgba(166, 60, 65, 0.15);
+  border: 1px solid rgba(166, 60, 65, 0.45);
+  color: #ffffff;
 }
 
 .neon-glow { box-shadow: 0 0 22px rgba(166, 60, 65, 0.4); }

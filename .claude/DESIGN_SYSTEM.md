@@ -14,6 +14,7 @@
 | 2.0 | 2026-06-02 | Stadium Primetime (navy + glass + gold "moment") — **REJECTED 2026-06-04 as generic AI slop** |
 | **3.0** | **2026-06-04** | **GRIDIRON: colorful-dark canvas + volt/electric-blue SET palette, broadcast type (Anton/Saira), performant (no backdrop-filter stacks), auction co-pilot components. Built UXV2-2.** |
 | **3.1** | **2026-08-09** | **Shipped Live Auction Room (UXV2-6/7). The room ships from its own locally-scoped `theme.ts` palette (amber-gold + a brighter lime-volt, four color-coded moves), lean by construction (no framer-motion, no filters, no will-change), with a reduced-motion DIAL-DOWN policy. This is a documented, scoped departure from the global tokens; the rest of the app is unchanged. See "Shipped Live Auction Room" below.** |
+| **4.1** | **2026-08-19** | **SHIELD Component Contract added (no palette/type change): the recovered look is now the typed layer `src/components/ui/shield.tsx` (`ShieldBackground`/`PageTitle`/`CardTitle`/`Nameplate`/`IconChip`). `<Nameplate>` supersedes raw `.ffi-card` on content screens; acceptance bar + ESLint hex guard defined for the SP-track full-app rollout. Live audit: 572 inline-hex literals across 18 files; only /prep + /prep/players on-standard so far.** |
 | **4.0** | **2026-08-14** | **SHIELD: full new identity locked at the D0 gate and ported to the app (D1). Navy-steel FIELD canvas + muted brick-RED action accent (used sparingly) + STEEL-BLUE info/structure + chrome-silver titles + lifted steel-blue cards. Type -> Kanit (broadcast display) + Hanken Grotesk (UI). Icons -> duotone (red chip + white glyph); the `Zap` bolt is retired, Live Draft now carries a `Gavel`. GRIDIRON's volt-green and all gold are removed from the global palette. Token/class NAMES kept stable from v3 so all 61 screens repaint at once; only VALUES + treatments changed. Proven on `/prep`.** |
 
 ## Creative North Star — SHIELD
@@ -115,6 +116,36 @@ Old `.ffi-glass*` / `.glass-*` names are KEPT but re-skinned to solid layered su
 
 ---
 
+## SHIELD Component Contract — typed layer (`shield.tsx`) `[ADDED 2026-08-19]`
+
+> **This is the acceptance bar for the full-app SHIELD rollout (BUILD_PLAN SP-track). It does not change the LOCKED palette/type above — it names the sanctioned way to build with them.** The recovered SHIELD look is now a typed component layer at `src/components/ui/shield.tsx`. Compose it; never hand-roll a card, title, or icon chip.
+
+**The vocabulary is exactly two files. Nothing else may render a card/title/chip on a content screen:**
+
+| Need | Use | From |
+|------|-----|------|
+| Page canvas | `<ShieldBackground />` | `shield.tsx` (already mounted in `app-shell.tsx`) |
+| Card / panel / tappable row | `<Nameplate>` / `<Nameplate interactive>` | `shield.tsx` |
+| Page headline (red bevel) | `<PageTitle>` | `shield.tsx` |
+| Chrome section/card title | `<CardTitle>` | `shield.tsx` |
+| Icon in a chip (red plate + white glyph) | `<IconChip icon={…}>` | `shield.tsx` |
+| Buttons / badges / inputs / section headers | `FFIButton` / `FFIBadge` / `FFIInput` / `FFISectionHeader` | `ffi-primitives.tsx` |
+
+**A screen is "on-standard" only when ALL of these hold:**
+1. Cards are `<Nameplate>` (or `<Nameplate interactive>` for tappable rows) — **never** raw `.ffi-card`, **never** shadcn `Card`, **never** an inline `bg-[#…] border` div.
+2. Page headline is `<PageTitle>`; chrome titles are `<CardTitle>`.
+3. Chip icons are `<IconChip icon={…}>`.
+4. Buttons `FFIButton`, tags `FFIBadge`, inputs `FFIInput`.
+5. **Zero inline hex** — `bg-[#…]` / `text-[#…]` / `border-[#…]` are banned; all color flows from `--ffi-*` tokens. (Enforced by the ESLint `no-restricted-syntax` hex guard — warning during the SP sweep, `error` once the count hits 0.)
+6. The child feature components a screen renders meet 1–5 too (converting a screen means converting its components — hex-clean at the page level is NOT enough; the flatness usually hides one level down).
+7. Playwright screenshot pasted + Joe signs off, per screen.
+
+**Relationship to `.ffi-card`:** `.ffi-card` (defined above) is the raw class the earlier repaint left everywhere. It is now **legacy on content screens** — `<Nameplate>` is the gunmetal card that replaces it. `.ffi-card` stays defined only because primitives/library code still reference it during the transition; it is retired screen-by-screen as the SP-track converts each one.
+
+**Reference implementations (copy these):** `src/app/(app)/prep/page.tsx` and `src/app/(app)/prep/players/client.tsx` are converted, Joe-approved, and playwright-proven. `.ffi-plate-row` in `globals.css` is the row material for dense list rows that need the nameplate lift without the full card chrome.
+
+---
+
 ## Auction Co-Pilot Components (the live draft room)
 
 > **Product model:** live IN-PERSON auction. The app does NOT bid. It (1) advises and (2) records results. No bid stepper, no "Place Bid".
@@ -193,7 +224,7 @@ Cross-fades (color/opacity) are kept so state changes still read, just at half d
 
 > **SHIELD color note:** where this section says "volt" read **RED** and where it says "blue" read **steel-blue** — the semantic roles are unchanged, only the hues moved (see Color Palette). Red choreography stays reserved for the user's own moments so it never floods.
 
-Motion is a primary pillar, not polish. The bar is Family (fluid, weighted, nothing just appears) + EA FC (cinematic moments) + Linear (crisp, never gratuitous). Tech: Framer Motion + View Transitions API (`src/lib/view-transition.ts`) + CSS `@property`. Named curves: `--ease-broadcast` (wipes), `--ease-spring` (reveals/pops), `--ease-standard` (UI).
+Motion is a primary pillar, not polish. The bar is Family (fluid, weighted, nothing just appears) + EA FC (cinematic moments) + crisp utility motion (never gratuitous). Tech: Framer Motion + View Transitions API (`src/lib/view-transition.ts`) + CSS `@property`. Named curves: `--ease-broadcast` (wipes), `--ease-spring` (reveals/pops), `--ease-standard` (UI).
 
 **Signature moments (cinematic):**
 - On-the-clock: hero card spring-in (scale 0.9->1), canvas glow brightens + breathes, one-shot volt edge sheen, "Bid Up To" counts up.
@@ -204,7 +235,7 @@ Motion is a primary pillar, not polish. The bar is Family (fluid, weighted, noth
 
 **Transitions (continuity):** Board->Live morphs the tapped player card into the on-the-block hero (View Transitions / `layoutId`). Tabs/routes spring cross-fade, never a hard cut.
 
-**Micro (everywhere, Linear-crisp):** button press scale+glow, card lift, stepper number roll, filter-pill slide. Numbers tick + flash on change (volt=value, blue=info), tabular so zero layout shift. Lists cascade-in + FLIP reorder.
+**Micro (everywhere, utility-crisp):** button press scale+glow, card lift, stepper number roll, filter-pill slide. Numbers tick + flash on change (volt=value, blue=info), tabular so zero layout shift. Lists cascade-in + FLIP reorder.
 
 **Discipline (elegant, not exhausting):** cinematic on the moments; routine picks get a ~200ms acknowledgment only (a fast auction must not become a fireworks show). Reserve celebration for the user's picks, steals, and the finish.
 

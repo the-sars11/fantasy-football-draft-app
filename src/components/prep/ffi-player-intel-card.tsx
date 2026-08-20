@@ -3,17 +3,19 @@
 /**
  * FFIPlayerIntelCard
  *
- * Player card for the Player Browser. Rebuilt in D4 as a broadcast-style
- * compact list (NFL lower-third / EA FC reference, SHIELD v4):
- *   - collapsed = one thin ~50px row: position chip | name | tier | value      [D4]
- *   - expert-consensus TIER badge on the face (T1 red = elite, T2 blue, T3+ muted)
- *   - projected points demoted into the expansion                              [D4]
- *   - expansion is three labeled groups: Valuation / Outlook / Your call        [D4]
+ * Player card for the Player Browser. The D0-locked SHIELD layer: the card IS
+ * <Nameplate> (gunmetal, shield.tsx) - never a hand-rolled shell. The D4 spec
+ * (Joe-approved 2026-08-16, 4th attempt) governs the CONTENT:
+ *   - collapsed = one thin ~50px row: position chip | name | tier | value | expand
+ *   - NO headshot / NO ALL-CAPS / NO "Your value" label / NO range bar on the face
+ *   - tier badge on the face (T1 red = elite, T2 blue, T3+ muted) - the one red signal
+ *   - projected points, range bar, and the recommendation live in the EXPANSION
+ *   - expansion = labeled groups: Valuation / Outlook / Draft Intel / Your Call / math
  *
  * Every number still traces to real data: VORP worth (ESPN 2026 full-PPR,
  * roster-aware), the 16-yr Nasties room-price ledger, FantasyPros ECR/tier/std,
  * and injury status. Nothing fabricated. No ADP (that's a snake stat; this is an
- * auction). All of it re-derives on each pull, so a fresh fetch refreshes values.
+ * auction). SHIELD palette: steel-blue, brick-red, chrome - no green, no gold.
  */
 
 import { useState } from 'react'
@@ -37,9 +39,11 @@ import type { PlayerTag, PlayerTagId } from '@/lib/players/tags'
 import { computeValueRange } from '@/lib/players/value-range'
 import { computeRecommendation } from '@/lib/players/recommendation'
 import { CALIBRATION_ERA, CALIBRATION_DRAFTS_USED } from '@/lib/draft/league-calibration'
+import { Nameplate } from '@/components/ui/shield'
 
 // --- Tag styling (keyed by real tag id). Labels come from the tag itself
-//     (they carry dynamic dollars, e.g. "+$21 POCKET"). ---
+//     (they carry dynamic dollars, e.g. "+$21 POCKET"). SHIELD: positives are
+//     steel-blue (never green), tax/injury/volatile carry warning hues. ---
 
 interface TagStyle {
   bgClass: string
@@ -146,7 +150,8 @@ export function FFIPlayerIntelCard({
 
   const chip = posChipFor(player.position)
 
-  // Expert-consensus tier badge (real FantasyPros tier; 1 = elite).
+  // Expert-consensus tier badge (real FantasyPros tier; 1 = elite). The one red
+  // signal on the face (D4: RED = act-now elite, everything else earns its own tone).
   const tier = player.expertTier
   const tierBadge =
     tier != null ? (
@@ -177,7 +182,7 @@ export function FFIPlayerIntelCard({
   // Small position chip (color rail + POS + projection rank), used on face + hero.
   const posChipEl = (
     <div
-      className="flex items-baseline justify-center gap-px h-[21px] rounded-md flex-shrink-0"
+      className="flex items-baseline justify-center gap-px h-[21px] px-[7px] rounded-md flex-shrink-0"
       style={{ background: chip.bg }}
     >
       <span className="font-headline font-bold text-[11px] leading-none text-[#04070d]">{player.position}</span>
@@ -190,31 +195,29 @@ export function FFIPlayerIntelCard({
   return (
     <div className="relative group">
       {isHighlighted && !isNegative && (
-        <div className="absolute inset-0 bg-[#5FA8E0]/5 blur-2xl rounded-xl -z-10" />
+        <div className="absolute inset-0 bg-[#5FA8E0]/5 blur-2xl rounded-2xl -z-10" />
       )}
 
-      <div
+      <Nameplate
+        interactive
         className={`
-          rounded-xl overflow-hidden transition-all
+          overflow-hidden rounded-2xl transition-all
           ${isTarget
-            ? 'border border-[#5FA8E0]/40 shadow-[0_0_20px_rgba(95,168,224,0.12)]'
+            ? 'ring-1 ring-[#5FA8E0]/45 shadow-[0_0_22px_rgba(95,168,224,0.14)]'
             : isNegative
-            ? 'border border-[#ff716c]/25'
-            : isHighlighted
-            ? 'border border-[#5FA8E0]/12'
-            : 'border border-[rgba(180,200,224,0.1)] hover:border-[rgba(200,215,235,0.18)]'
+            ? 'ring-1 ring-[#ff716c]/28'
+            : ''
           }
         `}
-        style={{ background: 'var(--ffi-surface-2)' }}
       >
-        {/* ---------- COLLAPSED: one thin broadcast row ---------- */}
+        {/* ---------- COLLAPSED: one thin broadcast row (D4 spec) ---------- */}
         {!isExpanded && (
           <div
             onClick={onToggleExpand}
-            className="relative grid items-center gap-3 pl-[11px] pr-3 py-[9px] min-h-[50px] cursor-pointer overflow-hidden"
+            className="relative grid items-center gap-3 pl-[13px] pr-3 py-[9px] min-h-[50px] cursor-pointer overflow-hidden"
             style={{
-              gridTemplateColumns: '30px minmax(0,1fr) auto 16px',
-              background: `linear-gradient(90deg, ${chip.wash} 0%, transparent 38%)`,
+              gridTemplateColumns: 'auto minmax(0,1fr) auto 16px',
+              background: `linear-gradient(90deg, ${chip.wash} 0%, transparent 42%)`,
             }}
           >
             {/* color rail */}
@@ -255,7 +258,7 @@ export function FFIPlayerIntelCard({
               onClick={onToggleExpand}
               className="relative grid items-center gap-3 pl-[15px] pr-[14px] py-[13px] cursor-pointer overflow-hidden"
               style={{
-                gridTemplateColumns: '30px minmax(0,1fr) auto',
+                gridTemplateColumns: 'auto minmax(0,1fr) auto',
                 background: `linear-gradient(90deg, ${chip.wash} 0%, transparent 60%)`,
               }}
             >
@@ -270,7 +273,6 @@ export function FFIPlayerIntelCard({
               </div>
               <div className="flex flex-col items-end gap-[5px] text-right">
                 {tierBadge}
-                <div className="font-body font-bold text-[8px] tracking-[0.14em] uppercase text-[#5e708a]">Your value</div>
                 <div className="font-mono font-extrabold text-[21px] leading-none" style={{ color: '#7FC0EA' }}>
                   {rangeLabel}
                 </div>
@@ -578,7 +580,7 @@ export function FFIPlayerIntelCard({
             </div>
           </>
         )}
-      </div>
+      </Nameplate>
     </div>
   )
 }

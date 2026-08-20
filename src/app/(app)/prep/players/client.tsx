@@ -13,6 +13,7 @@ import { useState, useEffect, useMemo, useCallback } from 'react'
 import Link from 'next/link'
 import { Search, SlidersHorizontal, X, AlertTriangle, Info, Play, ChevronLeft, RefreshCw } from 'lucide-react'
 import { FFIInput, FFIButton, FFIEmptyState } from '@/components/ui/ffi-primitives'
+import { PageTitle, Nameplate } from '@/components/ui/shield'
 import { FFIPlayerIntelCard } from '@/components/prep/ffi-player-intel-card'
 import { useUserTags, useToggleTag, useSystemTagActions, useUpdateGrade } from '@/hooks/use-user-tags'
 import { cacheToPlayers } from '@/lib/players/convert'
@@ -352,10 +353,7 @@ export function PlayerBrowserClient() {
     return (
       <div className="pb-2">
         <PlayersHeader count={null} />
-        <div
-          className="rounded-[14px] p-6 text-center"
-          style={{ background: 'var(--ffi-surface-2)', border: '1px solid var(--ffi-hairline)' }}
-        >
+        <Nameplate className="rounded-[14px] p-6 text-center">
           <AlertTriangle className="h-7 w-7 mx-auto mb-2.5" style={{ color: 'var(--ffi-warning)' }} />
           <p className="text-[15px] font-bold mb-1" style={{ fontFamily: 'var(--font-cond)', color: 'var(--ffi-ink)' }}>
             Couldn&apos;t load players
@@ -364,7 +362,7 @@ export function PlayerBrowserClient() {
             The player database didn&apos;t respond. Check your connection and try again.
           </p>
           <FFIButton variant="secondary" onClick={fetchPlayers}>Retry</FFIButton>
-        </div>
+        </Nameplate>
       </div>
     )
   }
@@ -373,10 +371,7 @@ export function PlayerBrowserClient() {
     return (
       <div className="pb-2">
         <PlayersHeader count={0} />
-        <div
-          className="rounded-[14px] p-8 text-center"
-          style={{ background: 'var(--ffi-surface-2)', border: '1px solid var(--ffi-hairline)' }}
-        >
+        <Nameplate className="rounded-[14px] p-8 text-center">
           <Info className="h-7 w-7 mx-auto mb-2.5" style={{ color: 'var(--ffi-ink-3)' }} />
           <p className="text-[16px] font-bold mb-1" style={{ fontFamily: 'var(--font-cond)', color: 'var(--ffi-ink)' }}>
             No player data yet
@@ -392,7 +387,7 @@ export function PlayerBrowserClient() {
             <Play className="w-[13px] h-[13px]" strokeWidth={2.5} color="var(--ffi-volt-ink)" />
             Run research
           </Link>
-        </div>
+        </Nameplate>
       </div>
     )
   }
@@ -709,9 +704,9 @@ function PlayersHeader({ count }: { count: number | null }) {
       </Link>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <h1 className="ffi-title-red text-[26px] font-bold leading-none">
+          <PageTitle as="h1" className="text-[26px] font-bold leading-none">
             Players
-          </h1>
+          </PageTitle>
           {count !== null && (
             <span
               className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-widest"

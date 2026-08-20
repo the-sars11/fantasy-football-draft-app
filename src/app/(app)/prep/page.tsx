@@ -12,7 +12,7 @@
  * Cost guard: the pull fires the research pipeline behind an inline confirm,
  * never auto-run. It's a free data pull (no AI credits) — the confirm says so.
  *
- * Reference: Linear mobile home (row destinations, quiet labels, one accent,
+ * Reference: row destinations pattern (quiet labels, one accent,
  * subordinate utilities). Rows, not a card grid (Joe's stated FF UI rule).
  */
 
@@ -31,6 +31,8 @@ import {
   Loader2,
   AlertTriangle,
 } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
+import { PageTitle, Nameplate, IconChip } from '@/components/ui/shield'
 
 const NASTIES = 'The Nasties'
 
@@ -203,8 +205,14 @@ export default function PrepPage() {
   return (
     <div className="pb-2">
       {/* ── Screen header ─────────────────────────────────────── */}
-      <div className="flex items-center justify-between mb-1">
-        <h1 className="ffi-title-red font-extrabold text-[26px] leading-none">Research</h1>
+      <p
+        className="font-bold text-[10px] uppercase mb-1"
+        style={{ fontFamily: 'var(--font-cond)', letterSpacing: '0.32em', color: 'var(--ffi-ink-3)' }}
+      >
+        Draft Advisor
+      </p>
+      <div className="flex items-end justify-between mb-1">
+        <PageTitle className="text-[34px] leading-none">Research</PageTitle>
         <span
           className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-wider"
           style={{
@@ -228,28 +236,28 @@ export default function PrepPage() {
       <div className="space-y-2.5">
         <DestRow
           href="/prep/players"
-          icon={<Search className="w-5 h-5" strokeWidth={1.9} color="#ffffff" />}
+          icon={Search}
           label="Players"
           sub="Search &amp; scan the full pool"
           metric={playersMetric}
         />
         <DestRow
           href="/prep/board"
-          icon={<BarChart3 className="w-5 h-5" strokeWidth={1.9} color="#ffffff" />}
+          icon={BarChart3}
           label="Cheat Sheet"
           sub="Ranked, position-colored board"
           metric={cheatMetric}
         />
         <DestRow
           href="/prep/strategies"
-          icon={<Layers className="w-5 h-5" strokeWidth={1.9} color="#ffffff" />}
+          icon={Layers}
           label="Strategies"
           sub="Budget-by-position plans"
           metric={strategiesMetric}
         />
         <DestRow
           href="/prep/simulate"
-          icon={<Activity className="w-5 h-5" strokeWidth={1.9} color="#ffffff" />}
+          icon={Activity}
           label="Sims"
           sub="Mock the auction, see your rosters"
           metric={simsMetric}
@@ -290,10 +298,7 @@ export default function PrepPage() {
       {phase === 'loading' ? (
         <PullSkeleton />
       ) : phase === 'error' ? (
-        <div
-          className="rounded-[14px] p-4"
-          style={{ background: 'var(--ffi-surface-1)', border: '1px solid var(--ffi-hairline)' }}
-        >
+        <div className="ffi-nameplate p-4">
           <div className="flex items-center gap-2.5">
             <AlertTriangle className="w-[18px] h-[18px]" color="var(--ffi-warning)" strokeWidth={2} />
             <p className="font-bold text-[14px]" style={{ color: 'var(--ffi-ink)' }}>
@@ -313,10 +318,7 @@ export default function PrepPage() {
           </button>
         </div>
       ) : (
-        <div
-          className="rounded-[14px] p-3.5"
-          style={{ background: 'var(--ffi-surface-1)', border: '1px solid var(--ffi-hairline)' }}
-        >
+        <div className="ffi-nameplate p-3.5">
           {/* Status row */}
           <div className="flex items-center gap-2.5">
             <div
@@ -469,37 +471,21 @@ function DestRow({
   metric,
 }: {
   href: string
-  icon: React.ReactNode
+  icon: LucideIcon
   label: string
   sub: string
   metric: Metric
 }) {
   return (
-    <Link
-      href={href}
-      className="relative flex items-center gap-3.5 rounded-[15px] p-[15px] overflow-hidden transition-all duration-150 active:scale-[0.99]"
-      style={{
-        background: 'linear-gradient(160deg, var(--ffi-surface-3) 0%, var(--ffi-surface-2) 78%)',
-        border: '1px solid var(--ffi-hairline-bright)',
-      }}
-    >
-      {/* red identity accent */}
-      <span
-        className="absolute left-0 top-0 bottom-0 w-[3px]"
-        style={{ background: 'linear-gradient(180deg, var(--ffi-volt), var(--ffi-volt-deep))' }}
-      />
-      <div
-        className="w-11 h-11 rounded-[12px] flex items-center justify-center shrink-0"
-        style={{ background: 'rgba(166,60,65,0.16)', border: '1px solid rgba(166,60,65,0.38)' }}
-      >
-        {icon}
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="ffi-title-red font-extrabold text-[17px] leading-none">{label}</p>
-        <p className="text-[12px] mt-1 truncate" style={{ color: 'var(--ffi-ink-2)' }}>
-          {sub}
-        </p>
-      </div>
+    <Link href={href} className="block active:scale-[0.99] transition-transform duration-150">
+      <Nameplate interactive className="flex items-center gap-3.5 p-[15px]">
+        <IconChip icon={icon} size="md" className="h-11 w-11 rounded-[12px]" />
+        <div className="flex-1 min-w-0">
+          <p className="ffi-title-chrome text-[17px] leading-none">{label}</p>
+          <p className="text-[12px] mt-1 truncate" style={{ color: 'var(--ffi-ink-2)' }}>
+            {sub}
+          </p>
+        </div>
       {metric && 'badge' in metric ? (
         <span
           className="shrink-0 rounded-md px-1.5 py-1 text-[11px] font-bold uppercase"
@@ -529,11 +515,12 @@ function DestRow({
           </p>
         </div>
       ) : null}
-      <ChevronRight
-        className="w-4 h-4 shrink-0 opacity-30"
-        color="var(--ffi-ink-2)"
-        strokeWidth={2}
-      />
+        <ChevronRight
+          className="w-4 h-4 shrink-0 opacity-30"
+          color="var(--ffi-ink-2)"
+          strokeWidth={2}
+        />
+      </Nameplate>
     </Link>
   )
 }
@@ -554,11 +541,8 @@ function HighlightCard({
   players: ScoredPlayerSummary[]
 }) {
   return (
-    <Link
-      href={href}
-      className="block rounded-[13px] p-3.5 transition-all duration-150 active:scale-[0.99]"
-      style={{ background: 'var(--ffi-surface-1)', border: '1px solid var(--ffi-hairline)' }}
-    >
+    <Link href={href} className="block active:scale-[0.99] transition-transform duration-150">
+      <Nameplate interactive className="p-3.5">
       <div className="flex items-center gap-2 mb-2.5">
         <div
           className="w-6 h-6 rounded-[7px] flex items-center justify-center"
@@ -597,16 +581,14 @@ function HighlightCard({
           </span>
         ))}
       </div>
+      </Nameplate>
     </Link>
   )
 }
 
 function PullSkeleton() {
   return (
-    <div
-      className="rounded-[14px] p-3.5"
-      style={{ background: 'var(--ffi-surface-1)', border: '1px solid var(--ffi-hairline)' }}
-    >
+    <div className="ffi-nameplate p-3.5">
       <div className="flex items-center gap-2.5">
         <div className="ffi-skeleton w-[30px] h-[30px] rounded-[9px]" />
         <div className="flex-1">

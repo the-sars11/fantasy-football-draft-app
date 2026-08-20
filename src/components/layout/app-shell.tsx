@@ -21,6 +21,7 @@ import { signOut } from '@/app/(auth)/actions'
 import { NavProvider } from '@/lib/nav-context'
 import { PageTransition } from '@/components/layout/page-transition'
 import { SwipeCarousel } from '@/components/layout/swipe-carousel'
+import { ShieldBackground } from '@/components/ui/shield'
 import { motion, AnimatePresence } from 'framer-motion'
 
 interface NavItem {
@@ -102,9 +103,8 @@ export function AppShell({
   return (
     <NavProvider>
     <div className="flex h-dvh flex-col md:flex-row overflow-hidden bg-[var(--ffi-background)] relative">
-      {/* Stadium Primetime atmospheric background (UX-1.4) */}
-      <div className="stadium-atmos" aria-hidden="true" />
-      <div className="atmos-grain" aria-hidden="true" />
+      {/* SHIELD background — D0-locked blacked-out shield photo + veil (2026-08-14) */}
+      <ShieldBackground />
       {/* Desktop sidebar — hidden on mobile, and entirely on the live room */}
       {!isLiveRoom && (
       <aside
@@ -201,7 +201,7 @@ export function AppShell({
 
       {/* Mobile top header — hidden on desktop, and entirely on the live room */}
       {!isLiveRoom && (
-      <header className="flex md:hidden items-center justify-between border-b border-[var(--ffi-border)]/20 ffi-surface-secondary px-4 h-12 shrink-0 relative z-10">
+      <header className="shield-glass shield-glass--bottom flex md:hidden items-center justify-between px-4 h-12 shrink-0 relative z-10">
         <div className="flex items-center gap-2">
           <Image
             src="/icons/FFI - 32x32 - Favicon.png"
@@ -248,7 +248,7 @@ export function AppShell({
 
       {/* Mobile bottom tab bar — hidden on desktop and on the live room (FF-103) */}
       {!isLiveRoom && (
-      <nav className="flex md:hidden items-center justify-around border-t border-white/5 backdrop-blur-2xl bg-[#031018]/90 h-16 shrink-0 safe-bottom rounded-t-xl shadow-[0_-4px_20px_rgba(0,0,0,0.5)]">
+      <nav className="shield-glass shield-glass--top flex md:hidden items-center justify-around h-16 shrink-0 safe-bottom rounded-t-xl relative z-10">
         {navItems.map((item) => {
           const isActive = item.href === activeHref
           const Icon = item.icon
