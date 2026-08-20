@@ -105,7 +105,6 @@ export default function PrepPage() {
   const [phase, setPhase] = useState<Phase>('loading')
   const [league, setLeague] = useState<League | null>(null)
   const [cache, setCache] = useState<CacheStatus | null>(null)
-  const [latestRun, setLatestRun] = useState<RunListItem | null>(null)
   const [detail, setDetail] = useState<RunDetail | null>(null)
   const [strategyCount, setStrategyCount] = useState<number | null>(null)
 
@@ -148,7 +147,6 @@ export default function PrepPage() {
       }
 
       const latest = runs.find((r) => r.status === 'completed') ?? null
-      setLatestRun(latest)
 
       if (!latest) {
         setDetail(null)
@@ -432,7 +430,12 @@ export default function PrepPage() {
               ) : (
                 <>
                   <Play className="w-[13px] h-[13px]" strokeWidth={2.5} color="var(--ffi-ink-2)" />
-                  {latestRun ? 'Pull fresh data' : 'Run first pull'}
+                  {/* Key the label off `cache` (the player pool) -- the same
+                      source as the "N players · Fresh/Stale" badge above. A
+                      fresh pool means a pull already ran; keying off a saved
+                      analysis run instead showed "Run first pull" while the
+                      badge said "3,150 · Fresh" -- contradictory copy. */}
+                  {cache ? 'Pull fresh data' : 'Run first pull'}
                 </>
               )}
             </button>

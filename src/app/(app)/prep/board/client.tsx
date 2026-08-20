@@ -24,7 +24,9 @@ interface LeagueSummary {
   scoring_format: string
 }
 
-const POSITIONS: (Position | 'ALL')[] = ['ALL', 'QB', 'RB', 'WR', 'TE', 'K', 'DEF']
+// K omitted: the Nasties is a no-kicker league, so a kicker filter is dead
+// weight here (mirrors /prep/players, which omits K for the same reason).
+const POSITIONS: (Position | 'ALL')[] = ['ALL', 'QB', 'RB', 'WR', 'TE', 'DEF']
 type SortField = 'rank' | 'score' | 'value' | 'name'
 type TargetFilter = 'all' | 'target' | 'avoid' | 'neutral'
 
@@ -226,7 +228,10 @@ export function DraftBoardClient() {
 
   // Filter + sort
   const filteredPlayers = useMemo(() => {
-    let result = scoredPlayers
+    // No-kicker league: kickers never belong on the board, so drop them from
+    // the base pool (mirrors /prep/players line ~247). Keeps the ALL view and
+    // any sort from surfacing a kicker even though the K tab is gone.
+    let result = scoredPlayers.filter((sp) => sp.player.position !== 'K')
     if (positionFilter !== 'ALL') result = result.filter((sp) => sp.player.position === positionFilter)
     if (targetFilter !== 'all') result = result.filter((sp) => sp.targetStatus === targetFilter)
     return [...result].sort((a, b) => {
