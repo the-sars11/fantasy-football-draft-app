@@ -2,6 +2,21 @@
 
 ---
 
+## 2026-08-19 / R14 findings #4 + #5 -- live-room + simulate leagueId plumbing
+
+**Class:** shared/bugfix (Architecture + QA lenses). Found during the Phase 2 R14 usability walkthrough (live probes against a `next start` server on 3141 + DEV_MODE).
+
+- **F5 [P1] -- live draft room never loaded a saved strategy.** `use-live-draft-data.ts` fetched `/api/strategies` with NO leagueId inside the initial `Promise.all`. The GET route requires leagueId and 400s ("leagueId is required") without it, so `stratRes.ok` was false, the whole strategy block was skipped, `allStrategies` stayed empty, and no active strategy was ever set -- the in-room advisor fell back to "No strategy set" even when a saved strategy existed for that league. The dev intent (fetch all, filter client-side by `session.league_id`) was unreachable because the route rejects the paramless call.
+  - **Fix (`src/hooks/use-live-draft-data.ts`):** leagueId only exists after the session resolves, so the strategies fetch moved OUT of the `Promise.all` (session + players) to AFTER `sessionData`, using `sessionData.session.league_id` -> `/api/strategies?leagueId=<id>` (200). The route filters by league server-side, so the client-side league filter was dropped. Wrapped in its own try/catch so a transient strategy failure never blanks an already-loaded session.
+  - **Live proof (fresh build on :3141, brand-new tab, empty network buffer):** one room load = exactly one strategies call, `GET /api/strategies?leagueId=0d2914f1-... -> 200 OK`. Zero bare 400s. In-page contract re-check: bare = 400 `{"error":"leagueId is required"}`, `?leagueId=` = 200 `{"strategies":[]}` (this session's league has no saved strategy yet; the fetch now succeeds instead of the block being skipped, so a real saved strategy will load). Live room console: 0 errors.
+- **F4 [P2] -- /prep/simulate league Select leaked the raw uuid.** The Select trigger rendered `0d2914f1-...` instead of the league name. Radix `SelectValue` auto-text fails when the value is set programmatically on load (before the items register).
+  - **Fix (`src/app/(app)/prep/simulate/client.tsx`):** render `selectedLeague?.name` explicitly as `SelectValue` children.
+  - **Live proof (fresh build on :3141):** combobox now reads **"Nasties 2026"** (read_page ref_13), not the uuid.
+
+**Gate:** `npm run type-check` 0 errors. `npm run test:run` 507/507 across 41 files. `npm run lint` 45 errors / 111 warnings = pre-existing baseline, 0 in the 2 touched files (0 new). `npm run build` clean, all routes prerendered. No em/en-dashes. Commit `6a31095`. The concurrent-session `sim-engine.ts` + its test were left untouched (committed by explicit path).
+
+---
+
 ## 2026-08-19 / R14 finding #1 -- batch user-tags 500 on null leagueId (/prep/board, /prep/simulate)
 
 **Class:** bugfix (QA lens). Found during the Phase 2 R14 usability walkthrough (live probes against a `next start` server on 3141 + DEV_MODE).
