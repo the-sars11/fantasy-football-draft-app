@@ -1,0 +1,4271 @@
+{
+  "meta": {
+    "generated_from": "Sleeper historical weekly PPR actuals (free, keyless)",
+    "years": [
+      2010,
+      2011,
+      2012,
+      2013,
+      2014,
+      2015,
+      2017,
+      2018,
+      2019,
+      2020,
+      2021,
+      2022,
+      2023,
+      2024,
+      2025
+    ],
+    "excluded": [
+      2016
+    ],
+    "weeks_window": "1-14 (fantasy regular season)",
+    "healthy_games_max": 13,
+    "durability_definition": "gpRate = mean over real-role seasons of (games played in wks 1-14) / 13 (one bye baked in). Real role = top-48 positional finish that year.",
+    "outcome_definition": "per-game multiplier = ppg(year) / ppg(prior year), grouped by PRIOR-year positional tier; requires gp>=6 both years. Prior-year finish is the expectation proxy (no historical preseason projections on disk). Availability is layer 1, so this isolates performance variance.",
+    "bust_threshold": 0.75,
+    "breakout_threshold": 1.25,
+    "note": "All values measured from real actuals. Players lacking >=2 real seasons use the position durability baseline; thin outcome tiers fall back in the sim."
+  },
+  "durability": {
+    "baseline": {
+      "QB": 0.9524,
+      "RB": 0.9466,
+      "WR": 0.9729,
+      "TE": 0.9421,
+      "DEF": 1
+    },
+    "byPlayer": {
+      "4": {
+        "name": "Roddy White",
+        "pos": "WR",
+        "gpRate": 0.9615,
+        "seasons": 4
+      },
+      "16": {
+        "name": "Ray Rice",
+        "pos": "RB",
+        "gpRate": 0.9808,
+        "seasons": 4
+      },
+      "19": {
+        "name": "Joe Flacco",
+        "pos": "QB",
+        "gpRate": 0.6872,
+        "seasons": 15
+      },
+      "23": {
+        "name": "Jason Witten",
+        "pos": "TE",
+        "gpRate": 1,
+        "seasons": 8
+      },
+      "24": {
+        "name": "Matt Ryan",
+        "pos": "QB",
+        "gpRate": 0.9808,
+        "seasons": 12
+      },
+      "32": {
+        "name": "Jacob Tamme",
+        "pos": "TE",
+        "gpRate": 0.9846,
+        "seasons": 5
+      },
+      "34": {
+        "name": "Pierre Thomas",
+        "pos": "RB",
+        "gpRate": 0.8,
+        "seasons": 5
+      },
+      "36": {
+        "name": "Matt Hasselbeck",
+        "pos": "QB",
+        "gpRate": 0.75,
+        "seasons": 4
+      },
+      "40": {
+        "name": "Martellus Bennett",
+        "pos": "TE",
+        "gpRate": 0.9121,
+        "seasons": 7
+      },
+      "51": {
+        "name": "Anthony Fasano",
+        "pos": "TE",
+        "gpRate": 0.9231,
+        "seasons": 6
+      },
+      "57": {
+        "name": "Steven Jackson",
+        "pos": "RB",
+        "gpRate": 0.9231,
+        "seasons": 5
+      },
+      "58": {
+        "name": "Greg Olsen",
+        "pos": "TE",
+        "gpRate": 0.9316,
+        "seasons": 9
+      },
+      "64": {
+        "name": "Owen Daniels",
+        "pos": "TE",
+        "gpRate": 0.8077,
+        "seasons": 6
+      },
+      "68": {
+        "name": "Mario Manningham",
+        "pos": "WR",
+        "gpRate": 0.8846,
+        "seasons": 2
+      },
+      "69": {
+        "name": "Santana Moss",
+        "pos": "WR",
+        "gpRate": 0.8462,
+        "seasons": 2
+      },
+      "71": {
+        "name": "Jason Avant",
+        "pos": "WR",
+        "gpRate": 1,
+        "seasons": 2
+      },
+      "78": {
+        "name": "Ahmad Bradshaw",
+        "pos": "RB",
+        "gpRate": 0.8462,
+        "seasons": 4
+      },
+      "83": {
+        "name": "Tim Hightower",
+        "pos": "RB",
+        "gpRate": 0.6923,
+        "seasons": 2
+      },
+      "86": {
+        "name": "Dante Rosario",
+        "pos": "TE",
+        "gpRate": 0.9231,
+        "seasons": 3
+      },
+      "89": {
+        "name": "Chad Henne",
+        "pos": "QB",
+        "gpRate": 0.5846,
+        "seasons": 5
+      },
+      "91": {
+        "name": "Carson Palmer",
+        "pos": "QB",
+        "gpRate": 0.7912,
+        "seasons": 7
+      },
+      "92": {
+        "name": "Andre Johnson",
+        "pos": "WR",
+        "gpRate": 0.9808,
+        "seasons": 4
+      },
+      "96": {
+        "name": "Aaron Rodgers",
+        "pos": "QB",
+        "gpRate": 0.9231,
+        "seasons": 14
+      },
+      "98": {
+        "name": "Fred Davis",
+        "pos": "TE",
+        "gpRate": 0.8205,
+        "seasons": 3
+      },
+      "103": {
+        "name": "Matt Forte",
+        "pos": "RB",
+        "gpRate": 0.9121,
+        "seasons": 7
+      },
+      "108": {
+        "name": "Steve Johnson",
+        "pos": "WR",
+        "gpRate": 0.9615,
+        "seasons": 4
+      },
+      "111": {
+        "name": "Marcedes Lewis",
+        "pos": "TE",
+        "gpRate": 0.9077,
+        "seasons": 5
+      },
+      "122": {
+        "name": "Miles Austin",
+        "pos": "WR",
+        "gpRate": 0.8462,
+        "seasons": 3
+      },
+      "128": {
+        "name": "Vincent Jackson",
+        "pos": "WR",
+        "gpRate": 1,
+        "seasons": 4
+      },
+      "138": {
+        "name": "Ben Roethlisberger",
+        "pos": "QB",
+        "gpRate": 0.9077,
+        "seasons": 10
+      },
+      "142": {
+        "name": "Tony Romo",
+        "pos": "QB",
+        "gpRate": 0.7821,
+        "seasons": 6
+      },
+      "143": {
+        "name": "John Carlson",
+        "pos": "TE",
+        "gpRate": 0.9744,
+        "seasons": 3
+      },
+      "144": {
+        "name": "Matt Flynn",
+        "pos": "QB",
+        "gpRate": 0.2692,
+        "seasons": 4
+      },
+      "147": {
+        "name": "DeSean Jackson",
+        "pos": "WR",
+        "gpRate": 0.9231,
+        "seasons": 7
+      },
+      "154": {
+        "name": "Tarvaris Jackson",
+        "pos": "QB",
+        "gpRate": 0.4359,
+        "seasons": 3
+      },
+      "155": {
+        "name": "Jerricho Cotchery",
+        "pos": "WR",
+        "gpRate": 0.9231,
+        "seasons": 2
+      },
+      "167": {
+        "name": "Tom Brady",
+        "pos": "QB",
+        "gpRate": 1,
+        "seasons": 12
+      },
+      "169": {
+        "name": "Steve Smith",
+        "pos": "WR",
+        "gpRate": 0.9103,
+        "seasons": 6
+      },
+      "171": {
+        "name": "Zach Miller",
+        "pos": "TE",
+        "gpRate": 0.9231,
+        "seasons": 4
+      },
+      "175": {
+        "name": "Jordy Nelson",
+        "pos": "WR",
+        "gpRate": 0.9744,
+        "seasons": 6
+      },
+      "176": {
+        "name": "Gary Barnidge",
+        "pos": "TE",
+        "gpRate": 1,
+        "seasons": 4
+      },
+      "177": {
+        "name": "Wes Welker",
+        "pos": "WR",
+        "gpRate": 1,
+        "seasons": 4
+      },
+      "178": {
+        "name": "Matt Schaub",
+        "pos": "QB",
+        "gpRate": 0.6667,
+        "seasons": 6
+      },
+      "179": {
+        "name": "Reggie Bush",
+        "pos": "RB",
+        "gpRate": 0.8077,
+        "seasons": 4
+      },
+      "181": {
+        "name": "Drew Stanton",
+        "pos": "QB",
+        "gpRate": 0.4103,
+        "seasons": 3
+      },
+      "184": {
+        "name": "Adrian Peterson",
+        "pos": "RB",
+        "gpRate": 0.9615,
+        "seasons": 8
+      },
+      "188": {
+        "name": "Eli Manning",
+        "pos": "QB",
+        "gpRate": 0.906,
+        "seasons": 9
+      },
+      "194": {
+        "name": "Reggie Wayne",
+        "pos": "WR",
+        "gpRate": 0.9808,
+        "seasons": 4
+      },
+      "198": {
+        "name": "Kellen Clemens",
+        "pos": "QB",
+        "gpRate": 0.3462,
+        "seasons": 2
+      },
+      "200": {
+        "name": "Vernon Davis",
+        "pos": "TE",
+        "gpRate": 0.9615,
+        "seasons": 8
+      },
+      "201": {
+        "name": "Marques Colston",
+        "pos": "WR",
+        "gpRate": 0.9538,
+        "seasons": 5
+      },
+      "208": {
+        "name": "Josh McCown",
+        "pos": "QB",
+        "gpRate": 0.6154,
+        "seasons": 5
+      },
+      "218": {
+        "name": "Jonathan Stewart",
+        "pos": "RB",
+        "gpRate": 0.8846,
+        "seasons": 6
+      },
+      "221": {
+        "name": "Brent Celek",
+        "pos": "TE",
+        "gpRate": 1,
+        "seasons": 6
+      },
+      "223": {
+        "name": "Larry Fitzgerald",
+        "pos": "WR",
+        "gpRate": 1,
+        "seasons": 8
+      },
+      "228": {
+        "name": "Fred Jackson",
+        "pos": "RB",
+        "gpRate": 0.8769,
+        "seasons": 5
+      },
+      "230": {
+        "name": "Robert Meachem",
+        "pos": "WR",
+        "gpRate": 1,
+        "seasons": 2
+      },
+      "232": {
+        "name": "Frank Gore",
+        "pos": "RB",
+        "gpRate": 0.9829,
+        "seasons": 9
+      },
+      "233": {
+        "name": "Matt Moore",
+        "pos": "QB",
+        "gpRate": 0.4154,
+        "seasons": 5
+      },
+      "240": {
+        "name": "Calvin Johnson",
+        "pos": "WR",
+        "gpRate": 0.9487,
+        "seasons": 6
+      },
+      "246": {
+        "name": "Darren Sproles",
+        "pos": "RB",
+        "gpRate": 0.9359,
+        "seasons": 6
+      },
+      "247": {
+        "name": "Harry Douglas",
+        "pos": "WR",
+        "gpRate": 1,
+        "seasons": 2
+      },
+      "248": {
+        "name": "Luke McCown",
+        "pos": "QB",
+        "gpRate": 0.1538,
+        "seasons": 3
+      },
+      "250": {
+        "name": "Matt Spaeth",
+        "pos": "TE",
+        "gpRate": 0.8846,
+        "seasons": 2
+      },
+      "253": {
+        "name": "James Jones",
+        "pos": "WR",
+        "gpRate": 1,
+        "seasons": 5
+      },
+      "258": {
+        "name": "Ronnie Brown",
+        "pos": "RB",
+        "gpRate": 0.9615,
+        "seasons": 2
+      },
+      "260": {
+        "name": "Josh Johnson",
+        "pos": "QB",
+        "gpRate": 0.3846,
+        "seasons": 4
+      },
+      "264": {
+        "name": "Greg Jennings",
+        "pos": "WR",
+        "gpRate": 0.9808,
+        "seasons": 4
+      },
+      "268": {
+        "name": "Alex Smith",
+        "pos": "QB",
+        "gpRate": 0.8462,
+        "seasons": 9
+      },
+      "269": {
+        "name": "Pierre Garcon",
+        "pos": "WR",
+        "gpRate": 0.9692,
+        "seasons": 5
+      },
+      "270": {
+        "name": "Lance Moore",
+        "pos": "WR",
+        "gpRate": 0.9487,
+        "seasons": 3
+      },
+      "272": {
+        "name": "Chris Johnson",
+        "pos": "RB",
+        "gpRate": 0.9744,
+        "seasons": 6
+      },
+      "277": {
+        "name": "Daniel Fells",
+        "pos": "TE",
+        "gpRate": 1,
+        "seasons": 3
+      },
+      "284": {
+        "name": "Delanie Walker",
+        "pos": "TE",
+        "gpRate": 0.8942,
+        "seasons": 8
+      },
+      "286": {
+        "name": "Dwayne Bowe",
+        "pos": "WR",
+        "gpRate": 1,
+        "seasons": 4
+      },
+      "289": {
+        "name": "Drew Brees",
+        "pos": "QB",
+        "gpRate": 0.9231,
+        "seasons": 10
+      },
+      "293": {
+        "name": "Maurice Jones-Drew",
+        "pos": "RB",
+        "gpRate": 0.8654,
+        "seasons": 4
+      },
+      "294": {
+        "name": "Peyton Manning",
+        "pos": "QB",
+        "gpRate": 0.9385,
+        "seasons": 5
+      },
+      "297": {
+        "name": "Eddie Royal",
+        "pos": "WR",
+        "gpRate": 0.9744,
+        "seasons": 3
+      },
+      "306": {
+        "name": "DeAngelo Williams",
+        "pos": "RB",
+        "gpRate": 0.8769,
+        "seasons": 5
+      },
+      "310": {
+        "name": "Heath Miller",
+        "pos": "TE",
+        "gpRate": 0.9487,
+        "seasons": 6
+      },
+      "316": {
+        "name": "Malcom Floyd",
+        "pos": "WR",
+        "gpRate": 0.9231,
+        "seasons": 3
+      },
+      "317": {
+        "name": "Caleb Hanie",
+        "pos": "QB",
+        "gpRate": 0.2692,
+        "seasons": 2
+      },
+      "322": {
+        "name": "Antonio Gates",
+        "pos": "TE",
+        "gpRate": 0.8846,
+        "seasons": 8
+      },
+      "323": {
+        "name": "Jamaal Charles",
+        "pos": "RB",
+        "gpRate": 0.7436,
+        "seasons": 6
+      },
+      "326": {
+        "name": "Darren McFadden",
+        "pos": "RB",
+        "gpRate": 0.7821,
+        "seasons": 6
+      },
+      "328": {
+        "name": "Kellen Davis",
+        "pos": "TE",
+        "gpRate": 1,
+        "seasons": 3
+      },
+      "331": {
+        "name": "Philip Rivers",
+        "pos": "QB",
+        "gpRate": 1,
+        "seasons": 10
+      },
+      "333": {
+        "name": "Ryan Fitzpatrick",
+        "pos": "QB",
+        "gpRate": 0.7923,
+        "seasons": 10
+      },
+      "339": {
+        "name": "Brian Hartline",
+        "pos": "WR",
+        "gpRate": 0.9744,
+        "seasons": 3
+      },
+      "344": {
+        "name": "Julian Edelman",
+        "pos": "WR",
+        "gpRate": 0.8769,
+        "seasons": 5
+      },
+      "345": {
+        "name": "Brian Hoyer",
+        "pos": "QB",
+        "gpRate": 0.4725,
+        "seasons": 7
+      },
+      "348": {
+        "name": "Shonn Greene",
+        "pos": "RB",
+        "gpRate": 1,
+        "seasons": 3
+      },
+      "350": {
+        "name": "Mark Sanchez",
+        "pos": "QB",
+        "gpRate": 0.7385,
+        "seasons": 5
+      },
+      "355": {
+        "name": "Brian Leonard",
+        "pos": "RB",
+        "gpRate": 0.8462,
+        "seasons": 2
+      },
+      "362": {
+        "name": "David Johnson",
+        "pos": "TE",
+        "gpRate": 1,
+        "seasons": 2
+      },
+      "365": {
+        "name": "Mike Wallace",
+        "pos": "WR",
+        "gpRate": 0.9872,
+        "seasons": 6
+      },
+      "367": {
+        "name": "Jared Cook",
+        "pos": "TE",
+        "gpRate": 0.979,
+        "seasons": 11
+      },
+      "370": {
+        "name": "Nate Washington",
+        "pos": "WR",
+        "gpRate": 0.9615,
+        "seasons": 4
+      },
+      "374": {
+        "name": "Dan Orlovsky",
+        "pos": "QB",
+        "gpRate": 0.2308,
+        "seasons": 2
+      },
+      "377": {
+        "name": "Donald Brown",
+        "pos": "RB",
+        "gpRate": 0.8846,
+        "seasons": 4
+      },
+      "380": {
+        "name": "Rashad Jennings",
+        "pos": "RB",
+        "gpRate": 0.8308,
+        "seasons": 5
+      },
+      "386": {
+        "name": "Brandon Lloyd",
+        "pos": "WR",
+        "gpRate": 0.9744,
+        "seasons": 3
+      },
+      "387": {
+        "name": "Knowshon Moreno",
+        "pos": "RB",
+        "gpRate": 0.6731,
+        "seasons": 4
+      },
+      "388": {
+        "name": "Kyle Orton",
+        "pos": "QB",
+        "gpRate": 0.5577,
+        "seasons": 4
+      },
+      "389": {
+        "name": "Matt Cassel",
+        "pos": "QB",
+        "gpRate": 0.6026,
+        "seasons": 6
+      },
+      "393": {
+        "name": "Bruce Gradkowski",
+        "pos": "QB",
+        "gpRate": 0.3077,
+        "seasons": 2
+      },
+      "397": {
+        "name": "Brandon Myers",
+        "pos": "TE",
+        "gpRate": 0.9808,
+        "seasons": 4
+      },
+      "406": {
+        "name": "John Phillips",
+        "pos": "TE",
+        "gpRate": 1,
+        "seasons": 2
+      },
+      "411": {
+        "name": "Jeremy Maclin",
+        "pos": "WR",
+        "gpRate": 0.9231,
+        "seasons": 5
+      },
+      "416": {
+        "name": "Jay Cutler",
+        "pos": "QB",
+        "gpRate": 0.8571,
+        "seasons": 7
+      },
+      "421": {
+        "name": "Matthew Stafford",
+        "pos": "QB",
+        "gpRate": 0.8974,
+        "seasons": 15
+      },
+      "429": {
+        "name": "Percy Harvin",
+        "pos": "WR",
+        "gpRate": 0.8462,
+        "seasons": 3
+      },
+      "448": {
+        "name": "Josh Freeman",
+        "pos": "QB",
+        "gpRate": 0.8077,
+        "seasons": 4
+      },
+      "454": {
+        "name": "Chris Ogbonnaya",
+        "pos": "RB",
+        "gpRate": 0.8846,
+        "seasons": 2
+      },
+      "455": {
+        "name": "Michael Crabtree",
+        "pos": "WR",
+        "gpRate": 0.967,
+        "seasons": 7
+      },
+      "458": {
+        "name": "Justin Forsett",
+        "pos": "RB",
+        "gpRate": 0.9538,
+        "seasons": 5
+      },
+      "461": {
+        "name": "Michael Vick",
+        "pos": "QB",
+        "gpRate": 0.6282,
+        "seasons": 6
+      },
+      "465": {
+        "name": "Brandon Pettigrew",
+        "pos": "TE",
+        "gpRate": 1,
+        "seasons": 4
+      },
+      "469": {
+        "name": "Matthew Mulligan",
+        "pos": "TE",
+        "gpRate": 0.9231,
+        "seasons": 3
+      },
+      "474": {
+        "name": "Hakeem Nicks",
+        "pos": "WR",
+        "gpRate": 0.8654,
+        "seasons": 4
+      },
+      "490": {
+        "name": "Chase Daniel",
+        "pos": "QB",
+        "gpRate": 0.6769,
+        "seasons": 5
+      },
+      "491": {
+        "name": "Danny Amendola",
+        "pos": "WR",
+        "gpRate": 0.9487,
+        "seasons": 3
+      },
+      "496": {
+        "name": "Brandon Gibson",
+        "pos": "WR",
+        "gpRate": 0.9231,
+        "seasons": 2
+      },
+      "502": {
+        "name": "Bear Pascoe",
+        "pos": "TE",
+        "gpRate": 0.9615,
+        "seasons": 2
+      },
+      "507": {
+        "name": "C.J. Spiller",
+        "pos": "RB",
+        "gpRate": 0.9423,
+        "seasons": 4
+      },
+      "515": {
+        "name": "Rob Gronkowski",
+        "pos": "TE",
+        "gpRate": 0.8462,
+        "seasons": 10
+      },
+      "521": {
+        "name": "Jeff Cumberland",
+        "pos": "TE",
+        "gpRate": 0.6923,
+        "seasons": 3
+      },
+      "523": {
+        "name": "Joe McKnight",
+        "pos": "RB",
+        "gpRate": 0.6923,
+        "seasons": 2
+      },
+      "527": {
+        "name": "Dennis Pitta",
+        "pos": "TE",
+        "gpRate": 0.8974,
+        "seasons": 3
+      },
+      "530": {
+        "name": "Jermaine Gresham",
+        "pos": "TE",
+        "gpRate": 0.9451,
+        "seasons": 7
+      },
+      "533": {
+        "name": "Colt McCoy",
+        "pos": "QB",
+        "gpRate": 0.4359,
+        "seasons": 6
+      },
+      "536": {
+        "name": "Antonio Brown",
+        "pos": "WR",
+        "gpRate": 0.967,
+        "seasons": 7
+      },
+      "538": {
+        "name": "Emmanuel Sanders",
+        "pos": "WR",
+        "gpRate": 0.9744,
+        "seasons": 6
+      },
+      "543": {
+        "name": "Garrett Graham",
+        "pos": "TE",
+        "gpRate": 0.8077,
+        "seasons": 4
+      },
+      "558": {
+        "name": "Eric Decker",
+        "pos": "WR",
+        "gpRate": 0.9692,
+        "seasons": 5
+      },
+      "559": {
+        "name": "Tim Tebow",
+        "pos": "TE",
+        "gpRate": 0.6538,
+        "seasons": 2
+      },
+      "560": {
+        "name": "Demaryius Thomas",
+        "pos": "WR",
+        "gpRate": 1,
+        "seasons": 6
+      },
+      "564": {
+        "name": "Dexter McCluster",
+        "pos": "RB",
+        "gpRate": 0.8923,
+        "seasons": 5
+      },
+      "565": {
+        "name": "Tony Moeaki",
+        "pos": "TE",
+        "gpRate": 0.9615,
+        "seasons": 2
+      },
+      "571": {
+        "name": "Ryan Mathews",
+        "pos": "RB",
+        "gpRate": 0.8462,
+        "seasons": 5
+      },
+      "574": {
+        "name": "Dez Bryant",
+        "pos": "WR",
+        "gpRate": 0.9744,
+        "seasons": 6
+      },
+      "584": {
+        "name": "Clay Harbor",
+        "pos": "TE",
+        "gpRate": 0.8462,
+        "seasons": 5
+      },
+      "587": {
+        "name": "Logan Paulsen",
+        "pos": "TE",
+        "gpRate": 0.9038,
+        "seasons": 4
+      },
+      "601": {
+        "name": "Andrew Quarless",
+        "pos": "TE",
+        "gpRate": 0.8846,
+        "seasons": 4
+      },
+      "604": {
+        "name": "Toby Gerhart",
+        "pos": "RB",
+        "gpRate": 0.9615,
+        "seasons": 2
+      },
+      "606": {
+        "name": "Joe Webb",
+        "pos": "QB",
+        "gpRate": 0.5897,
+        "seasons": 3
+      },
+      "611": {
+        "name": "Jimmy Clausen",
+        "pos": "QB",
+        "gpRate": 0.5,
+        "seasons": 2
+      },
+      "613": {
+        "name": "Brandon LaFell",
+        "pos": "WR",
+        "gpRate": 0.9615,
+        "seasons": 4
+      },
+      "616": {
+        "name": "Jimmy Graham",
+        "pos": "TE",
+        "gpRate": 0.9692,
+        "seasons": 10
+      },
+      "621": {
+        "name": "Sam Bradford",
+        "pos": "QB",
+        "gpRate": 0.7179,
+        "seasons": 6
+      },
+      "622": {
+        "name": "Michael Hoomanawanui",
+        "pos": "TE",
+        "gpRate": 0.5769,
+        "seasons": 2
+      },
+      "626": {
+        "name": "Jim Dray",
+        "pos": "TE",
+        "gpRate": 1,
+        "seasons": 3
+      },
+      "640": {
+        "name": "Anthony McCoy",
+        "pos": "TE",
+        "gpRate": 0.7179,
+        "seasons": 3
+      },
+      "642": {
+        "name": "Golden Tate",
+        "pos": "WR",
+        "gpRate": 0.9744,
+        "seasons": 6
+      },
+      "648": {
+        "name": "Brandon Marshall",
+        "pos": "WR",
+        "gpRate": 0.9744,
+        "seasons": 6
+      },
+      "651": {
+        "name": "Santonio Holmes",
+        "pos": "WR",
+        "gpRate": 0.8462,
+        "seasons": 2
+      },
+      "655": {
+        "name": "Anquan Boldin",
+        "pos": "WR",
+        "gpRate": 0.9744,
+        "seasons": 6
+      },
+      "659": {
+        "name": "Cedric Peerman",
+        "pos": "RB",
+        "gpRate": 0.6538,
+        "seasons": 2
+      },
+      "660": {
+        "name": "Peyton Hillis",
+        "pos": "RB",
+        "gpRate": 0.7692,
+        "seasons": 2
+      },
+      "661": {
+        "name": "Alex Smith",
+        "pos": "TE",
+        "gpRate": 0.5385,
+        "seasons": 2
+      },
+      "663": {
+        "name": "Benjamin Watson",
+        "pos": "TE",
+        "gpRate": 0.989,
+        "seasons": 7
+      },
+      "669": {
+        "name": "Arian Foster",
+        "pos": "RB",
+        "gpRate": 0.8462,
+        "seasons": 5
+      },
+      "673": {
+        "name": "Jason Campbell",
+        "pos": "QB",
+        "gpRate": 0.5385,
+        "seasons": 4
+      },
+      "676": {
+        "name": "LeSean McCoy",
+        "pos": "RB",
+        "gpRate": 0.9402,
+        "seasons": 9
+      },
+      "679": {
+        "name": "Rex Grossman",
+        "pos": "QB",
+        "gpRate": 0.4231,
+        "seasons": 2
+      },
+      "686": {
+        "name": "Shaun Hill",
+        "pos": "QB",
+        "gpRate": 0.3462,
+        "seasons": 4
+      },
+      "691": {
+        "name": "Derek Anderson",
+        "pos": "QB",
+        "gpRate": 0.4615,
+        "seasons": 3
+      },
+      "695": {
+        "name": "Ted Ginn",
+        "pos": "WR",
+        "gpRate": 1,
+        "seasons": 2
+      },
+      "697": {
+        "name": "Leon Washington",
+        "pos": "RB",
+        "gpRate": 1,
+        "seasons": 2
+      },
+      "698": {
+        "name": "Charlie Whitehurst",
+        "pos": "QB",
+        "gpRate": 0.2564,
+        "seasons": 3
+      },
+      "701": {
+        "name": "Ed Dickson",
+        "pos": "TE",
+        "gpRate": 0.9615,
+        "seasons": 6
+      },
+      "717": {
+        "name": "Chris Ivory",
+        "pos": "RB",
+        "gpRate": 0.7846,
+        "seasons": 5
+      },
+      "719": {
+        "name": "Victor Cruz",
+        "pos": "WR",
+        "gpRate": 1,
+        "seasons": 3
+      },
+      "730": {
+        "name": "LeGarrette Blount",
+        "pos": "RB",
+        "gpRate": 0.9077,
+        "seasons": 5
+      },
+      "735": {
+        "name": "Danny Woodhead",
+        "pos": "RB",
+        "gpRate": 0.9692,
+        "seasons": 5
+      },
+      "736": {
+        "name": "Joique Bell",
+        "pos": "RB",
+        "gpRate": 0.8846,
+        "seasons": 4
+      },
+      "745": {
+        "name": "Marshawn Lynch",
+        "pos": "RB",
+        "gpRate": 0.9744,
+        "seasons": 6
+      },
+      "748": {
+        "name": "Mike Williams",
+        "pos": "WR",
+        "gpRate": 1,
+        "seasons": 3
+      },
+      "749": {
+        "name": "Zach Miller",
+        "pos": "TE",
+        "gpRate": 0.7308,
+        "seasons": 4
+      },
+      "762": {
+        "name": "James Starks",
+        "pos": "RB",
+        "gpRate": 0.6923,
+        "seasons": 3
+      },
+      "768": {
+        "name": "Scott Chandler",
+        "pos": "TE",
+        "gpRate": 0.9487,
+        "seasons": 6
+      },
+      "788": {
+        "name": "Dion Lewis",
+        "pos": "RB",
+        "gpRate": 0.8462,
+        "seasons": 3
+      },
+      "801": {
+        "name": "Charles Clay",
+        "pos": "TE",
+        "gpRate": 0.9135,
+        "seasons": 8
+      },
+      "806": {
+        "name": "Daniel Thomas",
+        "pos": "RB",
+        "gpRate": 0.8462,
+        "seasons": 3
+      },
+      "810": {
+        "name": "Ryan Mallett",
+        "pos": "QB",
+        "gpRate": 0.2821,
+        "seasons": 3
+      },
+      "811": {
+        "name": "Stevan Ridley",
+        "pos": "RB",
+        "gpRate": 0.9487,
+        "seasons": 3
+      },
+      "812": {
+        "name": "Lee Smith",
+        "pos": "TE",
+        "gpRate": 0.8462,
+        "seasons": 2
+      },
+      "814": {
+        "name": "Shane Vereen",
+        "pos": "RB",
+        "gpRate": 0.7885,
+        "seasons": 4
+      },
+      "818": {
+        "name": "Bilal Powell",
+        "pos": "RB",
+        "gpRate": 0.8654,
+        "seasons": 4
+      },
+      "826": {
+        "name": "Torrey Smith",
+        "pos": "WR",
+        "gpRate": 1,
+        "seasons": 4
+      },
+      "827": {
+        "name": "Tyrod Taylor",
+        "pos": "QB",
+        "gpRate": 0.5096,
+        "seasons": 8
+      },
+      "829": {
+        "name": "Andy Dalton",
+        "pos": "QB",
+        "gpRate": 0.7811,
+        "seasons": 13
+      },
+      "830": {
+        "name": "A.J. Green",
+        "pos": "WR",
+        "gpRate": 0.9135,
+        "seasons": 8
+      },
+      "833": {
+        "name": "Jordan Cameron",
+        "pos": "TE",
+        "gpRate": 0.8846,
+        "seasons": 4
+      },
+      "857": {
+        "name": "T.J. Yates",
+        "pos": "QB",
+        "gpRate": 0.1923,
+        "seasons": 4
+      },
+      "862": {
+        "name": "Blaine Gabbert",
+        "pos": "QB",
+        "gpRate": 0.5,
+        "seasons": 6
+      },
+      "866": {
+        "name": "Cecil Shorts",
+        "pos": "WR",
+        "gpRate": 0.9615,
+        "seasons": 2
+      },
+      "874": {
+        "name": "Julius Thomas",
+        "pos": "TE",
+        "gpRate": 0.8269,
+        "seasons": 4
+      },
+      "887": {
+        "name": "Denarius Moore",
+        "pos": "WR",
+        "gpRate": 0.8205,
+        "seasons": 3
+      },
+      "904": {
+        "name": "DeMarco Murray",
+        "pos": "RB",
+        "gpRate": 0.8846,
+        "seasons": 6
+      },
+      "915": {
+        "name": "Roy Helu",
+        "pos": "RB",
+        "gpRate": 1,
+        "seasons": 3
+      },
+      "918": {
+        "name": "Niles Paul",
+        "pos": "TE",
+        "gpRate": 1,
+        "seasons": 2
+      },
+      "928": {
+        "name": "Randall Cobb",
+        "pos": "WR",
+        "gpRate": 0.9692,
+        "seasons": 5
+      },
+      "941": {
+        "name": "Christian Ponder",
+        "pos": "QB",
+        "gpRate": 0.6154,
+        "seasons": 4
+      },
+      "943": {
+        "name": "Kyle Rudolph",
+        "pos": "TE",
+        "gpRate": 0.8923,
+        "seasons": 10
+      },
+      "947": {
+        "name": "Julio Jones",
+        "pos": "WR",
+        "gpRate": 0.9231,
+        "seasons": 8
+      },
+      "949": {
+        "name": "Jacquizz Rodgers",
+        "pos": "RB",
+        "gpRate": 1,
+        "seasons": 3
+      },
+      "954": {
+        "name": "Cam Newton",
+        "pos": "QB",
+        "gpRate": 0.906,
+        "seasons": 9
+      },
+      "956": {
+        "name": "Mark Ingram",
+        "pos": "RB",
+        "gpRate": 0.8846,
+        "seasons": 8
+      },
+      "963": {
+        "name": "Luke Stocker",
+        "pos": "TE",
+        "gpRate": 0.9231,
+        "seasons": 2
+      },
+      "964": {
+        "name": "Lance Kendricks",
+        "pos": "TE",
+        "gpRate": 0.9538,
+        "seasons": 5
+      },
+      "971": {
+        "name": "Rob Housler",
+        "pos": "TE",
+        "gpRate": 0.8462,
+        "seasons": 3
+      },
+      "978": {
+        "name": "Kendall Hunter",
+        "pos": "RB",
+        "gpRate": 0.9231,
+        "seasons": 2
+      },
+      "980": {
+        "name": "Colin Kaepernick",
+        "pos": "QB",
+        "gpRate": 0.7385,
+        "seasons": 5
+      },
+      "988": {
+        "name": "Doug Baldwin",
+        "pos": "WR",
+        "gpRate": 1,
+        "seasons": 5
+      },
+      "1004": {
+        "name": "Ben Tate",
+        "pos": "RB",
+        "gpRate": 0.9615,
+        "seasons": 2
+      },
+      "1029": {
+        "name": "Nick Foles",
+        "pos": "QB",
+        "gpRate": 0.5275,
+        "seasons": 7
+      },
+      "1046": {
+        "name": "Rishard Matthews",
+        "pos": "WR",
+        "gpRate": 0.8462,
+        "seasons": 2
+      },
+      "1048": {
+        "name": "Lamar Miller",
+        "pos": "RB",
+        "gpRate": 0.9846,
+        "seasons": 5
+      },
+      "1049": {
+        "name": "Ryan Tannehill",
+        "pos": "QB",
+        "gpRate": 0.8692,
+        "seasons": 10
+      },
+      "1059": {
+        "name": "Bobby Rainey",
+        "pos": "RB",
+        "gpRate": 0.9231,
+        "seasons": 2
+      },
+      "1067": {
+        "name": "Marvin Jones",
+        "pos": "WR",
+        "gpRate": 1,
+        "seasons": 6
+      },
+      "1071": {
+        "name": "Mohamed Sanu",
+        "pos": "WR",
+        "gpRate": 0.9744,
+        "seasons": 3
+      },
+      "1077": {
+        "name": "Travis Benjamin",
+        "pos": "WR",
+        "gpRate": 1,
+        "seasons": 2
+      },
+      "1082": {
+        "name": "Trent Richardson",
+        "pos": "RB",
+        "gpRate": 0.9744,
+        "seasons": 3
+      },
+      "1085": {
+        "name": "Brandon Weeden",
+        "pos": "QB",
+        "gpRate": 0.5385,
+        "seasons": 4
+      },
+      "1097": {
+        "name": "Kendall Wright",
+        "pos": "WR",
+        "gpRate": 0.9744,
+        "seasons": 3
+      },
+      "1105": {
+        "name": "Dwayne Allen",
+        "pos": "TE",
+        "gpRate": 0.9231,
+        "seasons": 2
+      },
+      "1107": {
+        "name": "Coby Fleener",
+        "pos": "TE",
+        "gpRate": 0.9077,
+        "seasons": 5
+      },
+      "1110": {
+        "name": "T.Y. Hilton",
+        "pos": "WR",
+        "gpRate": 0.956,
+        "seasons": 7
+      },
+      "1111": {
+        "name": "Andrew Luck",
+        "pos": "QB",
+        "gpRate": 0.9077,
+        "seasons": 5
+      },
+      "1123": {
+        "name": "Ronnie Hillman",
+        "pos": "RB",
+        "gpRate": 0.7692,
+        "seasons": 2
+      },
+      "1126": {
+        "name": "Brock Osweiler",
+        "pos": "QB",
+        "gpRate": 0.4103,
+        "seasons": 3
+      },
+      "1139": {
+        "name": "Ladarius Green",
+        "pos": "TE",
+        "gpRate": 0.9231,
+        "seasons": 3
+      },
+      "1144": {
+        "name": "Cole Beasley",
+        "pos": "WR",
+        "gpRate": 1,
+        "seasons": 3
+      },
+      "1149": {
+        "name": "Alshon Jeffery",
+        "pos": "WR",
+        "gpRate": 0.859,
+        "seasons": 6
+      },
+      "1164": {
+        "name": "Rueben Randle",
+        "pos": "WR",
+        "gpRate": 1,
+        "seasons": 3
+      },
+      "1166": {
+        "name": "Kirk Cousins",
+        "pos": "QB",
+        "gpRate": 0.8077,
+        "seasons": 12
+      },
+      "1169": {
+        "name": "Robert Griffin",
+        "pos": "QB",
+        "gpRate": 0.8205,
+        "seasons": 3
+      },
+      "1170": {
+        "name": "Alfred Morris",
+        "pos": "RB",
+        "gpRate": 1,
+        "seasons": 3
+      },
+      "1195": {
+        "name": "Doug Martin",
+        "pos": "RB",
+        "gpRate": 1,
+        "seasons": 3
+      },
+      "1211": {
+        "name": "Rhett Ellison",
+        "pos": "TE",
+        "gpRate": 0.8974,
+        "seasons": 3
+      },
+      "1219": {
+        "name": "Michael Floyd",
+        "pos": "WR",
+        "gpRate": 0.9615,
+        "seasons": 2
+      },
+      "1223": {
+        "name": "Garrett Celek",
+        "pos": "TE",
+        "gpRate": 0.9231,
+        "seasons": 2
+      },
+      "1234": {
+        "name": "Russell Wilson",
+        "pos": "QB",
+        "gpRate": 0.8994,
+        "seasons": 13
+      },
+      "1244": {
+        "name": "Josh Gordon",
+        "pos": "WR",
+        "gpRate": 0.8974,
+        "seasons": 3
+      },
+      "1339": {
+        "name": "Zach Ertz",
+        "pos": "TE",
+        "gpRate": 0.891,
+        "seasons": 12
+      },
+      "1349": {
+        "name": "E.J. Manuel",
+        "pos": "QB",
+        "gpRate": 0.4038,
+        "seasons": 4
+      },
+      "1352": {
+        "name": "Robert Woods",
+        "pos": "WR",
+        "gpRate": 0.8769,
+        "seasons": 5
+      },
+      "1373": {
+        "name": "Geno Smith",
+        "pos": "QB",
+        "gpRate": 0.7788,
+        "seasons": 8
+      },
+      "1386": {
+        "name": "Giovani Bernard",
+        "pos": "RB",
+        "gpRate": 0.9103,
+        "seasons": 6
+      },
+      "1387": {
+        "name": "Rex Burkhead",
+        "pos": "RB",
+        "gpRate": 0.7308,
+        "seasons": 2
+      },
+      "1388": {
+        "name": "Tyler Eifert",
+        "pos": "TE",
+        "gpRate": 0.8308,
+        "seasons": 5
+      },
+      "1408": {
+        "name": "Le'Veon Bell",
+        "pos": "RB",
+        "gpRate": 0.8308,
+        "seasons": 5
+      },
+      "1425": {
+        "name": "Ryan Griffin",
+        "pos": "TE",
+        "gpRate": 0.8269,
+        "seasons": 4
+      },
+      "1426": {
+        "name": "DeAndre Hopkins",
+        "pos": "WR",
+        "gpRate": 0.9371,
+        "seasons": 11
+      },
+      "1451": {
+        "name": "C.J. Anderson",
+        "pos": "RB",
+        "gpRate": 0.9487,
+        "seasons": 3
+      },
+      "1466": {
+        "name": "Travis Kelce",
+        "pos": "TE",
+        "gpRate": 0.993,
+        "seasons": 11
+      },
+      "1476": {
+        "name": "Latavius Murray",
+        "pos": "RB",
+        "gpRate": 0.956,
+        "seasons": 7
+      },
+      "1477": {
+        "name": "Mychal Rivera",
+        "pos": "TE",
+        "gpRate": 1,
+        "seasons": 3
+      },
+      "1479": {
+        "name": "Keenan Allen",
+        "pos": "WR",
+        "gpRate": 0.9371,
+        "seasons": 11
+      },
+      "1500": {
+        "name": "Jordan Reed",
+        "pos": "TE",
+        "gpRate": 0.7051,
+        "seasons": 6
+      },
+      "1517": {
+        "name": "Theo Riddick",
+        "pos": "RB",
+        "gpRate": 0.9231,
+        "seasons": 4
+      },
+      "1527": {
+        "name": "Eddie Lacy",
+        "pos": "RB",
+        "gpRate": 0.9487,
+        "seasons": 3
+      },
+      "1535": {
+        "name": "Cordarrelle Patterson",
+        "pos": "RB",
+        "gpRate": 0.9038,
+        "seasons": 4
+      },
+      "1555": {
+        "name": "Kenny Stills",
+        "pos": "WR",
+        "gpRate": 0.9487,
+        "seasons": 3
+      },
+      "1559": {
+        "name": "Mike Glennon",
+        "pos": "QB",
+        "gpRate": 0.4,
+        "seasons": 5
+      },
+      "1567": {
+        "name": "Tavon Austin",
+        "pos": "WR",
+        "gpRate": 1,
+        "seasons": 2
+      },
+      "1575": {
+        "name": "Andre Ellington",
+        "pos": "RB",
+        "gpRate": 0.8718,
+        "seasons": 3
+      },
+      "1587": {
+        "name": "Vance McDonald",
+        "pos": "TE",
+        "gpRate": 0.8974,
+        "seasons": 3
+      },
+      "1592": {
+        "name": "Darren Fells",
+        "pos": "TE",
+        "gpRate": 0.9615,
+        "seasons": 4
+      },
+      "1603": {
+        "name": "Luke Willson",
+        "pos": "TE",
+        "gpRate": 0.9615,
+        "seasons": 4
+      },
+      "1619": {
+        "name": "Demetrius Harris",
+        "pos": "TE",
+        "gpRate": 0.9231,
+        "seasons": 2
+      },
+      "1635": {
+        "name": "Timothy Wright",
+        "pos": "TE",
+        "gpRate": 1,
+        "seasons": 2
+      },
+      "1642": {
+        "name": "Levine Toilolo",
+        "pos": "TE",
+        "gpRate": 1,
+        "seasons": 2
+      },
+      "1689": {
+        "name": "Adam Thielen",
+        "pos": "WR",
+        "gpRate": 0.9744,
+        "seasons": 6
+      },
+      "1706": {
+        "name": "Jack Doyle",
+        "pos": "TE",
+        "gpRate": 0.8462,
+        "seasons": 5
+      },
+      "1737": {
+        "name": "Case Keenum",
+        "pos": "QB",
+        "gpRate": 0.7077,
+        "seasons": 5
+      },
+      "1759": {
+        "name": "Larry Donnell",
+        "pos": "TE",
+        "gpRate": 0.8077,
+        "seasons": 2
+      },
+      "1777": {
+        "name": "Josh Hill",
+        "pos": "TE",
+        "gpRate": 1,
+        "seasons": 2
+      },
+      "1793": {
+        "name": "Trey Burton",
+        "pos": "TE",
+        "gpRate": 0.8974,
+        "seasons": 3
+      },
+      "1800": {
+        "name": "Jordan Matthews",
+        "pos": "TE",
+        "gpRate": 0.9038,
+        "seasons": 4
+      },
+      "1817": {
+        "name": "Sammy Watkins",
+        "pos": "WR",
+        "gpRate": 0.9038,
+        "seasons": 4
+      },
+      "1825": {
+        "name": "Jarvis Landry",
+        "pos": "WR",
+        "gpRate": 1,
+        "seasons": 6
+      },
+      "1837": {
+        "name": "Jimmy Garoppolo",
+        "pos": "QB",
+        "gpRate": 0.5934,
+        "seasons": 7
+      },
+      "1848": {
+        "name": "James White",
+        "pos": "RB",
+        "gpRate": 0.9423,
+        "seasons": 4
+      },
+      "1892": {
+        "name": "Jeremy Hill",
+        "pos": "RB",
+        "gpRate": 1,
+        "seasons": 2
+      },
+      "1901": {
+        "name": "Isaiah Crowell",
+        "pos": "RB",
+        "gpRate": 1,
+        "seasons": 4
+      },
+      "1907": {
+        "name": "Johnny Manziel",
+        "pos": "QB",
+        "gpRate": 0.3846,
+        "seasons": 2
+      },
+      "1911": {
+        "name": "Willie Snead",
+        "pos": "WR",
+        "gpRate": 0.9615,
+        "seasons": 2
+      },
+      "1971": {
+        "name": "Donte Moncrief",
+        "pos": "WR",
+        "gpRate": 1,
+        "seasons": 2
+      },
+      "1979": {
+        "name": "Blake Bortles",
+        "pos": "QB",
+        "gpRate": 0.9231,
+        "seasons": 4
+      },
+      "1984": {
+        "name": "Allen Hurns",
+        "pos": "WR",
+        "gpRate": 0.9615,
+        "seasons": 2
+      },
+      "1992": {
+        "name": "Allen Robinson",
+        "pos": "WR",
+        "gpRate": 0.9615,
+        "seasons": 4
+      },
+      "2028": {
+        "name": "Derek Carr",
+        "pos": "QB",
+        "gpRate": 0.9692,
+        "seasons": 10
+      },
+      "2078": {
+        "name": "Odell Beckham",
+        "pos": "WR",
+        "gpRate": 0.9038,
+        "seasons": 4
+      },
+      "2118": {
+        "name": "Eric Ebron",
+        "pos": "TE",
+        "gpRate": 0.9103,
+        "seasons": 6
+      },
+      "2133": {
+        "name": "Davante Adams",
+        "pos": "WR",
+        "gpRate": 0.9145,
+        "seasons": 9
+      },
+      "2146": {
+        "name": "Richard Rodgers",
+        "pos": "TE",
+        "gpRate": 1,
+        "seasons": 3
+      },
+      "2152": {
+        "name": "Teddy Bridgewater",
+        "pos": "QB",
+        "gpRate": 0.7564,
+        "seasons": 6
+      },
+      "2161": {
+        "name": "Jerick McKinnon",
+        "pos": "RB",
+        "gpRate": 0.9615,
+        "seasons": 4
+      },
+      "2168": {
+        "name": "Devonta Freeman",
+        "pos": "RB",
+        "gpRate": 0.8846,
+        "seasons": 4
+      },
+      "2182": {
+        "name": "Kelvin Benjamin",
+        "pos": "WR",
+        "gpRate": 0.9231,
+        "seasons": 2
+      },
+      "2197": {
+        "name": "Brandin Cooks",
+        "pos": "WR",
+        "gpRate": 0.9451,
+        "seasons": 7
+      },
+      "2214": {
+        "name": "Cameron Brate",
+        "pos": "TE",
+        "gpRate": 0.9744,
+        "seasons": 6
+      },
+      "2216": {
+        "name": "Mike Evans",
+        "pos": "WR",
+        "gpRate": 0.9462,
+        "seasons": 10
+      },
+      "2222": {
+        "name": "Austin Seferian-Jenkins",
+        "pos": "TE",
+        "gpRate": 0.6154,
+        "seasons": 3
+      },
+      "2238": {
+        "name": "John Brown",
+        "pos": "WR",
+        "gpRate": 0.9744,
+        "seasons": 3
+      },
+      "2251": {
+        "name": "Logan Thomas",
+        "pos": "TE",
+        "gpRate": 0.7885,
+        "seasons": 4
+      },
+      "2257": {
+        "name": "Carlos Hyde",
+        "pos": "RB",
+        "gpRate": 0.9744,
+        "seasons": 3
+      },
+      "2306": {
+        "name": "Jameis Winston",
+        "pos": "QB",
+        "gpRate": 0.6442,
+        "seasons": 8
+      },
+      "2307": {
+        "name": "Marcus Mariota",
+        "pos": "QB",
+        "gpRate": 0.7143,
+        "seasons": 7
+      },
+      "2309": {
+        "name": "Amari Cooper",
+        "pos": "WR",
+        "gpRate": 0.9615,
+        "seasons": 8
+      },
+      "2315": {
+        "name": "Todd Gurley",
+        "pos": "RB",
+        "gpRate": 0.9385,
+        "seasons": 5
+      },
+      "2319": {
+        "name": "DeVante Parker",
+        "pos": "WR",
+        "gpRate": 1,
+        "seasons": 2
+      },
+      "2320": {
+        "name": "Melvin Gordon",
+        "pos": "RB",
+        "gpRate": 0.8681,
+        "seasons": 7
+      },
+      "2325": {
+        "name": "Nelson Agholor",
+        "pos": "WR",
+        "gpRate": 1,
+        "seasons": 3
+      },
+      "2341": {
+        "name": "T.J. Yeldon",
+        "pos": "RB",
+        "gpRate": 0.9615,
+        "seasons": 2
+      },
+      "2346": {
+        "name": "Devin Funchess",
+        "pos": "TE",
+        "gpRate": 0.9744,
+        "seasons": 3
+      },
+      "2359": {
+        "name": "Ameer Abdullah",
+        "pos": "RB",
+        "gpRate": 0.9231,
+        "seasons": 2
+      },
+      "2374": {
+        "name": "Tyler Lockett",
+        "pos": "WR",
+        "gpRate": 1,
+        "seasons": 8
+      },
+      "2378": {
+        "name": "Tevin Coleman",
+        "pos": "RB",
+        "gpRate": 0.9487,
+        "seasons": 3
+      },
+      "2382": {
+        "name": "Duke Johnson",
+        "pos": "RB",
+        "gpRate": 0.9692,
+        "seasons": 5
+      },
+      "2390": {
+        "name": "Tyler Kroft",
+        "pos": "TE",
+        "gpRate": 0.8462,
+        "seasons": 2
+      },
+      "2391": {
+        "name": "David Johnson",
+        "pos": "RB",
+        "gpRate": 0.8846,
+        "seasons": 4
+      },
+      "2410": {
+        "name": "Jamison Crowder",
+        "pos": "WR",
+        "gpRate": 0.8718,
+        "seasons": 3
+      },
+      "2430": {
+        "name": "Javorius Allen",
+        "pos": "RB",
+        "gpRate": 1,
+        "seasons": 3
+      },
+      "2431": {
+        "name": "Mike Davis",
+        "pos": "RB",
+        "gpRate": 0.9744,
+        "seasons": 3
+      },
+      "2449": {
+        "name": "Stefon Diggs",
+        "pos": "WR",
+        "gpRate": 0.9154,
+        "seasons": 10
+      },
+      "2460": {
+        "name": "C.J. Uzomah",
+        "pos": "TE",
+        "gpRate": 1,
+        "seasons": 3
+      },
+      "2463": {
+        "name": "Jesse James",
+        "pos": "TE",
+        "gpRate": 1,
+        "seasons": 2
+      },
+      "2474": {
+        "name": "Nick Boyle",
+        "pos": "TE",
+        "gpRate": 0.9744,
+        "seasons": 3
+      },
+      "2476": {
+        "name": "James O'Shaughnessy",
+        "pos": "TE",
+        "gpRate": 0.7179,
+        "seasons": 3
+      },
+      "2505": {
+        "name": "Darren Waller",
+        "pos": "TE",
+        "gpRate": 0.7051,
+        "seasons": 6
+      },
+      "2545": {
+        "name": "Geoff Swaim",
+        "pos": "TE",
+        "gpRate": 0.8077,
+        "seasons": 2
+      },
+      "2549": {
+        "name": "Trevor Siemian",
+        "pos": "QB",
+        "gpRate": 0.5769,
+        "seasons": 2
+      },
+      "2711": {
+        "name": "Taylor Heinicke",
+        "pos": "QB",
+        "gpRate": 0.5897,
+        "seasons": 3
+      },
+      "2749": {
+        "name": "Raheem Mostert",
+        "pos": "RB",
+        "gpRate": 0.8654,
+        "seasons": 4
+      },
+      "3157": {
+        "name": "William Fuller",
+        "pos": "WR",
+        "gpRate": 0.7692,
+        "seasons": 2
+      },
+      "3161": {
+        "name": "Carson Wentz",
+        "pos": "QB",
+        "gpRate": 0.8022,
+        "seasons": 7
+      },
+      "3163": {
+        "name": "Jared Goff",
+        "pos": "QB",
+        "gpRate": 0.9915,
+        "seasons": 9
+      },
+      "3164": {
+        "name": "Ezekiel Elliott",
+        "pos": "RB",
+        "gpRate": 0.9231,
+        "seasons": 7
+      },
+      "3198": {
+        "name": "Derrick Henry",
+        "pos": "RB",
+        "gpRate": 0.9573,
+        "seasons": 9
+      },
+      "3199": {
+        "name": "Michael Thomas",
+        "pos": "WR",
+        "gpRate": 1,
+        "seasons": 3
+      },
+      "3202": {
+        "name": "Austin Hooper",
+        "pos": "TE",
+        "gpRate": 0.9327,
+        "seasons": 8
+      },
+      "3214": {
+        "name": "Hunter Henry",
+        "pos": "TE",
+        "gpRate": 0.9615,
+        "seasons": 8
+      },
+      "3225": {
+        "name": "Tyler Boyd",
+        "pos": "WR",
+        "gpRate": 1,
+        "seasons": 6
+      },
+      "3242": {
+        "name": "Kenyan Drake",
+        "pos": "RB",
+        "gpRate": 0.9231,
+        "seasons": 6
+      },
+      "3257": {
+        "name": "Jacoby Brissett",
+        "pos": "QB",
+        "gpRate": 0.7802,
+        "seasons": 7
+      },
+      "3271": {
+        "name": "Tyler Higbee",
+        "pos": "TE",
+        "gpRate": 0.9231,
+        "seasons": 8
+      },
+      "3294": {
+        "name": "Dak Prescott",
+        "pos": "QB",
+        "gpRate": 0.8376,
+        "seasons": 9
+      },
+      "3306": {
+        "name": "Jordan Howard",
+        "pos": "RB",
+        "gpRate": 0.8974,
+        "seasons": 3
+      },
+      "3321": {
+        "name": "Tyreek Hill",
+        "pos": "WR",
+        "gpRate": 0.9615,
+        "seasons": 8
+      },
+      "3327": {
+        "name": "Alex Collins",
+        "pos": "RB",
+        "gpRate": 0.8462,
+        "seasons": 2
+      },
+      "3357": {
+        "name": "Brandon Allen",
+        "pos": "QB",
+        "gpRate": 0.2308,
+        "seasons": 2
+      },
+      "3362": {
+        "name": "Jeff Driskel",
+        "pos": "QB",
+        "gpRate": 0.3077,
+        "seasons": 3
+      },
+      "3423": {
+        "name": "Robbie Chosen",
+        "pos": "WR",
+        "gpRate": 1,
+        "seasons": 3
+      },
+      "3594": {
+        "name": "Peyton Barber",
+        "pos": "RB",
+        "gpRate": 1,
+        "seasons": 2
+      },
+      "3664": {
+        "name": "J.D. McKissic",
+        "pos": "RB",
+        "gpRate": 0.9487,
+        "seasons": 3
+      },
+      "3969": {
+        "name": "Leonard Fournette",
+        "pos": "RB",
+        "gpRate": 0.8333,
+        "seasons": 6
+      },
+      "3976": {
+        "name": "Mitchell Trubisky",
+        "pos": "QB",
+        "gpRate": 0.6282,
+        "seasons": 6
+      },
+      "4017": {
+        "name": "Deshaun Watson",
+        "pos": "QB",
+        "gpRate": 0.6703,
+        "seasons": 7
+      },
+      "4018": {
+        "name": "Joe Mixon",
+        "pos": "RB",
+        "gpRate": 0.8558,
+        "seasons": 8
+      },
+      "4029": {
+        "name": "Dalvin Cook",
+        "pos": "RB",
+        "gpRate": 0.8615,
+        "seasons": 5
+      },
+      "4033": {
+        "name": "David Njoku",
+        "pos": "TE",
+        "gpRate": 0.9121,
+        "seasons": 7
+      },
+      "4034": {
+        "name": "Christian McCaffrey",
+        "pos": "RB",
+        "gpRate": 0.8462,
+        "seasons": 8
+      },
+      "4035": {
+        "name": "Alvin Kamara",
+        "pos": "RB",
+        "gpRate": 0.8889,
+        "seasons": 9
+      },
+      "4036": {
+        "name": "Corey Davis",
+        "pos": "WR",
+        "gpRate": 0.8462,
+        "seasons": 3
+      },
+      "4037": {
+        "name": "Chris Godwin",
+        "pos": "WR",
+        "gpRate": 0.8681,
+        "seasons": 7
+      },
+      "4039": {
+        "name": "Cooper Kupp",
+        "pos": "WR",
+        "gpRate": 0.8365,
+        "seasons": 8
+      },
+      "4040": {
+        "name": "JuJu Smith-Schuster",
+        "pos": "WR",
+        "gpRate": 0.9423,
+        "seasons": 4
+      },
+      "4046": {
+        "name": "Patrick Mahomes",
+        "pos": "QB",
+        "gpRate": 0.9808,
+        "seasons": 8
+      },
+      "4054": {
+        "name": "Mo Alie-Cox",
+        "pos": "TE",
+        "gpRate": 0.9744,
+        "seasons": 3
+      },
+      "4055": {
+        "name": "O.J. Howard",
+        "pos": "TE",
+        "gpRate": 0.8718,
+        "seasons": 3
+      },
+      "4066": {
+        "name": "Evan Engram",
+        "pos": "TE",
+        "gpRate": 0.8547,
+        "seasons": 9
+      },
+      "4068": {
+        "name": "Mike Williams",
+        "pos": "WR",
+        "gpRate": 0.9038,
+        "seasons": 4
+      },
+      "4082": {
+        "name": "Curtis Samuel",
+        "pos": "WR",
+        "gpRate": 0.9615,
+        "seasons": 4
+      },
+      "4089": {
+        "name": "Gerald Everett",
+        "pos": "TE",
+        "gpRate": 0.9231,
+        "seasons": 7
+      },
+      "4098": {
+        "name": "Kareem Hunt",
+        "pos": "RB",
+        "gpRate": 0.8846,
+        "seasons": 8
+      },
+      "4111": {
+        "name": "D'Onta Foreman",
+        "pos": "RB",
+        "gpRate": 0.8077,
+        "seasons": 2
+      },
+      "4127": {
+        "name": "C.J. Beathard",
+        "pos": "QB",
+        "gpRate": 0.5,
+        "seasons": 2
+      },
+      "4131": {
+        "name": "Kenny Golladay",
+        "pos": "WR",
+        "gpRate": 1,
+        "seasons": 2
+      },
+      "4137": {
+        "name": "James Conner",
+        "pos": "RB",
+        "gpRate": 0.8352,
+        "seasons": 7
+      },
+      "4144": {
+        "name": "Jonnu Smith",
+        "pos": "TE",
+        "gpRate": 0.9712,
+        "seasons": 8
+      },
+      "4146": {
+        "name": "Dede Westbrook",
+        "pos": "WR",
+        "gpRate": 0.9615,
+        "seasons": 2
+      },
+      "4147": {
+        "name": "Samaje Perine",
+        "pos": "RB",
+        "gpRate": 1,
+        "seasons": 3
+      },
+      "4149": {
+        "name": "Jamaal Williams",
+        "pos": "RB",
+        "gpRate": 0.9231,
+        "seasons": 5
+      },
+      "4152": {
+        "name": "Marlon Mack",
+        "pos": "RB",
+        "gpRate": 0.7692,
+        "seasons": 2
+      },
+      "4157": {
+        "name": "Tarik Cohen",
+        "pos": "RB",
+        "gpRate": 1,
+        "seasons": 3
+      },
+      "4183": {
+        "name": "Nathan Peterman",
+        "pos": "QB",
+        "gpRate": 0.3077,
+        "seasons": 2
+      },
+      "4199": {
+        "name": "Aaron Jones",
+        "pos": "RB",
+        "gpRate": 0.8558,
+        "seasons": 8
+      },
+      "4217": {
+        "name": "George Kittle",
+        "pos": "TE",
+        "gpRate": 0.812,
+        "seasons": 9
+      },
+      "4273": {
+        "name": "Chris Carson",
+        "pos": "RB",
+        "gpRate": 0.8462,
+        "seasons": 3
+      },
+      "4314": {
+        "name": "Johnny Mundt",
+        "pos": "TE",
+        "gpRate": 1,
+        "seasons": 2
+      },
+      "4335": {
+        "name": "P.J. Walker",
+        "pos": "QB",
+        "gpRate": 0.4615,
+        "seasons": 2
+      },
+      "4351": {
+        "name": "Tim Patrick",
+        "pos": "WR",
+        "gpRate": 0.9615,
+        "seasons": 2
+      },
+      "4381": {
+        "name": "Taysom Hill",
+        "pos": "TE",
+        "gpRate": 0.859,
+        "seasons": 6
+      },
+      "4421": {
+        "name": "Jacob Hollister",
+        "pos": "TE",
+        "gpRate": 0.8077,
+        "seasons": 2
+      },
+      "4435": {
+        "name": "Anthony Firkser",
+        "pos": "TE",
+        "gpRate": 0.8654,
+        "seasons": 4
+      },
+      "4455": {
+        "name": "Matt Breida",
+        "pos": "RB",
+        "gpRate": 0.8462,
+        "seasons": 2
+      },
+      "4464": {
+        "name": "Nick Mullens",
+        "pos": "QB",
+        "gpRate": 0.5385,
+        "seasons": 2
+      },
+      "4531": {
+        "name": "Ricky Seals-Jones",
+        "pos": "TE",
+        "gpRate": 0.7885,
+        "seasons": 4
+      },
+      "4574": {
+        "name": "Cooper Rush",
+        "pos": "QB",
+        "gpRate": 0.5128,
+        "seasons": 3
+      },
+      "4602": {
+        "name": "Robert Tonyan",
+        "pos": "TE",
+        "gpRate": 0.8718,
+        "seasons": 3
+      },
+      "4663": {
+        "name": "Austin Ekeler",
+        "pos": "RB",
+        "gpRate": 0.8942,
+        "seasons": 8
+      },
+      "4741": {
+        "name": "Dan Arnold",
+        "pos": "TE",
+        "gpRate": 0.9615,
+        "seasons": 2
+      },
+      "4863": {
+        "name": "Josh Rosen",
+        "pos": "QB",
+        "gpRate": 0.6538,
+        "seasons": 2
+      },
+      "4866": {
+        "name": "Saquon Barkley",
+        "pos": "RB",
+        "gpRate": 0.8901,
+        "seasons": 7
+      },
+      "4881": {
+        "name": "Lamar Jackson",
+        "pos": "QB",
+        "gpRate": 0.9423,
+        "seasons": 8
+      },
+      "4892": {
+        "name": "Baker Mayfield",
+        "pos": "QB",
+        "gpRate": 0.9231,
+        "seasons": 8
+      },
+      "4943": {
+        "name": "Sam Darnold",
+        "pos": "QB",
+        "gpRate": 0.7253,
+        "seasons": 7
+      },
+      "4950": {
+        "name": "Christian Kirk",
+        "pos": "WR",
+        "gpRate": 0.9231,
+        "seasons": 6
+      },
+      "4951": {
+        "name": "DJ Chark",
+        "pos": "WR",
+        "gpRate": 0.9231,
+        "seasons": 2
+      },
+      "4962": {
+        "name": "Sony Michel",
+        "pos": "RB",
+        "gpRate": 0.8846,
+        "seasons": 2
+      },
+      "4972": {
+        "name": "Mason Rudolph",
+        "pos": "QB",
+        "gpRate": 0.4615,
+        "seasons": 3
+      },
+      "4973": {
+        "name": "Hayden Hurst",
+        "pos": "TE",
+        "gpRate": 0.8769,
+        "seasons": 5
+      },
+      "4981": {
+        "name": "Calvin Ridley",
+        "pos": "WR",
+        "gpRate": 0.9846,
+        "seasons": 5
+      },
+      "4983": {
+        "name": "DJ Moore",
+        "pos": "WR",
+        "gpRate": 0.9904,
+        "seasons": 8
+      },
+      "4984": {
+        "name": "Josh Allen",
+        "pos": "QB",
+        "gpRate": 0.9615,
+        "seasons": 8
+      },
+      "4988": {
+        "name": "Nick Chubb",
+        "pos": "RB",
+        "gpRate": 0.9103,
+        "seasons": 6
+      },
+      "4993": {
+        "name": "Mike Gesicki",
+        "pos": "TE",
+        "gpRate": 0.956,
+        "seasons": 7
+      },
+      "4995": {
+        "name": "Ian Thomas",
+        "pos": "TE",
+        "gpRate": 1,
+        "seasons": 2
+      },
+      "5000": {
+        "name": "Chase Edmonds",
+        "pos": "RB",
+        "gpRate": 0.8205,
+        "seasons": 3
+      },
+      "5001": {
+        "name": "Dalton Schultz",
+        "pos": "TE",
+        "gpRate": 0.9487,
+        "seasons": 6
+      },
+      "5008": {
+        "name": "Durham Smythe",
+        "pos": "TE",
+        "gpRate": 0.9487,
+        "seasons": 3
+      },
+      "5010": {
+        "name": "Will Dissly",
+        "pos": "TE",
+        "gpRate": 0.8923,
+        "seasons": 5
+      },
+      "5012": {
+        "name": "Mark Andrews",
+        "pos": "TE",
+        "gpRate": 0.9423,
+        "seasons": 8
+      },
+      "5022": {
+        "name": "Dallas Goedert",
+        "pos": "TE",
+        "gpRate": 0.8269,
+        "seasons": 8
+      },
+      "5032": {
+        "name": "Jordan Akins",
+        "pos": "TE",
+        "gpRate": 0.9038,
+        "seasons": 4
+      },
+      "5038": {
+        "name": "Michael Gallup",
+        "pos": "WR",
+        "gpRate": 0.9231,
+        "seasons": 2
+      },
+      "5045": {
+        "name": "Courtland Sutton",
+        "pos": "WR",
+        "gpRate": 0.9872,
+        "seasons": 6
+      },
+      "5052": {
+        "name": "Ronald Jones",
+        "pos": "RB",
+        "gpRate": 1,
+        "seasons": 2
+      },
+      "5089": {
+        "name": "Mike White",
+        "pos": "QB",
+        "gpRate": 0.3077,
+        "seasons": 2
+      },
+      "5127": {
+        "name": "Kyle Allen",
+        "pos": "QB",
+        "gpRate": 0.4359,
+        "seasons": 3
+      },
+      "5133": {
+        "name": "Tyler Conklin",
+        "pos": "TE",
+        "gpRate": 1,
+        "seasons": 4
+      },
+      "5170": {
+        "name": "Phillip Lindsay",
+        "pos": "RB",
+        "gpRate": 1,
+        "seasons": 2
+      },
+      "5248": {
+        "name": "Gus Edwards",
+        "pos": "RB",
+        "gpRate": 1,
+        "seasons": 2
+      },
+      "5347": {
+        "name": "Nyheim Miller-Hines",
+        "pos": "RB",
+        "gpRate": 1,
+        "seasons": 4
+      },
+      "5820": {
+        "name": "BenJarvus Green-Ellis",
+        "pos": "RB",
+        "gpRate": 1,
+        "seasons": 4
+      },
+      "5844": {
+        "name": "T.J. Hockenson",
+        "pos": "TE",
+        "gpRate": 0.9011,
+        "seasons": 7
+      },
+      "5845": {
+        "name": "Dwayne Haskins",
+        "pos": "QB",
+        "gpRate": 0.4615,
+        "seasons": 2
+      },
+      "5846": {
+        "name": "DK Metcalf",
+        "pos": "WR",
+        "gpRate": 0.967,
+        "seasons": 7
+      },
+      "5848": {
+        "name": "Marquise Brown",
+        "pos": "WR",
+        "gpRate": 0.8974,
+        "seasons": 6
+      },
+      "5849": {
+        "name": "Kyler Murray",
+        "pos": "QB",
+        "gpRate": 0.7582,
+        "seasons": 7
+      },
+      "5850": {
+        "name": "Josh Jacobs",
+        "pos": "RB",
+        "gpRate": 0.9451,
+        "seasons": 7
+      },
+      "5854": {
+        "name": "Drew Lock",
+        "pos": "QB",
+        "gpRate": 0.3846,
+        "seasons": 4
+      },
+      "5857": {
+        "name": "Noah Fant",
+        "pos": "TE",
+        "gpRate": 0.9341,
+        "seasons": 7
+      },
+      "5859": {
+        "name": "A.J. Brown",
+        "pos": "WR",
+        "gpRate": 0.9011,
+        "seasons": 7
+      },
+      "5870": {
+        "name": "Daniel Jones",
+        "pos": "QB",
+        "gpRate": 0.8352,
+        "seasons": 7
+      },
+      "5872": {
+        "name": "Deebo Samuel",
+        "pos": "WR",
+        "gpRate": 0.9103,
+        "seasons": 6
+      },
+      "5890": {
+        "name": "Damien Harris",
+        "pos": "RB",
+        "gpRate": 0.8462,
+        "seasons": 2
+      },
+      "5892": {
+        "name": "David Montgomery",
+        "pos": "RB",
+        "gpRate": 0.9011,
+        "seasons": 7
+      },
+      "5906": {
+        "name": "Dawson Knox",
+        "pos": "TE",
+        "gpRate": 0.8974,
+        "seasons": 6
+      },
+      "5916": {
+        "name": "Darrell Henderson",
+        "pos": "RB",
+        "gpRate": 0.8846,
+        "seasons": 2
+      },
+      "5927": {
+        "name": "Terry McLaurin",
+        "pos": "WR",
+        "gpRate": 0.9872,
+        "seasons": 6
+      },
+      "5937": {
+        "name": "Diontae Johnson",
+        "pos": "WR",
+        "gpRate": 0.9615,
+        "seasons": 4
+      },
+      "5947": {
+        "name": "Jakobi Meyers",
+        "pos": "WR",
+        "gpRate": 0.8923,
+        "seasons": 5
+      },
+      "5967": {
+        "name": "Tony Pollard",
+        "pos": "RB",
+        "gpRate": 0.9846,
+        "seasons": 5
+      },
+      "5973": {
+        "name": "Josh Oliver",
+        "pos": "TE",
+        "gpRate": 0.9231,
+        "seasons": 4
+      },
+      "5980": {
+        "name": "Myles Gaskin",
+        "pos": "RB",
+        "gpRate": 0.8077,
+        "seasons": 2
+      },
+      "5985": {
+        "name": "Foster Moreau",
+        "pos": "TE",
+        "gpRate": 0.9385,
+        "seasons": 5
+      },
+      "5987": {
+        "name": "Alexander Mattison",
+        "pos": "RB",
+        "gpRate": 0.9231,
+        "seasons": 3
+      },
+      "6001": {
+        "name": "Drew Sample",
+        "pos": "TE",
+        "gpRate": 1,
+        "seasons": 2
+      },
+      "6011": {
+        "name": "Gardner Minshew",
+        "pos": "QB",
+        "gpRate": 0.6769,
+        "seasons": 5
+      },
+      "6074": {
+        "name": "Donald Parham",
+        "pos": "TE",
+        "gpRate": 1,
+        "seasons": 2
+      },
+      "6111": {
+        "name": "Jake Browning",
+        "pos": "QB",
+        "gpRate": 0.3846,
+        "seasons": 2
+      },
+      "6126": {
+        "name": "Irv Smith",
+        "pos": "TE",
+        "gpRate": 0.7692,
+        "seasons": 3
+      },
+      "6130": {
+        "name": "Devin Singletary",
+        "pos": "RB",
+        "gpRate": 0.9359,
+        "seasons": 6
+      },
+      "6149": {
+        "name": "Darius Slayton",
+        "pos": "WR",
+        "gpRate": 0.9231,
+        "seasons": 2
+      },
+      "6151": {
+        "name": "Miles Sanders",
+        "pos": "RB",
+        "gpRate": 0.8923,
+        "seasons": 5
+      },
+      "6768": {
+        "name": "Tua Tagovailoa",
+        "pos": "QB",
+        "gpRate": 0.7949,
+        "seasons": 6
+      },
+      "6770": {
+        "name": "Joe Burrow",
+        "pos": "QB",
+        "gpRate": 0.8077,
+        "seasons": 6
+      },
+      "6783": {
+        "name": "Jerry Jeudy",
+        "pos": "WR",
+        "gpRate": 0.9231,
+        "seasons": 2
+      },
+      "6786": {
+        "name": "CeeDee Lamb",
+        "pos": "WR",
+        "gpRate": 0.9487,
+        "seasons": 6
+      },
+      "6790": {
+        "name": "D'Andre Swift",
+        "pos": "RB",
+        "gpRate": 0.8846,
+        "seasons": 6
+      },
+      "6794": {
+        "name": "Justin Jefferson",
+        "pos": "WR",
+        "gpRate": 0.9103,
+        "seasons": 6
+      },
+      "6797": {
+        "name": "Justin Herbert",
+        "pos": "QB",
+        "gpRate": 0.9872,
+        "seasons": 6
+      },
+      "6801": {
+        "name": "Tee Higgins",
+        "pos": "WR",
+        "gpRate": 0.8769,
+        "seasons": 5
+      },
+      "6803": {
+        "name": "Brandon Aiyuk",
+        "pos": "WR",
+        "gpRate": 0.9231,
+        "seasons": 4
+      },
+      "6804": {
+        "name": "Jordan Love",
+        "pos": "QB",
+        "gpRate": 0.9487,
+        "seasons": 3
+      },
+      "6806": {
+        "name": "J.K. Dobbins",
+        "pos": "RB",
+        "gpRate": 0.8462,
+        "seasons": 3
+      },
+      "6813": {
+        "name": "Jonathan Taylor",
+        "pos": "RB",
+        "gpRate": 0.8333,
+        "seasons": 6
+      },
+      "6819": {
+        "name": "Michael Pittman",
+        "pos": "WR",
+        "gpRate": 0.9808,
+        "seasons": 4
+      },
+      "6820": {
+        "name": "Clyde Edwards-Helaire",
+        "pos": "RB",
+        "gpRate": 0.7692,
+        "seasons": 3
+      },
+      "6826": {
+        "name": "Cole Kmet",
+        "pos": "TE",
+        "gpRate": 0.9872,
+        "seasons": 6
+      },
+      "6828": {
+        "name": "AJ Dillon",
+        "pos": "RB",
+        "gpRate": 1,
+        "seasons": 3
+      },
+      "6845": {
+        "name": "Zack Moss",
+        "pos": "RB",
+        "gpRate": 0.7692,
+        "seasons": 3
+      },
+      "6850": {
+        "name": "Harrison Bryant",
+        "pos": "TE",
+        "gpRate": 1,
+        "seasons": 2
+      },
+      "6865": {
+        "name": "Colby Parkinson",
+        "pos": "TE",
+        "gpRate": 0.9615,
+        "seasons": 4
+      },
+      "6869": {
+        "name": "Adam Trautman",
+        "pos": "TE",
+        "gpRate": 0.8718,
+        "seasons": 3
+      },
+      "6886": {
+        "name": "Chase Claypool",
+        "pos": "WR",
+        "gpRate": 0.9231,
+        "seasons": 2
+      },
+      "6904": {
+        "name": "Jalen Hurts",
+        "pos": "QB",
+        "gpRate": 0.9744,
+        "seasons": 6
+      },
+      "6943": {
+        "name": "Gabe Davis",
+        "pos": "WR",
+        "gpRate": 0.9615,
+        "seasons": 2
+      },
+      "6945": {
+        "name": "Antonio Gibson",
+        "pos": "RB",
+        "gpRate": 0.9692,
+        "seasons": 5
+      },
+      "6955": {
+        "name": "James Robinson",
+        "pos": "RB",
+        "gpRate": 0.9231,
+        "seasons": 3
+      },
+      "7002": {
+        "name": "Juwan Johnson",
+        "pos": "TE",
+        "gpRate": 0.8923,
+        "seasons": 5
+      },
+      "7021": {
+        "name": "Rico Dowdle",
+        "pos": "RB",
+        "gpRate": 0.9744,
+        "seasons": 3
+      },
+      "7049": {
+        "name": "Jauan Jennings",
+        "pos": "WR",
+        "gpRate": 0.8462,
+        "seasons": 2
+      },
+      "7083": {
+        "name": "Tyler Huntley",
+        "pos": "QB",
+        "gpRate": 0.2308,
+        "seasons": 4
+      },
+      "7090": {
+        "name": "Darnell Mooney",
+        "pos": "WR",
+        "gpRate": 1,
+        "seasons": 2
+      },
+      "7523": {
+        "name": "Trevor Lawrence",
+        "pos": "QB",
+        "gpRate": 0.9538,
+        "seasons": 5
+      },
+      "7525": {
+        "name": "DeVonta Smith",
+        "pos": "WR",
+        "gpRate": 0.9538,
+        "seasons": 5
+      },
+      "7526": {
+        "name": "Jaylen Waddle",
+        "pos": "WR",
+        "gpRate": 0.9846,
+        "seasons": 5
+      },
+      "7527": {
+        "name": "Mac Jones",
+        "pos": "QB",
+        "gpRate": 0.7692,
+        "seasons": 5
+      },
+      "7528": {
+        "name": "Najee Harris",
+        "pos": "RB",
+        "gpRate": 1,
+        "seasons": 4
+      },
+      "7538": {
+        "name": "Zach Wilson",
+        "pos": "QB",
+        "gpRate": 0.6923,
+        "seasons": 3
+      },
+      "7543": {
+        "name": "Travis Etienne",
+        "pos": "RB",
+        "gpRate": 0.9615,
+        "seasons": 4
+      },
+      "7547": {
+        "name": "Amon-Ra St. Brown",
+        "pos": "WR",
+        "gpRate": 0.9692,
+        "seasons": 5
+      },
+      "7553": {
+        "name": "Kyle Pitts",
+        "pos": "TE",
+        "gpRate": 0.9538,
+        "seasons": 5
+      },
+      "7564": {
+        "name": "Ja'Marr Chase",
+        "pos": "WR",
+        "gpRate": 0.9231,
+        "seasons": 5
+      },
+      "7567": {
+        "name": "Kenny Gainwell",
+        "pos": "RB",
+        "gpRate": 0.9615,
+        "seasons": 2
+      },
+      "7569": {
+        "name": "Nico Collins",
+        "pos": "WR",
+        "gpRate": 0.8205,
+        "seasons": 3
+      },
+      "7585": {
+        "name": "Davis Mills",
+        "pos": "QB",
+        "gpRate": 0.641,
+        "seasons": 3
+      },
+      "7588": {
+        "name": "Javonte Williams",
+        "pos": "RB",
+        "gpRate": 0.9808,
+        "seasons": 4
+      },
+      "7591": {
+        "name": "Justin Fields",
+        "pos": "QB",
+        "gpRate": 0.7692,
+        "seasons": 5
+      },
+      "7594": {
+        "name": "Chuba Hubbard",
+        "pos": "RB",
+        "gpRate": 0.9615,
+        "seasons": 4
+      },
+      "7600": {
+        "name": "Pat Freiermuth",
+        "pos": "TE",
+        "gpRate": 0.9077,
+        "seasons": 5
+      },
+      "7602": {
+        "name": "Kylen Granson",
+        "pos": "TE",
+        "gpRate": 0.8846,
+        "seasons": 2
+      },
+      "7607": {
+        "name": "Michael Carter",
+        "pos": "RB",
+        "gpRate": 0.8462,
+        "seasons": 2
+      },
+      "7611": {
+        "name": "Rhamondre Stevenson",
+        "pos": "RB",
+        "gpRate": 0.9038,
+        "seasons": 4
+      },
+      "7694": {
+        "name": "Tommy Tremble",
+        "pos": "TE",
+        "gpRate": 0.8846,
+        "seasons": 4
+      },
+      "7828": {
+        "name": "Noah Gray",
+        "pos": "TE",
+        "gpRate": 1,
+        "seasons": 3
+      },
+      "8110": {
+        "name": "Jake Ferguson",
+        "pos": "TE",
+        "gpRate": 0.9423,
+        "seasons": 4
+      },
+      "8111": {
+        "name": "Cade Otton",
+        "pos": "TE",
+        "gpRate": 0.9808,
+        "seasons": 4
+      },
+      "8112": {
+        "name": "Drake London",
+        "pos": "WR",
+        "gpRate": 0.9038,
+        "seasons": 4
+      },
+      "8121": {
+        "name": "Romeo Doubs",
+        "pos": "WR",
+        "gpRate": 1,
+        "seasons": 2
+      },
+      "8126": {
+        "name": "Wan'Dale Robinson",
+        "pos": "WR",
+        "gpRate": 1,
+        "seasons": 2
+      },
+      "8130": {
+        "name": "Trey McBride",
+        "pos": "TE",
+        "gpRate": 0.9744,
+        "seasons": 3
+      },
+      "8131": {
+        "name": "Isaiah Likely",
+        "pos": "TE",
+        "gpRate": 0.9038,
+        "seasons": 4
+      },
+      "8132": {
+        "name": "Tyler Allgeier",
+        "pos": "RB",
+        "gpRate": 0.9808,
+        "seasons": 4
+      },
+      "8134": {
+        "name": "Khalil Shakir",
+        "pos": "WR",
+        "gpRate": 0.9615,
+        "seasons": 2
+      },
+      "8136": {
+        "name": "Rachaad White",
+        "pos": "RB",
+        "gpRate": 0.9808,
+        "seasons": 4
+      },
+      "8137": {
+        "name": "George Pickens",
+        "pos": "WR",
+        "gpRate": 0.9808,
+        "seasons": 4
+      },
+      "8138": {
+        "name": "James Cook",
+        "pos": "RB",
+        "gpRate": 0.9744,
+        "seasons": 3
+      },
+      "8142": {
+        "name": "Alec Pierce",
+        "pos": "WR",
+        "gpRate": 0.9231,
+        "seasons": 2
+      },
+      "8143": {
+        "name": "Jerome Ford",
+        "pos": "RB",
+        "gpRate": 0.9231,
+        "seasons": 2
+      },
+      "8144": {
+        "name": "Chris Olave",
+        "pos": "WR",
+        "gpRate": 0.9744,
+        "seasons": 3
+      },
+      "8146": {
+        "name": "Garrett Wilson",
+        "pos": "WR",
+        "gpRate": 0.8846,
+        "seasons": 4
+      },
+      "8148": {
+        "name": "Jameson Williams",
+        "pos": "WR",
+        "gpRate": 0.9231,
+        "seasons": 2
+      },
+      "8150": {
+        "name": "Kyren Williams",
+        "pos": "RB",
+        "gpRate": 0.8974,
+        "seasons": 3
+      },
+      "8151": {
+        "name": "Kenneth Walker",
+        "pos": "RB",
+        "gpRate": 0.8654,
+        "seasons": 4
+      },
+      "8154": {
+        "name": "Brian Robinson",
+        "pos": "RB",
+        "gpRate": 0.8205,
+        "seasons": 3
+      },
+      "8155": {
+        "name": "Breece Hall",
+        "pos": "RB",
+        "gpRate": 0.8654,
+        "seasons": 4
+      },
+      "8157": {
+        "name": "Bailey Zappe",
+        "pos": "QB",
+        "gpRate": 0.3846,
+        "seasons": 2
+      },
+      "8160": {
+        "name": "Kenny Pickett",
+        "pos": "QB",
+        "gpRate": 0.8462,
+        "seasons": 2
+      },
+      "8167": {
+        "name": "Christian Watson",
+        "pos": "WR",
+        "gpRate": 0.6538,
+        "seasons": 2
+      },
+      "8183": {
+        "name": "Brock Purdy",
+        "pos": "QB",
+        "gpRate": 0.6731,
+        "seasons": 4
+      },
+      "8205": {
+        "name": "Isiah Pacheco",
+        "pos": "RB",
+        "gpRate": 0.9615,
+        "seasons": 2
+      },
+      "8210": {
+        "name": "Chig Okonkwo",
+        "pos": "TE",
+        "gpRate": 1,
+        "seasons": 4
+      },
+      "8228": {
+        "name": "Jaylen Warren",
+        "pos": "RB",
+        "gpRate": 0.9231,
+        "seasons": 3
+      },
+      "8408": {
+        "name": "Jordan Mason",
+        "pos": "RB",
+        "gpRate": 0.9615,
+        "seasons": 2
+      },
+      "8676": {
+        "name": "Rashid Shaheed",
+        "pos": "WR",
+        "gpRate": 0.9231,
+        "seasons": 2
+      },
+      "9221": {
+        "name": "Jahmyr Gibbs",
+        "pos": "RB",
+        "gpRate": 0.9487,
+        "seasons": 3
+      },
+      "9224": {
+        "name": "Chase Brown",
+        "pos": "RB",
+        "gpRate": 1,
+        "seasons": 2
+      },
+      "9226": {
+        "name": "De'Von Achane",
+        "pos": "RB",
+        "gpRate": 0.8462,
+        "seasons": 3
+      },
+      "9228": {
+        "name": "Bryce Young",
+        "pos": "QB",
+        "gpRate": 0.8718,
+        "seasons": 3
+      },
+      "9229": {
+        "name": "Anthony Richardson",
+        "pos": "QB",
+        "gpRate": 0.5,
+        "seasons": 2
+      },
+      "9479": {
+        "name": "Darnell Washington",
+        "pos": "TE",
+        "gpRate": 1,
+        "seasons": 2
+      },
+      "9480": {
+        "name": "Brenton Strange",
+        "pos": "TE",
+        "gpRate": 0.8077,
+        "seasons": 2
+      },
+      "9482": {
+        "name": "Michael Mayer",
+        "pos": "TE",
+        "gpRate": 0.8462,
+        "seasons": 2
+      },
+      "9484": {
+        "name": "Tucker Kraft",
+        "pos": "TE",
+        "gpRate": 0.8718,
+        "seasons": 3
+      },
+      "9488": {
+        "name": "Jaxon Smith-Njigba",
+        "pos": "WR",
+        "gpRate": 1,
+        "seasons": 2
+      },
+      "9493": {
+        "name": "Puka Nacua",
+        "pos": "WR",
+        "gpRate": 0.8462,
+        "seasons": 3
+      },
+      "9500": {
+        "name": "Josh Downs",
+        "pos": "WR",
+        "gpRate": 0.8846,
+        "seasons": 2
+      },
+      "9509": {
+        "name": "Bijan Robinson",
+        "pos": "RB",
+        "gpRate": 1,
+        "seasons": 3
+      },
+      "9753": {
+        "name": "Zach Charbonnet",
+        "pos": "RB",
+        "gpRate": 0.9487,
+        "seasons": 3
+      },
+      "9756": {
+        "name": "Jordan Addison",
+        "pos": "WR",
+        "gpRate": 0.8718,
+        "seasons": 3
+      },
+      "9758": {
+        "name": "C.J. Stroud",
+        "pos": "QB",
+        "gpRate": 0.9231,
+        "seasons": 3
+      },
+      "9997": {
+        "name": "Zay Flowers",
+        "pos": "WR",
+        "gpRate": 1,
+        "seasons": 3
+      },
+      "9999": {
+        "name": "Will Levis",
+        "pos": "QB",
+        "gpRate": 0.6538,
+        "seasons": 2
+      },
+      "10222": {
+        "name": "Jayden Reed",
+        "pos": "WR",
+        "gpRate": 1,
+        "seasons": 2
+      },
+      "10229": {
+        "name": "Rashee Rice",
+        "pos": "WR",
+        "gpRate": 0.7692,
+        "seasons": 2
+      },
+      "10236": {
+        "name": "Dalton Kincaid",
+        "pos": "TE",
+        "gpRate": 0.7949,
+        "seasons": 3
+      },
+      "10859": {
+        "name": "Sam LaPorta",
+        "pos": "TE",
+        "gpRate": 0.8718,
+        "seasons": 3
+      },
+      "10866": {
+        "name": "Aidan O'Connell",
+        "pos": "QB",
+        "gpRate": 0.5,
+        "seasons": 2
+      },
+      "11292": {
+        "name": "Tommy DeVito",
+        "pos": "QB",
+        "gpRate": 0.3077,
+        "seasons": 2
+      },
+      "11439": {
+        "name": "Jaleel McLaughlin",
+        "pos": "RB",
+        "gpRate": 1,
+        "seasons": 2
+      },
+      "11560": {
+        "name": "Caleb Williams",
+        "pos": "QB",
+        "gpRate": 1,
+        "seasons": 2
+      },
+      "11562": {
+        "name": "Spencer Rattler",
+        "pos": "QB",
+        "gpRate": 0.4231,
+        "seasons": 2
+      },
+      "11563": {
+        "name": "Bo Nix",
+        "pos": "QB",
+        "gpRate": 1,
+        "seasons": 2
+      },
+      "11564": {
+        "name": "Drake Maye",
+        "pos": "QB",
+        "gpRate": 0.8462,
+        "seasons": 2
+      },
+      "11566": {
+        "name": "Jayden Daniels",
+        "pos": "QB",
+        "gpRate": 0.7692,
+        "seasons": 2
+      },
+      "11584": {
+        "name": "Bucky Irving",
+        "pos": "RB",
+        "gpRate": 0.7308,
+        "seasons": 2
+      },
+      "11597": {
+        "name": "Theo Johnson",
+        "pos": "TE",
+        "gpRate": 0.9615,
+        "seasons": 2
+      },
+      "11600": {
+        "name": "Ja'Tavion Sanders",
+        "pos": "TE",
+        "gpRate": 0.8462,
+        "seasons": 2
+      },
+      "11603": {
+        "name": "AJ Barner",
+        "pos": "TE",
+        "gpRate": 1,
+        "seasons": 2
+      },
+      "11604": {
+        "name": "Brock Bowers",
+        "pos": "TE",
+        "gpRate": 0.8846,
+        "seasons": 2
+      },
+      "11620": {
+        "name": "Rome Odunze",
+        "pos": "WR",
+        "gpRate": 0.9615,
+        "seasons": 2
+      },
+      "11628": {
+        "name": "Marvin Harrison",
+        "pos": "WR",
+        "gpRate": 0.8846,
+        "seasons": 2
+      },
+      "11631": {
+        "name": "Brian Thomas",
+        "pos": "WR",
+        "gpRate": 0.8846,
+        "seasons": 2
+      },
+      "11635": {
+        "name": "Ladd McConkey",
+        "pos": "WR",
+        "gpRate": 0.9615,
+        "seasons": 2
+      },
+      "11655": {
+        "name": "Tyrone Tracy",
+        "pos": "RB",
+        "gpRate": 0.9231,
+        "seasons": 2
+      }
+    }
+  },
+  "outcome": {
+    "QB": {
+      "1-3": {
+        "n": 35,
+        "p10": 0.71,
+        "p25": 0.757,
+        "p50": 0.86,
+        "p75": 0.929,
+        "p90": 1.02,
+        "bustRate": 0.229,
+        "breakoutRate": 0.029,
+        "cdf": [
+          0.528,
+          0.671,
+          0.71,
+          0.728,
+          0.749,
+          0.757,
+          0.767,
+          0.791,
+          0.804,
+          0.808,
+          0.86,
+          0.87,
+          0.877,
+          0.888,
+          0.895,
+          0.929,
+          0.954,
+          0.991,
+          1.02,
+          1.078,
+          1.303
+        ]
+      },
+      "4-6": {
+        "n": 34,
+        "p10": 0.783,
+        "p25": 0.869,
+        "p50": 0.964,
+        "p75": 1.146,
+        "p90": 1.268,
+        "bustRate": 0.088,
+        "breakoutRate": 0.118,
+        "cdf": [
+          0.591,
+          0.689,
+          0.783,
+          0.812,
+          0.843,
+          0.869,
+          0.885,
+          0.896,
+          0.919,
+          0.949,
+          0.964,
+          0.974,
+          1.001,
+          1.013,
+          1.082,
+          1.146,
+          1.22,
+          1.237,
+          1.268,
+          1.287,
+          1.322
+        ]
+      },
+      "7-12": {
+        "n": 75,
+        "p10": 0.773,
+        "p25": 0.848,
+        "p50": 0.976,
+        "p75": 1.089,
+        "p90": 1.19,
+        "bustRate": 0.093,
+        "breakoutRate": 0.053,
+        "cdf": [
+          0.436,
+          0.67,
+          0.773,
+          0.802,
+          0.832,
+          0.848,
+          0.887,
+          0.919,
+          0.936,
+          0.96,
+          0.976,
+          0.991,
+          1.017,
+          1.034,
+          1.053,
+          1.089,
+          1.135,
+          1.178,
+          1.19,
+          1.251,
+          1.342
+        ]
+      },
+      "13-24": {
+        "n": 127,
+        "p10": 0.767,
+        "p25": 0.864,
+        "p50": 0.985,
+        "p75": 1.19,
+        "p90": 1.27,
+        "bustRate": 0.094,
+        "breakoutRate": 0.126,
+        "cdf": [
+          0.156,
+          0.681,
+          0.767,
+          0.822,
+          0.847,
+          0.864,
+          0.905,
+          0.932,
+          0.948,
+          0.964,
+          0.985,
+          1.026,
+          1.067,
+          1.144,
+          1.163,
+          1.19,
+          1.218,
+          1.231,
+          1.27,
+          1.344,
+          1.502
+        ]
+      },
+      "25-48": {
+        "n": 82,
+        "p10": 0.593,
+        "p25": 0.908,
+        "p50": 1.183,
+        "p75": 1.407,
+        "p90": 1.991,
+        "bustRate": 0.159,
+        "breakoutRate": 0.427,
+        "cdf": [
+          -0.046,
+          0.275,
+          0.593,
+          0.696,
+          0.861,
+          0.908,
+          0.987,
+          1.026,
+          1.055,
+          1.153,
+          1.183,
+          1.225,
+          1.257,
+          1.293,
+          1.349,
+          1.407,
+          1.457,
+          1.64,
+          1.991,
+          3.462,
+          7.61
+        ]
+      }
+    },
+    "RB": {
+      "1-3": {
+        "n": 36,
+        "p10": 0.525,
+        "p25": 0.611,
+        "p50": 0.74,
+        "p75": 0.952,
+        "p90": 1.168,
+        "bustRate": 0.528,
+        "breakoutRate": 0,
+        "cdf": [
+          0.336,
+          0.489,
+          0.525,
+          0.56,
+          0.587,
+          0.611,
+          0.633,
+          0.659,
+          0.682,
+          0.701,
+          0.74,
+          0.784,
+          0.829,
+          0.84,
+          0.877,
+          0.952,
+          1.079,
+          1.112,
+          1.168,
+          1.188,
+          1.205
+        ]
+      },
+      "4-6": {
+        "n": 34,
+        "p10": 0.671,
+        "p25": 0.763,
+        "p50": 0.913,
+        "p75": 1.076,
+        "p90": 1.202,
+        "bustRate": 0.206,
+        "breakoutRate": 0.088,
+        "cdf": [
+          0.459,
+          0.639,
+          0.671,
+          0.708,
+          0.739,
+          0.763,
+          0.8,
+          0.812,
+          0.824,
+          0.841,
+          0.913,
+          0.935,
+          0.947,
+          0.957,
+          0.995,
+          1.076,
+          1.085,
+          1.103,
+          1.202,
+          1.328,
+          1.487
+        ]
+      },
+      "7-12": {
+        "n": 74,
+        "p10": 0.532,
+        "p25": 0.675,
+        "p50": 0.855,
+        "p75": 1.01,
+        "p90": 1.274,
+        "bustRate": 0.365,
+        "breakoutRate": 0.122,
+        "cdf": [
+          0.201,
+          0.489,
+          0.532,
+          0.552,
+          0.617,
+          0.675,
+          0.709,
+          0.735,
+          0.78,
+          0.823,
+          0.855,
+          0.879,
+          0.918,
+          0.938,
+          0.968,
+          1.01,
+          1.096,
+          1.18,
+          1.274,
+          1.392,
+          1.745
+        ]
+      },
+      "13-24": {
+        "n": 133,
+        "p10": 0.449,
+        "p25": 0.675,
+        "p50": 0.845,
+        "p75": 1.123,
+        "p90": 1.392,
+        "bustRate": 0.338,
+        "breakoutRate": 0.188,
+        "cdf": [
+          0.088,
+          0.316,
+          0.449,
+          0.562,
+          0.64,
+          0.675,
+          0.72,
+          0.767,
+          0.783,
+          0.818,
+          0.845,
+          0.885,
+          0.965,
+          0.993,
+          1.059,
+          1.123,
+          1.217,
+          1.282,
+          1.392,
+          1.528,
+          2.014
+        ]
+      },
+      "25-48": {
+        "n": 248,
+        "p10": 0.31,
+        "p25": 0.553,
+        "p50": 0.898,
+        "p75": 1.27,
+        "p90": 1.652,
+        "bustRate": 0.375,
+        "breakoutRate": 0.262,
+        "cdf": [
+          0.008,
+          0.215,
+          0.31,
+          0.413,
+          0.47,
+          0.553,
+          0.618,
+          0.705,
+          0.792,
+          0.822,
+          0.898,
+          0.937,
+          1.032,
+          1.114,
+          1.175,
+          1.27,
+          1.34,
+          1.49,
+          1.652,
+          1.783,
+          5.219
+        ]
+      }
+    },
+    "WR": {
+      "1-3": {
+        "n": 37,
+        "p10": 0.609,
+        "p25": 0.731,
+        "p50": 0.821,
+        "p75": 0.968,
+        "p90": 1.089,
+        "bustRate": 0.297,
+        "breakoutRate": 0,
+        "cdf": [
+          0.513,
+          0.544,
+          0.609,
+          0.67,
+          0.714,
+          0.731,
+          0.754,
+          0.768,
+          0.78,
+          0.788,
+          0.821,
+          0.857,
+          0.872,
+          0.885,
+          0.94,
+          0.968,
+          1.03,
+          1.04,
+          1.089,
+          1.117,
+          1.209
+        ]
+      },
+      "4-6": {
+        "n": 37,
+        "p10": 0.696,
+        "p25": 0.774,
+        "p50": 0.822,
+        "p75": 1.091,
+        "p90": 1.209,
+        "bustRate": 0.216,
+        "breakoutRate": 0.108,
+        "cdf": [
+          0.526,
+          0.647,
+          0.696,
+          0.73,
+          0.74,
+          0.774,
+          0.791,
+          0.796,
+          0.804,
+          0.811,
+          0.822,
+          0.845,
+          0.926,
+          0.943,
+          1.056,
+          1.091,
+          1.101,
+          1.145,
+          1.209,
+          1.32,
+          1.356
+        ]
+      },
+      "7-12": {
+        "n": 74,
+        "p10": 0.571,
+        "p25": 0.768,
+        "p50": 0.883,
+        "p75": 1.079,
+        "p90": 1.257,
+        "bustRate": 0.203,
+        "breakoutRate": 0.108,
+        "cdf": [
+          0.382,
+          0.528,
+          0.571,
+          0.682,
+          0.742,
+          0.768,
+          0.792,
+          0.835,
+          0.852,
+          0.869,
+          0.883,
+          0.906,
+          0.914,
+          0.948,
+          0.998,
+          1.079,
+          1.118,
+          1.154,
+          1.257,
+          1.314,
+          1.443
+        ]
+      },
+      "13-24": {
+        "n": 145,
+        "p10": 0.647,
+        "p25": 0.753,
+        "p50": 0.91,
+        "p75": 1.076,
+        "p90": 1.216,
+        "bustRate": 0.241,
+        "breakoutRate": 0.097,
+        "cdf": [
+          0.366,
+          0.517,
+          0.647,
+          0.69,
+          0.722,
+          0.753,
+          0.795,
+          0.826,
+          0.853,
+          0.882,
+          0.91,
+          0.931,
+          0.986,
+          1.01,
+          1.031,
+          1.076,
+          1.128,
+          1.144,
+          1.216,
+          1.306,
+          1.821
+        ]
+      },
+      "25-48": {
+        "n": 282,
+        "p10": 0.445,
+        "p25": 0.684,
+        "p50": 0.957,
+        "p75": 1.206,
+        "p90": 1.471,
+        "bustRate": 0.316,
+        "breakoutRate": 0.22,
+        "cdf": [
+          0.025,
+          0.368,
+          0.445,
+          0.546,
+          0.633,
+          0.684,
+          0.731,
+          0.804,
+          0.866,
+          0.903,
+          0.957,
+          1.011,
+          1.05,
+          1.091,
+          1.153,
+          1.206,
+          1.277,
+          1.372,
+          1.471,
+          1.605,
+          2.64
+        ]
+      }
+    },
+    "TE": {
+      "1-3": {
+        "n": 39,
+        "p10": 0.629,
+        "p25": 0.736,
+        "p50": 0.828,
+        "p75": 1.025,
+        "p90": 1.239,
+        "bustRate": 0.308,
+        "breakoutRate": 0.103,
+        "cdf": [
+          0.371,
+          0.495,
+          0.629,
+          0.678,
+          0.726,
+          0.736,
+          0.756,
+          0.793,
+          0.798,
+          0.822,
+          0.828,
+          0.858,
+          0.911,
+          0.939,
+          0.971,
+          1.025,
+          1.059,
+          1.184,
+          1.239,
+          1.323,
+          1.332
+        ]
+      },
+      "4-6": {
+        "n": 39,
+        "p10": 0.513,
+        "p25": 0.632,
+        "p50": 0.751,
+        "p75": 0.99,
+        "p90": 1.237,
+        "bustRate": 0.487,
+        "breakoutRate": 0.103,
+        "cdf": [
+          0.074,
+          0.436,
+          0.513,
+          0.581,
+          0.621,
+          0.632,
+          0.645,
+          0.71,
+          0.724,
+          0.733,
+          0.751,
+          0.767,
+          0.842,
+          0.932,
+          0.966,
+          0.99,
+          1.016,
+          1.131,
+          1.237,
+          1.283,
+          1.428
+        ]
+      },
+      "7-12": {
+        "n": 68,
+        "p10": 0.526,
+        "p25": 0.716,
+        "p50": 0.896,
+        "p75": 1.148,
+        "p90": 1.332,
+        "bustRate": 0.324,
+        "breakoutRate": 0.147,
+        "cdf": [
+          0.248,
+          0.374,
+          0.526,
+          0.641,
+          0.694,
+          0.716,
+          0.732,
+          0.774,
+          0.801,
+          0.872,
+          0.896,
+          0.922,
+          0.98,
+          1.046,
+          1.085,
+          1.148,
+          1.213,
+          1.247,
+          1.332,
+          1.414,
+          2.592
+        ]
+      },
+      "13-24": {
+        "n": 137,
+        "p10": 0.351,
+        "p25": 0.651,
+        "p50": 0.926,
+        "p75": 1.246,
+        "p90": 1.566,
+        "bustRate": 0.365,
+        "breakoutRate": 0.248,
+        "cdf": [
+          0.104,
+          0.276,
+          0.351,
+          0.466,
+          0.567,
+          0.651,
+          0.679,
+          0.729,
+          0.843,
+          0.897,
+          0.926,
+          1.019,
+          1.043,
+          1.084,
+          1.153,
+          1.246,
+          1.296,
+          1.388,
+          1.566,
+          1.733,
+          4.003
+        ]
+      },
+      "25-48": {
+        "n": 248,
+        "p10": 0.257,
+        "p25": 0.518,
+        "p50": 0.884,
+        "p75": 1.497,
+        "p90": 2.075,
+        "bustRate": 0.399,
+        "breakoutRate": 0.339,
+        "cdf": [
+          0,
+          0.191,
+          0.257,
+          0.337,
+          0.394,
+          0.518,
+          0.582,
+          0.665,
+          0.748,
+          0.797,
+          0.884,
+          0.985,
+          1.048,
+          1.17,
+          1.377,
+          1.497,
+          1.666,
+          1.819,
+          2.075,
+          3.273,
+          24.659
+        ]
+      }
+    }
+  }
+}
