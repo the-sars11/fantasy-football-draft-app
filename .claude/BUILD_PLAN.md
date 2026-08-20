@@ -514,7 +514,7 @@ Screen → target: S1 research-hub `/research`; S2 player-browser (D4, already b
 > - `src/components/prep/strategy-proposals.tsx` — full rewrite: auto-load on mount, sorted by `projected_ceiling` DESC, ranked expandable rows with star ratings, Regenerate button.
 > - `src/app/(app)/prep/strategies/client.tsx` — Dry-run link + `PlayCircle` import removed.
 > - Ranking key: `projected_ceiling` DESC (R9 board-derived). MC per-strategy ranking deferred to R10b (no per-strategy me-seat in `SimEngineInput`).
-> - **Functional gap (confirmed):** player pull on `/prep` does NOT re-flow strategy proposals. Fix: wire a pull-complete signal to reset `fetchedRef.current` in `StrategyProposals`. Target: R10b or D3-fix.
+> - **Functional gap — ✅ CLOSED 2026-08-19 (Phase 1):** player pull on `/prep` now re-flows strategy proposals. `src/lib/prep/pull-signal.ts` stamps a per-league timestamp on pull completion (`/prep` `doRun`); `StrategyProposals` reads it on mount + tab focus/visibility and re-runs `/api/strategies/propose` when the stamp is newer than the one its proposals were built from. Proof: 7 new tests (pull-signal unit + re-flow component, both directions), 504/504 green, type-check 0, lint 0 new, build clean.
 > - **Proof:** type-check 0 errors; 392/392 tests green; lint 0 new; build clean; 375px screenshot `d3_strategies_375.png`. Migration applied to production Supabase (Joe, 2026-08-15 via SQL Editor).
 
 ### D4 — Players card redesign `[Sonnet]` · class: output ✅ DONE (2026-08-16)

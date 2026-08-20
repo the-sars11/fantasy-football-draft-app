@@ -2,6 +2,20 @@
 
 ---
 
+## 2026-08-19 / Phase 1 -- Player Pull re-flows strategy proposals (close BUILD_PLAN:517 gap)
+
+**Class:** shared/bugfix (Architecture + QA lenses). Functionality-first sequencing after the SP-track was paused.
+
+- **What / why:** the confirmed functional gap at `BUILD_PLAN.md:517`. `StrategyProposals` (`/prep/strategies`) fetches once and caches via `fetchedRef`, so a fresh Player Pull on `/prep` (which refreshes the cached player pool the proposals derive from) did NOT re-flow them. New injuries/projections/values never moved the ranked strategies until a manual Regenerate. Joe explicitly asked for a pull to re-flow.
+- **Fix:** `src/lib/prep/pull-signal.ts` (new) -- a tiny cross-route signal: `markPullComplete(leagueId)` stamps `localStorage` key `ffi:last-pull:<leagueId>` with a timestamp; `readPullStamp(leagueId)` reads it back (0 when none/unavailable). Both SSR-safe and degrade to no-ops when `localStorage` is blocked.
+- **Producer:** `/prep` `page.tsx` `doRun()` calls `markPullComplete(league.id)` on a successful `/api/research` pull, before `load()`.
+- **Consumer:** `strategy-proposals.tsx` replaced the mount-only effect with a mount + `focus`/`visibilitychange` effect. On first load it adopts the current stamp (no double-fetch); when it later sees a stamp newer than the one its proposals were built from, it re-runs `/api/strategies/propose`. Same-tab SPA navigation is why it polls on focus rather than listening for the cross-tab `storage` event.
+- **Tests (+7):** `pull-signal.test.ts` (5 -- read-empty, write/read, per-league isolation, newer-wins, empty-id) + `strategy-proposals-reflow.test.tsx` (2 -- re-fetches on newer-pull+focus, does NOT re-fetch on a bare focus).
+
+**Gate:** `npm run type-check` 0 errors. `npm run test:run` 504/504 across 40 files (was 497/38; +7). `npx eslint` on all 5 touched files 0 problems (0 new). `npm run build` compiled successfully in 4.4s, all routes prerendered. No em/en-dashes.
+
+---
+
 ## 2026-08-18 / SP-4V -- Validate /prep/configure rebuild (Opus, fresh context) + MED dash fix
 
 **Class:** output (Design + QA lenses). **Opus, WORKHORSE (validation), OTHER_FAMILY** (did NOT write SP-4). Independent adversarial check behind SP-4 commit `771ecc1`.

@@ -27,7 +27,7 @@ The prior plan (S1–S8 / P2 DR / P3 VAL) marked the app "done" while it (a) pri
 
 ### ▶ ACTIVE FOCUS 2026-08-19 -- functionality first; SP-track PAUSED
 
-Joe's order: pause the SHIELD screen reskin, sequence functionality before pixels, KEEP the SP-track on the plan (do not delete). Active queue, in order: **Phase 1** line-517 strategy re-flow fix -> **R14** usability walkthrough (`BUILD_PLAN.md:411`) -> **R15** rehearsal gate (`:419`). Only after those close does the SP-track resume.
+Joe's order: pause the SHIELD screen reskin, sequence functionality before pixels, KEEP the SP-track on the plan (do not delete). Active queue: ~~**Phase 1** line-517 strategy re-flow fix~~ ✅ DONE 2026-08-19 (pull-signal, 504/504, +7 tests) -> **R14** usability walkthrough (`BUILD_PLAN.md:411`) **← NEXT** -> **R15** rehearsal gate (`:419`). Only after those close does the SP-track resume.
 
 The SP-track (SHIELD Screen-Parity Sprint, SP-0..SP-7 + OTHER_FAMILY validators) is retained but **PAUSED** behind the three gates above. Joe flagged the SHIELD rollout was a token-VALUE repaint, not a per-screen redesign: only D2-D6 got a real craft pass; every other screen still wears GRIDIRON-era structure + stale off-token literals. See `BUILD_PLAN.md` "SP-track" section. **One plan of record = `.claude/BUILD_PLAN.md`**; the scratch plans `cozy-waddling-creek.md` and `atomic-spindle.md` are SUPERSEDED.
 

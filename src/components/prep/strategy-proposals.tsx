@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { RefreshCw, Star, ChevronRight } from 'lucide-react'
 import type { StrategyProposal } from '@/lib/research/strategy/research'
 import type { DraftFormat } from '@/lib/players/types'
+import { readPullStamp } from '@/lib/prep/pull-signal'
 
 interface StrategyProposalsProps {
   leagueId: string
@@ -450,6 +451,8 @@ export function StrategyProposals({
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const fetchedRef = useRef(false)
+  // Pull stamp the current proposals were built from (0 = none seen yet).
+  const seenPullStampRef = useRef(0)
 
   const fetchProposals = useCallback(
     async (isRegenerate = false) => {
@@ -497,12 +500,34 @@ export function StrategyProposals({
     }
   }, [leagueId])
 
-  // Auto-load on mount
+  // Auto-load on mount, then re-flow whenever a newer Player Pull is detected.
+  // The pull lands on /prep (a sibling route in the same tab), so we re-check
+  // the stamp on mount and on tab focus/visibility rather than a storage event.
   useEffect(() => {
-    if (fetchedRef.current) return
-    fetchProposals()
-    fetchRatings()
-  }, [fetchProposals, fetchRatings])
+    function syncToPull() {
+      const stamp = readPullStamp(leagueId)
+      if (!fetchedRef.current) {
+        // First load: adopt the current stamp so we don't double-fetch.
+        seenPullStampRef.current = stamp
+        fetchProposals()
+        fetchRatings()
+        return
+      }
+      if (stamp > seenPullStampRef.current) {
+        // A fresh pull refreshed the pool - re-run generation.
+        seenPullStampRef.current = stamp
+        fetchProposals(true)
+      }
+    }
+
+    syncToPull()
+    window.addEventListener('focus', syncToPull)
+    document.addEventListener('visibilitychange', syncToPull)
+    return () => {
+      window.removeEventListener('focus', syncToPull)
+      document.removeEventListener('visibilitychange', syncToPull)
+    }
+  }, [leagueId, fetchProposals, fetchRatings])
 
   const handleRating = useCallback(
     async (archetype: string, n: number) => {

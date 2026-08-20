@@ -33,6 +33,7 @@ import {
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { PageTitle, Nameplate, IconChip } from '@/components/ui/shield'
+import { markPullComplete } from '@/lib/prep/pull-signal'
 
 const NASTIES = 'The Nasties'
 
@@ -180,6 +181,8 @@ export default function PrepPage() {
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'Research failed')
+      // Signal the fresh pool so /prep/strategies re-flows its proposals.
+      markPullComplete(league.id)
       setRunState('idle')
       await load()
     } catch (e) {
