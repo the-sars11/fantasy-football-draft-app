@@ -2,6 +2,19 @@
 
 ---
 
+## 2026-08-20 / Risk-model derive is now self-sufficient (pulls Sleeper directly)
+
+**Class:** infra (Ops + Security lenses). Closes the follow-up flagged when the risk model shipped: `scripts/derive-risk-model.mjs` read the ephemeral session scratchpad, so the runtime `risk-model.json` was permanent but could not be regenerated once that scratchpad vanished. The derive script now pulls its own data.
+
+- **Change (`scripts/derive-risk-model.mjs`):** new `loadJson(name, url)` fetches the raw actuals straight from the Sleeper API (free, keyless, no auth, $0) on a cache miss and stores each response under `scripts/.sleeper-cache/` (gitignored) so re-runs are instant and offline. Load order: repo cache -> legacy scratchpad (migrated forward if present) -> live fetch. 3-try backoff + 120ms politeness delay across the 211 calls (1 player map + 210 weekly files), well under Sleeper's rate limit. Portable `--fresh` argv flag (or `DERIVE_FRESH=1`) ignores every local cache and forces a fresh re-pull.
+- **npm scripts (`package.json`):** `risk:derive` (cache-first) and `risk:derive:fresh` (`--fresh`, re-pulls Sleeper). The argv flag means the fresh script runs on Windows with no `cross-env` dependency.
+- **Gitignore:** `/scripts/.sleeper-cache/` (re-pullable, never committed).
+- **Proof:** a full cold pull (`npm run risk:derive:fresh`, all 211 endpoints re-fetched from Sleeper with the cache present) reproduces the committed `src/data/risk-model.json` byte-for-byte -- sha256 `dd42110b...`, empty `git diff`. Spot checks identical: McCaffrey gpRate 0.846 over 8 seasons, Derrick Henry 0.957, Josh Allen 0.962, RB tier-1 bust 53%. Deterministic and self-contained.
+
+**Gate:** cold re-pull reproduces the model exactly (hash match). $0 (Sleeper free/keyless). No em/en-dashes. `risk-model.json` unchanged, so only the script, `package.json`, and `.gitignore` moved.
+
+---
+
 ## 2026-08-20 / Measured risk model wired into the sim -- real durability + bust/breakout by tier
 
 **Class:** pipeline (Architecture + QA lenses). Supersedes the flat injury layer below with a data-driven model derived from 15 seasons of Sleeper weekly PPR actuals (`scripts/derive-risk-model.mjs` -> `src/data/risk-model.json`, committed 693e6cb). Answers Joe's four questions honestly: risk is now PER-PLAYER (not flat), MEASURED (not assumed), and it models bust AND breakout, not just injury. McCaffrey carries his real games-played history; an elite RB carries the real 52.8% bust rate its tier has shown.
