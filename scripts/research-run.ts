@@ -46,6 +46,7 @@ import { computeValueRange } from '@/lib/players/value-range'
 import { computePlayerTags } from '@/lib/players/tags'
 import { computeRecommendation } from '@/lib/players/recommendation'
 import { computeLandProbability } from '@/lib/draft/room-sim-probability'
+import { durabilityPriceFactor as computeDurabilityPriceFactor } from '@/lib/draft/sim-grade'
 import {
   allPositionalInflation,
   allOwnerLeans,
@@ -289,6 +290,7 @@ async function main(): Promise<void> {
     tags: computePlayerTags(p),
     read: computeRecommendation(p),
     landProbability: landMap.has(p.id) ? landMap.get(p.id)! : null,
+    durabilityPriceFactor: computeDurabilityPriceFactor(p.sleeperId, p.position),
   }))
 
   // 5) LEAGUE INTEL - the Nasties ledger that grounds the advice.

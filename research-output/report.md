@@ -1,6 +1,6 @@
 # The Nasties - Draft Research Dataset
 
-Generated 2026-08-21T03:12:01.762Z. 12-team, $200 auction, full PPR, no kicker.
+Generated 2026-08-21T16:56:32.548Z. 12-team, $200 auction, full PPR, no kicker.
 Roster: QB1, RB1, WR1, TE1, FLEX3, DEF1, Bench5.
 Players: 1000. Cache last updated 2026-08-20T01:00:27.018+00:00 (stale=true).
 Sims: 400 Monte-Carlo runs per strategy, 14-game season, seed 42.

@@ -22,6 +22,7 @@ import { ChevronLeft, ChevronDown, Trophy, AlertTriangle, RotateCw } from 'lucid
 import { PageTitle, Nameplate } from '@/components/ui/shield'
 import { FFIPositionBadge, FFISectionHeader } from '@/components/ui/ffi-primitives'
 import { SimRecordHero, SimRosterCarousel } from '@/components/prep/sim-results-cards'
+import { LeagueIntelPanel } from '@/components/prep/league-intel-panel'
 import { useResearchDataset } from '@/hooks/use-research-dataset'
 import { rankStrategies, resolveTargetPrice } from '@/lib/research/leaderboard'
 import type { ResolvedTargetPrice } from '@/lib/research/leaderboard'
@@ -90,6 +91,8 @@ export function LeaderboardClient() {
         <EmptyDatasetState />
       ) : (
         <>
+          <LeagueIntelPanel intel={dataset.leagueIntel} />
+
           <QuietLabel>Ranked by projected wins</QuietLabel>
           <div className="space-y-2.5">
             {ranked.map((strategy, i) => (

@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { Loader2, AlertCircle, RefreshCw, CheckCircle2, Star, ArrowDown, ArrowUp, Play, ChevronLeft } from 'lucide-react'
 import { DraftBoardTable } from '@/components/prep/draft-board-table'
 import { PositionBreakdown } from '@/components/prep/position-breakdown'
+import { LeagueIntelPanel } from '@/components/prep/league-intel-panel'
 import {
   scorePlayersWithStrategy,
   buildIntelContextMap,
@@ -12,6 +13,8 @@ import {
 } from '@/lib/research/strategy/scoring'
 import { cacheToPlayers } from '@/lib/players/convert'
 import { useUserTags, useToggleTag } from '@/hooks/use-user-tags'
+import { useResearchDataset } from '@/hooks/use-research-dataset'
+import { buildEnrichmentMap } from '@/lib/research/dataset-enrichment'
 import type { Strategy } from '@/lib/supabase/database.types'
 import type { DraftFormat, Player, Position } from '@/lib/players/types'
 
@@ -98,6 +101,18 @@ export function DraftBoardClient() {
     enabled: players.length > 0,
   })
   const { toggle: toggleTag, isLoading: toggleLoading } = useToggleTag(selectedLeagueId)
+
+  // Research dataset (W0 seam) - additive per-player enrichment + league intel.
+  // Board keeps working exactly as before when no dataset is published yet.
+  const { run: datasetRun, isEmpty: datasetEmpty } = useResearchDataset({
+    leagueId: selectedLeagueId,
+    enabled: !!selectedLeagueId,
+  })
+  const dataset = datasetRun?.dataset ?? null
+  const enrichmentMap = useMemo(
+    () => (dataset ? buildEnrichmentMap(dataset.players) : undefined),
+    [dataset],
+  )
 
   // Fetch leagues — single-league app: The Nasties (is_active) sorts to leagues[0].
   const fetchLeagues = useCallback(async () => {
@@ -325,6 +340,8 @@ export function DraftBoardClient() {
 
       {/* ── SCREEN HEADER ── */}
       <BoardHeader leagueName={selectedLeague?.name} />
+
+      {dataset && !datasetEmpty && <LeagueIntelPanel intel={dataset.leagueIntel} />}
 
       {/* ── META STRIP ── */}
       <div className="flex items-center gap-2 flex-wrap mb-4">
@@ -590,6 +607,7 @@ export function DraftBoardClient() {
               <DraftBoardTable
                 players={filteredPlayers}
                 format={selectedLeague?.format ?? 'auction'}
+                enrichmentMap={enrichmentMap}
                 onToggleTarget={async (playerId) => {
                   const result = await toggleTag(playerId, 'target')
                   if (result.success) refetchTags()
@@ -632,6 +650,7 @@ export function DraftBoardClient() {
               <DraftBoardTable
                 players={flexPlayers}
                 format={selectedLeague?.format ?? 'auction'}
+                enrichmentMap={enrichmentMap}
                 onToggleTarget={async (playerId) => {
                   const result = await toggleTag(playerId, 'target')
                   if (result.success) refetchTags()

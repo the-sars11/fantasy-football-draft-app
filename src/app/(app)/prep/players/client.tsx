@@ -21,6 +21,8 @@ import { computePlayerTags } from '@/lib/players/tags'
 import { computeRosterConstrainedMaxBid } from '@/lib/draft/roster-solver'
 import type { BoardPlayer, SlotsRemaining, ReplacementCosts, SolverInput, RosterConstrainedMaxBid } from '@/lib/draft/roster-solver'
 import { buildPrepFitLine } from '@/lib/players/prep-fit-line'
+import { useResearchDataset } from '@/hooks/use-research-dataset'
+import { buildEnrichmentMap } from '@/lib/research/dataset-enrichment'
 import type { Player, Position } from '@/lib/players/types'
 
 // Position filter options — FLEX is a virtual position (RB+WR+TE combined); K omitted (no-kicker league)
@@ -78,6 +80,11 @@ export function PlayerBrowserClient() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  // League id (for the research dataset only - player fetch itself is
+  // league-agnostic). Mirrors the leaderboard client's pattern.
+  const [leagueId, setLeagueId] = useState<string | null>(null)
+  const [leagueLoading, setLeagueLoading] = useState(true)
+
   // Filters
   const [searchQuery, setSearchQuery] = useState('')
   const [positionFilter, setPositionFilter] = useState<PositionFilter>('ALL')
@@ -131,6 +138,40 @@ export function PlayerBrowserClient() {
   useEffect(() => {
     fetchPlayers()
   }, [fetchPlayers])
+
+  // Fetch the league id, then the research dataset (W0 seam) for it. $0,
+  // additive only - the browser degrades to today's behavior when either the
+  // league lookup or the dataset itself comes back empty.
+  useEffect(() => {
+    let cancelled = false
+    async function loadLeague() {
+      setLeagueLoading(true)
+      try {
+        const res = await fetch('/api/leagues')
+        if (!res.ok) throw new Error('leagues')
+        const data = await res.json()
+        const list: { id: string }[] = data.leagues ?? []
+        if (!cancelled) setLeagueId(list[0]?.id ?? null)
+      } catch {
+        if (!cancelled) setLeagueId(null)
+      } finally {
+        if (!cancelled) setLeagueLoading(false)
+      }
+    }
+    loadLeague()
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  const { run: datasetRun } = useResearchDataset({
+    leagueId,
+    enabled: !leagueLoading && !!leagueId,
+  })
+  const enrichmentMap = useMemo(
+    () => (datasetRun?.dataset ? buildEnrichmentMap(datasetRun.dataset.players) : undefined),
+    [datasetRun],
+  )
 
   // --- Filter logic ---
   const filteredPlayers = useMemo(() => {
@@ -665,6 +706,7 @@ export function PlayerBrowserClient() {
               tagSeverity={userTagsMap[player.id]?.tagSeverity ?? 'soft'}
               onUpdateGrade={(w, s) => handleUpdateGrade(player.id, w, s)}
               fitLine={fitLineMap.get(player.id)}
+              enrichment={enrichmentMap?.get(player.id)}
             />
           ))}
 

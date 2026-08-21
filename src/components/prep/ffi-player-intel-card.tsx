@@ -36,6 +36,7 @@ import {
 } from 'lucide-react'
 import type { Player, Position } from '@/lib/players/types'
 import type { PlayerTag, PlayerTagId } from '@/lib/players/tags'
+import type { EnrichedPlayer } from '@/lib/research/dataset-types'
 import { computeValueRange } from '@/lib/players/value-range'
 import { computeRecommendation } from '@/lib/players/recommendation'
 import { CALIBRATION_ERA, CALIBRATION_DRAFTS_USED } from '@/lib/draft/league-calibration'
@@ -99,6 +100,10 @@ interface FFIPlayerIntelCardProps {
   onUpdateGrade?: (weight?: number, severity?: string) => void
   /** R7b: solver-driven strategy-fit line, e.g. "Your target -- can bid up to $67, needs QB and 2 FLEX" */
   fitLine?: string
+  /** W2: optional dataset enrichment (W0 seam) matched by player id. Absent
+   *  entirely (no dataset published yet) or absent for this player both
+   *  degrade silently - the card renders exactly as it does today. */
+  enrichment?: EnrichedPlayer
 }
 
 // --- Component ---
@@ -120,6 +125,7 @@ export function FFIPlayerIntelCard({
   tagSeverity = 'soft',
   onUpdateGrade,
   fitLine,
+  enrichment,
 }: FFIPlayerIntelCardProps) {
   const [showCalc, setShowCalc] = useState(false)
 
@@ -340,6 +346,30 @@ export function FFIPlayerIntelCard({
                   <span className="font-body text-[11px] leading-snug text-[#5e708a]">{fitLine}</span>
                 </div>
               )}
+              {enrichment && (() => {
+                const parts = [
+                  enrichment.landProbability != null
+                    ? `land ${Math.round(enrichment.landProbability * 100)}%`
+                    : null,
+                  enrichment.expectedRoomPrice != null
+                    ? enrichment.durabilityPriceFactor < 1
+                      ? `room $${enrichment.expectedRoomPrice} · ${enrichment.durabilityPriceFactor.toFixed(2)}x`
+                      : `room $${enrichment.expectedRoomPrice}`
+                    : null,
+                  enrichment.valueBand.low !== enrichment.valueBand.high
+                    ? `band $${enrichment.valueBand.low}-${enrichment.valueBand.high}`
+                    : null,
+                ].filter((part): part is string => part !== null)
+                if (parts.length === 0) return null
+                return (
+                  <div className="flex gap-2 items-start mt-[9px]">
+                    <span className="text-[10px] shrink-0 mt-px" style={{ color: 'var(--ffi-blue)', opacity: 0.5 }}>▪</span>
+                    <span className="font-mono text-[10.5px] leading-snug" style={{ color: 'var(--ffi-ink-3)' }}>
+                      {parts.join('  ·  ')}
+                    </span>
+                  </div>
+                )
+              })()}
             </div>
 
             {/* DRAFT INTEL (real, computed tags) */}

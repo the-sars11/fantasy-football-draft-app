@@ -178,6 +178,7 @@ describe('resolveTargetPrice', () => {
       tags: [],
       read: { line: 'Anchor - pay up to $67 to lock a Tier 1 player.', intent: 'anchor' },
       landProbability: 0.5,
+      durabilityPriceFactor: 0.89,
     },
     {
       id: 'p2',
@@ -200,6 +201,7 @@ describe('resolveTargetPrice', () => {
       tags: [],
       read: { line: 'Fair value, here is the band.', intent: 'fair' },
       landProbability: 0.3,
+      durabilityPriceFactor: 1,
     },
   ]
 

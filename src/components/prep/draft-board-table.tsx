@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils'
 import type { ScoredPlayer } from '@/lib/research/strategy/scoring'
 import type { DraftFormat } from '@/lib/players/types'
 import { computeValueRange } from '@/lib/players/value-range'
+import type { EnrichedPlayer } from '@/lib/research/dataset-types'
 
 interface DraftBoardTableProps {
   players: ScoredPlayer[]
@@ -14,6 +15,10 @@ interface DraftBoardTableProps {
   onToggleTarget?: (playerId: string) => Promise<void>
   onToggleAvoid?: (playerId: string) => Promise<void>
   isTagLoading?: boolean
+  /** Optional dataset enrichment (W0 seam), keyed by player id. Absent entirely
+   *  or absent per-row both degrade silently - the row renders exactly as it
+   *  does today when there is no match. */
+  enrichmentMap?: Map<string, EnrichedPlayer>
 }
 
 const POS_COLORS: Record<string, { bg: string; text: string }> = {
@@ -64,11 +69,12 @@ interface PlayerCardProps {
   onToggleTarget?: (playerId: string) => Promise<void>
   onToggleAvoid?: (playerId: string) => Promise<void>
   isTagLoading?: boolean
+  enrichment?: EnrichedPlayer
 }
 
 function PlayerCard({
   sp, rank, format, isExpanded, onToggle,
-  onToggleTarget, onToggleAvoid, isTagLoading,
+  onToggleTarget, onToggleAvoid, isTagLoading, enrichment,
 }: PlayerCardProps) {
   const p = sp.player
   const isAuction = format === 'auction'
@@ -449,6 +455,31 @@ function PlayerCard({
               </div>
             ))}
           </div>
+
+          {/* Dataset intel (W0 seam, additive) - land odds + durability-adjusted
+              room price. Renders nothing when the dataset has no match or no
+              usable fields. */}
+          {enrichment && (() => {
+            const parts = [
+              enrichment.landProbability != null
+                ? `land ${Math.round(enrichment.landProbability * 100)}%`
+                : null,
+              enrichment.expectedRoomPrice != null
+                ? enrichment.durabilityPriceFactor < 1
+                  ? `room $${enrichment.expectedRoomPrice} · ${enrichment.durabilityPriceFactor.toFixed(2)}x`
+                  : `room $${enrichment.expectedRoomPrice}`
+                : null,
+            ].filter((part): part is string => part !== null)
+            if (parts.length === 0) return null
+            return (
+              <div
+                className="text-[11px] mt-[12px]"
+                style={{ fontFamily: 'var(--font-mono)', color: 'var(--ffi-ink-3)' }}
+              >
+                {parts.join('  ·  ')}
+              </div>
+            )
+          })()}
         </div>
       )}
     </div>
@@ -461,6 +492,7 @@ export function DraftBoardTable({
   onToggleTarget,
   onToggleAvoid,
   isTagLoading,
+  enrichmentMap,
 }: DraftBoardTableProps) {
   const [expandedId, setExpandedId] = useState<string | null>(null)
 
@@ -512,6 +544,7 @@ export function DraftBoardTable({
               onToggleTarget={onToggleTarget}
               onToggleAvoid={onToggleAvoid}
               isTagLoading={isTagLoading}
+              enrichment={enrichmentMap?.get(sp.player.id)}
             />
           </motion.div>
         ))}

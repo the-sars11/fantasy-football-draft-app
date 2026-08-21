@@ -102,6 +102,8 @@ export interface EnrichedPlayer {
   tags: PlayerTag[]
   read: PlayerRecommendation
   landProbability: number | null
+  /** Injury-durability haircut on the room price, in (0,1]. 1 means no discount (healthy baseline or unmeasurable). */
+  durabilityPriceFactor: number
 }
 
 /** The whole snapshot - one interrogable object the app and any LLM can read. */
