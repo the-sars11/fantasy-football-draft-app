@@ -14,6 +14,8 @@ import { describe, it, expect } from 'vitest'
 import {
   generateAnchorStrategies,
   generateStrategiesFromPool,
+  sweepAnchorStrategies,
+  sweepStrategiesFromPool,
   priceBoard,
   type PricedBoardPlayer,
   type AnchorSlots,
@@ -206,6 +208,89 @@ describe('generateAnchorStrategies - budget-balanced policy', () => {
     const qbTargets = balanced!.key_targets.filter((n) => n.includes('qb-'))
     expect(qbTargets.length).toBeLessThanOrEqual(1)
     expect(balanced!.budget_allocation?.QB ?? 0).toBeLessThan(25)
+  })
+})
+
+// ── Anchor-pattern sweep ─────────────────────────────────────────────────────
+
+describe('sweepAnchorStrategies - explores the strategy space, not 3 buckets', () => {
+  it('produces far more distinct strategies than the archetype generator', () => {
+    const board = fullBoard()
+    const archetypes = generateAnchorStrategies({ board, slots: NASTIES_SLOTS, budget: 200 })
+    const swept = sweepAnchorStrategies({ board, slots: NASTIES_SLOTS, budget: 200 })
+
+    expect(swept.length).toBeGreaterThan(archetypes.length)
+    expect(swept.length).toBeGreaterThanOrEqual(5)
+  })
+
+  it('gives every swept strategy a unique name', () => {
+    const swept = sweepAnchorStrategies({ board: fullBoard(), slots: NASTIES_SLOTS, budget: 200 })
+    const names = swept.map((s) => s.name)
+    expect(new Set(names).size).toBe(names.length)
+  })
+
+  it('every swept roster is completable within budget (bench reserve > 0, alloc sums to 100)', () => {
+    const swept = sweepAnchorStrategies({ board: fullBoard(), slots: NASTIES_SLOTS, budget: 200 })
+    expect(swept.length).toBeGreaterThan(0)
+    for (const s of swept) {
+      const alloc = s.budget_allocation ?? {}
+      const total = Object.values(alloc).reduce((sum, v) => sum + v, 0)
+      expect(total).toBe(100)
+      expect(alloc.bench ?? 0).toBeGreaterThan(0)
+    }
+  })
+
+  it('draws every target from the real board (nothing invented)', () => {
+    const board = fullBoard()
+    const names = new Set(board.map((p) => p.name))
+    const swept = sweepAnchorStrategies({ board, slots: NASTIES_SLOTS, budget: 200 })
+    for (const s of swept) {
+      for (const t of s.key_targets) expect(names.has(t)).toBe(true)
+    }
+  })
+
+  it('the WR-WR pattern anchors WR over RB; the zero-RB pattern skips the RB anchor', () => {
+    const swept = sweepAnchorStrategies({ board: fullBoard(), slots: NASTIES_SLOTS, budget: 200 })
+
+    const wrwr = swept.find((s) => s.name.startsWith('WR-WR'))
+    expect(wrwr).toBeDefined()
+    // A WR-WR shape spends more on WR than RB.
+    expect(wrwr!.budget_allocation?.WR ?? 0).toBeGreaterThan(wrwr!.budget_allocation?.RB ?? 0)
+
+    const zero = swept.find((s) => s.name.startsWith('Zero RB'))
+    expect(zero).toBeDefined()
+    // Zero RB keeps its paid anchors off RB, so RB never leads the spend.
+    expect(zero!.budget_allocation?.RB ?? 0).toBeLessThan(zero!.budget_allocation?.WR ?? 0)
+  })
+
+  it('is deterministic (same board -> byte-identical strategy list)', () => {
+    const a = sweepAnchorStrategies({ board: fullBoard(), slots: NASTIES_SLOTS, budget: 200 })
+    const b = sweepAnchorStrategies({ board: fullBoard(), slots: NASTIES_SLOTS, budget: 200 })
+    expect(JSON.stringify(a)).toBe(JSON.stringify(b))
+  })
+
+  it('returns nothing on an empty board or non-positive budget', () => {
+    expect(sweepAnchorStrategies({ board: [], slots: NASTIES_SLOTS, budget: 200 })).toEqual([])
+    expect(sweepAnchorStrategies({ board: fullBoard(), slots: NASTIES_SLOTS, budget: 0 })).toEqual([])
+  })
+})
+
+describe('sweepStrategiesFromPool (prep wrapper)', () => {
+  it('attaches solver-fit target pricing to every swept strategy and matches inserts', () => {
+    const result = sweepStrategiesFromPool({ league: auctionLeague(), players: realPool() })
+    expect(result.proposals.length).toBeGreaterThan(0)
+    expect(result.inserts).toHaveLength(result.proposals.length)
+    for (const p of result.proposals) {
+      expect(p.target_pricing).toBeDefined()
+      expect(p.key_targets.length).toBeGreaterThan(0)
+    }
+  })
+
+  it('returns empty for snake (auction-only sweep)', () => {
+    const snake = { ...auctionLeague(), format: 'snake' as const }
+    const result = sweepStrategiesFromPool({ league: snake, players: realPool() })
+    expect(result.proposals).toEqual([])
+    expect(result.inserts).toEqual([])
   })
 })
 

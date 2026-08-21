@@ -521,6 +521,153 @@ export function generateAnchorStrategies(input: AnchorGenInput): StrategyProposa
     .map((v) => v.proposal)
 }
 
+// ─── Anchor-pattern sweep (best-available per pattern × budget split) ──────────
+
+/**
+ * A concrete drafting pattern: which positions the paid "studs" go to. The sweep
+ * builds the best-available completable roster for each pattern at several budget
+ * splits, so the sim can rank genuinely distinct strategies (RB-RB vs WR-WR vs
+ * hero-RB vs zero-RB vs elite-QB vs elite-TE ...) instead of a few archetype
+ * buckets. An empty studPositions list means no anchor at all: spread the whole
+ * budget, i.e. a true balanced draft.
+ */
+export interface AnchorPattern {
+  key: string
+  label: string
+  /** Ordered positions the paid studs must fill (best-available within each). */
+  studPositions: GenPosition[]
+}
+
+/** Share of budget the paid studs may consume. Same pattern, different shape. */
+interface BudgetSplit {
+  key: string
+  label: string
+  fraction: number
+}
+
+/**
+ * The pattern grid. Kept to real, distinct draft philosophies (not every
+ * combinatorial permutation) so the leaderboard stays readable. Best-available
+ * within each pattern means the solver takes the top-ceiling players that fit the
+ * required positions and the budget split.
+ */
+const SWEEP_PATTERNS: AnchorPattern[] = [
+  { key: 'rb-rb', label: 'Robust RB (RB-RB)', studPositions: ['RB', 'RB'] },
+  { key: 'wr-wr', label: 'WR-WR', studPositions: ['WR', 'WR'] },
+  { key: 'rb-wr', label: 'RB-WR', studPositions: ['RB', 'WR'] },
+  { key: 'wr-wr-wr', label: 'Triple WR', studPositions: ['WR', 'WR', 'WR'] },
+  { key: 'rb-rb-wr', label: 'Double RB + WR', studPositions: ['RB', 'RB', 'WR'] },
+  { key: 'hero-rb', label: 'Hero RB (RB + WR-WR)', studPositions: ['RB', 'WR', 'WR'] },
+  { key: 'zero-rb', label: 'Zero RB (WR-WR-TE)', studPositions: ['WR', 'WR', 'TE'] },
+  { key: 'elite-qb', label: 'Elite QB anchor', studPositions: ['QB', 'RB', 'WR'] },
+  { key: 'elite-te', label: 'Elite TE anchor', studPositions: ['TE', 'WR', 'WR'] },
+  { key: 'balanced', label: 'Balanced (no anchor)', studPositions: [] },
+]
+
+const SWEEP_SPLITS: BudgetSplit[] = [
+  { key: 'heavy', label: 'heavy anchors', fraction: 0.72 },
+  { key: 'even', label: 'even split', fraction: 0.55 },
+  { key: 'light', label: 'light anchors', fraction: 0.42 },
+]
+
+// Field-phase per-pick cap: once the pattern's studs are bought, the rest of the
+// roster fills cheap so the budget split holds and the shape stays true to type.
+const SWEEP_FIELD_CAP_FRACTION = 0.08
+
+/**
+ * Build a policy that buys this pattern's studs best-available (highest ceiling at
+ * the required position, capped so total stud spend stays under studFraction of
+ * the budget), then fills the rest of the roster cheaply. Reuses fillPlan's
+ * completion invariant, so every result is a completable $budget roster.
+ */
+function patternPolicy(pattern: AnchorPattern, studFraction: number): Policy {
+  const studCount = pattern.studPositions.length
+  return {
+    key: `${pattern.key}@${Math.round(studFraction * 100)}`,
+    select: (aff, chosen, _cliffs, _maxCliff, ctx) => {
+      // STUD PHASE: still owe a paid anchor for this pattern.
+      if (chosen.length < studCount) {
+        const wantPos = pattern.studPositions[chosen.length]
+        const studBudget = ctx.budget * studFraction
+        const roomForStud = studBudget - ctx.spent // spent is all-stud in this phase
+        const atPos = aff.filter((p) => p.position === wantPos)
+        // Prefer the exact position; fall back to any pattern position, then any
+        // affordable, so a thin position never stalls the whole roster.
+        const patternPool = aff.filter((p) => pattern.studPositions.includes(p.position))
+        const base = atPos.length > 0 ? atPos : patternPool.length > 0 ? patternPool : aff
+        // Under the split cap where possible (light splits buy cheaper studs at the
+        // same positions); if only pricier studs remain, take them so it completes.
+        const underCap = base.filter((p) => p.expectedCost <= roomForStud)
+        const pool = underCap.length > 0 ? underCap : base
+        return bestBy(pool, (p) => p.ceiling)
+      }
+      // FIELD PHASE: studs bought. Fill starters first, then bench, cheap + spread.
+      const fieldCap = Math.max(1, ctx.budget * SWEEP_FIELD_CAP_FRACTION)
+      const starters = aff.filter((p) => canClaimStarter(p.position, ctx.slots))
+      const eligible = starters.length > 0 ? starters : aff
+      const underCap = eligible.filter((p) => p.expectedCost <= fieldCap)
+      const pool = underCap.length > 0 ? underCap : eligible
+      const anchoredCount = (pos: GenPosition) => chosen.filter((c) => c.position === pos).length
+      const minCount = Math.min(...pool.map((p) => anchoredCount(p.position)))
+      const leastAnchored = pool.filter((p) => anchoredCount(p.position) === minCount)
+      return bestBy(leastAnchored, (p) => p.ceiling)
+    },
+  }
+}
+
+export interface AnchorSweepInput {
+  board: PricedBoardPlayer[]
+  slots: AnchorSlots
+  budget: number
+}
+
+/**
+ * Sweep the strategy SPACE: for every anchor pattern × budget split, solve the
+ * best-available completable roster and turn it into a StrategyProposal. Dedupes
+ * by the concrete roster (identical player sets collapse to one), so the output is
+ * the set of genuinely distinct, sim-gradeable ways to draft this board - far more
+ * than the handful of archetype buckets generateAnchorStrategies emits. Ordered by
+ * total anchor ceiling (richest shape first). Pure, deterministic, $0.
+ */
+export function sweepAnchorStrategies(input: AnchorSweepInput): StrategyProposal[] {
+  const { board, slots, budget } = input
+  if (board.length === 0 || budget <= 0) return []
+
+  const cliffs = positionCliffs(board)
+  const maxAnchors = slots.qb + slots.rb + slots.wr + slots.te + slots.flex + slots.dst
+
+  const seen = new Map<string, { proposal: StrategyProposal; ceiling: number }>()
+
+  for (const pattern of SWEEP_PATTERNS) {
+    // Balanced has no studs, so the split axis does nothing - run it once.
+    const splits = pattern.studPositions.length === 0 ? [SWEEP_SPLITS[1]] : SWEEP_SPLITS
+    for (const split of splits) {
+      const policy = patternPolicy(pattern, split.fraction)
+      const plan = fillPlan(board, slots, budget, maxAnchors, cliffs, policy)
+      if (plan.chosen.length === 0) continue
+
+      // Dedupe by the concrete roster: identical player sets collapse to the first
+      // (pattern, split) that produced them, deterministically.
+      const rosterKey = plan.chosen.map((p) => p.id).sort().join('|')
+      if (seen.has(rosterKey)) continue
+
+      const base = planToProposal(plan, budget)
+      const splitTag = pattern.studPositions.length === 0 ? '' : `, ${split.label}`
+      const proposal: StrategyProposal = {
+        ...base,
+        name: `${pattern.label}${splitTag}`,
+        philosophy: `Pattern sweep: ${pattern.label}${splitTag}. ${base.philosophy}`,
+      }
+      const totalCeiling = plan.chosen.reduce((s, p) => s + p.ceiling, 0)
+      seen.set(rosterKey, { proposal, ceiling: totalCeiling })
+    }
+  }
+
+  return [...seen.values()]
+    .sort((a, b) => b.ceiling - a.ceiling)
+    .map((v) => v.proposal)
+}
+
 // ─── Prep wrapper ──────────────────────────────────────────────────────────────
 
 /** Full remaining slots from an app-level League roster config (K dropped). */
@@ -560,13 +707,28 @@ export function generateStrategiesFromPool(
   const slots = leagueToAnchorSlots(league)
 
   const rawProposals = generateAnchorStrategies({ board, slots, budget })
+  return attachTargetPricingAndInserts(rawProposals, league, available, board, budget)
+}
 
-  // Room price is the single source of truth from priceBoard (expectedCost =
-  // expectedRoomPrice(pos, posRank)). We feed THAT into target-pricing instead
-  // of relying on the input player objects to carry `expectedRoomPrice`. The
-  // headless path passes real Player[] (which do carry it), but the live
-  // /strategies/propose route passes ConsensusPlayer[] (which do NOT) — so
-  // deriving room price here keeps both paths room-anchored and consistent.
+/**
+ * Shared tail for both the archetype generator and the pattern sweep: attach
+ * solver-fit target prices (R6) so each strategy's targets sum to a completable
+ * $budget roster, then build one insert row per proposal.
+ *
+ * Room price is the single source of truth from priceBoard (expectedCost =
+ * expectedRoomPrice(pos, posRank)). We feed THAT into target-pricing instead of
+ * relying on the input player objects to carry `expectedRoomPrice`. The headless
+ * path passes real Player[] (which do carry it), but the live /strategies/propose
+ * route passes ConsensusPlayer[] (which do NOT), so deriving room price here keeps
+ * both paths room-anchored and consistent.
+ */
+function attachTargetPricingAndInserts(
+  rawProposals: StrategyProposal[],
+  league: League,
+  available: ConsensusPlayer[],
+  board: PricedBoardPlayer[],
+  budget: number,
+): StrategyResearchResult {
   const roomByName = new Map(board.map((b) => [b.name.toLowerCase(), b.expectedCost]))
   const pricedPlayers = available.map((p) => ({
     name: p.name,
@@ -575,8 +737,6 @@ export function generateStrategiesFromPool(
     consensusAuctionValue: p.consensusAuctionValue ?? null,
   }))
 
-  // Attach solver-fit target prices (R6) so each strategy's targets sum to a
-  // completable $200 roster.
   const proposals = rawProposals.map((p) => ({
     ...p,
     target_pricing: assignTargetPrices({
@@ -591,4 +751,32 @@ export function generateStrategiesFromPool(
 
   const inserts = proposals.map((p) => proposalToInsert(p, league.id, league.format, 'preset'))
   return { proposals, inserts }
+}
+
+/**
+ * Prep entry point for the FULL strategy sweep: instead of the handful of
+ * archetype buckets generateStrategiesFromPool emits, this solves the
+ * best-available completable roster for every anchor pattern (RB-RB, WR-WR,
+ * RB-WR, hero-RB, zero-RB, elite-QB, elite-TE, ...) crossed with several budget
+ * splits, dedupes identical rosters, and attaches solver-fit target prices. Same
+ * StrategyResearchResult contract, so it flows through the sim + report unchanged.
+ * Auction only; snake pools return empty (the AI path still owns snake).
+ */
+export function sweepStrategiesFromPool(
+  input: StrategyResearchInput,
+): StrategyResearchResult {
+  const { league, players, keeperNames = [] } = input
+
+  if (league.format !== 'auction') return { proposals: [], inserts: [] }
+
+  const available = keeperNames.length > 0
+    ? players.filter((p) => !keeperNames.includes(p.name))
+    : players
+
+  const budget = league.budget ?? 200
+  const board = priceBoard(available)
+  const slots = leagueToAnchorSlots(league)
+
+  const rawProposals = sweepAnchorStrategies({ board, slots, budget })
+  return attachTargetPricingAndInserts(rawProposals, league, available, board, budget)
 }

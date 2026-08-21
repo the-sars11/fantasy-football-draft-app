@@ -29,7 +29,7 @@ import type { RosterSlots as DbRosterSlots } from '@/lib/supabase/database.types
 import { readPlayerCache, getCacheStatus } from '@/lib/research/cache'
 import { cacheToPlayers } from '@/lib/players/convert'
 import type { ConsensusPlayer } from '@/lib/research/normalize'
-import { generateStrategiesFromPool } from '@/lib/research/strategy/generate'
+import { sweepStrategiesFromPool } from '@/lib/research/strategy/generate'
 import type { StrategyProposal } from '@/lib/research/strategy/research'
 import { buildBoardPlayers } from '@/lib/draft/solver-bridge'
 import { buildOpponentProfiles } from '@/lib/draft/league-opponents'
@@ -165,13 +165,16 @@ async function main(): Promise<void> {
   const byName = new Map<string, Player>()
   for (const p of players) byName.set(p.name.toLowerCase(), p)
 
-  // 1) STRATEGIES - solver-enumerated anchor strategies off the real board ($0).
-  console.log('[research-run] generating strategies ...')
-  const stratResult = generateStrategiesFromPool({
+  // 1) STRATEGIES - full anchor-pattern sweep off the real board ($0). Every
+  // pattern (RB-RB, WR-WR, RB-WR, hero-RB, zero-RB, elite-QB, elite-TE, triple-WR,
+  // double-RB, balanced) crossed with heavy/even/light budget splits, deduped to
+  // the genuinely distinct completable rosters this board supports.
+  console.log('[research-run] sweeping strategy space ...')
+  const stratResult = sweepStrategiesFromPool({
     league: NASTIES_LEAGUE,
     players: asConsensus(players),
   })
-  console.log(`[research-run] ${stratResult.proposals.length} strategies`)
+  console.log(`[research-run] ${stratResult.proposals.length} distinct strategies`)
 
   // 2) SIMS - Monte-Carlo record + modal rosters + landed, biased to each strategy.
   // Trim to the draft-relevant top of the board (by national ceiling) so the room

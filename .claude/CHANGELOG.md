@@ -2,6 +2,20 @@
 
 ---
 
+## 2026-08-20 / Strategy sweep -- 26 distinct strategies instead of 3 archetype buckets
+
+**Class:** pipeline (Architecture + QA lenses). Joe pushed back: "you only looked at three strategies? there are TONS of possibilities." He was right. The old prep path (`generateStrategiesFromPool`) emits one strategy per distinct budget-shape POLICY that survives the board gate, then dedupes by archetype label -- on this board that collapsed to 3 (Stars & Scrubs, Studs & Duds, Balanced). It sampled the SHAPE space, never the concrete anchor-pattern space (RB-RB vs WR-WR vs hero-RB vs zero-RB vs elite-QB vs elite-TE, at different budget splits).
+
+- **New engine (`src/lib/research/strategy/generate.ts`):** `sweepAnchorStrategies` runs a grid of 10 anchor patterns (RB-RB, WR-WR, RB-WR, triple-WR, double-RB+WR, hero-RB, zero-RB, elite-QB, elite-TE, balanced) x 3 budget splits (heavy 0.72 / even 0.55 / light 0.42 of budget on the paid studs). Each cell is solved best-available: a per-pattern `patternPolicy` buys the highest-ceiling player at each required position under the split cap, then fills the rest of the roster cheap (8%-of-budget field cap) so the split holds. Reuses the existing `fillPlan` completion invariant, so every roster is completable within $200. Results dedupe by the concrete player set (identical rosters collapse to the first pattern that built them), so the output is the genuinely distinct ways to draft this board. Pure, deterministic, $0.
+- **Shared tail refactor:** extracted `attachTargetPricingAndInserts` so both `generateStrategiesFromPool` (unchanged archetype path, still used by the live route) and the new `sweepStrategiesFromPool` (prep path) attach identical solver-fit target pricing + inserts. Same `StrategyResearchResult` contract, so the sweep flows through the sim + report untouched.
+- **Orchestrator (`scripts/research-run.ts`):** prep now calls `sweepStrategiesFromPool`. Each swept strategy is sim-graded twice (risk on + healthy) exactly as before.
+- **Proof:** `npm run research:run` produced **26 distinct strategies** (was 3), each with a Monte-Carlo record over 400 runs vs the 11 replicated Nasties owners. Honest finding: with the full sweep the projected records cluster tight -- every one of the 26 lands **9.4 to 9.8 wins**, a ~0.4-win spread. Heavy-anchor variants edge the top (Robust RB / RB-WR / Double-RB+WR / WR-WR / Triple-WR / Hero-RB heavy all 9.8-4.2); Balanced-no-anchor and light Elite-TE/QB trail at 9.4-4.6. Risk-adjusted winner = healthy-basis winner = Robust RB (RB-RB) heavy; the top pattern is unchanged once risk is priced in. Takeaway: on this board WHICH anchor pattern you pick moves the record far less than the 3-strategy view implied -- executing any sound anchor plan is worth ~0.4 wins over drafting balanced, and the pattern label barely matters beyond that.
+- **Tests (`src/lib/research/strategy/generate.test.ts`, 9 new):** sweep beats the archetype count and yields >=5 distinct shapes; unique names; every roster completable (alloc sums to 100, bench reserve > 0); all targets are real board players; WR-WR anchors WR over RB and Zero-RB keeps RB off its paid anchors; deterministic (byte-identical reruns); empty on empty board / non-positive budget; wrapper attaches target pricing + matching inserts and returns empty for snake.
+
+**Gate:** `npm run type-check` 0 errors. `npx vitest run` **570/570** (was 561; +9 sweep tests). `npx eslint` on the 3 touched files: 0 errors (3 pre-existing warnings in untouched parts of `research-run.ts`). Deterministic. $0 (Sleeper-derived data + local compute, no Claude call). No em/en-dashes.
+
+---
+
 ## 2026-08-20 / Risk-model derive is now self-sufficient (pulls Sleeper directly)
 
 **Class:** infra (Ops + Security lenses). Closes the follow-up flagged when the risk model shipped: `scripts/derive-risk-model.mjs` read the ephemeral session scratchpad, so the runtime `risk-model.json` was permanent but could not be regenerated once that scratchpad vanished. The derive script now pulls its own data.
