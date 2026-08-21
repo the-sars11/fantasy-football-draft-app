@@ -2,6 +2,26 @@
 
 ---
 
+## 2026-08-20 / Durability-adjusted target price -- the injury signal now moves the pay-up number, not just the record
+
+**Class:** pipeline (Architecture + QA lenses). Closes the OPEN GAP from the durability-join fix earlier today. Joe: "yes, build the durability-adjusted target price." Before this, the sim penalized a fragile roster's projected RECORD (McCaffrey's real 0.8462 games-played rate now hits the sim), but `target-pricing.ts` still anchored the pay-up number purely on room price -- so the tool said "don't build around McCaffrey" out of one side and "$67 is a fair price" out of the other. Two unreconciled signals. This wires the measured durability into the price.
+
+**Design.** New `durabilityPriceFactor(sleeperId, position, model)` in `sim-grade.ts` (single source of the durability-to-price logic, reuses the real `DEFAULT_RISK_MODEL`): `factor = clamp(gpRate / positionBaseline, 0.75, 1.0)`. Three deliberate choices: (1) **relative to the position baseline, not to a perfect 17 games** -- the market already prices in that RBs miss time, so discounting vs the RB norm avoids double-counting the risk that's already in room price; (2) **only ever discounts, never inflates** (hard-capped at 1.0) -- a durable player does not get a target-price premium, he just avoids the haircut; (3) **DEF and unmeasured players (rookies, model-absent) return 1.0** -- no change, they ride the room price exactly as before. McCaffrey: 0.8462 / 0.9466 = 0.894x -> ~11% haircut.
+
+- **Applied in `target-pricing.ts`:** `TargetPricingPlayer` gains optional `durabilityFactor`; `assignTargetPrices` multiplies each key_target's room-price anchor by the factor (via a `durabilityMultiplier` clamp that ignores absent/>=1 factors), and the drop-cheapest completion loop now compares the discounted price. `baseValue` on the output preserves the un-adjusted room anchor so the report can show both; walk-up-to-win is computed off the discounted price. The no-durability path is byte-identical (factor 1 = no-op), which is why all 21 pre-existing target-pricing tests passed unchanged.
+- **Threaded at all 3 call sites** that feed players into the pricer: `generate.ts` (`attachTargetPricingAndInserts`), `research.ts` (`priceProposals`), `room-target-pricing.ts` (the live-room My Team panel). Each maps `durabilityFactor: durabilityPriceFactor(p.sleeperId, p.position)` onto the player before pricing, so prep, the Claude path, and the live room all share one haircut.
+- **Report renderer (`scripts/research-run.ts`)** now shows the discount inline: `Christian McCaffrey $60 (room $67, 0.89x durability) (win by $66)`.
+
+**Proof (pasted, regenerated `research-output/report.md`).**
+- McCaffrey target price dropped from **$67 -> $60** (room $67, 0.89x durability), walk-up-to-win $74 -> $66. The sim and the price sheet now agree: fragile veteran, pay less.
+- Same run, other measured haircuts surfaced correctly: Davante Adams **$13 -> $12** (0.94x), Sam LaPorta **$7 -> $6** (0.93x). Durable/unmeasured targets (Gibbs $76, Luther Burden III $14, Jalen Hurts $13) unchanged -- no premium, no phantom discount.
+
+**Tests (9 new).** `sim-grade.test.ts` (5): McCaffrey `durabilityPriceFactor` ~0.89x; returns 1 for unmeasured / undefined / null id; returns 1 for DEF; never inflates (at/above baseline -> 1.0); floors at `DURABILITY_PRICE_FLOOR` (0.75) for a catastrophic 0.40 gpRate. `target-pricing.test.ts` (4): factor 0.9 haircuts a $60 RB to price 54 + walk-up round(54*1.1) while `baseValue` keeps room 60; no-factor path leaves price==baseValue and factor undefined; factor>=1 never inflates; the haircut still yields a budget-completable roster.
+
+**Gate:** `npm run type-check` 0 errors. `npx vitest run` **591/591** (was 582; +9). `npx eslint` on all 8 touched files: 0 errors (3 pre-existing warnings in `research-run.ts`, untouched by this change). `npm run research:run` regenerated `dataset.json` + `report.md`. `npm run research:verify` **250 passed / 1 failed** -- the one FAIL is the same pre-existing environmental "cache was not stale" check (needs `npm run data:pull`, unrelated). Deterministic. $0 (no Claude call). No em/en-dashes.
+
+---
+
 ## 2026-08-20 / Risk-model durability join was silently dead -- every player rode the position baseline
 
 **Class:** bugfix + pipeline (Architecture + QA lenses). Joe's driving question: "i highly question paying over $70 for an aging injury risk like mccaffrey. am i overthinking it?" Investigating that surfaced a real bug, then Joe: "fix it."

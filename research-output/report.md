@@ -1,6 +1,6 @@
 # The Nasties - Draft Research Dataset
 
-Generated 2026-08-21T02:52:13.017Z. 12-team, $200 auction, full PPR, no kicker.
+Generated 2026-08-21T03:12:01.762Z. 12-team, $200 auction, full PPR, no kicker.
 Roster: QB1, RB1, WR1, TE1, FLEX3, DEF1, Bench5.
 Players: 1000. Cache last updated 2026-08-20T01:00:27.018+00:00 (stale=true).
 Sims: 400 Monte-Carlo runs per strategy, 14-game season, seed 42.
@@ -87,7 +87,7 @@ Pool-generated Stars & Scrubs: 8 anchors (RB/WR/QB/DEF/TE), rest at room price.
 - Why: The board supports paying up for Jahmyr Gibbs (~$76), Amon-Ra St. Brown (~$64), Luther Burden III (~$14). RB runs COOL (0.84x room vs national). This shape spends $190 on anchors and keeps $10 to complete the roster at room prices.
 - Philosophy: Pattern sweep: RB-WR, heavy anchors. Built from the live board: stars and scrubs shape emerged as a completable $200 roster given the current pool.
 - Budget split: QB 7%, RB 44%, WR 39%, TE 3%, DST 3%, K 0%, bench 4%.
-- Target prices (expect / walk-up to win): Jahmyr Gibbs $76 (win by $84), Amon-Ra St. Brown $64 (win by $70), Luther Burden III $14 (win by $15), Jalen Hurts $13 (win by $14), Quinshon Judkins $12 (win by $13).
+- Target prices (durability-adjusted expect / walk-up to win): Jahmyr Gibbs $76 (win by $84), Amon-Ra St. Brown $64 (win by $70), Luther Burden III $14 (win by $15), Jalen Hurts $13 (win by $14), Quinshon Judkins $12 (win by $13).
   Targets $179 + reserve $8 = $187 of $200 (completable).
 
   Most common roster cores this strategy landed:
@@ -113,8 +113,8 @@ Pool-generated Stars & Scrubs: 8 anchors (RB/WR/QB/TE/DEF), rest at room price.
 - Why: The board supports paying up for Jahmyr Gibbs (~$76), Amon-Ra St. Brown (~$64), Jalen Hurts (~$13). RB runs COOL (0.84x room vs national). This shape spends $183 on anchors and keeps $17 to complete the roster at room prices.
 - Philosophy: Pattern sweep: Hero RB (RB + WR-WR), heavy anchors. Built from the live board: stars and scrubs shape emerged as a completable $200 roster given the current pool.
 - Budget split: QB 7%, RB 44%, WR 33%, TE 6%, DST 3%, K 0%, bench 7%.
-- Target prices (expect / walk-up to win): Jahmyr Gibbs $76 (win by $84), Amon-Ra St. Brown $64 (win by $70), Jalen Hurts $13 (win by $14), Quinshon Judkins $12 (win by $13), Sam LaPorta $7 (win by $8).
-  Targets $172 + reserve $8 = $180 of $200 (completable).
+- Target prices (durability-adjusted expect / walk-up to win): Jahmyr Gibbs $76 (win by $84), Amon-Ra St. Brown $64 (win by $70), Jalen Hurts $13 (win by $14), Quinshon Judkins $12 (win by $13), Sam LaPorta $6 (room $7, 0.93x durability) (win by $7).
+  Targets $171 + reserve $8 = $179 of $200 (completable).
 
   Most common roster cores this strategy landed:
   - 16% of drafts: Jahmyr Gibbs + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 9.5-4.5.
@@ -139,8 +139,8 @@ Pool-generated Stars & Scrubs: 8 anchors (RB/WR/QB/DEF/TE), rest at room price.
 - Why: The board supports paying up for Jahmyr Gibbs (~$76), Christian McCaffrey (~$67), Luther Burden III (~$14). RB runs COOL (0.84x room vs national). This shape spends $194 on anchors and keeps $6 to complete the roster at room prices.
 - Philosophy: Pattern sweep: Robust RB (RB-RB), heavy anchors. Built from the live board: stars and scrubs shape emerged as a completable $200 roster given the current pool.
 - Budget split: QB 7%, RB 72%, WR 14%, TE 3%, DST 3%, K 0%, bench 1%.
-- Target prices (expect / walk-up to win): Jahmyr Gibbs $76 (win by $84), Christian McCaffrey $67 (win by $74), Luther Burden III $14 (win by $15), Jalen Hurts $13 (win by $14), Davante Adams $13 (win by $14).
-  Targets $183 + reserve $8 = $191 of $200 (completable).
+- Target prices (durability-adjusted expect / walk-up to win): Jahmyr Gibbs $76 (win by $84), Christian McCaffrey $60 (room $67, 0.89x durability) (win by $66), Luther Burden III $14 (win by $15), Jalen Hurts $13 (win by $14), Davante Adams $12 (room $13, 0.94x durability) (win by $13).
+  Targets $175 + reserve $8 = $183 of $200 (completable).
 
   Most common roster cores this strategy landed:
   - 36% of drafts: Jahmyr Gibbs + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 9.5-4.5.
@@ -165,8 +165,8 @@ Pool-generated Stars & Scrubs: 8 anchors (RB/WR/QB/TE/DEF), rest at room price.
 - Why: The board supports paying up for Jahmyr Gibbs (~$76), Christian McCaffrey (~$67), Luther Burden III (~$14). RB runs COOL (0.84x room vs national). This shape spends $188 on anchors and keeps $12 to complete the roster at room prices.
 - Philosophy: Pattern sweep: Double RB + WR, heavy anchors. Built from the live board: stars and scrubs shape emerged as a completable $200 roster given the current pool.
 - Budget split: QB 7%, RB 72%, WR 8%, TE 6%, DST 3%, K 0%, bench 4%.
-- Target prices (expect / walk-up to win): Jahmyr Gibbs $76 (win by $84), Christian McCaffrey $67 (win by $74), Luther Burden III $14 (win by $15), Jalen Hurts $13 (win by $14), Sam LaPorta $7 (win by $8).
-  Targets $177 + reserve $8 = $185 of $200 (completable).
+- Target prices (durability-adjusted expect / walk-up to win): Jahmyr Gibbs $76 (win by $84), Christian McCaffrey $60 (room $67, 0.89x durability) (win by $66), Luther Burden III $14 (win by $15), Jalen Hurts $13 (win by $14), Sam LaPorta $6 (room $7, 0.93x durability) (win by $7).
+  Targets $169 + reserve $8 = $177 of $200 (completable).
 
   Most common roster cores this strategy landed:
   - 36% of drafts: Jahmyr Gibbs + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 9.5-4.5.
@@ -191,8 +191,8 @@ Pool-generated Stars & Scrubs: 8 anchors (WR/RB/QB/TE/DEF), rest at room price.
 - Why: The board supports paying up for Puka Nacua (~$76), Amon-Ra St. Brown (~$64), Jalen Hurts (~$13). WR runs HOT (1.18x room vs national). This shape spends $183 on anchors and keeps $17 to complete the roster at room prices.
 - Philosophy: Pattern sweep: WR-WR, heavy anchors. Built from the live board: stars and scrubs shape emerged as a completable $200 roster given the current pool.
 - Budget split: QB 7%, RB 7%, WR 70%, TE 6%, DST 3%, K 0%, bench 7%.
-- Target prices (expect / walk-up to win): Puka Nacua $76 (win by $84), Amon-Ra St. Brown $64 (win by $70), Jalen Hurts $13 (win by $14), Quinshon Judkins $12 (win by $13), Sam LaPorta $7 (win by $8).
-  Targets $172 + reserve $8 = $180 of $200 (completable).
+- Target prices (durability-adjusted expect / walk-up to win): Puka Nacua $66 (room $76, 0.87x durability) (win by $73), Amon-Ra St. Brown $64 (win by $70), Jalen Hurts $13 (win by $14), Quinshon Judkins $12 (win by $13), Sam LaPorta $6 (room $7, 0.93x durability) (win by $7).
+  Targets $161 + reserve $8 = $169 of $200 (completable).
 
   Most common roster cores this strategy landed:
   - 8.3% of drafts: Puka Nacua + Bijan Robinson + Luther Burden III - avg spend $200, avg record 9.5-4.5.
@@ -217,8 +217,8 @@ Pool-generated Stars & Scrubs: 8 anchors (WR/RB/QB/DEF/TE), rest at room price.
 - Why: The board supports paying up for Puka Nacua (~$76), Amon-Ra St. Brown (~$64), Jalen Hurts (~$13). WR runs HOT (1.18x room vs national). This shape spends $177 on anchors and keeps $23 to complete the roster at room prices.
 - Philosophy: Pattern sweep: Triple WR, heavy anchors. Built from the live board: stars and scrubs shape emerged as a completable $200 roster given the current pool.
 - Budget split: QB 7%, RB 7%, WR 71%, TE 2%, DST 3%, K 0%, bench 10%.
-- Target prices (expect / walk-up to win): Puka Nacua $76 (win by $84), Amon-Ra St. Brown $64 (win by $70), Jalen Hurts $13 (win by $14), Quinshon Judkins $12 (win by $13), Houston Texans $6 (win by $7).
-  Targets $171 + reserve $8 = $179 of $200 (completable).
+- Target prices (durability-adjusted expect / walk-up to win): Puka Nacua $66 (room $76, 0.87x durability) (win by $73), Amon-Ra St. Brown $64 (win by $70), Jalen Hurts $13 (win by $14), Quinshon Judkins $12 (win by $13), Houston Texans $6 (win by $7).
+  Targets $161 + reserve $8 = $169 of $200 (completable).
 
   Most common roster cores this strategy landed:
   - 8.3% of drafts: Puka Nacua + Bijan Robinson + Luther Burden III - avg spend $200, avg record 9.5-4.5.
@@ -243,7 +243,7 @@ Pool-generated Stars & Scrubs: 8 anchors (RB/WR/QB/TE/DEF), rest at room price.
 - Why: The board supports paying up for Jahmyr Gibbs (~$76), Josh Allen (~$36), Zay Flowers (~$24). RB runs COOL (0.84x room vs national). This shape spends $179 on anchors and keeps $21 to complete the roster at room prices.
 - Philosophy: Pattern sweep: Elite QB anchor, heavy anchors. Built from the live board: stars and scrubs shape emerged as a completable $200 roster given the current pool.
 - Budget split: QB 18%, RB 44%, WR 19%, TE 6%, DST 3%, K 0%, bench 10%.
-- Target prices (expect / walk-up to win): Jahmyr Gibbs $76 (win by $84), Josh Allen $36 (win by $40), Zay Flowers $24 (win by $26), Luther Burden III $14 (win by $15), Quinshon Judkins $12 (win by $13).
+- Target prices (durability-adjusted expect / walk-up to win): Jahmyr Gibbs $76 (win by $84), Josh Allen $36 (win by $40), Zay Flowers $24 (win by $26), Luther Burden III $14 (win by $15), Quinshon Judkins $12 (win by $13).
   Targets $162 + reserve $8 = $170 of $200 (completable).
 
   Most common roster cores this strategy landed:
@@ -269,7 +269,7 @@ Pool-generated Studs & Duds: 8 anchors (RB/WR/QB/TE/DEF), rest at room price.
 - Why: The board supports paying up for Jahmyr Gibbs (~$76), Zay Flowers (~$24), Luther Burden III (~$14). RB runs COOL (0.84x room vs national). This shape spends $156 on anchors and keeps $44 to complete the roster at room prices.
 - Philosophy: Pattern sweep: RB-WR, even split. Built from the live board: studs and duds shape emerged as a completable $200 roster given the current pool.
 - Budget split: QB 7%, RB 44%, WR 19%, TE 6%, DST 3%, K 0%, bench 21%.
-- Target prices (expect / walk-up to win): Jahmyr Gibbs $76 (win by $84), Zay Flowers $24 (win by $26), Luther Burden III $14 (win by $15), Jalen Hurts $13 (win by $14), Quinshon Judkins $12 (win by $13).
+- Target prices (durability-adjusted expect / walk-up to win): Jahmyr Gibbs $76 (win by $84), Zay Flowers $24 (win by $26), Luther Burden III $14 (win by $15), Jalen Hurts $13 (win by $14), Quinshon Judkins $12 (win by $13).
   Targets $139 + reserve $8 = $147 of $200 (completable).
 
   Most common roster cores this strategy landed:
@@ -295,7 +295,7 @@ Pool-generated Studs & Duds: 8 anchors (RB/WR/QB/TE/DEF), rest at room price.
 - Why: The board supports paying up for Jahmyr Gibbs (~$76), Jeremiyah Love (~$29), Emeka Egbuka (~$16). RB runs COOL (0.84x room vs national). This shape spends $165 on anchors and keeps $35 to complete the roster at room prices.
 - Philosophy: Pattern sweep: Robust RB (RB-RB), even split. Built from the live board: studs and duds shape emerged as a completable $200 roster given the current pool.
 - Budget split: QB 7%, RB 53%, WR 15%, TE 6%, DST 3%, K 0%, bench 16%.
-- Target prices (expect / walk-up to win): Jahmyr Gibbs $76 (win by $84), Jeremiyah Love $29 (win by $32), Emeka Egbuka $16 (win by $18), Luther Burden III $14 (win by $15), Jalen Hurts $13 (win by $14).
+- Target prices (durability-adjusted expect / walk-up to win): Jahmyr Gibbs $76 (win by $84), Jeremiyah Love $29 (win by $32), Emeka Egbuka $16 (win by $18), Luther Burden III $14 (win by $15), Jalen Hurts $13 (win by $14).
   Targets $148 + reserve $8 = $156 of $200 (completable).
 
   Most common roster cores this strategy landed:
@@ -321,7 +321,7 @@ Pool-generated Studs & Duds: 8 anchors (RB/WR/QB/TE/DEF), rest at room price.
 - Why: The board supports paying up for Jahmyr Gibbs (~$76), Zay Flowers (~$24), Jalen Hurts (~$13). RB runs COOL (0.84x room vs national). This shape spends $151 on anchors and keeps $49 to complete the roster at room prices.
 - Philosophy: Pattern sweep: Hero RB (RB + WR-WR), even split. Built from the live board: studs and duds shape emerged as a completable $200 roster given the current pool.
 - Budget split: QB 7%, RB 44%, WR 17%, TE 6%, DST 3%, K 0%, bench 23%.
-- Target prices (expect / walk-up to win): Jahmyr Gibbs $76 (win by $84), Zay Flowers $24 (win by $26), Jalen Hurts $13 (win by $14), Quinshon Judkins $12 (win by $13), Rome Odunze $9 (win by $10).
+- Target prices (durability-adjusted expect / walk-up to win): Jahmyr Gibbs $76 (win by $84), Zay Flowers $24 (win by $26), Jalen Hurts $13 (win by $14), Quinshon Judkins $12 (win by $13), Rome Odunze $9 (win by $10).
   Targets $134 + reserve $8 = $142 of $200 (completable).
 
   Most common roster cores this strategy landed:
@@ -347,8 +347,8 @@ Pool-generated Studs & Duds: 8 anchors (RB/WR/QB/TE/DEF), rest at room price.
 - Why: The board supports paying up for Jahmyr Gibbs (~$76), Jeremiyah Love (~$29), Luther Burden III (~$14). RB runs COOL (0.84x room vs national). This shape spends $150 on anchors and keeps $50 to complete the roster at room prices.
 - Philosophy: Pattern sweep: Double RB + WR, even split. Built from the live board: studs and duds shape emerged as a completable $200 roster given the current pool.
 - Budget split: QB 7%, RB 53%, WR 8%, TE 6%, DST 3%, K 0%, bench 23%.
-- Target prices (expect / walk-up to win): Jahmyr Gibbs $76 (win by $84), Jeremiyah Love $29 (win by $32), Luther Burden III $14 (win by $15), Jalen Hurts $13 (win by $14), Sam LaPorta $7 (win by $8).
-  Targets $139 + reserve $8 = $147 of $200 (completable).
+- Target prices (durability-adjusted expect / walk-up to win): Jahmyr Gibbs $76 (win by $84), Jeremiyah Love $29 (win by $32), Luther Burden III $14 (win by $15), Jalen Hurts $13 (win by $14), Sam LaPorta $6 (room $7, 0.93x durability) (win by $7).
+  Targets $138 + reserve $8 = $146 of $200 (completable).
 
   Most common roster cores this strategy landed:
   - 18.8% of drafts: Jahmyr Gibbs + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 9.5-4.5.
@@ -373,8 +373,8 @@ Pool-generated Balanced Auction: 8 anchors (RB/WR/QB/TE/DEF), rest at room price
 - Why: The board supports paying up for Jahmyr Gibbs (~$76), Emeka Egbuka (~$16), Luther Burden III (~$14). RB runs COOL (0.84x room vs national). This shape spends $137 on anchors and keeps $63 to complete the roster at room prices.
 - Philosophy: Pattern sweep: Robust RB (RB-RB), light anchors. Built from the live board: balanced shape emerged as a completable $200 roster given the current pool.
 - Budget split: QB 7%, RB 39%, WR 15%, TE 6%, DST 3%, K 0%, bench 30%.
-- Target prices (expect / walk-up to win): Jahmyr Gibbs $76 (win by $84), Emeka Egbuka $16 (win by $18), Luther Burden III $14 (win by $15), Jalen Hurts $13 (win by $14), Sam LaPorta $7 (win by $8).
-  Targets $126 + reserve $8 = $134 of $200 (completable).
+- Target prices (durability-adjusted expect / walk-up to win): Jahmyr Gibbs $76 (win by $84), Emeka Egbuka $16 (win by $18), Luther Burden III $14 (win by $15), Jalen Hurts $13 (win by $14), Sam LaPorta $6 (room $7, 0.93x durability) (win by $7).
+  Targets $125 + reserve $8 = $133 of $200 (completable).
 
   Most common roster cores this strategy landed:
   - 18.8% of drafts: Jahmyr Gibbs + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 9.5-4.5.
@@ -399,8 +399,8 @@ Pool-generated Studs & Duds: 8 anchors (RB/WR/QB/TE/DEF), rest at room price.
 - Why: The board supports paying up for Jahmyr Gibbs (~$76), Luther Burden III (~$14), Jalen Hurts (~$13). RB runs COOL (0.84x room vs national). This shape spends $138 on anchors and keeps $62 to complete the roster at room prices.
 - Philosophy: Pattern sweep: RB-WR, light anchors. Built from the live board: studs and duds shape emerged as a completable $200 roster given the current pool.
 - Budget split: QB 7%, RB 44%, WR 10%, TE 6%, DST 3%, K 0%, bench 30%.
-- Target prices (expect / walk-up to win): Jahmyr Gibbs $76 (win by $84), Luther Burden III $14 (win by $15), Jalen Hurts $13 (win by $14), Quinshon Judkins $12 (win by $13), Sam LaPorta $7 (win by $8).
-  Targets $122 + reserve $8 = $130 of $200 (completable).
+- Target prices (durability-adjusted expect / walk-up to win): Jahmyr Gibbs $76 (win by $84), Luther Burden III $14 (win by $15), Jalen Hurts $13 (win by $14), Quinshon Judkins $12 (win by $13), Sam LaPorta $6 (room $7, 0.93x durability) (win by $7).
+  Targets $121 + reserve $8 = $129 of $200 (completable).
 
   Most common roster cores this strategy landed:
   - 18.8% of drafts: Jahmyr Gibbs + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 9.5-4.5.
@@ -425,8 +425,8 @@ Pool-generated Balanced Auction: 8 anchors (RB/WR/QB/TE/DEF), rest at room price
 - Why: The board supports paying up for Jahmyr Gibbs (~$76), Luther Burden III (~$14), Jalen Hurts (~$13). RB runs COOL (0.84x room vs national). This shape spends $127 on anchors and keeps $73 to complete the roster at room prices.
 - Philosophy: Pattern sweep: Double RB + WR, light anchors. Built from the live board: balanced shape emerged as a completable $200 roster given the current pool.
 - Budget split: QB 7%, RB 39%, WR 10%, TE 6%, DST 3%, K 0%, bench 35%.
-- Target prices (expect / walk-up to win): Jahmyr Gibbs $76 (win by $84), Luther Burden III $14 (win by $15), Jalen Hurts $13 (win by $14), Sam LaPorta $7 (win by $8), Carnell Tate $6 (win by $7).
-  Targets $116 + reserve $8 = $124 of $200 (completable).
+- Target prices (durability-adjusted expect / walk-up to win): Jahmyr Gibbs $76 (win by $84), Luther Burden III $14 (win by $15), Jalen Hurts $13 (win by $14), Sam LaPorta $6 (room $7, 0.93x durability) (win by $7), Carnell Tate $6 (win by $7).
+  Targets $115 + reserve $8 = $123 of $200 (completable).
 
   Most common roster cores this strategy landed:
   - 18.8% of drafts: Jahmyr Gibbs + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 9.5-4.5.
@@ -451,8 +451,8 @@ Pool-generated Studs & Duds: 8 anchors (RB/QB/TE/WR/DEF), rest at room price.
 - Why: The board supports paying up for Jahmyr Gibbs (~$76), Jalen Hurts (~$13), Quinshon Judkins (~$12). RB runs COOL (0.84x room vs national). This shape spends $125 on anchors and keeps $75 to complete the roster at room prices.
 - Philosophy: Pattern sweep: Hero RB (RB + WR-WR), light anchors. Built from the live board: studs and duds shape emerged as a completable $200 roster given the current pool.
 - Budget split: QB 7%, RB 44%, WR 4%, TE 6%, DST 3%, K 0%, bench 36%.
-- Target prices (expect / walk-up to win): Jahmyr Gibbs $76 (win by $84), Jalen Hurts $13 (win by $14), Quinshon Judkins $12 (win by $13), Sam LaPorta $7 (win by $8), Carnell Tate $6 (win by $7).
-  Targets $114 + reserve $8 = $122 of $200 (completable).
+- Target prices (durability-adjusted expect / walk-up to win): Jahmyr Gibbs $76 (win by $84), Jalen Hurts $13 (win by $14), Quinshon Judkins $12 (win by $13), Sam LaPorta $6 (room $7, 0.93x durability) (win by $7), Carnell Tate $6 (win by $7).
+  Targets $113 + reserve $8 = $121 of $200 (completable).
 
   Most common roster cores this strategy landed:
   - 18.8% of drafts: Jahmyr Gibbs + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 9.5-4.5.
@@ -477,8 +477,8 @@ Pool-generated Stars & Scrubs: 8 anchors (WR/TE/RB/QB/DEF), rest at room price.
 - Why: The board supports paying up for Puka Nacua (~$76), Brock Bowers (~$49), Luther Burden III (~$14). WR runs HOT (1.18x room vs national). This shape spends $175 on anchors and keeps $25 to complete the roster at room prices.
 - Philosophy: Pattern sweep: Elite TE anchor, heavy anchors. Built from the live board: stars and scrubs shape emerged as a completable $200 roster given the current pool.
 - Budget split: QB 7%, RB 7%, WR 45%, TE 27%, DST 3%, K 0%, bench 11%.
-- Target prices (expect / walk-up to win): Puka Nacua $76 (win by $84), Brock Bowers $49 (win by $54), Luther Burden III $14 (win by $15), Jalen Hurts $13 (win by $14), Quinshon Judkins $12 (win by $13).
-  Targets $164 + reserve $8 = $172 of $200 (completable).
+- Target prices (durability-adjusted expect / walk-up to win): Puka Nacua $66 (room $76, 0.87x durability) (win by $73), Brock Bowers $46 (room $49, 0.94x durability) (win by $51), Luther Burden III $14 (win by $15), Jalen Hurts $13 (win by $14), Quinshon Judkins $12 (win by $13).
+  Targets $151 + reserve $8 = $159 of $200 (completable).
 
   Most common roster cores this strategy landed:
   - 11% of drafts: Puka Nacua + Bijan Robinson + Luther Burden III - avg spend $200, avg record 9.6-4.4.
@@ -503,8 +503,8 @@ Pool-generated WR Heavy (Auction): 8 anchors (WR/RB/QB/DEF/TE), rest at room pri
 - Why: The board supports paying up for Puka Nacua (~$76), Zay Flowers (~$24), Jalen Hurts (~$13). WR runs HOT (1.18x room vs national). This shape spends $145 on anchors and keeps $55 to complete the roster at room prices.
 - Philosophy: Pattern sweep: Triple WR, even split. Built from the live board: wr heavy shape emerged as a completable $200 roster given the current pool.
 - Budget split: QB 7%, RB 7%, WR 55%, TE 2%, DST 3%, K 0%, bench 26%.
-- Target prices (expect / walk-up to win): Puka Nacua $76 (win by $84), Zay Flowers $24 (win by $26), Jalen Hurts $13 (win by $14), Quinshon Judkins $12 (win by $13), Rome Odunze $9 (win by $10).
-  Targets $134 + reserve $8 = $142 of $200 (completable).
+- Target prices (durability-adjusted expect / walk-up to win): Puka Nacua $66 (room $76, 0.87x durability) (win by $73), Zay Flowers $24 (win by $26), Jalen Hurts $13 (win by $14), Quinshon Judkins $12 (win by $13), Rome Odunze $9 (win by $10).
+  Targets $124 + reserve $8 = $132 of $200 (completable).
 
   Most common roster cores this strategy landed:
   - 11% of drafts: Puka Nacua + Bijan Robinson + Luther Burden III - avg spend $200, avg record 9.6-4.4.
@@ -529,8 +529,8 @@ Pool-generated Studs & Duds: 8 anchors (WR/RB/QB/TE/DEF), rest at room price.
 - Why: The board supports paying up for Puka Nacua (~$76), Zay Flowers (~$24), Jalen Hurts (~$13). WR runs HOT (1.18x room vs national). This shape spends $143 on anchors and keeps $57 to complete the roster at room prices.
 - Philosophy: Pattern sweep: WR-WR, even split. Built from the live board: studs and duds shape emerged as a completable $200 roster given the current pool.
 - Budget split: QB 7%, RB 7%, WR 50%, TE 6%, DST 3%, K 0%, bench 27%.
-- Target prices (expect / walk-up to win): Puka Nacua $76 (win by $84), Zay Flowers $24 (win by $26), Jalen Hurts $13 (win by $14), Quinshon Judkins $12 (win by $13), Sam LaPorta $7 (win by $8).
-  Targets $132 + reserve $8 = $140 of $200 (completable).
+- Target prices (durability-adjusted expect / walk-up to win): Puka Nacua $66 (room $76, 0.87x durability) (win by $73), Zay Flowers $24 (win by $26), Jalen Hurts $13 (win by $14), Quinshon Judkins $12 (win by $13), Sam LaPorta $6 (room $7, 0.93x durability) (win by $7).
+  Targets $121 + reserve $8 = $129 of $200 (completable).
 
   Most common roster cores this strategy landed:
   - 11% of drafts: Puka Nacua + Bijan Robinson + Luther Burden III - avg spend $200, avg record 9.6-4.4.
@@ -555,8 +555,8 @@ Pool-generated Studs & Duds: 8 anchors (WR/RB/QB/TE/DEF), rest at room price.
 - Why: The board supports paying up for Puka Nacua (~$76), Jalen Hurts (~$13), Quinshon Judkins (~$12). WR runs HOT (1.18x room vs national). This shape spends $125 on anchors and keeps $75 to complete the roster at room prices.
 - Philosophy: Pattern sweep: WR-WR, light anchors. Built from the live board: studs and duds shape emerged as a completable $200 roster given the current pool.
 - Budget split: QB 7%, RB 7%, WR 41%, TE 6%, DST 3%, K 0%, bench 36%.
-- Target prices (expect / walk-up to win): Puka Nacua $76 (win by $84), Jalen Hurts $13 (win by $14), Quinshon Judkins $12 (win by $13), Sam LaPorta $7 (win by $8), Carnell Tate $6 (win by $7).
-  Targets $114 + reserve $8 = $122 of $200 (completable).
+- Target prices (durability-adjusted expect / walk-up to win): Puka Nacua $66 (room $76, 0.87x durability) (win by $73), Jalen Hurts $13 (win by $14), Quinshon Judkins $12 (win by $13), Sam LaPorta $6 (room $7, 0.93x durability) (win by $7), Carnell Tate $6 (win by $7).
+  Targets $103 + reserve $8 = $111 of $200 (completable).
 
   Most common roster cores this strategy landed:
   - 11% of drafts: Puka Nacua + Bijan Robinson + Luther Burden III - avg spend $200, avg record 9.6-4.4.
@@ -581,8 +581,8 @@ Pool-generated WR Heavy (Auction): 8 anchors (WR/RB/QB/DEF/TE), rest at room pri
 - Why: The board supports paying up for Puka Nacua (~$76), Jalen Hurts (~$13), Quinshon Judkins (~$12). WR runs HOT (1.18x room vs national). This shape spends $119 on anchors and keeps $81 to complete the roster at room prices.
 - Philosophy: Pattern sweep: Triple WR, light anchors. Built from the live board: wr heavy shape emerged as a completable $200 roster given the current pool.
 - Budget split: QB 7%, RB 7%, WR 42%, TE 2%, DST 3%, K 0%, bench 39%.
-- Target prices (expect / walk-up to win): Puka Nacua $76 (win by $84), Jalen Hurts $13 (win by $14), Quinshon Judkins $12 (win by $13), Carnell Tate $6 (win by $7), Houston Texans $6 (win by $7).
-  Targets $113 + reserve $8 = $121 of $200 (completable).
+- Target prices (durability-adjusted expect / walk-up to win): Puka Nacua $66 (room $76, 0.87x durability) (win by $73), Jalen Hurts $13 (win by $14), Quinshon Judkins $12 (win by $13), Carnell Tate $6 (win by $7), Houston Texans $6 (win by $7).
+  Targets $103 + reserve $8 = $111 of $200 (completable).
 
   Most common roster cores this strategy landed:
   - 11% of drafts: Puka Nacua + Bijan Robinson + Luther Burden III - avg spend $200, avg record 9.6-4.4.
@@ -607,8 +607,8 @@ Pool-generated Studs & Duds: 8 anchors (WR/RB/QB/DEF/TE), rest at room price.
 - Why: The board supports paying up for Puka Nacua (~$76), Jalen Hurts (~$13), Quinshon Judkins (~$12). WR runs HOT (1.18x room vs national). This shape spends $119 on anchors and keeps $81 to complete the roster at room prices.
 - Philosophy: Pattern sweep: Zero RB (WR-WR-TE), light anchors. Built from the live board: studs and duds shape emerged as a completable $200 roster given the current pool.
 - Budget split: QB 7%, RB 7%, WR 41%, TE 3%, DST 3%, K 0%, bench 39%.
-- Target prices (expect / walk-up to win): Puka Nacua $76 (win by $84), Jalen Hurts $13 (win by $14), Quinshon Judkins $12 (win by $13), Carnell Tate $6 (win by $7), Houston Texans $6 (win by $7).
-  Targets $113 + reserve $8 = $121 of $200 (completable).
+- Target prices (durability-adjusted expect / walk-up to win): Puka Nacua $66 (room $76, 0.87x durability) (win by $73), Jalen Hurts $13 (win by $14), Quinshon Judkins $12 (win by $13), Carnell Tate $6 (win by $7), Houston Texans $6 (win by $7).
+  Targets $103 + reserve $8 = $111 of $200 (completable).
 
   Most common roster cores this strategy landed:
   - 11% of drafts: Puka Nacua + Bijan Robinson + Luther Burden III - avg spend $200, avg record 9.6-4.4.
@@ -633,8 +633,8 @@ Pool-generated Balanced Auction: 8 anchors (WR/TE/RB/QB/DEF), rest at room price
 - Why: The board supports paying up for Justin Jefferson (~$57), Brock Bowers (~$49), Jalen Hurts (~$13). WR runs HOT (1.18x room vs national). This shape spends $143 on anchors and keeps $57 to complete the roster at room prices.
 - Philosophy: Pattern sweep: Elite TE anchor, even split. Built from the live board: balanced shape emerged as a completable $200 roster given the current pool.
 - Budget split: QB 7%, RB 7%, WR 29%, TE 27%, DST 3%, K 0%, bench 27%.
-- Target prices (expect / walk-up to win): Justin Jefferson $57 (win by $63), Brock Bowers $49 (win by $54), Jalen Hurts $13 (win by $14), Quinshon Judkins $12 (win by $13), Houston Texans $6 (win by $7).
-  Targets $137 + reserve $8 = $145 of $200 (completable).
+- Target prices (durability-adjusted expect / walk-up to win): Justin Jefferson $53 (room $57, 0.94x durability) (win by $58), Brock Bowers $46 (room $49, 0.94x durability) (win by $51), Jalen Hurts $13 (win by $14), Quinshon Judkins $12 (win by $13), Houston Texans $6 (win by $7).
+  Targets $130 + reserve $8 = $138 of $200 (completable).
 
   Most common roster cores this strategy landed:
   - 13% of drafts: Jahmyr Gibbs + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 9.2-4.8.
@@ -659,8 +659,8 @@ Pool-generated Balanced Auction: 8 anchors (RB/QB/WR/TE/DEF), rest at room price
 - Why: The board supports paying up for Christian McCaffrey (~$67), Josh Allen (~$36), Luther Burden III (~$14). RB runs COOL (0.84x room vs national). This shape spends $152 on anchors and keeps $48 to complete the roster at room prices.
 - Philosophy: Pattern sweep: Elite QB anchor, even split. Built from the live board: balanced shape emerged as a completable $200 roster given the current pool.
 - Budget split: QB 18%, RB 40%, WR 10%, TE 6%, DST 3%, K 0%, bench 23%.
-- Target prices (expect / walk-up to win): Christian McCaffrey $67 (win by $74), Josh Allen $36 (win by $40), Luther Burden III $14 (win by $15), Quinshon Judkins $12 (win by $13), Sam LaPorta $7 (win by $8).
-  Targets $136 + reserve $8 = $144 of $200 (completable).
+- Target prices (durability-adjusted expect / walk-up to win): Christian McCaffrey $60 (room $67, 0.89x durability) (win by $66), Josh Allen $36 (win by $40), Luther Burden III $14 (win by $15), Quinshon Judkins $12 (win by $13), Sam LaPorta $6 (room $7, 0.93x durability) (win by $7).
+  Targets $128 + reserve $8 = $136 of $200 (completable).
 
   Most common roster cores this strategy landed:
   - 23.3% of drafts: Jahmyr Gibbs + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 9.3-4.7.
@@ -685,8 +685,8 @@ Pool-generated Balanced Auction: 8 anchors (RB/QB/WR/TE/DEF), rest at room price
 - Why: The board supports paying up for Saquon Barkley (~$42), Josh Allen (~$36), Luther Burden III (~$14). RB runs COOL (0.84x room vs national). This shape spends $127 on anchors and keeps $73 to complete the roster at room prices.
 - Philosophy: Pattern sweep: Elite QB anchor, light anchors. Built from the live board: balanced shape emerged as a completable $200 roster given the current pool.
 - Budget split: QB 18%, RB 27%, WR 10%, TE 6%, DST 3%, K 0%, bench 36%.
-- Target prices (expect / walk-up to win): Saquon Barkley $42 (win by $46), Josh Allen $36 (win by $40), Luther Burden III $14 (win by $15), Quinshon Judkins $12 (win by $13), Sam LaPorta $7 (win by $8).
-  Targets $111 + reserve $8 = $119 of $200 (completable).
+- Target prices (durability-adjusted expect / walk-up to win): Saquon Barkley $39 (room $42, 0.94x durability) (win by $43), Josh Allen $36 (win by $40), Luther Burden III $14 (win by $15), Quinshon Judkins $12 (win by $13), Sam LaPorta $6 (room $7, 0.93x durability) (win by $7).
+  Targets $107 + reserve $8 = $115 of $200 (completable).
 
   Most common roster cores this strategy landed:
   - 12.8% of drafts: Jahmyr Gibbs + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 9.2-4.8.
@@ -711,8 +711,8 @@ Pool-generated Balanced Auction: 8 anchors (WR/RB/QB/TE/DEF), rest at room price
 - Why: The board supports paying up for Emeka Egbuka (~$16), Luther Burden III (~$14), Jalen Hurts (~$13). WR runs HOT (1.18x room vs national). This shape spends $73 on anchors and keeps $127 to complete the roster at room prices.
 - Philosophy: Pattern sweep: Balanced (no anchor). Built from the live board: balanced shape emerged as a completable $200 roster given the current pool.
 - Budget split: QB 7%, RB 7%, WR 15%, TE 6%, DST 3%, K 0%, bench 62%.
-- Target prices (expect / walk-up to win): Emeka Egbuka $16 (win by $18), Luther Burden III $14 (win by $15), Jalen Hurts $13 (win by $14), Quinshon Judkins $12 (win by $13), Sam LaPorta $7 (win by $8).
-  Targets $62 + reserve $8 = $70 of $200 (completable).
+- Target prices (durability-adjusted expect / walk-up to win): Emeka Egbuka $16 (win by $18), Luther Burden III $14 (win by $15), Jalen Hurts $13 (win by $14), Quinshon Judkins $12 (win by $13), Sam LaPorta $6 (room $7, 0.93x durability) (win by $7).
+  Targets $61 + reserve $8 = $69 of $200 (completable).
 
   Most common roster cores this strategy landed:
   - 13% of drafts: Jahmyr Gibbs + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 9.3-4.7.
@@ -737,8 +737,8 @@ Pool-generated Balanced Auction: 8 anchors (TE/WR/RB/QB/DEF), rest at room price
 - Why: The board supports paying up for Brock Bowers (~$49), Zay Flowers (~$24), Jalen Hurts (~$13). TE runs HOT (1.17x room vs national). This shape spends $118 on anchors and keeps $82 to complete the roster at room prices.
 - Philosophy: Pattern sweep: Elite TE anchor, light anchors. Built from the live board: balanced shape emerged as a completable $200 roster given the current pool.
 - Budget split: QB 7%, RB 7%, WR 17%, TE 27%, DST 3%, K 0%, bench 39%.
-- Target prices (expect / walk-up to win): Brock Bowers $49 (win by $54), Zay Flowers $24 (win by $26), Jalen Hurts $13 (win by $14), Quinshon Judkins $12 (win by $13), Rome Odunze $9 (win by $10).
-  Targets $107 + reserve $8 = $115 of $200 (completable).
+- Target prices (durability-adjusted expect / walk-up to win): Brock Bowers $46 (room $49, 0.94x durability) (win by $51), Zay Flowers $24 (win by $26), Jalen Hurts $13 (win by $14), Quinshon Judkins $12 (win by $13), Rome Odunze $9 (win by $10).
+  Targets $104 + reserve $8 = $112 of $200 (completable).
 
   Most common roster cores this strategy landed:
   - 13% of drafts: Jahmyr Gibbs + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 9.3-4.7.
@@ -781,39 +781,39 @@ with the risk model on. Grouped by pattern, best projected record first.
 
 ### Robust RB (RB-RB)
 
-- **Jahmyr Gibbs + Christian McCaffrey**: 9.4-4.6, 1974.1 starter pts - target Jahmyr Gibbs $76, Christian McCaffrey $67.
+- **Jahmyr Gibbs + Christian McCaffrey**: 9.4-4.6, 1974.1 starter pts - target Jahmyr Gibbs $76, Christian McCaffrey $60.
 - **Jahmyr Gibbs + Bijan Robinson**: 9.4-4.6, 1969.5 starter pts - target Jahmyr Gibbs $76, Bijan Robinson $70.
-- **Christian McCaffrey + Bijan Robinson**: 9.3-4.7, 1960.8 starter pts - target Bijan Robinson $70, Christian McCaffrey $67.
+- **Christian McCaffrey + Bijan Robinson**: 9.3-4.7, 1960.8 starter pts - target Bijan Robinson $70, Christian McCaffrey $60.
 
 ### WR-WR
 
-- **Puka Nacua + Jaxon Smith-Njigba**: 9.5-4.5, 1956 starter pts - target Puka Nacua $76, Jaxon Smith-Njigba $72.
-- **Puka Nacua + Amon-Ra St. Brown**: 9.4-4.6, 1954.4 starter pts - target Puka Nacua $76, Amon-Ra St. Brown $64.
-- **Puka Nacua + Ja'Marr Chase**: 9.4-4.6, 1952.6 starter pts - target Ja'Marr Chase $79, Puka Nacua $76.
+- **Puka Nacua + Jaxon Smith-Njigba**: 9.5-4.5, 1956 starter pts - target Puka Nacua $66, Jaxon Smith-Njigba $72.
+- **Puka Nacua + Amon-Ra St. Brown**: 9.4-4.6, 1954.4 starter pts - target Puka Nacua $66, Amon-Ra St. Brown $64.
+- **Puka Nacua + Ja'Marr Chase**: 9.4-4.6, 1952.6 starter pts - target Ja'Marr Chase $75, Puka Nacua $66.
 
 ### RB-WR
 
 - **Jahmyr Gibbs + Jaxon Smith-Njigba**: 9.6-4.4, 1963.4 starter pts - target Jahmyr Gibbs $76, Jaxon Smith-Njigba $72.
-- **Jahmyr Gibbs + Puka Nacua**: 9.5-4.5, 1966 starter pts - target Jahmyr Gibbs $76, Puka Nacua $76.
+- **Jahmyr Gibbs + Puka Nacua**: 9.5-4.5, 1966 starter pts - target Jahmyr Gibbs $76, Puka Nacua $66.
 - **Jahmyr Gibbs + Amon-Ra St. Brown**: 9.5-4.5, 1965.1 starter pts - target Jahmyr Gibbs $76, Amon-Ra St. Brown $64.
 
 ### Zero RB (WR-WR-TE)
 
-- **Jaxon Smith-Njigba + Amon-Ra St. Brown + Brock Bowers**: 9.5-4.5, 1950.3 starter pts - target Jaxon Smith-Njigba $72, Amon-Ra St. Brown $64, Brock Bowers $49.
-- **Puka Nacua + Jaxon Smith-Njigba + Trey McBride**: 9.5-4.5, 1956 starter pts - target Puka Nacua $76, Jaxon Smith-Njigba $72, Trey McBride $35.
-- **Puka Nacua + Amon-Ra St. Brown + Brock Bowers**: 9.4-4.6, 1953.4 starter pts - target Puka Nacua $76, Amon-Ra St. Brown $64, Brock Bowers $49.
+- **Jaxon Smith-Njigba + Amon-Ra St. Brown + Brock Bowers**: 9.5-4.5, 1950.3 starter pts - target Jaxon Smith-Njigba $72, Amon-Ra St. Brown $64, Brock Bowers $46.
+- **Puka Nacua + Jaxon Smith-Njigba + Trey McBride**: 9.5-4.5, 1956 starter pts - target Puka Nacua $66, Jaxon Smith-Njigba $72, Trey McBride $35.
+- **Puka Nacua + Amon-Ra St. Brown + Brock Bowers**: 9.4-4.6, 1953.4 starter pts - target Puka Nacua $66, Amon-Ra St. Brown $64, Brock Bowers $46.
 
 ### Elite QB anchor
 
-- **Josh Allen + Jahmyr Gibbs + Puka Nacua**: 9.5-4.5, 1965.8 starter pts - target Jahmyr Gibbs $76, Puka Nacua $76, Josh Allen $36.
-- **Lamar Jackson + Jahmyr Gibbs + Puka Nacua**: 9.5-4.5, 1964.5 starter pts - target Jahmyr Gibbs $76, Puka Nacua $76, Lamar Jackson $32.
-- **Drake Maye + Jahmyr Gibbs + Puka Nacua**: 9.5-4.5, 1965.5 starter pts - target Jahmyr Gibbs $76, Puka Nacua $76, Drake Maye $28.
+- **Josh Allen + Jahmyr Gibbs + Puka Nacua**: 9.5-4.5, 1965.8 starter pts - target Jahmyr Gibbs $76, Puka Nacua $66, Josh Allen $36.
+- **Lamar Jackson + Jahmyr Gibbs + Puka Nacua**: 9.5-4.5, 1964.5 starter pts - target Jahmyr Gibbs $76, Puka Nacua $66, Lamar Jackson $32.
+- **Drake Maye + Jahmyr Gibbs + Puka Nacua**: 9.5-4.5, 1965.5 starter pts - target Jahmyr Gibbs $76, Puka Nacua $66, Drake Maye $25.
 
 ### Elite TE anchor
 
 - **Trey McBride + Jaxon Smith-Njigba + Amon-Ra St. Brown**: 9.5-4.5, 1951.2 starter pts - target Jaxon Smith-Njigba $72, Amon-Ra St. Brown $64, Trey McBride $35.
-- **Trey McBride + Puka Nacua + Amon-Ra St. Brown**: 9.4-4.6, 1954.4 starter pts - target Puka Nacua $76, Amon-Ra St. Brown $64, Trey McBride $35.
-- **Trey McBride + Puka Nacua + Ja'Marr Chase**: 9.4-4.6, 1952.6 starter pts - target Ja'Marr Chase $79, Puka Nacua $76, Trey McBride $35.
+- **Trey McBride + Puka Nacua + Amon-Ra St. Brown**: 9.4-4.6, 1954.4 starter pts - target Puka Nacua $66, Amon-Ra St. Brown $64, Trey McBride $35.
+- **Trey McBride + Puka Nacua + Ja'Marr Chase**: 9.4-4.6, 1952.6 starter pts - target Ja'Marr Chase $75, Puka Nacua $66, Trey McBride $35.
 
 _No affordable elite combo: Triple WR, Double RB + WR, Hero RB (RB + WR-WR). The top studs at
 those positions cost more than $200 combined at room price, so no concrete

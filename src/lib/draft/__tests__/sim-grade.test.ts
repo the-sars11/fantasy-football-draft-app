@@ -18,6 +18,8 @@ import {
   starterConfigOf,
   DEFAULT_INJURY_MODEL,
   DEFAULT_RISK_MODEL,
+  durabilityPriceFactor,
+  DURABILITY_PRICE_FLOOR,
   type StarterConfig,
 } from '../sim-grade'
 import type { SimRun, SimManagerRoster, SimWonPlayer, SimRosterConfig } from '../sim-engine'
@@ -392,6 +394,53 @@ describe('gradeRun durability joins on sleeperId (real per-player games-missed)'
     // the +50 margin sits well inside that so it proves the join fires without
     // being rng-sensitive. Before the fix this gap was 0 (baseline for everyone).
     expect(baselineWins).toBeGreaterThan(fragileWins + 50)
+  })
+})
+
+describe('durabilityPriceFactor (injury haircut for target prices)', () => {
+  // The factor multiplies a player's room price. It measures durability RELATIVE
+  // to the position baseline (what the market already assumes), never vs a perfect
+  // season, so it does not double-count the risk the room has already priced in.
+  const RB_BASE = DEFAULT_RISK_MODEL.durability.baseline.RB
+
+  it('discounts McCaffrey to gpRate / RB-baseline (~0.89x), an ~11% haircut', () => {
+    const f = durabilityPriceFactor('4034', 'RB')
+    expect(f).toBeCloseTo(0.8462 / RB_BASE, 3)
+    expect(f).toBeLessThan(1)
+    expect(f).toBeGreaterThan(0.85) // real haircut, not catastrophic
+  })
+
+  it('returns 1 (no discount) for a player the model cannot measure', () => {
+    // Rookie / model-absent -> no measured durability -> ride the price at room.
+    expect(durabilityPriceFactor('does-not-exist', 'RB')).toBe(1)
+    expect(durabilityPriceFactor(undefined, 'RB')).toBe(1)
+    expect(durabilityPriceFactor(null, 'WR')).toBe(1)
+  })
+
+  it('returns 1 for DEF (defenses are always available in this model)', () => {
+    expect(durabilityPriceFactor('4034', 'DEF')).toBe(1)
+  })
+
+  it('never inflates: a player at/above baseline durability stays at 1.0', () => {
+    // Synthetic model: a WR exactly at the WR baseline must not get a premium.
+    const model = {
+      durability: {
+        baseline: { WR: 0.95 },
+        byPlayer: { solid: { gpRate: 0.99 }, exact: { gpRate: 0.95 } },
+      },
+      outcome: {},
+    }
+    expect(durabilityPriceFactor('solid', 'WR', model)).toBe(1)
+    expect(durabilityPriceFactor('exact', 'WR', model)).toBe(1)
+  })
+
+  it('floors the haircut at DURABILITY_PRICE_FLOOR for a catastrophic history', () => {
+    // gpRate 0.40 / baseline 0.95 = 0.42, well below the floor -> clamped up.
+    const model = {
+      durability: { baseline: { RB: 0.95 }, byPlayer: { wreck: { gpRate: 0.4 } } },
+      outcome: {},
+    }
+    expect(durabilityPriceFactor('wreck', 'RB', model)).toBe(DURABILITY_PRICE_FLOOR)
   })
 })
 

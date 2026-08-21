@@ -13,6 +13,7 @@ import type { League, DraftFormat, RosterSlots, ScoringFormat } from '@/lib/play
 import type { ConsensusPlayer } from '@/lib/research/normalize'
 import type { StrategyInsert, Position as DbPosition } from '@/lib/supabase/database.types'
 import { askClaudeJson } from '@/lib/ai/claude'
+import { durabilityPriceFactor } from '@/lib/draft/sim-grade'
 import { AUCTION_ARCHETYPES, SNAKE_ARCHETYPES, AUCTION_PRESETS } from './presets'
 import type { AuctionArchetype } from './presets'
 import { assignTargetPrices, type TargetPricing } from './target-pricing'
@@ -276,7 +277,11 @@ function priceProposals(
       targetNames: p.key_targets,
       budgetAllocation: p.budget_allocation,
       maxBidPercentage: p.max_bid_percentage,
-      players,
+      // Attach the injury haircut (joins on Sleeper id; 1 = no discount).
+      players: players.map((pl) => ({
+        ...pl,
+        durabilityFactor: durabilityPriceFactor(pl.sleeperId, pl.position),
+      })),
       rosterSlots: league.rosterSlots,
       budget,
     }),

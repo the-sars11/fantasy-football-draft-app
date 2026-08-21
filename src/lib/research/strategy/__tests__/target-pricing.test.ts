@@ -233,3 +233,52 @@ describe('assignTargetPrices - resolution rules', () => {
     expect(r.fits).toBe(true)
   })
 })
+
+describe('assignTargetPrices - durability haircut', () => {
+  // A durabilityFactor < 1 on a player haircuts its room anchor. The factor is
+  // resolved by the caller from the risk model (durabilityPriceFactor); here we
+  // pass it directly to prove assignTargetPrices applies it correctly.
+  it('haircuts price/walk-up by the factor while baseValue keeps the room price', () => {
+    const fragile: TargetPricingPlayer = {
+      name: 'Fragile RB', position: 'RB', expectedRoomPrice: 60, durabilityFactor: 0.9,
+    }
+    const r = assignTargetPrices(baseInput({ targetNames: ['Fragile RB'], players: [fragile] }))
+    expect(r.prices).toHaveLength(1)
+    const p = r.prices[0]
+    expect(p.baseValue).toBe(60)              // un-adjusted room anchor preserved
+    expect(p.price).toBe(54)                  // 60 * 0.9
+    expect(p.durabilityFactor).toBe(0.9)      // surfaced for the report
+    expect(p.walkUp).toBe(Math.round(54 * 1.1)) // walk-up rides the adjusted price
+  })
+
+  it('leaves price == baseValue and omits the factor when there is no discount', () => {
+    // Backward-compat: absent factor (or factor 1) is byte-identical to before.
+    const healthy: TargetPricingPlayer = {
+      name: 'Healthy RB', position: 'RB', expectedRoomPrice: 60,
+    }
+    const r = assignTargetPrices(baseInput({ targetNames: ['Healthy RB'], players: [healthy] }))
+    expect(r.prices[0].price).toBe(60)
+    expect(r.prices[0].baseValue).toBe(60)
+    expect(r.prices[0].durabilityFactor).toBeUndefined()
+  })
+
+  it('never inflates: a factor >= 1 is treated as no discount', () => {
+    const player: TargetPricingPlayer = {
+      name: 'Solid RB', position: 'RB', expectedRoomPrice: 50, durabilityFactor: 1.2,
+    }
+    const r = assignTargetPrices(baseInput({ targetNames: ['Solid RB'], players: [player] }))
+    expect(r.prices[0].price).toBe(50) // not 60
+    expect(r.prices[0].durabilityFactor).toBeUndefined()
+  })
+
+  it('frees budget: the haircut keeps the completable-roster invariant', () => {
+    const players: TargetPricingPlayer[] = [
+      { name: 'A', position: 'RB', expectedRoomPrice: 70, durabilityFactor: 0.85 },
+      { name: 'B', position: 'WR', expectedRoomPrice: 70, durabilityFactor: 0.85 },
+    ]
+    const r = assignTargetPrices(baseInput({ targetNames: ['A', 'B'], players }))
+    expect(r.total).toBe(r.targetTotal + r.reserve)
+    expect(r.total).toBeLessThanOrEqual(BUDGET)
+    expect(r.fits).toBe(true)
+  })
+})

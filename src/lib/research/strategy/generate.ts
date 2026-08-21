@@ -31,6 +31,7 @@
 import type { League } from '@/lib/players/types'
 import type { ConsensusPlayer } from '@/lib/research/normalize'
 import { expectedRoomPrice, positionalInflation } from '@/lib/draft/league-calibration'
+import { durabilityPriceFactor } from '@/lib/draft/sim-grade'
 import { assignTargetPrices } from './target-pricing'
 import type { AuctionArchetype } from './presets'
 import type {
@@ -937,6 +938,9 @@ function attachTargetPricingAndInserts(
     position: p.position,
     expectedRoomPrice: roomByName.get(p.name.toLowerCase()) ?? null,
     consensusAuctionValue: p.consensusAuctionValue ?? null,
+    // Injury haircut off the measured risk model (1 = no discount when the
+    // player has no Sleeper id / no measured durability). Joins on Sleeper id.
+    durabilityFactor: durabilityPriceFactor(p.sleeperId, p.position),
   }))
 
   const proposals = rawProposals.map((p) => ({

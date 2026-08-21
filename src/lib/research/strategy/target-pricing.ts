@@ -61,12 +61,23 @@ const FLEX_ELIGIBLE = new Set<Position>(['RB', 'WR', 'TE'])
 export interface TargetPrice {
   name: string
   position: Position
-  /** EXPECT: the price to plan on paying (expected room price), >= 1. */
+  /**
+   * EXPECT: the price to plan on paying, >= 1. This is the room price after the
+   * durability haircut (== baseValue when the player has no injury discount).
+   */
   price: number
-  /** WALK-UP: the max to bid to actually win a contested lot (room price +buffer). */
+  /** WALK-UP: the max to bid to actually win a contested lot (expect +buffer). */
   walkUp: number
-  /** The expected room price this target is anchored to (== price unless capped). */
+  /**
+   * The un-adjusted room-price anchor (what Joe's league pays for this rank),
+   * BEFORE any durability haircut. baseValue - price = the injury discount.
+   */
   baseValue: number
+  /**
+   * Durability multiplier applied to baseValue to get price (1 = none, <1 =
+   * fragile). Present so the report/UI can show "room $67, 0.89x durability".
+   */
+  durabilityFactor?: number
 }
 
 export interface TargetPricing {
@@ -132,6 +143,12 @@ export interface TargetPricingPlayer {
   position: Position
   expectedRoomPrice?: number | null
   consensusAuctionValue?: number | null
+  /**
+   * Durability price multiplier in (0,1]; 1 (or absent) = no injury discount.
+   * Resolved by the caller from the risk model (durabilityPriceFactor). Haircuts
+   * the room anchor so the target price reflects games a fragile stud misses.
+   */
+  durabilityFactor?: number | null
 }
 
 export interface AssignTargetPricesInput {
@@ -155,6 +172,17 @@ function anchorPrice(player: TargetPricingPlayer): number {
 }
 
 /**
+ * Clamp a caller-supplied durability factor into (0,1). Absent, invalid, or >= 1
+ * -> 1 (no discount): durability only ever haircuts a price, never inflates it.
+ */
+function durabilityMultiplier(factor: number | null | undefined): number {
+  if (typeof factor === 'number' && Number.isFinite(factor) && factor > 0 && factor < 1) {
+    return factor
+  }
+  return 1
+}
+
+/**
  * Assign each key_target its EXPECT (room) price + a WALK-UP (room +buffer) price
  * so the full roster fits `budget`. Unknown or kicker targets are skipped. When
  * the named targets overflow the budget at real room prices, the cheapest are
@@ -168,7 +196,16 @@ export function assignTargetPrices(input: AssignTargetPricesInput): TargetPricin
   for (const p of players) byName.set(p.name.toLowerCase(), p)
 
   const seen = new Set<string>()
-  const resolved: Array<{ name: string; position: Position; baseValue: number }> = []
+  const resolved: Array<{
+    name: string
+    position: Position
+    /** Un-adjusted room-price anchor. */
+    baseValue: number
+    /** Room anchor after the durability haircut (what counts against budget). */
+    price: number
+    /** The multiplier applied (1 = no discount). */
+    durabilityFactor: number
+  }> = []
   let slots = toSlotsRemaining(rosterSlots)
 
   for (const rawName of targetNames) {
@@ -183,10 +220,15 @@ export function assignTargetPrices(input: AssignTargetPricesInput): TargetPricin
     slots = nextSlots
     seen.add(key)
 
+    const roomValue = anchorPrice(player)
+    const factor = durabilityMultiplier(player.durabilityFactor)
     resolved.push({
       name: player.name,
       position: player.position,
-      baseValue: anchorPrice(player),
+      baseValue: roomValue,
+      // Haircut the room anchor for injury risk, floored at $1.
+      price: Math.max(1, Math.round(roomValue * factor)),
+      durabilityFactor: factor,
     })
   }
 
@@ -207,13 +249,15 @@ export function assignTargetPrices(input: AssignTargetPricesInput): TargetPricin
   // budget, drop the CHEAPEST target (its slot falls back to a $1 reserve slot)
   // and retry -- the honest "you can only afford a couple of studs" outcome,
   // never a below-room discount to squeeze more studs in.
-  const kept = resolved.map((t) => ({ ...t, price: t.baseValue }))
+  // price already carries the durability haircut; the budget math and drop order
+  // both run on the adjusted price (what a target actually costs Joe).
+  const kept = resolved.map((t) => ({ ...t }))
   const reserveFor = (n: number) => totalSlots - n
   const sumPrices = (rows: { price: number }[]) => rows.reduce((s, r) => s + r.price, 0)
 
   while (kept.length > 1 && sumPrices(kept) + reserveFor(kept.length) > budget) {
     let minIdx = 0
-    for (let i = 1; i < kept.length; i++) if (kept[i].baseValue < kept[minIdx].baseValue) minIdx = i
+    for (let i = 1; i < kept.length; i++) if (kept[i].price < kept[minIdx].price) minIdx = i
     kept.splice(minIdx, 1)
   }
 
@@ -232,10 +276,13 @@ export function assignTargetPrices(input: AssignTargetPricesInput): TargetPricin
     name: t.name,
     position: t.position,
     price: t.price,
-    // Walk-up = room price + buffer, never below the expect price and never past
-    // what a single slot can solvently absorb.
+    // Walk-up = durability-adjusted expect + buffer, never below the expect price
+    // and never past what a single slot can solvently absorb.
     walkUp: Math.min(singleSlotMax, Math.max(t.price, Math.round(t.price * (1 + WALKUP_BUFFER)))),
     baseValue: t.baseValue,
+    // Only surface the factor when it actually discounted (< 1), so the
+    // no-durability path stays byte-identical to before.
+    ...(t.durabilityFactor < 1 ? { durabilityFactor: t.durabilityFactor } : {}),
   }))
 
   const targetTotal = prices.reduce((s, p) => s + p.price, 0)

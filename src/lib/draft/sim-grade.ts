@@ -218,6 +218,45 @@ export interface RiskModel {
 /** The measured model used by the real sim path (buildSimSummary). */
 export const DEFAULT_RISK_MODEL: RiskModel = riskModelJson as unknown as RiskModel
 
+/**
+ * A durability discount never haircuts a player's room price by more than this.
+ * One 15-season model should nudge a price, not zero a stud out; a chronically
+ * fragile guy still gets a real number.
+ */
+export const DURABILITY_PRICE_FLOOR = 0.75
+
+/**
+ * Durability PRICE factor: how much to haircut a player's room price for injury
+ * risk. Multiply the room-anchor price by this (1 = no change, <1 = discount).
+ *
+ * The haircut is RELATIVE to the durability the market already assumes for the
+ * position (the position baseline), NOT relative to a perfect 17-game season.
+ * The room price already bakes in some awareness that RBs miss time; discounting
+ * against a flawless season would double-count that. So a player exactly as
+ * durable as his position's baseline gets factor 1.0 (no discount); only the
+ * SHORTFALL below baseline is charged. McCaffrey 0.8462 / RB baseline 0.9466 =
+ * 0.89x -> an ~11% haircut off his room price.
+ *
+ * It only ever discounts, never inflates (capped at 1.0): a rock-solid player's
+ * price stays at room, we never tell Joe to bid MORE for health. Floored at
+ * DURABILITY_PRICE_FLOOR. Returns 1 (no adjustment) for DEF and for any player
+ * the model can't measure (rookies, <2 real-role seasons, model-absent) -- the
+ * same set that correctly rides the position baseline in the sim.
+ */
+export function durabilityPriceFactor(
+  sleeperId: string | null | undefined,
+  position: string,
+  model: RiskModel = DEFAULT_RISK_MODEL,
+): number {
+  if (position === 'DEF') return 1
+  const entry = sleeperId ? model.durability.byPlayer[sleeperId] : undefined
+  if (!entry || !Number.isFinite(entry.gpRate)) return 1
+  const baseline = model.durability.baseline[position]
+  if (!(typeof baseline === 'number' && baseline > 0)) return 1
+  const raw = entry.gpRate / baseline
+  return Math.min(1, Math.max(DURABILITY_PRICE_FLOOR, raw))
+}
+
 /** Salt so the season-outcome PRNG is independent of the weekly PRNG at the same seed. */
 const OUTCOME_SEED_SALT = 0x85ebca6b
 

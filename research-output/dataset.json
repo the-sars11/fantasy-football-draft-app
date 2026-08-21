@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generatedAt": "2026-08-21T02:52:13.017Z",
+    "generatedAt": "2026-08-21T03:12:01.762Z",
     "league": "The Nasties",
     "playerCount": 1000,
     "simRunsPerStrategy": 400,
@@ -581,9 +581,10 @@
             {
               "name": "Christian McCaffrey",
               "position": "RB",
-              "price": 67,
-              "walkUp": 74,
-              "baseValue": 67
+              "price": 60,
+              "walkUp": 66,
+              "baseValue": 67,
+              "durabilityFactor": 0.893936192689626
             },
             {
               "name": "Luther Burden III",
@@ -602,14 +603,15 @@
             {
               "name": "Davante Adams",
               "position": "WR",
-              "price": 13,
-              "walkUp": 14,
-              "baseValue": 13
+              "price": 12,
+              "walkUp": 13,
+              "baseValue": 13,
+              "durabilityFactor": 0.9399732757734608
             }
           ],
-          "targetTotal": 183,
+          "targetTotal": 175,
           "reserve": 8,
-          "total": 191,
+          "total": 183,
           "fits": true
         }
       },
@@ -1728,7 +1730,8 @@
               "position": "WR",
               "price": 64,
               "walkUp": 70,
-              "baseValue": 64
+              "baseValue": 64,
+              "durabilityFactor": 0.9961969369924967
             },
             {
               "name": "Luther Burden III",
@@ -2872,9 +2875,10 @@
             {
               "name": "Christian McCaffrey",
               "position": "RB",
-              "price": 67,
-              "walkUp": 74,
-              "baseValue": 67
+              "price": 60,
+              "walkUp": 66,
+              "baseValue": 67,
+              "durabilityFactor": 0.893936192689626
             },
             {
               "name": "Luther Burden III",
@@ -2893,14 +2897,15 @@
             {
               "name": "Sam LaPorta",
               "position": "TE",
-              "price": 7,
-              "walkUp": 8,
-              "baseValue": 7
+              "price": 6,
+              "walkUp": 7,
+              "baseValue": 7,
+              "durabilityFactor": 0.9253794713936949
             }
           ],
-          "targetTotal": 177,
+          "targetTotal": 169,
           "reserve": 8,
-          "total": 185,
+          "total": 177,
           "fits": true
         }
       },
@@ -4010,16 +4015,18 @@
             {
               "name": "Puka Nacua",
               "position": "WR",
-              "price": 76,
-              "walkUp": 84,
-              "baseValue": 76
+              "price": 66,
+              "walkUp": 73,
+              "baseValue": 76,
+              "durabilityFactor": 0.8697707883646829
             },
             {
               "name": "Amon-Ra St. Brown",
               "position": "WR",
               "price": 64,
               "walkUp": 70,
-              "baseValue": 64
+              "baseValue": 64,
+              "durabilityFactor": 0.9961969369924967
             },
             {
               "name": "Jalen Hurts",
@@ -4038,14 +4045,15 @@
             {
               "name": "Sam LaPorta",
               "position": "TE",
-              "price": 7,
-              "walkUp": 8,
-              "baseValue": 7
+              "price": 6,
+              "walkUp": 7,
+              "baseValue": 7,
+              "durabilityFactor": 0.9253794713936949
             }
           ],
-          "targetTotal": 172,
+          "targetTotal": 161,
           "reserve": 8,
-          "total": 180,
+          "total": 169,
           "fits": true
         }
       },
@@ -5154,16 +5162,18 @@
             {
               "name": "Puka Nacua",
               "position": "WR",
-              "price": 76,
-              "walkUp": 84,
-              "baseValue": 76
+              "price": 66,
+              "walkUp": 73,
+              "baseValue": 76,
+              "durabilityFactor": 0.8697707883646829
             },
             {
               "name": "Amon-Ra St. Brown",
               "position": "WR",
               "price": 64,
               "walkUp": 70,
-              "baseValue": 64
+              "baseValue": 64,
+              "durabilityFactor": 0.9961969369924967
             },
             {
               "name": "Jalen Hurts",
@@ -5187,9 +5197,9 @@
               "baseValue": 6
             }
           ],
-          "targetTotal": 171,
+          "targetTotal": 161,
           "reserve": 8,
-          "total": 179,
+          "total": 169,
           "fits": true
         }
       },
@@ -6307,7 +6317,8 @@
               "position": "WR",
               "price": 64,
               "walkUp": 70,
-              "baseValue": 64
+              "baseValue": 64,
+              "durabilityFactor": 0.9961969369924967
             },
             {
               "name": "Jalen Hurts",
@@ -6326,14 +6337,15 @@
             {
               "name": "Sam LaPorta",
               "position": "TE",
-              "price": 7,
-              "walkUp": 8,
-              "baseValue": 7
+              "price": 6,
+              "walkUp": 7,
+              "baseValue": 7,
+              "durabilityFactor": 0.9253794713936949
             }
           ],
-          "targetTotal": 172,
+          "targetTotal": 171,
           "reserve": 8,
-          "total": 180,
+          "total": 179,
           "fits": true
         }
       },
@@ -7444,16 +7456,18 @@
             {
               "name": "Puka Nacua",
               "position": "WR",
-              "price": 76,
-              "walkUp": 84,
-              "baseValue": 76
+              "price": 66,
+              "walkUp": 73,
+              "baseValue": 76,
+              "durabilityFactor": 0.8697707883646829
             },
             {
               "name": "Brock Bowers",
               "position": "TE",
-              "price": 49,
-              "walkUp": 54,
-              "baseValue": 49
+              "price": 46,
+              "walkUp": 51,
+              "baseValue": 49,
+              "durabilityFactor": 0.9389661394756396
             },
             {
               "name": "Luther Burden III",
@@ -7477,9 +7491,9 @@
               "baseValue": 12
             }
           ],
-          "targetTotal": 164,
+          "targetTotal": 151,
           "reserve": 8,
-          "total": 172,
+          "total": 159,
           "fits": true
         }
       },
@@ -12029,9 +12043,10 @@
             {
               "name": "Puka Nacua",
               "position": "WR",
-              "price": 76,
-              "walkUp": 84,
-              "baseValue": 76
+              "price": 66,
+              "walkUp": 73,
+              "baseValue": 76,
+              "durabilityFactor": 0.8697707883646829
             },
             {
               "name": "Zay Flowers",
@@ -12059,12 +12074,13 @@
               "position": "WR",
               "price": 9,
               "walkUp": 10,
-              "baseValue": 9
+              "baseValue": 9,
+              "durabilityFactor": 0.9882824545174221
             }
           ],
-          "targetTotal": 134,
+          "targetTotal": 124,
           "reserve": 8,
-          "total": 142,
+          "total": 132,
           "fits": true
         }
       },
@@ -13173,9 +13189,10 @@
             {
               "name": "Puka Nacua",
               "position": "WR",
-              "price": 76,
-              "walkUp": 84,
-              "baseValue": 76
+              "price": 66,
+              "walkUp": 73,
+              "baseValue": 76,
+              "durabilityFactor": 0.8697707883646829
             },
             {
               "name": "Zay Flowers",
@@ -13201,14 +13218,15 @@
             {
               "name": "Sam LaPorta",
               "position": "TE",
-              "price": 7,
-              "walkUp": 8,
-              "baseValue": 7
+              "price": 6,
+              "walkUp": 7,
+              "baseValue": 7,
+              "durabilityFactor": 0.9253794713936949
             }
           ],
-          "targetTotal": 132,
+          "targetTotal": 121,
           "reserve": 8,
-          "total": 140,
+          "total": 129,
           "fits": true
         }
       },
@@ -14347,7 +14365,8 @@
               "position": "WR",
               "price": 9,
               "walkUp": 10,
-              "baseValue": 9
+              "baseValue": 9,
+              "durabilityFactor": 0.9882824545174221
             }
           ],
           "targetTotal": 134,
@@ -15492,14 +15511,15 @@
             {
               "name": "Sam LaPorta",
               "position": "TE",
-              "price": 7,
-              "walkUp": 8,
-              "baseValue": 7
+              "price": 6,
+              "walkUp": 7,
+              "baseValue": 7,
+              "durabilityFactor": 0.9253794713936949
             }
           ],
-          "targetTotal": 139,
+          "targetTotal": 138,
           "reserve": 8,
-          "total": 147,
+          "total": 146,
           "fits": true
         }
       },
@@ -16639,14 +16659,15 @@
             {
               "name": "Sam LaPorta",
               "position": "TE",
-              "price": 7,
-              "walkUp": 8,
-              "baseValue": 7
+              "price": 6,
+              "walkUp": 7,
+              "baseValue": 7,
+              "durabilityFactor": 0.9253794713936949
             }
           ],
-          "targetTotal": 126,
+          "targetTotal": 125,
           "reserve": 8,
-          "total": 134,
+          "total": 133,
           "fits": true
         }
       },
@@ -17786,14 +17807,15 @@
             {
               "name": "Sam LaPorta",
               "position": "TE",
-              "price": 7,
-              "walkUp": 8,
-              "baseValue": 7
+              "price": 6,
+              "walkUp": 7,
+              "baseValue": 7,
+              "durabilityFactor": 0.9253794713936949
             }
           ],
-          "targetTotal": 122,
+          "targetTotal": 121,
           "reserve": 8,
-          "total": 130,
+          "total": 129,
           "fits": true
         }
       },
@@ -18905,16 +18927,18 @@
             {
               "name": "Justin Jefferson",
               "position": "WR",
-              "price": 57,
-              "walkUp": 63,
-              "baseValue": 57
+              "price": 53,
+              "walkUp": 58,
+              "baseValue": 57,
+              "durabilityFactor": 0.9356562853325111
             },
             {
               "name": "Brock Bowers",
               "position": "TE",
-              "price": 49,
-              "walkUp": 54,
-              "baseValue": 49
+              "price": 46,
+              "walkUp": 51,
+              "baseValue": 49,
+              "durabilityFactor": 0.9389661394756396
             },
             {
               "name": "Jalen Hurts",
@@ -18938,9 +18962,9 @@
               "baseValue": 6
             }
           ],
-          "targetTotal": 137,
+          "targetTotal": 130,
           "reserve": 8,
-          "total": 145,
+          "total": 138,
           "fits": true
         }
       },
@@ -20072,9 +20096,10 @@
             {
               "name": "Sam LaPorta",
               "position": "TE",
-              "price": 7,
-              "walkUp": 8,
-              "baseValue": 7
+              "price": 6,
+              "walkUp": 7,
+              "baseValue": 7,
+              "durabilityFactor": 0.9253794713936949
             },
             {
               "name": "Carnell Tate",
@@ -20084,9 +20109,9 @@
               "baseValue": 6
             }
           ],
-          "targetTotal": 116,
+          "targetTotal": 115,
           "reserve": 8,
-          "total": 124,
+          "total": 123,
           "fits": true
         }
       },
@@ -21198,9 +21223,10 @@
             {
               "name": "Puka Nacua",
               "position": "WR",
-              "price": 76,
-              "walkUp": 84,
-              "baseValue": 76
+              "price": 66,
+              "walkUp": 73,
+              "baseValue": 76,
+              "durabilityFactor": 0.8697707883646829
             },
             {
               "name": "Jalen Hurts",
@@ -21219,9 +21245,10 @@
             {
               "name": "Sam LaPorta",
               "position": "TE",
-              "price": 7,
-              "walkUp": 8,
-              "baseValue": 7
+              "price": 6,
+              "walkUp": 7,
+              "baseValue": 7,
+              "durabilityFactor": 0.9253794713936949
             },
             {
               "name": "Carnell Tate",
@@ -21231,9 +21258,9 @@
               "baseValue": 6
             }
           ],
-          "targetTotal": 114,
+          "targetTotal": 103,
           "reserve": 8,
-          "total": 122,
+          "total": 111,
           "fits": true
         }
       },
@@ -22342,9 +22369,10 @@
             {
               "name": "Puka Nacua",
               "position": "WR",
-              "price": 76,
-              "walkUp": 84,
-              "baseValue": 76
+              "price": 66,
+              "walkUp": 73,
+              "baseValue": 76,
+              "durabilityFactor": 0.8697707883646829
             },
             {
               "name": "Jalen Hurts",
@@ -22375,9 +22403,9 @@
               "baseValue": 6
             }
           ],
-          "targetTotal": 113,
+          "targetTotal": 103,
           "reserve": 8,
-          "total": 121,
+          "total": 111,
           "fits": true
         }
       },
@@ -23486,9 +23514,10 @@
             {
               "name": "Christian McCaffrey",
               "position": "RB",
-              "price": 67,
-              "walkUp": 74,
-              "baseValue": 67
+              "price": 60,
+              "walkUp": 66,
+              "baseValue": 67,
+              "durabilityFactor": 0.893936192689626
             },
             {
               "name": "Josh Allen",
@@ -23514,14 +23543,15 @@
             {
               "name": "Sam LaPorta",
               "position": "TE",
-              "price": 7,
-              "walkUp": 8,
-              "baseValue": 7
+              "price": 6,
+              "walkUp": 7,
+              "baseValue": 7,
+              "durabilityFactor": 0.9253794713936949
             }
           ],
-          "targetTotal": 136,
+          "targetTotal": 128,
           "reserve": 8,
-          "total": 144,
+          "total": 136,
           "fits": true
         }
       },
@@ -24653,9 +24683,10 @@
             {
               "name": "Sam LaPorta",
               "position": "TE",
-              "price": 7,
-              "walkUp": 8,
-              "baseValue": 7
+              "price": 6,
+              "walkUp": 7,
+              "baseValue": 7,
+              "durabilityFactor": 0.9253794713936949
             },
             {
               "name": "Carnell Tate",
@@ -24665,9 +24696,9 @@
               "baseValue": 6
             }
           ],
-          "targetTotal": 114,
+          "targetTotal": 113,
           "reserve": 8,
-          "total": 122,
+          "total": 121,
           "fits": true
         }
       },
@@ -25779,9 +25810,10 @@
             {
               "name": "Puka Nacua",
               "position": "WR",
-              "price": 76,
-              "walkUp": 84,
-              "baseValue": 76
+              "price": 66,
+              "walkUp": 73,
+              "baseValue": 76,
+              "durabilityFactor": 0.8697707883646829
             },
             {
               "name": "Jalen Hurts",
@@ -25812,9 +25844,9 @@
               "baseValue": 6
             }
           ],
-          "targetTotal": 113,
+          "targetTotal": 103,
           "reserve": 8,
-          "total": 121,
+          "total": 111,
           "fits": true
         }
       },
@@ -26923,9 +26955,10 @@
             {
               "name": "Brock Bowers",
               "position": "TE",
-              "price": 49,
-              "walkUp": 54,
-              "baseValue": 49
+              "price": 46,
+              "walkUp": 51,
+              "baseValue": 49,
+              "durabilityFactor": 0.9389661394756396
             },
             {
               "name": "Zay Flowers",
@@ -26953,12 +26986,13 @@
               "position": "WR",
               "price": 9,
               "walkUp": 10,
-              "baseValue": 9
+              "baseValue": 9,
+              "durabilityFactor": 0.9882824545174221
             }
           ],
-          "targetTotal": 107,
+          "targetTotal": 104,
           "reserve": 8,
-          "total": 115,
+          "total": 112,
           "fits": true
         }
       },
@@ -28068,9 +28102,10 @@
             {
               "name": "Saquon Barkley",
               "position": "RB",
-              "price": 42,
-              "walkUp": 46,
-              "baseValue": 42
+              "price": 39,
+              "walkUp": 43,
+              "baseValue": 42,
+              "durabilityFactor": 0.9403126980773294
             },
             {
               "name": "Josh Allen",
@@ -28096,14 +28131,15 @@
             {
               "name": "Sam LaPorta",
               "position": "TE",
-              "price": 7,
-              "walkUp": 8,
-              "baseValue": 7
+              "price": 6,
+              "walkUp": 7,
+              "baseValue": 7,
+              "durabilityFactor": 0.9253794713936949
             }
           ],
-          "targetTotal": 111,
+          "targetTotal": 107,
           "reserve": 8,
-          "total": 119,
+          "total": 115,
           "fits": true
         }
       },
@@ -29243,14 +29279,15 @@
             {
               "name": "Sam LaPorta",
               "position": "TE",
-              "price": 7,
-              "walkUp": 8,
-              "baseValue": 7
+              "price": 6,
+              "walkUp": 7,
+              "baseValue": 7,
+              "durabilityFactor": 0.9253794713936949
             }
           ],
-          "targetTotal": 62,
+          "targetTotal": 61,
           "reserve": 8,
-          "total": 70,
+          "total": 69,
           "fits": true
         }
       },
@@ -30376,9 +30413,10 @@
             {
               "name": "Christian McCaffrey",
               "position": "RB",
-              "price": 67,
-              "walkUp": 74,
-              "baseValue": 67
+              "price": 60,
+              "walkUp": 66,
+              "baseValue": 67,
+              "durabilityFactor": 0.893936192689626
             },
             {
               "name": "Luther Burden III",
@@ -30397,14 +30435,15 @@
             {
               "name": "Davante Adams",
               "position": "WR",
-              "price": 13,
-              "walkUp": 14,
-              "baseValue": 13
+              "price": 12,
+              "walkUp": 13,
+              "baseValue": 13,
+              "durabilityFactor": 0.9399732757734608
             }
           ],
-          "targetTotal": 183,
+          "targetTotal": 175,
           "reserve": 8,
-          "total": 191,
+          "total": 183,
           "fits": true
         }
       },
@@ -31550,7 +31589,8 @@
               "position": "WR",
               "price": 9,
               "walkUp": 10,
-              "baseValue": 9
+              "baseValue": 9,
+              "durabilityFactor": 0.9882824545174221
             }
           ],
           "targetTotal": 182,
@@ -32678,9 +32718,10 @@
             {
               "name": "Christian McCaffrey",
               "position": "RB",
-              "price": 67,
-              "walkUp": 74,
-              "baseValue": 67
+              "price": 60,
+              "walkUp": 66,
+              "baseValue": 67,
+              "durabilityFactor": 0.893936192689626
             },
             {
               "name": "Emeka Egbuka",
@@ -32704,9 +32745,9 @@
               "baseValue": 13
             }
           ],
-          "targetTotal": 180,
+          "targetTotal": 173,
           "reserve": 8,
-          "total": 188,
+          "total": 181,
           "fits": true
         }
       },
@@ -33823,9 +33864,10 @@
             {
               "name": "Puka Nacua",
               "position": "WR",
-              "price": 76,
-              "walkUp": 84,
-              "baseValue": 76
+              "price": 66,
+              "walkUp": 73,
+              "baseValue": 76,
+              "durabilityFactor": 0.8697707883646829
             },
             {
               "name": "Jaxon Smith-Njigba",
@@ -33851,14 +33893,15 @@
             {
               "name": "Sam LaPorta",
               "position": "TE",
-              "price": 7,
-              "walkUp": 8,
-              "baseValue": 7
+              "price": 6,
+              "walkUp": 7,
+              "baseValue": 7,
+              "durabilityFactor": 0.9253794713936949
             }
           ],
-          "targetTotal": 180,
+          "targetTotal": 169,
           "reserve": 8,
-          "total": 188,
+          "total": 177,
           "fits": true
         }
       },
@@ -34973,16 +35016,18 @@
             {
               "name": "Puka Nacua",
               "position": "WR",
-              "price": 76,
-              "walkUp": 84,
-              "baseValue": 76
+              "price": 66,
+              "walkUp": 73,
+              "baseValue": 76,
+              "durabilityFactor": 0.8697707883646829
             },
             {
               "name": "Amon-Ra St. Brown",
               "position": "WR",
               "price": 64,
               "walkUp": 70,
-              "baseValue": 64
+              "baseValue": 64,
+              "durabilityFactor": 0.9961969369924967
             },
             {
               "name": "Jalen Hurts",
@@ -35001,14 +35046,15 @@
             {
               "name": "Sam LaPorta",
               "position": "TE",
-              "price": 7,
-              "walkUp": 8,
-              "baseValue": 7
+              "price": 6,
+              "walkUp": 7,
+              "baseValue": 7,
+              "durabilityFactor": 0.9253794713936949
             }
           ],
-          "targetTotal": 172,
+          "targetTotal": 161,
           "reserve": 8,
-          "total": 180,
+          "total": 169,
           "fits": true
         }
       },
@@ -36123,16 +36169,18 @@
             {
               "name": "Ja'Marr Chase",
               "position": "WR",
-              "price": 79,
-              "walkUp": 87,
-              "baseValue": 79
+              "price": 75,
+              "walkUp": 83,
+              "baseValue": 79,
+              "durabilityFactor": 0.9488128276287389
             },
             {
               "name": "Puka Nacua",
               "position": "WR",
-              "price": 76,
-              "walkUp": 84,
-              "baseValue": 76
+              "price": 66,
+              "walkUp": 73,
+              "baseValue": 76,
+              "durabilityFactor": 0.8697707883646829
             },
             {
               "name": "Jalen Hurts",
@@ -36156,9 +36204,9 @@
               "baseValue": 6
             }
           ],
-          "targetTotal": 186,
+          "targetTotal": 172,
           "reserve": 8,
-          "total": 194,
+          "total": 180,
           "fits": true
         }
       },
@@ -37280,9 +37328,10 @@
             {
               "name": "Puka Nacua",
               "position": "WR",
-              "price": 76,
-              "walkUp": 84,
-              "baseValue": 76
+              "price": 66,
+              "walkUp": 73,
+              "baseValue": 76,
+              "durabilityFactor": 0.8697707883646829
             },
             {
               "name": "Jalen Hurts",
@@ -37306,9 +37355,9 @@
               "baseValue": 6
             }
           ],
-          "targetTotal": 183,
+          "targetTotal": 173,
           "reserve": 8,
-          "total": 191,
+          "total": 181,
           "fits": true
         }
       },
@@ -38454,7 +38503,8 @@
               "position": "WR",
               "price": 9,
               "walkUp": 10,
-              "baseValue": 9
+              "baseValue": 9,
+              "durabilityFactor": 0.9882824545174221
             }
           ],
           "targetTotal": 182,
@@ -39585,7 +39635,8 @@
               "position": "WR",
               "price": 64,
               "walkUp": 70,
-              "baseValue": 64
+              "baseValue": 64,
+              "durabilityFactor": 0.9961969369924967
             },
             {
               "name": "Luther Burden III",
@@ -40729,23 +40780,26 @@
             {
               "name": "Puka Nacua",
               "position": "WR",
-              "price": 76,
-              "walkUp": 84,
-              "baseValue": 76
+              "price": 66,
+              "walkUp": 73,
+              "baseValue": 76,
+              "durabilityFactor": 0.8697707883646829
             },
             {
               "name": "Amon-Ra St. Brown",
               "position": "WR",
               "price": 64,
               "walkUp": 70,
-              "baseValue": 64
+              "baseValue": 64,
+              "durabilityFactor": 0.9961969369924967
             },
             {
               "name": "Brock Bowers",
               "position": "TE",
-              "price": 49,
-              "walkUp": 54,
-              "baseValue": 49
+              "price": 46,
+              "walkUp": 51,
+              "baseValue": 49,
+              "durabilityFactor": 0.9389661394756396
             },
             {
               "name": "Philadelphia Eagles",
@@ -40762,9 +40816,9 @@
               "baseValue": 1
             }
           ],
-          "targetTotal": 192,
+          "targetTotal": 179,
           "reserve": 8,
-          "total": 200,
+          "total": 187,
           "fits": true
         }
       },
@@ -41889,14 +41943,16 @@
               "position": "WR",
               "price": 64,
               "walkUp": 70,
-              "baseValue": 64
+              "baseValue": 64,
+              "durabilityFactor": 0.9961969369924967
             },
             {
               "name": "Brock Bowers",
               "position": "TE",
-              "price": 49,
-              "walkUp": 54,
-              "baseValue": 49
+              "price": 46,
+              "walkUp": 51,
+              "baseValue": 49,
+              "durabilityFactor": 0.9389661394756396
             },
             {
               "name": "Houston Texans",
@@ -41913,9 +41969,9 @@
               "baseValue": 1
             }
           ],
-          "targetTotal": 192,
+          "targetTotal": 189,
           "reserve": 8,
-          "total": 200,
+          "total": 197,
           "fits": true
         }
       },
@@ -43031,9 +43087,10 @@
             {
               "name": "Puka Nacua",
               "position": "WR",
-              "price": 76,
-              "walkUp": 84,
-              "baseValue": 76
+              "price": 66,
+              "walkUp": 73,
+              "baseValue": 76,
+              "durabilityFactor": 0.8697707883646829
             },
             {
               "name": "Jaxon Smith-Njigba",
@@ -43064,9 +43121,9 @@
               "baseValue": 1
             }
           ],
-          "targetTotal": 190,
+          "targetTotal": 180,
           "reserve": 8,
-          "total": 198,
+          "total": 188,
           "fits": true
         }
       },
@@ -44189,9 +44246,10 @@
             {
               "name": "Puka Nacua",
               "position": "WR",
-              "price": 76,
-              "walkUp": 84,
-              "baseValue": 76
+              "price": 66,
+              "walkUp": 73,
+              "baseValue": 76,
+              "durabilityFactor": 0.8697707883646829
             },
             {
               "name": "Josh Allen",
@@ -44212,12 +44270,13 @@
               "position": "TE",
               "price": 1,
               "walkUp": 1,
-              "baseValue": 1
+              "baseValue": 1,
+              "durabilityFactor": 0.8777199872624986
             }
           ],
-          "targetTotal": 192,
+          "targetTotal": 182,
           "reserve": 8,
-          "total": 200,
+          "total": 190,
           "fits": true
         }
       },
@@ -45341,23 +45400,26 @@
             {
               "name": "Puka Nacua",
               "position": "WR",
-              "price": 76,
-              "walkUp": 84,
-              "baseValue": 76
+              "price": 66,
+              "walkUp": 73,
+              "baseValue": 76,
+              "durabilityFactor": 0.8697707883646829
             },
             {
               "name": "Lamar Jackson",
               "position": "QB",
               "price": 32,
               "walkUp": 35,
-              "baseValue": 32
+              "baseValue": 32,
+              "durabilityFactor": 0.9893952120957581
             },
             {
               "name": "George Kittle",
               "position": "TE",
-              "price": 4,
-              "walkUp": 4,
-              "baseValue": 4
+              "price": 3,
+              "walkUp": 3,
+              "baseValue": 4,
+              "durabilityFactor": 0.8619042564483601
             },
             {
               "name": "Denver Broncos",
@@ -45367,9 +45429,9 @@
               "baseValue": 3
             }
           ],
-          "targetTotal": 191,
+          "targetTotal": 180,
           "reserve": 8,
-          "total": 199,
+          "total": 188,
           "fits": true
         }
       },
@@ -46493,16 +46555,18 @@
             {
               "name": "Puka Nacua",
               "position": "WR",
-              "price": 76,
-              "walkUp": 84,
-              "baseValue": 76
+              "price": 66,
+              "walkUp": 73,
+              "baseValue": 76,
+              "durabilityFactor": 0.8697707883646829
             },
             {
               "name": "Drake Maye",
               "position": "QB",
-              "price": 28,
-              "walkUp": 31,
-              "baseValue": 28
+              "price": 25,
+              "walkUp": 28,
+              "baseValue": 28,
+              "durabilityFactor": 0.8884922301553968
             },
             {
               "name": "Houston Texans",
@@ -46514,14 +46578,15 @@
             {
               "name": "George Kittle",
               "position": "TE",
-              "price": 4,
-              "walkUp": 4,
-              "baseValue": 4
+              "price": 3,
+              "walkUp": 3,
+              "baseValue": 4,
+              "durabilityFactor": 0.8619042564483601
             }
           ],
-          "targetTotal": 190,
+          "targetTotal": 176,
           "reserve": 8,
-          "total": 198,
+          "total": 184,
           "fits": true
         }
       },
@@ -47638,16 +47703,18 @@
             {
               "name": "Puka Nacua",
               "position": "WR",
-              "price": 76,
-              "walkUp": 84,
-              "baseValue": 76
+              "price": 66,
+              "walkUp": 73,
+              "baseValue": 76,
+              "durabilityFactor": 0.8697707883646829
             },
             {
               "name": "Amon-Ra St. Brown",
               "position": "WR",
               "price": 64,
               "walkUp": 70,
-              "baseValue": 64
+              "baseValue": 64,
+              "durabilityFactor": 0.9961969369924967
             },
             {
               "name": "Trey McBride",
@@ -47671,9 +47738,9 @@
               "baseValue": 3
             }
           ],
-          "targetTotal": 191,
+          "targetTotal": 181,
           "reserve": 8,
-          "total": 199,
+          "total": 189,
           "fits": true
         }
       },
@@ -48789,16 +48856,18 @@
             {
               "name": "Ja'Marr Chase",
               "position": "WR",
-              "price": 79,
-              "walkUp": 87,
-              "baseValue": 79
+              "price": 75,
+              "walkUp": 83,
+              "baseValue": 79,
+              "durabilityFactor": 0.9488128276287389
             },
             {
               "name": "Puka Nacua",
               "position": "WR",
-              "price": 76,
-              "walkUp": 84,
-              "baseValue": 76
+              "price": 66,
+              "walkUp": 73,
+              "baseValue": 76,
+              "durabilityFactor": 0.8697707883646829
             },
             {
               "name": "Trey McBride",
@@ -48822,9 +48891,9 @@
               "baseValue": 1
             }
           ],
-          "targetTotal": 192,
+          "targetTotal": 178,
           "reserve": 8,
-          "total": 200,
+          "total": 186,
           "fits": true
         }
       },
@@ -49949,7 +50018,8 @@
               "position": "WR",
               "price": 64,
               "walkUp": 70,
-              "baseValue": 64
+              "baseValue": 64,
+              "durabilityFactor": 0.9961969369924967
             },
             {
               "name": "Trey McBride",

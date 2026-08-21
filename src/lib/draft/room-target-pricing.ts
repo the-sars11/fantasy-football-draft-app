@@ -14,6 +14,7 @@ import type { RosterSlots as DbRosterSlots, StrategyPlayerTarget } from '@/lib/s
 import type { RosterSlots as PlayersRosterSlots, Position } from '@/lib/players/types'
 import type { ScoredPlayer } from '@/lib/research/strategy/scoring'
 import { assignTargetPrices } from '@/lib/research/strategy/target-pricing'
+import { durabilityPriceFactor } from '@/lib/draft/sim-grade'
 
 interface RosterPick {
   player_name: string
@@ -133,7 +134,11 @@ export function computeOpenSlotTargets({
     targetNames: openTargetNames,
     budgetAllocation: activeStrategy.budget_allocation ?? undefined,
     maxBidPercentage: activeStrategy.max_bid_percentage ?? undefined,
-    players: available.map(sp => sp.player),
+    players: available.map(sp => ({
+      ...sp.player,
+      // Injury haircut off the measured risk model (joins on Sleeper id).
+      durabilityFactor: durabilityPriceFactor(sp.player.sleeperId, sp.player.position),
+    })),
     rosterSlots: openSlots,
     budget: budgetRemaining,
   })
