@@ -52,6 +52,7 @@ import {
   CALIBRATION_ERA,
   CALIBRATION_DRAFTS_USED,
 } from '@/lib/draft/league-calibration'
+import type { ResearchDataset, DatasetMeta } from '@/lib/research/dataset-types'
 
 // ─── .env.local loader (tsx does not auto-load it) ───────────────────────────
 
@@ -304,7 +305,7 @@ async function main(): Promise<void> {
   // ── Write artifacts ─────────────────────────────────────────────────────────
   mkdirSync(OUT_DIR, { recursive: true })
 
-  const dataset = {
+  const dataset: ResearchDataset = {
     meta: {
       generatedAt: new Date().toISOString(),
       league: NASTIES_LEAGUE.name,
@@ -358,13 +359,13 @@ function buildEnrichedType() {
 type StudComboGraded = StudCombo & { sim: SimSummary }
 
 function buildReport(
-  dataset: { meta: Record<string, unknown>; leagueIntel: ReturnType<typeof buildIntelType> },
+  dataset: { meta: DatasetMeta; leagueIntel: ReturnType<typeof buildIntelType> },
   players: Enriched[],
   strategies: Array<{ proposal: StrategyProposal; sim: SimSummary; simHealthy: SimSummary }>,
   studCombos: StudComboGraded[],
 ): string {
   const L: string[] = []
-  const meta = dataset.meta as Record<string, string | number | boolean>
+  const meta = dataset.meta
 
   L.push('# The Nasties - Draft Research Dataset')
   L.push('')

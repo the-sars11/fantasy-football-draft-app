@@ -25,6 +25,15 @@ The prior plan (S1–S8 / P2 DR / P3 VAL) marked the app "done" while it (a) pri
 
 ## Next open item
 
+### ▶ ACTIVE FOCUS 2026-08-21 -- W-track: wire the headless engine INTO the app UI
+
+Joe-approved 2026-08-21: the HEADLESS ENGINE track (below) deliberately made `dataset.json` for in-chat interrogation and skipped the UI. Joe now wants it in the app too, plus a draft-day workflow: decide (in-app OR via Claude) -> LOCK -> draft dynamically on the phone off the locked plan. New `W-track` section in `BUILD_PLAN.md` (W0-W5). Reuses the shipped decisions layer (`user_tags`/`strategies` from R7a/R7b/R9/R11b), adds NO AI to the deterministic live Read (DEC-2 preserved), reuses `research_runs` kind-discrimination (no migration).
+
+- **W0 [Opus] DONE 2026-08-21 -- dataset contract + storage seam.** `src/lib/research/dataset-types.ts` (`ResearchDataset`, `RESEARCH_DATASET_KIND='dataset'`, fields reference the engine's own return types); `research-run.ts` `dataset` const typed to it. `scripts/research-publish.ts` + `research:publish` (reads `dataset.json`, INSERT `research_runs` kind:'dataset', explicit `user_id`, prints size, newest-wins). `GET /api/research-dataset` (getClient+requireUser+kind-filter copied from `api/sim-runs/[id]/route.ts`; `?meta=1` freshness envelope). `src/hooks/use-research-dataset.ts` (full+meta, empty state); retired dead `use-research.ts` stub. Proof: published row `7f63f239` (1000 players/26 strat/18 combos/1.27 MB); `GET` round-trip 1,333,508 bytes, McCaffrey $60 (room $67, 0.894x) intact through the DB. Gate: type-check 0, test:run 591/591, eslint 0 on 4 new files. See CHANGELOG 2026-08-21.
+- **NEXT = W1 [Sonnet]:** Strategy Leaderboard screen (`prep/leaderboard`), SHIELD mockup + Joe sign-off BEFORE build. Then W2 (League Intel + player upgrades), W3 (Decisions+Lock + Claude write seam), W4 (Draft Plan screen + live-room consumption), W5 (rehearsal + deploy, folds into R15).
+
+---
+
 ### ▶ ACTIVE FOCUS 2026-08-20 -- room-price model, now wired into the live app
 
 Joe's draft-prep thread (headless engine + in-app parity). Done + committed this stretch:

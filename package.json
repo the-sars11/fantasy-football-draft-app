@@ -16,6 +16,7 @@
     "data:pull": "tsx scripts/seed-players-sleeper.ts && tsx scripts/populate-fantasypros.ts && tsx scripts/populate-auction-values.ts",
     "data:calibrate": "tsx scripts/derive-league-calibration.ts",
     "research:run": "tsx scripts/research-run.ts",
+    "research:publish": "tsx scripts/research-publish.ts",
     "research:verify": "tsx scripts/research-verify.ts",
     "risk:derive": "node scripts/derive-risk-model.mjs",
     "risk:derive:fresh": "node scripts/derive-risk-model.mjs --fresh"

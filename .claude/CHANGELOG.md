@@ -2,6 +2,26 @@
 
 ---
 
+## 2026-08-21 / W0 -- dataset contract + storage seam (the headless engine can now reach the app)
+
+**Class:** shared + pipeline (Architecture + QA + Security lenses). First W-track session (Joe-approved 2026-08-21): the HEADLESS ENGINE track produced `research-output/dataset.json` for in-chat interrogation but the app never read it -- the app can only read Supabase, not the filesystem, and on Vercel on-disk reads are out entirely. W0 builds the seam so the rich 400-run snapshot (every strategy sim, stud combo, enriched player, league intel) becomes readable in the app with zero recompute.
+
+**Design.** One shared contract, three consumers, no drift:
+- **`src/lib/research/dataset-types.ts`** -- `ResearchDataset` (+ `DatasetMeta`/`DatasetStrategy`/`DatasetStudCombo`/`DatasetLeagueIntel`/`EnrichedPlayer`/`ResearchDatasetRun`) with every field referencing the engine's OWN return types (`StrategyProposal`, `PersistedSimResults`, `PlayerTag`, `PlayerRecommendation`, `CalibratedValueRange`, `PositionInflation`, `OwnerLean`). `RESEARCH_DATASET_KIND='dataset'` mirrors `SIM_RUN_KIND='sim'` so both live in `research_runs` discriminated by `strategy_settings->>kind` -- **no migration**.
+- **`scripts/research-run.ts`** -- typed its `dataset` const as `ResearchDataset`, binding the writer to the contract (the file and the type can no longer diverge). Only type annotations changed; output byte-identical.
+- **`scripts/research-publish.ts` + `research:publish` npm script** -- reads `dataset.json`, validates the spine (refuses an empty/malformed snapshot), resolves the active league scoped to `DEV_USER_ID`, INSERTs one `research_runs` row kind:'dataset' with an EXPLICIT `user_id` (service-role, RLS bypassed like `research-run.ts`), prints payload size. Newest-wins, non-destructive (re-publish supersedes via the reader's `order desc limit 1`, no delete).
+- **`GET /api/research-dataset`** -- copies the `getClient()` (service in DEV_MODE, cookie-scoped otherwise) + `requireUser()` + `strategy_settings->>kind` filter pattern from `api/sim-runs/[id]/route.ts` verbatim. Returns the newest dataset row for a league (or `run:null` = empty state, not an error). `?meta=1` returns a cheap freshness envelope (id/generatedAt/playerCount/strategyCount/bytes) without pulling the megabyte body.
+- **`src/hooks/use-research-dataset.ts`** -- client hook, full + meta modes, `isEmpty` state; retired the dead `use-research.ts` TODO stub (confirmed zero imports).
+
+**Proof (pasted).**
+- `npm run research:publish` -> `dataset ok: 1000 players, 26 strategies, 18 combos ... (1.27 MB)`; attached to league "Nasties 2026" owner `1fe61f29-...`; `published dataset row 7f63f239-8b17-44db-b255-343d28311551`.
+- `GET /api/research-dataset?leagueId=...&meta=1` -> `{playerCount:1000, strategyCount:26, bytes:1333301}`.
+- `GET /api/research-dataset?leagueId=...` (full, dev server :3003, DEV_MODE) -> 1,333,508 bytes; through the DB round-trip McCaffrey's durability-adjusted target price is intact: **`{price:60, room:67, durabilityFactor:0.894}`** in "Robust RB (RB-RB), heavy anchors"; 1000 players / 26 strategies / 18 studCombos / leagueIntel positions QB,RB,TE,WR,DEF.
+
+**Gate:** `npm run type-check` 0 errors. `npm run test:run` **591/591**. `npm run lint` 0 findings on the 4 new files (3 pre-existing warnings on `research-run.ts` unchanged; 42 pre-existing errors elsewhere untouched -- not in scope). No em/en-dashes. $0 (no Claude call; own-infra Supabase read/write only).
+
+---
+
 ## 2026-08-20 / Durability-adjusted target price -- the injury signal now moves the pay-up number, not just the record
 
 **Class:** pipeline (Architecture + QA lenses). Closes the OPEN GAP from the durability-join fix earlier today. Joe: "yes, build the durability-adjusted target price." Before this, the sim penalized a fragile roster's projected RECORD (McCaffrey's real 0.8462 games-played rate now hits the sim), but `target-pricing.ts` still anchored the pay-up number purely on room price -- so the tool said "don't build around McCaffrey" out of one side and "$67 is a fair price" out of the other. Two unreconciled signals. This wires the measured durability into the price.
