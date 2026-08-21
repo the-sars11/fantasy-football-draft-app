@@ -2,6 +2,28 @@
 
 ---
 
+## 2026-08-21 / W2 -- League Intel panel + per-player dataset enrichment
+
+**Class:** output + shared (Design + QA lenses). Third W-track session. Same orchestration shape as W1: Opus orchestrator dispatched a Sonnet worker to build, then an independent adversarial Sonnet validator; the orchestrator fixed the finding and committed. Reads the W0 dataset snapshot -- zero recompute, $0.
+
+**League Intel.** New `src/components/prep/league-intel-panel.tsx` -- a collapsible `Nameplate`-based `LeagueIntelPanel` (prop `intel: DatasetLeagueIntel`) that turns the dataset's league-history block into a scannable panel. Header states the sample ("From 4 drafts, 2022 to 2025") from `intel.era` + `intel.draftsUsed`. Positional inflation rows show each position's HOT/COOL/NEUTRAL tag and multiplier (percent = `Math.round((mult-1)*100)`), toned HOT->`--ffi-warning`, COOL->`--ffi-blue-bright`, NEUTRAL->`--ffi-ink-3`. Owner-leans list is filtered to managers with a real top lean, sorted by absolute dollars-vs-room, and scrolls inside a fixed-height box. Mounted dataset-gated on both `prep/leaderboard` (before the ranked list) and `prep/board` (below the board header).
+
+**Per-player enrichment.** New pure `src/lib/research/dataset-enrichment.ts` (`buildEnrichmentMap` keyed by `player.id`, `pickEnrichment`; 7 unit tests). When a dataset is present, each `/prep/players` card (FFIPlayerIntelCard OUTLOOK line) and `/prep/board` expanded-stats row merges the dataset's per-player read -- `landProbability`, `expectedRoomPrice`, `durabilityPriceFactor`, `valueBand` -- rendered additively as `land N% · room $X · 0.NNx · band $lo-$hi`. Fully additive: no dataset -> the existing client-computed view is unchanged.
+
+**Contract + writer.** `durabilityPriceFactor: number` added to the `EnrichedPlayer` interface in `dataset-types.ts` and written per-player in `scripts/research-run.ts` via an aliased import of `durabilityPriceFactor` from `sim-grade`. Dataset republished (1000 players, real factors 0.75 -> 1.0). Two `leaderboard.test.ts` fixtures updated for the now-required field.
+
+**One defect the validator caught, fixed before commit:**
+- **SHIELD token-lock violation.** The worker shipped raw hex (`text-[#5FA8E0]/50`, `text-[#5e708a]`) in the new OUTLOOK line of `ffi-player-intel-card.tsx` -- inconsistent with `draft-board-table.tsx`, which used tokens correctly. Fix: converted to inline-style `var(--ffi-blue)` (opacity 0.5) and `var(--ffi-ink-3)`.
+
+**Proof (pasted).**
+- Gate: `type-check` 0 errors; `test:run` **607/607** (7 new enrichment tests + 2 leaderboard fixtures updated); `eslint` exit 0 on the fixed file; `build` `Compiled successfully in 4.8s`.
+- Live DOM (dev :3003, DEV_MODE, league `0d2914f1`, dataset row `8112f3e6`): League Intel panel renders on leaderboard + board; player intel card shows the merged `land / room / durability / band` line.
+- Republished dataset verified: `durabilityPriceFactor` present on all 1000 players, values spanning 0.75 -> 1.0.
+- Screenshots NOT captured -- the computer/screenshot tool times out in this session ("Browser pane not displayed"); all live proof is via text DOM tools. Joe can view the panels on his phone via the running dev server.
+- Commit `1cfea82`, pushed to `master`.
+
+---
+
 ## 2026-08-21 / W1 -- Strategy Leaderboard screen (the engine's rankings, in the app)
 
 **Class:** output (Design + QA lenses). Second W-track session. Orchestrated: an Opus orchestrator dispatched a Sonnet worker to build, then an independent adversarial Sonnet validator; the orchestrator fixed the validator's findings and committed. Reads the W0 dataset snapshot -- zero recompute, $0.
