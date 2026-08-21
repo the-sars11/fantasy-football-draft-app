@@ -551,7 +551,7 @@ interface BudgetSplit {
  * within each pattern means the solver takes the top-ceiling players that fit the
  * required positions and the budget split.
  */
-const SWEEP_PATTERNS: AnchorPattern[] = [
+export const SWEEP_PATTERNS: AnchorPattern[] = [
   { key: 'rb-rb', label: 'Robust RB (RB-RB)', studPositions: ['RB', 'RB'] },
   { key: 'wr-wr', label: 'WR-WR', studPositions: ['WR', 'WR'] },
   { key: 'rb-wr', label: 'RB-WR', studPositions: ['RB', 'WR'] },
@@ -573,6 +573,29 @@ const SWEEP_SPLITS: BudgetSplit[] = [
 // Field-phase per-pick cap: once the pattern's studs are bought, the rest of the
 // roster fills cheap so the budget split holds and the shape stays true to type.
 const SWEEP_FIELD_CAP_FRACTION = 0.08
+
+/**
+ * Field-phase pick: once the paid anchors are bought, complete the roster cheaply.
+ * Cap each remaining pick at ~8% of budget and spread it onto the least-anchored
+ * open starter slot (bench last), so the anchor spend stays the shape's signature.
+ * Shared by the pattern sweep and the forced stud-combo fill.
+ */
+function selectField(
+  affordable: PricedBoardPlayer[],
+  chosen: PricedBoardPlayer[],
+  budget: number,
+  slots: AnchorSlots,
+): PricedBoardPlayer | null {
+  const fieldCap = Math.max(1, budget * SWEEP_FIELD_CAP_FRACTION)
+  const starters = affordable.filter((p) => canClaimStarter(p.position, slots))
+  const eligible = starters.length > 0 ? starters : affordable
+  const underCap = eligible.filter((p) => p.expectedCost <= fieldCap)
+  const pool = underCap.length > 0 ? underCap : eligible
+  const anchoredCount = (pos: GenPosition) => chosen.filter((c) => c.position === pos).length
+  const minCount = Math.min(...pool.map((p) => anchoredCount(p.position)))
+  const leastAnchored = pool.filter((p) => anchoredCount(p.position) === minCount)
+  return bestBy(leastAnchored, (p) => p.ceiling)
+}
 
 /**
  * Build a policy that buys this pattern's studs best-available (highest ceiling at
@@ -602,15 +625,7 @@ function patternPolicy(pattern: AnchorPattern, studFraction: number): Policy {
         return bestBy(pool, (p) => p.ceiling)
       }
       // FIELD PHASE: studs bought. Fill starters first, then bench, cheap + spread.
-      const fieldCap = Math.max(1, ctx.budget * SWEEP_FIELD_CAP_FRACTION)
-      const starters = aff.filter((p) => canClaimStarter(p.position, ctx.slots))
-      const eligible = starters.length > 0 ? starters : aff
-      const underCap = eligible.filter((p) => p.expectedCost <= fieldCap)
-      const pool = underCap.length > 0 ? underCap : eligible
-      const anchoredCount = (pos: GenPosition) => chosen.filter((c) => c.position === pos).length
-      const minCount = Math.min(...pool.map((p) => anchoredCount(p.position)))
-      const leastAnchored = pool.filter((p) => anchoredCount(p.position) === minCount)
-      return bestBy(leastAnchored, (p) => p.ceiling)
+      return selectField(aff, chosen, ctx.budget, ctx.slots)
     },
   }
 }
@@ -666,6 +681,193 @@ export function sweepAnchorStrategies(input: AnchorSweepInput): StrategyProposal
   return [...seen.values()]
     .sort((a, b) => b.ceiling - a.ceiling)
     .map((v) => v.proposal)
+}
+
+// ─── Specific stud combos (which exact players to target) ──────────────────────
+
+/**
+ * Fill a completable roster where a SPECIFIC ordered set of anchor players is
+ * forced into the paid core, then the rest fills cheap + spread (same field logic
+ * the pattern sweep uses). Returns null if any forced anchor can't be placed under
+ * the $1-per-open-slot completion invariant, i.e. the concrete combo can't complete
+ * a $budget roster. This is what turns "RB-WR" into "Bijan + Chase".
+ */
+function fillForcedPlan(
+  board: PricedBoardPlayer[],
+  initialSlots: AnchorSlots,
+  budget: number,
+  maxAnchors: number,
+  forced: PricedBoardPlayer[],
+): AnchorPlan | null {
+  const totalSlots = sumSlots(initialSlots)
+  let slots = { ...initialSlots }
+  const used = new Set<string>()
+  const chosen: PricedBoardPlayer[] = []
+  let spent = 0
+
+  // 1) Place the forced anchors, each honoring the completion invariant.
+  for (const anchor of forced) {
+    if (used.has(anchor.id)) return null
+    const reserveRest = totalSlots - chosen.length - 1
+    if (!canClaim(anchor.position, slots)) return null
+    if (spent + anchor.expectedCost + reserveRest > budget) return null // can't complete
+    const next = claimSlot(anchor.position, slots)
+    if (next === null) return null
+    used.add(anchor.id)
+    slots = next
+    spent += anchor.expectedCost
+    chosen.push(anchor)
+  }
+
+  // 2) Fill the rest cheap + spread, exactly like the pattern sweep's field phase.
+  while (chosen.length < maxAnchors) {
+    const reserveRest = totalSlots - chosen.length - 1
+    const affordable = board.filter(
+      (p) =>
+        !used.has(p.id) &&
+        canClaim(p.position, slots) &&
+        spent + p.expectedCost + reserveRest <= budget,
+    )
+    if (affordable.length === 0) break
+    const pick = selectField(affordable, chosen, budget, slots)
+    if (!pick) break
+    const next = claimSlot(pick.position, slots)
+    if (next === null) break
+    used.add(pick.id)
+    slots = next
+    spent += pick.expectedCost
+    chosen.push(pick)
+  }
+
+  return { policyKey: 'forced', chosen, anchorSpend: spent }
+}
+
+/** Top-K players at one position by ceiling (the genuine studs to enumerate). */
+function topAtPosition(
+  board: PricedBoardPlayer[],
+  pos: GenPosition,
+  k: number,
+): PricedBoardPlayer[] {
+  return board
+    .filter((p) => p.position === pos)
+    .sort((a, b) => b.ceiling - a.ceiling)
+    .slice(0, k)
+}
+
+/**
+ * Every distinct set of specific players that fills a pattern's required stud
+ * positions, drawing top-K candidates per position. Players must be distinct and
+ * each set is deduped order-independently, so ['WR','WR'] yields unordered WR pairs
+ * (Chase+Jefferson once, not twice).
+ */
+function studComboSets(
+  board: PricedBoardPlayer[],
+  studPositions: GenPosition[],
+  k: number,
+): PricedBoardPlayer[][] {
+  const pools = studPositions.map((pos) => topAtPosition(board, pos, k))
+  const results: PricedBoardPlayer[][] = []
+  const seen = new Set<string>()
+
+  const recurse = (i: number, acc: PricedBoardPlayer[], usedIds: Set<string>): void => {
+    if (i === pools.length) {
+      const key = acc.map((p) => p.id).sort().join('|')
+      if (!seen.has(key)) {
+        seen.add(key)
+        results.push([...acc])
+      }
+      return
+    }
+    for (const cand of pools[i]) {
+      if (usedIds.has(cand.id)) continue
+      usedIds.add(cand.id)
+      acc.push(cand)
+      recurse(i + 1, acc, usedIds)
+      acc.pop()
+      usedIds.delete(cand.id)
+    }
+  }
+
+  recurse(0, [], new Set())
+  return results
+}
+
+export interface StudComboInput {
+  board: PricedBoardPlayer[]
+  slots: AnchorSlots
+  budget: number
+  /** Candidate studs per required position (default 4). */
+  topKPerPosition?: number
+  /** Keep the best N completable combos per pattern by anchor ceiling (default 3). */
+  combosPerPattern?: number
+}
+
+/** One concrete stud combo: named players + the completable roster they anchor. */
+export interface StudCombo {
+  patternKey: string
+  patternLabel: string
+  anchorNames: string[]
+  proposal: StrategyProposal
+}
+
+/**
+ * The specific-combos tier: within each anchor pattern, enumerate CONCRETE stud
+ * sets (Chase+Bijan vs Jefferson+Gibbs vs ...), keep the top completable ones by
+ * anchor ceiling, and name each by its actual players. Where the pattern sweep says
+ * "RB-WR wins," this says WHICH RB-WR pair to target. Every combo is a completable
+ * $budget roster (fillForcedPlan enforces the invariant), deduped by concrete
+ * roster across patterns. Pure, deterministic, $0. Balanced (no studs) is skipped -
+ * there is nothing specific to enumerate.
+ */
+export function enumerateStudCombos(input: StudComboInput): StudCombo[] {
+  const { board, slots, budget } = input
+  const k = input.topKPerPosition ?? 4
+  const perPattern = input.combosPerPattern ?? 3
+  if (board.length === 0 || budget <= 0) return []
+
+  const maxAnchors = slots.qb + slots.rb + slots.wr + slots.te + slots.flex + slots.dst
+  const out: StudCombo[] = []
+  const globalRosters = new Set<string>()
+
+  for (const pattern of SWEEP_PATTERNS) {
+    if (pattern.studPositions.length === 0) continue // nothing specific to enumerate
+
+    const built: { combo: StudCombo; ceiling: number; rosterKey: string }[] = []
+    const patternRosters = new Set<string>()
+
+    for (const studs of studComboSets(board, pattern.studPositions, k)) {
+      const plan = fillForcedPlan(board, slots, budget, maxAnchors, studs)
+      if (!plan || plan.chosen.length === 0) continue
+
+      const rosterKey = plan.chosen.map((p) => p.id).sort().join('|')
+      if (patternRosters.has(rosterKey) || globalRosters.has(rosterKey)) continue
+      patternRosters.add(rosterKey)
+
+      const base = planToProposal(plan, budget)
+      const anchorNames = studs.map((p) => p.name)
+      const proposal: StrategyProposal = {
+        ...base,
+        name: `${anchorNames.join(' + ')} (${pattern.label})`,
+        philosophy: `Stud combo, ${pattern.label}: pay up for ${anchorNames.join(
+          ' + ',
+        )}, fill the rest at room price. ${base.philosophy}`,
+      }
+      const ceiling = studs.reduce((s, p) => s + p.ceiling, 0)
+      built.push({
+        combo: { patternKey: pattern.key, patternLabel: pattern.label, anchorNames, proposal },
+        ceiling,
+        rosterKey,
+      })
+    }
+
+    built.sort((a, b) => b.ceiling - a.ceiling)
+    for (const b of built.slice(0, perPattern)) {
+      globalRosters.add(b.rosterKey)
+      out.push(b.combo)
+    }
+  }
+
+  return out
 }
 
 // ─── Prep wrapper ──────────────────────────────────────────────────────────────
@@ -779,4 +981,46 @@ export function sweepStrategiesFromPool(
 
   const rawProposals = sweepAnchorStrategies({ board, slots, budget })
   return attachTargetPricingAndInserts(rawProposals, league, available, board, budget)
+}
+
+/**
+ * Prep entry point for the SPECIFIC stud-combos tier: within each anchor pattern,
+ * name the exact stud sets to target (Chase+Bijan vs Jefferson+Gibbs ...) instead
+ * of only the shape. Returns the StudCombo list (pattern-tagged, named) with each
+ * proposal carrying solver-fit target prices, plus the same StrategyResearchResult
+ * insert contract so it flows through the sim + report unchanged. Auction only.
+ */
+export function combosFromPool(
+  input: StrategyResearchInput,
+  opts: { topKPerPosition?: number; combosPerPattern?: number } = {},
+): { combos: StudCombo[]; result: StrategyResearchResult } {
+  const { league, players, keeperNames = [] } = input
+  if (league.format !== 'auction') return { combos: [], result: { proposals: [], inserts: [] } }
+
+  const available = keeperNames.length > 0
+    ? players.filter((p) => !keeperNames.includes(p.name))
+    : players
+
+  const budget = league.budget ?? 200
+  const board = priceBoard(available)
+  const slots = leagueToAnchorSlots(league)
+
+  const combos = enumerateStudCombos({
+    board,
+    slots,
+    budget,
+    topKPerPosition: opts.topKPerPosition,
+    combosPerPattern: opts.combosPerPattern,
+  })
+  const result = attachTargetPricingAndInserts(
+    combos.map((c) => c.proposal),
+    league,
+    available,
+    board,
+    budget,
+  )
+  // attachTargetPricingAndInserts preserves order, so result.proposals[i] is the
+  // priced version of combos[i]. Re-seat it so combo names/patterns stay aligned.
+  const priced = combos.map((c, i) => ({ ...c, proposal: result.proposals[i] }))
+  return { combos: priced, result }
 }

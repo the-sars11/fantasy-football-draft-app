@@ -16,6 +16,8 @@ import {
   generateStrategiesFromPool,
   sweepAnchorStrategies,
   sweepStrategiesFromPool,
+  enumerateStudCombos,
+  combosFromPool,
   priceBoard,
   type PricedBoardPlayer,
   type AnchorSlots,
@@ -289,6 +291,97 @@ describe('sweepStrategiesFromPool (prep wrapper)', () => {
   it('returns empty for snake (auction-only sweep)', () => {
     const snake = { ...auctionLeague(), format: 'snake' as const }
     const result = sweepStrategiesFromPool({ league: snake, players: realPool() })
+    expect(result.proposals).toEqual([])
+    expect(result.inserts).toEqual([])
+  })
+})
+
+describe('enumerateStudCombos - names the exact players inside each pattern', () => {
+  it('names every combo by its specific studs, all drawn from the real board', () => {
+    const board = fullBoard()
+    const names = new Set(board.map((p) => p.name))
+    const combos = enumerateStudCombos({ board, slots: NASTIES_SLOTS, budget: 200 })
+
+    expect(combos.length).toBeGreaterThan(0)
+    for (const c of combos) {
+      // Anchor names are real board players, not invented.
+      expect(c.anchorNames.length).toBeGreaterThan(0)
+      for (const n of c.anchorNames) expect(names.has(n)).toBe(true)
+      // The proposal name is the specific players + the pattern label.
+      expect(c.proposal.name).toBe(`${c.anchorNames.join(' + ')} (${c.patternLabel})`)
+      // key_targets carry the paid studs so the sim biases toward them.
+      for (const n of c.anchorNames) expect(c.proposal.key_targets).toContain(n)
+    }
+  })
+
+  it('every combo roster is completable within budget (bench reserve > 0, alloc sums to 100)', () => {
+    const combos = enumerateStudCombos({ board: fullBoard(), slots: NASTIES_SLOTS, budget: 200 })
+    expect(combos.length).toBeGreaterThan(0)
+    for (const c of combos) {
+      const alloc = c.proposal.budget_allocation ?? {}
+      const total = Object.values(alloc).reduce((sum, v) => sum + v, 0)
+      expect(total).toBe(100)
+      expect(alloc.bench ?? 0).toBeGreaterThan(0)
+    }
+  })
+
+  it('caps combos per pattern and keeps each pattern combo set distinct', () => {
+    const perPattern = 2
+    const combos = enumerateStudCombos({
+      board: fullBoard(),
+      slots: NASTIES_SLOTS,
+      budget: 200,
+      combosPerPattern: perPattern,
+    })
+    const byPattern = new Map<string, string[]>()
+    for (const c of combos) {
+      const list = byPattern.get(c.patternKey) ?? []
+      list.push(c.anchorNames.slice().sort().join('|'))
+      byPattern.set(c.patternKey, list)
+    }
+    for (const [, list] of byPattern) {
+      // Never more than the cap per pattern ...
+      expect(list.length).toBeLessThanOrEqual(perPattern)
+      // ... and no repeated anchor set inside one pattern.
+      expect(new Set(list).size).toBe(list.length)
+    }
+  })
+
+  it('the balanced (no-anchor) pattern produces no specific combo', () => {
+    const combos = enumerateStudCombos({ board: fullBoard(), slots: NASTIES_SLOTS, budget: 200 })
+    expect(combos.some((c) => c.patternKey === 'balanced')).toBe(false)
+  })
+
+  it('is deterministic (same board -> byte-identical combo list)', () => {
+    const a = enumerateStudCombos({ board: fullBoard(), slots: NASTIES_SLOTS, budget: 200 })
+    const b = enumerateStudCombos({ board: fullBoard(), slots: NASTIES_SLOTS, budget: 200 })
+    expect(JSON.stringify(a)).toBe(JSON.stringify(b))
+  })
+
+  it('returns nothing on an empty board or non-positive budget', () => {
+    expect(enumerateStudCombos({ board: [], slots: NASTIES_SLOTS, budget: 200 })).toEqual([])
+    expect(enumerateStudCombos({ board: fullBoard(), slots: NASTIES_SLOTS, budget: 0 })).toEqual([])
+  })
+})
+
+describe('combosFromPool (prep wrapper)', () => {
+  it('attaches solver-fit target pricing to every combo and aligns proposals/inserts', () => {
+    const { combos, result } = combosFromPool({ league: auctionLeague(), players: realPool() })
+    expect(combos.length).toBeGreaterThan(0)
+    expect(result.proposals).toHaveLength(combos.length)
+    expect(result.inserts).toHaveLength(combos.length)
+    combos.forEach((c, i) => {
+      // The combo carries the priced proposal, aligned by index.
+      expect(c.proposal).toBe(result.proposals[i])
+      expect(c.proposal.target_pricing).toBeDefined()
+      expect(c.proposal.key_targets.length).toBeGreaterThan(0)
+    })
+  })
+
+  it('returns empty for snake (auction-only tier)', () => {
+    const snake = { ...auctionLeague(), format: 'snake' as const }
+    const { combos, result } = combosFromPool({ league: snake, players: realPool() })
+    expect(combos).toEqual([])
     expect(result.proposals).toEqual([])
     expect(result.inserts).toEqual([])
   })

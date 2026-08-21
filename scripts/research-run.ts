@@ -29,7 +29,8 @@ import type { RosterSlots as DbRosterSlots } from '@/lib/supabase/database.types
 import { readPlayerCache, getCacheStatus } from '@/lib/research/cache'
 import { cacheToPlayers } from '@/lib/players/convert'
 import type { ConsensusPlayer } from '@/lib/research/normalize'
-import { sweepStrategiesFromPool } from '@/lib/research/strategy/generate'
+import { sweepStrategiesFromPool, combosFromPool, SWEEP_PATTERNS } from '@/lib/research/strategy/generate'
+import type { StudCombo } from '@/lib/research/strategy/generate'
 import type { StrategyProposal } from '@/lib/research/strategy/research'
 import { buildBoardPlayers } from '@/lib/draft/solver-bridge'
 import { buildOpponentProfiles } from '@/lib/draft/league-opponents'
@@ -194,22 +195,25 @@ async function main(): Promise<void> {
     `[research-run] opponents replicated from ledger: ${ownerOrder.join(', ')}`,
   )
 
+  // One sim input per strategy: the shared board + replicated room, biased to that
+  // strategy's named targets. Reused by the pattern sweep and the stud-combo tier.
+  const simInputFor = (proposal: StrategyProposal) => ({
+    board,
+    rosterConfig: SIM_ROSTER,
+    numManagers: NUM_MANAGERS,
+    budget: BUDGET,
+    runs: SIM_RUNS,
+    seed: SIM_SEED,
+    myManagerIndex: 0,
+    myBias: buildMyBiasFromTags(biasFromStrategy(proposal, byName)),
+    opponentProfiles,
+  })
+
   const strategies = stratResult.proposals.map((proposal, i) => {
-    const bias = buildMyBiasFromTags(biasFromStrategy(proposal, byName))
     console.log(
       `[research-run]   sim ${i + 1}/${stratResult.proposals.length}: ${proposal.name} (${SIM_RUNS} runs)`,
     )
-    const simInput = {
-      board,
-      rosterConfig: SIM_ROSTER,
-      numManagers: NUM_MANAGERS,
-      budget: BUDGET,
-      runs: SIM_RUNS,
-      seed: SIM_SEED,
-      myManagerIndex: 0,
-      myBias: bias,
-      opponentProfiles,
-    }
+    const simInput = simInputFor(proposal)
     // AFTER: graded with the measured risk model on (durability + tier bust/breakout).
     const summary: SimSummary = buildSimSummary(simInput, { games: REGULAR_SEASON_GAMES })
     // BEFORE: same board/seed graded on the old "every stud plays every game at full
@@ -219,6 +223,26 @@ async function main(): Promise<void> {
       risk: false,
     })
     return { proposal, sim: summary, simHealthy: summaryHealthy }
+  })
+
+  // 2b) SPECIFIC STUD COMBOS - the "which exact players" tier. Within each anchor
+  // pattern, enumerate concrete stud sets (Chase+Bijan vs Jefferson+Gibbs ...) and
+  // sim-grade each with the risk model on, so the leaderboard names the pair/trio to
+  // target, not just the shape. One graded sim each (risk on) to keep the batch quick.
+  console.log('[research-run] enumerating specific stud combos ...')
+  const { combos: studCombosRaw } = combosFromPool({
+    league: NASTIES_LEAGUE,
+    players: asConsensus(players),
+  })
+  console.log(`[research-run] ${studCombosRaw.length} specific stud combos`)
+  const studCombos = studCombosRaw.map((combo, i) => {
+    console.log(
+      `[research-run]   combo sim ${i + 1}/${studCombosRaw.length}: ${combo.proposal.name} (${SIM_RUNS} runs)`,
+    )
+    const sim: SimSummary = buildSimSummary(simInputFor(combo.proposal), {
+      games: REGULAR_SEASON_GAMES,
+    })
+    return { ...combo, sim }
   })
 
   // 3) LAND PROBABILITY - top of the board only, full board models the scarcity.
@@ -298,11 +322,18 @@ async function main(): Promise<void> {
       proposal: s.proposal,
       sim: toPersistedSim(s.sim),
     })),
+    studCombos: studCombos.map((c) => ({
+      patternKey: c.patternKey,
+      patternLabel: c.patternLabel,
+      anchorNames: c.anchorNames,
+      proposal: c.proposal,
+      sim: toPersistedSim(c.sim),
+    })),
     players: enriched,
   }
   writeFileSync(join(OUT_DIR, 'dataset.json'), JSON.stringify(dataset, null, 2), 'utf-8')
 
-  writeFileSync(join(OUT_DIR, 'report.md'), buildReport(dataset, enriched, strategies), 'utf-8')
+  writeFileSync(join(OUT_DIR, 'report.md'), buildReport(dataset, enriched, strategies, studCombos), 'utf-8')
 
   console.log(`[research-run] wrote research-output/dataset.json + report.md`)
 }
@@ -324,10 +355,13 @@ function buildEnrichedType() {
   }
 }
 
+type StudComboGraded = StudCombo & { sim: SimSummary }
+
 function buildReport(
   dataset: { meta: Record<string, unknown>; leagueIntel: ReturnType<typeof buildIntelType> },
   players: Enriched[],
   strategies: Array<{ proposal: StrategyProposal; sim: SimSummary; simHealthy: SimSummary }>,
+  studCombos: StudComboGraded[],
 ): string {
   const L: string[] = []
   const meta = dataset.meta as Record<string, string | number | boolean>
@@ -438,6 +472,68 @@ function buildReport(
     }
     L.push('')
   })
+
+  // ── Specific stud combos (which exact players to target) ─────────────────────
+  if (studCombos.length > 0) {
+    L.push('## Specific stud combos (which exact players to target)')
+    L.push('')
+    L.push('The strategy leaderboard above says which SHAPE wins. This tier says which')
+    L.push('exact studs to buy inside each shape. Every combo is a completable $200')
+    L.push('roster (the named anchors forced in, the rest filled at room price) graded')
+    L.push('with the risk model on. Grouped by pattern, best projected record first.')
+    L.push('')
+
+    // Overall combo leaderboard - the single best specific pairs/trios on the board.
+    const comboRanked = [...studCombos].sort((a, b) => b.sim.grade.meanWins - a.sim.grade.meanWins)
+    L.push('### Top combos overall')
+    L.push('')
+    L.push('| # | Anchors | Pattern | Proj record | Mean starter pts |')
+    L.push('|---|---------|---------|-------------|------------------|')
+    comboRanked.slice(0, 12).forEach((c, i) => {
+      const g = c.sim.grade
+      L.push(
+        `| ${i + 1} | ${c.anchorNames.join(' + ')} | ${c.patternLabel} | ${r1(g.meanWins)}-${r1(g.meanLosses)} | ${r1(g.meanStarterPoints)} |`,
+      )
+    })
+    L.push('')
+
+    // Per-pattern breakout so Joe can compare pairs within one shape head to head.
+    const byPattern = new Map<string, StudComboGraded[]>()
+    for (const c of studCombos) {
+      const list = byPattern.get(c.patternKey) ?? []
+      list.push(c)
+      byPattern.set(c.patternKey, list)
+    }
+    for (const [, list] of byPattern) {
+      const sorted = [...list].sort((a, b) => b.sim.grade.meanWins - a.sim.grade.meanWins)
+      L.push(`### ${sorted[0].patternLabel}`)
+      L.push('')
+      sorted.forEach((c) => {
+        const g = c.sim.grade
+        const tp = c.proposal.target_pricing
+        const priceStr = tp && tp.prices.length > 0
+          ? ` - target ${tp.prices.slice(0, c.anchorNames.length).map((t) => `${t.name} $${t.price}`).join(', ')}`
+          : ''
+        L.push(
+          `- **${c.anchorNames.join(' + ')}**: ${r1(g.meanWins)}-${r1(g.meanLosses)}, ${r1(g.meanStarterPoints)} starter pts${priceStr}.`,
+        )
+      })
+      L.push('')
+    }
+
+    // Honest coverage note: anchor patterns whose elite studs cannot co-exist under
+    // $200 at room price produce no combo at all. That is a real finding, not a gap.
+    const covered = new Set(studCombos.map((c) => c.patternKey))
+    const infeasible = SWEEP_PATTERNS
+      .filter((p) => p.studPositions.length > 0 && !covered.has(p.key))
+      .map((p) => p.label)
+    if (infeasible.length > 0) {
+      L.push(`_No affordable elite combo: ${infeasible.join(', ')}. The top studs at`)
+      L.push(`those positions cost more than $200 combined at room price, so no concrete`)
+      L.push(`elite combination completes a $200 roster - the room prices these shapes out._`)
+      L.push('')
+    }
+  }
 
   // ── League intel ────────────────────────────────────────────────────────────
   L.push('## League intel (Nasties ledger)')

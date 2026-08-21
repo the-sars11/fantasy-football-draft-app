@@ -1,6 +1,6 @@
 # The Nasties - Draft Research Dataset
 
-Generated 2026-08-21T01:42:51.572Z. 12-team, $200 auction, full PPR, no kicker.
+Generated 2026-08-21T01:57:46.383Z. 12-team, $200 auction, full PPR, no kicker.
 Roster: QB1, RB1, WR1, TE1, FLEX3, DEF1, Bench5.
 Players: 1000. Cache last updated 2026-08-20T01:00:27.018+00:00 (stale=true).
 Sims: 400 Monte-Carlo runs per strategy, 14-game season, seed 42.
@@ -754,6 +754,70 @@ Pool-generated Balanced Auction: 8 anchors (WR/RB/QB/TE/DEF), rest at room price
   - Houston Texans (DEF): 63.8% of drafts, avg $1.
   - Sam LaPorta (TE): 59.3% of drafts, avg $1.
   - Jahmyr Gibbs (RB): 59% of drafts, avg $87.
+
+## Specific stud combos (which exact players to target)
+
+The strategy leaderboard above says which SHAPE wins. This tier says which
+exact studs to buy inside each shape. Every combo is a completable $200
+roster (the named anchors forced in, the rest filled at room price) graded
+with the risk model on. Grouped by pattern, best projected record first.
+
+### Top combos overall
+
+| # | Anchors | Pattern | Proj record | Mean starter pts |
+|---|---------|---------|-------------|------------------|
+| 1 | Puka Nacua + Jaxon Smith-Njigba | WR-WR | 9.9-4.1 | 1956 |
+| 2 | Jahmyr Gibbs + Puka Nacua | RB-WR | 9.9-4.1 | 1966 |
+| 3 | Puka Nacua + Jaxon Smith-Njigba + Trey McBride | Zero RB (WR-WR-TE) | 9.9-4.1 | 1956 |
+| 4 | Josh Allen + Jahmyr Gibbs + Puka Nacua | Elite QB anchor | 9.9-4.1 | 1965.8 |
+| 5 | Lamar Jackson + Jahmyr Gibbs + Puka Nacua | Elite QB anchor | 9.9-4.1 | 1964.5 |
+| 6 | Drake Maye + Jahmyr Gibbs + Puka Nacua | Elite QB anchor | 9.9-4.1 | 1965.5 |
+| 7 | Jahmyr Gibbs + Christian McCaffrey | Robust RB (RB-RB) | 9.8-4.2 | 1974.1 |
+| 8 | Jahmyr Gibbs + Bijan Robinson | Robust RB (RB-RB) | 9.8-4.2 | 1969.5 |
+| 9 | Puka Nacua + Amon-Ra St. Brown | WR-WR | 9.8-4.2 | 1954.4 |
+| 10 | Puka Nacua + Ja'Marr Chase | WR-WR | 9.8-4.2 | 1952.6 |
+| 11 | Jahmyr Gibbs + Jaxon Smith-Njigba | RB-WR | 9.8-4.2 | 1963.4 |
+| 12 | Jahmyr Gibbs + Amon-Ra St. Brown | RB-WR | 9.8-4.2 | 1965.1 |
+
+### Robust RB (RB-RB)
+
+- **Jahmyr Gibbs + Christian McCaffrey**: 9.8-4.2, 1974.1 starter pts - target Jahmyr Gibbs $76, Christian McCaffrey $67.
+- **Jahmyr Gibbs + Bijan Robinson**: 9.8-4.2, 1969.5 starter pts - target Jahmyr Gibbs $76, Bijan Robinson $70.
+- **Christian McCaffrey + Bijan Robinson**: 9.7-4.3, 1960.8 starter pts - target Bijan Robinson $70, Christian McCaffrey $67.
+
+### WR-WR
+
+- **Puka Nacua + Jaxon Smith-Njigba**: 9.9-4.1, 1956 starter pts - target Puka Nacua $76, Jaxon Smith-Njigba $72.
+- **Puka Nacua + Amon-Ra St. Brown**: 9.8-4.2, 1954.4 starter pts - target Puka Nacua $76, Amon-Ra St. Brown $64.
+- **Puka Nacua + Ja'Marr Chase**: 9.8-4.2, 1952.6 starter pts - target Ja'Marr Chase $79, Puka Nacua $76.
+
+### RB-WR
+
+- **Jahmyr Gibbs + Puka Nacua**: 9.9-4.1, 1966 starter pts - target Jahmyr Gibbs $76, Puka Nacua $76.
+- **Jahmyr Gibbs + Jaxon Smith-Njigba**: 9.8-4.2, 1963.4 starter pts - target Jahmyr Gibbs $76, Jaxon Smith-Njigba $72.
+- **Jahmyr Gibbs + Amon-Ra St. Brown**: 9.8-4.2, 1965.1 starter pts - target Jahmyr Gibbs $76, Amon-Ra St. Brown $64.
+
+### Zero RB (WR-WR-TE)
+
+- **Puka Nacua + Jaxon Smith-Njigba + Trey McBride**: 9.9-4.1, 1956 starter pts - target Puka Nacua $76, Jaxon Smith-Njigba $72, Trey McBride $35.
+- **Puka Nacua + Amon-Ra St. Brown + Brock Bowers**: 9.8-4.2, 1953.4 starter pts - target Puka Nacua $76, Amon-Ra St. Brown $64, Brock Bowers $49.
+- **Jaxon Smith-Njigba + Amon-Ra St. Brown + Brock Bowers**: 9.8-4.2, 1950.3 starter pts - target Jaxon Smith-Njigba $72, Amon-Ra St. Brown $64, Brock Bowers $49.
+
+### Elite QB anchor
+
+- **Josh Allen + Jahmyr Gibbs + Puka Nacua**: 9.9-4.1, 1965.8 starter pts - target Jahmyr Gibbs $76, Puka Nacua $76, Josh Allen $36.
+- **Lamar Jackson + Jahmyr Gibbs + Puka Nacua**: 9.9-4.1, 1964.5 starter pts - target Jahmyr Gibbs $76, Puka Nacua $76, Lamar Jackson $32.
+- **Drake Maye + Jahmyr Gibbs + Puka Nacua**: 9.9-4.1, 1965.5 starter pts - target Jahmyr Gibbs $76, Puka Nacua $76, Drake Maye $28.
+
+### Elite TE anchor
+
+- **Trey McBride + Puka Nacua + Amon-Ra St. Brown**: 9.8-4.2, 1954.4 starter pts - target Puka Nacua $76, Amon-Ra St. Brown $64, Trey McBride $35.
+- **Trey McBride + Puka Nacua + Ja'Marr Chase**: 9.8-4.2, 1952.6 starter pts - target Ja'Marr Chase $79, Puka Nacua $76, Trey McBride $35.
+- **Trey McBride + Jaxon Smith-Njigba + Amon-Ra St. Brown**: 9.8-4.2, 1951.2 starter pts - target Jaxon Smith-Njigba $72, Amon-Ra St. Brown $64, Trey McBride $35.
+
+_No affordable elite combo: Triple WR, Double RB + WR, Hero RB (RB + WR-WR). The top studs at
+those positions cost more than $200 combined at room price, so no concrete
+elite combination completes a $200 roster - the room prices these shapes out._
 
 ## League intel (Nasties ledger)
 
