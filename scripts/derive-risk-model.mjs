@@ -6,8 +6,11 @@
 //                      handled by layer 1, so this isolates PERFORMANCE variance and
 //                      does not double-count injuries.
 //
-// $0: reads the local Sleeper stats cache (free, keyless) + player map. No network,
-// no Claude. Read-only analysis; writes one JSON to src/data/risk-model.json.
+// $0: self-sufficient. Pulls the raw actuals from the Sleeper API (free, keyless, no
+// auth) and caches each response under scripts/.sleeper-cache/ (gitignored) so re-runs
+// are instant and offline. No Claude, no paid source. Writes one JSON to
+// src/data/risk-model.json. Run: `node scripts/derive-risk-model.mjs`
+// (set DERIVE_FRESH=1 to ignore the local cache and force a fresh Sleeper re-pull).
 //
 // Honesty: every number below is measured from real actuals. Per-player durability is
 // MEASURED for players with >=2 real seasons; everyone else falls back to the position
@@ -18,10 +21,59 @@
 import fs from 'node:fs'
 import path from 'node:path'
 
-const CACHE =
-  'C:/Users/jrasa/AppData/Local/Temp/claude/C--Users-jrasa-AI-Projects/ef908f98-9fc2-47d5-b134-6d57228db2bf/scratchpad'
 const REPO = 'C:/Users/jrasa/AI Projects/fantasy_football_draft_app'
 const OUT = path.join(REPO, 'src/data/risk-model.json')
+
+// Self-sufficient data layer. This script no longer depends on any ephemeral session
+// scratchpad: it pulls the raw actuals straight from Sleeper (free, keyless, $0) and
+// caches each response under scripts/.sleeper-cache/ (gitignored) so re-runs are
+// instant and offline. A legacy scratchpad dir is still honored if present, purely so
+// an existing local cache is reused instead of re-pulled -- it is never required.
+const CACHE_DIR = path.join(REPO, 'scripts/.sleeper-cache')
+const LEGACY_CACHE =
+  'C:/Users/jrasa/AppData/Local/Temp/claude/C--Users-jrasa-AI-Projects/ef908f98-9fc2-47d5-b134-6d57228db2bf/scratchpad'
+const SLEEPER = 'https://api.sleeper.app/v1'
+const playersUrl = () => `${SLEEPER}/players/nfl`
+const statsUrl = (yr, wk) => `${SLEEPER}/stats/nfl/regular/${yr}/${wk}`
+
+fs.mkdirSync(CACHE_DIR, { recursive: true })
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
+
+/**
+ * Load one cached JSON by filename, fetching from Sleeper on a miss.
+ * Order: repo cache -> legacy scratchpad (copied forward) -> live fetch (then cached).
+ */
+// Set DERIVE_FRESH=1 to ignore every local cache and re-pull straight from Sleeper.
+const FRESH = process.env.DERIVE_FRESH === '1'
+async function loadJson(name, url) {
+  const repoPath = path.join(CACHE_DIR, name)
+  if (!FRESH && fs.existsSync(repoPath)) return JSON.parse(fs.readFileSync(repoPath, 'utf8'))
+
+  const legacyPath = path.join(LEGACY_CACHE, name)
+  if (!FRESH && fs.existsSync(legacyPath)) {
+    const raw = fs.readFileSync(legacyPath, 'utf8')
+    fs.writeFileSync(repoPath, raw) // migrate into the permanent cache
+    return JSON.parse(raw)
+  }
+
+  process.stdout.write(`  fetch ${url} ... `)
+  let lastErr
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      const res = await fetch(url)
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      const raw = await res.text()
+      fs.writeFileSync(repoPath, raw)
+      console.log('ok')
+      await sleep(120) // be polite to Sleeper (well under their rate limit)
+      return JSON.parse(raw)
+    } catch (err) {
+      lastErr = err
+      await sleep(500 * attempt)
+    }
+  }
+  throw new Error(`failed to load ${name} from ${url}: ${lastErr?.message}`)
+}
 
 // Fantasy regular-season window. Every NFL team's bye falls inside weeks 1-14, so a
 // fully healthy player tops out at 13 games in this window (one bye). Denominator = 13.
@@ -31,7 +83,8 @@ const YEARS = [2010, 2011, 2012, 2013, 2014, 2015, 2017, 2018, 2019, 2020, 2021,
 const SKILL = ['QB', 'RB', 'WR', 'TE']
 
 // ---------- player map: id -> {pos, name} ----------
-const pm = JSON.parse(fs.readFileSync(path.join(CACHE, 'sleeper_players.json'), 'utf8'))
+console.log('loading Sleeper player map ...')
+const pm = await loadJson('sleeper_players.json', playersUrl())
 const posById = new Map()
 const nameById = new Map()
 for (const id of Object.keys(pm)) {
@@ -45,11 +98,12 @@ for (const id of Object.keys(pm)) {
 
 // ---------- load weekly gp + pts_ppr per player per year ----------
 // perYear[yr] = Map(id -> { gp, pts })  season aggregates over weeks 1-14 (skill only)
+console.log(`loading weekly actuals for ${YEARS.length} seasons (wks 1-${WEEKS}) ...`)
 const perYear = {}
 for (const yr of YEARS) {
   const agg = new Map()
   for (let wk = 1; wk <= WEEKS; wk++) {
-    const j = JSON.parse(fs.readFileSync(path.join(CACHE, `stats_${yr}_wk${wk}.json`), 'utf8'))
+    const j = await loadJson(`stats_${yr}_wk${wk}.json`, statsUrl(yr, wk))
     for (const id of Object.keys(j)) {
       if (!posById.has(id)) continue
       const row = j[id]

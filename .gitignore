@@ -59,6 +59,9 @@ Keys*Accounts*
 # Visual brainstorming session files
 .superpowers/
 
+# Sleeper actuals cache for scripts/derive-risk-model.mjs (re-pullable, $0, never commit)
+/scripts/.sleeper-cache/
+
 # Dev scratch / one-off verification artifacts (never commit)
 /_dev_*.js
 /fp_*.html
