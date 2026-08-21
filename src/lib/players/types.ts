@@ -14,6 +14,12 @@ export type Platform = 'espn' | 'yahoo' | 'sleeper'
 
 export interface Player {
   id: string
+  /**
+   * Cross-source id from the cache (sleeperId || espnId || fpId). For Sleeper-
+   * backed players this is the Sleeper player id, the key the measured risk
+   * model uses. `id` is a Supabase UUID and does NOT join to the risk model.
+   */
+  sleeperId?: string
   name: string
   team: string
   position: Position

@@ -98,6 +98,7 @@ export function buildBoardPlayers(
     const ceiling = p.ceilingValue ?? p.consensusAuctionValue ?? 1
     board.push({
       id: p.id,
+      sleeperId: p.sleeperId,
       name: p.name,
       // K already filtered; remaining positions are all BoardPlayer-valid.
       position: p.position as BoardPlayer['position'],

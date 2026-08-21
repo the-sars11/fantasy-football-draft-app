@@ -5,6 +5,7 @@ import type { CachedPlayer } from '@/lib/research/cache'
 function cachedPlayer(overrides: Partial<CachedPlayer> = {}): CachedPlayer {
   return {
     id: 'p1',
+    external_id: null,
     name: 'Test Player',
     team: 'TEST',
     position: 'RB',
@@ -19,7 +20,21 @@ function cachedPlayer(overrides: Partial<CachedPlayer> = {}): CachedPlayer {
   }
 }
 
-describe('cacheToPlayer — field truth (RV-7 regression)', () => {
+describe('cacheToPlayer - field truth (RV-7 regression)', () => {
+  it('maps external_id to sleeperId (risk-model join key)', () => {
+    // external_id is the Sleeper id for Sleeper-backed players; the risk model
+    // is keyed by it. `id` is a Supabase UUID that never joins. Regression for
+    // the McCaffrey durability blind-spot bug.
+    const p = cacheToPlayer(cachedPlayer({ id: 'uuid-abc', external_id: '4034' }))
+    expect(p.sleeperId).toBe('4034')
+    expect(p.id).toBe('uuid-abc')
+  })
+
+  it('leaves sleeperId undefined when external_id is null', () => {
+    const p = cacheToPlayer(cachedPlayer({ external_id: null }))
+    expect(p.sleeperId).toBeUndefined()
+  })
+
   it('maps source_data.pos_rank "RB12" to ecrPositionRank=12', () => {
     const p = cacheToPlayer(cachedPlayer({ source_data: { pos_rank: 'RB12' } }))
     expect(p.ecrPositionRank).toBe(12)

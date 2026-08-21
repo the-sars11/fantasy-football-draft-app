@@ -299,10 +299,14 @@ function applyRiskModel(
   const effRosters = run.rosters.map(r =>
     r.players.map(p => {
       // Durability: weekly out-rate = 1 - real games-played rate (per player, else baseline).
+      // The risk model is keyed by Sleeper id, so join on sleeperId; `id` is a
+      // Supabase UUID that never matches and would silently fall back to baseline
+      // for everyone (the McCaffrey blind-spot bug). Rookies / players absent from
+      // the model still fall back to the position baseline, which is correct.
       const gpRate =
         p.position === 'DEF'
           ? 1
-          : model.durability.byPlayer[p.id]?.gpRate ?? model.durability.baseline[p.position] ?? 1
+          : model.durability.byPlayer[p.sleeperId ?? p.id]?.gpRate ?? model.durability.baseline[p.position] ?? 1
       outRateById.set(p.id, Math.min(MAX_WEEKLY_OUT, Math.max(0, 1 - gpRate)))
 
       // Outcome: one season multiplier drawn from this player's tier's REAL distribution.
@@ -472,14 +476,20 @@ export function summarizeGrades(grades: RunGrade[], games: number, numManagers: 
   const bestWins = winsList.length ? Math.max(...winsList) : 0
   const worstWins = winsList.length ? Math.min(...winsList) : 0
 
+  // Per run losses = games - wins (no ties: the matchup uses a strict >), so the
+  // true mean losses is exactly games - meanWins. Derive it from the ROUNDED
+  // meanWins so the persisted pair always sums to `games`; rounding each mean
+  // independently could otherwise drift the sum to e.g. 14.1 (9.4 + 4.7).
+  const meanWins = mean(winsList)
+
   return {
     runs: grades.length,
     games,
     numManagers,
     meanStarterPoints: mean(grades.map(g => g.myStarterPoints)),
     meanRank: mean(grades.map(g => g.myRank)),
-    meanWins: mean(winsList),
-    meanLosses: mean(grades.map(g => g.losses)),
+    meanWins,
+    meanLosses: Math.round((games - meanWins) * 10) / 10,
     modalRecord: {
       wins: modalWins,
       losses: games - modalWins,

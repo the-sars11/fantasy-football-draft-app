@@ -2,6 +2,27 @@
 
 ---
 
+## 2026-08-20 / Risk-model durability join was silently dead -- every player rode the position baseline
+
+**Class:** bugfix + pipeline (Architecture + QA lenses). Joe's driving question: "i highly question paying over $70 for an aging injury risk like mccaffrey. am i overthinking it?" Investigating that surfaced a real bug, then Joe: "fix it."
+
+**Root cause.** `risk-model.json` durability is keyed by **Sleeper player id** (McCaffrey = "4034"). But board/sim players carry a **Supabase UUID** as `id`. `applyRiskModel` looked up `model.durability.byPlayer[p.id]` -- UUID against a Sleeper-keyed map -- so it **missed for EVERY player** and everyone silently fell back to the position durability baseline (RB 0.9466). The measured per-player layer (the whole point of the risk model: McCaffrey's real 0.8462 games-played rate, ~2.6 missed games of 17) was computed, shipped in the JSON, and never once read. The sim was blind to real injury history and under-penalized fragile veterans.
+
+- **Fix (`sim-grade.ts` `applyRiskModel`):** look up on the real join key -- `model.durability.byPlayer[p.sleeperId ?? p.id]`. DEF short-circuits to 1. Rookies / players the model has never seen correctly fall to `baseline[pos]` (that fallback was always right; it was just firing for 100% of players instead of the few it should).
+- **Threaded the Sleeper id end to end.** `external_id` (the Sleeper id for Sleeper-backed players, written by the cache upsert) now rides from cache to sim: `CachedPlayer.external_id` (interface made honest -- column was always selected, never typed) -> `Player.sleeperId` (`convert.ts` maps `external_id`) -> `BoardPlayer.sleeperId` (`solver-bridge.ts`) -> `SimWonPlayer.sleeperId` (`sim-engine.ts`). Six files, all additive optional fields, no behavior change anywhere except the now-live join.
+- **Also fixed a latent rounding artifact in `summarizeGrades`:** losses are defined as `games - wins` with strict `>` (no ties), so wins+losses must equal `games` exactly. The summary rounded `meanWins` and `meanLosses` independently, so the persisted pair could read 9.4 + 4.7 = 14.1. Now `meanLosses = round(games - meanWins)` off the same rounded mean, so the pair always sums to `games`. Fixed two `research:verify` FAILs at the root.
+
+**Proof (pasted).**
+- Join now resolves: `DEFAULT_RISK_MODEL.durability.byPlayer['4034'].gpRate` = **0.8462** (< RB baseline 0.9466). On the live 240-player board the join hits **124/240** real Sleeper ids (was **0**); the ~116 misses are legitimately rookies (<2 real-role seasons, e.g. Jeanty) or players absent from the 593-entry model, which correctly ride the baseline.
+- Regression test (`sim-grade.test.ts`, new describe block): identical builds except one anchor is McCaffrey (fragile, 0.8462) vs a 100%-durable RB, 400 seeds -- the durable build wins **~125 more games** (1275 vs 1150). Before the fix that gap was **0** (both got the RB baseline).
+- Product output flip (`research-output/report.md`): same Gibbs + Burden core, **Gibbs + Bijan Robinson (100% durable) = 9.8-4.2** now grades **above** **Gibbs + Christian McCaffrey (84.6%) = 9.5-4.5**. Pre-fix both got the RB baseline and graded near-identical (McCaffrey often nosed ahead on raw projection). The durability signal is now visible in the leaderboard.
+
+**Tests (6 new):** `sim-grade.test.ts` -- byPlayer['4034'] resolves and is below RB baseline; 400-seed fragile-vs-durable win-gap > 50. `convert.test.ts` -- `external_id` "4034" maps to `sleeperId` while UUID stays on `id`; null `external_id` leaves `sleeperId` undefined; added the now-required `external_id` to the fixture; fixed a pre-existing em-dash in a describe title (touched-file-clean rule).
+
+**Gate:** `npm run type-check` 0 errors. `npx vitest run` **582/582** (was 578; +4 net). `npx eslint` on all touched files: 0 errors. `npm run research:run` regenerated `dataset.json` + `report.md`. `npm run research:verify` **250 passed / 1 failed** -- the one FAIL is the pre-existing environmental "cache was not stale" check (cacheStale=true at HEAD too; needs `npm run data:pull`, unrelated to this fix). Deterministic. $0 (no Claude call). No em/en-dashes.
+
+---
+
 ## 2026-08-20 / Specific stud combos -- name the exact players, not just the shape
 
 **Class:** pipeline (Architecture + QA lenses). Follow-on to the 26-strategy sweep below. Joe: "add the specific stud combos tier." The sweep answers WHICH SHAPE wins (RB-RB vs WR-WR vs ...). This tier answers WHICH EXACT STUDS to buy inside each shape (Gibbs+McCaffrey vs Gibbs+Bijan vs Nacua+JSN vs ...), so the leaderboard names the pair/trio to target on draft night, not an abstract pattern.

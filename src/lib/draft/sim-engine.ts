@@ -149,6 +149,8 @@ export type SimMyBias = Record<string, SimBiasEntry>
 /** One player a manager won, with what they paid. */
 export interface SimWonPlayer {
   id: string
+  /** Sleeper/external id, carried from the board so grading can join real durability. */
+  sleeperId?: string
   name: string
   position: BoardPlayer['position']
   price: number
@@ -478,6 +480,7 @@ export function runAuctionSim(
     assignWonSlot(winner.slots, nominated.position)
     winner.players.push({
       id: nominated.id,
+      sleeperId: nominated.sleeperId,
       name: nominated.name,
       position: nominated.position,
       price,

@@ -1,6 +1,6 @@
 # The Nasties - Draft Research Dataset
 
-Generated 2026-08-21T01:57:46.383Z. 12-team, $200 auction, full PPR, no kicker.
+Generated 2026-08-21T02:52:13.017Z. 12-team, $200 auction, full PPR, no kicker.
 Roster: QB1, RB1, WR1, TE1, FLEX3, DEF1, Bench5.
 Players: 1000. Cache last updated 2026-08-20T01:00:27.018+00:00 (stale=true).
 Sims: 400 Monte-Carlo runs per strategy, 14-game season, seed 42.
@@ -9,32 +9,32 @@ Sims: 400 Monte-Carlo runs per strategy, 14-game season, seed 42.
 
 | # | Strategy | Proj record | Modal record | Mean starter pts | Ceiling / Floor |
 |---|----------|-------------|--------------|------------------|-----------------|
-| 1 | Robust RB (RB-RB), heavy anchors | 9.8-4.2 | 11-3 (17.8%) | 1974.1 | $86 / $62 |
-| 2 | RB-WR, heavy anchors | 9.8-4.2 | 11-3 (18.3%) | 1965.1 | $86 / $62 |
-| 3 | Double RB + WR, heavy anchors | 9.8-4.2 | 11-3 (17.8%) | 1974.1 | $86 / $62 |
-| 4 | WR-WR, heavy anchors | 9.8-4.2 | 12-2 (17.5%) | 1954.4 | $86 / $62 |
-| 5 | Triple WR, heavy anchors | 9.8-4.2 | 12-2 (17.5%) | 1954.4 | $86 / $62 |
-| 6 | Hero RB (RB + WR-WR), heavy anchors | 9.8-4.2 | 11-3 (18.3%) | 1965.1 | $86 / $62 |
-| 7 | Elite TE anchor, heavy anchors | 9.7-4.3 | 11-3 (16.5%) | 1946.5 | $85 / $61 |
-| 8 | Elite QB anchor, heavy anchors | 9.7-4.3 | 12-2 (16.5%) | 1955.2 | $84 / $60 |
-| 9 | RB-WR, even split | 9.7-4.3 | 12-2 (16.5%) | 1953.2 | $84 / $60 |
-| 10 | Robust RB (RB-RB), even split | 9.7-4.3 | 11-3 (16.5%) | 1953.3 | $83 / $59 |
-| 11 | Triple WR, even split | 9.7-4.3 | 11-3 (16%) | 1947.9 | $83 / $59 |
-| 12 | WR-WR, even split | 9.7-4.3 | 11-3 (16%) | 1947.9 | $83 / $59 |
-| 13 | Hero RB (RB + WR-WR), even split | 9.7-4.3 | 12-2 (16.5%) | 1953.2 | $83 / $59 |
-| 14 | Double RB + WR, even split | 9.7-4.3 | 11-3 (16.5%) | 1953.3 | $83 / $59 |
-| 15 | Robust RB (RB-RB), light anchors | 9.7-4.3 | 12-2 (16.5%) | 1953.3 | $82 / $68 |
-| 16 | RB-WR, light anchors | 9.7-4.3 | 12-2 (16.5%) | 1953.2 | $82 / $68 |
-| 17 | Double RB + WR, light anchors | 9.7-4.3 | 12-2 (16.5%) | 1953.3 | $81 / $67 |
-| 18 | WR-WR, light anchors | 9.7-4.3 | 11-3 (16%) | 1947.9 | $81 / $67 |
-| 19 | Triple WR, light anchors | 9.7-4.3 | 11-3 (16%) | 1947.9 | $81 / $67 |
-| 20 | Hero RB (RB + WR-WR), light anchors | 9.7-4.3 | 12-2 (16.5%) | 1953.2 | $81 / $67 |
-| 21 | Zero RB (WR-WR-TE), light anchors | 9.7-4.3 | 11-3 (16%) | 1947.9 | $81 / $67 |
-| 22 | Elite QB anchor, even split | 9.6-4.4 | 10-4 (17.5%) | 1949 | $81 / $57 |
-| 23 | Elite TE anchor, even split | 9.5-4.5 | 11-3 (17%) | 1929.5 | $81 / $57 |
-| 24 | Elite QB anchor, light anchors | 9.5-4.5 | 11-3 (16.5%) | 1933.4 | $79 / $65 |
-| 25 | Elite TE anchor, light anchors | 9.4-4.6 | 10-4 (16.5%) | 1921.6 | $80 / $66 |
-| 26 | Balanced (no anchor) | 9.4-4.6 | 10-4 (15.5%) | 1925.8 | $76 / $62 |
+| 1 | RB-WR, heavy anchors | 9.5-4.5 | 11-3 (18.5%) | 1965.1 | $86 / $62 |
+| 2 | Hero RB (RB + WR-WR), heavy anchors | 9.5-4.5 | 11-3 (18.5%) | 1965.1 | $86 / $62 |
+| 3 | Robust RB (RB-RB), heavy anchors | 9.4-4.6 | 10-4 (18.3%) | 1974.1 | $86 / $62 |
+| 4 | Double RB + WR, heavy anchors | 9.4-4.6 | 10-4 (18.3%) | 1974.1 | $86 / $62 |
+| 5 | WR-WR, heavy anchors | 9.4-4.6 | 10-4 (16%) | 1954.4 | $86 / $62 |
+| 6 | Triple WR, heavy anchors | 9.4-4.6 | 10-4 (16%) | 1954.4 | $86 / $62 |
+| 7 | Elite QB anchor, heavy anchors | 9.4-4.6 | 11-3 (18.3%) | 1955.2 | $84 / $60 |
+| 8 | RB-WR, even split | 9.4-4.6 | 11-3 (18%) | 1953.2 | $84 / $60 |
+| 9 | Robust RB (RB-RB), even split | 9.4-4.6 | 11-3 (18%) | 1953.3 | $83 / $59 |
+| 10 | Hero RB (RB + WR-WR), even split | 9.4-4.6 | 11-3 (18%) | 1953.2 | $83 / $59 |
+| 11 | Double RB + WR, even split | 9.4-4.6 | 11-3 (18%) | 1953.3 | $83 / $59 |
+| 12 | Robust RB (RB-RB), light anchors | 9.4-4.6 | 11-3 (17.8%) | 1953.3 | $82 / $68 |
+| 13 | RB-WR, light anchors | 9.4-4.6 | 11-3 (18%) | 1953.2 | $82 / $68 |
+| 14 | Double RB + WR, light anchors | 9.4-4.6 | 11-3 (17.8%) | 1953.3 | $81 / $67 |
+| 15 | Hero RB (RB + WR-WR), light anchors | 9.4-4.6 | 11-3 (18%) | 1953.2 | $81 / $67 |
+| 16 | Elite TE anchor, heavy anchors | 9.3-4.7 | 10-4 (16.5%) | 1946.5 | $85 / $61 |
+| 17 | Triple WR, even split | 9.3-4.7 | 10-4 (16.5%) | 1947.9 | $83 / $59 |
+| 18 | WR-WR, even split | 9.3-4.7 | 10-4 (16.5%) | 1947.9 | $83 / $59 |
+| 19 | WR-WR, light anchors | 9.3-4.7 | 10-4 (16.5%) | 1947.9 | $81 / $67 |
+| 20 | Triple WR, light anchors | 9.3-4.7 | 10-4 (16.5%) | 1947.9 | $81 / $67 |
+| 21 | Zero RB (WR-WR-TE), light anchors | 9.3-4.7 | 10-4 (16.5%) | 1947.9 | $81 / $67 |
+| 22 | Elite TE anchor, even split | 9.2-4.8 | 10-4 (18.5%) | 1929.5 | $81 / $57 |
+| 23 | Elite QB anchor, even split | 9.2-4.8 | 10-4 (17.8%) | 1949 | $81 / $57 |
+| 24 | Elite QB anchor, light anchors | 9.2-4.8 | 10-4 (16%) | 1933.4 | $79 / $65 |
+| 25 | Balanced (no anchor) | 9.1-4.9 | 10-4 (15.5%) | 1925.8 | $76 / $62 |
+| 26 | Elite TE anchor, light anchors | 9-5 | 10-4 (16.3%) | 1921.6 | $80 / $66 |
 
 _Records above are graded with the measured risk model ON (real per-player
 durability + tier bust/breakout from 15 seasons of Sleeper actuals)._
@@ -48,68 +48,42 @@ flattered because it never priced in that studs bust or miss time.
 
 | # | Strategy | Before (healthy) | After (risk on) | Wins lost to risk |
 |---|----------|------------------|-----------------|-------------------|
-| 1 | Robust RB (RB-RB), heavy anchors | 11.2-2.8 | 9.8-4.2 | -1.4 |
-| 2 | RB-WR, heavy anchors | 11-3 | 9.8-4.2 | -1.2 |
-| 3 | Double RB + WR, heavy anchors | 11.2-2.8 | 9.8-4.2 | -1.4 |
-| 4 | WR-WR, heavy anchors | 10.9-3.1 | 9.8-4.2 | -1.1 |
-| 5 | Triple WR, heavy anchors | 10.9-3.1 | 9.8-4.2 | -1.1 |
-| 6 | Hero RB (RB + WR-WR), heavy anchors | 11-3 | 9.8-4.2 | -1.2 |
-| 7 | Elite TE anchor, heavy anchors | 10.7-3.3 | 9.7-4.3 | -1 |
-| 8 | Elite QB anchor, heavy anchors | 10.9-3.1 | 9.7-4.3 | -1.2 |
-| 9 | RB-WR, even split | 10.9-3.1 | 9.7-4.3 | -1.2 |
-| 10 | Robust RB (RB-RB), even split | 10.9-3.1 | 9.7-4.3 | -1.2 |
-| 11 | Triple WR, even split | 10.8-3.2 | 9.7-4.3 | -1.1 |
-| 12 | WR-WR, even split | 10.8-3.2 | 9.7-4.3 | -1.1 |
-| 13 | Hero RB (RB + WR-WR), even split | 10.9-3.1 | 9.7-4.3 | -1.2 |
-| 14 | Double RB + WR, even split | 10.9-3.1 | 9.7-4.3 | -1.2 |
-| 15 | Robust RB (RB-RB), light anchors | 10.9-3.1 | 9.7-4.3 | -1.2 |
-| 16 | RB-WR, light anchors | 10.9-3.1 | 9.7-4.3 | -1.2 |
-| 17 | Double RB + WR, light anchors | 10.9-3.1 | 9.7-4.3 | -1.2 |
-| 18 | WR-WR, light anchors | 10.8-3.2 | 9.7-4.3 | -1.1 |
-| 19 | Triple WR, light anchors | 10.8-3.2 | 9.7-4.3 | -1.1 |
-| 20 | Hero RB (RB + WR-WR), light anchors | 10.9-3.1 | 9.7-4.3 | -1.2 |
-| 21 | Zero RB (WR-WR-TE), light anchors | 10.8-3.2 | 9.7-4.3 | -1.1 |
-| 22 | Elite QB anchor, even split | 10.8-3.2 | 9.6-4.4 | -1.2 |
-| 23 | Elite TE anchor, even split | 10.6-3.4 | 9.5-4.5 | -1.1 |
-| 24 | Elite QB anchor, light anchors | 10.6-3.4 | 9.5-4.5 | -1.1 |
-| 25 | Elite TE anchor, light anchors | 10.4-3.6 | 9.4-4.6 | -1 |
-| 26 | Balanced (no anchor) | 10.5-3.5 | 9.4-4.6 | -1.1 |
+| 1 | RB-WR, heavy anchors | 11-3 | 9.5-4.5 | -1.5 |
+| 2 | Hero RB (RB + WR-WR), heavy anchors | 11-3 | 9.5-4.5 | -1.5 |
+| 3 | Robust RB (RB-RB), heavy anchors | 11.2-2.8 | 9.4-4.6 | -1.8 |
+| 4 | Double RB + WR, heavy anchors | 11.2-2.8 | 9.4-4.6 | -1.8 |
+| 5 | WR-WR, heavy anchors | 10.9-3.1 | 9.4-4.6 | -1.5 |
+| 6 | Triple WR, heavy anchors | 10.9-3.1 | 9.4-4.6 | -1.5 |
+| 7 | Elite QB anchor, heavy anchors | 10.9-3.1 | 9.4-4.6 | -1.5 |
+| 8 | RB-WR, even split | 10.9-3.1 | 9.4-4.6 | -1.5 |
+| 9 | Robust RB (RB-RB), even split | 10.9-3.1 | 9.4-4.6 | -1.5 |
+| 10 | Hero RB (RB + WR-WR), even split | 10.9-3.1 | 9.4-4.6 | -1.5 |
+| 11 | Double RB + WR, even split | 10.9-3.1 | 9.4-4.6 | -1.5 |
+| 12 | Robust RB (RB-RB), light anchors | 10.9-3.1 | 9.4-4.6 | -1.5 |
+| 13 | RB-WR, light anchors | 10.9-3.1 | 9.4-4.6 | -1.5 |
+| 14 | Double RB + WR, light anchors | 10.9-3.1 | 9.4-4.6 | -1.5 |
+| 15 | Hero RB (RB + WR-WR), light anchors | 10.9-3.1 | 9.4-4.6 | -1.5 |
+| 16 | Elite TE anchor, heavy anchors | 10.7-3.3 | 9.3-4.7 | -1.4 |
+| 17 | Triple WR, even split | 10.8-3.2 | 9.3-4.7 | -1.5 |
+| 18 | WR-WR, even split | 10.8-3.2 | 9.3-4.7 | -1.5 |
+| 19 | WR-WR, light anchors | 10.8-3.2 | 9.3-4.7 | -1.5 |
+| 20 | Triple WR, light anchors | 10.8-3.2 | 9.3-4.7 | -1.5 |
+| 21 | Zero RB (WR-WR-TE), light anchors | 10.8-3.2 | 9.3-4.7 | -1.5 |
+| 22 | Elite TE anchor, even split | 10.6-3.4 | 9.2-4.8 | -1.4 |
+| 23 | Elite QB anchor, even split | 10.8-3.2 | 9.2-4.8 | -1.6 |
+| 24 | Elite QB anchor, light anchors | 10.6-3.4 | 9.2-4.8 | -1.4 |
+| 25 | Balanced (no anchor) | 10.5-3.5 | 9.1-4.9 | -1.4 |
+| 26 | Elite TE anchor, light anchors | 10.4-3.6 | 9-5 | -1.4 |
 
 Healthy-basis winner: **Robust RB (RB-RB), heavy anchors** (11.2 wins).
-Risk-adjusted winner: **Robust RB (RB-RB), heavy anchors** (9.8 wins).
-The top strategy is unchanged once risk is priced in.
+Risk-adjusted winner: **RB-WR, heavy anchors** (9.5 wins).
+The top strategy CHANGES once risk is priced in: "Robust RB (RB-RB), heavy anchors" no longer leads.
 
-### 1. Robust RB (RB-RB), heavy anchors  (stars-and-scrubs, aggressive risk)
-
-Pool-generated Stars & Scrubs: 8 anchors (RB/WR/QB/DEF/TE), rest at room price.
-
-- Projected record: 9.8-4.2 (best 14-0, worst 2-12).
-- Why: The board supports paying up for Jahmyr Gibbs (~$76), Christian McCaffrey (~$67), Luther Burden III (~$14). RB runs COOL (0.84x room vs national). This shape spends $194 on anchors and keeps $6 to complete the roster at room prices.
-- Philosophy: Pattern sweep: Robust RB (RB-RB), heavy anchors. Built from the live board: stars and scrubs shape emerged as a completable $200 roster given the current pool.
-- Budget split: QB 7%, RB 72%, WR 14%, TE 3%, DST 3%, K 0%, bench 1%.
-- Target prices (expect / walk-up to win): Jahmyr Gibbs $76 (win by $84), Christian McCaffrey $67 (win by $74), Luther Burden III $14 (win by $15), Jalen Hurts $13 (win by $14), Davante Adams $13 (win by $14).
-  Targets $183 + reserve $8 = $191 of $200 (completable).
-
-  Most common roster cores this strategy landed:
-  - 36% of drafts: Jahmyr Gibbs + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 9.8-4.2.
-  - 7% of drafts: Jahmyr Gibbs + Bijan Robinson + Luther Burden III - avg spend $200, avg record 10.2-3.8.
-  - 4.5% of drafts: Jahmyr Gibbs + Jayden Daniels + Christian McCaffrey - avg spend $200, avg record 9.4-4.6.
-
-  Players you land most:
-  - Tony Pollard (RB): 85.8% of drafts, avg $1.
-  - Zach Charbonnet (RB): 83.3% of drafts, avg $1.
-  - Jahmyr Gibbs (RB): 83% of drafts, avg $88.
-  - Jameson Williams (WR): 81.8% of drafts, avg $1.
-  - Christian McCaffrey (RB): 81% of drafts, avg $85.
-  - Luther Burden (WR): 77.5% of drafts, avg $1.
-  - Courtland Sutton (WR): 76.8% of drafts, avg $1.
-  - Houston Texans (DEF): 64.3% of drafts, avg $1.
-
-### 2. RB-WR, heavy anchors  (stars-and-scrubs, aggressive risk)
+### 1. RB-WR, heavy anchors  (stars-and-scrubs, aggressive risk)
 
 Pool-generated Stars & Scrubs: 8 anchors (RB/WR/QB/DEF/TE), rest at room price.
 
-- Projected record: 9.8-4.2 (best 14-0, worst 2-12).
+- Projected record: 9.5-4.5 (best 14-0, worst 2-12).
 - Why: The board supports paying up for Jahmyr Gibbs (~$76), Amon-Ra St. Brown (~$64), Luther Burden III (~$14). RB runs COOL (0.84x room vs national). This shape spends $190 on anchors and keeps $10 to complete the roster at room prices.
 - Philosophy: Pattern sweep: RB-WR, heavy anchors. Built from the live board: stars and scrubs shape emerged as a completable $200 roster given the current pool.
 - Budget split: QB 7%, RB 44%, WR 39%, TE 3%, DST 3%, K 0%, bench 4%.
@@ -117,9 +91,9 @@ Pool-generated Stars & Scrubs: 8 anchors (RB/WR/QB/DEF/TE), rest at room price.
   Targets $179 + reserve $8 = $187 of $200 (completable).
 
   Most common roster cores this strategy landed:
-  - 16% of drafts: Jahmyr Gibbs + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 9.9-4.1.
-  - 11.5% of drafts: Jahmyr Gibbs + Bijan Robinson + Luther Burden III - avg spend $200, avg record 9.5-4.5.
-  - 11% of drafts: Jahmyr Gibbs + Luther Burden III + Amon-Ra St. Brown - avg spend $200, avg record 9.4-4.6.
+  - 16% of drafts: Jahmyr Gibbs + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 9.5-4.5.
+  - 11.5% of drafts: Jahmyr Gibbs + Bijan Robinson + Luther Burden III - avg spend $200, avg record 9.2-4.8.
+  - 11% of drafts: Jahmyr Gibbs + Luther Burden III + Amon-Ra St. Brown - avg spend $200, avg record 9.1-4.9.
 
   Players you land most:
   - Jahmyr Gibbs (RB): 86.5% of drafts, avg $88.
@@ -131,21 +105,47 @@ Pool-generated Stars & Scrubs: 8 anchors (RB/WR/QB/DEF/TE), rest at room price.
   - Houston Texans (DEF): 64.8% of drafts, avg $1.
   - Tee Higgins (WR): 61.8% of drafts, avg $1.
 
-### 3. Double RB + WR, heavy anchors  (stars-and-scrubs, aggressive risk)
+### 2. Hero RB (RB + WR-WR), heavy anchors  (stars-and-scrubs, aggressive risk)
 
 Pool-generated Stars & Scrubs: 8 anchors (RB/WR/QB/TE/DEF), rest at room price.
 
-- Projected record: 9.8-4.2 (best 14-0, worst 2-12).
-- Why: The board supports paying up for Jahmyr Gibbs (~$76), Christian McCaffrey (~$67), Luther Burden III (~$14). RB runs COOL (0.84x room vs national). This shape spends $188 on anchors and keeps $12 to complete the roster at room prices.
-- Philosophy: Pattern sweep: Double RB + WR, heavy anchors. Built from the live board: stars and scrubs shape emerged as a completable $200 roster given the current pool.
-- Budget split: QB 7%, RB 72%, WR 8%, TE 6%, DST 3%, K 0%, bench 4%.
-- Target prices (expect / walk-up to win): Jahmyr Gibbs $76 (win by $84), Christian McCaffrey $67 (win by $74), Luther Burden III $14 (win by $15), Jalen Hurts $13 (win by $14), Sam LaPorta $7 (win by $8).
-  Targets $177 + reserve $8 = $185 of $200 (completable).
+- Projected record: 9.5-4.5 (best 14-0, worst 2-12).
+- Why: The board supports paying up for Jahmyr Gibbs (~$76), Amon-Ra St. Brown (~$64), Jalen Hurts (~$13). RB runs COOL (0.84x room vs national). This shape spends $183 on anchors and keeps $17 to complete the roster at room prices.
+- Philosophy: Pattern sweep: Hero RB (RB + WR-WR), heavy anchors. Built from the live board: stars and scrubs shape emerged as a completable $200 roster given the current pool.
+- Budget split: QB 7%, RB 44%, WR 33%, TE 6%, DST 3%, K 0%, bench 7%.
+- Target prices (expect / walk-up to win): Jahmyr Gibbs $76 (win by $84), Amon-Ra St. Brown $64 (win by $70), Jalen Hurts $13 (win by $14), Quinshon Judkins $12 (win by $13), Sam LaPorta $7 (win by $8).
+  Targets $172 + reserve $8 = $180 of $200 (completable).
 
   Most common roster cores this strategy landed:
-  - 36% of drafts: Jahmyr Gibbs + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 9.8-4.2.
-  - 7% of drafts: Jahmyr Gibbs + Bijan Robinson + Luther Burden III - avg spend $200, avg record 10.2-3.8.
-  - 4.5% of drafts: Jahmyr Gibbs + Jayden Daniels + Christian McCaffrey - avg spend $200, avg record 9.4-4.6.
+  - 16% of drafts: Jahmyr Gibbs + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 9.5-4.5.
+  - 11.5% of drafts: Jahmyr Gibbs + Bijan Robinson + Luther Burden III - avg spend $200, avg record 9.2-4.8.
+  - 11% of drafts: Jahmyr Gibbs + Luther Burden III + Amon-Ra St. Brown - avg spend $200, avg record 9.1-4.9.
+
+  Players you land most:
+  - Jahmyr Gibbs (RB): 86.5% of drafts, avg $88.
+  - Tony Pollard (RB): 84.8% of drafts, avg $1.
+  - Jameson Williams (WR): 83% of drafts, avg $1.
+  - Zach Charbonnet (RB): 82.8% of drafts, avg $1.
+  - Courtland Sutton (WR): 76.8% of drafts, avg $1.
+  - Luther Burden (WR): 75.8% of drafts, avg $1.
+  - Houston Texans (DEF): 64.8% of drafts, avg $1.
+  - Tee Higgins (WR): 61.8% of drafts, avg $1.
+
+### 3. Robust RB (RB-RB), heavy anchors  (stars-and-scrubs, aggressive risk)
+
+Pool-generated Stars & Scrubs: 8 anchors (RB/WR/QB/DEF/TE), rest at room price.
+
+- Projected record: 9.4-4.6 (best 14-0, worst 2-12).
+- Why: The board supports paying up for Jahmyr Gibbs (~$76), Christian McCaffrey (~$67), Luther Burden III (~$14). RB runs COOL (0.84x room vs national). This shape spends $194 on anchors and keeps $6 to complete the roster at room prices.
+- Philosophy: Pattern sweep: Robust RB (RB-RB), heavy anchors. Built from the live board: stars and scrubs shape emerged as a completable $200 roster given the current pool.
+- Budget split: QB 7%, RB 72%, WR 14%, TE 3%, DST 3%, K 0%, bench 1%.
+- Target prices (expect / walk-up to win): Jahmyr Gibbs $76 (win by $84), Christian McCaffrey $67 (win by $74), Luther Burden III $14 (win by $15), Jalen Hurts $13 (win by $14), Davante Adams $13 (win by $14).
+  Targets $183 + reserve $8 = $191 of $200 (completable).
+
+  Most common roster cores this strategy landed:
+  - 36% of drafts: Jahmyr Gibbs + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 9.5-4.5.
+  - 7% of drafts: Jahmyr Gibbs + Bijan Robinson + Luther Burden III - avg spend $200, avg record 9.8-4.2.
+  - 4.5% of drafts: Jahmyr Gibbs + Jayden Daniels + Christian McCaffrey - avg spend $200, avg record 8.4-5.6.
 
   Players you land most:
   - Tony Pollard (RB): 85.8% of drafts, avg $1.
@@ -157,11 +157,37 @@ Pool-generated Stars & Scrubs: 8 anchors (RB/WR/QB/TE/DEF), rest at room price.
   - Courtland Sutton (WR): 76.8% of drafts, avg $1.
   - Houston Texans (DEF): 64.3% of drafts, avg $1.
 
-### 4. WR-WR, heavy anchors  (stars-and-scrubs, aggressive risk)
+### 4. Double RB + WR, heavy anchors  (stars-and-scrubs, aggressive risk)
+
+Pool-generated Stars & Scrubs: 8 anchors (RB/WR/QB/TE/DEF), rest at room price.
+
+- Projected record: 9.4-4.6 (best 14-0, worst 2-12).
+- Why: The board supports paying up for Jahmyr Gibbs (~$76), Christian McCaffrey (~$67), Luther Burden III (~$14). RB runs COOL (0.84x room vs national). This shape spends $188 on anchors and keeps $12 to complete the roster at room prices.
+- Philosophy: Pattern sweep: Double RB + WR, heavy anchors. Built from the live board: stars and scrubs shape emerged as a completable $200 roster given the current pool.
+- Budget split: QB 7%, RB 72%, WR 8%, TE 6%, DST 3%, K 0%, bench 4%.
+- Target prices (expect / walk-up to win): Jahmyr Gibbs $76 (win by $84), Christian McCaffrey $67 (win by $74), Luther Burden III $14 (win by $15), Jalen Hurts $13 (win by $14), Sam LaPorta $7 (win by $8).
+  Targets $177 + reserve $8 = $185 of $200 (completable).
+
+  Most common roster cores this strategy landed:
+  - 36% of drafts: Jahmyr Gibbs + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 9.5-4.5.
+  - 7% of drafts: Jahmyr Gibbs + Bijan Robinson + Luther Burden III - avg spend $200, avg record 9.8-4.2.
+  - 4.5% of drafts: Jahmyr Gibbs + Jayden Daniels + Christian McCaffrey - avg spend $200, avg record 8.4-5.6.
+
+  Players you land most:
+  - Tony Pollard (RB): 85.8% of drafts, avg $1.
+  - Zach Charbonnet (RB): 83.3% of drafts, avg $1.
+  - Jahmyr Gibbs (RB): 83% of drafts, avg $88.
+  - Jameson Williams (WR): 81.8% of drafts, avg $1.
+  - Christian McCaffrey (RB): 81% of drafts, avg $85.
+  - Luther Burden (WR): 77.5% of drafts, avg $1.
+  - Courtland Sutton (WR): 76.8% of drafts, avg $1.
+  - Houston Texans (DEF): 64.3% of drafts, avg $1.
+
+### 5. WR-WR, heavy anchors  (stars-and-scrubs, aggressive risk)
 
 Pool-generated Stars & Scrubs: 8 anchors (WR/RB/QB/TE/DEF), rest at room price.
 
-- Projected record: 9.8-4.2 (best 14-0, worst 2-12).
+- Projected record: 9.4-4.6 (best 14-0, worst 1-13).
 - Why: The board supports paying up for Puka Nacua (~$76), Amon-Ra St. Brown (~$64), Jalen Hurts (~$13). WR runs HOT (1.18x room vs national). This shape spends $183 on anchors and keeps $17 to complete the roster at room prices.
 - Philosophy: Pattern sweep: WR-WR, heavy anchors. Built from the live board: stars and scrubs shape emerged as a completable $200 roster given the current pool.
 - Budget split: QB 7%, RB 7%, WR 70%, TE 6%, DST 3%, K 0%, bench 7%.
@@ -169,9 +195,9 @@ Pool-generated Stars & Scrubs: 8 anchors (WR/RB/QB/TE/DEF), rest at room price.
   Targets $172 + reserve $8 = $180 of $200 (completable).
 
   Most common roster cores this strategy landed:
-  - 8.3% of drafts: Puka Nacua + Bijan Robinson + Luther Burden III - avg spend $200, avg record 9.9-4.1.
-  - 7% of drafts: Puka Nacua + Jahmyr Gibbs + Luther Burden III - avg spend $200, avg record 10.6-3.4.
-  - 7% of drafts: Puka Nacua + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 9.6-4.4.
+  - 8.3% of drafts: Puka Nacua + Bijan Robinson + Luther Burden III - avg spend $200, avg record 9.5-4.5.
+  - 7% of drafts: Puka Nacua + Jahmyr Gibbs + Luther Burden III - avg spend $200, avg record 10.3-3.7.
+  - 7% of drafts: Puka Nacua + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 9.4-4.6.
 
   Players you land most:
   - Tony Pollard (RB): 82.8% of drafts, avg $1.
@@ -183,11 +209,11 @@ Pool-generated Stars & Scrubs: 8 anchors (WR/RB/QB/TE/DEF), rest at room price.
   - Puka Nacua (WR): 64.5% of drafts, avg $88.
   - Tee Higgins (WR): 64.5% of drafts, avg $1.
 
-### 5. Triple WR, heavy anchors  (stars-and-scrubs, aggressive risk)
+### 6. Triple WR, heavy anchors  (stars-and-scrubs, aggressive risk)
 
 Pool-generated Stars & Scrubs: 8 anchors (WR/RB/QB/DEF/TE), rest at room price.
 
-- Projected record: 9.8-4.2 (best 14-0, worst 2-12).
+- Projected record: 9.4-4.6 (best 14-0, worst 1-13).
 - Why: The board supports paying up for Puka Nacua (~$76), Amon-Ra St. Brown (~$64), Jalen Hurts (~$13). WR runs HOT (1.18x room vs national). This shape spends $177 on anchors and keeps $23 to complete the roster at room prices.
 - Philosophy: Pattern sweep: Triple WR, heavy anchors. Built from the live board: stars and scrubs shape emerged as a completable $200 roster given the current pool.
 - Budget split: QB 7%, RB 7%, WR 71%, TE 2%, DST 3%, K 0%, bench 10%.
@@ -195,9 +221,9 @@ Pool-generated Stars & Scrubs: 8 anchors (WR/RB/QB/DEF/TE), rest at room price.
   Targets $171 + reserve $8 = $179 of $200 (completable).
 
   Most common roster cores this strategy landed:
-  - 8.3% of drafts: Puka Nacua + Bijan Robinson + Luther Burden III - avg spend $200, avg record 9.9-4.1.
-  - 7% of drafts: Puka Nacua + Jahmyr Gibbs + Luther Burden III - avg spend $200, avg record 10.6-3.4.
-  - 7% of drafts: Puka Nacua + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 9.6-4.4.
+  - 8.3% of drafts: Puka Nacua + Bijan Robinson + Luther Burden III - avg spend $200, avg record 9.5-4.5.
+  - 7% of drafts: Puka Nacua + Jahmyr Gibbs + Luther Burden III - avg spend $200, avg record 10.3-3.7.
+  - 7% of drafts: Puka Nacua + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 9.4-4.6.
 
   Players you land most:
   - Tony Pollard (RB): 82.8% of drafts, avg $1.
@@ -209,63 +235,11 @@ Pool-generated Stars & Scrubs: 8 anchors (WR/RB/QB/DEF/TE), rest at room price.
   - Puka Nacua (WR): 64.5% of drafts, avg $88.
   - Tee Higgins (WR): 64.5% of drafts, avg $1.
 
-### 6. Hero RB (RB + WR-WR), heavy anchors  (stars-and-scrubs, aggressive risk)
+### 7. Elite QB anchor, heavy anchors  (stars-and-scrubs, aggressive risk)
 
 Pool-generated Stars & Scrubs: 8 anchors (RB/WR/QB/TE/DEF), rest at room price.
 
-- Projected record: 9.8-4.2 (best 14-0, worst 2-12).
-- Why: The board supports paying up for Jahmyr Gibbs (~$76), Amon-Ra St. Brown (~$64), Jalen Hurts (~$13). RB runs COOL (0.84x room vs national). This shape spends $183 on anchors and keeps $17 to complete the roster at room prices.
-- Philosophy: Pattern sweep: Hero RB (RB + WR-WR), heavy anchors. Built from the live board: stars and scrubs shape emerged as a completable $200 roster given the current pool.
-- Budget split: QB 7%, RB 44%, WR 33%, TE 6%, DST 3%, K 0%, bench 7%.
-- Target prices (expect / walk-up to win): Jahmyr Gibbs $76 (win by $84), Amon-Ra St. Brown $64 (win by $70), Jalen Hurts $13 (win by $14), Quinshon Judkins $12 (win by $13), Sam LaPorta $7 (win by $8).
-  Targets $172 + reserve $8 = $180 of $200 (completable).
-
-  Most common roster cores this strategy landed:
-  - 16% of drafts: Jahmyr Gibbs + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 9.9-4.1.
-  - 11.5% of drafts: Jahmyr Gibbs + Bijan Robinson + Luther Burden III - avg spend $200, avg record 9.5-4.5.
-  - 11% of drafts: Jahmyr Gibbs + Luther Burden III + Amon-Ra St. Brown - avg spend $200, avg record 9.4-4.6.
-
-  Players you land most:
-  - Jahmyr Gibbs (RB): 86.5% of drafts, avg $88.
-  - Tony Pollard (RB): 84.8% of drafts, avg $1.
-  - Jameson Williams (WR): 83% of drafts, avg $1.
-  - Zach Charbonnet (RB): 82.8% of drafts, avg $1.
-  - Courtland Sutton (WR): 76.8% of drafts, avg $1.
-  - Luther Burden (WR): 75.8% of drafts, avg $1.
-  - Houston Texans (DEF): 64.8% of drafts, avg $1.
-  - Tee Higgins (WR): 61.8% of drafts, avg $1.
-
-### 7. Elite TE anchor, heavy anchors  (stars-and-scrubs, aggressive risk)
-
-Pool-generated Stars & Scrubs: 8 anchors (WR/TE/RB/QB/DEF), rest at room price.
-
-- Projected record: 9.7-4.3 (best 14-0, worst 2-12).
-- Why: The board supports paying up for Puka Nacua (~$76), Brock Bowers (~$49), Luther Burden III (~$14). WR runs HOT (1.18x room vs national). This shape spends $175 on anchors and keeps $25 to complete the roster at room prices.
-- Philosophy: Pattern sweep: Elite TE anchor, heavy anchors. Built from the live board: stars and scrubs shape emerged as a completable $200 roster given the current pool.
-- Budget split: QB 7%, RB 7%, WR 45%, TE 27%, DST 3%, K 0%, bench 11%.
-- Target prices (expect / walk-up to win): Puka Nacua $76 (win by $84), Brock Bowers $49 (win by $54), Luther Burden III $14 (win by $15), Jalen Hurts $13 (win by $14), Quinshon Judkins $12 (win by $13).
-  Targets $164 + reserve $8 = $172 of $200 (completable).
-
-  Most common roster cores this strategy landed:
-  - 11% of drafts: Puka Nacua + Bijan Robinson + Luther Burden III - avg spend $200, avg record 10-4.
-  - 8.3% of drafts: Puka Nacua + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 9.8-4.2.
-  - 8% of drafts: Puka Nacua + Jahmyr Gibbs + Luther Burden III - avg spend $200, avg record 10.6-3.4.
-
-  Players you land most:
-  - Tony Pollard (RB): 84% of drafts, avg $1.
-  - Zach Charbonnet (RB): 81.8% of drafts, avg $1.
-  - Jameson Williams (WR): 80.8% of drafts, avg $1.
-  - Luther Burden (WR): 78% of drafts, avg $1.
-  - Courtland Sutton (WR): 70.5% of drafts, avg $1.
-  - Puka Nacua (WR): 68.3% of drafts, avg $88.
-  - Houston Texans (DEF): 67% of drafts, avg $1.
-  - Tee Higgins (WR): 63.8% of drafts, avg $1.
-
-### 8. Elite QB anchor, heavy anchors  (stars-and-scrubs, aggressive risk)
-
-Pool-generated Stars & Scrubs: 8 anchors (RB/WR/QB/TE/DEF), rest at room price.
-
-- Projected record: 9.7-4.3 (best 14-0, worst 1-13).
+- Projected record: 9.4-4.6 (best 14-0, worst 1-13).
 - Why: The board supports paying up for Jahmyr Gibbs (~$76), Josh Allen (~$36), Zay Flowers (~$24). RB runs COOL (0.84x room vs national). This shape spends $179 on anchors and keeps $21 to complete the roster at room prices.
 - Philosophy: Pattern sweep: Elite QB anchor, heavy anchors. Built from the live board: stars and scrubs shape emerged as a completable $200 roster given the current pool.
 - Budget split: QB 18%, RB 44%, WR 19%, TE 6%, DST 3%, K 0%, bench 10%.
@@ -273,9 +247,9 @@ Pool-generated Stars & Scrubs: 8 anchors (RB/WR/QB/TE/DEF), rest at room price.
   Targets $162 + reserve $8 = $170 of $200 (completable).
 
   Most common roster cores this strategy landed:
-  - 18.8% of drafts: Jahmyr Gibbs + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 9.8-4.2.
-  - 15% of drafts: Jahmyr Gibbs + Bijan Robinson + Luther Burden III - avg spend $200, avg record 9.8-4.2.
-  - 4% of drafts: Ja'Marr Chase + Jahmyr Gibbs + Zay Flowers - avg spend $200, avg record 10.8-3.2.
+  - 18.8% of drafts: Jahmyr Gibbs + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 9.5-4.5.
+  - 15% of drafts: Jahmyr Gibbs + Bijan Robinson + Luther Burden III - avg spend $200, avg record 9.5-4.5.
+  - 4% of drafts: Ja'Marr Chase + Jahmyr Gibbs + Zay Flowers - avg spend $200, avg record 10.4-3.6.
 
   Players you land most:
   - Jahmyr Gibbs (RB): 91.3% of drafts, avg $88.
@@ -287,11 +261,11 @@ Pool-generated Stars & Scrubs: 8 anchors (RB/WR/QB/TE/DEF), rest at room price.
   - Houston Texans (DEF): 62.5% of drafts, avg $1.
   - Tee Higgins (WR): 60.3% of drafts, avg $1.
 
-### 9. RB-WR, even split  (studs-and-duds, aggressive risk)
+### 8. RB-WR, even split  (studs-and-duds, aggressive risk)
 
 Pool-generated Studs & Duds: 8 anchors (RB/WR/QB/TE/DEF), rest at room price.
 
-- Projected record: 9.7-4.3 (best 14-0, worst 1-13).
+- Projected record: 9.4-4.6 (best 14-0, worst 1-13).
 - Why: The board supports paying up for Jahmyr Gibbs (~$76), Zay Flowers (~$24), Luther Burden III (~$14). RB runs COOL (0.84x room vs national). This shape spends $156 on anchors and keeps $44 to complete the roster at room prices.
 - Philosophy: Pattern sweep: RB-WR, even split. Built from the live board: studs and duds shape emerged as a completable $200 roster given the current pool.
 - Budget split: QB 7%, RB 44%, WR 19%, TE 6%, DST 3%, K 0%, bench 21%.
@@ -299,9 +273,9 @@ Pool-generated Studs & Duds: 8 anchors (RB/WR/QB/TE/DEF), rest at room price.
   Targets $139 + reserve $8 = $147 of $200 (completable).
 
   Most common roster cores this strategy landed:
-  - 18.8% of drafts: Jahmyr Gibbs + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 9.8-4.2.
-  - 15% of drafts: Jahmyr Gibbs + Bijan Robinson + Luther Burden III - avg spend $200, avg record 9.8-4.2.
-  - 4% of drafts: Ja'Marr Chase + Jahmyr Gibbs + Zay Flowers - avg spend $200, avg record 10.8-3.2.
+  - 18.8% of drafts: Jahmyr Gibbs + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 9.5-4.5.
+  - 15% of drafts: Jahmyr Gibbs + Bijan Robinson + Luther Burden III - avg spend $200, avg record 9.5-4.5.
+  - 4% of drafts: Ja'Marr Chase + Jahmyr Gibbs + Zay Flowers - avg spend $200, avg record 10.4-3.6.
 
   Players you land most:
   - Jahmyr Gibbs (RB): 91.3% of drafts, avg $88.
@@ -313,11 +287,11 @@ Pool-generated Studs & Duds: 8 anchors (RB/WR/QB/TE/DEF), rest at room price.
   - Houston Texans (DEF): 62.5% of drafts, avg $1.
   - Tee Higgins (WR): 60.3% of drafts, avg $1.
 
-### 10. Robust RB (RB-RB), even split  (studs-and-duds, aggressive risk)
+### 9. Robust RB (RB-RB), even split  (studs-and-duds, aggressive risk)
 
 Pool-generated Studs & Duds: 8 anchors (RB/WR/QB/TE/DEF), rest at room price.
 
-- Projected record: 9.7-4.3 (best 14-0, worst 1-13).
+- Projected record: 9.4-4.6 (best 14-0, worst 1-13).
 - Why: The board supports paying up for Jahmyr Gibbs (~$76), Jeremiyah Love (~$29), Emeka Egbuka (~$16). RB runs COOL (0.84x room vs national). This shape spends $165 on anchors and keeps $35 to complete the roster at room prices.
 - Philosophy: Pattern sweep: Robust RB (RB-RB), even split. Built from the live board: studs and duds shape emerged as a completable $200 roster given the current pool.
 - Budget split: QB 7%, RB 53%, WR 15%, TE 6%, DST 3%, K 0%, bench 16%.
@@ -325,9 +299,9 @@ Pool-generated Studs & Duds: 8 anchors (RB/WR/QB/TE/DEF), rest at room price.
   Targets $148 + reserve $8 = $156 of $200 (completable).
 
   Most common roster cores this strategy landed:
-  - 18.8% of drafts: Jahmyr Gibbs + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 9.8-4.2.
-  - 15% of drafts: Jahmyr Gibbs + Bijan Robinson + Luther Burden III - avg spend $200, avg record 9.8-4.2.
-  - 4% of drafts: Ja'Marr Chase + Jahmyr Gibbs + Zay Flowers - avg spend $200, avg record 10.8-3.2.
+  - 18.8% of drafts: Jahmyr Gibbs + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 9.5-4.5.
+  - 15% of drafts: Jahmyr Gibbs + Bijan Robinson + Luther Burden III - avg spend $200, avg record 9.5-4.5.
+  - 4% of drafts: Ja'Marr Chase + Jahmyr Gibbs + Zay Flowers - avg spend $200, avg record 10.4-3.6.
 
   Players you land most:
   - Jahmyr Gibbs (RB): 91.3% of drafts, avg $88.
@@ -339,63 +313,11 @@ Pool-generated Studs & Duds: 8 anchors (RB/WR/QB/TE/DEF), rest at room price.
   - Houston Texans (DEF): 62.8% of drafts, avg $1.
   - Tee Higgins (WR): 60.3% of drafts, avg $1.
 
-### 11. Triple WR, even split  (wr-heavy-auction, aggressive risk)
-
-Pool-generated WR Heavy (Auction): 8 anchors (WR/RB/QB/DEF/TE), rest at room price.
-
-- Projected record: 9.7-4.3 (best 14-0, worst 1-13).
-- Why: The board supports paying up for Puka Nacua (~$76), Zay Flowers (~$24), Jalen Hurts (~$13). WR runs HOT (1.18x room vs national). This shape spends $145 on anchors and keeps $55 to complete the roster at room prices.
-- Philosophy: Pattern sweep: Triple WR, even split. Built from the live board: wr heavy shape emerged as a completable $200 roster given the current pool.
-- Budget split: QB 7%, RB 7%, WR 55%, TE 2%, DST 3%, K 0%, bench 26%.
-- Target prices (expect / walk-up to win): Puka Nacua $76 (win by $84), Zay Flowers $24 (win by $26), Jalen Hurts $13 (win by $14), Quinshon Judkins $12 (win by $13), Rome Odunze $9 (win by $10).
-  Targets $134 + reserve $8 = $142 of $200 (completable).
-
-  Most common roster cores this strategy landed:
-  - 11% of drafts: Puka Nacua + Bijan Robinson + Luther Burden III - avg spend $200, avg record 10-4.
-  - 8.3% of drafts: Puka Nacua + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 9.8-4.2.
-  - 8% of drafts: Puka Nacua + Jahmyr Gibbs + Luther Burden III - avg spend $200, avg record 10.6-3.4.
-
-  Players you land most:
-  - Tony Pollard (RB): 83.3% of drafts, avg $1.
-  - Zach Charbonnet (RB): 82% of drafts, avg $1.
-  - Jameson Williams (WR): 80% of drafts, avg $1.
-  - Luther Burden (WR): 77.5% of drafts, avg $1.
-  - Courtland Sutton (WR): 70.8% of drafts, avg $1.
-  - Puka Nacua (WR): 68.3% of drafts, avg $88.
-  - Houston Texans (DEF): 67% of drafts, avg $1.
-  - Tee Higgins (WR): 63% of drafts, avg $1.
-
-### 12. WR-WR, even split  (studs-and-duds, aggressive risk)
-
-Pool-generated Studs & Duds: 8 anchors (WR/RB/QB/TE/DEF), rest at room price.
-
-- Projected record: 9.7-4.3 (best 14-0, worst 1-13).
-- Why: The board supports paying up for Puka Nacua (~$76), Zay Flowers (~$24), Jalen Hurts (~$13). WR runs HOT (1.18x room vs national). This shape spends $143 on anchors and keeps $57 to complete the roster at room prices.
-- Philosophy: Pattern sweep: WR-WR, even split. Built from the live board: studs and duds shape emerged as a completable $200 roster given the current pool.
-- Budget split: QB 7%, RB 7%, WR 50%, TE 6%, DST 3%, K 0%, bench 27%.
-- Target prices (expect / walk-up to win): Puka Nacua $76 (win by $84), Zay Flowers $24 (win by $26), Jalen Hurts $13 (win by $14), Quinshon Judkins $12 (win by $13), Sam LaPorta $7 (win by $8).
-  Targets $132 + reserve $8 = $140 of $200 (completable).
-
-  Most common roster cores this strategy landed:
-  - 11% of drafts: Puka Nacua + Bijan Robinson + Luther Burden III - avg spend $200, avg record 10-4.
-  - 8.3% of drafts: Puka Nacua + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 9.8-4.2.
-  - 8% of drafts: Puka Nacua + Jahmyr Gibbs + Luther Burden III - avg spend $200, avg record 10.6-3.4.
-
-  Players you land most:
-  - Tony Pollard (RB): 83.3% of drafts, avg $1.
-  - Zach Charbonnet (RB): 82% of drafts, avg $1.
-  - Jameson Williams (WR): 80% of drafts, avg $1.
-  - Luther Burden (WR): 77.5% of drafts, avg $1.
-  - Courtland Sutton (WR): 70.8% of drafts, avg $1.
-  - Puka Nacua (WR): 68.3% of drafts, avg $88.
-  - Houston Texans (DEF): 67% of drafts, avg $1.
-  - Tee Higgins (WR): 63% of drafts, avg $1.
-
-### 13. Hero RB (RB + WR-WR), even split  (studs-and-duds, aggressive risk)
+### 10. Hero RB (RB + WR-WR), even split  (studs-and-duds, aggressive risk)
 
 Pool-generated Studs & Duds: 8 anchors (RB/WR/QB/TE/DEF), rest at room price.
 
-- Projected record: 9.7-4.3 (best 14-0, worst 1-13).
+- Projected record: 9.4-4.6 (best 14-0, worst 1-13).
 - Why: The board supports paying up for Jahmyr Gibbs (~$76), Zay Flowers (~$24), Jalen Hurts (~$13). RB runs COOL (0.84x room vs national). This shape spends $151 on anchors and keeps $49 to complete the roster at room prices.
 - Philosophy: Pattern sweep: Hero RB (RB + WR-WR), even split. Built from the live board: studs and duds shape emerged as a completable $200 roster given the current pool.
 - Budget split: QB 7%, RB 44%, WR 17%, TE 6%, DST 3%, K 0%, bench 23%.
@@ -403,9 +325,9 @@ Pool-generated Studs & Duds: 8 anchors (RB/WR/QB/TE/DEF), rest at room price.
   Targets $134 + reserve $8 = $142 of $200 (completable).
 
   Most common roster cores this strategy landed:
-  - 18.8% of drafts: Jahmyr Gibbs + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 9.8-4.2.
-  - 15% of drafts: Jahmyr Gibbs + Bijan Robinson + Luther Burden III - avg spend $200, avg record 9.8-4.2.
-  - 4% of drafts: Ja'Marr Chase + Jahmyr Gibbs + Zay Flowers - avg spend $200, avg record 10.8-3.2.
+  - 18.8% of drafts: Jahmyr Gibbs + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 9.5-4.5.
+  - 15% of drafts: Jahmyr Gibbs + Bijan Robinson + Luther Burden III - avg spend $200, avg record 9.5-4.5.
+  - 4% of drafts: Ja'Marr Chase + Jahmyr Gibbs + Zay Flowers - avg spend $200, avg record 10.4-3.6.
 
   Players you land most:
   - Jahmyr Gibbs (RB): 91.3% of drafts, avg $88.
@@ -417,11 +339,11 @@ Pool-generated Studs & Duds: 8 anchors (RB/WR/QB/TE/DEF), rest at room price.
   - Houston Texans (DEF): 62.5% of drafts, avg $1.
   - Tee Higgins (WR): 60.3% of drafts, avg $1.
 
-### 14. Double RB + WR, even split  (studs-and-duds, aggressive risk)
+### 11. Double RB + WR, even split  (studs-and-duds, aggressive risk)
 
 Pool-generated Studs & Duds: 8 anchors (RB/WR/QB/TE/DEF), rest at room price.
 
-- Projected record: 9.7-4.3 (best 14-0, worst 1-13).
+- Projected record: 9.4-4.6 (best 14-0, worst 1-13).
 - Why: The board supports paying up for Jahmyr Gibbs (~$76), Jeremiyah Love (~$29), Luther Burden III (~$14). RB runs COOL (0.84x room vs national). This shape spends $150 on anchors and keeps $50 to complete the roster at room prices.
 - Philosophy: Pattern sweep: Double RB + WR, even split. Built from the live board: studs and duds shape emerged as a completable $200 roster given the current pool.
 - Budget split: QB 7%, RB 53%, WR 8%, TE 6%, DST 3%, K 0%, bench 23%.
@@ -429,9 +351,9 @@ Pool-generated Studs & Duds: 8 anchors (RB/WR/QB/TE/DEF), rest at room price.
   Targets $139 + reserve $8 = $147 of $200 (completable).
 
   Most common roster cores this strategy landed:
-  - 18.8% of drafts: Jahmyr Gibbs + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 9.8-4.2.
-  - 15% of drafts: Jahmyr Gibbs + Bijan Robinson + Luther Burden III - avg spend $200, avg record 9.8-4.2.
-  - 4% of drafts: Ja'Marr Chase + Jahmyr Gibbs + Zay Flowers - avg spend $200, avg record 10.8-3.2.
+  - 18.8% of drafts: Jahmyr Gibbs + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 9.5-4.5.
+  - 15% of drafts: Jahmyr Gibbs + Bijan Robinson + Luther Burden III - avg spend $200, avg record 9.5-4.5.
+  - 4% of drafts: Ja'Marr Chase + Jahmyr Gibbs + Zay Flowers - avg spend $200, avg record 10.4-3.6.
 
   Players you land most:
   - Jahmyr Gibbs (RB): 91.3% of drafts, avg $88.
@@ -443,11 +365,11 @@ Pool-generated Studs & Duds: 8 anchors (RB/WR/QB/TE/DEF), rest at room price.
   - Houston Texans (DEF): 62.8% of drafts, avg $1.
   - Tee Higgins (WR): 60.3% of drafts, avg $1.
 
-### 15. Robust RB (RB-RB), light anchors  (balanced-auction, balanced risk)
+### 12. Robust RB (RB-RB), light anchors  (balanced-auction, balanced risk)
 
 Pool-generated Balanced Auction: 8 anchors (RB/WR/QB/TE/DEF), rest at room price.
 
-- Projected record: 9.7-4.3 (best 14-0, worst 1-13).
+- Projected record: 9.4-4.6 (best 14-0, worst 1-13).
 - Why: The board supports paying up for Jahmyr Gibbs (~$76), Emeka Egbuka (~$16), Luther Burden III (~$14). RB runs COOL (0.84x room vs national). This shape spends $137 on anchors and keeps $63 to complete the roster at room prices.
 - Philosophy: Pattern sweep: Robust RB (RB-RB), light anchors. Built from the live board: balanced shape emerged as a completable $200 roster given the current pool.
 - Budget split: QB 7%, RB 39%, WR 15%, TE 6%, DST 3%, K 0%, bench 30%.
@@ -455,9 +377,9 @@ Pool-generated Balanced Auction: 8 anchors (RB/WR/QB/TE/DEF), rest at room price
   Targets $126 + reserve $8 = $134 of $200 (completable).
 
   Most common roster cores this strategy landed:
-  - 18.8% of drafts: Jahmyr Gibbs + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 9.8-4.2.
-  - 15% of drafts: Jahmyr Gibbs + Bijan Robinson + Luther Burden III - avg spend $200, avg record 9.8-4.2.
-  - 4% of drafts: Ja'Marr Chase + Jahmyr Gibbs + Zay Flowers - avg spend $200, avg record 10.8-3.2.
+  - 18.8% of drafts: Jahmyr Gibbs + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 9.5-4.5.
+  - 15% of drafts: Jahmyr Gibbs + Bijan Robinson + Luther Burden III - avg spend $200, avg record 9.5-4.5.
+  - 4% of drafts: Ja'Marr Chase + Jahmyr Gibbs + Zay Flowers - avg spend $200, avg record 10.4-3.6.
 
   Players you land most:
   - Jahmyr Gibbs (RB): 91.3% of drafts, avg $88.
@@ -469,11 +391,11 @@ Pool-generated Balanced Auction: 8 anchors (RB/WR/QB/TE/DEF), rest at room price
   - Houston Texans (DEF): 62.5% of drafts, avg $1.
   - Tee Higgins (WR): 60.3% of drafts, avg $1.
 
-### 16. RB-WR, light anchors  (studs-and-duds, balanced risk)
+### 13. RB-WR, light anchors  (studs-and-duds, balanced risk)
 
 Pool-generated Studs & Duds: 8 anchors (RB/WR/QB/TE/DEF), rest at room price.
 
-- Projected record: 9.7-4.3 (best 14-0, worst 1-13).
+- Projected record: 9.4-4.6 (best 14-0, worst 1-13).
 - Why: The board supports paying up for Jahmyr Gibbs (~$76), Luther Burden III (~$14), Jalen Hurts (~$13). RB runs COOL (0.84x room vs national). This shape spends $138 on anchors and keeps $62 to complete the roster at room prices.
 - Philosophy: Pattern sweep: RB-WR, light anchors. Built from the live board: studs and duds shape emerged as a completable $200 roster given the current pool.
 - Budget split: QB 7%, RB 44%, WR 10%, TE 6%, DST 3%, K 0%, bench 30%.
@@ -481,9 +403,9 @@ Pool-generated Studs & Duds: 8 anchors (RB/WR/QB/TE/DEF), rest at room price.
   Targets $122 + reserve $8 = $130 of $200 (completable).
 
   Most common roster cores this strategy landed:
-  - 18.8% of drafts: Jahmyr Gibbs + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 9.8-4.2.
-  - 15% of drafts: Jahmyr Gibbs + Bijan Robinson + Luther Burden III - avg spend $200, avg record 9.8-4.2.
-  - 4% of drafts: Ja'Marr Chase + Jahmyr Gibbs + Zay Flowers - avg spend $200, avg record 10.8-3.2.
+  - 18.8% of drafts: Jahmyr Gibbs + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 9.5-4.5.
+  - 15% of drafts: Jahmyr Gibbs + Bijan Robinson + Luther Burden III - avg spend $200, avg record 9.5-4.5.
+  - 4% of drafts: Ja'Marr Chase + Jahmyr Gibbs + Zay Flowers - avg spend $200, avg record 10.4-3.6.
 
   Players you land most:
   - Jahmyr Gibbs (RB): 91.3% of drafts, avg $88.
@@ -495,11 +417,11 @@ Pool-generated Studs & Duds: 8 anchors (RB/WR/QB/TE/DEF), rest at room price.
   - Houston Texans (DEF): 62.5% of drafts, avg $1.
   - Tee Higgins (WR): 60.3% of drafts, avg $1.
 
-### 17. Double RB + WR, light anchors  (balanced-auction, balanced risk)
+### 14. Double RB + WR, light anchors  (balanced-auction, balanced risk)
 
 Pool-generated Balanced Auction: 8 anchors (RB/WR/QB/TE/DEF), rest at room price.
 
-- Projected record: 9.7-4.3 (best 14-0, worst 1-13).
+- Projected record: 9.4-4.6 (best 14-0, worst 1-13).
 - Why: The board supports paying up for Jahmyr Gibbs (~$76), Luther Burden III (~$14), Jalen Hurts (~$13). RB runs COOL (0.84x room vs national). This shape spends $127 on anchors and keeps $73 to complete the roster at room prices.
 - Philosophy: Pattern sweep: Double RB + WR, light anchors. Built from the live board: balanced shape emerged as a completable $200 roster given the current pool.
 - Budget split: QB 7%, RB 39%, WR 10%, TE 6%, DST 3%, K 0%, bench 35%.
@@ -507,9 +429,9 @@ Pool-generated Balanced Auction: 8 anchors (RB/WR/QB/TE/DEF), rest at room price
   Targets $116 + reserve $8 = $124 of $200 (completable).
 
   Most common roster cores this strategy landed:
-  - 18.8% of drafts: Jahmyr Gibbs + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 9.8-4.2.
-  - 15% of drafts: Jahmyr Gibbs + Bijan Robinson + Luther Burden III - avg spend $200, avg record 9.8-4.2.
-  - 4% of drafts: Ja'Marr Chase + Jahmyr Gibbs + Zay Flowers - avg spend $200, avg record 10.8-3.2.
+  - 18.8% of drafts: Jahmyr Gibbs + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 9.5-4.5.
+  - 15% of drafts: Jahmyr Gibbs + Bijan Robinson + Luther Burden III - avg spend $200, avg record 9.5-4.5.
+  - 4% of drafts: Ja'Marr Chase + Jahmyr Gibbs + Zay Flowers - avg spend $200, avg record 10.4-3.6.
 
   Players you land most:
   - Jahmyr Gibbs (RB): 91.3% of drafts, avg $88.
@@ -521,63 +443,11 @@ Pool-generated Balanced Auction: 8 anchors (RB/WR/QB/TE/DEF), rest at room price
   - Houston Texans (DEF): 62.5% of drafts, avg $1.
   - Tee Higgins (WR): 60.3% of drafts, avg $1.
 
-### 18. WR-WR, light anchors  (studs-and-duds, balanced risk)
-
-Pool-generated Studs & Duds: 8 anchors (WR/RB/QB/TE/DEF), rest at room price.
-
-- Projected record: 9.7-4.3 (best 14-0, worst 1-13).
-- Why: The board supports paying up for Puka Nacua (~$76), Jalen Hurts (~$13), Quinshon Judkins (~$12). WR runs HOT (1.18x room vs national). This shape spends $125 on anchors and keeps $75 to complete the roster at room prices.
-- Philosophy: Pattern sweep: WR-WR, light anchors. Built from the live board: studs and duds shape emerged as a completable $200 roster given the current pool.
-- Budget split: QB 7%, RB 7%, WR 41%, TE 6%, DST 3%, K 0%, bench 36%.
-- Target prices (expect / walk-up to win): Puka Nacua $76 (win by $84), Jalen Hurts $13 (win by $14), Quinshon Judkins $12 (win by $13), Sam LaPorta $7 (win by $8), Carnell Tate $6 (win by $7).
-  Targets $114 + reserve $8 = $122 of $200 (completable).
-
-  Most common roster cores this strategy landed:
-  - 11% of drafts: Puka Nacua + Bijan Robinson + Luther Burden III - avg spend $200, avg record 10-4.
-  - 8.3% of drafts: Puka Nacua + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 9.8-4.2.
-  - 8% of drafts: Puka Nacua + Jahmyr Gibbs + Luther Burden III - avg spend $200, avg record 10.6-3.4.
-
-  Players you land most:
-  - Tony Pollard (RB): 83.3% of drafts, avg $1.
-  - Zach Charbonnet (RB): 82% of drafts, avg $1.
-  - Jameson Williams (WR): 80% of drafts, avg $1.
-  - Luther Burden (WR): 77.5% of drafts, avg $1.
-  - Courtland Sutton (WR): 70.8% of drafts, avg $1.
-  - Puka Nacua (WR): 68.3% of drafts, avg $88.
-  - Houston Texans (DEF): 67% of drafts, avg $1.
-  - Tee Higgins (WR): 63% of drafts, avg $1.
-
-### 19. Triple WR, light anchors  (wr-heavy-auction, balanced risk)
-
-Pool-generated WR Heavy (Auction): 8 anchors (WR/RB/QB/DEF/TE), rest at room price.
-
-- Projected record: 9.7-4.3 (best 14-0, worst 1-13).
-- Why: The board supports paying up for Puka Nacua (~$76), Jalen Hurts (~$13), Quinshon Judkins (~$12). WR runs HOT (1.18x room vs national). This shape spends $119 on anchors and keeps $81 to complete the roster at room prices.
-- Philosophy: Pattern sweep: Triple WR, light anchors. Built from the live board: wr heavy shape emerged as a completable $200 roster given the current pool.
-- Budget split: QB 7%, RB 7%, WR 42%, TE 2%, DST 3%, K 0%, bench 39%.
-- Target prices (expect / walk-up to win): Puka Nacua $76 (win by $84), Jalen Hurts $13 (win by $14), Quinshon Judkins $12 (win by $13), Carnell Tate $6 (win by $7), Houston Texans $6 (win by $7).
-  Targets $113 + reserve $8 = $121 of $200 (completable).
-
-  Most common roster cores this strategy landed:
-  - 11% of drafts: Puka Nacua + Bijan Robinson + Luther Burden III - avg spend $200, avg record 10-4.
-  - 8.3% of drafts: Puka Nacua + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 9.8-4.2.
-  - 8% of drafts: Puka Nacua + Jahmyr Gibbs + Luther Burden III - avg spend $200, avg record 10.6-3.4.
-
-  Players you land most:
-  - Tony Pollard (RB): 83.3% of drafts, avg $1.
-  - Zach Charbonnet (RB): 82% of drafts, avg $1.
-  - Jameson Williams (WR): 80% of drafts, avg $1.
-  - Luther Burden (WR): 77.5% of drafts, avg $1.
-  - Courtland Sutton (WR): 70.8% of drafts, avg $1.
-  - Puka Nacua (WR): 68.3% of drafts, avg $88.
-  - Houston Texans (DEF): 67% of drafts, avg $1.
-  - Tee Higgins (WR): 63% of drafts, avg $1.
-
-### 20. Hero RB (RB + WR-WR), light anchors  (studs-and-duds, balanced risk)
+### 15. Hero RB (RB + WR-WR), light anchors  (studs-and-duds, balanced risk)
 
 Pool-generated Studs & Duds: 8 anchors (RB/QB/TE/WR/DEF), rest at room price.
 
-- Projected record: 9.7-4.3 (best 14-0, worst 1-13).
+- Projected record: 9.4-4.6 (best 14-0, worst 1-13).
 - Why: The board supports paying up for Jahmyr Gibbs (~$76), Jalen Hurts (~$13), Quinshon Judkins (~$12). RB runs COOL (0.84x room vs national). This shape spends $125 on anchors and keeps $75 to complete the roster at room prices.
 - Philosophy: Pattern sweep: Hero RB (RB + WR-WR), light anchors. Built from the live board: studs and duds shape emerged as a completable $200 roster given the current pool.
 - Budget split: QB 7%, RB 44%, WR 4%, TE 6%, DST 3%, K 0%, bench 36%.
@@ -585,9 +455,9 @@ Pool-generated Studs & Duds: 8 anchors (RB/QB/TE/WR/DEF), rest at room price.
   Targets $114 + reserve $8 = $122 of $200 (completable).
 
   Most common roster cores this strategy landed:
-  - 18.8% of drafts: Jahmyr Gibbs + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 9.8-4.2.
-  - 15% of drafts: Jahmyr Gibbs + Bijan Robinson + Luther Burden III - avg spend $200, avg record 9.8-4.2.
-  - 4% of drafts: Ja'Marr Chase + Jahmyr Gibbs + Zay Flowers - avg spend $200, avg record 10.8-3.2.
+  - 18.8% of drafts: Jahmyr Gibbs + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 9.5-4.5.
+  - 15% of drafts: Jahmyr Gibbs + Bijan Robinson + Luther Burden III - avg spend $200, avg record 9.5-4.5.
+  - 4% of drafts: Ja'Marr Chase + Jahmyr Gibbs + Zay Flowers - avg spend $200, avg record 10.4-3.6.
 
   Players you land most:
   - Jahmyr Gibbs (RB): 91.3% of drafts, avg $88.
@@ -599,21 +469,47 @@ Pool-generated Studs & Duds: 8 anchors (RB/QB/TE/WR/DEF), rest at room price.
   - Houston Texans (DEF): 62.5% of drafts, avg $1.
   - Tee Higgins (WR): 60.3% of drafts, avg $1.
 
-### 21. Zero RB (WR-WR-TE), light anchors  (studs-and-duds, balanced risk)
+### 16. Elite TE anchor, heavy anchors  (stars-and-scrubs, aggressive risk)
 
-Pool-generated Studs & Duds: 8 anchors (WR/RB/QB/DEF/TE), rest at room price.
+Pool-generated Stars & Scrubs: 8 anchors (WR/TE/RB/QB/DEF), rest at room price.
 
-- Projected record: 9.7-4.3 (best 14-0, worst 1-13).
-- Why: The board supports paying up for Puka Nacua (~$76), Jalen Hurts (~$13), Quinshon Judkins (~$12). WR runs HOT (1.18x room vs national). This shape spends $119 on anchors and keeps $81 to complete the roster at room prices.
-- Philosophy: Pattern sweep: Zero RB (WR-WR-TE), light anchors. Built from the live board: studs and duds shape emerged as a completable $200 roster given the current pool.
-- Budget split: QB 7%, RB 7%, WR 41%, TE 3%, DST 3%, K 0%, bench 39%.
-- Target prices (expect / walk-up to win): Puka Nacua $76 (win by $84), Jalen Hurts $13 (win by $14), Quinshon Judkins $12 (win by $13), Carnell Tate $6 (win by $7), Houston Texans $6 (win by $7).
-  Targets $113 + reserve $8 = $121 of $200 (completable).
+- Projected record: 9.3-4.7 (best 14-0, worst 1-13).
+- Why: The board supports paying up for Puka Nacua (~$76), Brock Bowers (~$49), Luther Burden III (~$14). WR runs HOT (1.18x room vs national). This shape spends $175 on anchors and keeps $25 to complete the roster at room prices.
+- Philosophy: Pattern sweep: Elite TE anchor, heavy anchors. Built from the live board: stars and scrubs shape emerged as a completable $200 roster given the current pool.
+- Budget split: QB 7%, RB 7%, WR 45%, TE 27%, DST 3%, K 0%, bench 11%.
+- Target prices (expect / walk-up to win): Puka Nacua $76 (win by $84), Brock Bowers $49 (win by $54), Luther Burden III $14 (win by $15), Jalen Hurts $13 (win by $14), Quinshon Judkins $12 (win by $13).
+  Targets $164 + reserve $8 = $172 of $200 (completable).
 
   Most common roster cores this strategy landed:
-  - 11% of drafts: Puka Nacua + Bijan Robinson + Luther Burden III - avg spend $200, avg record 10-4.
-  - 8.3% of drafts: Puka Nacua + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 9.8-4.2.
-  - 8% of drafts: Puka Nacua + Jahmyr Gibbs + Luther Burden III - avg spend $200, avg record 10.6-3.4.
+  - 11% of drafts: Puka Nacua + Bijan Robinson + Luther Burden III - avg spend $200, avg record 9.6-4.4.
+  - 8.3% of drafts: Puka Nacua + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 9.4-4.6.
+  - 8% of drafts: Puka Nacua + Jahmyr Gibbs + Luther Burden III - avg spend $200, avg record 10.3-3.7.
+
+  Players you land most:
+  - Tony Pollard (RB): 84% of drafts, avg $1.
+  - Zach Charbonnet (RB): 81.8% of drafts, avg $1.
+  - Jameson Williams (WR): 80.8% of drafts, avg $1.
+  - Luther Burden (WR): 78% of drafts, avg $1.
+  - Courtland Sutton (WR): 70.5% of drafts, avg $1.
+  - Puka Nacua (WR): 68.3% of drafts, avg $88.
+  - Houston Texans (DEF): 67% of drafts, avg $1.
+  - Tee Higgins (WR): 63.8% of drafts, avg $1.
+
+### 17. Triple WR, even split  (wr-heavy-auction, aggressive risk)
+
+Pool-generated WR Heavy (Auction): 8 anchors (WR/RB/QB/DEF/TE), rest at room price.
+
+- Projected record: 9.3-4.7 (best 14-0, worst 1-13).
+- Why: The board supports paying up for Puka Nacua (~$76), Zay Flowers (~$24), Jalen Hurts (~$13). WR runs HOT (1.18x room vs national). This shape spends $145 on anchors and keeps $55 to complete the roster at room prices.
+- Philosophy: Pattern sweep: Triple WR, even split. Built from the live board: wr heavy shape emerged as a completable $200 roster given the current pool.
+- Budget split: QB 7%, RB 7%, WR 55%, TE 2%, DST 3%, K 0%, bench 26%.
+- Target prices (expect / walk-up to win): Puka Nacua $76 (win by $84), Zay Flowers $24 (win by $26), Jalen Hurts $13 (win by $14), Quinshon Judkins $12 (win by $13), Rome Odunze $9 (win by $10).
+  Targets $134 + reserve $8 = $142 of $200 (completable).
+
+  Most common roster cores this strategy landed:
+  - 11% of drafts: Puka Nacua + Bijan Robinson + Luther Burden III - avg spend $200, avg record 9.6-4.4.
+  - 8.3% of drafts: Puka Nacua + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 9.4-4.6.
+  - 8% of drafts: Puka Nacua + Jahmyr Gibbs + Luther Burden III - avg spend $200, avg record 10.3-3.7.
 
   Players you land most:
   - Tony Pollard (RB): 83.3% of drafts, avg $1.
@@ -625,37 +521,115 @@ Pool-generated Studs & Duds: 8 anchors (WR/RB/QB/DEF/TE), rest at room price.
   - Houston Texans (DEF): 67% of drafts, avg $1.
   - Tee Higgins (WR): 63% of drafts, avg $1.
 
-### 22. Elite QB anchor, even split  (balanced-auction, aggressive risk)
+### 18. WR-WR, even split  (studs-and-duds, aggressive risk)
 
-Pool-generated Balanced Auction: 8 anchors (RB/QB/WR/TE/DEF), rest at room price.
+Pool-generated Studs & Duds: 8 anchors (WR/RB/QB/TE/DEF), rest at room price.
 
-- Projected record: 9.6-4.4 (best 14-0, worst 1-13).
-- Why: The board supports paying up for Christian McCaffrey (~$67), Josh Allen (~$36), Luther Burden III (~$14). RB runs COOL (0.84x room vs national). This shape spends $152 on anchors and keeps $48 to complete the roster at room prices.
-- Philosophy: Pattern sweep: Elite QB anchor, even split. Built from the live board: balanced shape emerged as a completable $200 roster given the current pool.
-- Budget split: QB 18%, RB 40%, WR 10%, TE 6%, DST 3%, K 0%, bench 23%.
-- Target prices (expect / walk-up to win): Christian McCaffrey $67 (win by $74), Josh Allen $36 (win by $40), Luther Burden III $14 (win by $15), Quinshon Judkins $12 (win by $13), Sam LaPorta $7 (win by $8).
-  Targets $136 + reserve $8 = $144 of $200 (completable).
+- Projected record: 9.3-4.7 (best 14-0, worst 1-13).
+- Why: The board supports paying up for Puka Nacua (~$76), Zay Flowers (~$24), Jalen Hurts (~$13). WR runs HOT (1.18x room vs national). This shape spends $143 on anchors and keeps $57 to complete the roster at room prices.
+- Philosophy: Pattern sweep: WR-WR, even split. Built from the live board: studs and duds shape emerged as a completable $200 roster given the current pool.
+- Budget split: QB 7%, RB 7%, WR 50%, TE 6%, DST 3%, K 0%, bench 27%.
+- Target prices (expect / walk-up to win): Puka Nacua $76 (win by $84), Zay Flowers $24 (win by $26), Jalen Hurts $13 (win by $14), Quinshon Judkins $12 (win by $13), Sam LaPorta $7 (win by $8).
+  Targets $132 + reserve $8 = $140 of $200 (completable).
 
   Most common roster cores this strategy landed:
-  - 23.3% of drafts: Jahmyr Gibbs + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 9.6-4.4.
-  - 7.8% of drafts: Bijan Robinson + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 9-5.
-  - 5% of drafts: Zay Flowers + Bijan Robinson + Christian McCaffrey - avg spend $200, avg record 9.7-4.3.
+  - 11% of drafts: Puka Nacua + Bijan Robinson + Luther Burden III - avg spend $200, avg record 9.6-4.4.
+  - 8.3% of drafts: Puka Nacua + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 9.4-4.6.
+  - 8% of drafts: Puka Nacua + Jahmyr Gibbs + Luther Burden III - avg spend $200, avg record 10.3-3.7.
 
   Players you land most:
-  - Christian McCaffrey (RB): 86.8% of drafts, avg $85.
-  - Tony Pollard (RB): 84.3% of drafts, avg $1.
-  - Jameson Williams (WR): 82.3% of drafts, avg $1.
-  - Zach Charbonnet (RB): 80.8% of drafts, avg $1.
-  - Luther Burden (WR): 75% of drafts, avg $1.
-  - Courtland Sutton (WR): 74.8% of drafts, avg $1.
-  - Houston Texans (DEF): 65.5% of drafts, avg $1.
-  - Sam LaPorta (TE): 63.5% of drafts, avg $1.
+  - Tony Pollard (RB): 83.3% of drafts, avg $1.
+  - Zach Charbonnet (RB): 82% of drafts, avg $1.
+  - Jameson Williams (WR): 80% of drafts, avg $1.
+  - Luther Burden (WR): 77.5% of drafts, avg $1.
+  - Courtland Sutton (WR): 70.8% of drafts, avg $1.
+  - Puka Nacua (WR): 68.3% of drafts, avg $88.
+  - Houston Texans (DEF): 67% of drafts, avg $1.
+  - Tee Higgins (WR): 63% of drafts, avg $1.
 
-### 23. Elite TE anchor, even split  (balanced-auction, aggressive risk)
+### 19. WR-WR, light anchors  (studs-and-duds, balanced risk)
+
+Pool-generated Studs & Duds: 8 anchors (WR/RB/QB/TE/DEF), rest at room price.
+
+- Projected record: 9.3-4.7 (best 14-0, worst 1-13).
+- Why: The board supports paying up for Puka Nacua (~$76), Jalen Hurts (~$13), Quinshon Judkins (~$12). WR runs HOT (1.18x room vs national). This shape spends $125 on anchors and keeps $75 to complete the roster at room prices.
+- Philosophy: Pattern sweep: WR-WR, light anchors. Built from the live board: studs and duds shape emerged as a completable $200 roster given the current pool.
+- Budget split: QB 7%, RB 7%, WR 41%, TE 6%, DST 3%, K 0%, bench 36%.
+- Target prices (expect / walk-up to win): Puka Nacua $76 (win by $84), Jalen Hurts $13 (win by $14), Quinshon Judkins $12 (win by $13), Sam LaPorta $7 (win by $8), Carnell Tate $6 (win by $7).
+  Targets $114 + reserve $8 = $122 of $200 (completable).
+
+  Most common roster cores this strategy landed:
+  - 11% of drafts: Puka Nacua + Bijan Robinson + Luther Burden III - avg spend $200, avg record 9.6-4.4.
+  - 8.3% of drafts: Puka Nacua + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 9.4-4.6.
+  - 8% of drafts: Puka Nacua + Jahmyr Gibbs + Luther Burden III - avg spend $200, avg record 10.3-3.7.
+
+  Players you land most:
+  - Tony Pollard (RB): 83.3% of drafts, avg $1.
+  - Zach Charbonnet (RB): 82% of drafts, avg $1.
+  - Jameson Williams (WR): 80% of drafts, avg $1.
+  - Luther Burden (WR): 77.5% of drafts, avg $1.
+  - Courtland Sutton (WR): 70.8% of drafts, avg $1.
+  - Puka Nacua (WR): 68.3% of drafts, avg $88.
+  - Houston Texans (DEF): 67% of drafts, avg $1.
+  - Tee Higgins (WR): 63% of drafts, avg $1.
+
+### 20. Triple WR, light anchors  (wr-heavy-auction, balanced risk)
+
+Pool-generated WR Heavy (Auction): 8 anchors (WR/RB/QB/DEF/TE), rest at room price.
+
+- Projected record: 9.3-4.7 (best 14-0, worst 1-13).
+- Why: The board supports paying up for Puka Nacua (~$76), Jalen Hurts (~$13), Quinshon Judkins (~$12). WR runs HOT (1.18x room vs national). This shape spends $119 on anchors and keeps $81 to complete the roster at room prices.
+- Philosophy: Pattern sweep: Triple WR, light anchors. Built from the live board: wr heavy shape emerged as a completable $200 roster given the current pool.
+- Budget split: QB 7%, RB 7%, WR 42%, TE 2%, DST 3%, K 0%, bench 39%.
+- Target prices (expect / walk-up to win): Puka Nacua $76 (win by $84), Jalen Hurts $13 (win by $14), Quinshon Judkins $12 (win by $13), Carnell Tate $6 (win by $7), Houston Texans $6 (win by $7).
+  Targets $113 + reserve $8 = $121 of $200 (completable).
+
+  Most common roster cores this strategy landed:
+  - 11% of drafts: Puka Nacua + Bijan Robinson + Luther Burden III - avg spend $200, avg record 9.6-4.4.
+  - 8.3% of drafts: Puka Nacua + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 9.4-4.6.
+  - 8% of drafts: Puka Nacua + Jahmyr Gibbs + Luther Burden III - avg spend $200, avg record 10.3-3.7.
+
+  Players you land most:
+  - Tony Pollard (RB): 83.3% of drafts, avg $1.
+  - Zach Charbonnet (RB): 82% of drafts, avg $1.
+  - Jameson Williams (WR): 80% of drafts, avg $1.
+  - Luther Burden (WR): 77.5% of drafts, avg $1.
+  - Courtland Sutton (WR): 70.8% of drafts, avg $1.
+  - Puka Nacua (WR): 68.3% of drafts, avg $88.
+  - Houston Texans (DEF): 67% of drafts, avg $1.
+  - Tee Higgins (WR): 63% of drafts, avg $1.
+
+### 21. Zero RB (WR-WR-TE), light anchors  (studs-and-duds, balanced risk)
+
+Pool-generated Studs & Duds: 8 anchors (WR/RB/QB/DEF/TE), rest at room price.
+
+- Projected record: 9.3-4.7 (best 14-0, worst 1-13).
+- Why: The board supports paying up for Puka Nacua (~$76), Jalen Hurts (~$13), Quinshon Judkins (~$12). WR runs HOT (1.18x room vs national). This shape spends $119 on anchors and keeps $81 to complete the roster at room prices.
+- Philosophy: Pattern sweep: Zero RB (WR-WR-TE), light anchors. Built from the live board: studs and duds shape emerged as a completable $200 roster given the current pool.
+- Budget split: QB 7%, RB 7%, WR 41%, TE 3%, DST 3%, K 0%, bench 39%.
+- Target prices (expect / walk-up to win): Puka Nacua $76 (win by $84), Jalen Hurts $13 (win by $14), Quinshon Judkins $12 (win by $13), Carnell Tate $6 (win by $7), Houston Texans $6 (win by $7).
+  Targets $113 + reserve $8 = $121 of $200 (completable).
+
+  Most common roster cores this strategy landed:
+  - 11% of drafts: Puka Nacua + Bijan Robinson + Luther Burden III - avg spend $200, avg record 9.6-4.4.
+  - 8.3% of drafts: Puka Nacua + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 9.4-4.6.
+  - 8% of drafts: Puka Nacua + Jahmyr Gibbs + Luther Burden III - avg spend $200, avg record 10.3-3.7.
+
+  Players you land most:
+  - Tony Pollard (RB): 83.3% of drafts, avg $1.
+  - Zach Charbonnet (RB): 82% of drafts, avg $1.
+  - Jameson Williams (WR): 80% of drafts, avg $1.
+  - Luther Burden (WR): 77.5% of drafts, avg $1.
+  - Courtland Sutton (WR): 70.8% of drafts, avg $1.
+  - Puka Nacua (WR): 68.3% of drafts, avg $88.
+  - Houston Texans (DEF): 67% of drafts, avg $1.
+  - Tee Higgins (WR): 63% of drafts, avg $1.
+
+### 22. Elite TE anchor, even split  (balanced-auction, aggressive risk)
 
 Pool-generated Balanced Auction: 8 anchors (WR/TE/RB/QB/DEF), rest at room price.
 
-- Projected record: 9.5-4.5 (best 14-0, worst 1-13).
+- Projected record: 9.2-4.8 (best 14-0, worst 1-13).
 - Why: The board supports paying up for Justin Jefferson (~$57), Brock Bowers (~$49), Jalen Hurts (~$13). WR runs HOT (1.18x room vs national). This shape spends $143 on anchors and keeps $57 to complete the roster at room prices.
 - Philosophy: Pattern sweep: Elite TE anchor, even split. Built from the live board: balanced shape emerged as a completable $200 roster given the current pool.
 - Budget split: QB 7%, RB 7%, WR 29%, TE 27%, DST 3%, K 0%, bench 27%.
@@ -663,9 +637,9 @@ Pool-generated Balanced Auction: 8 anchors (WR/TE/RB/QB/DEF), rest at room price
   Targets $137 + reserve $8 = $145 of $200 (completable).
 
   Most common roster cores this strategy landed:
-  - 13% of drafts: Jahmyr Gibbs + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 9.6-4.4.
-  - 9.3% of drafts: Jahmyr Gibbs + Bijan Robinson + Luther Burden III - avg spend $200, avg record 10-4.
-  - 2.8% of drafts: Jahmyr Gibbs + Zay Flowers + Justin Jefferson - avg spend $200, avg record 9.9-4.1.
+  - 13% of drafts: Jahmyr Gibbs + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 9.2-4.8.
+  - 9.3% of drafts: Jahmyr Gibbs + Bijan Robinson + Luther Burden III - avg spend $200, avg record 9.6-4.4.
+  - 2.8% of drafts: Jahmyr Gibbs + Zay Flowers + Justin Jefferson - avg spend $200, avg record 9.2-4.8.
 
   Players you land most:
   - Jameson Williams (WR): 81.3% of drafts, avg $1.
@@ -677,11 +651,37 @@ Pool-generated Balanced Auction: 8 anchors (WR/TE/RB/QB/DEF), rest at room price
   - Sam LaPorta (TE): 60.3% of drafts, avg $1.
   - Tee Higgins (WR): 59.3% of drafts, avg $1.
 
+### 23. Elite QB anchor, even split  (balanced-auction, aggressive risk)
+
+Pool-generated Balanced Auction: 8 anchors (RB/QB/WR/TE/DEF), rest at room price.
+
+- Projected record: 9.2-4.8 (best 14-0, worst 1-13).
+- Why: The board supports paying up for Christian McCaffrey (~$67), Josh Allen (~$36), Luther Burden III (~$14). RB runs COOL (0.84x room vs national). This shape spends $152 on anchors and keeps $48 to complete the roster at room prices.
+- Philosophy: Pattern sweep: Elite QB anchor, even split. Built from the live board: balanced shape emerged as a completable $200 roster given the current pool.
+- Budget split: QB 18%, RB 40%, WR 10%, TE 6%, DST 3%, K 0%, bench 23%.
+- Target prices (expect / walk-up to win): Christian McCaffrey $67 (win by $74), Josh Allen $36 (win by $40), Luther Burden III $14 (win by $15), Quinshon Judkins $12 (win by $13), Sam LaPorta $7 (win by $8).
+  Targets $136 + reserve $8 = $144 of $200 (completable).
+
+  Most common roster cores this strategy landed:
+  - 23.3% of drafts: Jahmyr Gibbs + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 9.3-4.7.
+  - 7.8% of drafts: Bijan Robinson + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 8.6-5.4.
+  - 5% of drafts: Zay Flowers + Bijan Robinson + Christian McCaffrey - avg spend $200, avg record 9.5-4.5.
+
+  Players you land most:
+  - Christian McCaffrey (RB): 86.8% of drafts, avg $85.
+  - Tony Pollard (RB): 84.3% of drafts, avg $1.
+  - Jameson Williams (WR): 82.3% of drafts, avg $1.
+  - Zach Charbonnet (RB): 80.8% of drafts, avg $1.
+  - Luther Burden (WR): 75% of drafts, avg $1.
+  - Courtland Sutton (WR): 74.8% of drafts, avg $1.
+  - Houston Texans (DEF): 65.5% of drafts, avg $1.
+  - Sam LaPorta (TE): 63.5% of drafts, avg $1.
+
 ### 24. Elite QB anchor, light anchors  (balanced-auction, balanced risk)
 
 Pool-generated Balanced Auction: 8 anchors (RB/QB/WR/TE/DEF), rest at room price.
 
-- Projected record: 9.5-4.5 (best 14-0, worst 1-13).
+- Projected record: 9.2-4.8 (best 14-0, worst 1-13).
 - Why: The board supports paying up for Saquon Barkley (~$42), Josh Allen (~$36), Luther Burden III (~$14). RB runs COOL (0.84x room vs national). This shape spends $127 on anchors and keeps $73 to complete the roster at room prices.
 - Philosophy: Pattern sweep: Elite QB anchor, light anchors. Built from the live board: balanced shape emerged as a completable $200 roster given the current pool.
 - Budget split: QB 18%, RB 27%, WR 10%, TE 6%, DST 3%, K 0%, bench 36%.
@@ -689,9 +689,9 @@ Pool-generated Balanced Auction: 8 anchors (RB/QB/WR/TE/DEF), rest at room price
   Targets $111 + reserve $8 = $119 of $200 (completable).
 
   Most common roster cores this strategy landed:
-  - 12.8% of drafts: Jahmyr Gibbs + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 9.6-4.4.
-  - 9.3% of drafts: Jahmyr Gibbs + Bijan Robinson + Luther Burden III - avg spend $200, avg record 10-4.
-  - 2.8% of drafts: Jahmyr Gibbs + Bijan Robinson + Garrett Wilson - avg spend $200, avg record 9.9-4.1.
+  - 12.8% of drafts: Jahmyr Gibbs + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 9.2-4.8.
+  - 9.3% of drafts: Jahmyr Gibbs + Bijan Robinson + Luther Burden III - avg spend $200, avg record 9.6-4.4.
+  - 2.8% of drafts: Jahmyr Gibbs + Bijan Robinson + Garrett Wilson - avg spend $200, avg record 9.8-4.2.
 
   Players you land most:
   - Jameson Williams (WR): 81.8% of drafts, avg $1.
@@ -703,37 +703,11 @@ Pool-generated Balanced Auction: 8 anchors (RB/QB/WR/TE/DEF), rest at room price
   - Sam LaPorta (TE): 60.5% of drafts, avg $1.
   - Jahmyr Gibbs (RB): 59% of drafts, avg $87.
 
-### 25. Elite TE anchor, light anchors  (balanced-auction, balanced risk)
-
-Pool-generated Balanced Auction: 8 anchors (TE/WR/RB/QB/DEF), rest at room price.
-
-- Projected record: 9.4-4.6 (best 14-0, worst 2-12).
-- Why: The board supports paying up for Brock Bowers (~$49), Zay Flowers (~$24), Jalen Hurts (~$13). TE runs HOT (1.17x room vs national). This shape spends $118 on anchors and keeps $82 to complete the roster at room prices.
-- Philosophy: Pattern sweep: Elite TE anchor, light anchors. Built from the live board: balanced shape emerged as a completable $200 roster given the current pool.
-- Budget split: QB 7%, RB 7%, WR 17%, TE 27%, DST 3%, K 0%, bench 39%.
-- Target prices (expect / walk-up to win): Brock Bowers $49 (win by $54), Zay Flowers $24 (win by $26), Jalen Hurts $13 (win by $14), Quinshon Judkins $12 (win by $13), Rome Odunze $9 (win by $10).
-  Targets $107 + reserve $8 = $115 of $200 (completable).
-
-  Most common roster cores this strategy landed:
-  - 13% of drafts: Jahmyr Gibbs + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 9.6-4.4.
-  - 9.3% of drafts: Jahmyr Gibbs + Bijan Robinson + Luther Burden III - avg spend $200, avg record 10-4.
-  - 3% of drafts: Bijan Robinson + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 8.6-5.4.
-
-  Players you land most:
-  - Tony Pollard (RB): 80.8% of drafts, avg $1.
-  - Jameson Williams (WR): 79.5% of drafts, avg $1.
-  - Zach Charbonnet (RB): 78% of drafts, avg $1.
-  - Courtland Sutton (WR): 73.3% of drafts, avg $1.
-  - Luther Burden (WR): 71.5% of drafts, avg $1.
-  - Houston Texans (DEF): 63.3% of drafts, avg $1.
-  - Sam LaPorta (TE): 60.3% of drafts, avg $1.
-  - Jahmyr Gibbs (RB): 59% of drafts, avg $87.
-
-### 26. Balanced (no anchor)  (balanced-auction, conservative risk)
+### 25. Balanced (no anchor)  (balanced-auction, conservative risk)
 
 Pool-generated Balanced Auction: 8 anchors (WR/RB/QB/TE/DEF), rest at room price.
 
-- Projected record: 9.4-4.6 (best 14-0, worst 1-13).
+- Projected record: 9.1-4.9 (best 14-0, worst 1-13).
 - Why: The board supports paying up for Emeka Egbuka (~$16), Luther Burden III (~$14), Jalen Hurts (~$13). WR runs HOT (1.18x room vs national). This shape spends $73 on anchors and keeps $127 to complete the roster at room prices.
 - Philosophy: Pattern sweep: Balanced (no anchor). Built from the live board: balanced shape emerged as a completable $200 roster given the current pool.
 - Budget split: QB 7%, RB 7%, WR 15%, TE 6%, DST 3%, K 0%, bench 62%.
@@ -741,9 +715,9 @@ Pool-generated Balanced Auction: 8 anchors (WR/RB/QB/TE/DEF), rest at room price
   Targets $62 + reserve $8 = $70 of $200 (completable).
 
   Most common roster cores this strategy landed:
-  - 13% of drafts: Jahmyr Gibbs + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 9.6-4.4.
-  - 9.3% of drafts: Jahmyr Gibbs + Bijan Robinson + Luther Burden III - avg spend $200, avg record 10-4.
-  - 3% of drafts: Bijan Robinson + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 8.6-5.4.
+  - 13% of drafts: Jahmyr Gibbs + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 9.3-4.7.
+  - 9.3% of drafts: Jahmyr Gibbs + Bijan Robinson + Luther Burden III - avg spend $200, avg record 9.6-4.4.
+  - 3% of drafts: Bijan Robinson + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 8.2-5.8.
 
   Players you land most:
   - Tony Pollard (RB): 80% of drafts, avg $1.
@@ -753,6 +727,32 @@ Pool-generated Balanced Auction: 8 anchors (WR/RB/QB/TE/DEF), rest at room price
   - Luther Burden (WR): 70.3% of drafts, avg $1.
   - Houston Texans (DEF): 63.8% of drafts, avg $1.
   - Sam LaPorta (TE): 59.3% of drafts, avg $1.
+  - Jahmyr Gibbs (RB): 59% of drafts, avg $87.
+
+### 26. Elite TE anchor, light anchors  (balanced-auction, balanced risk)
+
+Pool-generated Balanced Auction: 8 anchors (TE/WR/RB/QB/DEF), rest at room price.
+
+- Projected record: 9-5 (best 14-0, worst 2-12).
+- Why: The board supports paying up for Brock Bowers (~$49), Zay Flowers (~$24), Jalen Hurts (~$13). TE runs HOT (1.17x room vs national). This shape spends $118 on anchors and keeps $82 to complete the roster at room prices.
+- Philosophy: Pattern sweep: Elite TE anchor, light anchors. Built from the live board: balanced shape emerged as a completable $200 roster given the current pool.
+- Budget split: QB 7%, RB 7%, WR 17%, TE 27%, DST 3%, K 0%, bench 39%.
+- Target prices (expect / walk-up to win): Brock Bowers $49 (win by $54), Zay Flowers $24 (win by $26), Jalen Hurts $13 (win by $14), Quinshon Judkins $12 (win by $13), Rome Odunze $9 (win by $10).
+  Targets $107 + reserve $8 = $115 of $200 (completable).
+
+  Most common roster cores this strategy landed:
+  - 13% of drafts: Jahmyr Gibbs + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 9.3-4.7.
+  - 9.3% of drafts: Jahmyr Gibbs + Bijan Robinson + Luther Burden III - avg spend $200, avg record 9.6-4.4.
+  - 3% of drafts: Bijan Robinson + Christian McCaffrey + Luther Burden III - avg spend $200, avg record 8.2-5.8.
+
+  Players you land most:
+  - Tony Pollard (RB): 80.8% of drafts, avg $1.
+  - Jameson Williams (WR): 79.5% of drafts, avg $1.
+  - Zach Charbonnet (RB): 78% of drafts, avg $1.
+  - Courtland Sutton (WR): 73.3% of drafts, avg $1.
+  - Luther Burden (WR): 71.5% of drafts, avg $1.
+  - Houston Texans (DEF): 63.3% of drafts, avg $1.
+  - Sam LaPorta (TE): 60.3% of drafts, avg $1.
   - Jahmyr Gibbs (RB): 59% of drafts, avg $87.
 
 ## Specific stud combos (which exact players to target)
@@ -766,54 +766,54 @@ with the risk model on. Grouped by pattern, best projected record first.
 
 | # | Anchors | Pattern | Proj record | Mean starter pts |
 |---|---------|---------|-------------|------------------|
-| 1 | Puka Nacua + Jaxon Smith-Njigba | WR-WR | 9.9-4.1 | 1956 |
-| 2 | Jahmyr Gibbs + Puka Nacua | RB-WR | 9.9-4.1 | 1966 |
-| 3 | Puka Nacua + Jaxon Smith-Njigba + Trey McBride | Zero RB (WR-WR-TE) | 9.9-4.1 | 1956 |
-| 4 | Josh Allen + Jahmyr Gibbs + Puka Nacua | Elite QB anchor | 9.9-4.1 | 1965.8 |
-| 5 | Lamar Jackson + Jahmyr Gibbs + Puka Nacua | Elite QB anchor | 9.9-4.1 | 1964.5 |
-| 6 | Drake Maye + Jahmyr Gibbs + Puka Nacua | Elite QB anchor | 9.9-4.1 | 1965.5 |
-| 7 | Jahmyr Gibbs + Christian McCaffrey | Robust RB (RB-RB) | 9.8-4.2 | 1974.1 |
-| 8 | Jahmyr Gibbs + Bijan Robinson | Robust RB (RB-RB) | 9.8-4.2 | 1969.5 |
-| 9 | Puka Nacua + Amon-Ra St. Brown | WR-WR | 9.8-4.2 | 1954.4 |
-| 10 | Puka Nacua + Ja'Marr Chase | WR-WR | 9.8-4.2 | 1952.6 |
-| 11 | Jahmyr Gibbs + Jaxon Smith-Njigba | RB-WR | 9.8-4.2 | 1963.4 |
-| 12 | Jahmyr Gibbs + Amon-Ra St. Brown | RB-WR | 9.8-4.2 | 1965.1 |
+| 1 | Jahmyr Gibbs + Jaxon Smith-Njigba | RB-WR | 9.6-4.4 | 1963.4 |
+| 2 | Puka Nacua + Jaxon Smith-Njigba | WR-WR | 9.5-4.5 | 1956 |
+| 3 | Jahmyr Gibbs + Puka Nacua | RB-WR | 9.5-4.5 | 1966 |
+| 4 | Jahmyr Gibbs + Amon-Ra St. Brown | RB-WR | 9.5-4.5 | 1965.1 |
+| 5 | Jaxon Smith-Njigba + Amon-Ra St. Brown + Brock Bowers | Zero RB (WR-WR-TE) | 9.5-4.5 | 1950.3 |
+| 6 | Puka Nacua + Jaxon Smith-Njigba + Trey McBride | Zero RB (WR-WR-TE) | 9.5-4.5 | 1956 |
+| 7 | Josh Allen + Jahmyr Gibbs + Puka Nacua | Elite QB anchor | 9.5-4.5 | 1965.8 |
+| 8 | Lamar Jackson + Jahmyr Gibbs + Puka Nacua | Elite QB anchor | 9.5-4.5 | 1964.5 |
+| 9 | Drake Maye + Jahmyr Gibbs + Puka Nacua | Elite QB anchor | 9.5-4.5 | 1965.5 |
+| 10 | Trey McBride + Jaxon Smith-Njigba + Amon-Ra St. Brown | Elite TE anchor | 9.5-4.5 | 1951.2 |
+| 11 | Jahmyr Gibbs + Christian McCaffrey | Robust RB (RB-RB) | 9.4-4.6 | 1974.1 |
+| 12 | Jahmyr Gibbs + Bijan Robinson | Robust RB (RB-RB) | 9.4-4.6 | 1969.5 |
 
 ### Robust RB (RB-RB)
 
-- **Jahmyr Gibbs + Christian McCaffrey**: 9.8-4.2, 1974.1 starter pts - target Jahmyr Gibbs $76, Christian McCaffrey $67.
-- **Jahmyr Gibbs + Bijan Robinson**: 9.8-4.2, 1969.5 starter pts - target Jahmyr Gibbs $76, Bijan Robinson $70.
-- **Christian McCaffrey + Bijan Robinson**: 9.7-4.3, 1960.8 starter pts - target Bijan Robinson $70, Christian McCaffrey $67.
+- **Jahmyr Gibbs + Christian McCaffrey**: 9.4-4.6, 1974.1 starter pts - target Jahmyr Gibbs $76, Christian McCaffrey $67.
+- **Jahmyr Gibbs + Bijan Robinson**: 9.4-4.6, 1969.5 starter pts - target Jahmyr Gibbs $76, Bijan Robinson $70.
+- **Christian McCaffrey + Bijan Robinson**: 9.3-4.7, 1960.8 starter pts - target Bijan Robinson $70, Christian McCaffrey $67.
 
 ### WR-WR
 
-- **Puka Nacua + Jaxon Smith-Njigba**: 9.9-4.1, 1956 starter pts - target Puka Nacua $76, Jaxon Smith-Njigba $72.
-- **Puka Nacua + Amon-Ra St. Brown**: 9.8-4.2, 1954.4 starter pts - target Puka Nacua $76, Amon-Ra St. Brown $64.
-- **Puka Nacua + Ja'Marr Chase**: 9.8-4.2, 1952.6 starter pts - target Ja'Marr Chase $79, Puka Nacua $76.
+- **Puka Nacua + Jaxon Smith-Njigba**: 9.5-4.5, 1956 starter pts - target Puka Nacua $76, Jaxon Smith-Njigba $72.
+- **Puka Nacua + Amon-Ra St. Brown**: 9.4-4.6, 1954.4 starter pts - target Puka Nacua $76, Amon-Ra St. Brown $64.
+- **Puka Nacua + Ja'Marr Chase**: 9.4-4.6, 1952.6 starter pts - target Ja'Marr Chase $79, Puka Nacua $76.
 
 ### RB-WR
 
-- **Jahmyr Gibbs + Puka Nacua**: 9.9-4.1, 1966 starter pts - target Jahmyr Gibbs $76, Puka Nacua $76.
-- **Jahmyr Gibbs + Jaxon Smith-Njigba**: 9.8-4.2, 1963.4 starter pts - target Jahmyr Gibbs $76, Jaxon Smith-Njigba $72.
-- **Jahmyr Gibbs + Amon-Ra St. Brown**: 9.8-4.2, 1965.1 starter pts - target Jahmyr Gibbs $76, Amon-Ra St. Brown $64.
+- **Jahmyr Gibbs + Jaxon Smith-Njigba**: 9.6-4.4, 1963.4 starter pts - target Jahmyr Gibbs $76, Jaxon Smith-Njigba $72.
+- **Jahmyr Gibbs + Puka Nacua**: 9.5-4.5, 1966 starter pts - target Jahmyr Gibbs $76, Puka Nacua $76.
+- **Jahmyr Gibbs + Amon-Ra St. Brown**: 9.5-4.5, 1965.1 starter pts - target Jahmyr Gibbs $76, Amon-Ra St. Brown $64.
 
 ### Zero RB (WR-WR-TE)
 
-- **Puka Nacua + Jaxon Smith-Njigba + Trey McBride**: 9.9-4.1, 1956 starter pts - target Puka Nacua $76, Jaxon Smith-Njigba $72, Trey McBride $35.
-- **Puka Nacua + Amon-Ra St. Brown + Brock Bowers**: 9.8-4.2, 1953.4 starter pts - target Puka Nacua $76, Amon-Ra St. Brown $64, Brock Bowers $49.
-- **Jaxon Smith-Njigba + Amon-Ra St. Brown + Brock Bowers**: 9.8-4.2, 1950.3 starter pts - target Jaxon Smith-Njigba $72, Amon-Ra St. Brown $64, Brock Bowers $49.
+- **Jaxon Smith-Njigba + Amon-Ra St. Brown + Brock Bowers**: 9.5-4.5, 1950.3 starter pts - target Jaxon Smith-Njigba $72, Amon-Ra St. Brown $64, Brock Bowers $49.
+- **Puka Nacua + Jaxon Smith-Njigba + Trey McBride**: 9.5-4.5, 1956 starter pts - target Puka Nacua $76, Jaxon Smith-Njigba $72, Trey McBride $35.
+- **Puka Nacua + Amon-Ra St. Brown + Brock Bowers**: 9.4-4.6, 1953.4 starter pts - target Puka Nacua $76, Amon-Ra St. Brown $64, Brock Bowers $49.
 
 ### Elite QB anchor
 
-- **Josh Allen + Jahmyr Gibbs + Puka Nacua**: 9.9-4.1, 1965.8 starter pts - target Jahmyr Gibbs $76, Puka Nacua $76, Josh Allen $36.
-- **Lamar Jackson + Jahmyr Gibbs + Puka Nacua**: 9.9-4.1, 1964.5 starter pts - target Jahmyr Gibbs $76, Puka Nacua $76, Lamar Jackson $32.
-- **Drake Maye + Jahmyr Gibbs + Puka Nacua**: 9.9-4.1, 1965.5 starter pts - target Jahmyr Gibbs $76, Puka Nacua $76, Drake Maye $28.
+- **Josh Allen + Jahmyr Gibbs + Puka Nacua**: 9.5-4.5, 1965.8 starter pts - target Jahmyr Gibbs $76, Puka Nacua $76, Josh Allen $36.
+- **Lamar Jackson + Jahmyr Gibbs + Puka Nacua**: 9.5-4.5, 1964.5 starter pts - target Jahmyr Gibbs $76, Puka Nacua $76, Lamar Jackson $32.
+- **Drake Maye + Jahmyr Gibbs + Puka Nacua**: 9.5-4.5, 1965.5 starter pts - target Jahmyr Gibbs $76, Puka Nacua $76, Drake Maye $28.
 
 ### Elite TE anchor
 
-- **Trey McBride + Puka Nacua + Amon-Ra St. Brown**: 9.8-4.2, 1954.4 starter pts - target Puka Nacua $76, Amon-Ra St. Brown $64, Trey McBride $35.
-- **Trey McBride + Puka Nacua + Ja'Marr Chase**: 9.8-4.2, 1952.6 starter pts - target Ja'Marr Chase $79, Puka Nacua $76, Trey McBride $35.
-- **Trey McBride + Jaxon Smith-Njigba + Amon-Ra St. Brown**: 9.8-4.2, 1951.2 starter pts - target Jaxon Smith-Njigba $72, Amon-Ra St. Brown $64, Trey McBride $35.
+- **Trey McBride + Jaxon Smith-Njigba + Amon-Ra St. Brown**: 9.5-4.5, 1951.2 starter pts - target Jaxon Smith-Njigba $72, Amon-Ra St. Brown $64, Trey McBride $35.
+- **Trey McBride + Puka Nacua + Amon-Ra St. Brown**: 9.4-4.6, 1954.4 starter pts - target Puka Nacua $76, Amon-Ra St. Brown $64, Trey McBride $35.
+- **Trey McBride + Puka Nacua + Ja'Marr Chase**: 9.4-4.6, 1952.6 starter pts - target Ja'Marr Chase $79, Puka Nacua $76, Trey McBride $35.
 
 _No affordable elite combo: Triple WR, Double RB + WR, Hero RB (RB + WR-WR). The top studs at
 those positions cost more than $200 combined at room price, so no concrete

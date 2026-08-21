@@ -19,6 +19,12 @@
 /** One undrafted player on the available board. */
 export interface BoardPlayer {
   id: string
+  /**
+   * Sleeper/external id carried through for risk-model joins. The solver ignores
+   * it; the sim copies it onto won players so grading can look up real per-player
+   * durability (risk-model.json is keyed by Sleeper id, not by `id`).
+   */
+  sleeperId?: string
   name: string
   position: 'QB' | 'RB' | 'WR' | 'TE' | 'DEF'
   /** Expected auction cost — expectedRoomPrice ?? consensusAuctionValue */

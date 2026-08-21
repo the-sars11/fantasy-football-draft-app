@@ -88,6 +88,9 @@ export function cacheToPlayer(cached: CachedPlayer): Player {
 
   return {
     id: cached.id,
+    // Sleeper/external id joins the row to the measured risk model. `id` is a
+    // Supabase UUID and never matches the model's Sleeper-id keys.
+    sleeperId: cached.external_id ?? undefined,
     name: cached.name,
     team: cached.team ?? '',
     position: appPos,

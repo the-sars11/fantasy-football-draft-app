@@ -323,6 +323,78 @@ describe('gradeRun measured risk model (real data)', () => {
   })
 })
 
+describe('gradeRun durability joins on sleeperId (real per-player games-missed)', () => {
+  // Regression for the McCaffrey blind-spot bug: risk-model.json is keyed by
+  // Sleeper id, but board/sim players carry a Supabase UUID as `id`. Before the
+  // fix, applyRiskModel looked up byPlayer[p.id], which never matched, so EVERY
+  // player silently fell back to the position baseline and real injury history
+  // (McCaffrey 84.6% games-played) was ignored. The join now uses sleeperId.
+  const MCCAFFREY_SLEEPER_ID = '4034' // real: gpRate 0.8462 (misses ~2.6 of 17)
+
+  function wonWithSleeperId(
+    id: string,
+    sleeperId: string | undefined,
+    position: SimWonPlayer['position'],
+    projectedPoints: number,
+    price = 1,
+  ): SimWonPlayer {
+    return { id, sleeperId, name: id, position, price, ceiling: price, projectedPoints }
+  }
+
+  // Identical elite-RB builds; the ONLY difference is whether the anchor carries
+  // McCaffrey's real Sleeper id (fragile, 84.6%) or no id (RB baseline ~94.7%).
+  const anchorBuild = (sleeperId: string | undefined) => [
+    wonWithSleeperId('anchor_rb', sleeperId, 'RB', 320, 90),
+    won('c_rb2', 'RB', 40, 2),
+    won('c_qb', 'QB', 40, 2),
+    won('c_wr', 'WR', 40, 2),
+    won('c_te', 'TE', 40, 2),
+    won('c_def', 'DEF', 10, 1),
+  ]
+  const OPPONENTS = () => [
+    roster(1, false, [
+      won('o1_qb', 'QB', 55, 12), won('o1_rb1', 'RB', 140, 40), won('o1_rb2', 'RB', 130, 30),
+      won('o1_wr1', 'WR', 140, 40), won('o1_wr2', 'WR', 130, 30), won('o1_te', 'TE', 95, 12),
+      won('o1_def', 'DEF', 15, 1),
+    ]),
+    roster(2, false, [
+      won('o2_qb', 'QB', 50, 10), won('o2_rb1', 'RB', 145, 40), won('o2_rb2', 'RB', 135, 30),
+      won('o2_wr1', 'WR', 140, 40), won('o2_wr2', 'WR', 120, 28), won('o2_te', 'TE', 100, 14),
+      won('o2_def', 'DEF', 15, 1),
+    ]),
+  ]
+
+  it('has McCaffrey in the measured model at his real games-played rate', () => {
+    // Guards the join key itself: if the model ever drops McCaffrey, this fails
+    // loudly instead of silently reverting the sim to the baseline blind spot.
+    const cmc = DEFAULT_RISK_MODEL.durability.byPlayer[MCCAFFREY_SLEEPER_ID]
+    expect(cmc).toBeDefined()
+    expect(cmc.gpRate).toBeCloseTo(0.8462, 3)
+    expect(cmc.gpRate).toBeLessThan(DEFAULT_RISK_MODEL.durability.baseline.RB)
+  })
+
+  it('applies real durability only when the anchor carries its sleeperId', () => {
+    // Healthy strength is identical, and the outcome (bust/breakout) draws are
+    // identical because positional ranks match. The ONLY moving part is the
+    // weekly out-rate: 0.8462 (real) vs the RB baseline. So the id-carrying
+    // (fragile) build must grade to fewer wins than the id-less (baseline) build.
+    const SEEDS = 400
+    let fragileWins = 0
+    let baselineWins = 0
+    for (let seed = 1; seed <= SEEDS; seed++) {
+      const fragileSeats = [roster(0, true, anchorBuild(MCCAFFREY_SLEEPER_ID)), ...OPPONENTS()]
+      const baselineSeats = [roster(0, true, anchorBuild(undefined)), ...OPPONENTS()]
+      fragileWins += gradeRun(run(seed, fragileSeats), LINEUP, 3, 14, { risk: DEFAULT_RISK_MODEL }).wins
+      baselineWins += gradeRun(run(seed, baselineSeats), LINEUP, 3, 14, { risk: DEFAULT_RISK_MODEL }).wins
+    }
+    // Real injury history costs the fragile anchor games and therefore wins.
+    // Observed gap ~125 wins across 400 seeds (baseline 1275 vs fragile 1150);
+    // the +50 margin sits well inside that so it proves the join fires without
+    // being rng-sensitive. Before the fix this gap was 0 (baseline for everyone).
+    expect(baselineWins).toBeGreaterThan(fragileWins + 50)
+  })
+})
+
 describe('summarizeGrades', () => {
   it('reports the modal record and best/worst spread', () => {
     const grades = [

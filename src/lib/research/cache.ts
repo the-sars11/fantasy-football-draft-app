@@ -13,6 +13,13 @@ import type { ConsensusPlayer, SourceFreshness } from './normalize'
 
 export interface CachedPlayer {
   id: string
+  /**
+   * Stable cross-source id (populate step: sleeperId || espnId || fpId). For
+   * players with a Sleeper id this IS the Sleeper player id, which is the key
+   * the measured risk model (risk-model.json) is indexed by. The row's own `id`
+   * is a Supabase UUID and does NOT join to the risk model.
+   */
+  external_id: string | null
   name: string
   team: string | null
   position: string
