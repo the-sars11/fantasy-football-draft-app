@@ -9,8 +9,8 @@
 // $0: self-sufficient. Pulls the raw actuals from the Sleeper API (free, keyless, no
 // auth) and caches each response under scripts/.sleeper-cache/ (gitignored) so re-runs
 // are instant and offline. No Claude, no paid source. Writes one JSON to
-// src/data/risk-model.json. Run: `node scripts/derive-risk-model.mjs`
-// (set DERIVE_FRESH=1 to ignore the local cache and force a fresh Sleeper re-pull).
+// src/data/risk-model.json. Run: `npm run risk:derive`
+// (`npm run risk:derive:fresh` ignores the local cache and re-pulls from Sleeper).
 //
 // Honesty: every number below is measured from real actuals. Per-player durability is
 // MEASURED for players with >=2 real seasons; everyone else falls back to the position
@@ -43,8 +43,9 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
  * Load one cached JSON by filename, fetching from Sleeper on a miss.
  * Order: repo cache -> legacy scratchpad (copied forward) -> live fetch (then cached).
  */
-// Set DERIVE_FRESH=1 to ignore every local cache and re-pull straight from Sleeper.
-const FRESH = process.env.DERIVE_FRESH === '1'
+// Pass --fresh (or set DERIVE_FRESH=1) to ignore every local cache and re-pull
+// straight from Sleeper. The flag is portable across Windows/POSIX shells.
+const FRESH = process.env.DERIVE_FRESH === '1' || process.argv.includes('--fresh')
 async function loadJson(name, url) {
   const repoPath = path.join(CACHE_DIR, name)
   if (!FRESH && fs.existsSync(repoPath)) return JSON.parse(fs.readFileSync(repoPath, 'utf8'))
