@@ -2,6 +2,22 @@
 
 ---
 
+## 2026-08-21 / PREP RE-EVAL Part 1 -- strategy-driven sim + identity dedup
+
+**Class:** pipeline + shared (Architecture + QA lenses). Joe rejected the prep screens on two data defects: (1) virtually every strategy produced the SAME roster (Gibbs + Luther Burden regardless of strategy), and (2) each sample roster spent the full $200 on just 3-4 players (unrealistic). Root-caused to the engine + the cache, not the display. Part 1 fixes the engine/data; Part 2 (screens) is separate. Pure engine, $0, no LLM, no network re-pull.
+
+**Defect B (strategy-blind sim) -- fixed in `src/lib/draft/sim-engine.ts`.** The me-seat always valued players at a fixed national ceiling and won ties, so every strategy converged on the same top-2 studs at ~$88 then dropped to $1 fills. Added `SimMyPlan { anchors: Record<id, {maxPrice}> }` + `myPlan?` on `SimEngineInput`, and a new me-seat valuation branch: with a plan, me chases its strategy's named anchors up to their solved walk-up price and values every OTHER slot at room price capped by a dynamic per-slot fair share (`remaining budget / open slots x VALUE_FILL_SPREAD=2.5`). So leftover dollars spread across the whole roster and taper as slots fill, instead of hoarding the next stud. Absent `myPlan` => legacy ceiling-chase (all existing sim tests unchanged). New `buildMyPlanFromStrategy` in `sim-results.ts` maps a strategy's `target_pricing.prices` (+ un-priced `key_targets`) to anchors keyed by board id, capped at $88; threaded through `scripts/research-run.ts` `simInputFor`.
+
+**Defect C (duplicate identities) -- fixed in `src/lib/players/dedupe-identities.ts` (new) wired into `cacheToPlayers`.** `players_cache` held two rows for one human -- "Luther Burden III" (ADP 47, $27, no projection) and a ghost "Luther Burden" (ADP 999, proj 212.3) -- and the sim drafted both. `normalize.ts` was NOT the origin (its `normalizeName` already strips suffixes); the dup is two separate cache rows, so the fix lives at the shared read path. New pure `dedupePlayerIdentities` collapses same canonical-name + position + compatible-team rows: keeps the best-ranked (lowest-ADP) row's identity/pricing, adopts only MISSING scoring fields from the ghost, never overwrites, never merges different-team/different-position same-names. Called inside `cacheToPlayers` (best-first sort before dedup), so the sim, the published dataset, AND the live screens all see one row per player. 8 unit tests.
+
+**Proof (pasted).**
+- Gate: `type-check` 0 errors; `test:run` **614/614** (7 new dedup tests, 0 regressions); `lint` 0 errors/0 warnings in every touched file (the repo's 42 pre-existing baseline errors are all in untouched files, e.g. `verify-vorp.ts`).
+- Dataset regenerated (`npm run research:run`) + assertion script, all PASS: Burden rows in published players **2 -> 1** (survivor keeps ADP 47/$27 AND adopts proj 212.3); duplicate-identity roster hits **5 -> 0**; every strategy rep roster = 13 players; distinct core-sets **2 -> 17** of 26; all 26 grades finite; strategies spreading >=8 players over $1 = **18/26**; max single-player prevalence **26/26 -> 15/26**.
+- Spread now tracks the strategy shape: heavy-anchor builds concentrate (top-3 = 85-95%, correct stars-and-scrubs), even/light/balanced spread across 9-13 players (top-3 = 46-74%). Grades vary 7.7-9.3.
+- Part 1B (repair the projection join for ~21 still-null top-40 players, e.g. Jonathan Taylor / Jeanty / Lamar) deferred: it needs a network `data:pull` that shifts numbers under Joe mid-review, and the sim no longer depends on it.
+
+---
+
 ## 2026-08-21 / W2 -- League Intel panel + per-player dataset enrichment
 
 **Class:** output + shared (Design + QA lenses). Third W-track session. Same orchestration shape as W1: Opus orchestrator dispatched a Sonnet worker to build, then an independent adversarial Sonnet validator; the orchestrator fixed the finding and committed. Reads the W0 dataset snapshot -- zero recompute, $0.

@@ -14,8 +14,10 @@ import {
   runMonteCarlo,
   type SimEngineInput,
   type SimMyBias,
+  type SimMyPlan,
   type SimDistribution,
 } from './sim-engine'
+import type { BoardPlayer } from './roster-solver'
 import {
   starterConfigOf,
   gradeRun,
@@ -67,6 +69,65 @@ export function buildMyBiasFromTags(
     }
   }
   return bias
+}
+
+// ─── R10b strategy plan from a proposal ──────────────────────────────────────
+
+/** Hard clearing cap ($) mirrored from the engine so an anchor never asks for a
+ *  price the room has never paid. Kept in sync with sim-engine's LEAGUE_MAX_CLEAR. */
+const PLAN_MAX_CLEAR = 88
+
+/** Minimal solved-target shape (subset of research target-pricing TargetPrice). */
+export interface PlanTargetLike {
+  name: string
+  /** WALK-UP: absolute max-to-win dollars for this target. */
+  walkUp?: number | null
+  /** EXPECT: plan-to-pay dollars (fallback when walkUp is absent). */
+  price?: number | null
+  /** Un-adjusted room anchor (last-resort fallback). */
+  baseValue?: number | null
+}
+
+/**
+ * R10b: turn ONE strategy's solved targets (+ any un-priced key_targets) into the
+ * me-seat plan the engine executes. Anchors are keyed by BoardPlayer.id (resolved
+ * by name against the sim board), each with the most me will pay to WIN it:
+ *   - a solved target -> its walk-up price (fall back to expect, then room anchor),
+ *   - an un-priced key_target -> the player's Nasties ceiling (band-high),
+ * both floored at $1 and capped at PLAN_MAX_CLEAR. Names that match no board
+ * player are dropped (never invents an id). First board row per name wins, matching
+ * the dedup upstream. Returns { anchors: {} } when nothing resolves, which the
+ * engine treats as "fill the whole roster at market" (still a valid plan).
+ */
+export function buildMyPlanFromStrategy(
+  board: BoardPlayer[],
+  solvedTargets: PlanTargetLike[],
+  keyTargets: string[] = [],
+): SimMyPlan {
+  const byName = new Map<string, BoardPlayer>()
+  for (const p of board) {
+    const key = p.name.toLowerCase()
+    if (!byName.has(key)) byName.set(key, p)
+  }
+
+  const anchors: SimMyPlan['anchors'] = {}
+
+  for (const t of solvedTargets) {
+    const bp = byName.get(t.name.toLowerCase())
+    if (!bp) continue
+    const raw = t.walkUp ?? t.price ?? t.baseValue ?? bp.ceiling
+    const maxPrice = Math.min(PLAN_MAX_CLEAR, Math.max(1, Math.round(raw)))
+    anchors[bp.id] = { maxPrice }
+  }
+
+  for (const name of keyTargets) {
+    const bp = byName.get(name.toLowerCase())
+    if (!bp || anchors[bp.id]) continue
+    const maxPrice = Math.min(PLAN_MAX_CLEAR, Math.max(1, Math.round(bp.ceiling)))
+    anchors[bp.id] = { maxPrice }
+  }
+
+  return { anchors }
 }
 
 // ─── Full sim summary ────────────────────────────────────────────────────────

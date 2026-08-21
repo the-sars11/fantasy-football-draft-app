@@ -25,6 +25,18 @@ The prior plan (S1–S8 / P2 DR / P3 VAL) marked the app "done" while it (a) pri
 
 ## Next open item
 
+### ▶ ACTIVE FOCUS 2026-08-21 -- PREP SCREENS RE-EVAL (approved plan)
+
+Joe rejected the prep screens (data + display). Two-part approved plan: **Part 1 (engine/data correctness) -- DONE**, **Part 2 (per-screen IA inside SHIELD) -- NEXT**.
+
+- **Part 1A [Opus] DONE -- strategy-driven me-seat.** `SimMyPlan` + `myPlan?` on `SimEngineInput`; me chases its strategy's anchors to their walk-up price and fills the rest at room price under a per-slot cap (`VALUE_FILL_SPREAD=2.5`). `buildMyPlanFromStrategy` (`sim-results.ts`) threaded through `research-run.ts`. Absent plan => legacy behavior (tests unchanged). Result: distinct core-sets 2 -> 17/26, spread tracks strategy shape, grades 7.7-9.3.
+- **Part 1C [Opus] DONE -- identity dedup.** New `src/lib/players/dedupe-identities.ts` wired into `cacheToPlayers`; collapses "Luther Burden III" + ghost "Luther Burden" (dup roster hits 5 -> 0). 8 tests.
+- **Part 1B DEFERRED** -- ~21 top-40 players still null-projection; needs a network `data:pull` (shifts numbers mid-review) and the sim no longer depends on it.
+- **Proof:** type-check 0, test:run 614/614, lint 0 in touched files; dataset assertions all PASS. See CHANGELOG 2026-08-21 / PREP RE-EVAL Part 1.
+- **NEXT = Part 2:** re-architect Strategy Leaderboard, Draft Board/Cheat Sheet, Players, League Intel panel inside SHIELD v4 (full 13-man rosters w/ real dollar spread; fix hex/volt-green/HTML-table violations; expandable rows). Screens now read correct + differentiated data.
+
+---
+
 ### ▶ ACTIVE FOCUS 2026-08-21 -- W-track: wire the headless engine INTO the app UI
 
 Joe-approved 2026-08-21: the HEADLESS ENGINE track (below) deliberately made `dataset.json` for in-chat interrogation and skipped the UI. Joe now wants it in the app too, plus a draft-day workflow: decide (in-app OR via Claude) -> LOCK -> draft dynamically on the phone off the locked plan. New `W-track` section in `BUILD_PLAN.md` (W0-W5). Reuses the shipped decisions layer (`user_tags`/`strategies` from R7a/R7b/R9/R11b), adds NO AI to the deterministic live Read (DEC-2 preserved), reuses `research_runs` kind-discrimination (no migration).

@@ -122,6 +122,17 @@ export interface SimEngineInput {
    * generic opponents (backwards-compatible with every existing sim test).
    */
   opponentProfiles?: OpponentProfile[]
+  /**
+   * R10b (STRATEGY-DRIVE): the me-seat's concrete plan for ONE strategy, so the
+   * sim executes that strategy's shape instead of chasing a fixed national
+   * ceiling. When present, the me-seat pursues its named anchors up to their
+   * solved walk-up price and fills every OTHER slot at room price capped by a
+   * dynamic per-slot fair share (so leftover dollars spread across the whole
+   * roster rather than collapsing to $1 fills). Absent => legacy ceiling-chase
+   * (backwards-compatible with every existing sim test). Only the me-seat is
+   * affected; opponents are untouched.
+   */
+  myPlan?: SimMyPlan
 }
 
 /**
@@ -145,6 +156,21 @@ export interface SimBiasEntry {
 
 /** Me-seat graded leans keyed by BoardPlayer.id. */
 export type SimMyBias = Record<string, SimBiasEntry>
+
+/**
+ * R10b (STRATEGY-DRIVE): the me-seat's concrete draft plan for ONE strategy.
+ * `anchors` are the strategy's named studs keyed by BoardPlayer.id, each with the
+ * most me will pay to WIN that anchor (the solver's durability-adjusted walk-up
+ * price, already fit to $200 and capped at LEAGUE_MAX_CLEAR upstream). The sim
+ * uses this to make the me-seat spend like the strategy: chase these specific
+ * players hard, then fill the rest of the roster at market value under a per-slot
+ * cap. Two strategies with different anchors therefore land visibly different
+ * rosters instead of both converging on the same national-ceiling studs.
+ */
+export interface SimMyPlan {
+  /** Named anchors keyed by BoardPlayer.id -> the most me will pay to win them. */
+  anchors: Record<string, { maxPrice: number }>
+}
 
 /** One player a manager won, with what they paid. */
 export interface SimWonPlayer {
@@ -230,6 +256,17 @@ const FLEX_ELIGIBLE = new Set<BoardPlayer['position']>(['RB', 'WR', 'TE'])
 const TARGET_MAX_BOOST = 0.35
 /** Soft-avoid valuation multiplier: me only takes the player at a real discount. */
 const SOFT_AVOID_FACTOR = 0.5
+
+/**
+ * R10b (STRATEGY-DRIVE): how far above the per-slot fair share the me-seat will
+ * pay for a NON-anchor filler. With the plan active, me values every non-anchor at
+ * min(room price, (remaining budget / open slots) x this). At 2.5, a seat holding
+ * $120 for 12 open slots ($10/slot) will pay up to ~$25 for a filler, so leftover
+ * budget spreads across ~10-12 real mid-tier players and tapers as slots fill,
+ * instead of me hoarding the next-nominated stud at national ceiling and dropping
+ * to $1 fills. Higher => more concentrated at the top; lower => flatter/cheaper.
+ */
+const VALUE_FILL_SPREAD = 2.5
 
 // ─── LR-1 opponent "room-price drive" ────────────────────────────────────────
 /**
@@ -340,6 +377,7 @@ export function runAuctionSim(
     myManagerIndex = 0,
     myBias,
     opponentProfiles,
+    myPlan,
   } = input
   const noisePct = input.noisePct ?? 0.15
   const rng = mulberry32(seed)
@@ -414,6 +452,26 @@ export function runAuctionSim(
         // clear studs at what Joe's league actually pays, not national ceiling.
         const tilt = 1 + OPPONENT_LEAN_STRENGTH * (lean - 1)
         valuation = Math.max(1, Math.round(nominated.expectedCost * tilt * noise))
+      } else if (m.index === myManagerIndex && myPlan) {
+        // R10b (STRATEGY-DRIVE): the me-seat executes THIS strategy's plan.
+        //   - Anchor (a named target for this strategy): chase it up to the
+        //     solver's walk-up price so me actually wins its advertised studs.
+        //   - Any other player: value at the ROOM price (expectedCost) but never
+        //     above a dynamic per-slot fair share (remaining budget / open slots
+        //     x VALUE_FILL_SPREAD). openSlotCount is >= 1 here (hasOpenSlotFor
+        //     guarded it), so perSlot is finite. This spends leftover budget
+        //     across the whole roster in real mid-tier players and tapers as
+        //     slots fill, instead of hoarding the next stud at national ceiling.
+        const anchor = myPlan.anchors[nominated.id]
+        if (anchor) {
+          valuation = Math.max(1, Math.round(anchor.maxPrice * noise))
+        } else {
+          const openSlots = openSlotCount(m.slots)
+          const perSlot = openSlots > 0 ? m.budget / openSlots : m.budget
+          const fillCap = perSlot * VALUE_FILL_SPREAD
+          const base = Math.min(nominated.expectedCost, fillCap)
+          valuation = Math.max(1, Math.round(base * noise))
+        }
       } else {
         valuation = Math.max(1, Math.round(nominated.ceiling * noise))
       }
@@ -603,6 +661,7 @@ export function runMonteCarlo(input: SimEngineInput): SimEngineResult {
       myManagerIndex,
       myBias: input.myBias ?? {},
       opponentProfiles: input.opponentProfiles ?? [],
+      myPlan: input.myPlan ?? { anchors: {} },
       rosterConfig: input.rosterConfig,
     },
   }

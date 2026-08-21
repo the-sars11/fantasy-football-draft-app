@@ -6,6 +6,7 @@
 import type { Player, Position } from './types'
 import type { CachedPlayer } from '@/lib/research/cache'
 import { expectedRoomPrice } from '@/lib/draft/league-calibration'
+import { dedupePlayerIdentities } from './dedupe-identities'
 
 /** Map DB position (DST) to app position (DEF) */
 function dbPosToAppPos(pos: string): Position {
@@ -130,9 +131,18 @@ export function cacheToPlayer(cached: CachedPlayer): Player {
   }
 }
 
-/** Convert an array of CachedPlayers to Players, sorted by consensus rank */
+/**
+ * Convert an array of CachedPlayers to Players, sorted by consensus rank, with
+ * duplicate identities collapsed. The list is sorted best-first BEFORE the dedup
+ * so the real pricing row (lowest ADP) survives and only its missing projection/
+ * VORP is filled from the ghost row (e.g. "Luther Burden III" keeps its $27/ADP 47
+ * and adopts the ghost "Luther Burden"'s projected points). This is the single
+ * read path every consumer shares, so the sim, the published dataset, and the live
+ * screens all see one row per player.
+ */
 export function cacheToPlayers(cached: CachedPlayer[]): Player[] {
-  return cached
+  const sorted = cached
     .map(cacheToPlayer)
     .sort((a, b) => a.consensusRank - b.consensusRank)
+  return dedupePlayerIdentities(sorted)
 }

@@ -37,6 +37,7 @@ import { buildOpponentProfiles } from '@/lib/draft/league-opponents'
 import {
   buildSimSummary,
   buildMyBiasFromTags,
+  buildMyPlanFromStrategy,
   toPersistedSim,
   type GradedTagLike,
   type SimSummary,
@@ -209,6 +210,16 @@ async function main(): Promise<void> {
     myManagerIndex: 0,
     myBias: buildMyBiasFromTags(biasFromStrategy(proposal, byName)),
     opponentProfiles,
+    // R10b: the me-seat executes THIS strategy's solved plan (anchors chased to
+    // their walk-up price, rest of roster filled at market under a per-slot cap),
+    // so each strategy lands a visibly distinct, fully-spread roster instead of
+    // every strategy converging on the same national-ceiling studs. Falls back to
+    // key_targets when the solver did not price the strategy.
+    myPlan: buildMyPlanFromStrategy(
+      board,
+      proposal.target_pricing?.prices ?? [],
+      proposal.key_targets ?? [],
+    ),
   })
 
   const strategies = stratResult.proposals.map((proposal, i) => {
