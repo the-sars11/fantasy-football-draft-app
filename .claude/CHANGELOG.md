@@ -2,6 +2,24 @@
 
 ---
 
+## 2026-08-21 / W1 -- Strategy Leaderboard screen (the engine's rankings, in the app)
+
+**Class:** output (Design + QA lenses). Second W-track session. Orchestrated: an Opus orchestrator dispatched a Sonnet worker to build, then an independent adversarial Sonnet validator; the orchestrator fixed the validator's findings and committed. Reads the W0 dataset snapshot -- zero recompute, $0.
+
+**Design.** New route `src/app/(app)/prep/leaderboard/{page,client}.tsx` + a "Leaderboard" destination row on the `/prep` hub (D2 pattern). Every anchor strategy from the published dataset, ranked descending by its real 400-run `sim.grade.meanWins`. Expandable rows (Joe's locked rule, not a card grid): collapsed shows rank + name + projected record + avg wins; expanded shows why-it-wins (`proposal.reasoning`), the record hero (reused `SimRecordHero`), key targets with solver + durability-adjusted prices, and a swipeable sample-roster carousel (reused `SimRosterCarousel`). A "Stud combos" section renders `dataset.studCombos` the same way. SHIELD throughout: `Nameplate`/`PageTitle`/`FFISectionHeader`, zero inline hex. New pure module `src/lib/research/leaderboard.ts` (`rankStrategies` + `resolveTargetPrice`) with 10 unit tests; `resolveTargetPrice` returns an honest all-null `unknown` shape rather than fabricating a price when a target has no data.
+
+**Two defects the validator caught, both fixed before commit:**
+- **`/prep` hub crash (regression from W0).** `GET /api/research` only excluded `kind:'sim'`, so once a `kind:'dataset'` row was published it could be picked as the hub's "latest completed run"; its payload has no `analysis` key and `prep/page.tsx` read `.analysis.targets` unguarded -> error boundary on the whole Research hub. Fix: (1) `src/app/api/research/route.ts` filter now excludes `sim` + `dataset` + `plan` (future W3) while staying null-tolerant for legacy research rows -- `kind IS NULL OR (kind != sim AND kind != dataset AND kind != plan)`; (2) defensive `?.analysis?.` optional chaining in `prep/page.tsx` so a stray non-research row can never crash the hub.
+- **Stud-combo shared expand state.** Combo rows keyed on `patternKey` alone, but there are 3 combos per pattern -> duplicate React keys, so expanding one expanded its siblings. Fix: key + expand-identity now `${patternKey}::${anchorNames.join('|')}`.
+
+**Proof (pasted).**
+- Gate: `type-check` 0 errors; `test:run` **601/601** (10 new leaderboard tests); `eslint` exit 0 on all edited files; `build` compiled, `/prep/leaderboard` a static route (58/58 pages).
+- Live DOM (dev :3003, DEV_MODE, real dataset row `7f63f239`): leaderboard renders all 26 strategies ranked 9.5 -> 9.0 avg wins; validator confirmed `Christian McCaffrey $60 · room $67 · 0.89x durability` and stud combo `Jahmyr Gibbs + Christian McCaffrey 10-4`.
+- Bug 1 fixed: `GET /api/research?leagueId=...` -> 200, `runs:0`, dataset row excluded; `/prep` renders clean (no error boundary), "Leaderboard" hub row present.
+- Bug 2 fixed: 0 duplicate-key console warnings (validator saw 6).
+
+---
+
 ## 2026-08-21 / W0 -- dataset contract + storage seam (the headless engine can now reach the app)
 
 **Class:** shared + pipeline (Architecture + QA + Security lenses). First W-track session (Joe-approved 2026-08-21): the HEADLESS ENGINE track produced `research-output/dataset.json` for in-chat interrogation but the app never read it -- the app can only read Supabase, not the filesystem, and on Vercel on-disk reads are out entirely. W0 builds the seam so the rich 400-run snapshot (every strategy sim, stud combo, enriched player, league intel) becomes readable in the app with zero recompute.

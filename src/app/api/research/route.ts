@@ -49,10 +49,14 @@ export async function GET(req: NextRequest) {
       .select('id, league_id, strategy_settings, status, error_message, created_at, completed_at')
       .eq('league_id', leagueId)
       .eq('user_id', user.id)
-      // R10b: sim runs share this table (strategy_settings.kind === 'sim') but
-      // belong on the Simulate screen, not here. Null-tolerant so legacy research
-      // rows (no kind) are still returned.
-      .or('strategy_settings->>kind.is.null,strategy_settings->>kind.neq.sim')
+      // This table is shared by kind-discriminated rows: 'sim' (Simulate screen),
+      // 'dataset' (W0 headless research snapshot), and 'plan' (W3 locked draft
+      // plan). None of those are research-hub runs, so exclude all of them.
+      // Null-tolerant so legacy research rows (no kind) are still returned.
+      // Shape: kind IS NULL OR (kind != sim AND kind != dataset AND kind != plan).
+      .or(
+        'strategy_settings->>kind.is.null,and(strategy_settings->>kind.neq.sim,strategy_settings->>kind.neq.dataset,strategy_settings->>kind.neq.plan)',
+      )
       .order('created_at', { ascending: false })
       .limit(20)
 

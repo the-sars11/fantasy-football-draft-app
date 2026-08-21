@@ -23,6 +23,7 @@ import {
   BarChart3,
   Layers,
   Activity,
+  Trophy,
   ChevronRight,
   Play,
   Target,
@@ -189,8 +190,12 @@ export default function PrepPage() {
     }
   }
 
-  const targets = detail?.results?.analysis.targets ?? []
-  const avoids = detail?.results?.analysis.avoids ?? []
+  // Guard the whole chain: non-research rows (sim/dataset/plan) have no
+  // `analysis` key, so an unguarded `.analysis.targets` would throw. The
+  // API filter below should keep them out of this list, but never crash the
+  // hub if one slips through.
+  const targets = detail?.results?.analysis?.targets ?? []
+  const avoids = detail?.results?.analysis?.avoids ?? []
 
   // Real glanceable metrics for the destination rows — no fabricated numbers.
   const playersMetric: Metric = cache
@@ -202,6 +207,7 @@ export default function PrepPage() {
   const strategiesMetric: Metric =
     strategyCount && strategyCount > 0 ? { value: String(strategyCount), label: 'saved' } : null
   const simsMetric: Metric = { badge: 'New' }
+  const leaderboardMetric: Metric = { badge: 'New' }
 
   return (
     <div className="pb-2">
@@ -262,6 +268,13 @@ export default function PrepPage() {
           label="Sims"
           sub="Mock the auction, see your rosters"
           metric={simsMetric}
+        />
+        <DestRow
+          href="/prep/leaderboard"
+          icon={Trophy}
+          label="Leaderboard"
+          sub="Every strategy, ranked by projected wins"
+          metric={leaderboardMetric}
         />
       </div>
 
