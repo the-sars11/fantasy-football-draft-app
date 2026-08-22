@@ -15,7 +15,9 @@
  * Every number still traces to real data: VORP worth (ESPN 2026 full-PPR,
  * roster-aware), the 16-yr Nasties room-price ledger, FantasyPros ECR/tier/std,
  * and injury status. Nothing fabricated. No ADP (that's a snake stat; this is an
- * auction). SHIELD palette: steel-blue, brick-red, chrome - no green, no gold.
+ * auction). SHIELD palette, tokens only (2026-08-22 hex purge): steel-blue
+ * (--ffi-blue), brick-red (--ffi-volt), coral (--ffi-danger), warning
+ * (--ffi-warning), chrome inks - no raw hex, no green, no gold.
  */
 
 import { useState } from 'react'
@@ -43,8 +45,9 @@ import { CALIBRATION_ERA, CALIBRATION_DRAFTS_USED } from '@/lib/draft/league-cal
 import { Nameplate } from '@/components/ui/shield'
 
 // --- Tag styling (keyed by real tag id). Labels come from the tag itself
-//     (they carry dynamic dollars, e.g. "+$21 POCKET"). SHIELD: positives are
-//     steel-blue (never green), tax/injury/volatile carry warning hues. ---
+//     (they carry dynamic dollars, e.g. "+$21 POCKET"). SHIELD tokens only:
+//     positives are steel-blue (never green), tax = coral danger, volatile/
+//     injury = warning amber, sleeper = bright steel. ---
 
 interface TagStyle {
   bgClass: string
@@ -54,26 +57,29 @@ interface TagStyle {
 }
 
 const TAG_STYLE: Record<PlayerTagId, TagStyle> = {
-  elite: { bgClass: 'bg-[#5FA8E0]/18', textClass: 'text-[#5FA8E0]', icon: Zap, glow: true },
-  pocket: { bgClass: 'bg-[#5FA8E0]/14', textClass: 'text-[#5FA8E0]', icon: TrendingUp },
-  tax: { bgClass: 'bg-[#ff716c]/16', textClass: 'text-[#ff716c]', icon: TrendingDown },
-  volatile: { bgClass: 'bg-[#f5b301]/15', textClass: 'text-[#f5b301]', icon: AlertTriangle },
-  injury: { bgClass: 'bg-[#f5b301]/13', textClass: 'text-[#f5b301]', icon: Activity },
-  sleeper: { bgClass: 'bg-[#8bacff]/16', textClass: 'text-[#8bacff]', icon: Star },
+  elite: { bgClass: 'bg-[var(--ffi-blue)]/18', textClass: 'text-[var(--ffi-blue)]', icon: Zap, glow: true },
+  pocket: { bgClass: 'bg-[var(--ffi-blue)]/14', textClass: 'text-[var(--ffi-blue)]', icon: TrendingUp },
+  tax: { bgClass: 'bg-[var(--ffi-danger)]/16', textClass: 'text-[var(--ffi-danger)]', icon: TrendingDown },
+  volatile: { bgClass: 'bg-[var(--ffi-warning)]/15', textClass: 'text-[var(--ffi-warning)]', icon: AlertTriangle },
+  injury: { bgClass: 'bg-[var(--ffi-warning)]/13', textClass: 'text-[var(--ffi-warning)]', icon: Activity },
+  sleeper: { bgClass: 'bg-[var(--ffi-blue-bright)]/16', textClass: 'text-[var(--ffi-blue-bright)]', icon: Star },
 }
 
 const POSITIVE_TAGS: PlayerTagId[] = ['elite', 'pocket', 'sleeper']
 const NEGATIVE_TAGS: PlayerTagId[] = ['tax']
 
-// Position chip color-encoding (SHIELD v4 --ffi-pos-*). QB/RB/WR/TE carry hue;
-// DEF/K fall back to muted steel. `wash` is the faint left-to-right rail tint.
+// Position chip color-encoding (SHIELD v4 --ffi-pos-*). QB/RB/WR/TE/DEF/K each
+// carry their token hue; `wash` is the faint left-to-right rail tint (rgba of
+// the same token color).
 const POS_CHIP: Record<string, { bg: string; wash: string }> = {
   QB: { bg: 'var(--ffi-pos-qb)', wash: 'rgba(255,110,138,0.10)' },
   RB: { bg: 'var(--ffi-pos-rb)', wash: 'rgba(86,224,160,0.10)' },
   WR: { bg: 'var(--ffi-pos-wr)', wash: 'rgba(108,168,255,0.10)' },
   TE: { bg: 'var(--ffi-pos-te)', wash: 'rgba(255,176,92,0.10)' },
+  DEF: { bg: 'var(--ffi-pos-def)', wash: 'rgba(99,115,150,0.10)' },
+  K: { bg: 'var(--ffi-pos-k)', wash: 'rgba(167,139,250,0.10)' },
 }
-const POS_CHIP_FALLBACK = { bg: '#64768c', wash: 'rgba(100,118,140,0.10)' }
+const POS_CHIP_FALLBACK = { bg: 'var(--ffi-pos-def)', wash: 'rgba(99,115,150,0.10)' }
 
 function posChipFor(position: Position) {
   return POS_CHIP[position] ?? POS_CHIP_FALLBACK
@@ -163,22 +169,22 @@ export function FFIPlayerIntelCard({
     tier != null ? (
       tier === 1 ? (
         <span
-          className="font-headline font-bold text-[11px] leading-none px-[7px] py-[3px] rounded-md text-white"
-          style={{ background: '#A63C41', boxShadow: '0 0 11px rgba(166,60,65,0.45)' }}
+          className="font-headline font-bold text-[11px] leading-none px-[7px] py-[3px] rounded-md"
+          style={{ background: 'var(--ffi-volt)', color: 'var(--ffi-volt-ink)', boxShadow: '0 0 11px rgba(166,60,65,0.45)' }}
         >
           T1
         </span>
       ) : tier === 2 ? (
         <span
           className="font-headline font-bold text-[11px] leading-none px-[7px] py-[3px] rounded-md"
-          style={{ background: 'rgba(95,168,224,0.12)', color: '#7FC0EA', border: '1px solid rgba(95,168,224,0.5)' }}
+          style={{ background: 'rgba(95,168,224,0.12)', color: 'var(--ffi-blue-bright)', border: '1px solid rgba(95,168,224,0.5)' }}
         >
           T2
         </span>
       ) : (
         <span
           className="font-headline font-bold text-[11px] leading-none px-[7px] py-[3px] rounded-md"
-          style={{ color: '#5e708a', border: '1px solid rgba(180,200,224,0.1)' }}
+          style={{ color: 'var(--ffi-ink-3)', border: '1px solid var(--ffi-hairline)' }}
         >
           T{tier}
         </span>
@@ -191,9 +197,9 @@ export function FFIPlayerIntelCard({
       className="flex items-baseline justify-center gap-px h-[21px] px-[7px] rounded-md flex-shrink-0"
       style={{ background: chip.bg }}
     >
-      <span className="font-headline font-bold text-[11px] leading-none text-[#04070d]">{player.position}</span>
+      <span className="font-headline font-bold text-[11px] leading-none" style={{ color: 'var(--ffi-surface-1)' }}>{player.position}</span>
       {posRank != null && (
-        <span className="font-mono font-bold text-[9px] leading-none text-[#04070d]/85">{posRank}</span>
+        <span className="font-mono font-bold text-[9px] leading-none" style={{ color: 'var(--ffi-surface-1)', opacity: 0.85 }}>{posRank}</span>
       )}
     </div>
   )
@@ -201,7 +207,7 @@ export function FFIPlayerIntelCard({
   return (
     <div className="relative group">
       {isHighlighted && !isNegative && (
-        <div className="absolute inset-0 bg-[#5FA8E0]/5 blur-2xl rounded-2xl -z-10" />
+        <div className="absolute inset-0 bg-[var(--ffi-blue)]/5 blur-2xl rounded-2xl -z-10" />
       )}
 
       <Nameplate
@@ -209,9 +215,9 @@ export function FFIPlayerIntelCard({
         className={`
           overflow-hidden rounded-2xl transition-all
           ${isTarget
-            ? 'ring-1 ring-[#5FA8E0]/45 shadow-[0_0_22px_rgba(95,168,224,0.14)]'
+            ? 'ring-1 ring-[var(--ffi-blue)]/45 shadow-[0_0_22px_rgba(95,168,224,0.14)]'
             : isNegative
-            ? 'ring-1 ring-[#ff716c]/28'
+            ? 'ring-1 ring-[var(--ffi-danger)]/28'
             : ''
           }
         `}
@@ -235,10 +241,10 @@ export function FFIPlayerIntelCard({
             {posChipEl}
 
             <div className="min-w-0">
-              <div className="font-headline font-semibold text-[16px] leading-[1.05] text-[#eaf1f8] truncate">
+              <div className="font-headline font-semibold text-[16px] leading-[1.05] truncate" style={{ color: 'var(--ffi-ink)' }}>
                 {player.name}
               </div>
-              <div className="font-body font-semibold text-[10px] tracking-[0.05em] uppercase text-[#5e708a] mt-[2px]">
+              <div className="font-body font-semibold text-[10px] tracking-[0.05em] uppercase mt-[2px]" style={{ color: 'var(--ffi-ink-3)' }}>
                 {player.team}
                 {player.byeWeek > 0 && <> &middot; Bye {player.byeWeek}</>}
               </div>
@@ -247,12 +253,12 @@ export function FFIPlayerIntelCard({
             <div className="flex items-center gap-[10px]">
               {tierBadge}
               <div className="text-right min-w-[58px]">
-                <div className="font-mono font-extrabold text-[15px] leading-none text-[#eaf1f8]">{rangeLabel}</div>
-                <div className="font-mono font-semibold text-[9.5px] text-[#5e708a] mt-[3px]">base ${range.base}</div>
+                <div className="font-mono font-extrabold text-[15px] leading-none" style={{ color: 'var(--ffi-ink)' }}>{rangeLabel}</div>
+                <div className="font-mono font-semibold text-[9.5px] mt-[3px]" style={{ color: 'var(--ffi-ink-3)' }}>base ${range.base}</div>
               </div>
             </div>
 
-            <ChevronDown className="w-4 h-4 text-[#5e708a] justify-self-end" />
+            <ChevronDown className="w-4 h-4 justify-self-end" style={{ color: 'var(--ffi-ink-3)' }} />
           </div>
         )}
 
@@ -271,24 +277,24 @@ export function FFIPlayerIntelCard({
               <div className="absolute left-0 top-0 bottom-0 w-[3px]" style={{ background: chip.bg }} />
               {posChipEl}
               <div className="min-w-0">
-                <div className="font-headline font-bold text-[19px] leading-tight text-[#eaf1f8]">{player.name}</div>
-                <div className="font-body font-semibold text-[10px] tracking-[0.05em] uppercase text-[#5e708a] mt-[2px]">
+                <div className="font-headline font-bold text-[19px] leading-tight" style={{ color: 'var(--ffi-ink)' }}>{player.name}</div>
+                <div className="font-body font-semibold text-[10px] tracking-[0.05em] uppercase mt-[2px]" style={{ color: 'var(--ffi-ink-3)' }}>
                   {player.team}
                   {player.byeWeek > 0 && <> &middot; Bye {player.byeWeek}</>}
                 </div>
               </div>
               <div className="flex flex-col items-end gap-[5px] text-right">
                 {tierBadge}
-                <div className="font-mono font-extrabold text-[21px] leading-none" style={{ color: '#7FC0EA' }}>
+                <div className="font-mono font-extrabold text-[21px] leading-none" style={{ color: 'var(--ffi-blue-bright)' }}>
                   {rangeLabel}
                 </div>
-                <ChevronUp className="w-4 h-4 text-[#5e708a] mt-[2px]" />
+                <ChevronUp className="w-4 h-4 mt-[2px]" style={{ color: 'var(--ffi-ink-3)' }} />
               </div>
             </div>
 
             {/* VALUATION */}
-            <div className="pl-[15px] pr-[14px] pt-3 pb-[13px] border-t border-[rgba(180,200,224,0.1)]">
-              <div className="font-body font-bold text-[8.5px] tracking-[0.15em] uppercase text-[#5e708a] mb-[9px]">
+            <div className="pl-[15px] pr-[14px] pt-3 pb-[13px] border-t border-[var(--ffi-hairline)]">
+              <div className="font-body font-bold text-[8.5px] tracking-[0.15em] uppercase mb-[9px]" style={{ color: 'var(--ffi-ink-3)' }}>
                 Valuation
               </div>
               {showBar && (
@@ -299,51 +305,51 @@ export function FFIPlayerIntelCard({
                       style={{
                         left: `${fillLeft}%`,
                         width: `${fillWidth}%`,
-                        background: isTax ? 'rgba(255,113,108,0.5)' : 'rgba(95,168,224,0.55)',
+                        background: isTax ? 'rgba(255,110,138,0.5)' : 'rgba(95,168,224,0.55)',
                       }}
                     />
-                    <div className="absolute w-[2px] h-full bg-[#eaf1f8]" style={{ left: `${baseLeft}%` }} />
+                    <div className="absolute w-[2px] h-full" style={{ left: `${baseLeft}%`, background: 'var(--ffi-ink)' }} />
                   </div>
-                  <div className="flex justify-between font-mono text-[10px] text-[#5e708a] mt-[7px]">
-                    <span>room <b className="text-[#eaf1f8] font-bold">${range.low}</b></span>
-                    <span>base <b className="text-[#eaf1f8] font-bold">${range.base}</b></span>
-                    <span>worth <b className="text-[#eaf1f8] font-bold">${range.high}</b></span>
+                  <div className="flex justify-between font-mono text-[10px] mt-[7px]" style={{ color: 'var(--ffi-ink-3)' }}>
+                    <span>room <b className="font-bold" style={{ color: 'var(--ffi-ink)' }}>${range.low}</b></span>
+                    <span>base <b className="font-bold" style={{ color: 'var(--ffi-ink)' }}>${range.base}</b></span>
+                    <span>worth <b className="font-bold" style={{ color: 'var(--ffi-ink)' }}>${range.high}</b></span>
                   </div>
                 </>
               )}
-              <div className="grid grid-cols-3 gap-px mt-3 rounded-lg overflow-hidden" style={{ background: 'rgba(180,200,224,0.1)' }}>
+              <div className="grid grid-cols-3 gap-px mt-3 rounded-lg overflow-hidden" style={{ background: 'var(--ffi-hairline)' }}>
                 <div className="px-[10px] py-2" style={{ background: 'var(--ffi-surface-1)' }}>
-                  <div className="font-body font-bold text-[8px] tracking-[0.1em] uppercase text-[#5e708a]">Market</div>
-                  <div className="font-mono font-extrabold text-[14px] text-[#eaf1f8] mt-[3px]">
+                  <div className="font-body font-bold text-[8px] tracking-[0.1em] uppercase" style={{ color: 'var(--ffi-ink-3)' }}>Market</div>
+                  <div className="font-mono font-extrabold text-[14px] mt-[3px]" style={{ color: 'var(--ffi-ink)' }}>
                     {market != null && market > 0 ? `~$${Math.round(market)}` : '-'}
                   </div>
                 </div>
                 <div className="px-[10px] py-2" style={{ background: 'var(--ffi-surface-1)' }}>
-                  <div className="font-body font-bold text-[8px] tracking-[0.1em] uppercase text-[#5e708a]">Proj Pts</div>
-                  <div className="font-mono font-extrabold text-[14px] text-[#eaf1f8] mt-[3px]">
+                  <div className="font-body font-bold text-[8px] tracking-[0.1em] uppercase" style={{ color: 'var(--ffi-ink-3)' }}>Proj Pts</div>
+                  <div className="font-mono font-extrabold text-[14px] mt-[3px]" style={{ color: 'var(--ffi-ink)' }}>
                     {projPts != null ? Math.round(projPts) : '-'}
                   </div>
                 </div>
                 <div className="px-[10px] py-2" style={{ background: 'var(--ffi-surface-1)' }}>
-                  <div className="font-body font-bold text-[8px] tracking-[0.1em] uppercase text-[#5e708a]">Experts</div>
-                  <div className="font-mono font-extrabold text-[14px] text-[#eaf1f8] mt-[3px]">{expertRankLabel ?? '-'}</div>
+                  <div className="font-body font-bold text-[8px] tracking-[0.1em] uppercase" style={{ color: 'var(--ffi-ink-3)' }}>Experts</div>
+                  <div className="font-mono font-extrabold text-[14px] mt-[3px]" style={{ color: 'var(--ffi-ink)' }}>{expertRankLabel ?? '-'}</div>
                 </div>
               </div>
             </div>
 
             {/* OUTLOOK */}
-            <div className="pl-[15px] pr-[14px] pt-3 pb-[13px] border-t border-[rgba(180,200,224,0.1)]">
-              <div className="font-body font-bold text-[8.5px] tracking-[0.15em] uppercase text-[#5e708a] mb-[9px]">
+            <div className="pl-[15px] pr-[14px] pt-3 pb-[13px] border-t border-[var(--ffi-hairline)]">
+              <div className="font-body font-bold text-[8.5px] tracking-[0.15em] uppercase mb-[9px]" style={{ color: 'var(--ffi-ink-3)' }}>
                 Outlook
               </div>
               <div className="flex gap-2 items-start">
-                <span className={`text-[12px] leading-[1.3] mt-px ${rec.intent === 'pass' ? 'text-[#ff716c]' : 'text-[#5FA8E0]'}`}>▸</span>
-                <span className="font-body text-[12.5px] text-[#eaf1f8] leading-[1.45]">{rec.line}</span>
+                <span className="text-[12px] leading-[1.3] mt-px" style={{ color: rec.intent === 'pass' ? 'var(--ffi-danger)' : 'var(--ffi-blue)' }}>▸</span>
+                <span className="font-body text-[12.5px] leading-[1.45]" style={{ color: 'var(--ffi-ink)' }}>{rec.line}</span>
               </div>
               {fitLine && (
                 <div className="flex gap-2 items-start mt-[9px]">
-                  <span className="text-[#8bacff]/50 text-[10px] shrink-0 mt-px">◆</span>
-                  <span className="font-body text-[11px] leading-snug text-[#5e708a]">{fitLine}</span>
+                  <span className="text-[10px] shrink-0 mt-px" style={{ color: 'var(--ffi-blue-bright)', opacity: 0.5 }}>◆</span>
+                  <span className="font-body text-[11px] leading-snug" style={{ color: 'var(--ffi-ink-3)' }}>{fitLine}</span>
                 </div>
               )}
               {enrichment && (() => {
@@ -374,8 +380,8 @@ export function FFIPlayerIntelCard({
 
             {/* DRAFT INTEL (real, computed tags) */}
             {(tags.length > 0 || isTarget || isAvoid) && (
-              <div className="pl-[15px] pr-[14px] pt-3 pb-[13px] border-t border-[rgba(180,200,224,0.1)]">
-                <div className="font-body font-bold text-[8.5px] tracking-[0.15em] uppercase text-[#5e708a] mb-[9px]">
+              <div className="pl-[15px] pr-[14px] pt-3 pb-[13px] border-t border-[var(--ffi-hairline)]">
+                <div className="font-body font-bold text-[8.5px] tracking-[0.15em] uppercase mb-[9px]" style={{ color: 'var(--ffi-ink-3)' }}>
                   Draft intel
                 </div>
 
@@ -383,22 +389,22 @@ export function FFIPlayerIntelCard({
                   <div className="space-y-2 mb-3">
                     {isTarget && (
                       <div className="flex items-start gap-2">
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold tracking-wider bg-[#5FA8E0]/30 text-[#5FA8E0] shadow-[0_0_8px_rgba(95,168,224,0.4)] shrink-0">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold tracking-wider bg-[var(--ffi-blue)]/30 text-[var(--ffi-blue)] shadow-[0_0_8px_rgba(95,168,224,0.4)] shrink-0">
                           <Target className="h-3 w-3" />
                           TARGET
                         </span>
-                        <span className="text-[10px] text-[#9fb2c6] leading-relaxed">
+                        <span className="text-[10px] leading-relaxed" style={{ color: 'var(--ffi-ink-2)' }}>
                           You&apos;ve marked this player as a draft target
                         </span>
                       </div>
                     )}
                     {isAvoid && (
                       <div className="flex items-start gap-2">
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold tracking-wider bg-[#ff716c]/25 text-[#ff716c] shrink-0">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold tracking-wider bg-[var(--ffi-danger)]/25 text-[var(--ffi-danger)] shrink-0">
                           <Ban className="h-3 w-3" />
                           AVOID
                         </span>
-                        <span className="text-[10px] text-[#9fb2c6] leading-relaxed">
+                        <span className="text-[10px] leading-relaxed" style={{ color: 'var(--ffi-ink-2)' }}>
                           You&apos;ve marked this player to avoid
                         </span>
                       </div>
@@ -417,20 +423,20 @@ export function FFIPlayerIntelCard({
                           <span
                             className={`
                               inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold tracking-wider shrink-0
-                              ${isDismissed ? 'bg-[#8bacff]/10 text-[#697782]' : `${style.bgClass} ${style.textClass}`}
+                              ${isDismissed ? 'bg-[var(--ffi-ink-3)]/15 text-[var(--ffi-ink-3)]' : `${style.bgClass} ${style.textClass}`}
                             `}
                           >
                             <Icon className="h-3 w-3" />
                             {tag.label}
                           </span>
-                          <span className="text-[10px] text-[#9fb2c6] leading-relaxed flex-1">
-                            {isDismissed ? <span className="text-[#697782] italic">Dismissed</span> : tag.hint}
+                          <span className="text-[10px] leading-relaxed flex-1" style={{ color: 'var(--ffi-ink-2)' }}>
+                            {isDismissed ? <span className="italic" style={{ color: 'var(--ffi-ink-3)' }}>Dismissed</span> : tag.hint}
                           </span>
                           {isDismissed ? (
                             <button
                               onClick={(e) => { e.stopPropagation(); onUndismissSystemTag?.(tag.id) }}
                               disabled={isTagLoading}
-                              className="text-[9px] text-[#8bacff] hover:text-[#deedf9] transition-colors shrink-0 disabled:opacity-50"
+                              className="text-[9px] text-[var(--ffi-blue-bright)] hover:text-[var(--ffi-ink)] transition-colors shrink-0 disabled:opacity-50"
                             >
                               restore
                             </button>
@@ -438,7 +444,7 @@ export function FFIPlayerIntelCard({
                             <button
                               onClick={(e) => { e.stopPropagation(); onDismissSystemTag?.(tag.id) }}
                               disabled={isTagLoading}
-                              className="text-[#697782] hover:text-[#ff716c] transition-colors shrink-0 disabled:opacity-50 opacity-0 group-hover:opacity-100"
+                              className="text-[var(--ffi-ink-3)] hover:text-[var(--ffi-danger)] transition-colors shrink-0 disabled:opacity-50 opacity-0 group-hover:opacity-100"
                               title="Dismiss tag"
                             >
                               <X className="h-3 w-3" />
@@ -449,14 +455,14 @@ export function FFIPlayerIntelCard({
                     })}
                   </div>
                 ) : !isTarget && !isAvoid && (
-                  <p className="text-[10px] text-[#697782] italic">No standout signals for this player</p>
+                  <p className="text-[10px] italic" style={{ color: 'var(--ffi-ink-3)' }}>No standout signals for this player</p>
                 )}
               </div>
             )}
 
             {/* YOUR CALL (target / avoid + grades) */}
-            <div className="pl-[15px] pr-[14px] pt-3 pb-[13px] border-t border-[rgba(180,200,224,0.1)]">
-              <div className="font-body font-bold text-[8.5px] tracking-[0.15em] uppercase text-[#5e708a] mb-[9px]">
+            <div className="pl-[15px] pr-[14px] pt-3 pb-[13px] border-t border-[var(--ffi-hairline)]">
+              <div className="font-body font-bold text-[8.5px] tracking-[0.15em] uppercase mb-[9px]" style={{ color: 'var(--ffi-ink-3)' }}>
                 Your call
               </div>
               <div className="flex flex-wrap gap-2">
@@ -466,8 +472,8 @@ export function FFIPlayerIntelCard({
                   className={`
                     inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all
                     ${isTarget
-                      ? 'bg-[#5FA8E0]/30 text-[#5FA8E0] shadow-[0_0_12px_rgba(95,168,224,0.3)]'
-                      : 'bg-surface-container-high text-[#9fb2c6] hover:bg-[#5FA8E0]/10 hover:text-[#5FA8E0]'
+                      ? 'bg-[var(--ffi-blue)]/30 text-[var(--ffi-blue)] shadow-[0_0_12px_rgba(95,168,224,0.3)]'
+                      : 'bg-surface-container-high text-[var(--ffi-ink-2)] hover:bg-[var(--ffi-blue)]/10 hover:text-[var(--ffi-blue)]'
                     }
                     disabled:opacity-50 disabled:cursor-not-allowed
                   `}
@@ -481,8 +487,8 @@ export function FFIPlayerIntelCard({
                   className={`
                     inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all
                     ${isAvoid
-                      ? 'bg-[#ff716c]/25 text-[#ff716c]'
-                      : 'bg-surface-container-high text-[#9fb2c6] hover:bg-[#ff716c]/10 hover:text-[#ff716c]'
+                      ? 'bg-[var(--ffi-danger)]/25 text-[var(--ffi-danger)]'
+                      : 'bg-surface-container-high text-[var(--ffi-ink-2)] hover:bg-[var(--ffi-danger)]/10 hover:text-[var(--ffi-danger)]'
                     }
                     disabled:opacity-50 disabled:cursor-not-allowed
                   `}
@@ -493,8 +499,8 @@ export function FFIPlayerIntelCard({
 
               {/* Grade controls - only shown when a tag is active */}
               {isTarget && (
-                <div className="flex items-center gap-3 mt-3 pt-3 border-t border-[rgba(180,200,224,0.1)]">
-                  <span className="font-body text-[10px] font-bold uppercase tracking-widest text-[#697782] w-16 shrink-0">
+                <div className="flex items-center gap-3 mt-3 pt-3 border-t border-[var(--ffi-hairline)]">
+                  <span className="font-body text-[10px] font-bold uppercase tracking-widest w-16 shrink-0" style={{ color: 'var(--ffi-ink-3)' }}>
                     Priority
                   </span>
                   <div className="flex items-center gap-2">
@@ -504,12 +510,12 @@ export function FFIPlayerIntelCard({
                         onUpdateGrade?.(Math.max(1, tagWeight - 1), undefined)
                       }}
                       disabled={isTagLoading || tagWeight <= 1}
-                      className="w-7 h-7 rounded-lg flex items-center justify-center text-sm font-bold transition-all bg-[#5FA8E0]/10 text-[#5FA8E0] hover:bg-[#5FA8E0]/20 disabled:opacity-30 disabled:cursor-not-allowed"
+                      className="w-7 h-7 rounded-lg flex items-center justify-center text-sm font-bold transition-all bg-[var(--ffi-blue)]/10 text-[var(--ffi-blue)] hover:bg-[var(--ffi-blue)]/20 disabled:opacity-30 disabled:cursor-not-allowed"
                       aria-label="Decrease priority"
                     >
                       −
                     </button>
-                    <span className="font-mono text-lg font-bold text-[#5FA8E0] w-6 text-center tabular-nums">
+                    <span className="font-mono text-lg font-bold w-6 text-center tabular-nums" style={{ color: 'var(--ffi-blue)' }}>
                       {tagWeight}
                     </span>
                     <button
@@ -518,19 +524,19 @@ export function FFIPlayerIntelCard({
                         onUpdateGrade?.(Math.min(10, tagWeight + 1), undefined)
                       }}
                       disabled={isTagLoading || tagWeight >= 10}
-                      className="w-7 h-7 rounded-lg flex items-center justify-center text-sm font-bold transition-all bg-[#5FA8E0]/10 text-[#5FA8E0] hover:bg-[#5FA8E0]/20 disabled:opacity-30 disabled:cursor-not-allowed"
+                      className="w-7 h-7 rounded-lg flex items-center justify-center text-sm font-bold transition-all bg-[var(--ffi-blue)]/10 text-[var(--ffi-blue)] hover:bg-[var(--ffi-blue)]/20 disabled:opacity-30 disabled:cursor-not-allowed"
                       aria-label="Increase priority"
                     >
                       +
                     </button>
-                    <span className="font-body text-[10px] text-[#697782]">/ 10</span>
+                    <span className="font-body text-[10px]" style={{ color: 'var(--ffi-ink-3)' }}>/ 10</span>
                   </div>
                 </div>
               )}
 
               {isAvoid && (
-                <div className="flex items-center gap-3 mt-3 pt-3 border-t border-[rgba(180,200,224,0.1)]">
-                  <span className="font-body text-[10px] font-bold uppercase tracking-widest text-[#697782] w-16 shrink-0">
+                <div className="flex items-center gap-3 mt-3 pt-3 border-t border-[var(--ffi-hairline)]">
+                  <span className="font-body text-[10px] font-bold uppercase tracking-widest w-16 shrink-0" style={{ color: 'var(--ffi-ink-3)' }}>
                     Severity
                   </span>
                   <div className="flex gap-1.5">
@@ -543,9 +549,9 @@ export function FFIPlayerIntelCard({
                           px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all
                           ${tagSeverity === s
                             ? s === 'hard'
-                              ? 'bg-[#ff716c]/40 text-[#ff716c] shadow-[0_0_8px_rgba(255,113,108,0.3)]'
-                              : 'bg-[#ff716c]/20 text-[#ff716c]'
-                            : 'bg-[#8bacff]/8 text-[#697782] hover:text-[#9fb2c6]'
+                              ? 'bg-[var(--ffi-danger)]/40 text-[var(--ffi-danger)] shadow-[0_0_8px_rgba(255,110,138,0.3)]'
+                              : 'bg-[var(--ffi-danger)]/20 text-[var(--ffi-danger)]'
+                            : 'bg-[var(--ffi-ink-3)]/10 text-[var(--ffi-ink-3)] hover:text-[var(--ffi-ink-2)]'
                           }
                           disabled:opacity-50 disabled:cursor-not-allowed
                         `}
@@ -559,10 +565,10 @@ export function FFIPlayerIntelCard({
             </div>
 
             {/* HOW THIS IS CALCULATED (provenance) */}
-            <div className="pl-[15px] pr-[14px] pt-3 pb-[13px] border-t border-[rgba(180,200,224,0.1)]">
+            <div className="pl-[15px] pr-[14px] pt-3 pb-[13px] border-t border-[var(--ffi-hairline)]">
               <button
                 onClick={(e) => { e.stopPropagation(); setShowCalc((v) => !v) }}
-                className={`inline-flex items-center gap-1.5 font-body text-[10px] font-bold uppercase tracking-widest transition-colors ${showCalc ? 'text-[#8bacff]' : 'text-[#5e708a] hover:text-[#9fb2c6]'}`}
+                className={`inline-flex items-center gap-1.5 font-body text-[10px] font-bold uppercase tracking-widest transition-colors ${showCalc ? 'text-[var(--ffi-blue-bright)]' : 'text-[var(--ffi-ink-3)] hover:text-[var(--ffi-ink-2)]'}`}
               >
                 <Info className="w-3.5 h-3.5" />
                 {showCalc ? 'Hide the math' : 'How this value is calculated'}
@@ -571,12 +577,12 @@ export function FFIPlayerIntelCard({
               {showCalc && (
                 <div className="mt-3 space-y-2.5">
                   <div className="flex gap-3 text-[11px]">
-                    <span className="w-[92px] flex-shrink-0 font-body text-[9px] font-bold uppercase tracking-wider text-[#5FA8E0] pt-0.5">Range</span>
-                    <span className="text-[#9fb2c6] leading-relaxed">
+                    <span className="w-[92px] flex-shrink-0 font-body text-[9px] font-bold uppercase tracking-wider pt-0.5" style={{ color: 'var(--ffi-blue)' }}>Range</span>
+                    <span className="leading-relaxed" style={{ color: 'var(--ffi-ink-2)' }}>
                       {range.source === 'league' ? (
                         <>
-                          <span className="text-[#eaf1f8] font-bold">Worth ${player.ceilingValue}</span> (roster-aware VORP, ESPN 2026 full-PPR) ↔{' '}
-                          <span className="text-[#eaf1f8] font-bold">Room ${player.expectedRoomPrice}</span> (16-yr Nasties price for {posRankLabel ?? 'his rank'}). Band is those two real numbers; base is the midpoint.
+                          <span className="font-bold" style={{ color: 'var(--ffi-ink)' }}>Worth ${player.ceilingValue}</span> (roster-aware VORP, ESPN 2026 full-PPR) ↔{' '}
+                          <span className="font-bold" style={{ color: 'var(--ffi-ink)' }}>Room ${player.expectedRoomPrice}</span> (16-yr Nasties price for {posRankLabel ?? 'his rank'}). Band is those two real numbers; base is the midpoint.
                         </>
                       ) : range.source === 'national' ? (
                         <>Modeled from national FantasyPros expert-rank spread - no Nasties calibration for this player yet.</>
@@ -588,21 +594,21 @@ export function FFIPlayerIntelCard({
 
                   {visibleTags.map((t) => (
                     <div key={t.id} className="flex gap-3 text-[11px]">
-                      <span className="w-[92px] flex-shrink-0 font-body text-[9px] font-bold uppercase tracking-wider text-[#5FA8E0] pt-0.5">{t.label}</span>
-                      <span className="text-[#9fb2c6] leading-relaxed">{t.source}</span>
+                      <span className="w-[92px] flex-shrink-0 font-body text-[9px] font-bold uppercase tracking-wider pt-0.5" style={{ color: 'var(--ffi-blue)' }}>{t.label}</span>
+                      <span className="leading-relaxed" style={{ color: 'var(--ffi-ink-2)' }}>{t.source}</span>
                     </div>
                   ))}
 
                   {projPts != null && (
                     <div className="flex gap-3 text-[11px]">
-                      <span className="w-[92px] flex-shrink-0 font-body text-[9px] font-bold uppercase tracking-wider text-[#5FA8E0] pt-0.5">Projection</span>
-                      <span className="text-[#9fb2c6] leading-relaxed">
-                        <span className="text-[#eaf1f8] font-bold">{Math.round(projPts)} pts</span> - ESPN 2026 full-PPR season projection, your exact scoring.
+                      <span className="w-[92px] flex-shrink-0 font-body text-[9px] font-bold uppercase tracking-wider pt-0.5" style={{ color: 'var(--ffi-blue)' }}>Projection</span>
+                      <span className="leading-relaxed" style={{ color: 'var(--ffi-ink-2)' }}>
+                        <span className="font-bold" style={{ color: 'var(--ffi-ink)' }}>{Math.round(projPts)} pts</span> - ESPN 2026 full-PPR season projection, your exact scoring.
                       </span>
                     </div>
                   )}
 
-                  <p className="pt-2 border-t border-[rgba(180,200,224,0.1)] font-body text-[10px] text-[#697782] leading-relaxed">
+                  <p className="pt-2 border-t border-[var(--ffi-hairline)] font-body text-[10px] leading-relaxed" style={{ color: 'var(--ffi-ink-3)' }}>
                     Calibrated on {CALIBRATION_ERA.length} Nasties seasons ({CALIBRATION_DRAFTS_USED} drafts) · sources: ESPN projections · FantasyPros ECR · Nasties auction ledger
                   </p>
                 </div>
