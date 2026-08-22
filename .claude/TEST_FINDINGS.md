@@ -127,7 +127,7 @@ always-on adaptive `pivot-line` was positively observed recomputing in the DOM (
 
 | ID | layer | feature | expected | actual | repro | severity | suspected file:line | status |
 |----|-------|---------|----------|--------|-------|----------|---------------------|--------|
-| F1 | ui/data | position-urgency in `?sim=1` | tier counts populate so `urgency-<POS>` awareness items can surface | all tier counts render 0 (T1:0..T5:0 for every position); `urgency-<POS>` never renders in sim | nav `?sim=1`, read tier context rows; `GET /api/players` rows have no `tier` field | medium | scarcity/tier assignment not run on the sim data path; players_cache rows carry no tier | open (sim-mode limitation; urgency math itself proven by A3/A4). Confirm a real research-backed draft populates tiers before shipping urgency UI. |
+| F1 | ui/data | position-urgency in `?sim=1` (and real draft) | tier counts populate so `urgency-<POS>` awareness items can surface | all tier counts render 0 (T1:0..T5:0 for every position); `urgency-<POS>` never renders | nav `?sim=1`, read tier context rows; `GET /api/players` rows have no top-level `consensusTier` | medium | `src/hooks/use-live-draft-data.ts` fed raw `players_cache` rows into a `Player[]` state without the canonical `cacheToPlayers` mapping; raw rows keep the FP tier under `source_data.tier`, so `consensusTier` was `undefined` and every `calculateScarcity` tier filter returned 0 | **FIXED** (SHA eb61ea0). Root cause was NOT sim-only: the same raw-row path also degraded a REAL draft. Fix: map through `cacheToPlayers` at all 3 setPlayers sites in `use-live-draft-data.ts` (the read path every prep screen already uses). Regression test `src/lib/draft/__tests__/scarcity-tier-mapping.test.ts` pins it: raw rows -> `tier1Remaining=0` (bug), mapped rows -> WR `tier1Remaining=2`, `tier2=1`, RB `tier1=1` (urgency gate fires). Browser confirm: tier context now reads WR T3:44/T4:2/T5:42 (was all 0). |
 | F2 | app | `?sim=1` user-tags load | no server error in sim | `500` + console `[useUserTags] invalid input syntax for type uuid: "demo-league"` | open `?sim=1`, read console errors | low | useUserTags passes the non-UUID demo league id `"demo-league"` to a uuid column | open (sim-only, non-blocking; does not affect the adaptive room). |
 
 ---
@@ -139,10 +139,15 @@ always-on adaptive `pivot-line` was positively observed recomputing in the DOM (
 - **Group D (browser): D1 PASS, D2 PASS (live recompute observed in DOM with exact
   before/after), D3 gating PASS (true negative) + drift positive-render logged as a
   manual repro.**
-- **2 defects found by the browser layer:** F1 (medium — tiers render 0 in sim, so
-  urgency UI can't be exercised there; engine math proven at unit level) and F2 (low —
-  useUserTags 500 on the non-UUID demo league id). Both are sim-path issues, logged
-  `open` for Joe to triage — neither weakened any test assertion.
+- **2 defects found by the browser layer:** F1 (medium) and F2 (low).
+  - **F1 FIXED** (SHA `eb61ea0`): tiers rendered 0 not because of the sim but
+    because `use-live-draft-data.ts` skipped the canonical `cacheToPlayers`
+    mapping, leaving `consensusTier` undefined in a real draft too. Mapped all 3
+    setPlayers sites; regression test `scarcity-tier-mapping.test.ts` pins raw→0
+    vs mapped→real counts. Browser confirms tier context now populates.
+  - **F2 (low, still `open`):** useUserTags 500 on the non-UUID demo league id.
+    Sim-path only, non-blocking; logged for Joe to triage. No test assertion
+    was weakened.
 
 ---
 
