@@ -88,32 +88,32 @@ export function LeagueIntelPanel({ intel }: LeagueIntelPanelProps) {
                 const pctDelta = Math.round((inf.multiplier - 1) * 100)
                 const readLine =
                   inf.tag === 'HOT'
-                    ? `room pays ${pctDelta}% over national`
+                    ? `pays ${pctDelta}% over national, so spend elsewhere and let it inflate`
                     : inf.tag === 'COOL'
-                      ? `value pocket, room pays ${Math.abs(pctDelta)}% under`
-                      : 'in line with national'
+                      ? `value pocket, ${Math.abs(pctDelta)}% under national, so buy your ${pos} here`
+                      : 'in line with national, no edge either way'
                 return (
-                  <div key={pos} className="flex items-center gap-3 py-1">
+                  <div key={pos} className="flex items-start gap-3 py-1.5">
                     <span
-                      className="w-8 shrink-0 font-bold text-[12px]"
+                      className="w-8 shrink-0 font-bold text-[12px] pt-px"
                       style={{ fontFamily: 'var(--font-cond)', color: 'var(--ffi-ink)' }}
                     >
                       {pos}
                     </span>
                     <span
-                      className="flex-1 min-w-0 text-[11px] truncate"
+                      className="flex-1 min-w-0 text-[11px] leading-snug"
                       style={{ color: 'var(--ffi-ink-2)' }}
                     >
                       {readLine}
                     </span>
                     <span
-                      className="font-bold text-[10px] uppercase shrink-0"
+                      className="font-bold text-[10px] uppercase shrink-0 pt-px"
                       style={{ fontFamily: 'var(--font-cond)', letterSpacing: '0.08em', color: tone.color }}
                     >
                       {tone.label}
                     </span>
                     <span
-                      className="font-mono text-[12px] font-semibold tabular-nums shrink-0 w-12 text-right"
+                      className="font-mono text-[12px] font-semibold tabular-nums shrink-0 w-12 text-right pt-px"
                       style={{ color: 'var(--ffi-ink)' }}
                     >
                       {inf.multiplier.toFixed(2)}x

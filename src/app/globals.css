@@ -194,6 +194,8 @@
   --ffi-pos-rb: #56e0a0;
   --ffi-pos-wr: #6ca8ff;
   --ffi-pos-te: #ffb05c;
+  --ffi-pos-def: #637396;
+  --ffi-pos-k: #a78bfa;
 
   /* Semantic tokens (names kept; values = GRIDIRON) */
   --ffi-background: #08101c;

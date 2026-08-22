@@ -8,6 +8,7 @@ import type { ScoredPlayer } from '@/lib/research/strategy/scoring'
 import type { DraftFormat } from '@/lib/players/types'
 import { computeValueRange } from '@/lib/players/value-range'
 import type { EnrichedPlayer } from '@/lib/research/dataset-types'
+import { Nameplate } from '@/components/ui/shield'
 
 interface DraftBoardTableProps {
   players: ScoredPlayer[]
@@ -22,16 +23,16 @@ interface DraftBoardTableProps {
 }
 
 const POS_COLORS: Record<string, { bg: string; text: string }> = {
-  QB:  { bg: 'rgba(255,110,138,0.18)', text: '#FF6E8A' },
-  RB:  { bg: 'rgba(86,224,160,0.18)',  text: '#56E0A0' },
-  WR:  { bg: 'rgba(108,168,255,0.18)', text: '#6CA8FF' },
-  TE:  { bg: 'rgba(255,176,92,0.18)',  text: '#FFB05C' },
-  K:   { bg: 'rgba(167,139,250,0.18)', text: '#A78BFA' },
-  DEF: { bg: 'rgba(99,115,150,0.18)',  text: '#637396' },
+  QB:  { bg: 'rgba(255,110,138,0.18)', text: 'var(--ffi-pos-qb)' },
+  RB:  { bg: 'rgba(86,224,160,0.18)',  text: 'var(--ffi-pos-rb)' },
+  WR:  { bg: 'rgba(108,168,255,0.18)', text: 'var(--ffi-pos-wr)' },
+  TE:  { bg: 'rgba(255,176,92,0.18)',  text: 'var(--ffi-pos-te)' },
+  K:   { bg: 'rgba(167,139,250,0.18)', text: 'var(--ffi-pos-k)' },
+  DEF: { bg: 'rgba(99,115,150,0.18)',  text: 'var(--ffi-pos-def)' },
 }
 
 function PositionChip({ position }: { position: string }) {
-  const colors = POS_COLORS[position] ?? { bg: 'rgba(150,180,255,0.12)', text: '#9FB0CE' }
+  const colors = POS_COLORS[position] ?? { bg: 'rgba(150,180,255,0.12)', text: 'var(--ffi-ink-2)' }
   return (
     <span
       className="font-bold text-[11px] px-[7px] py-[4px] rounded-[7px] flex-shrink-0 leading-none"
@@ -95,33 +96,32 @@ function PlayerCard({
       : gap > 0
         ? {
             label: `+$${gap} pocket`,
-            color: 'var(--ffi-volt)',
-            bg: 'rgba(139,255,69,0.12)',
-            border: 'rgba(139,255,69,0.24)',
+            color: 'var(--ffi-blue)',
+            bg: 'rgba(95,168,224,0.12)',
+            border: 'rgba(95,168,224,0.28)',
           }
         : {
             label: `$${gap} hot`,
-            color: '#FF6E8A',
+            color: 'var(--ffi-danger)',
             bg: 'rgba(255,110,138,0.10)',
             border: 'rgba(255,110,138,0.22)',
           }
 
   const isElite = rank <= 24
   const score = sp.strategyScore
-  const scoreTier = score >= 75 ? 'volt' : score >= 55 ? 'mid' : 'low'
-  const scoreBarColor = { volt: 'var(--ffi-volt)', mid: 'var(--ffi-blue-bright)', low: 'var(--ffi-ink-3)' }[scoreTier]
+  const scoreTier = score >= 75 ? 'high' : score >= 55 ? 'mid' : 'low'
+  const scoreBarColor = { high: 'var(--ffi-blue-bright)', mid: 'var(--ffi-blue)', low: 'var(--ffi-ink-3)' }[scoreTier]
   const scoreTextColor = scoreBarColor
 
   return (
     <div
-      className={cn('rounded-[14px] cursor-pointer transition-colors', sp.targetStatus === 'avoid' && 'opacity-[0.58]')}
+      className={cn('ffi-plate-row rounded-[14px] cursor-pointer transition-colors', sp.targetStatus === 'avoid' && 'opacity-[0.58]')}
       style={{
-        background: 'var(--ffi-surface-2)',
         borderTop: '1px solid var(--ffi-hairline)',
         borderRight: '1px solid var(--ffi-hairline)',
         borderBottom: '1px solid var(--ffi-hairline)',
         borderLeft: sp.targetStatus === 'target'
-          ? '2.5px solid var(--ffi-volt)'
+          ? '2.5px solid var(--ffi-blue)'
           : '1px solid var(--ffi-hairline)',
         padding: '12px 14px',
       }}
@@ -151,20 +151,20 @@ function PlayerCard({
               fontFamily: 'var(--font-cond)',
               letterSpacing: '0.04em',
               background: p.expertTier === 1
-                ? 'rgba(139,255,69,0.12)'
+                ? 'rgba(166,60,65,0.16)'
                 : p.expertTier === 2
-                  ? 'rgba(77,130,255,0.12)'
+                  ? 'rgba(95,168,224,0.12)'
                   : 'rgba(150,180,255,0.06)',
               color: p.expertTier === 1
-                ? 'var(--ffi-volt)'
+                ? 'var(--ffi-gold)'
                 : p.expertTier === 2
                   ? 'var(--ffi-blue-bright)'
                   : 'var(--ffi-ink-3)',
               border: `1px solid ${
                 p.expertTier === 1
-                  ? 'rgba(139,255,69,0.24)'
+                  ? 'rgba(166,60,65,0.42)'
                   : p.expertTier === 2
-                    ? 'rgba(77,130,255,0.22)'
+                    ? 'rgba(95,168,224,0.30)'
                     : 'rgba(150,180,255,0.10)'
               }`,
             }}
@@ -253,10 +253,10 @@ function PlayerCard({
             fontSize: '9px',
             letterSpacing: '0.14em',
             padding: '2px 7px',
-            background: 'rgba(139,255,69,0.15)',
-            border: '1px solid rgba(139,255,69,0.28)',
-            color: 'var(--ffi-volt)',
-            boxShadow: '0 0 10px rgba(139,255,69,0.15)',
+            background: 'rgba(95,168,224,0.15)',
+            border: '1px solid rgba(95,168,224,0.30)',
+            color: 'var(--ffi-blue)',
+            boxShadow: '0 0 10px rgba(95,168,224,0.15)',
           }}
         >
           <Target style={{ width: 10, height: 10 }} />
@@ -273,7 +273,7 @@ function PlayerCard({
             padding: '2px 7px',
             background: 'rgba(255,110,138,0.12)',
             border: '1px solid rgba(255,110,138,0.22)',
-            color: '#FF6E8A',
+            color: 'var(--ffi-danger)',
           }}
         >
           <Ban style={{ width: 10, height: 10 }} />
@@ -367,10 +367,10 @@ function PlayerCard({
                     letterSpacing: '0.10em',
                     ...(sp.isUserTarget
                       ? {
-                          background: 'rgba(139,255,69,0.14)',
-                          border: '1px solid rgba(139,255,69,0.30)',
-                          color: 'var(--ffi-volt)',
-                          boxShadow: '0 0 14px rgba(139,255,69,0.14)',
+                          background: 'rgba(95,168,224,0.14)',
+                          border: '1px solid rgba(95,168,224,0.30)',
+                          color: 'var(--ffi-blue)',
+                          boxShadow: '0 0 14px rgba(95,168,224,0.14)',
                         }
                       : {
                           background: 'var(--ffi-surface-3)',
@@ -404,7 +404,7 @@ function PlayerCard({
                       ? {
                           background: 'rgba(255,110,138,0.12)',
                           border: '1px solid rgba(255,110,138,0.24)',
-                          color: '#FF6E8A',
+                          color: 'var(--ffi-danger)',
                         }
                       : {
                           background: 'var(--ffi-surface-3)',
@@ -506,14 +506,14 @@ export function DraftBoardTable({
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
-        className="rounded-2xl p-12 text-center"
-        style={{ background: 'var(--ffi-surface-2)', border: '1px solid var(--ffi-hairline)' }}
       >
-        <Sparkles
-          className="mx-auto mb-2 opacity-50"
-          style={{ width: 32, height: 32, color: 'var(--ffi-ink-3)' }}
-        />
-        <p style={{ color: 'var(--ffi-ink-3)' }}>No players match your filters</p>
+        <Nameplate className="p-12 text-center">
+          <Sparkles
+            className="mx-auto mb-2 opacity-50"
+            style={{ width: 32, height: 32, color: 'var(--ffi-ink-3)' }}
+          />
+          <p style={{ color: 'var(--ffi-ink-3)' }}>No players match your filters</p>
+        </Nameplate>
       </motion.div>
     )
   }

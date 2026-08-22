@@ -6,6 +6,7 @@ import { Loader2, AlertCircle, RefreshCw, CheckCircle2, Star, ArrowDown, ArrowUp
 import { DraftBoardTable } from '@/components/prep/draft-board-table'
 import { PositionBreakdown } from '@/components/prep/position-breakdown'
 import { LeagueIntelPanel } from '@/components/prep/league-intel-panel'
+import { Nameplate } from '@/components/ui/shield'
 import {
   scorePlayersWithStrategy,
   buildIntelContextMap,
@@ -40,12 +41,12 @@ const SORT_OPTIONS: { field: SortField; label: string }[] = [
 ]
 
 const POS_PILL_COLORS: Record<string, { text: string; border: string }> = {
-  QB:  { text: '#FF6E8A', border: 'rgba(255,110,138,0.30)' },
-  RB:  { text: '#56E0A0', border: 'rgba(86,224,160,0.30)'  },
-  WR:  { text: '#6CA8FF', border: 'rgba(108,168,255,0.30)' },
-  TE:  { text: '#FFB05C', border: 'rgba(255,176,92,0.30)'  },
-  K:   { text: '#A78BFA', border: 'rgba(167,139,250,0.30)' },
-  DEF: { text: '#637396', border: 'rgba(99,115,150,0.30)'  },
+  QB:  { text: 'var(--ffi-pos-qb)',  border: 'rgba(255,110,138,0.30)' },
+  RB:  { text: 'var(--ffi-pos-rb)',  border: 'rgba(86,224,160,0.30)'  },
+  WR:  { text: 'var(--ffi-pos-wr)',  border: 'rgba(108,168,255,0.30)' },
+  TE:  { text: 'var(--ffi-pos-te)',  border: 'rgba(255,176,92,0.30)'  },
+  K:   { text: 'var(--ffi-pos-k)',   border: 'rgba(167,139,250,0.30)' },
+  DEF: { text: 'var(--ffi-pos-def)', border: 'rgba(99,115,150,0.30)'  },
 }
 
 function PlayerListSkeleton() {
@@ -302,10 +303,7 @@ export function DraftBoardClient() {
     return (
       <div className="pb-2">
         <BoardHeader leagueName={selectedLeague?.name} />
-        <div
-          className="rounded-[14px] p-6 text-center"
-          style={{ background: 'var(--ffi-surface-2)', border: '1px solid var(--ffi-hairline)' }}
-        >
+        <Nameplate className="p-6 text-center">
           <AlertCircle className="h-7 w-7 mx-auto mb-2.5" style={{ color: 'var(--ffi-warning)' }} />
           <p className="text-[15px] font-bold mb-1" style={{ fontFamily: 'var(--font-cond)', color: 'var(--ffi-ink)' }}>
             Couldn&apos;t load the board
@@ -321,7 +319,7 @@ export function DraftBoardClient() {
             <RefreshCw className="h-3.5 w-3.5" />
             Retry
           </button>
-        </div>
+        </Nameplate>
       </div>
     )
   }
@@ -368,9 +366,9 @@ export function DraftBoardClient() {
             style={{
               fontFamily: 'var(--font-cond)',
               letterSpacing: '0.14em',
-              background: 'rgba(139,255,69,0.08)',
-              border: '1px solid rgba(139,255,69,0.16)',
-              color: 'var(--ffi-volt)',
+              background: 'rgba(166,60,65,0.12)',
+              border: '1px solid rgba(166,60,65,0.26)',
+              color: 'var(--ffi-gold-bright)',
             }}
           >
             <Star style={{ width: 11, height: 11 }} />
@@ -423,8 +421,8 @@ export function DraftBoardClient() {
           className="flex items-center gap-2 text-sm rounded-[11px] px-3 py-2 mb-4"
           style={
             refreshFeedback.startsWith('Error')
-              ? { background: 'rgba(255,110,138,0.08)', border: '1px solid rgba(255,110,138,0.18)', color: '#FF6E8A' }
-              : { background: 'rgba(139,255,69,0.08)', border: '1px solid rgba(139,255,69,0.18)', color: 'var(--ffi-volt)' }
+              ? { background: 'rgba(255,110,138,0.08)', border: '1px solid rgba(255,110,138,0.18)', color: 'var(--ffi-danger)' }
+              : { background: 'rgba(95,168,224,0.08)', border: '1px solid rgba(95,168,224,0.18)', color: 'var(--ffi-blue-bright)' }
           }
         >
           {refreshFeedback.startsWith('Error')
@@ -458,7 +456,7 @@ export function DraftBoardClient() {
                   ...(activeTab === tab
                     ? {
                         background: tab === 'flex' ? 'var(--ffi-volt)' : 'var(--ffi-blue)',
-                        color: tab === 'flex' ? 'var(--ffi-volt-ink)' : '#fff',
+                        color: tab === 'flex' ? 'var(--ffi-volt-ink)' : 'white',
                         boxShadow: tab === 'flex'
                           ? '0 4px 14px -4px var(--ffi-volt-glow)'
                           : '0 4px 14px -4px rgba(77,130,255,0.5)',
@@ -494,7 +492,7 @@ export function DraftBoardClient() {
                           ...(pos === 'ALL' && isActive
                             ? {
                                 background: 'var(--ffi-blue)',
-                                color: '#fff',
+                                color: 'white',
                                 boxShadow: '0 4px 14px -4px rgba(77,130,255,0.45)',
                                 border: 'none',
                               }
@@ -581,15 +579,15 @@ export function DraftBoardClient() {
                       padding: '5px 11px',
                       ...(targetFilter === 'target'
                         ? {
-                            background: 'rgba(139,255,69,0.12)',
-                            border: '1px solid rgba(139,255,69,0.25)',
-                            color: 'var(--ffi-volt)',
+                            background: 'rgba(95,168,224,0.12)',
+                            border: '1px solid rgba(95,168,224,0.28)',
+                            color: 'var(--ffi-blue)',
                           }
                         : targetFilter === 'avoid'
                           ? {
                               background: 'rgba(255,110,138,0.10)',
                               border: '1px solid rgba(255,110,138,0.22)',
-                              color: '#FF6E8A',
+                              color: 'var(--ffi-danger)',
                             }
                           : {
                               background: 'var(--ffi-surface-1)',
@@ -714,10 +712,7 @@ function BoardHeader({ leagueName }: { leagueName?: string }) {
 // ── Empty state: no board yet → deep-link to Research landing (9.1) ──
 function BoardEmpty() {
   return (
-    <div
-      className="rounded-[14px] p-8 text-center"
-      style={{ background: 'var(--ffi-surface-2)', border: '1px solid var(--ffi-hairline)' }}
-    >
+    <Nameplate className="p-8 text-center">
       <p
         className="text-[16px] font-bold mb-1"
         style={{ fontFamily: 'var(--font-cond)', color: 'var(--ffi-ink)' }}
@@ -735,6 +730,6 @@ function BoardEmpty() {
         <Play className="w-[13px] h-[13px]" strokeWidth={2.5} color="var(--ffi-volt-ink)" />
         Run research
       </Link>
-    </div>
+    </Nameplate>
   )
 }
