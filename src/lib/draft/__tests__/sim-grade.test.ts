@@ -14,6 +14,7 @@ import {
   summarizeGrades,
   studCore,
   topModalRosters,
+  medoidRoster,
   playersYouLandMost,
   starterConfigOf,
   DEFAULT_INJURY_MODEL,
@@ -502,6 +503,39 @@ describe('topModalRosters', () => {
     const grades = runs.map(r => gradeRun(r, LINEUP, 12, 14))
     const top = topModalRosters(runs, grades, LINEUP, { studThreshold: 10, top: 5 })
     expect(top).toHaveLength(5)
+  })
+
+  it('shows the medoid roster, not a flukey $1 end-game tail', () => {
+    // Three runs share the same stud core (a+b); the bench slot z clears at
+    // $6/$7 in the typical runs and $1 in one flukey run. The representative
+    // must be a typical roster (z ~ $6), never the $1 outlier.
+    const stud = () => [won('a', 'RB', 100, 50), won('b', 'WR', 90, 40)]
+    const runs = [
+      run(1, [roster(0, true, [...stud(), won('z', 'TE', 20, 6)])]),
+      run(2, [roster(0, true, [...stud(), won('z', 'TE', 20, 7)])]),
+      run(3, [roster(0, true, [...stud(), won('z', 'TE', 20, 1)])]),
+    ]
+    const grades = runs.map(r => gradeRun(r, LINEUP, 12, 14))
+    const top = topModalRosters(runs, grades, LINEUP, { studThreshold: 10, top: 5 })
+    expect(top).toHaveLength(1)
+    const zPrice = top[0].representative.find(p => p.id === 'z')!.price
+    expect(zPrice).toBe(6) // median of [1,6,7] is 6; run 1 is the medoid
+    expect(zPrice).not.toBe(1)
+  })
+})
+
+describe('medoidRoster', () => {
+  it('picks the run closest to the per-player median price', () => {
+    const mk = (zp: number) => [won('a', 'RB', 100, 50), won('z', 'TE', 20, zp)]
+    const rosters = [mk(6), mk(7), mk(1)]
+    const med = medoidRoster(rosters)
+    expect(med.find(p => p.id === 'z')!.price).toBe(6)
+  })
+
+  it('returns the sole roster unchanged and [] for an empty cluster', () => {
+    const only = [won('a', 'RB', 100, 50)]
+    expect(medoidRoster([only])).toBe(only)
+    expect(medoidRoster([])).toEqual([])
   })
 })
 

@@ -12,6 +12,7 @@
 import { describe, it, expect } from 'vitest'
 import {
   mulberry32,
+  pickNominationIndex,
   runAuctionSim,
   runMonteCarlo,
   percentile,
@@ -96,6 +97,47 @@ describe('mulberry32 PRNG', () => {
       expect(v).toBeGreaterThanOrEqual(0)
       expect(v).toBeLessThan(1)
     }
+  })
+})
+
+describe('pickNominationIndex (Phase 2 board control)', () => {
+  it('is deterministic for the same seed', () => {
+    const a = mulberry32(42)
+    const b = mulberry32(42)
+    const seqA = Array.from({ length: 20 }, () => pickNominationIndex(a, 60))
+    const seqB = Array.from({ length: 20 }, () => pickNominationIndex(b, 60))
+    expect(seqA).toEqual(seqB)
+  })
+
+  it('returns 0 when only one player remains', () => {
+    const rng = mulberry32(3)
+    expect(pickNominationIndex(rng, 1)).toBe(0)
+    expect(pickNominationIndex(rng, 0)).toBe(0)
+  })
+
+  it('stays within [0, count) and within the pool cap', () => {
+    const rng = mulberry32(9)
+    for (let i = 0; i < 2000; i++) {
+      const idx = pickNominationIndex(rng, 240)
+      expect(idx).toBeGreaterThanOrEqual(0)
+      expect(idx).toBeLessThan(60) // NOMINATION_POOL caps the considered set
+    }
+  })
+
+  it('favors studs but still surfaces mid-tier (not strict top-3 order)', () => {
+    const rng = mulberry32(11)
+    let top3 = 0
+    let midTier = 0 // rank 8..30: startable mid-tier that the old top-3 window starved
+    const N = 5000
+    for (let i = 0; i < N; i++) {
+      const idx = pickNominationIndex(rng, 60)
+      if (idx < 3) top3++
+      if (idx >= 8 && idx <= 30) midTier++
+    }
+    // Studs dominate early nominations...
+    expect(top3 / N).toBeGreaterThan(0.25)
+    // ...but mid-tier players genuinely come up (the whole point of the fix).
+    expect(midTier / N).toBeGreaterThan(0.1)
   })
 })
 

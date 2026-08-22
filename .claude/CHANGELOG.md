@@ -2,6 +2,23 @@
 
 ---
 
+## 2026-08-22 / PREP RE-EVAL Part 1 (cont.) -- realistic nomination + medoid rosters + imputation net
+
+**Class:** pipeline + shared (Architecture + QA lenses). Continues Part 1 after Joe's deep engine critique: real auctions have the lot WINNER nominate next, so budgets drain unevenly and "many guys go for way less than they should while many go for way more" -- a startable falling to $1 late is realistic, but the SAME startable pinned at $1 in every strategy is an artifact. P1A/P1C fixed strategy convergence and identity dupes; this pass fixes the residual $1-startable pinning AND the risk of studs cratering. Pure engine, $0, no LLM, no network re-pull.
+
+**Realistic nomination order -- `src/lib/draft/sim-engine.ts` `pickNominationIndex`.** The old model nominated strictly the top-3 remaining by ceiling, so mid-tier startables only came up after ~30 studs sold -- by which point opponents' slots were full and they cleared at $1 to a lone bidder. Replaced with a tight/wildcard MIXTURE: TIGHT (55% of lots) draws the top-4 remaining so studs clear promptly and never linger into the thin late market (this is the ONLY branch that nominates the very top -- it is what stops Puka/Gibbs cratering); WILDCARD (45%) draws UNIFORMLY over the mid/late board `[tightWindow, pool)`, deliberately pulling role players up while budgets are still live. (An earlier single-exponential attempt over-corrected -- studs cratered because nothing kept the top moving; a decay-toward-top wildcard just re-nominated near-studs and starved the mid-tier. The uniform mid-board draw targets exactly the band that needs surfacing.)
+
+**Medoid representative roster -- `src/lib/draft/sim-grade.ts` `medoidRoster` (new).** `topModalRosters` showed each strategy cluster's FIRST-occurrence run as its representative -- an arbitrary instance whose end-game bench slots often all landed at $1 by luck, even though the cluster's AGGREGATE prices were realistic (e.g. Rome Odunze landed $4-7 on average but the shown roster had him at $1). Now each cluster stores all its runs and the representative is the MEDOID: the real run whose per-slot prices deviate least from the cluster's per-player medians. No price is synthesized -- the medoid is an actual simulated roster; we only stop showing an atypical one.
+
+**Projection imputation safety net -- `src/lib/players/impute-projections.ts` (new), wired into `cacheToPlayers`.** Builds a rank->points curve per position from players with a real projection, then linear-interpolates `projectedPoints` for any draftable with a null/0 projection but a real `ecrPositionRank` (clamp at ends, no extrapolation). Flags each `projectionImputed:true` (new `Player` field) so it is never mistaken for a feed value; already-imputed rows are excluded as anchors. Fires AFTER dedupe at the shared read seam, so the sim never scores an elite at 0 when the offseason feed is empty. The current live feed carries real projections for all 6 prior-null elites, so 0 are imputed today -- it activates only if the feed regresses. Removes the sim's dependency on the still-deferred network `data:pull` repair (P1B).
+
+**Proof (pasted).**
+- Gate: `type-check` 0 errors; `test:run` **632/632** (13 new: 7 imputation + 4 nomination + 2 medoid, 0 regressions); `lint` 0 errors/0 warnings in every touched file (the repo's 42 pre-existing baseline errors are all in untouched in-season/script files).
+- Dataset regenerated (`npm run research:run`) + published to Supabase (row `243b4cef`). Measured on the shown representative rosters (44 = 26 strategies + 18 stud combos): distinct stud cores **26** (original defect was 2); Gibbs **$88** and Puka **$88** in every appearance (no cratering, was Gibbs $19 / Puka $1 in the failed single-exponential attempt); $1-startable slots **54 -> 36** after the medoid; spread median **7** players priced over $1 per 13-slot roster (min 4, max 12).
+- Residual $1 startables verified as correct auction behavior, not artifacts: Sam LaPorta (TE7 by room price) is $1 only in strategies that PUNT TE and spend the $200 elsewhere; strategies that value TE pay $18+ for Bowers/McBride. His aggregate landed price is $3-8. This is the imperfect-market behavior Joe asked for.
+
+---
+
 ## 2026-08-21 / PREP RE-EVAL Part 1 -- strategy-driven sim + identity dedup
 
 **Class:** pipeline + shared (Architecture + QA lenses). Joe rejected the prep screens on two data defects: (1) virtually every strategy produced the SAME roster (Gibbs + Luther Burden regardless of strategy), and (2) each sample roster spent the full $200 on just 3-4 players (unrealistic). Root-caused to the engine + the cache, not the display. Part 1 fixes the engine/data; Part 2 (screens) is separate. Pure engine, $0, no LLM, no network re-pull.

@@ -297,6 +297,62 @@ const OPPONENT_LEAN_STRENGTH = 0.35
  */
 const LEAGUE_MAX_CLEAR = 88
 
+/**
+ * Nomination realism (Phase 2, board control). The old model nominated randomly
+ * among the top-3 remaining by ceiling, so players cleared in near-strict value
+ * order: a startable mid-tier player (ceiling ~$20) was not nominated until every
+ * higher-ceiling player had sold, by which point rivals had filled that position
+ * and only the me-seat still had a slot -- so genuinely startable players (Tee
+ * Higgins, DJ Moore, Bucky Irving) cleared at $1 to a lone late bidder, which the
+ * Nasties ledger never shows.
+ *
+ * Real drafts nominate a MIXTURE every lot, and we model exactly that:
+ *   - TIGHT branch (NOMINATION_TIGHT_SHARE of lots): draw from the top few remaining
+ *     by ceiling, so the current best players clear PROMPTLY and never linger into
+ *     the thin-budget late phase. This is the ONLY branch that nominates the very
+ *     top of the board, which is what stops an elite (Puka, Gibbs) from ever
+ *     cratering to $1 -- he is always sold near the top while the room is flush.
+ *   - WILDCARD branch (the rest): draw UNIFORMLY from the mid/late board (ranks at
+ *     or below the tight window), deliberately pulling mid-tier and role players up
+ *     THROUGHOUT the draft while budgets are still live, so a startable (Tee Higgins,
+ *     Bucky Irving) faces a full market and clears at a realistic price instead of
+ *     $1 to a lone late bidder. (Decay toward the top was wrong here -- it just
+ *     re-nominated near-stud players; the mid-tier is exactly what needs surfacing.)
+ * Together: studs go early (tight), mid-tier is injected early (wildcard), neither
+ * defect returns. All three knobs are tunable (Joe, 2026-08-22).
+ */
+const NOMINATION_TIGHT_SHARE = 0.55
+const NOMINATION_TIGHT_WINDOW = 4
+const NOMINATION_POOL = 60
+
+/**
+ * Draw a nomination index into the ceiling-desc-sorted `remaining` array via the
+ * tight/wildcard mixture described above. Deterministic given `rng` (consumes two
+ * draws per call: branch, then index). Exported for tests.
+ */
+export function pickNominationIndex(
+  rng: () => number,
+  count: number,
+  poolCap: number = NOMINATION_POOL,
+  tightShare: number = NOMINATION_TIGHT_SHARE,
+  tightWindow: number = NOMINATION_TIGHT_WINDOW,
+): number {
+  if (count <= 1) return 0
+
+  // TIGHT branch: keep the top of the board moving so studs never linger.
+  if (rng() < tightShare) {
+    const tight = Math.min(count, tightWindow)
+    return Math.floor(rng() * tight)
+  }
+
+  // WILDCARD branch: uniform over the mid/late board [tightWindow, pool), pulling
+  // role players up early. When few remain (count <= tightWindow) fall back to the
+  // whole field so we always return a valid index.
+  const hi = Math.min(count, poolCap)
+  const lo = Math.min(tightWindow, hi - 1)
+  return lo + Math.floor(rng() * (hi - lo))
+}
+
 const POSITION_TO_DEDICATED: Record<BoardPlayer['position'], keyof SlotsRemaining> = {
   QB: 'qb',
   RB: 'rb',
@@ -413,11 +469,13 @@ export function runAuctionSim(
     const anyoneHasSlot = managers.some(m => openSlotCount(m.slots) > 0)
     if (!anyoneHasSlot) break
 
-    // --- Nomination: jitter among the top few remaining by ceiling so studs
-    //     still go early but the exact order varies run to run. ---
+    // --- Nomination (Phase 2, board control): draw from a wide pool with weight
+    //     decaying in ceiling-rank, so studs still go early on average but mid-tier
+    //     startables surface throughout the draft while budgets are live, instead
+    //     of clearing in strict value order and dropping to $1 to a lone late
+    //     bidder. See pickNominationIndex / NOMINATION_TEMP above. ---
     remaining.sort((a, b) => b.ceiling - a.ceiling)
-    const window = Math.min(3, remaining.length)
-    const nomIdx = Math.floor(rng() * window)
+    const nomIdx = pickNominationIndex(rng, remaining.length)
     const nominated = remaining[nomIdx]
 
     // --- Collect willingness across all managers who can slot this player. ---

@@ -7,6 +7,7 @@ import type { Player, Position } from './types'
 import type { CachedPlayer } from '@/lib/research/cache'
 import { expectedRoomPrice } from '@/lib/draft/league-calibration'
 import { dedupePlayerIdentities } from './dedupe-identities'
+import { imputeMissingProjections } from './impute-projections'
 
 /** Map DB position (DST) to app position (DEF) */
 function dbPosToAppPos(pos: string): Position {
@@ -144,5 +145,8 @@ export function cacheToPlayers(cached: CachedPlayer[]): Player[] {
   const sorted = cached
     .map(cacheToPlayer)
     .sort((a, b) => a.consensusRank - b.consensusRank)
-  return dedupePlayerIdentities(sorted)
+  // Dedup first (so one human = one row), then impute missing projections from
+  // the position rank->points curve so offseason nulls (Bowers, Jeanty, Taylor,
+  // Lamar, Henry, Breece) stop silently scoring 0 in the sim.
+  return imputeMissingProjections(dedupePlayerIdentities(sorted))
 }

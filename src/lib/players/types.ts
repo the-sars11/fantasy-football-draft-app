@@ -50,6 +50,7 @@ export interface Player {
   // auction value (consensusAuctionValue). Every number traces to ESPN's 2026
   // full-PPR projected stat line + VORP under his roster + $2,400 budget.
   projectedPoints?: number // ESPN 2026 full-PPR season projection (pts)
+  projectionImputed?: boolean // true = projectedPoints estimated from the position's rank->points curve (elite offseason nulls), NOT a real feed value
   vorp?: number // points above replacement for his roster
   positionRankByPoints?: number // 1 = best at position by projected points
   replacementPoints?: number // replacement-level points for the position

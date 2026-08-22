@@ -553,7 +553,9 @@ export interface ModalRoster {
   frequency: number
   /** Frequency as a percentage of all runs (one decimal). */
   frequencyPct: number
-  /** A real roster instance from this cluster (first occurrence). */
+  /** A real roster instance from this cluster (the medoid -- the run whose
+   *  per-slot prices are most typical of the cluster, not an arbitrary first
+   *  occurrence). Every price is a real simulated clearing price. */
   representative: SimWonPlayer[]
   /** Average total spent across runs in this cluster. */
   avgSpent: number
@@ -572,10 +574,54 @@ export function studCore(players: SimWonPlayer[], threshold: number): string[] {
 }
 
 /**
+ * Pick the medoid roster of a cluster: the real run instance whose per-slot
+ * prices deviate least from the cluster's per-player median price. This shows a
+ * TYPICAL roster instead of an arbitrary first occurrence, so a flukey run whose
+ * end-game bench slots all landed at $1 no longer stands in for the cluster. No
+ * price is synthesized -- we return an actual simulated roster; we only choose
+ * which one. Ties break to the earlier run for determinism.
+ */
+export function medoidRoster(rosters: SimWonPlayer[][]): SimWonPlayer[] {
+  if (rosters.length <= 1) return rosters[0] ?? []
+  // Per-player median price across the cluster.
+  const pricesById = new Map<string, number[]>()
+  for (const roster of rosters) {
+    for (const p of roster) {
+      const list = pricesById.get(p.id) ?? []
+      list.push(p.price)
+      pricesById.set(p.id, list)
+    }
+  }
+  const medianById = new Map<string, number>()
+  for (const [id, prices] of pricesById) {
+    prices.sort((a, b) => a - b)
+    const mid = Math.floor(prices.length / 2)
+    const median =
+      prices.length % 2 === 0 ? (prices[mid - 1] + prices[mid]) / 2 : prices[mid]
+    medianById.set(id, median)
+  }
+  // The run whose slot prices sit closest to those medians is the most typical.
+  let best = rosters[0]
+  let bestDeviation = Infinity
+  for (const roster of rosters) {
+    let deviation = 0
+    for (const p of roster) {
+      deviation += Math.abs(p.price - (medianById.get(p.id) ?? p.price))
+    }
+    if (deviation < bestDeviation) {
+      bestDeviation = deviation
+      best = roster
+    }
+  }
+  return best
+}
+
+/**
  * The 5 most frequently occurring roster shapes across all runs, clustered by
  * stud core. Modal, not percentile: these are the drafts that actually recurred,
  * each labeled with how often it hit. Ties break toward higher avg starter points
- * so the stronger of two equally-frequent shapes ranks first.
+ * so the stronger of two equally-frequent shapes ranks first. Each cluster's
+ * displayed roster is its medoid (see medoidRoster), not a first occurrence.
  */
 export function topModalRosters(
   runs: SimRun[],
@@ -590,7 +636,7 @@ export function topModalRosters(
   interface Cluster {
     coreIds: string[]
     coreNames: string[]
-    representative: SimWonPlayer[]
+    rosters: SimWonPlayer[][]
     spends: number[]
     starterPoints: number[]
     wins: number[]
@@ -606,13 +652,14 @@ export function topModalRosters(
       cluster = {
         coreIds: core,
         coreNames: core.map(id => byId.get(id)?.name ?? id),
-        representative: run.myRoster.players,
+        rosters: [],
         spends: [],
         starterPoints: [],
         wins: [],
       }
       clusters.set(key, cluster)
     }
+    cluster.rosters.push(run.myRoster.players)
     cluster.spends.push(run.myRoster.spent)
     cluster.starterPoints.push(bestLineupPoints(run.myRoster.players, lineup))
     cluster.wins.push(grades[i]?.wins ?? 0)
@@ -627,7 +674,7 @@ export function topModalRosters(
       coreNames: c.coreNames,
       frequency: c.spends.length,
       frequencyPct: Math.round((c.spends.length / total) * 1000) / 10,
-      representative: c.representative,
+      representative: medoidRoster(c.rosters),
       avgSpent: Math.round(avg(c.spends)),
       avgStarterPoints: avg(c.starterPoints),
       avgWins: avg(c.wins),
