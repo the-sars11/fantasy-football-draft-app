@@ -261,6 +261,7 @@ export function AuctionDraftRoom({
       items.push({
         strong: `${s.tier1Remaining} T1 ${s.position}${s.tier1Remaining === 1 ? '' : 's'} left`,
         dim,
+        testId: `urgency-${s.position}`,
       })
     }
     // Budget pace.
@@ -269,7 +270,7 @@ export function AuctionDraftRoom({
     const openSlots = Math.max(0, total - filled)
     if (myBudget != null && openSlots > 0) {
       const avg = (myBudget / openSlots).toFixed(2)
-      items.push({ strong: `$${myBudget} left · ${openSlots} slots`, dim: `avg $${avg} needed` })
+      items.push({ strong: `$${myBudget} left · ${openSlots} slots`, dim: `avg $${avg} needed`, testId: 'budget-pace' })
     }
     return items
   }, [scarcity, available, maxBidMap, myPicks.length, rosterSlots, myBudget])

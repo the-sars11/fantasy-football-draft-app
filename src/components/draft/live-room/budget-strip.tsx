@@ -14,16 +14,19 @@ function Stat({
   value,
   label,
   small,
+  testId,
 }: {
   value: string
   label: string
   small?: boolean
+  testId?: string
 }) {
   return (
     <div className="flex flex-1 flex-col items-center">
       <div
         className="font-mono font-bold tabular-nums"
         style={{ color: ROOM.t1, fontSize: small ? 17 : 19 }}
+        data-testid={testId}
       >
         {value}
       </div>
@@ -65,11 +68,11 @@ export function BudgetStrip({
       style={{ background: ROOM.card, border: `1px solid ${ROOM.border}` }}
     >
       <div className="flex items-center gap-2">
-        <Stat value={remaining != null ? `$${remaining}` : '--'} label="Remaining" />
+        <Stat value={remaining != null ? `$${remaining}` : '--'} label="Remaining" testId="budget-remaining" />
         {divider}
-        <Stat value={maxBid != null ? `$${maxBid}` : '--'} label="Max bid" />
+        <Stat value={maxBid != null ? `$${maxBid}` : '--'} label="Max bid" testId="budget-maxbid" />
         {divider}
-        <Stat value={`${filledSlots}/${totalSlots}`} label="Slots" small />
+        <Stat value={`${filledSlots}/${totalSlots}`} label="Slots" small testId="roster-count" />
       </div>
       {remainingPct != null && (
         <div

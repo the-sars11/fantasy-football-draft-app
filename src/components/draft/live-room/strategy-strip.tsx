@@ -71,6 +71,7 @@ export function StrategyStrip({ activeStrategy, strategies, onSelect, pivot }: S
         <div
           className="mx-2.5 mb-2.5 rounded-lg px-2.5 py-1.5 text-[11.5px] leading-snug"
           style={{ background: ROOM.blue10, border: `1px solid ${ROOM.blue20}`, color: ROOM.t1 }}
+          data-testid="pivot-line"
         >
           {pivot}
         </div>

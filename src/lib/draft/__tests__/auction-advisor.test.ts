@@ -11,11 +11,16 @@
  */
 
 import { describe, it, expect } from 'vitest'
-import { calculateMaxBidAdvice } from '../auction-advisor'
+import {
+  calculateMaxBidAdvice,
+  analyzeBudgetStrategy,
+  getPositionUrgencyWarnings,
+} from '../auction-advisor'
 import type { DraftState, ManagerState } from '../state'
 import type { CalibratedBidInputs } from '../auction-advisor'
 import type { ScoredPlayer } from '@/lib/research/strategy/scoring'
 import type { Player } from '@/lib/players/types'
+import { makePlayer, makeScored } from '@/test/factories'
 
 // ---------------------------------------------------------------------------
 // Fixtures
@@ -267,5 +272,92 @@ describe('calculateMaxBidAdvice -- missing manager', () => {
     )
     expect(result.maxBid).toBe(1)
     expect(result.reasoning).toContain('No budget data')
+  })
+})
+
+// ---------------------------------------------------------------------------
+// A4: analyzeBudgetStrategy pace boundaries (ahead / behind / on_track)
+// pctSpent  = (200 - budgetRemaining) / 200 * 100
+// pctPicks  = picksMade / 14 total slots * 100
+// ahead if pctSpent > pctPicks + 15 ; behind if pctSpent < pctPicks - 15
+// ---------------------------------------------------------------------------
+describe('analyzeBudgetStrategy -- pace (A4)', () => {
+  it('flags AHEAD when spend badly outruns pick progress', () => {
+    // 1 pick -> pctPicks ~7.1 ; spent 50 -> pctSpent 25 ; 25 > 7.1 + 15
+    const result = analyzeBudgetStrategy(makeState(150, 1), 'Joe')
+    expect(result).not.toBeNull()
+    expect(result!.status).toBe('ahead')
+  })
+
+  it('flags BEHIND when spend badly trails pick progress', () => {
+    // 7 picks -> pctPicks 50 ; spent 10 -> pctSpent 5 ; 5 < 50 - 15
+    const result = analyzeBudgetStrategy(makeState(190, 7), 'Joe')
+    expect(result!.status).toBe('behind')
+  })
+
+  it('flags ON_TRACK when spend is within +/-15 of pick progress', () => {
+    // 5 picks -> pctPicks ~35.7 ; spent 60 -> pctSpent 30 ; |30 - 35.7| < 15
+    const result = analyzeBudgetStrategy(makeState(140, 5), 'Joe')
+    expect(result!.status).toBe('on_track')
+  })
+
+  it('returns null for a snake draft (auction-only analysis)', () => {
+    const snake = { ...makeState(150, 0), format: 'snake' as const }
+    expect(analyzeBudgetStrategy(snake, 'Joe')).toBeNull()
+  })
+})
+
+// ---------------------------------------------------------------------------
+// A4: getPositionUrgencyWarnings severity + threshold selection
+// The threshold loop is [25, 15, 10, 5] and BREAKS at the first threshold with
+// underBudget <= 3. To make threshold 15 fire (not 25), the pool must have > 3
+// players priced in (15, 25] and the tested count priced <= 15.
+// severity: underBudget <= 1 -> critical ; <= 2 -> warning ; <= 3 -> info
+// ---------------------------------------------------------------------------
+function qbPool(counts: { at20: number; at12: number }): ScoredPlayer[] {
+  const pool: ScoredPlayer[] = []
+  for (let i = 0; i < counts.at20; i++) {
+    pool.push(makeScored(makePlayer({
+      id: `qb20-${i}`, name: `QB Twenty ${i}`, position: 'QB', consensusAuctionValue: 20,
+    }), { strategyScore: 60 }))
+  }
+  for (let i = 0; i < counts.at12; i++) {
+    pool.push(makeScored(makePlayer({
+      id: `qb12-${i}`, name: `QB Twelve ${i}`, position: 'QB', consensusAuctionValue: 12,
+    }), { strategyScore: 60 }))
+  }
+  return pool
+}
+
+describe('getPositionUrgencyWarnings -- severity + threshold (A4)', () => {
+  it('fires CRITICAL at threshold 15 when exactly 1 startable is under $15', () => {
+    // 4 QBs at $20 (skip threshold 25: underBudget=5 > 3) + 1 QB at $12.
+    const warnings = getPositionUrgencyWarnings(
+      makeState(150, 0), 'Joe', qbPool({ at20: 4, at12: 1 }), new Set(),
+    )
+    const qb = warnings.find((w) => w.position === 'QB')
+    expect(qb).toBeDefined()
+    expect(qb!.threshold).toBe(15)
+    expect(qb!.underBudget).toBe(1)
+    expect(qb!.severity).toBe('critical')
+  })
+
+  it('fires WARNING at threshold 15 when exactly 2 startables are under $15', () => {
+    const warnings = getPositionUrgencyWarnings(
+      makeState(150, 0), 'Joe', qbPool({ at20: 4, at12: 2 }), new Set(),
+    )
+    const qb = warnings.find((w) => w.position === 'QB')
+    expect(qb!.threshold).toBe(15)
+    expect(qb!.underBudget).toBe(2)
+    expect(qb!.severity).toBe('warning')
+  })
+
+  it('emits no warning for a position with no available players', () => {
+    // Only QBs supplied -> RB/WR/TE have an empty pool -> no warnings for them.
+    const warnings = getPositionUrgencyWarnings(
+      makeState(150, 0), 'Joe', qbPool({ at20: 4, at12: 1 }), new Set(),
+    )
+    expect(warnings.some((w) => w.position === 'RB')).toBe(false)
+    expect(warnings.some((w) => w.position === 'WR')).toBe(false)
   })
 })

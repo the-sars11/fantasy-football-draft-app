@@ -303,6 +303,7 @@ export function OnTheBlockCard({
           <span
             className="shrink-0 font-mono text-[14px] font-bold"
             style={{ color: ROOM.action }}
+            data-testid="otb-max-bid"
           >
             ${advice.capValue}
             <small className="ml-0.5 text-[9px] font-semibold" style={{ color: ROOM.t3 }}>

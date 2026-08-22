@@ -2,6 +2,24 @@
 
 ---
 
+## 2026-08-22 / R13 (test hardening) -- LIVE-DRAFT ADAPTIVE ENGINE test suite + Claude-driven browser layer
+
+**Class:** bugfix/QA (QA + Architecture lenses). Joe asked for detailed front-end + backend tests proving the live-draft adaptive engine actually adjusts as auctioneer picks land, with un-fakable definitions of done, plus Claude opening a browser to test the UI, and any issues documented so they can be fixed. Two locked decisions: add `data-testid` to source (not test-only shims); document AND fix clear-cut defects in the same pass (never soften an assertion). Plan of record: `C:\Users\jrasa\.claude\plans\fantasy-football-draft-app-this-app-tranquil-knuth.md`. $0 (no API calls).
+
+**What was built.** The two headline adaptive modules had ZERO tests before this pass. Added **+52 tests (632 -> 684, all green)** across three automated layers plus a browser layer:
+- **Group A (engine units):** `flow-monitor.test.ts` (detectStrategyDrift + analyzeDraftFlow/detectPositionRuns/detectValueAnomalies/analyzePoolQuality, 12 tests), `pivot-detector.test.ts` (detectPivotOpportunity scoring + named alt strategy, 4 tests), `auction-advisor.test.ts` extended (budget pace boundaries + position-urgency severity, +23). Exact thresholds asserted: drift active iff last target gone; pivot fires iff best-alt score>=15; pace +/-15 boundaries; urgency 1->critical / 2->warning at $15.
+- **Group B (recompute-on-pick integration):** `recompute-on-pick.test.ts` -- max-bid evolves 72 -> 86 (scarcity x1.2 when alts <=2) -> 8 (budget clamp) with exact numbers; drift+pivot flip at exactly the pick that removes the last RB target (step 4), pivot names `zero-rb`. `use-draft-state.test.ts` -- feed pick -> draftedNames(lowercased) + getBudget 200->155->140.
+- **Group C (API routes):** `auctioneer-feed/route.test.ts` (10 -- exact `{state,error}` envelope, always HTTP 200, code URL-encoded, trailing-slash strip), `draft/sessions/route.test.ts` (8 -- POST 400/404/201, PATCH 404/200), `players/route.test.ts` (6 -- limit 300, DEF->DST, empty-adp filter, 503).
+- **Group D (Claude-driven Chrome, `?sim=1`):** live DOM before/after on port 3003. Recompute observed: budget-remaining $200->$199->$198->$197, roster-count 0->1->2->3, progressbar 100->99, round-pick R1 PICK1->R3 PICK27, budget-pace recomputed, otb-max-bid renders finite $1, and the adaptive pivot-line changed "On plan..." -> "You are behind the WR run...". Full evidence + findings in `.claude/TEST_FINDINGS.md`.
+
+**P1 -- data-testid hooks added to source (11):** `budget-remaining`, `budget-maxbid`, `roster-count` (budget-strip.tsx); `otb-max-bid` (on-the-block-card.tsx); `round-pick` (status-bar.tsx); `pivot-line` (strategy-strip.tsx); `urgency-<POS>` + `budget-pace` (awareness-strip.tsx via a new optional `testId` on AwarenessItem, wired in auction-room.tsx); `drift-alert` + `pivot-suggestion` (draft-flow-alerts.tsx). Values-only, copy-independent.
+
+**Defects found (logged in TEST_FINDINGS.md, NOT fixed this pass -- sim-path, need Joe triage):** F1 (medium) -- in `?sim=1` all tier counts render 0 (players_cache rows carry no `tier` field; the sim data path never runs the analysis that assigns tiers), so the `urgency-<POS>` awareness items can't surface in sim; the urgency math itself is proven at unit level (A4). F2 (low) -- `?sim=1` throws a 500 + `[useUserTags] invalid input syntax for type uuid: "demo-league"` (the non-UUID demo league id hits a uuid column); sim-only, non-blocking. Zero defects in the adaptive engine itself -- all 26 automated behavioral assertions matched the spec.
+
+**Proof (pasted).** `npm run test:run` -> **55 files, 684 passed, 0 failed** (baseline 632, +52). `npm run type-check` -> 0 errors. `npx eslint` on all 7 touched components -> 0 errors/0 warnings. Browser layer run live against `http://localhost:3003/draft/live?sim=1` with DOM reads pasted into TEST_FINDINGS.md. New files: `src/lib/draft/__tests__/{flow-monitor,pivot-detector,recompute-on-pick}.test.ts`, `src/hooks/__tests__/use-draft-state.test.ts`, `src/app/api/{auctioneer-feed,draft/sessions,players}/__tests__/route.test.ts`, `src/test/{setup,factories}.ts`, `.claude/TEST_FINDINGS.md`.
+
+---
+
 ## 2026-08-22 / PREP RE-EVAL Part 2 -- per-screen IA inside SHIELD v4 (Leaderboard + Cheat Sheet + League Intel + Players card) -- COMPLETE
 
 **Class:** output/UI (Design + QA lenses). Part 1 made the data correct + differentiated + realistic; Part 2 rebuilds WHAT each prep screen shows and HOW it groups, staying inside the locked SHIELD v4 system (every card a `Nameplate`; zero inline hex, `--ffi-*` tokens only; no leftover GRIDIRON volt-green; expandable rows not card grids; mobile-first). No engine change, no network, $0.

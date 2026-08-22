@@ -99,6 +99,7 @@ export function StatusBar({
             <span
               className="pl-0.5 font-mono text-[10px] tabular-nums leading-none"
               style={{ color: ROOM.t3 }}
+              data-testid="round-pick"
             >
               R{round} · PICK {pick}
             </span>

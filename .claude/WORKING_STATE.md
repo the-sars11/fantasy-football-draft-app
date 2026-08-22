@@ -25,6 +25,12 @@ The prior plan (S1–S8 / P2 DR / P3 VAL) marked the app "done" while it (a) pri
 
 ## Next open item
 
+### ▶ ACTIVE FOCUS 2026-08-22 -- R13 test hardening: LIVE-DRAFT ADAPTIVE ENGINE suite DONE
+
+Joe asked for detailed FE+BE tests proving the live-draft engine adjusts as picks land, with un-fakable DoD + Claude driving a browser + documented findings. DONE: **+52 tests, 632 -> 684 green**, 4 layers (A units / B recompute-on-pick / C API routes / D Claude-driven Chrome on `?sim=1`). 11 `data-testid`s added to source. 0 adaptive-engine defects. **2 sim-path defects logged for triage in `.claude/TEST_FINDINGS.md` (the deliverable):** F1 (medium -- tiers render 0 in sim so `urgency-<POS>` never surfaces; players_cache has no tier field, sim skips the analysis that assigns tiers; urgency math proven at unit level) + F2 (low -- `useUserTags` 500 on the non-UUID `demo-league` id). Both -> R13-fix cards. Gate: type-check 0, eslint 0 on touched files, browser DOM before/after pasted into TEST_FINDINGS.md. Preview: http://localhost:3003/draft/live?sim=1. `/bug-hunt full` portion of R13 still open.
+
+---
+
 ### ▶ ACTIVE FOCUS 2026-08-21 -- PREP SCREENS RE-EVAL (approved plan)
 
 Joe rejected the prep screens (data + display). Two-part approved plan: **Part 1 (engine/data correctness) -- DONE**, **Part 2 (per-screen IA inside SHIELD) -- NEXT**.

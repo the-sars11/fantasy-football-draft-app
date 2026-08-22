@@ -11,6 +11,8 @@ import { ROOM } from './theme'
 export interface AwarenessItem {
   strong: string
   dim?: string
+  /** Stable hook for browser assertions (e.g. urgency-RB, budget-pace). */
+  testId?: string
 }
 
 export function AwarenessStrip({ items }: { items: AwarenessItem[] }) {
@@ -25,7 +27,7 @@ export function AwarenessStrip({ items }: { items: AwarenessItem[] }) {
       </span>
       <div className="flex gap-4 overflow-x-auto whitespace-nowrap [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {items.map((item, i) => (
-          <span key={i} className="shrink-0 text-[11.5px]" style={{ color: ROOM.blue }}>
+          <span key={i} className="shrink-0 text-[11.5px]" style={{ color: ROOM.blue }} data-testid={item.testId}>
             <strong className="font-bold">{item.strong}</strong>
             {item.dim && (
               <span style={{ color: ROOM.blue45 }}> {item.dim}</span>

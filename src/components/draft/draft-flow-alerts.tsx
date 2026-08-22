@@ -88,9 +88,9 @@ export function DraftFlowAlerts({
 
   return (
     <div className="space-y-1.5">
-      {/* Pivot suggestion — highest priority */}
+      {/* Pivot suggestion - highest priority */}
       {pivotSuggestion && (
-        <div className="rounded-lg border border-primary/30 bg-primary/5 px-3 py-2">
+        <div className="rounded-lg border border-primary/30 bg-primary/5 px-3 py-2" data-testid="pivot-suggestion">
           <div className="flex items-start gap-2">
             <Zap className="h-3.5 w-3.5 text-primary mt-0.5 shrink-0" />
             <div className="flex-1 min-w-0">
@@ -161,7 +161,7 @@ export function DraftFlowAlerts({
 
       {/* FF-272: Strategy drift alert */}
       {driftAlert?.active && (
-        <div className="rounded-lg border border-orange-500/30 bg-orange-500/5 px-3 py-2">
+        <div className="rounded-lg border border-orange-500/30 bg-orange-500/5 px-3 py-2" data-testid="drift-alert">
           <div className="flex items-start gap-2">
             <AlertTriangle className="h-3.5 w-3.5 text-orange-400 mt-0.5 shrink-0" />
             <div className="flex-1 min-w-0">
