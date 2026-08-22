@@ -15,6 +15,7 @@ import { useState, useEffect } from 'react'
 import type { DraftSession, League } from '@/lib/supabase/database.types'
 import type { Strategy as DbStrategy } from '@/lib/supabase/database.types'
 import type { Player } from '@/lib/players/types'
+import { cacheToPlayers } from '@/lib/players/convert'
 import { saveSessionCache, loadSessionCache } from '@/lib/draft/offline-cache'
 
 // UX-7.3: Mock session + league for sim demo mode (?sim=1 with no ?session=)
@@ -92,7 +93,11 @@ export function useLiveDraftData({
         setLeague(DEMO_LEAGUE)
         fetch('/api/players')
           .then(r => r.json())
-          .then(data => { if (data.players) setPlayers(data.players) })
+          // F1 fix: map raw CachedPlayer rows to the app Player shape (the
+          // canonical read path every prep screen uses). Without this the live
+          // room held raw DB rows with no consensusTier/consensusAuctionValue,
+          // so scarcity tier counts were all 0 and urgency never surfaced.
+          .then(data => { if (data.players) setPlayers(cacheToPlayers(data.players)) })
           .catch(() => {})
           .finally(() => setLoading(false))
       } else {
@@ -125,7 +130,8 @@ export function useLiveDraftData({
 
         const playersData = await playersRes.json()
         if (playersRes.ok && playersData.players) {
-          setPlayers(playersData.players)
+          // F1 fix: canonical CachedPlayer -> Player mapping (see note above).
+          setPlayers(cacheToPlayers(playersData.players))
         }
 
         // Strategies require leagueId -- GET /api/strategies 400s ("leagueId is
@@ -168,7 +174,8 @@ export function useLiveDraftData({
           // since the player pool doesn't change mid-draft.
           fetch('/api/players')
             .then(r => r.json())
-            .then(data => { if (data.players) setPlayers(data.players) })
+            // F1 fix: canonical CachedPlayer -> Player mapping (see note above).
+            .then(data => { if (data.players) setPlayers(cacheToPlayers(data.players)) })
             .catch(() => {})
         } else {
           setError(err instanceof Error ? err.message : 'Failed to load draft data')

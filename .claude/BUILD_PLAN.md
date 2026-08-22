@@ -451,6 +451,10 @@ Work top to bottom. Each session is scoped to finish cleanly in one focused sitt
 > **Reads first:** `.claude/REVIEW_LENSES.md`, the R1–R12 CHANGELOG entries, `src/**/*.test.ts`.
 > **Work:** `/bug-hunt full` across the whole rebuilt app, triage by severity, fix the real ones; **expand automated coverage on the new engines** — roster-solver, team-aware max-bid, strategy target prices, Monte Carlo sim — so the logic that wins the draft is actually tested.
 > **Done-when:** `/bug-hunt full` clean (or every finding triaged with a written defer reason); tests cover the team-construction paths; type-check + lint (0 new) + build clean. Findings + fixes in BUG_LOG + CHANGELOG.
+>
+> **R13 adaptive-engine test-hardening layer (2026-08-22)** — Groups A/B/C Vitest + Group D Claude-driven browser, per the approved live-draft test plan. Full defect log at `.claude/TEST_FINDINGS.md`. Browser layer found 2 defects:
+>   - **TEST_FINDINGS F1 [medium, FIXED]** live draft room rendered every Tier Context count as 0 (T1:0..T5:0) so `urgency-<POS>` never surfaced. Root cause: `src/hooks/use-live-draft-data.ts` fed raw `players_cache` rows straight into `Player[]` state WITHOUT the canonical `cacheToPlayers` mapping every prep screen uses, so `consensusTier` was `undefined` and `calculateScarcity`'s tier filters all returned 0 — degraded REAL drafts too, not just sim. Fixed by mapping through `cacheToPlayers` at all 3 `setPlayers` sites. Regression test `src/lib/draft/__tests__/scarcity-tier-mapping.test.ts` (raw->0, mapped->exact real counts). Browser confirm on `?sim=1`: WR T3:44/T4:2/T5:42 where before every chip was 0. See CHANGELOG 2026-08-22 / R13 F1 fix.
+>   - **TEST_FINDINGS F2 [low, open]** `useUserTags` 500s on the non-UUID demo league id `"demo-league"` in `?sim=1` only. Sim-only, non-blocking, does not affect the adaptive room. Logged for Joe to triage.
 
 ### R14 — Usability walkthrough — Claude drives Chrome `[Claude driving + Sonnet fixes]` · class: output/bugfix
 > - Class: WORKHORSE

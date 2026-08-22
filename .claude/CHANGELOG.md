@@ -2,6 +2,18 @@
 
 ---
 
+## 2026-08-22 / R13 F1 fix -- live draft room now maps players through cacheToPlayers (tier scarcity + urgency)
+
+**Class:** bugfix (QA lens). $0 (no API calls). Found by the R13 Claude-driven browser layer (TEST_FINDINGS F1).
+
+**Root cause.** `src/hooks/use-live-draft-data.ts` fetched raw `players_cache` rows from `GET /api/players` and set them straight into a `Player[]`-typed state WITHOUT the canonical `cacheToPlayers` mapping that every prep screen (`board`, `simulate`, `strategies`) already uses. Raw DB rows keep the FantasyPros tier under `source_data.tier` and have NO top-level `consensusTier`. So `calculateScarcity`'s tier filters (`consensusTier <= 1`, `=== 2`, `>= 3`) all ran against `undefined` and returned 0 for every tier at every position -- the Tier Context read T1:0..T5:0 across the board and the `urgency-<POS>` awareness items (gated on `tier1Remaining > 0`) never surfaced. Originally logged as "sim-only" but the same raw-row path degraded a REAL draft identically.
+
+**The fix.** Map the fetched rows through `cacheToPlayers` at all three `setPlayers` sites in `use-live-draft-data.ts` (sim demo path, real-session path, offline-fallback path). One-line change per site plus the import; scoped entirely to the live draft room (no route change -- other `/api/players` consumers still get raw `CachedPlayer` rows as they expect).
+
+**Proof (pasted).** `npm run type-check` -> 0 errors. `npx eslint src/hooks/use-live-draft-data.ts` -> clean. New regression test `src/lib/draft/__tests__/scarcity-tier-mapping.test.ts` (2 tests): raw rows -> WR/RB `tier1Remaining === 0` (the documented bug); `cacheToPlayers`-mapped rows -> WR `tier1Remaining===2`, `tier2===1`, `tier3===1`, `startableRemaining===3`, RB `tier1===1` (urgency gate can fire), and `consensusTier===1` on the elite WR. `npm run test:run` -> **56 files, 690 passed, 0 failed** (working tree; includes the 2 new F1 tests). Browser confirm on `?sim=1`: Tier Context now reads real counts (e.g. WR T3:44 / T4:2 / T5:42) where before the fix every tier chip was 0. Files: `src/hooks/use-live-draft-data.ts`, `src/lib/draft/__tests__/scarcity-tier-mapping.test.ts`, `.claude/TEST_FINDINGS.md`.
+
+---
+
 ## 2026-08-22 / VAL-2.2 -- expert-anchored valuation blend (fixes "all RB value / all WR prem")
 
 **Class:** shared (Architecture + QA lenses). `convert.ts` is the single shared read path. Plan of record: `C:\Users\jrasa\.claude\plans\bright-percolating-pudding.md` (approved). $0 (no API calls).
