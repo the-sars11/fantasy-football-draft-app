@@ -281,6 +281,142 @@ export function SimRosterCarousel({ rosters, runs }: { rosters: ModalRoster[]; r
   )
 }
 
+// ─── Full representative roster (all 13 slots, grouped by position) ────────
+
+/** Position order for the roster breakdown (QB, RB, WR, TE, then DEF/DST). */
+const ROSTER_POS_ORDER: SimWonPlayer['position'][] = ['QB', 'RB', 'WR', 'TE', 'DEF']
+
+interface RosterPosGroup {
+  pos: SimWonPlayer['position']
+  players: SimWonPlayer[]
+  spend: number
+}
+
+/** Split one shape's representative roster into position groups (priced high to low). */
+function groupRosterByPosition(players: SimWonPlayer[]): RosterPosGroup[] {
+  return ROSTER_POS_ORDER.map((pos) => {
+    const inPos = players
+      .filter((p) => p.position === pos)
+      .sort((a, b) => b.price - a.price || a.name.localeCompare(b.name))
+    return { pos, players: inPos, spend: inPos.reduce((s, p) => s + p.price, 0) }
+  }).filter((g) => g.players.length > 0)
+}
+
+/**
+ * The full 13-man representative roster for a strategy, grouped by position with
+ * the dollar paid on every slot, plus a spend-by-position "shape" strip so the
+ * $200 split is visible at a glance. When a strategy produced more than one
+ * recurring shape, a pill selector flips between them (each shows its own full
+ * roster and how often it recurred). Every number is the engine's own
+ * representative price or frequency; nothing is derived or invented here.
+ *
+ * This replaces the old core-only badge view (which showed just the 3-4 stud
+ * names) so the leaderboard finally shows what a strategy actually rosters and
+ * what it pays across the whole team.
+ */
+export function SimRosterDetail({
+  rosters,
+  runs,
+  budget = 200,
+}: {
+  rosters: ModalRoster[]
+  runs: number
+  budget?: number
+}) {
+  const [shapeIdx, setShapeIdx] = useState(0)
+  if (rosters.length === 0) return null
+
+  const active = rosters[Math.min(shapeIdx, rosters.length - 1)]
+  const players = active.representative
+  const groups = groupRosterByPosition(players)
+  const totalSpent = players.reduce((s, p) => s + p.price, 0)
+  const left = Math.max(0, budget - totalSpent)
+
+  return (
+    <FFICard>
+      <FFISectionHeader
+        title="Full roster"
+        subtitle={`All ${players.length} players this build lands, and what it pays for each`}
+      />
+
+      {rosters.length > 1 && (
+        <div className="flex flex-wrap gap-1.5 mb-3">
+          {rosters.map((r, i) => {
+            const selected = i === shapeIdx
+            return (
+              <button
+                key={i}
+                type="button"
+                onClick={() => setShapeIdx(i)}
+                aria-pressed={selected}
+                className="min-h-[44px] px-3 rounded-full border text-xs font-semibold tabular-nums transition-colors"
+                style={{
+                  background: selected ? 'var(--ffi-surface-3)' : 'var(--ffi-surface-1)',
+                  borderColor: selected ? 'var(--ffi-hairline-bright)' : 'var(--ffi-hairline)',
+                  color: selected ? 'var(--ffi-ink)' : 'var(--ffi-ink-2)',
+                }}
+              >
+                Shape {i + 1} · {r.frequencyPct}%
+              </button>
+            )
+          })}
+        </div>
+      )}
+
+      {/* Spend-by-position shape strip: where the $200 goes. */}
+      <div
+        className="flex flex-wrap gap-x-4 gap-y-1.5 mb-3 pb-3"
+        style={{ borderBottom: '1px solid var(--ffi-hairline)' }}
+      >
+        {groups.map((g) => (
+          <div key={g.pos} className="flex items-baseline gap-1.5">
+            <span className="ffi-caption text-[var(--ffi-ink-3)]">{g.pos}</span>
+            <span className="font-mono text-xs font-semibold text-[var(--ffi-ink)] tabular-nums">
+              ${g.spend}
+            </span>
+            <span className="ffi-caption text-[var(--ffi-ink-3)] tabular-nums">x{g.players.length}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* Every slot, grouped by position, priced high to low. */}
+      <div className="space-y-3">
+        {groups.map((g) => (
+          <div key={g.pos}>
+            <div className="flex items-baseline justify-between mb-1.5">
+              <span className="ffi-caption text-[var(--ffi-ink-3)]">{g.pos}</span>
+              <span className="font-mono text-[11px] text-[var(--ffi-ink-3)] tabular-nums">${g.spend}</span>
+            </div>
+            <div className="space-y-1">
+              {g.players.map((p) => (
+                <div key={p.id} className="flex items-center gap-3">
+                  <FFIPositionBadge position={p.position} />
+                  <span className="flex-1 text-sm font-medium text-[var(--ffi-ink)] truncate">{p.name}</span>
+                  <span className="font-mono text-sm font-semibold text-[var(--ffi-ink)] w-12 text-right tabular-nums">
+                    ${p.price}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div
+        className="mt-3 pt-3 flex items-baseline justify-between"
+        style={{ borderTop: '1px solid var(--ffi-hairline)' }}
+      >
+        <div className="ffi-caption text-[var(--ffi-ink-3)]">
+          {active.frequency} of {runs} sims{left > 0 ? ` · $${left} left` : ''}
+        </div>
+        <span className="font-mono text-sm font-semibold text-[var(--ffi-ink)] tabular-nums">
+          ${totalSpent} of ${budget}
+        </span>
+      </div>
+    </FFICard>
+  )
+}
+
 // ─── Players you land most ────────────────────────────────────────────────
 
 export function SimLandedTable({ landed }: { landed: LandedPlayer[] }) {

@@ -21,7 +21,7 @@ import Link from 'next/link'
 import { ChevronLeft, ChevronDown, Trophy, AlertTriangle, RotateCw } from 'lucide-react'
 import { PageTitle, Nameplate } from '@/components/ui/shield'
 import { FFIPositionBadge, FFISectionHeader } from '@/components/ui/ffi-primitives'
-import { SimRecordHero, SimRosterCarousel } from '@/components/prep/sim-results-cards'
+import { SimRecordHero, SimRosterDetail } from '@/components/prep/sim-results-cards'
 import { LeagueIntelPanel } from '@/components/prep/league-intel-panel'
 import { useResearchDataset } from '@/hooks/use-research-dataset'
 import { rankStrategies, resolveTargetPrice } from '@/lib/research/leaderboard'
@@ -337,7 +337,7 @@ function StrategyRow({
             </div>
           )}
 
-          <SimRosterCarousel rosters={sim.topRosters} runs={sim.grade.runs} />
+          <SimRosterDetail rosters={sim.topRosters} runs={sim.grade.runs} />
         </div>
       )}
     </Nameplate>
@@ -454,7 +454,7 @@ function StudComboRow({
             </div>
           )}
 
-          <SimRosterCarousel rosters={sim.topRosters} runs={sim.grade.runs} />
+          <SimRosterDetail rosters={sim.topRosters} runs={sim.grade.runs} />
         </div>
       )}
     </Nameplate>
