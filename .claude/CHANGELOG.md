@@ -2,6 +2,23 @@
 
 ---
 
+## 2026-08-22 / PREP RE-EVAL Part 2 -- per-screen IA inside SHIELD v4 (Leaderboard + Cheat Sheet + League Intel)
+
+**Class:** output/UI (Design + QA lenses). Part 1 made the data correct + differentiated + realistic; Part 2 rebuilds WHAT each prep screen shows and HOW it groups, staying inside the locked SHIELD v4 system (every card a `Nameplate`; zero inline hex, `--ffi-*` tokens only; no leftover GRIDIRON volt-green; expandable rows not card grids; mobile-first). No engine change, no network, $0.
+
+**Strategy Leaderboard -- full 13-man roster with the real dollar spread (commit `8e5e1ee`).** Defect D bit hardest here: the screen showed only the 3-4 `coreNames`. `leaderboard/client.tsx` + new `sim-results-cards.tsx` now render the full 13-man MEDOID roster grouped by position (QB/RB/WR/TE/FLEX/DST/bench) with the dollar paid on each slot, so Joe reads the shape of the $200, not just the studs. 16/16 component tests.
+
+**Cheat Sheet (Draft Board) + League Intel -- SHIELD compliance rebuild (commit `b523f19`).** `draft-board-table.tsx` was the genuine structural violation: a bespoke `var(--ffi-surface-2)` shell carrying leftover volt-green and inline hex. Moved every player row onto the sanctioned dense-list material `ffi-plate-row` and the empty state onto `Nameplate`; purged ALL volt-green and inline hex for `--ffi-*` tokens. SHIELD semantics wired through the tier/gap/target chips: targets + value pockets = steel-blue (`--ffi-blue`), elite/T1 = brick-red (`--ffi-gold`), hot/avoid = coral (`--ffi-danger`). `globals.css` gained `--ffi-pos-def` (#637396) + `--ffi-pos-k` (#a78bfa) so position pills stop borrowing another position's token. `board/client.tsx`: `Nameplate` error + empty cards, tokenized position pills, brick-red strategy badge, blue/coral filter-active states. `league-intel-panel.tsx`: the positional-inflation rows now carry a plain-English action that WRAPS on mobile instead of truncating (HOT -> "pays N% over national, so spend elsewhere and let it inflate"; COOL -> "value pocket, N% under national, so buy your POS here"; NEUTRAL -> "in line with national, no edge either way").
+
+**Players intel card DEFERRED.** `ffi-player-intel-card.tsx` already carries the Joe-approved D4 expandable-row IA; only 77 inline hex remain, most with Tailwind opacity modifiers (`text-[#5FA8E0]`, `bg-[#5FA8E0]/18`) that do not translate cleanly to `var(--ffi-*)`. Held for a separate careful verified pass rather than risk the approved look.
+
+**Proof (pasted).**
+- Gate: `type-check` 0 errors; `test:run` **632/632** (0 regressions); `lint` 0 errors on all touched TS files (`globals.css` correctly ignored by ESLint as CSS).
+- Live verification on the running dev server (`:3003`, dataset row `243b4cef`): `/prep/board` renders 483 player rows on `ffi-plate-row`; a computed-style scan across every rendered element returned **0** volt-green (`139,255,69`) hits. Rows show tier badges T1-T5, `+$N POCKET` (blue) and `$-N HOT` (coral) gap chips off the room-price model. Screenshot tool times out in this headless session; the DOM + computed-style scan is the pasted proof and Joe does the visual pass via the preview link.
+- Commits `8e5e1ee` (leaderboard) + `b523f19` (board/intel) pushed to `master`.
+
+---
+
 ## 2026-08-22 / PREP RE-EVAL Part 1 (cont.) -- realistic nomination + medoid rosters + imputation net
 
 **Class:** pipeline + shared (Architecture + QA lenses). Continues Part 1 after Joe's deep engine critique: real auctions have the lot WINNER nominate next, so budgets drain unevenly and "many guys go for way less than they should while many go for way more" -- a startable falling to $1 late is realistic, but the SAME startable pinned at $1 in every strategy is an artifact. P1A/P1C fixed strategy convergence and identity dupes; this pass fixes the residual $1-startable pinning AND the risk of studs cratering. Pure engine, $0, no LLM, no network re-pull.
