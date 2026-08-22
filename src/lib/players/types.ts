@@ -57,15 +57,26 @@ export interface Player {
   marketAuctionValue?: number // ESPN market $ — cross-check / real bid anchor
   ecrPositionRank?: number // FantasyPros expert-consensus positional rank (e.g. RB5 -> 5)
 
-  // League-calibrated valuation (P3 / VAL-1). Sourced from Joe's real 16-year
+  // League-calibrated valuation (VAL-2.2, expert-anchored). Sourced from Joe's real
   // Nasties auction ledger (src/data/league-history/), NOT national curves.
-  // ceilingValue      = genuine worth in Nasties full-PPR/no-K scoring (VORP $).
-  // expectedRoomPrice = what Joe's room actually pays for this positional rank.
-  // valueGap          = ceiling - room. Positive = value pocket (room underpays);
-  //                     negative = room overpays (let them).
+  // ceilingValue        = our OPTIMISTIC naive-persistence worth (VORP $). Context
+  //                       + upside only; runs high on breakouts. NOT the price.
+  // expectedRoomPrice   = what Joe's room pays for this player's EXPERT (ECR) rank.
+  //                       This is the number to bid against.
+  // expertAdjustedValue = expert-anchored worth = LAMBDA*ceiling + (1-LAMBDA)*room
+  //                       (VAL-2.2; low LAMBDA = a disciplined shrink toward the
+  //                       expert room price). PER-PLAYER, not a positional constant.
+  // valueGap            = expertAdjustedValue - expectedRoomPrice, per player.
+  //                       Positive = model + room agree he's underpriced; negative
+  //                       = the room overpays. Drives the POCKET/TAX tags.
+  // upsideValue         = ceilingValue - expectedRoomPrice. Separate lane: where
+  //                       our model sees more than the market. A breakout-at-a-
+  //                       discount / late-round dart signal. Do NOT pay up for it.
   ceilingValue?: number
   expectedRoomPrice?: number
+  expertAdjustedValue?: number
   valueGap?: number
+  upsideValue?: number
 
   // Per-source data
   sourceData: SourcePlayerData[]

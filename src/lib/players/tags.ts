@@ -9,9 +9,13 @@
  * question is "is he cheap or dear in THIS room," not "do experts rank him":
  *
  *   ELITE   - real FantasyPros tier 1. Anchor targets.            [FP tier]
- *   POCKET  - his Nasties worth (VORP $) beats what the room       [VORP ceiling
- *             historically pays for his rank by >= $4. Win him      vs ledger room]
- *             below value.
+ *   POCKET  - expert-anchored worth (VAL-2.2 blend) beats what     [blend worth
+ *             the room pays for his EXPERT rank by >= $4, AND        vs ledger room,
+ *             the experts aren't wildly split (rank std < 20).       expert-gated]
+ *             Model + room agree he's underpriced. When the gap
+ *             is there but experts ARE split, VOLATILE fires
+ *             instead (boom/bust) and the upsideValue lane carries
+ *             the dollar upside -- it is NOT a corroborated pocket.
  *   TAX     - the room historically pays >= $4 OVER his worth.     [same as POCKET]
  *             Reputation premium; let someone else have him.
  *   VOLATILE- experts wildly disagree (ECR rank std >= 20) and     [FP rank std]
@@ -79,24 +83,29 @@ export function computePlayerTags(p: Player): PlayerTag[] {
     })
   }
 
-  // POCKET / TAX - league-calibrated dollar gap (ceiling worth vs room price).
+  // POCKET / TAX - league-calibrated dollar gap (VAL-2.2 expert-anchored worth
+  // vs room price). POCKET is expert-CORROBORATED: it fires only when the experts
+  // aren't wildly split. When the gap is there but experts disagree hard
+  // (std >= VOLATILE_STD), we do NOT call it a pocket -- VOLATILE fires below and
+  // the separate upsideValue lane carries the dollar upside (a dart, not a bargain).
   const gap = p.valueGap
+  const expertsSplit = (p.rankSpread?.std ?? 0) >= VOLATILE_STD
   if (typeof gap === 'number') {
-    if (gap >= DOLLAR_GAP) {
+    if (gap >= DOLLAR_GAP && !expertsSplit) {
       tags.push({
         id: 'pocket',
         label: `+$${gap} POCKET`,
         tone: 'good',
-        hint: `Worth ~$${p.ceilingValue} in your league but the room pays ~$${p.expectedRoomPrice} for his rank - win him below value`,
-        source: 'VORP ceiling vs 16-yr Nasties room price',
+        hint: `Model + experts both beat your room's price here (~$${p.expertAdjustedValue} worth vs ~$${p.expectedRoomPrice} paid) - a corroborated value`,
+        source: 'VAL-2.2 expert-anchored worth vs Nasties room price',
       })
     } else if (gap <= -DOLLAR_GAP) {
       tags.push({
         id: 'tax',
         label: `-$${Math.abs(gap)} TAX`,
         tone: 'bad',
-        hint: `Room historically pays ~$${p.expectedRoomPrice} but he's only worth ~$${p.ceilingValue} here - reputation premium, let him go`,
-        source: 'VORP ceiling vs 16-yr Nasties room price',
+        hint: `Room historically pays ~$${p.expectedRoomPrice} but he's only worth ~$${p.expertAdjustedValue} here - reputation premium, let him go`,
+        source: 'VAL-2.2 expert-anchored worth vs Nasties room price',
       })
     }
   }

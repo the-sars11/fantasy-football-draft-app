@@ -21,7 +21,7 @@ function player(overrides: Partial<Player>): Player {
 
 const ids = (p: Player) => computePlayerTags(p).map((t) => t.id)
 
-describe('computePlayerTags — ELITE', () => {
+describe('computePlayerTags -ELITE', () => {
   it('fires on real FantasyPros tier 1', () => {
     expect(ids(player({ expertTier: 1 }))).toContain('elite')
   })
@@ -30,7 +30,7 @@ describe('computePlayerTags — ELITE', () => {
   })
 })
 
-describe('computePlayerTags — POCKET / TAX (league dollar gap)', () => {
+describe('computePlayerTags -POCKET / TAX (league dollar gap)', () => {
   it('POCKET at the +$4 threshold', () => {
     expect(ids(player({ valueGap: 4, ceilingValue: 30, expectedRoomPrice: 26 }))).toContain('pocket')
   })
@@ -52,9 +52,26 @@ describe('computePlayerTags — POCKET / TAX (league dollar gap)', () => {
     const t = ids(player({ valueGap: 10 }))
     expect(t.includes('pocket') && t.includes('tax')).toBe(false)
   })
+  it('POCKET is expert-corroborated: suppressed when experts are split (std >= 20)', () => {
+    // Gap says value, but the experts disagree hard -> not a corroborated pocket.
+    // VOLATILE carries the boom/bust meaning instead; upsideValue lane carries $.
+    const t = ids(player({
+      valueGap: 8, ceilingValue: 40, expectedRoomPrice: 32,
+      rankSpread: { min: 5, max: 90, std: 24 }, consensusRank: 40,
+    }))
+    expect(t).not.toContain('pocket')
+    expect(t).toContain('volatile')
+  })
+  it('POCKET fires when the gap is there and experts agree (std < 20)', () => {
+    const t = ids(player({
+      valueGap: 8, ceilingValue: 40, expectedRoomPrice: 32,
+      rankSpread: { min: 20, max: 30, std: 6 }, consensusRank: 40,
+    }))
+    expect(t).toContain('pocket')
+  })
 })
 
-describe('computePlayerTags — VOLATILE', () => {
+describe('computePlayerTags -VOLATILE', () => {
   it('fires when std >= 20 and in the pool', () => {
     expect(ids(player({ rankSpread: { min: 10, max: 90, std: 24 }, consensusRank: 40 }))).toContain('volatile')
   })
@@ -63,7 +80,7 @@ describe('computePlayerTags — VOLATILE', () => {
   })
 })
 
-describe('computePlayerTags — INJURY', () => {
+describe('computePlayerTags -INJURY', () => {
   it('fires on a real non-healthy designation', () => {
     expect(ids(player({ injuryStatus: 'Questionable' }))).toContain('injury')
     expect(ids(player({ injuryStatus: 'Out' }))).toContain('injury')
@@ -76,7 +93,7 @@ describe('computePlayerTags — INJURY', () => {
   })
 })
 
-describe('computePlayerTags — SLEEPER', () => {
+describe('computePlayerTags -SLEEPER', () => {
   it('fires for a late skill player clearing replacement', () => {
     expect(ids(player({ position: 'WR', consensusRank: 100, vorp: 5 }))).toContain('sleeper')
   })
@@ -86,7 +103,7 @@ describe('computePlayerTags — SLEEPER', () => {
   })
 })
 
-describe('computePlayerTags — provenance', () => {
+describe('computePlayerTags -provenance', () => {
   it('every emitted tag carries a real-data source string (FB-9)', () => {
     const p = player({
       expertTier: 1,

@@ -2,6 +2,26 @@
 
 ---
 
+## 2026-08-22 / VAL-2.2 -- expert-anchored valuation blend (fixes "all RB value / all WR prem")
+
+**Class:** shared (Architecture + QA lenses). `convert.ts` is the single shared read path. Plan of record: `C:\Users\jrasa\.claude\plans\bright-percolating-pudding.md` (approved). $0 (no API calls).
+
+**Root cause (self-inflicted in VAL-2.1).** The prior fix defined `valueGap = expertAdjustedValue - expectedRoom` where `expertAdjustedValue = round(expectedRoom / positionalInflationMult)`. Because the inflation multiplier is a per-POSITION constant (RB 0.84, WR 1.18, TE 1.17, QB 0.96, DEF 0.92), the gap collapsed to `expectedRoom * (1/mult - 1)` -- its SIGN was a pure function of position, with zero per-player signal. Result: every priced RB read as a value pocket and every priced WR/TE as a premium tax ("draft only RBs, never win a WR"). NOTE: this never touched the live engine -- the auction advisor, roster solver, and Monte-Carlo sim never read `valueGap`; they price off `ceilingValue` + `expectedRoomPrice`. The bug lived only in the prep-board tag/chip DISPLAY layer. The bad `room / const` MaxBid Joe saw was only in the hand-built `REPRICED_BOARD.md` markdown, never in the app.
+
+**The fix (VAL-2.2, expert-anchored -- Joe's chosen philosophy).**
+- `convert.ts`: `expertAdjustedValue = LAMBDA*ceilingValue + (1-LAMBDA)*expectedRoom` with `LAMBDA = 0.3` (low lambda = disciplined shrink toward the expert ECR room price). `valueGap = expertAdjustedValue - expectedRoom`, clamped to +/-40. Now rides each player's own `ceilingValue`, so per-player sign variation is restored. Our optimism is quarantined to the separate, unchanged `upsideValue` dart lane. Dropped the now-unused `positionalInflation` import.
+- `tags.ts`: POCKET is now expert-CORROBORATED -- fires only when `valueGap >= 4` AND experts aren't wildly split (`rankSpread.std < 20`). When the gap is there but experts disagree hard, VOLATILE fires instead and `upsideValue` carries the dollar upside (a dart, not a corroborated bargain). TAX unchanged. Hint/source copy updated to describe the blend.
+- `draft-board-table.tsx`: the board pocket chip got the same std-gate so it can't disagree with the card's POCKET tag (tags.ts header invariant). Hot chip ungated, mirroring TAX.
+- `types.ts`: doc comments corrected to describe the blend, not "inflation stripped out."
+
+**Proof (pasted).** `npm run type-check` -> 0 errors. `npm run test:run` -> **55 files, 688 passed, 0 failed** (baseline 684 + 4 new regression tests: 2 in `convert.test.ts` pinning the lambda=0.3 blend and proving two same-ECR-rank/different-VORP RBs get DIFFERENT ordered gaps; 2 in `tags.test.ts` pinning the expert-corroboration gate). `npx eslint` on all 6 touched files -> exit 0, 0 errors/0 warnings (also cleaned 6 pre-existing em-dash violations in `tags.test.ts` describe titles). Files: `src/lib/players/{convert,tags,types}.ts`, `src/lib/players/__tests__/{convert,tags}.test.ts`, `src/components/prep/draft-board-table.tsx`.
+
+**Board-visibility caveat (NOT yet reflected on the published board).** The code fix reaches the live advisor/sim immediately, but the prep board reads `research-output/dataset.json`, which is a STALE pre-VAL-2.1 snapshot. It will not show the corrected numbers until `npm run research:run` regenerates it (needs the Supabase service key + ESPN feed -- not available this session). Not claimed as done on the board.
+
+**Gaps roadmap (deferred, in the plan):** no real ESPN market auction anchor; lambda is a flat shrink not disagreement-weighted; `tendencies.ts` exploit engine wired to nothing; sim gives every seat the me-seat budget; no in-draft budget inflation; curves are 4 drafts not "16 years"; no dynamic positional scarcity repricing in the sim.
+
+---
+
 ## 2026-08-22 / R13 (test hardening) -- LIVE-DRAFT ADAPTIVE ENGINE test suite + Claude-driven browser layer
 
 **Class:** bugfix/QA (QA + Architecture lenses). Joe asked for detailed front-end + backend tests proving the live-draft adaptive engine actually adjusts as auctioneer picks land, with un-fakable definitions of done, plus Claude opening a browser to test the UI, and any issues documented so they can be fixed. Two locked decisions: add `data-testid` to source (not test-only shims); document AND fix clear-cut defects in the same pass (never soften an assertion). Plan of record: `C:\Users\jrasa\.claude\plans\fantasy-football-draft-app-this-app-tranquil-knuth.md`. $0 (no API calls).

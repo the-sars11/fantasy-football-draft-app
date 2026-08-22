@@ -90,8 +90,13 @@ function PlayerCard({
   const ceiling = p.ceilingValue ?? value
   const room = p.expectedRoomPrice
   const gap = p.valueGap
+  // Expert-corroboration gate (VAL-2.2): the pocket chip must match the card's
+  // POCKET tag, which is suppressed when experts are wildly split (std >= 20 =
+  // VOLATILE). The hot chip (negative gap) is never gated, same as the TAX tag,
+  // so the two views can't disagree (see tags.ts header invariant).
+  const expertsSplit = (p.rankSpread?.std ?? 0) >= 20
   const gapChip =
-    gap == null || Math.abs(gap) < 4
+    gap == null || Math.abs(gap) < 4 || (gap > 0 && expertsSplit)
       ? null
       : gap > 0
         ? {

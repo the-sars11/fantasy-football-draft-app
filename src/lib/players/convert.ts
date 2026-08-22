@@ -70,20 +70,47 @@ export function cacheToPlayer(cached: CachedPlayer): Player {
       ? { low: vLow, base: vBase, high: vHigh }
       : undefined
 
-  // --- League-calibrated valuation (VAL-1.2) ---
-  // CEILING: genuine worth in Nasties scoring = the roster-aware VORP $ when
-  // present, else the averaged auction value. This is the "he CAN be $97" number.
+  // --- League-calibrated valuation (VAL-2.1, expert-hedged) ---
+  // CEILING: our optimistic, naive-persistence worth (roster-aware VORP $ when
+  // present, else averaged auction). This is the "he CAN be $97" number and it
+  // runs wildly high on year-2 breakouts. Kept for context + the UPSIDE lane
+  // below; it is NOT the price.
   const appPos = dbPosToAppPos(cached.position)
   const ceilingValue = vorpValue !== undefined ? vorpValue : Math.round(avgAuction)
-  // REALITY: map the player's projected positional rank onto Joe's room's real
-  // price-by-rank curve. Prefer the VORP points rank; fall back to expert (ECR)
-  // positional rank so ranked-but-no-VORP rows still price.
-  const roomRank = posRankPoints ?? ecrPositionRank
+  // PRICE FIX (VAL-2.1): the room drafts off the EXPERT sheet (ESPN/magazines),
+  // not our model. Price the player by his expert (ECR) positional rank; fall
+  // back to our points rank only when no ECR is present. Previously this trusted
+  // our points rank FIRST, which priced last-year breakouts like Bo Nix as a
+  // top-3 QB -> $28 against a ~$1-5 market. The room perceives ECR, so we price
+  // off ECR. See DR: VAL-2.1 expert hedge.
+  const roomRank = ecrPositionRank ?? posRankPoints
   const expectedRoom =
     roomRank !== undefined ? expectedRoomPrice(appPos, roomRank) : undefined
-  // Only a real, positive worth can produce a meaningful gap. A ranked-but-
-  // unpriced row (ceiling 0) would otherwise paint a false "over" chip.
+  // EXPERT-ANCHORED WORTH (VAL-2.2): worth = a disciplined shrink of our
+  // optimistic model ceiling toward the expert (ECR) room price. Low LAMBDA =
+  // expert-anchored (Joe's choice); our optimism lives on ONLY in the separate
+  // upsideValue lane below. This restores PER-PLAYER signal (worth rides each
+  // player's own ceilingValue) while keeping the number close to what the room
+  // actually pays. The old VAL-2.1 "divide by positional inflation" collapsed
+  // valueGap to expectedRoom * (1/mult - 1) -- a per-POSITION constant, so every
+  // priced RB read as a pocket and every priced WR/TE as a tax, with zero
+  // per-player signal. See DR: VAL-2.2 expert-anchored blend.
+  const LAMBDA = 0.3
+  const expertAdjustedValue =
+    expectedRoom !== undefined && ceilingValue > 0
+      ? Math.max(1, Math.round(LAMBDA * ceilingValue + (1 - LAMBDA) * expectedRoom))
+      : expectedRoom
+  // valueGap = expert-anchored worth vs room price, PER PLAYER. Positive = model
+  // and room agree he is underpriced here; negative = the room overpays. Clamped
+  // to +/-40 so a lone VORP outlier can't dominate the pockets sort downstream.
   const valueGap =
+    expectedRoom !== undefined && ceilingValue > 0 && expertAdjustedValue !== undefined
+      ? Math.max(-40, Math.min(40, Math.round(expertAdjustedValue - expectedRoom)))
+      : undefined
+  // UPSIDE (separate lane, VAL-2.1): where OUR model sees more than the market
+  // price. Do NOT pay up for this -- it is a late-round dart / breakout-at-a-
+  // discount signal only (a healthy Bo Nix at a $1 price lights up here).
+  const upsideValue =
     expectedRoom !== undefined && ceilingValue > 0
       ? Math.round(ceilingValue - expectedRoom)
       : undefined
@@ -117,7 +144,9 @@ export function cacheToPlayer(cached: CachedPlayer): Player {
     // League-calibrated valuation (VAL-1.2) — Nasties ledger, not national.
     ceilingValue,
     expectedRoomPrice: expectedRoom,
+    expertAdjustedValue,
     valueGap,
+    upsideValue,
     sourceData: [],
     projections: {
       points: cached.projections?.points ?? projPoints ?? 0,

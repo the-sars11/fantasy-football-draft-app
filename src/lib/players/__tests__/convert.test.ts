@@ -80,3 +80,45 @@ describe('cacheToPlayer - field truth (RV-7 regression)', () => {
     expect(p.consensusAuctionValue).toBe(55)
   })
 })
+
+describe('cacheToPlayer - VAL-2.2 expert-anchored valuation', () => {
+  const LAMBDA = 0.3
+
+  it('pins expertAdjustedValue to the lambda=0.3 blend of ceiling and room price', () => {
+    const p = cacheToPlayer(cachedPlayer({
+      position: 'RB',
+      source_data: { pos_rank: 'RB5' },
+      auction_values: { vorp_12_200_ppr: 60 },
+    }))
+    // ceiling is the optimistic VORP $; room is the ECR-rank room price.
+    expect(p.ceilingValue).toBe(60)
+    const room = p.expectedRoomPrice
+    expect(typeof room).toBe('number')
+    const expectedWorth = Math.max(1, Math.round(LAMBDA * 60 + (1 - LAMBDA) * (room as number)))
+    expect(p.expertAdjustedValue).toBe(expectedWorth)
+    const expectedGap = Math.max(-40, Math.min(40, Math.round(expectedWorth - (room as number))))
+    expect(p.valueGap).toBe(expectedGap)
+  })
+
+  it('gives two same-ECR-rank players DIFFERENT gaps by VORP (per-player signal restored)', () => {
+    // Regression for the VAL-2.1 bug: valueGap = room * (1/mult - 1) was a
+    // per-POSITION constant, so every RB got the same gap. The blend must ride
+    // each player's own ceiling, so two RBs at the same ECR rank but different
+    // VORP get different gaps.
+    const hi = cacheToPlayer(cachedPlayer({
+      position: 'RB',
+      source_data: { pos_rank: 'RB8' },
+      auction_values: { vorp_12_200_ppr: 55 },
+    }))
+    const lo = cacheToPlayer(cachedPlayer({
+      position: 'RB',
+      source_data: { pos_rank: 'RB8' },
+      auction_values: { vorp_12_200_ppr: 18 },
+    }))
+    // Same ECR rank -> identical room price (the thing you bid against).
+    expect(hi.expectedRoomPrice).toBe(lo.expectedRoomPrice)
+    // But per-player worth -> different, ordered gaps. This is the whole fix.
+    expect(hi.valueGap).not.toBe(lo.valueGap)
+    expect(hi.valueGap as number).toBeGreaterThan(lo.valueGap as number)
+  })
+})
