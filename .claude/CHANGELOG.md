@@ -2,6 +2,24 @@
 
 ---
 
+## 2026-08-23 / SP-6V -- /settings rebuild validated (OTHER_FAMILY) -- PASS, 0 defects
+
+**Class:** output (validation). $0. Fresh-context Sonnet (OTHER_FAMILY, did NOT write SP-6), adversarial.
+
+**Verdict: PASS. Zero defects (0 CRITICAL / 0 HIGH / 0 MED / 0 LOW). No code changed.**
+
+**Independent grep (both files, not trusting prior claims):** `8bacff`, `139,255,69`, `77,130,255`, `121,166,255`, `4d82ff`, plus bonus `8bff45` / `79A6FF` -- all **0** in both `page.tsx` and `client.tsx`. Dash count 0/0.
+
+**Design Lens (vs mockup screen 04, checks a-g):** all PASS. Hero uses `.ffi-hero` + `.ffi-title-red`; QuietLabel sections condensed/wide-tracked/ink-3; DestRows `.ffi-nameplate-interactive` with 34px round chips and correct `--ffi-volt`(red)/`--ffi-blue`(Demo Draft) accents; Dev badge is `FFIBadge status="info"` (validator confirmed `.ffi-badge-info` = rgba(95,168,224,.16)/#7fc0ea steel-blue in globals.css, exactly the mockup translation note); Account block is a `.ffi-nameplate` card with `--ffi-hairline`-split InfoRows; Sign out is `--ffi-danger` pink. Every color is a `var(--ffi-*)` token; no raw hex, no AI slop. Omitted decorative rail acknowledged as the accepted SP-5-consistency decision (not flagged).
+
+**QA Lens (a-e):** all PASS. Null-safety traced end-to-end (no supabase / no league / no user all fall back to string literals, no crash path); `signOut` server action genuinely wired (`src/app/(auth)/actions.ts:95` -> `<form action={signOut}>` with real submit button); all 4 DestRow hrefs map to real routes; decorative icons carry `aria-hidden`, rows enforce `min-h-[44px]`; `getUser`/`createClient` correctly awaited and `createClient()` null return guarded by `if (supabase)`; no `any` / `as any`.
+
+**Gate re-run (validator, raw):** type-check 0 errors; eslint both files clean (no output); test:run **711 passed / 58 files**; build Compiled successfully in 4.1s, `/settings` route `○` prerendered static.
+
+**Files.** No source changes. `.claude/BUILD_PLAN.md` (SP-6V marked DONE + verdict), `.claude/WORKING_STATE.md` (pointer), this CHANGELOG. **/settings fully SHIELD-clean and validated.**
+
+---
+
 ## 2026-08-23 / SP-6 -- Rebuild /settings to approved SHIELD mockup
 
 **Class:** output (Design + QA lenses). $0. Built directly on Opus for mockup-match fidelity; fresh-context OTHER_FAMILY validator (SP-6V) runs next.

@@ -809,13 +809,14 @@ Screen → target: S1 research-hub `/research`; S2 player-browser (D4, already b
 > **DONE (proof):** rebuilt `page.tsx` to mockup screen 04 -- new ACTIVE LEAGUE `.ffi-hero` anchor (label blue-bright + league name `.ffi-title-red` 22px + muted format subline), `SectionLabel`->`QuietLabel`, `NavRow`->`DestRow` (`.ffi-nameplate-interactive` rows w/ icon chip [red `--ffi-volt`, blue `--ffi-blue` for Demo] + body + chevron), Dev badge `#8bacff`->`FFIBadge status="info"` steel-blue, Account = `.ffi-nameplate` card w/ InfoRows split by hairline. `client.tsx` SignOutRow restyled to `--ffi-danger` at rest (signOut action preserved). All 4 destinations + 44px targets kept. grep `8bacff`=0 both files; dashes 0; type-check 0; eslint 0; test:run 711/711; build clean (/settings static). Rendered at :3003/settings -- FULLY populated (hero + all DestRows + Dev badge + Account + Sign-out form), console clean (only unrelated `useUserTags`).
 > **1 decision (flagged):** omitted the mockup's decorative left "rail" on DestRows to stay visually consistent with the shipped SP-5 runs rows (same DestRow object, no rail) -- the two sibling list screens now match.
 
-### SP-6V -- Validate /settings rebuild `[Sonnet]` · class: output
+### SP-6V -- Validate /settings rebuild `[Sonnet]` · class: output -- [x] DONE 2026-08-23
 > - Class: WORKHORSE (validation)
 >   Reason: independent check behind SP-6.
 >   Verifier: OTHER_FAMILY -- did NOT write SP-6.
 > **Size:** S. **Depends on:** SP-6.
 > **Work:** adversarial `/code-review` + `/bug-hunt free`; Design + QA lenses; screenshot vs mockup; independent grep for `8bacff`; re-run gate.
 > **Done-when:** 0 unresolved HIGH; screenshot parity attached; grep clean; gate green.
+> **VERDICT: PASS -- 0 defects (0 CRIT/HIGH/MED/LOW).** OTHER_FAMILY fresh-context Sonnet, did not write SP-6. Independent grep of both files: `8bacff`/`139,255,69`/`77,130,255`/`121,166,255`/`4d82ff`/`8bff45`/`79A6FF` all = 0; dash count 0/0. Design Lens (checks a-g) all PASS vs mockup screen 04: hero (`.ffi-hero`+`.ffi-title-red`), QuietLabel sections, `.ffi-nameplate-interactive` DestRows w/ 34px chips + correct volt/blue accents, Dev badge = `FFIBadge status="info"` (confirmed `.ffi-badge-info` = rgba(95,168,224,.16)/#7fc0ea steel-blue), Account `.ffi-nameplate` InfoRow card, Sign out `--ffi-danger`; omitted rail acknowledged as accepted decision. QA Lens (a-e) all PASS: null-safety traced end-to-end (no-league/no-user fall back to "No league yet"/"Not configured yet"/"Not set", no crash path), `signOut` server action genuinely wired (`(auth)/actions.ts:95` -> `<form action={signOut}>`), all 4 hrefs real routes, aria-hidden + 44px targets present, `createClient()` null-guarded, no `any`. Gate re-run green: type-check 0 errors, eslint clean, test:run **711/711 (58 files)**, build Compiled successfully + `/settings` prerendered static. No fixes needed. See CHANGELOG SP-6V.
 
 ### SP-7 -- Rebuild (auth) sign-in + sign-up to approved mockup `[Sonnet]` · class: output
 > - Class: WORKHORSE
