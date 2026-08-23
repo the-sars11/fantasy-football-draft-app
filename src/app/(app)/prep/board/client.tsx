@@ -697,8 +697,8 @@ function BoardHeader({ leagueName }: { leagueName?: string }) {
           className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-bold uppercase"
           style={{
             fontFamily: 'var(--font-cond)',
-            background: 'rgba(121,166,255,0.10)',
-            border: '1px solid rgba(121,166,255,0.20)',
+            background: 'rgba(95,168,224,0.10)',
+            border: '1px solid rgba(95,168,224,0.20)',
             color: 'var(--ffi-blue-bright)',
             letterSpacing: '0.14em',
           }}

@@ -2,6 +2,20 @@
 
 ---
 
+## 2026-08-23 / SP-1V -- Tier A sweep validated (OTHER_FAMILY) + D1 leftover fixed
+
+**Class:** output (Design + QA lenses, validation). $0. Fresh-context Sonnet sub-agent (did NOT write SP-1) ran the adversarial validation the SP-track puts behind every build.
+
+**Verdict:** PASS. Independent grep = 0 stale literals; hand-diff of every changed line confirmed all green->brick-red (`166,60,65`) and off-token-blue->steel-blue (`95,168,224`) swaps are alpha-exact with no semantic drift; `Zap`->`Gavel` in both import and JSX (Gavel confirmed a real lucide export, no unused import); position-chip palette `POS_PILL_COLORS` (board :46-52) untouched; gate re-run green (type-check 0, lint 0, test:run 711/711).
+
+**D1 (LOW) found + fixed inline.** The validator caught a THIRD off-token blue triple `rgba(121,166,255,...)` (`#79A6FF`) on the board's league-name chip (`prep/board/client.tsx:700-701`) that SP-1's grep target list never caught because it's a different RGB value. Fixed in the same pass -> `rgba(95,168,224,...)` (alphas 0.10/0.20 held, `color: var(--ffi-blue-bright)` left intact).
+
+**Proof.** Extended grep of the 3 files for `139,255,69`/`77,130,255`/`121,166,255`/`8bacff`/`79A6FF`/`Zap` = 0; dash check clean; type-check 0; scoped eslint exit 0; test:run 711/711 (no regression); live DOM scan of /prep/board = 0 retired literals. Screenshot/mobile pixel check deferred (Supabase unauthorized in this sandbox -> board data 500s; Browser pane cannot composite here).
+
+**Files.** `src/app/(app)/prep/board/client.tsx` (D1 one-line fix), `.claude/BUILD_PLAN.md` (SP-1V marked DONE + report), `.claude/WORKING_STATE.md` (pointer), this CHANGELOG.
+
+---
+
 ## 2026-08-23 / SP-1 -- Tier A SHIELD token sweep (draft hub, review, board)
 
 **Class:** output (Design + QA lenses). $0. Second card of the resumed SP-track; mechanical find-replace against a grep-verified literal map on 3 already-SHIELD-shaped screens. Zero layout changes.
