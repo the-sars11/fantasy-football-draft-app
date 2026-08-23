@@ -358,8 +358,8 @@ export function DraftBoardClient() {
             style={{
               fontFamily: 'var(--font-cond)',
               letterSpacing: '0.16em',
-              background: 'rgba(77,130,255,0.10)',
-              border: '1px solid rgba(77,130,255,0.18)',
+              background: 'rgba(95,168,224,0.10)',
+              border: '1px solid rgba(95,168,224,0.18)',
               color: 'var(--ffi-blue-bright)',
             }}
           >
@@ -467,7 +467,7 @@ export function DraftBoardClient() {
                         color: tab === 'flex' ? 'var(--ffi-volt-ink)' : 'white',
                         boxShadow: tab === 'flex'
                           ? '0 4px 14px -4px var(--ffi-volt-glow)'
-                          : '0 4px 14px -4px rgba(77,130,255,0.5)',
+                          : '0 4px 14px -4px rgba(95,168,224,0.5)',
                       }
                     : {
                         color: 'var(--ffi-ink-3)',
@@ -501,7 +501,7 @@ export function DraftBoardClient() {
                             ? {
                                 background: 'var(--ffi-blue)',
                                 color: 'white',
-                                boxShadow: '0 4px 14px -4px rgba(77,130,255,0.45)',
+                                boxShadow: '0 4px 14px -4px rgba(95,168,224,0.45)',
                                 border: 'none',
                               }
                             : pos === 'ALL'
@@ -557,8 +557,8 @@ export function DraftBoardClient() {
                           padding: '5px 11px',
                           ...(isActive
                             ? {
-                                background: 'rgba(77,130,255,0.18)',
-                                border: '1px solid rgba(77,130,255,0.35)',
+                                background: 'rgba(95,168,224,0.18)',
+                                border: '1px solid rgba(95,168,224,0.35)',
                                 color: 'var(--ffi-blue-bright)',
                               }
                             : {

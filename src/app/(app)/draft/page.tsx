@@ -21,7 +21,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import {
   Radio,
-  Zap,
+  Gavel,
   Hand,
   AlertTriangle,
   RotateCw,
@@ -330,7 +330,7 @@ export default function DraftPage() {
                 className="ffi-btn-hero w-full mt-4 text-[14px] uppercase tracking-widest"
                 style={{ borderRadius: '12px' }}
               >
-                <Zap className="w-[15px] h-[15px]" strokeWidth={2.6} color="var(--ffi-volt-ink)" />
+                <Gavel className="w-[15px] h-[15px]" strokeWidth={2.6} color="var(--ffi-volt-ink)" />
                 Go Live
               </Link>
             ) : (

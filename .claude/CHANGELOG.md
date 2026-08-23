@@ -2,6 +2,20 @@
 
 ---
 
+## 2026-08-23 / SP-1 -- Tier A SHIELD token sweep (draft hub, review, board)
+
+**Class:** output (Design + QA lenses). $0. Second card of the resumed SP-track; mechanical find-replace against a grep-verified literal map on 3 already-SHIELD-shaped screens. Zero layout changes.
+
+**What it is.** These 3 screens hit the structural bar but still carried stale GRIDIRON color literals the earlier paint swap missed: legacy volt-green `rgba(139,255,69,...)`, off-token blue `rgba(77,130,255,...)` (NOT the SHIELD `--ffi-blue #5FA8E0`), and a retired `Zap` bolt on the draft hub (DESIGN_SYSTEM says Live Draft carries a `Gavel`).
+
+**What changed.** Green -> SHIELD brick-red `rgba(166,60,65,...)` (matches `--ffi-volt`); off-token blue -> SHIELD steel-blue `rgba(95,168,224,...)` (matches `--ffi-blue`); `Zap` -> `Gavel` (import + usage). Actual line numbers had drifted from the plan map and the board's green was already gone, so the map was re-derived by grep before editing: `review/client.tsx` :80,:81,:182,:267; `board/client.tsx` :361,:362,:470,:504,:560,:561; `draft/page.tsx` :24,:333. Sanctioned position-chip hex untouched.
+
+**Proof.** done-when grep of all 3 files for `139,255,69`/`77,130,255`/`8bacff`/`Zap` = 0; em/en-dash check clean; `type-check` 0 errors; scoped `eslint` exit 0; `test:run` 711 passed / 58 files (632 baseline, no regression); `build` Compiled successfully exit 0. Screenshot half deferred to SP-1V / Joe's eyeball via preview.
+
+**Files.** `src/app/(app)/draft/review/client.tsx`, `src/app/(app)/prep/board/client.tsx`, `src/app/(app)/draft/page.tsx`, `.claude/BUILD_PLAN.md` (SP-1 marked DONE + Shipped note), `.claude/WORKING_STATE.md` (focus pointer), this CHANGELOG.
+
+---
+
 ## 2026-08-23 / SP-0 -- Design review lens refreshed to SHIELD v4.0 (SP-track resumed)
 
 **Class:** docs (QA lens only). $0. Joe re-sequenced the SP-track to run now (ahead of W3/W4 and the R15 rehearsal) to finish the SHIELD UI reskin; the PAUSED banner is superseded, history kept.

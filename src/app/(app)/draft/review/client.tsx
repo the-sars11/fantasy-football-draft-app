@@ -77,8 +77,8 @@ export function ReviewClient() {
             className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-wider"
             style={{
               fontFamily: 'var(--font-cond)',
-              background: 'rgba(139,255,69,0.10)',
-              border: '1px solid rgba(139,255,69,0.18)',
+              background: 'rgba(166,60,65,0.10)',
+              border: '1px solid rgba(166,60,65,0.18)',
               color: 'var(--ffi-volt)',
               letterSpacing: '0.14em',
             }}
@@ -179,7 +179,7 @@ export function ReviewClient() {
               const label = mode === 'my-draft' ? 'My Draft' : mode === 'all-teams' ? 'All Teams' : 'Trash Talk'
               const activeStyle = mode === 'trash-talk'
                 ? { background: 'var(--ffi-danger)', boxShadow: '0 4px 14px -4px rgba(255,110,138,0.4)' }
-                : { background: 'var(--ffi-blue)', boxShadow: '0 4px 14px -4px rgba(77,130,255,0.5)' }
+                : { background: 'var(--ffi-blue)', boxShadow: '0 4px 14px -4px rgba(95,168,224,0.5)' }
               return (
                 <button
                   key={mode}
@@ -264,7 +264,7 @@ export function ReviewClient() {
                 value={review.stealCount}
                 icon={<Sparkles className="h-3.5 w-3.5" color="var(--ffi-volt)" />}
                 valueColor={review.stealCount > 0 ? 'var(--ffi-volt)' : 'var(--ffi-ink-2)'}
-                accentBorder={review.stealCount > 0 ? 'rgba(139,255,69,0.22)' : undefined}
+                accentBorder={review.stealCount > 0 ? 'rgba(166,60,65,0.22)' : undefined}
               />
               <StatTile
                 label="REACHES"
