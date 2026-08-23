@@ -2,6 +2,32 @@
 
 ---
 
+## 2026-08-23 / LB-2 -- Live board wired into the cockpit (Value Board + Market Pulse, strategy strip retired)
+
+**Class:** output (UI) + shared. $0, no Claude API. Built directly on Opus, single-threaded. Look already Joe-approved (`research-output/LIVE_BOARD_MOCKUP.html`, "looks good"); this is the real SHIELD-component build of that mockup.
+
+**Why.** LB Phase 2 -- turn the LB-1 repricing engine (pure, tested, no UI) into the live cockpit's core action base. Replaces the locked strategy banner with a board that reprices every target off the two drivers Joe named: (1) what the room is paying via the auctioneer feed (moves ROOM), and (2) his current roster need (moves YOUR target). Surfaces value pockets mid-draft and tells him where to push dollars.
+
+**What shipped:**
+- **`src/components/draft/live-room/market-pulse-strip.tsx`** (NEW) -- presentational strip over `computeMarketInflation`. A chip per skill position (RB/WR/TE/QB) showing how far its live clearing price has moved off baseline (hot >= +8% amber ▲, soft <= -8% blue ▼, else flat), plus one plain-English read naming the hottest-overpaid + softest-cheap position and where to push dollars. Replaces the old locked strategy banner.
+- **`src/components/draft/live-room/inline-players-panel.tsx`** (REWRITTEN -> Value Board, same export name) -- each row now shows YOUR target price over the ROOM price it must beat (with a ▲/▼ arrow for how inflation moved the room), a POCKET (+$X, blue, inset rail) or `tax` chip when the two diverge, and the LB-1 injury split (FRAGILE amber = injury-prone but priced in / OUT danger = unavailable now; Questionable silenced). Falls back to a bare value before any sale. Kept search / position pills / star (watchlist) / show-more.
+- **`src/components/draft/live-room/auction-room.tsx`** (WIRED) -- 3 new memos: `inflation` (SoldPlayer[] from `state.picks` -> `computeMarketInflation`), `openSlotsByPosition` (`myPicks` -> `openSlotsFromRoster`, flex+superflex folded in), `repriced` (`repriceBoard` over available players, baselineTarget = `computeValueRange(p).base`, baselineRoom = `expectedRoomPrice`, cap = maxBid/budget). Swapped `StrategyStrip` render -> `MarketPulseStrip`; fed `repriced` Map into the Value Board. Dropped now-unused `pivot`/`strategies`/`onSwitchStrategy` from the destructure (interface + client caller untouched; `activeStrategy` still used by MyTeamRoster).
+- **`src/lib/draft/live-reprice.ts`** -- added pure `openSlotsFromRoster(required, flex, filled)` -> `openSlotsByPosition`: dedicated starter gaps count directly, an open FLEX adds to every flex-eligible position (RB/WR/TE), players beyond a position's starters consume flex first so flex need drains as he fills out. Never negative.
+- **DELETED** `src/components/draft/live-room/strategy-strip.tsx` + its import/test block in `d6b1-ui-alignment.test.tsx`.
+- **New tests:** `market-pulse-strip.test.tsx` (5: quiet pre-draft, hot/soft/flat classification, split read), `value-board.test.tsx` (6: You/Room render, POCKET chip, tax chip, OUT pill, Questionable silenced, bare-value fallback), + 4 `openSlotsFromRoster` cases in `live-reprice.test.ts`.
+
+**Proof (VERIFY, pasted):**
+- `npm run type-check` -> **0 errors**.
+- `npm run lint` -> the 6 touched files clean (verified via targeted eslint, no output = 0). Repo still shows 30 pre-existing errors in untouched files (research sources, `require()` scripts) -- none introduced by LB-2.
+- `npm run test:run` -> **762 passed / 63 files** (+11 from the two new component test files + 4 openSlots cases; 0 failures).
+- **Live render (this session's own dev server, port 3141 config; verified through the shared-tree server on :3003 via `/draft/live?sim=1`):** Value Board + Market Pulse mount clean, no render errors from LB-2 components (only pre-existing sim-mode Supabase 404/500 from the mock `demo-league` non-UUID). At **pick 1 / empty roster:** Market Pulse all "quiet" with the correct pre-draft read; Value Board surfaces POCKETs where Joe has open slots (Tetairoa McMillan +$8, Rome Odunze +$8, D'Andre Swift +$5, Kyren Williams +$4). At **R3 / pick 34 (sim run):** Market Pulse moved live -- WR +12% ▲, TE +16% ▲, QB -14% ▼, read = "The room is overpaying TE and letting QB go cheap. Push your dollars to QB value now"; room-price arrows confirm the split (Travis Kelce room 6 ▲, Brock Purdy room 3 ▼). At **R15 / full roster:** every target correctly fades to `tax`. Both reprice drivers proven end-to-end.
+
+**NOT done / next:** LB-3 (dollar-bin watchlist reusing the star/target state) not started. `on-the-block-card.tsx` still shows the existing advisor number, not the repriced You/Room -- deferred (out of LB-2 scope; the Value Board is the substance of Joe's asks). Mine/gone row interleaving deferred (panel iterates `available` only). **Not committed/pushed at time of writing -- master push = live Vercel deploy, HARD-HALT for Joe's go.**
+
+**Files.** NEW: `src/components/draft/live-room/market-pulse-strip.tsx`, `src/components/draft/live-room/__tests__/market-pulse-strip.test.tsx`, `src/components/draft/live-room/__tests__/value-board.test.tsx`. EDITED: `src/components/draft/live-room/inline-players-panel.tsx`, `src/components/draft/live-room/auction-room.tsx`, `src/lib/draft/live-reprice.ts`, `src/lib/draft/__tests__/live-reprice.test.ts`, `src/components/draft/live-room/__tests__/d6b1-ui-alignment.test.tsx`. DELETED: `src/components/draft/live-room/strategy-strip.tsx`.
+
+---
+
 ## 2026-08-23 / SP-7V -- (auth) rebuild validated (OTHER_FAMILY) -- PASS, 0 defects
 
 **Class:** output (validation). $0. Fresh-context Sonnet (OTHER_FAMILY, did NOT write SP-7), adversarial.

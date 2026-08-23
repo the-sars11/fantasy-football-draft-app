@@ -21,12 +21,20 @@ import type { RosterSlots, Strategy as DbStrategy } from '@/lib/supabase/databas
 import { computeWhatToDo } from '@/lib/draft/what-to-do'
 import type { RosterMaxBidEntry } from '@/lib/draft/solver-bridge'
 import { computeLandProbability } from '@/lib/draft/room-sim-probability'
+import { computeMarketInflation, type SoldPlayer } from '@/lib/draft/market-inflation'
+import {
+  repriceBoard,
+  openSlotsFromRoster,
+  type RepricedPlayer,
+  type PlayerRepriceInput,
+} from '@/lib/draft/live-reprice'
+import { computeValueRange } from '@/lib/players/value-range'
 import { ROOM } from './theme'
 import { StatusBar } from './status-bar'
 import { OnTheBlockCard } from './on-the-block-card'
 import { AwarenessStrip, type AwarenessItem } from './awareness-strip'
 import { BudgetStrip } from './budget-strip'
-import { StrategyStrip } from './strategy-strip'
+import { MarketPulseStrip } from './market-pulse-strip'
 import { TierContext, type TierRow } from './tier-context'
 import { MyTeamRoster } from './my-team-roster'
 import { BottomNav } from './bottom-nav'
@@ -143,10 +151,7 @@ export function AuctionDraftRoom({
   onToggleAvoid,
   onEditPick,
   onRemovePick,
-  pivot,
   activeStrategy,
-  strategies,
-  onSwitchStrategy,
 }: AuctionRoomProps) {
   const [view, setView] = useState<'draft' | 'research'>('draft')
   const [pickerOpen, setPickerOpen] = useState(false)
@@ -167,6 +172,61 @@ export function AuctionDraftRoom({
     for (const s of scarcity) m.set(s.position, s)
     return m
   }, [scarcity])
+
+  // --- LB-2: live repricing engine (market inflation + roster need) ----------
+  // Driver 1: what the room has actually paid moves the ROOM price per position.
+  const inflation = useMemo(() => {
+    const byName = new Map<string, Player>()
+    for (const sp of scoredPlayers) byName.set(sp.player.name.toLowerCase(), sp.player)
+    const sold: SoldPlayer[] = []
+    for (const pk of state.picks) {
+      if (pk.price == null) continue
+      const src = byName.get(pk.player_name.toLowerCase())
+      const baselineRoom = src?.expectedRoomPrice
+      const pos = (pk.position ?? src?.position)?.toUpperCase() as Position | undefined
+      if (!pos || baselineRoom == null || baselineRoom <= 0) continue
+      sold.push({ position: pos, actualPrice: pk.price, baselineRoom })
+    }
+    return computeMarketInflation(sold)
+  }, [state.picks, scoredPlayers])
+
+  // Driver 2: Joe's still-open slots (FLEX folded into RB/WR/TE) move HIS target.
+  const openSlotsByPosition = useMemo(() => {
+    const filled: Record<Position, number> = { QB: 0, RB: 0, WR: 0, TE: 0, K: 0, DEF: 0 }
+    for (const pk of myPicks) {
+      const pos = pk.position?.toUpperCase() as Position | undefined
+      if (pos && pos in filled) filled[pos] += 1
+    }
+    return openSlotsFromRoster({
+      required: {
+        QB: rosterSlots.qb ?? 0,
+        RB: rosterSlots.rb ?? 0,
+        WR: rosterSlots.wr ?? 0,
+        TE: rosterSlots.te ?? 0,
+        K: rosterSlots.k ?? 0,
+        DEF: rosterSlots.def ?? 0,
+      },
+      flex: (rosterSlots.flex ?? 0) + (rosterSlots.superflex ?? 0),
+      filled,
+    })
+  }, [myPicks, rosterSlots])
+
+  // Reprice every available, league-priced player -> Map by id for O(1) lookup.
+  const repriced = useMemo(() => {
+    const cap = myMaxBid ?? myBudget ?? leagueBudget
+    const inputs: PlayerRepriceInput[] = []
+    for (const sp of available) {
+      const room = sp.player.expectedRoomPrice
+      if (room == null || room <= 0) continue // DEF / unpriced rows keep their bare value
+      const target = computeValueRange(sp.player).base
+      inputs.push({ id: sp.player.id, position: sp.player.position, baselineRoom: room, baselineTarget: target })
+    }
+    const out = new Map<string, RepricedPlayer>()
+    for (const r of repriceBoard(inputs, { inflation, openSlotsByPosition, maxBid: cap })) {
+      out.set(r.id, r)
+    }
+    return out
+  }, [available, inflation, openSlotsByPosition, myMaxBid, myBudget, leagueBudget])
 
   // --- What To Do + rule-based confidence for the player on the block -------
   const { advice, confidence } = useMemo(() => {
@@ -369,14 +429,12 @@ export function AuctionDraftRoom({
           />
         ) : (
           <>
-            {/* D6b-1: strategy switcher moved ABOVE the on-block card */}
+            {/* LB-2: the strategy banner is gone. The Market Pulse strip reads
+                what the room is actually paying, live, and the board below is
+                repriced off it. The board is the strategy, in the moment. */}
             <div className="pt-3">
-              <StrategyStrip
-                activeStrategy={activeStrategy}
-                strategies={strategies}
-                onSelect={onSwitchStrategy}
-                pivot={pivot}
-              />
+              <SectionHeader label="Market Pulse" />
+              <MarketPulseStrip inflation={inflation} />
             </div>
 
             <div className="pt-2.5">
@@ -454,6 +512,7 @@ export function AuctionDraftRoom({
             <InlinePlayersPanel
               available={available}
               maxBidMap={maxBidMap}
+              repriced={repriced}
               isTarget={isTarget}
               onToggleTarget={onToggleTarget}
               onSelectPlayer={setOnBlockPlayer}

@@ -3,7 +3,6 @@ import { render, screen } from '@testing-library/react'
 import { describe, it, expect } from 'vitest'
 import { OnTheBlockCard } from '../on-the-block-card'
 import { StatusBar } from '../status-bar'
-import { StrategyStrip } from '../strategy-strip'
 import type { Player } from '@/lib/players/types'
 import type { WhatToDoAdvice } from '@/lib/draft/what-to-do'
 
@@ -266,42 +265,5 @@ describe('D6b-1 StatusBar - round/pick (gap #4)', () => {
   it('always renders LIVE indicator when online', () => {
     render(<StatusBar leagueName="Nasties" online={true} onLeave={noop} round={1} pick={1} />)
     expect(screen.getByText('LIVE')).toBeInTheDocument()
-  })
-})
-
-// ── StrategyStrip ───────────────────────────────────────────────────────────
-
-const strats = [
-  { id: 's1', name: 'Hero RB', league_id: 'l1' },
-  { id: 's2', name: 'Balanced', league_id: 'l1' },
-  { id: 's3', name: 'Zero RB', league_id: 'l1' },
-] as Parameters<typeof StrategyStrip>[0]['strategies']
-
-describe('D6b-1 StrategyStrip - ranked label (gap #3)', () => {
-  it('shows ranked label for the active strategy', () => {
-    render(
-      <StrategyStrip
-        activeStrategy={strats[0]}
-        strategies={strats}
-        onSelect={noop}
-        pivot=""
-      />,
-    )
-    // Active strategy should show "Hero RB - #1"
-    expect(screen.getByText('Hero RB - #1')).toBeInTheDocument()
-  })
-
-  it('shows "ranked from your research" in the label', () => {
-    render(
-      <StrategyStrip
-        activeStrategy={strats[0]}
-        strategies={strats}
-        onSelect={noop}
-        pivot=""
-      />,
-    )
-    expect(
-      screen.getByText('Strategy · ranked from your research'),
-    ).toBeInTheDocument()
   })
 })

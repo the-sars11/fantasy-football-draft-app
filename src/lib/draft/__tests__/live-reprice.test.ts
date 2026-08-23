@@ -3,6 +3,7 @@ import {
   repricePlayer,
   repriceBoard,
   needMultiplier,
+  openSlotsFromRoster,
   NEED_FILLED_FACTOR,
   NEED_MAX_LEAN,
   type RepriceContext,
@@ -136,6 +137,53 @@ describe('repricePlayer - the core Joe scenario', () => {
     expect(r.pocket).toBe(10)
     expect(r.isPocket).toBe(true)
     expect(r.isTax).toBe(false)
+  })
+})
+
+describe('openSlotsFromRoster', () => {
+  // Joe's Nasties starters: QB1 RB1 WR1 TE1 FLEX3 DEF1.
+  const required = { QB: 1, RB: 1, WR: 1, TE: 1, K: 0, DEF: 1 } as Record<Position, number>
+  const noFill = { QB: 0, RB: 0, WR: 0, TE: 0, K: 0, DEF: 0 } as Record<Position, number>
+
+  it('adds the open FLEX to every flex-eligible position at the start', () => {
+    const open = openSlotsFromRoster({ required, flex: 3, filled: noFill })
+    expect(open.RB).toBe(1 + 3) // dedicated RB + all 3 flex still open
+    expect(open.WR).toBe(1 + 3)
+    expect(open.TE).toBe(1 + 3)
+    expect(open.QB).toBe(1) // QB never gets flex
+    expect(open.DEF).toBe(1)
+  })
+
+  it('drains flex need as flex-eligible slots get filled beyond dedicated starters', () => {
+    // 3 RBs rostered: 1 fills the dedicated RB, 2 consume flex -> 1 flex left.
+    const open = openSlotsFromRoster({
+      required,
+      flex: 3,
+      filled: { QB: 0, RB: 3, WR: 0, TE: 0, K: 0, DEF: 0 },
+    })
+    expect(open.RB).toBe(1) // dedicated filled (0) + 1 remaining flex
+    expect(open.WR).toBe(1 + 1) // dedicated WR + 1 remaining flex
+    expect(open.TE).toBe(1 + 1)
+  })
+
+  it('drops a filled dedicated position to zero need (before flex)', () => {
+    const open = openSlotsFromRoster({
+      required,
+      flex: 0,
+      filled: { QB: 1, RB: 0, WR: 0, TE: 0, K: 0, DEF: 0 },
+    })
+    expect(open.QB).toBe(0)
+  })
+
+  it('never returns a negative open count', () => {
+    const open = openSlotsFromRoster({
+      required,
+      flex: 0,
+      filled: { QB: 3, RB: 9, WR: 9, TE: 3, K: 0, DEF: 3 },
+    })
+    for (const pos of ['QB', 'RB', 'WR', 'TE', 'K', 'DEF'] as Position[]) {
+      expect(open[pos]).toBeGreaterThanOrEqual(0)
+    }
   })
 })
 

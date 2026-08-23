@@ -86,6 +86,43 @@ export function needMultiplier(openSlots: number): number {
   return 1 + Math.min(NEED_MAX_LEAN, NEED_STEP * (openSlots - 1))
 }
 
+/** RB/WR/TE all compete for the FLEX slots, so an open FLEX leans all three up. */
+const FLEX_POSITIONS: Position[] = ['RB', 'WR', 'TE']
+
+export interface RosterNeedInput {
+  /** Dedicated starter slots per position (QB/RB/WR/TE/K/DEF). */
+  required: Record<Position, number>
+  /** FLEX slots RB/WR/TE compete for (fold superflex in here too). */
+  flex: number
+  /** How many Joe has already rostered at each position. */
+  filled: Record<Position, number>
+}
+
+/**
+ * Turn Joe's roster (required starters + flex + what he's filled) into the
+ * openSlotsByPosition map the repricer needs. A dedicated starter gap counts
+ * directly; a still-open FLEX slot is added to EVERY flex-eligible position
+ * (RB/WR/TE) because they all still compete for it - so a player at a flex
+ * position Joe hasn't finished stocking still leans his target up. Players
+ * rostered beyond a position's dedicated starters are treated as having
+ * consumed FLEX slots first, so the flex need drains as he fills out.
+ *
+ * Pure + deterministic.
+ */
+export function openSlotsFromRoster(input: RosterNeedInput): Record<Position, number> {
+  const open = {} as Record<Position, number>
+  let flexConsumed = 0
+  for (const pos of ['QB', 'RB', 'WR', 'TE', 'K', 'DEF'] as Position[]) {
+    const req = Math.max(0, input.required[pos] ?? 0)
+    const filled = Math.max(0, input.filled[pos] ?? 0)
+    open[pos] = Math.max(0, req - filled)
+    if (FLEX_POSITIONS.includes(pos)) flexConsumed += Math.max(0, filled - req)
+  }
+  const flexOpen = Math.max(0, (input.flex ?? 0) - flexConsumed)
+  for (const pos of FLEX_POSITIONS) open[pos] += flexOpen
+  return open
+}
+
 /** Reprice a single player against the live draft context. */
 export function repricePlayer(p: PlayerRepriceInput, ctx: RepriceContext): RepricedPlayer {
   const posInflation = ctx.inflation[p.position]?.multiplier ?? 1
