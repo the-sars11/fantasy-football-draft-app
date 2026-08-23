@@ -2,6 +2,27 @@
 
 ---
 
+## 2026-08-23 / SP-5 -- Rebuild /prep/runs to approved SHIELD mockup
+
+**Class:** output (Design + QA lenses). $0. Built directly on Opus for mockup-match fidelity; fresh-context OTHER_FAMILY validator (SP-5V) runs next.
+
+**What it is.** `/prep/runs` had an on-token header but a flat "list of cards" utility layout with no SHIELD hero/section objects, plus a stale volt-green literal `rgba(139,255,69,0.16)` at `client.tsx:66` on the completed-status style. Rebuilt the whole client to the Joe-approved SP-2 runs mockup (screen 03).
+
+**What changed (`src/app/(app)/prep/runs/client.tsx`, full rewrite):**
+- Local `QuietLabel` section headers (LATEST RUN / ALL RUNS / TOP TARGETS - latest), Kanit condensed, `--ffi-ink-3`.
+- **LATEST RUN** = `.ffi-hero` panel: date in `.ffi-title-red`, status + strategy as `FFIBadge`, a 4-up stat cluster (Players `--ffi-ink` / Targets `--ffi-volt` / Avoids `--ffi-danger` / Value `--ffi-blue-bright`) in tabular-nums.
+- **ALL RUNS** = DestRow-style `.ffi-nameplate` rows: compare checkbox + round clock chip (`--ffi-volt`) + date/strategy body + status badge + View/Collapse, preserving the inline expandable `RunDetailView`.
+- **TOP TARGETS - latest** = `.ffi-nameplate` card, `FFIPositionBadge` rows split by `--ffi-hairline`.
+- Green literal deleted: status badges now go through `FFIBadge` (Completed -> `status="success"` steel-blue, Failed -> `status="danger"` pink, Strategy -> `status="info"`). `RunDetailView` + `CompareView` position chips promoted to `FFIPositionBadge`; `CompareView` uses CSS-grid rows (no HTML table). All functionality preserved: league selector, Refresh (FF-028), compare/`CompareView`.
+
+**2 decisions flagged to Joe.** (1) **Completed status is steel-blue**, not brick-red: the plan prose said `var(--ffi-volt)` but the approved mockup (line 414) maps Completed -> `badge blue`; mockup is authoritative and red stays reserved for act-now/value. (2) **Hero stat cluster auto-loads** the newest completed run's detail via `/api/research/${latest.id}` on mount -- the runs-list endpoint returns no result counts, so faithfully rendering the approved hero needs it. Per-row destrow counts stay omitted (not fabricated), honest to the available data.
+
+**Proof.** grep `139,255,69` in file = 0; `type-check` 0 errors; `eslint` on the file exit 0 (no output); `test:run` **711 passed / 58 files** (no regression); `build` Compiled successfully in 4.6s, `/prep/runs` prerendered static. Rendered at http://localhost:3003/prep/runs -- header + shell render clean; body populates only against a live DB (sandbox Supabase 500 `fetch failed` is the known env-only limit, not a regression; console shows only those + unrelated `useUserTags`). Full populated hero/destrow/top-targets NOT visually verified here (no DB in sandbox) -- deferred to SP-5V / Joe's env.
+
+**Files.** `src/app/(app)/prep/runs/client.tsx` (full rebuild), `.claude/BUILD_PLAN.md` (SP-5 marked DONE + 2 decisions), `.claude/WORKING_STATE.md` (focus pointer), this CHANGELOG.
+
+---
+
 ## 2026-08-23 / SP-1V -- Tier A sweep validated (OTHER_FAMILY) + D1 leftover fixed
 
 **Class:** output (Design + QA lenses, validation). $0. Fresh-context Sonnet sub-agent (did NOT write SP-1) ran the adversarial validation the SP-track puts behind every build.

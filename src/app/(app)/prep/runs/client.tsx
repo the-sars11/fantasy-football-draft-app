@@ -1,8 +1,11 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Loader2, Eye, GitCompare, ChevronUp, RefreshCw, CheckCircle2, AlertCircle } from 'lucide-react'
+import { Loader2, Eye, GitCompare, ChevronUp, RefreshCw, CheckCircle2, AlertCircle, Clock } from 'lucide-react'
+import { FFIBadge, FFIPositionBadge } from '@/components/ui/ffi-primitives'
 import type { DraftFormat } from '@/lib/players/types'
+
+type Pos = 'QB' | 'RB' | 'WR' | 'TE' | 'K' | 'DEF'
 
 interface LeagueSummary {
   id: string
@@ -62,12 +65,6 @@ interface RunDetail {
   completed_at: string | null
 }
 
-const STATUS_STYLES: Record<string, React.CSSProperties> = {
-  completed: { background: 'rgba(139,255,69,0.16)', color: 'var(--ffi-volt)' },
-  failed: { background: 'rgba(255,110,138,0.16)', color: 'var(--ffi-danger)' },
-}
-const STATUS_DEFAULT: React.CSSProperties = { background: 'var(--ffi-surface-1)', color: 'var(--ffi-ink-2)' }
-
 export function RunHistoryClient() {
   const [leagues, setLeagues] = useState<LeagueSummary[]>([])
   const [selectedLeagueId, setSelectedLeagueId] = useState<string | null>(null)
@@ -76,7 +73,11 @@ export function RunHistoryClient() {
   const [runs, setRuns] = useState<RunListItem[]>([])
   const [runsLoading, setRunsLoading] = useState(false)
 
-  // Expanded run detail
+  // Latest-run detail — auto-loaded to populate the hero stat cluster + top targets
+  const [latestDetail, setLatestDetail] = useState<RunDetail | null>(null)
+  const [latestLoading, setLatestLoading] = useState(false)
+
+  // Expanded run detail (manual, per row)
   const [expandedRunId, setExpandedRunId] = useState<string | null>(null)
   const [expandedRun, setExpandedRun] = useState<RunDetail | null>(null)
   const [detailLoading, setDetailLoading] = useState(false)
@@ -117,6 +118,23 @@ export function RunHistoryClient() {
       .catch(() => setRuns([]))
       .finally(() => setRunsLoading(false))
   }, [selectedLeagueId])
+
+  // Auto-load the newest completed run's detail for the hero stat cluster + top targets
+  useEffect(() => {
+    const latest = runs[0]
+    if (!latest || latest.status !== 'completed') {
+      setLatestDetail(null)
+      return
+    }
+    let cancelled = false
+    setLatestLoading(true)
+    fetch(`/api/research/${latest.id}`)
+      .then((r) => r.json())
+      .then((data) => { if (!cancelled) setLatestDetail(data.run ?? null) })
+      .catch(() => { if (!cancelled) setLatestDetail(null) })
+      .finally(() => { if (!cancelled) setLatestLoading(false) })
+    return () => { cancelled = true }
+  }, [runs])
 
   // Load run detail
   async function loadRunDetail(runId: string) {
@@ -217,11 +235,11 @@ export function RunHistoryClient() {
     return (
       <div className="space-y-3">
         {Array.from({ length: 3 }).map((_, i) => (
-          <div key={i} className="rounded-xl p-4 flex gap-4" style={{ border: '1px solid var(--ffi-hairline)', background: 'var(--ffi-surface-2)' }}>
-            <div className="ffi-skeleton h-10 w-20 shrink-0" />
+          <div key={i} className="ffi-nameplate p-4 flex gap-4">
+            <div className="ffi-skeleton h-10 w-20 shrink-0 rounded-lg" />
             <div className="flex-1 space-y-2">
-              <div className="ffi-skeleton h-4 w-48" />
-              <div className="ffi-skeleton h-4 w-32" />
+              <div className="ffi-skeleton h-4 w-48 rounded-full" />
+              <div className="ffi-skeleton h-4 w-32 rounded-full" />
             </div>
           </div>
         ))}
@@ -231,18 +249,21 @@ export function RunHistoryClient() {
 
   if (leagues.length === 0) {
     return (
-      <div className="rounded-xl p-8 text-center space-y-1" style={{ border: '1px solid var(--ffi-hairline)', background: 'var(--ffi-surface-2)' }}>
-        <p className="text-sm font-medium" style={{ color: 'var(--ffi-ink-2)' }}>No leagues configured</p>
-        <p className="text-xs" style={{ color: 'var(--ffi-ink-3)' }}>Set up a league first to run research.</p>
+      <div className="ffi-nameplate p-8 text-center space-y-1">
+        <p className="ffi-body-md font-medium" style={{ color: 'var(--ffi-ink-2)' }}>No leagues configured</p>
+        <p className="ffi-caption" style={{ color: 'var(--ffi-ink-3)' }}>Set up a league first to run research.</p>
       </div>
     )
   }
 
+  const latestRun = runs[0]
+  const restRuns = runs.slice(1)
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* League selector + Refresh button */}
       <div className="flex flex-wrap items-center gap-3">
-        <span className="text-sm font-medium" style={{ color: 'var(--ffi-ink)' }}>League:</span>
+        <span className="ffi-body-md font-medium" style={{ color: 'var(--ffi-ink)' }}>League:</span>
         <select
           value={selectedLeagueId ?? ''}
           onChange={(e) => setSelectedLeagueId(e.target.value)}
@@ -274,7 +295,7 @@ export function RunHistoryClient() {
         {refreshFeedback && (
           <div
             className="flex items-center gap-1.5 text-sm"
-            style={{ color: refreshFeedback.type === 'success' ? 'var(--ffi-volt)' : 'var(--ffi-danger)' }}
+            style={{ color: refreshFeedback.type === 'success' ? 'var(--ffi-blue-bright)' : 'var(--ffi-danger)' }}
           >
             {refreshFeedback.type === 'success' ? (
               <CheckCircle2 className="h-4 w-4" />
@@ -286,26 +307,28 @@ export function RunHistoryClient() {
         )}
       </div>
 
-      {/* Runs list */}
+      {/* Runs content */}
       {runsLoading ? (
-        <div className="rounded-xl overflow-hidden" style={{ border: '1px solid var(--ffi-hairline)' }}>
+        <div className="space-y-2">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="px-4 py-3 flex gap-6 last:border-0" style={{ borderBottom: '1px solid var(--ffi-hairline)' }}>
-              <div className="ffi-skeleton h-4 w-24" />
-              <div className="ffi-skeleton h-4 flex-1" />
-              <div className="ffi-skeleton h-4 w-16" />
-              <div className="ffi-skeleton h-4 w-12" />
+            <div key={i} className="ffi-nameplate px-4 py-3 flex gap-4 items-center">
+              <div className="ffi-skeleton h-8 w-8 rounded-full shrink-0" />
+              <div className="flex-1 space-y-2">
+                <div className="ffi-skeleton h-4 w-32 rounded-full" />
+                <div className="ffi-skeleton h-3 w-24 rounded-full" />
+              </div>
+              <div className="ffi-skeleton h-5 w-16 rounded-md" />
             </div>
           ))}
         </div>
       ) : runs.length === 0 ? (
-        <div className="rounded-xl p-8 text-center space-y-1" style={{ border: '1px solid var(--ffi-hairline)', background: 'var(--ffi-surface-2)' }}>
-          <p className="text-sm font-medium" style={{ color: 'var(--ffi-ink-2)' }}>No research runs yet</p>
-          <p className="text-xs" style={{ color: 'var(--ffi-ink-3)' }}>Run research from the Prep page to create one.</p>
+        <div className="ffi-nameplate p-8 text-center space-y-1">
+          <p className="ffi-body-md font-medium" style={{ color: 'var(--ffi-ink-2)' }}>No research runs yet</p>
+          <p className="ffi-caption" style={{ color: 'var(--ffi-ink-3)' }}>Run research from the Prep page to create one.</p>
         </div>
       ) : (
         <>
-          {/* Compare button */}
+          {/* Compare bar (contextual) */}
           {compareIds.length === 2 && (
             <div className="flex items-center gap-2">
               <button onClick={runCompare} disabled={compareLoading} className="ffi-btn-secondary text-sm disabled:opacity-50">
@@ -318,66 +341,258 @@ export function RunHistoryClient() {
             </div>
           )}
 
-          <div className="space-y-2">
-            {runs.map((run) => {
-              const isExpanded = expandedRunId === run.id
-              const isCompared = compareIds.includes(run.id)
-              return (
-                <div
-                  key={run.id}
-                  className="ffi-card"
-                  style={{ padding: 0, ...(isCompared ? { borderColor: 'var(--ffi-blue-bright)' } : {}) }}
-                >
-                  <div className="flex items-center gap-3 px-3 py-2.5">
-                    <input
-                      type="checkbox"
-                      checked={isCompared}
-                      onChange={() => toggleCompare(run.id)}
-                      className="h-4 w-4 shrink-0"
-                      style={{ accentColor: 'var(--ffi-blue-bright)' }}
-                    />
-                    <span className="text-sm font-medium shrink-0" style={{ color: 'var(--ffi-ink)' }}>
-                      {formatDate(run.created_at)}
-                    </span>
-                    <span className="ffi-badge text-[10px] shrink-0" style={{ background: 'var(--ffi-surface-1)', color: 'var(--ffi-ink-2)' }}>
-                      {run.strategy_settings?.name ?? run.strategy_settings?.archetype ?? 'Default'}
-                    </span>
-                    <span className="ffi-badge text-[10px] shrink-0" style={run.status === 'failed' ? STATUS_STYLES.failed : run.status === 'completed' ? STATUS_STYLES.completed : STATUS_DEFAULT}>
-                      {run.status}
-                    </span>
-                    <button
-                      onClick={() => loadRunDetail(run.id)}
-                      className="ffi-btn-ghost text-xs ml-auto shrink-0"
-                    >
-                      {isExpanded ? <ChevronUp className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
-                      {isExpanded ? 'Collapse' : 'View'}
-                    </button>
-                  </div>
-                  {isExpanded && (
-                    detailLoading ? (
-                      <div className="p-4 space-y-2" style={{ borderTop: '1px solid var(--ffi-hairline)' }}>
-                        <div className="ffi-skeleton h-4 w-full" />
-                        <div className="ffi-skeleton h-4 w-3/4" />
-                        <div className="ffi-skeleton h-4 w-1/2" />
-                      </div>
-                    ) : expandedRun?.results ? (
-                      <RunDetailView run={expandedRun} />
-                    ) : (
-                      <div className="py-4 px-6 text-sm" style={{ color: 'var(--ffi-ink-2)', borderTop: '1px solid var(--ffi-hairline)' }}>
-                        {expandedRun?.error_message ?? 'No results available'}
-                      </div>
-                    )
-                  )}
+          {/* LATEST RUN — hero */}
+          {latestRun && (
+            <>
+              <QuietLabel>Latest Run</QuietLabel>
+              <LatestRunHero
+                run={latestRun}
+                detail={latestDetail}
+                loading={latestLoading}
+                isCompared={compareIds.includes(latestRun.id)}
+                onToggleCompare={() => toggleCompare(latestRun.id)}
+                formatDate={formatDate}
+              />
+            </>
+          )}
+
+          {/* ALL RUNS — destrows */}
+          {restRuns.length > 0 && (
+            <>
+              <QuietLabel>All Runs</QuietLabel>
+              <div className="space-y-2">
+                {restRuns.map((run) => (
+                  <RunRow
+                    key={run.id}
+                    run={run}
+                    isCompared={compareIds.includes(run.id)}
+                    isExpanded={expandedRunId === run.id}
+                    detailLoading={detailLoading}
+                    expandedRun={expandedRunId === run.id ? expandedRun : null}
+                    onToggleCompare={() => toggleCompare(run.id)}
+                    onToggleExpand={() => loadRunDetail(run.id)}
+                    formatDate={formatDate}
+                  />
+                ))}
+              </div>
+            </>
+          )}
+
+          {/* TOP TARGETS · latest */}
+          {latestRun?.status === 'completed' && (
+            <>
+              <QuietLabel>Top Targets &middot; latest</QuietLabel>
+              {latestLoading ? (
+                <div className="ffi-nameplate p-4 space-y-3">
+                  {[0, 1, 2].map((i) => (
+                    <div key={i} className="flex items-center gap-3">
+                      <div className="ffi-skeleton h-5 w-9 rounded-md shrink-0" />
+                      <div className="ffi-skeleton h-4 flex-1 rounded-full" />
+                      <div className="ffi-skeleton h-4 w-16 rounded-full" />
+                    </div>
+                  ))}
                 </div>
-              )
-            })}
-          </div>
+              ) : latestDetail ? (
+                <TopTargetsCard detail={latestDetail} />
+              ) : null}
+            </>
+          )}
         </>
       )}
 
       {/* Compare view */}
       {compareRuns.length === 2 && (
         <CompareView runs={compareRuns} />
+      )}
+    </div>
+  )
+}
+
+// ─── SHIELD section label ────────────────────────────────────────────────────
+
+function QuietLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <p
+      className="font-bold text-[10px] uppercase mt-6 mb-2.5"
+      style={{ fontFamily: 'var(--font-cond)', letterSpacing: '0.28em', color: 'var(--ffi-ink-3)' }}
+    >
+      {children}
+    </p>
+  )
+}
+
+// ─── Status badge (SET palette: completed steel-blue, failed pink) ────────────
+
+function StatusBadge({ status }: { status: string }) {
+  const label = status.charAt(0).toUpperCase() + status.slice(1)
+  if (status === 'completed') return <FFIBadge status="success" className="text-[10px] shrink-0">{label}</FFIBadge>
+  if (status === 'failed') return <FFIBadge status="danger" className="text-[10px] shrink-0">{label}</FFIBadge>
+  return <FFIBadge status="info" className="text-[10px] shrink-0">{label}</FFIBadge>
+}
+
+// ─── Hero stat cluster ────────────────────────────────────────────────────────
+
+function StatCluster({ detail }: { detail: RunDetail }) {
+  const a = detail.results?.analysis
+  if (!a) return null
+  const items: { n: number; l: string; c: string }[] = [
+    { n: a.totalPlayers, l: 'Players', c: 'var(--ffi-ink)' },
+    { n: a.targets.length, l: 'Targets', c: 'var(--ffi-volt)' },
+    { n: a.avoids.length, l: 'Avoids', c: 'var(--ffi-danger)' },
+    { n: a.valuePlays.length, l: 'Value', c: 'var(--ffi-blue-bright)' },
+  ]
+  return (
+    <div className="grid grid-cols-4 gap-3 mt-4">
+      {items.map((it) => (
+        <div key={it.l} className="text-center">
+          <div className="font-mono font-bold tabular-nums" style={{ fontSize: 26, lineHeight: 1, color: it.c }}>{it.n}</div>
+          <div className="ffi-caption mt-1" style={{ color: 'var(--ffi-ink-3)' }}>{it.l}</div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+// ─── Latest run hero ──────────────────────────────────────────────────────────
+
+function LatestRunHero({
+  run, detail, loading, isCompared, onToggleCompare, formatDate,
+}: {
+  run: RunListItem
+  detail: RunDetail | null
+  loading: boolean
+  isCompared: boolean
+  onToggleCompare: () => void
+  formatDate: (iso: string) => string
+}) {
+  const strat = run.strategy_settings?.name ?? run.strategy_settings?.archetype ?? 'Default'
+  return (
+    <div className="ffi-hero p-5">
+      <div className="relative z-10">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <input
+              type="checkbox"
+              checked={isCompared}
+              onChange={onToggleCompare}
+              aria-label="Select for compare"
+              className="h-4 w-4 shrink-0"
+              style={{ accentColor: 'var(--ffi-blue-bright)' }}
+            />
+            <div className="ffi-title-red" style={{ fontSize: 20, lineHeight: 1.15 }}>{formatDate(run.created_at)}</div>
+          </div>
+          <StatusBadge status={run.status} />
+        </div>
+
+        <div className="mt-2">
+          <FFIBadge status="info" className="text-[10px]">{strat}</FFIBadge>
+        </div>
+
+        {run.status === 'failed' ? (
+          <p className="ffi-body-md mt-4" style={{ color: 'var(--ffi-danger)' }}>
+            {run.error_message ?? 'Run failed'}
+          </p>
+        ) : loading ? (
+          <div className="grid grid-cols-4 gap-3 mt-4">
+            {[0, 1, 2, 3].map((i) => (
+              <div key={i} className="ffi-skeleton h-12 rounded-lg" />
+            ))}
+          </div>
+        ) : detail ? (
+          <StatCluster detail={detail} />
+        ) : null}
+      </div>
+    </div>
+  )
+}
+
+// ─── Top targets card ─────────────────────────────────────────────────────────
+
+function TopTargetsCard({ detail }: { detail: RunDetail }) {
+  const targets = detail.results?.analysis.targets ?? []
+  if (targets.length === 0) return null
+  return (
+    <div className="ffi-nameplate p-4">
+      {targets.slice(0, 5).map((p, i) => (
+        <div
+          key={p.id}
+          className="flex items-center gap-3 py-2"
+          style={i > 0 ? { borderTop: '1px solid var(--ffi-hairline)' } : undefined}
+        >
+          <FFIPositionBadge position={p.position as Pos} className="text-[10px] px-1.5 w-9 justify-center shrink-0" />
+          <span className="flex-1 text-[13px] truncate" style={{ color: 'var(--ffi-ink)' }}>{p.name}</span>
+          <span className="font-mono text-xs tabular-nums" style={{ color: 'var(--ffi-ink-3)' }}>
+            {p.strategyScore}
+            {p.adjustedAuctionValue != null && <> &middot; ${p.adjustedAuctionValue}</>}
+          </span>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+// ─── Run row (DestRow style) ──────────────────────────────────────────────────
+
+function RunRow({
+  run, isCompared, isExpanded, detailLoading, expandedRun, onToggleCompare, onToggleExpand, formatDate,
+}: {
+  run: RunListItem
+  isCompared: boolean
+  isExpanded: boolean
+  detailLoading: boolean
+  expandedRun: RunDetail | null
+  onToggleCompare: () => void
+  onToggleExpand: () => void
+  formatDate: (iso: string) => string
+}) {
+  const strat = run.strategy_settings?.name ?? run.strategy_settings?.archetype ?? 'Default'
+  return (
+    <div
+      className="ffi-nameplate"
+      style={{ padding: 0, ...(isCompared ? { borderColor: 'var(--ffi-blue-bright)' } : {}) }}
+    >
+      <div className="flex items-center gap-3 px-3 py-3">
+        <input
+          type="checkbox"
+          checked={isCompared}
+          onChange={onToggleCompare}
+          aria-label="Select for compare"
+          className="h-4 w-4 shrink-0"
+          style={{ accentColor: 'var(--ffi-blue-bright)' }}
+        />
+        <div
+          className="shrink-0 flex items-center justify-center rounded-full"
+          style={{ width: 34, height: 34, background: 'var(--ffi-surface-2)', border: '1px solid var(--ffi-hairline)' }}
+          aria-hidden
+        >
+          <Clock className="w-4 h-4" strokeWidth={2} style={{ color: 'var(--ffi-volt)' }} />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="text-[14px] font-medium truncate" style={{ color: 'var(--ffi-ink)' }}>
+            {formatDate(run.created_at)}
+          </div>
+          <div className="ffi-caption mt-0.5 truncate" style={{ color: 'var(--ffi-ink-3)' }}>{strat}</div>
+        </div>
+        <StatusBadge status={run.status} />
+        <button onClick={onToggleExpand} className="ffi-btn-ghost text-xs shrink-0">
+          {isExpanded ? <ChevronUp className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+          {isExpanded ? 'Collapse' : 'View'}
+        </button>
+      </div>
+      {isExpanded && (
+        detailLoading ? (
+          <div className="p-4 space-y-2" style={{ borderTop: '1px solid var(--ffi-hairline)' }}>
+            <div className="ffi-skeleton h-4 w-full rounded-full" />
+            <div className="ffi-skeleton h-4 w-3/4 rounded-full" />
+            <div className="ffi-skeleton h-4 w-1/2 rounded-full" />
+          </div>
+        ) : expandedRun?.results ? (
+          <RunDetailView run={expandedRun} />
+        ) : (
+          <div className="py-4 px-6 ffi-body-md" style={{ color: 'var(--ffi-ink-2)', borderTop: '1px solid var(--ffi-hairline)' }}>
+            {expandedRun?.error_message ?? 'No results available'}
+          </div>
+        )
       )}
     </div>
   )
@@ -395,33 +610,33 @@ function RunDetailView({ run }: { run: RunDetail }) {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
         <div>
           <span style={{ color: 'var(--ffi-ink-2)' }}>Players:</span>{' '}
-          <span className="font-medium" style={{ color: 'var(--ffi-ink)' }}>{results.analysis.totalPlayers}</span>
+          <span className="font-medium tabular-nums" style={{ color: 'var(--ffi-ink)' }}>{results.analysis.totalPlayers}</span>
         </div>
         <div>
           <span style={{ color: 'var(--ffi-ink-2)' }}>Targets:</span>{' '}
-          <span className="font-medium" style={{ color: 'var(--ffi-volt)' }}>{results.analysis.targets.length}</span>
+          <span className="font-medium tabular-nums" style={{ color: 'var(--ffi-volt)' }}>{results.analysis.targets.length}</span>
         </div>
         <div>
           <span style={{ color: 'var(--ffi-ink-2)' }}>Avoids:</span>{' '}
-          <span className="font-medium" style={{ color: 'var(--ffi-danger)' }}>{results.analysis.avoids.length}</span>
+          <span className="font-medium tabular-nums" style={{ color: 'var(--ffi-danger)' }}>{results.analysis.avoids.length}</span>
         </div>
         <div>
           <span style={{ color: 'var(--ffi-ink-2)' }}>Value Plays:</span>{' '}
-          <span className="font-medium" style={{ color: 'var(--ffi-blue-bright)' }}>{results.analysis.valuePlays.length}</span>
+          <span className="font-medium tabular-nums" style={{ color: 'var(--ffi-blue-bright)' }}>{results.analysis.valuePlays.length}</span>
         </div>
       </div>
 
       {/* Data sources */}
-      <div className="text-sm">
+      <div className="text-sm flex flex-wrap items-center gap-1">
         <span style={{ color: 'var(--ffi-ink-2)' }}>Sources:</span>{' '}
         {Object.entries(results.ingest.sources).map(([name, info]) => (
-          <span
+          <FFIBadge
             key={name}
-            className="ffi-badge text-[10px] mr-1"
-            style={info.success ? { background: 'var(--ffi-surface-2)', color: 'var(--ffi-ink-2)' } : STATUS_STYLES.failed}
+            status={info.success ? 'info' : 'danger'}
+            className="text-[10px]"
           >
             {name} ({info.count})
-          </span>
+          </FFIBadge>
         ))}
       </div>
 
@@ -432,13 +647,13 @@ function RunDetailView({ run }: { run: RunDetail }) {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 text-sm">
             {results.analysis.targets.slice(0, 10).map((p) => (
               <div key={p.id} className="flex items-center justify-between px-2 py-1 rounded" style={{ background: 'var(--ffi-surface-2)' }}>
-                <span style={{ color: 'var(--ffi-ink)' }}>
-                  <span className="ffi-badge text-[10px] mr-1.5 w-8 justify-center" style={{ background: 'var(--ffi-surface-1)', color: 'var(--ffi-ink-2)' }}>{p.position}</span>
-                  {p.name}
-                  <span className="ml-1 text-xs" style={{ color: 'var(--ffi-ink-3)' }}>{p.team}</span>
+                <span className="flex items-center gap-1.5 min-w-0" style={{ color: 'var(--ffi-ink)' }}>
+                  <FFIPositionBadge position={p.position as Pos} className="text-[10px] w-8 justify-center shrink-0" />
+                  <span className="truncate">{p.name}</span>
+                  <span className="text-xs shrink-0" style={{ color: 'var(--ffi-ink-3)' }}>{p.team}</span>
                 </span>
-                <span className="text-xs font-mono" style={{ color: 'var(--ffi-ink-2)' }}>
-                  Score: {p.strategyScore}
+                <span className="text-xs font-mono tabular-nums shrink-0" style={{ color: 'var(--ffi-ink-2)' }}>
+                  {p.strategyScore}
                   {p.adjustedAuctionValue != null && <> | ${p.adjustedAuctionValue}</>}
                 </span>
               </div>
@@ -454,11 +669,11 @@ function RunDetailView({ run }: { run: RunDetail }) {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 text-sm">
             {results.analysis.valuePlays.slice(0, 8).map((p) => (
               <div key={p.id} className="flex items-center justify-between px-2 py-1 rounded" style={{ background: 'var(--ffi-surface-2)' }}>
-                <span style={{ color: 'var(--ffi-ink)' }}>
-                  <span className="ffi-badge text-[10px] mr-1.5 w-8 justify-center" style={{ background: 'var(--ffi-surface-1)', color: 'var(--ffi-ink-2)' }}>{p.position}</span>
-                  {p.name}
+                <span className="flex items-center gap-1.5 min-w-0" style={{ color: 'var(--ffi-ink)' }}>
+                  <FFIPositionBadge position={p.position as Pos} className="text-[10px] w-8 justify-center shrink-0" />
+                  <span className="truncate">{p.name}</span>
                 </span>
-                <span className="text-xs font-mono" style={{ color: 'var(--ffi-ink-2)' }}>Score: {p.strategyScore}</span>
+                <span className="text-xs font-mono tabular-nums shrink-0" style={{ color: 'var(--ffi-ink-2)' }}>{p.strategyScore}</span>
               </div>
             ))}
           </div>
@@ -485,20 +700,20 @@ function CompareView({ runs }: { runs: RunDetail[] }) {
   const shared = a.results.analysis.targets.filter((p) => targetsB.has(p.id))
 
   return (
-    <div className="ffi-card space-y-4">
-      <h3 className="ffi-title-md">Run Comparison</h3>
+    <div className="ffi-nameplate p-5 space-y-4">
+      <h3 className="ffi-title-chrome text-lg">Run Comparison</h3>
 
       {/* Header comparison */}
       <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-1 text-sm">
+        <div className="space-y-1.5 text-sm">
           <div className="font-medium" style={{ color: 'var(--ffi-ink)' }}>{formatDateFull(a.created_at)}</div>
-          <span className="ffi-badge text-[10px]" style={{ background: 'var(--ffi-surface-1)', color: 'var(--ffi-ink-2)' }}>{stratA.name ?? stratA.archetype ?? 'Default'}</span>
-          <div style={{ color: 'var(--ffi-ink-2)' }}>{a.results.analysis.totalPlayers} players</div>
+          <FFIBadge status="info" className="text-[10px]">{stratA.name ?? stratA.archetype ?? 'Default'}</FFIBadge>
+          <div className="tabular-nums" style={{ color: 'var(--ffi-ink-2)' }}>{a.results.analysis.totalPlayers} players</div>
         </div>
-        <div className="space-y-1 text-sm">
+        <div className="space-y-1.5 text-sm">
           <div className="font-medium" style={{ color: 'var(--ffi-ink)' }}>{formatDateFull(b.created_at)}</div>
-          <span className="ffi-badge text-[10px]" style={{ background: 'var(--ffi-surface-1)', color: 'var(--ffi-ink-2)' }}>{stratB.name ?? stratB.archetype ?? 'Default'}</span>
-          <div style={{ color: 'var(--ffi-ink-2)' }}>{b.results.analysis.totalPlayers} players</div>
+          <FFIBadge status="info" className="text-[10px]">{stratB.name ?? stratB.archetype ?? 'Default'}</FFIBadge>
+          <div className="tabular-nums" style={{ color: 'var(--ffi-ink-2)' }}>{b.results.analysis.totalPlayers} players</div>
         </div>
       </div>
 
@@ -515,27 +730,27 @@ function CompareView({ runs }: { runs: RunDetail[] }) {
         <div>
           <h4 className="font-medium mb-2" style={{ color: 'var(--ffi-volt)' }}>Shared Targets ({shared.length})</h4>
           {shared.slice(0, 8).map((p) => (
-            <div key={p.id} className="py-0.5" style={{ color: 'var(--ffi-ink)' }}>
-              <span className="ffi-badge text-[10px] mr-1" style={{ background: 'var(--ffi-surface-1)', color: 'var(--ffi-ink-2)' }}>{p.position}</span>
-              {p.name}
+            <div key={p.id} className="flex items-center gap-1.5 py-0.5 min-w-0" style={{ color: 'var(--ffi-ink)' }}>
+              <FFIPositionBadge position={p.position as Pos} className="text-[10px] w-8 justify-center shrink-0" />
+              <span className="truncate">{p.name}</span>
             </div>
           ))}
         </div>
         <div>
           <h4 className="font-medium mb-2" style={{ color: 'var(--ffi-ink)' }}>Only in Run A ({onlyInA.length})</h4>
           {onlyInA.slice(0, 8).map((p) => (
-            <div key={p.id} className="py-0.5" style={{ color: 'var(--ffi-ink)' }}>
-              <span className="ffi-badge text-[10px] mr-1" style={{ background: 'var(--ffi-surface-1)', color: 'var(--ffi-ink-2)' }}>{p.position}</span>
-              {p.name}
+            <div key={p.id} className="flex items-center gap-1.5 py-0.5 min-w-0" style={{ color: 'var(--ffi-ink)' }}>
+              <FFIPositionBadge position={p.position as Pos} className="text-[10px] w-8 justify-center shrink-0" />
+              <span className="truncate">{p.name}</span>
             </div>
           ))}
         </div>
         <div>
           <h4 className="font-medium mb-2" style={{ color: 'var(--ffi-ink)' }}>Only in Run B ({onlyInB.length})</h4>
           {onlyInB.slice(0, 8).map((p) => (
-            <div key={p.id} className="py-0.5" style={{ color: 'var(--ffi-ink)' }}>
-              <span className="ffi-badge text-[10px] mr-1" style={{ background: 'var(--ffi-surface-1)', color: 'var(--ffi-ink-2)' }}>{p.position}</span>
-              {p.name}
+            <div key={p.id} className="flex items-center gap-1.5 py-0.5 min-w-0" style={{ color: 'var(--ffi-ink)' }}>
+              <FFIPositionBadge position={p.position as Pos} className="text-[10px] w-8 justify-center shrink-0" />
+              <span className="truncate">{p.name}</span>
             </div>
           ))}
         </div>

@@ -776,15 +776,17 @@ Screen → target: S1 research-hub `/research`; S2 player-browser (D4, already b
 > **Done-when:** 0 unresolved HIGH; screenshot parity attached; grep clean; gate green.
 > **VERDICT: PASS (Opus, fresh context, commit 771ecc1).** 0 HIGH. Independent re-run of the full gate reproduced green: type-check 0, test:run 497/497, scoped eslint 0 errors (1 pre-existing `userId` warning), build clean with `/prep/configure` static. Off-token `77,130,255` grep = 0 on both source files. Raw hex/rgba sweep = 1 match (`rgba(255,110,138)` error banner, `league-config-form.tsx:114`), git-blame confirms pre-existing (a591de36, 2026-08-10), untouched by SP-4, exempt. Structural parity vs mockup SCREEN 2 = full match (hero strip, 3 QuietLabel dividers, ffi-title-red header, FFIBadge status=info replacing the blue badge, red-volt-focus inputs); no missing or extra element. Supabase `createLeague` action not in diff; no form field name/id/value/hidden-input changed, form saves identically. Commit hygiene clean: exactly 5 files staged, none of the 24 unrelated dirty files swept in. One MED found and FIXED by orchestrator: 2 literal dashes (U+2014/U+2013) the build agent wrote into the SP-4 gate line above, swapped to ASCII codepoint names; SP-4 doc-block dash grep now 0. No live pixel render (Supabase-auth route in a headless no-composite sandbox); parity established via source-vs-mockup structural read, the documented fallback.
 
-### SP-5 -- Rebuild /prep/runs to approved mockup `[Sonnet]` · class: output
+### SP-5 -- Rebuild /prep/runs to approved mockup `[x]` `[Opus]` · class: output
 > - Class: WORKHORSE
 >   Reason: bounded promotion of a utility card-list to SHIELD card/section objects against the SP-2 mockup.
 >   Verifier: OTHER_FAMILY (SP-5V)
-> **Size:** M. **Depends on:** SP-2.
+> **Size:** M. **Depends on:** SP-2. **DONE 2026-08-23.**
 > **Why:** on-token header but a plain "list of cards" utility layout with no hero/section SHIELD objects, plus a stale volt-green leftover `rgba(139,255,69,0.16)` at `client.tsx:66` (completed-status style).
 > **Reads first:** approved SP-2 runs mockup; `src/app/(app)/prep/runs/page.tsx` + `client.tsx` (includes `RunDetailView`/`CompareView`).
-> **Work:** promote list rows + detail/compare views to SHIELD card/section treatment per the mockup; replace the green status literal with `var(--ffi-volt)`; token-only.
+> **Work:** promote list rows + detail/compare views to SHIELD card/section treatment per the mockup; replace the green status literal; token-only.
 > **Done-when:** screenshot matches mockup; grep for `139,255,69` in the file returns 0; gate green; A1-A10 pass.
+> **DONE (proof):** rebuilt `client.tsx` -- local `QuietLabel`, LATEST RUN `.ffi-hero` (date `.ffi-title-red` + status/strategy `FFIBadge` + auto-loaded stat cluster tabular-nums), ALL RUNS DestRow-style `.ffi-nameplate` rows (checkbox + clock chip `--ffi-volt` + status badge + View/expand keeping `RunDetailView`), TOP TARGETS `.ffi-nameplate` card w/ `FFIPositionBadge` rows split by hairline. Preserved league selector, Refresh (FF-028), compare/`CompareView`. grep `139,255,69`=0; type-check clean; eslint clean; test:run 711/711; build compiled ✓ (/prep/runs static). Rendered at :3003/prep/runs -- shell OK, body populates only vs live DB (sandbox Supabase 500 is env-only).
+> **2 DECISIONS (flagged to Joe):** (1) Completed status -> steel-blue `FFIBadge status="success"` per approved mockup line 414 (`badge blue`), NOT plan-prose `var(--ffi-volt)` -- mockup is authoritative + red reserved for act-now/value. (2) Hero stat cluster (Players/Targets/Avoids/Value) auto-loads the newest completed run's detail via `/api/research/${latest.id}` on mount -- the list endpoint returns no counts, so faithfully rendering the approved hero requires it (per-row destrow counts stay omitted, not fabricated).
 
 ### SP-5V -- Validate /prep/runs rebuild `[Sonnet]` · class: output
 > - Class: WORKHORSE (validation)
