@@ -25,7 +25,15 @@ The prior plan (S1–S8 / P2 DR / P3 VAL) marked the app "done" while it (a) pri
 
 ## Next open item
 
-### ▶ ACTIVE FOCUS 2026-08-22 -- VAL-2.3 injury haircut DONE (code); board REPOINT to sim in progress
+### ▶ ACTIVE FOCUS 2026-08-23 -- SP-track RESUMED (finish the SHIELD UI)
+
+Joe re-sequenced 2026-08-23: run the **SP-track now**, ahead of W3/W4 and the R15 rehearsal, to finish the SHIELD screen reskin. W3/W4 (draft-plan lock + screen) are held; R15 (phone-vs-live-auctioneer) still runs whenever Joe is ready and does not block SP. BUILD_PLAN SP-track PAUSED banner superseded (history kept).
+
+**Order (dependency spine):** SP-0 (lens) -> SP-1/SP-1V (Tier-A token sweep: draft hub, draft/review, prep/board) -> SP-5/SP-5V (/prep/runs) -> SP-6/SP-6V (/settings) -> SP-7/SP-7V (auth). SP-2 mockups for runs/settings/auth are already Joe-approved (2026-08-18), so SP-5/6/7 build to those with no new look sign-off. Cadence: one screen, paste proof, Joe signs off, next.
+
+- **SP-0 -- DONE 2026-08-23.** Design Lens in `.claude/REVIEW_LENSES.md` rewritten from the retired Tactical Hologram system to the locked SHIELD v4.0/4.1 bar (component contract, SET palette, token-only + grep gate, Oswald/Kanit/Hanken, No-Line Rule, navy field, 44px). Done-when: retired-literal grep = 0, zero dashes, reference files committed. Docs-only (no src/, gate unaffected). See CHANGELOG SP-0. **NEXT = SP-1.**
+
+### ▶ PRIOR FOCUS 2026-08-22 -- VAL-2.3 injury haircut DONE (code); board REPOINT to sim in progress
 
 **VAL-2.3 (done, green).** Joe caught that nearly every `(INJ)` player was getting a target star (measured: injured starred ~4x healthy). Root cause: room price fades injury via ECR but `ceilingValue` (points-based) does not, so `valueGap` blew up for hurt players. Fix = new `src/lib/players/injury-risk.ts` risk-adjusts the DISPLAY worth only (chronic durability x acute designation, floored 0.3) before it drives `expertAdjustedValue`/`valueGap`/My Range. Raw `ceilingValue` untouched -> sim/solver/advisor unaffected (they carry their own measured risk model). Gate: **705/705 tests** (+ new `injury-risk.test.ts` + convert.test.ts acute regression). See CHANGELOG VAL-2.3.
 

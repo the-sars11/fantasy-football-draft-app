@@ -72,14 +72,18 @@ Six lenses applied during PROPOSE (pre-checks) and VERIFY (completion checklist)
 
 ## Design Lens
 
+> Reference: `DESIGN_SYSTEM.md` SHIELD v4.0/4.1 (LOCKED). SHIELD is a navy-steel broadcast cockpit: one disciplined brick-RED that only ever means "act now", steel-blue as the everyday structure color, chrome-silver readouts, on a navy-steel FIELD. The legacy volt-green and all gold are removed from the palette.
+
 **Pre-check (PROPOSE):**
-- [ ] Does this UI change match DESIGN_SYSTEM.md (Tactical Hologram)?
+- [ ] Does this UI build with the SHIELD component contract (`src/components/ui/shield.tsx`): cards are `<Nameplate>` / `<Nameplate interactive>`, page headline `<PageTitle>`, chrome title `<CardTitle>`, icon chip `<IconChip>`, canvas `<ShieldBackground>`? Never raw `.ffi-card`, never shadcn `Card`, never an inline `bg-[#...] border` div.
+- [ ] Does color carry meaning on the SET palette: brick-RED (`#A63C41` body, `#C25A5E` Oswald headers) reserved for headers plus the moment/value/user action and used sparingly in the body; steel-blue (`#5FA8E0`) for structure/info/depth; chrome-silver ink for names and stat readouts? No new color literals.
 - [ ] Does it meet the one-thumb mobile usability standard (NORTH_STAR criterion 5)?
 
 **Verify (VERIFY):**
-- [ ] Visual matches DESIGN_SYSTEM.md tokens (colors `#8bacff`/`#2ff801`/`#031018`, typography Space Grotesk/Manrope, no 1px borders)
-- [ ] Tested on mobile viewport
-- [ ] 44px minimum touch targets on all interactive elements
+- [ ] All color is inline `var(--ffi-*)` / rgba tokens: zero hardcoded structure hex, zero shadcn `Card`, zero `blur-3xl` wallpaper, no off-token color literals (no legacy volt-green, no gold, no non-SHIELD blue). Grep the touched files clean.
+- [ ] Type is on-system: Oswald brick-red headers (`.ffi-title-red`), Kanit for names/stats/labels, Hanken Grotesk for body and UI. Numbers use `tabular-nums`.
+- [ ] Boundaries follow the No-Line Rule: tonal shift plus a cool-steel hairline (<=18%), not gray borders, not backdrop-blur. The navy FIELD (`.stadium-atmos`) is present (inherited from `app-shell.tsx` for the `(app)` group; the `(auth)` group must mount it explicitly).
+- [ ] Tested on mobile viewport; 44px minimum touch targets on all interactive elements.
 
 ---
 

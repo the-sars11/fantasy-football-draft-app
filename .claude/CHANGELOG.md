@@ -2,6 +2,20 @@
 
 ---
 
+## 2026-08-23 / SP-0 -- Design review lens refreshed to SHIELD v4.0 (SP-track resumed)
+
+**Class:** docs (QA lens only). $0. Joe re-sequenced the SP-track to run now (ahead of W3/W4 and the R15 rehearsal) to finish the SHIELD UI reskin; the PAUSED banner is superseded, history kept.
+
+**What it is.** SP-0, the first card of the SP-track: the Design Lens in `.claude/REVIEW_LENSES.md` still described the retired "Tactical Hologram" system (Space Grotesk, `#8bacff`/`#2ff801`/`#031018`). Every SP validator uses that lens, so a stale lens meant stale validation. Rewrote it to the locked SHIELD v4.0/4.1 bar.
+
+**What changed.** New Design Lens pre-check + verify encode: the SHIELD component contract (`shield.tsx` -- `<Nameplate>`/`<PageTitle>`/`<CardTitle>`/`<IconChip>`/`<ShieldBackground>`, never raw `.ffi-card`, shadcn `Card`, or inline `bg-[#...]`); SET-palette meaning (brick-RED `#A63C41` body / `#C25A5E` Oswald headers, steel-blue `#5FA8E0` structure, chrome-silver readouts); inline `var(--ffi-*)`-only with a hex/`Card`/`blur-3xl` grep gate; Oswald/Kanit/Hanken type + `tabular-nums`; the No-Line Rule (tonal shift + cool-steel hairline <=18%, no gray borders, no backdrop-blur); navy FIELD (`.stadium-atmos`) inheritance; 44px touch targets.
+
+**Files.** `.claude/REVIEW_LENSES.md` (Design Lens rewrite), `.claude/BUILD_PLAN.md` (SP-track un-paused + SP-0 marked DONE), `.claude/WORKING_STATE.md` (focus pointer), this CHANGELOG.
+
+**Proof (pasted).** Done-when met: `grep -cE "Tactical Hologram|Space Grotesk|8bacff|2ff801|031018|Manrope" .claude/REVIEW_LENSES.md` = **0**; zero em/en-dashes in the rewrite; both reference files (`.claude/DESIGN_SYSTEM.md`, `UI/mockup-SHIELD-token-map.md`) already tracked/committed. Docs-only edit (no `src/` touched) so the Vitest/ESLint gate is unaffected and was not re-run.
+
+---
+
 ## 2026-08-23 / PLAN-1 -- "Your Plan" board header (answer up top, GAP demoted)
 
 **Class:** shared + output UI (Architecture + QA + Design lenses). $0 (no API calls). Requested by Joe: stop leading the board with GAP (a bargain-detector he kept misreading as a talent score); instead put the sim's actual answer -- who to target, in what order, at what price -- at the top of the board, and leave GAP as the small footnote it always should have been.

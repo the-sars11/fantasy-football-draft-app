@@ -647,9 +647,13 @@ Screen → target: S1 research-hub `/research`; S2 player-browser (D4, already b
 
 ---
 
-## SP-track -- SHIELD Screen-Parity Sprint (added 2026-08-18) -- PAUSED
+## SP-track -- SHIELD Screen-Parity Sprint (added 2026-08-18) -- RESUMED 2026-08-23
 
-> ### ⏸ PAUSED 2026-08-19 -- functionality before pixels
+> ### ▶ RESUMED 2026-08-23 -- Joe's call: finish the UI now
+>
+> Joe re-sequenced: run the SP-track now, ahead of W3/W4 and the R15 rehearsal, to finish the SHIELD reskin. W3/W4 are held; R15 (phone-vs-live-auctioneer rehearsal) still runs whenever Joe is ready and does not block SP. Prior order note below is kept for history.
+>
+> ### ⏸ PAUSED 2026-08-19 -- functionality before pixels (SUPERSEDED 2026-08-23)
 >
 > Joe's order: pause the SHIELD screen reskin, sequence functionality first, but KEEP this track on the build plan (do not delete it). This whole SP-track is retained and runs LAST, only after the three open functional/usability gates close: the line-517 strategy re-flow fix (Phase 1), R14 (usability walkthrough, `BUILD_PLAN.md:411`), and R15 (rehearsal gate, `:419`). No screen reskin jumps that queue again. Everything below is real, wanted work -- just not before the app is proven usable and rehearsed.
 
@@ -686,7 +690,8 @@ Screen → target: S1 research-hub `/research`; S2 player-browser (D4, already b
 
 **Dependency spine:** SP-0 and SP-1 run immediately (no mockup needed). SP-2 (Opus design) is a HARD Joe-gated halt -- no SP-3..SP-7 build starts until Joe signs off the mockups. Each build has its own OTHER_FAMILY validator behind it.
 
-### SP-0 -- Refresh stale Design review lens to SHIELD v4.0 `[Sonnet]` · class: docs
+### SP-0 -- Refresh stale Design review lens to SHIELD v4.0 `[Sonnet]` · class: docs -- **[x] DONE (2026-08-23)**
+> **Shipped:** rewrote the Design Lens in `.claude/REVIEW_LENSES.md` (pre-check + verify) to the SHIELD v4.0/4.1 bar: SHIELD component contract (`shield.tsx` -- `<Nameplate>`/`<PageTitle>`/`<CardTitle>`/`<IconChip>`/`<ShieldBackground>`, never raw `.ffi-card`/shadcn `Card`/inline `bg-[#...]`), SET palette meaning (brick-RED `#A63C41` body / `#C25A5E` Oswald headers, steel-blue `#5FA8E0` structure, chrome-silver readouts), inline `var(--ffi-*)` only with a hex/`Card`/`blur-3xl` grep gate, Oswald/Kanit/Hanken typography + `tabular-nums`, the No-Line Rule (tonal shift + cool-steel hairline <=18%, no gray borders, no backdrop-blur), navy FIELD (`.stadium-atmos`) inheritance, and the 44px touch-target rule. **Done-when met:** grep of `REVIEW_LENSES.md` for `Tactical Hologram|Space Grotesk|8bacff|2ff801|031018|Manrope` = 0; zero em/en-dashes in the rewrite; both reference files (`.claude/DESIGN_SYSTEM.md`, `UI/mockup-SHIELD-token-map.md`) already tracked/committed. Docs-only edit (no `src/` touched), so the Vitest/ESLint gate is unaffected.
 > - Class: WORKHORSE
 >   Reason: bounded doc rewrite against an already-LOCKED spec (DESIGN_SYSTEM SHIELD v4.0); zero open judgment.
 >   Verifier: self (docs class, QA lens only)
