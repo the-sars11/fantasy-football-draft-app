@@ -788,13 +788,14 @@ Screen → target: S1 research-hub `/research`; S2 player-browser (D4, already b
 > **DONE (proof):** rebuilt `client.tsx` -- local `QuietLabel`, LATEST RUN `.ffi-hero` (date `.ffi-title-red` + status/strategy `FFIBadge` + auto-loaded stat cluster tabular-nums), ALL RUNS DestRow-style `.ffi-nameplate` rows (checkbox + clock chip `--ffi-volt` + status badge + View/expand keeping `RunDetailView`), TOP TARGETS `.ffi-nameplate` card w/ `FFIPositionBadge` rows split by hairline. Preserved league selector, Refresh (FF-028), compare/`CompareView`. grep `139,255,69`=0; type-check clean; eslint clean; test:run 711/711; build compiled ✓ (/prep/runs static). Rendered at :3003/prep/runs -- shell OK, body populates only vs live DB (sandbox Supabase 500 is env-only).
 > **2 DECISIONS (flagged to Joe):** (1) Completed status -> steel-blue `FFIBadge status="success"` per approved mockup line 414 (`badge blue`), NOT plan-prose `var(--ffi-volt)` -- mockup is authoritative + red reserved for act-now/value. (2) Hero stat cluster (Players/Targets/Avoids/Value) auto-loads the newest completed run's detail via `/api/research/${latest.id}` on mount -- the list endpoint returns no counts, so faithfully rendering the approved hero requires it (per-row destrow counts stay omitted, not fabricated).
 
-### SP-5V -- Validate /prep/runs rebuild `[Sonnet]` · class: output
+### SP-5V -- Validate /prep/runs rebuild `[x]` `[Sonnet]` · class: output
 > - Class: WORKHORSE (validation)
 >   Reason: independent check behind SP-5.
 >   Verifier: OTHER_FAMILY -- did NOT write SP-5.
-> **Size:** S. **Depends on:** SP-5.
+> **Size:** S. **Depends on:** SP-5. **DONE 2026-08-23.**
 > **Work:** adversarial `/code-review` + `/bug-hunt free`; Design + QA lenses; screenshot vs mockup; independent grep for green literal; re-run gate.
 > **Done-when:** 0 unresolved HIGH; screenshot parity attached; grep clean; gate green.
+> **DONE (proof):** fresh-context Sonnet validator = **VERDICT PASS** (0 HIGH+). Independent grep = 0 for every retired literal (`139,255,69`/`77,130,255`/`8bacff`/`121,166,255`/`79A6FF`) + 0 raw hex/off-token rgba (full token compliance). Mockup parity confirmed (section order, 4-stat cluster colors, hairline separators); DestRow checkbox/contextual-Compare divergence judged correct (interactive functionality the static mockup omits). Auto-load effect verified correctly guarded + `runs[0]` genuinely newest (API `.order('created_at', ascending:false)`); failed-run + 0-target + compare-cap-2 paths safe; no `any`, no missing keys, a11y labels present. 3 findings, all resolved: F1 (LOW, 6 em-dashes in comments) fixed; F2 (MED, missing `cancelled` guard on league-runs fetch) fixed; F3 (LOW, dangling Top Targets label at 0 targets) fixed. Gate re-run after fixes: dashes 0, type-check 0, lint 0, test:run 711/711, build clean. See CHANGELOG SP-5V.
 
 ### SP-6 -- Rebuild /settings to approved mockup `[Sonnet]` · class: output
 > - Class: WORKHORSE

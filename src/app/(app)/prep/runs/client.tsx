@@ -73,7 +73,7 @@ export function RunHistoryClient() {
   const [runs, setRuns] = useState<RunListItem[]>([])
   const [runsLoading, setRunsLoading] = useState(false)
 
-  // Latest-run detail — auto-loaded to populate the hero stat cluster + top targets
+  // Latest-run detail - auto-loaded to populate the hero stat cluster + top targets
   const [latestDetail, setLatestDetail] = useState<RunDetail | null>(null)
   const [latestLoading, setLatestLoading] = useState(false)
 
@@ -82,7 +82,7 @@ export function RunHistoryClient() {
   const [expandedRun, setExpandedRun] = useState<RunDetail | null>(null)
   const [detailLoading, setDetailLoading] = useState(false)
 
-  // Refresh (re-run research with fresh data) — FF-028
+  // Refresh (re-run research with fresh data) - FF-028
   const [refreshing, setRefreshing] = useState(false)
   const [refreshFeedback, setRefreshFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
 
@@ -111,12 +111,14 @@ export function RunHistoryClient() {
       setRuns([])
       return
     }
+    let cancelled = false
     setRunsLoading(true)
     fetch(`/api/research?leagueId=${selectedLeagueId}`)
       .then((r) => r.json())
-      .then((data) => setRuns(data.runs ?? []))
-      .catch(() => setRuns([]))
-      .finally(() => setRunsLoading(false))
+      .then((data) => { if (!cancelled) setRuns(data.runs ?? []) })
+      .catch(() => { if (!cancelled) setRuns([]) })
+      .finally(() => { if (!cancelled) setRunsLoading(false) })
+    return () => { cancelled = true }
   }, [selectedLeagueId])
 
   // Auto-load the newest completed run's detail for the hero stat cluster + top targets
@@ -277,7 +279,7 @@ export function RunHistoryClient() {
           ))}
         </select>
 
-        {/* Refresh button — FF-028 */}
+        {/* Refresh button - FF-028 */}
         <button
           onClick={handleRefresh}
           disabled={!selectedLeagueId || refreshing}
@@ -341,7 +343,7 @@ export function RunHistoryClient() {
             </div>
           )}
 
-          {/* LATEST RUN — hero */}
+          {/* LATEST RUN - hero */}
           {latestRun && (
             <>
               <QuietLabel>Latest Run</QuietLabel>
@@ -356,7 +358,7 @@ export function RunHistoryClient() {
             </>
           )}
 
-          {/* ALL RUNS — destrows */}
+          {/* ALL RUNS - destrows */}
           {restRuns.length > 0 && (
             <>
               <QuietLabel>All Runs</QuietLabel>
@@ -378,8 +380,9 @@ export function RunHistoryClient() {
             </>
           )}
 
-          {/* TOP TARGETS · latest */}
-          {latestRun?.status === 'completed' && (
+          {/* TOP TARGETS · latest - hide the label entirely when there are no targets */}
+          {latestRun?.status === 'completed' &&
+            (latestLoading || (latestDetail?.results?.analysis.targets.length ?? 0) > 0) && (
             <>
               <QuietLabel>Top Targets &middot; latest</QuietLabel>
               {latestLoading ? (
@@ -717,7 +720,7 @@ function CompareView({ runs }: { runs: RunDetail[] }) {
         </div>
       </div>
 
-      {/* Stats comparison — CSS-grid rows, no HTML table */}
+      {/* Stats comparison - CSS-grid rows, no HTML table */}
       <div>
         <CompareStatRow label="Total Players" a={a.results.analysis.totalPlayers} b={b.results.analysis.totalPlayers} />
         <CompareStatRow label="Targets" a={a.results.analysis.targets.length} b={b.results.analysis.targets.length} color="var(--ffi-volt)" />

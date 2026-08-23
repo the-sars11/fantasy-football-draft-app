@@ -2,6 +2,23 @@
 
 ---
 
+## 2026-08-23 / SP-5V -- /prep/runs rebuild validated (OTHER_FAMILY) + 3 findings fixed
+
+**Class:** output (Design + QA lenses, validation). $0. Fresh-context Sonnet sub-agent (did NOT write SP-5) ran the adversarial check the SP-track puts behind every build.
+
+**Verdict: PASS** (0 unresolved HIGH+). Independent grep = 0 for all retired literals and 0 raw hex / off-token rgba anywhere in the file (every color goes through `var(--ffi-*)`). Mockup parity confirmed against screen 03 (section order LATEST RUN -> ALL RUNS -> TOP TARGETS; 4-stat cluster colors Players ink / Targets volt / Avoids danger / Value blue-bright; top-targets hairline separators). The DestRow "N tgt" chip -> compare checkbox + status badge swap, and Refresh-in-header / contextual-Compare placement, were judged correct: interactive functionality the static mockup does not need to show. The auto-load `useEffect` was verified correctly `cancelled`-guarded and `runs[0]` is genuinely newest (API `GET /api/research` sorts `.order('created_at', { ascending: false })`); failed-run, 0-target, and compare-cap-2 paths are crash-safe; no `any`, no missing `key`, a11y labels present.
+
+**3 findings, all resolved this pass:**
+- **F1 (LOW)** -- 6 em-dash characters in code comments (zero-dash rule). Fixed by the validator inline; a 7th introduced by the F3 fix comment was caught by the parent's post-fix dash grep and also fixed. File dash count now 0.
+- **F2 (MEDIUM)** -- the "fetch runs for selected league" `useEffect` had no `cancelled`/abort guard (unlike the sibling auto-load effect). Rapid league switching could let a stale slower response overwrite a newer one. Fixed: added the same `let cancelled = false` + cleanup pattern (`client.tsx:108-121`).
+- **F3 (LOW)** -- when the latest run is completed with 0 targets, `TopTargetsCard` returns null but the `QuietLabel` header still rendered, leaving a dangling section label. Fixed: the whole section is now gated on `latestLoading || targets.length > 0` (`client.tsx:383-401`).
+
+**Proof (gate re-run after fixes).** In-file grep `139,255,69`/`77,130,255`/`8bacff`/`121,166,255`/`79A6FF` = 0; em/en-dash count = 0; `type-check` 0 errors; `eslint` on the file exit 0; `test:run` 711 passed / 58 files; `build` Compiled successfully, `/prep/runs` prerendered static.
+
+**Files.** `src/app/(app)/prep/runs/client.tsx` (F1+F2+F3 fixes), `.claude/BUILD_PLAN.md` (SP-5V marked DONE + report), `.claude/WORKING_STATE.md` (pointer), this CHANGELOG.
+
+---
+
 ## 2026-08-23 / SP-5 -- Rebuild /prep/runs to approved SHIELD mockup
 
 **Class:** output (Design + QA lenses). $0. Built directly on Opus for mockup-match fidelity; fresh-context OTHER_FAMILY validator (SP-5V) runs next.
