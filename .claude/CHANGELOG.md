@@ -2,6 +2,27 @@
 
 ---
 
+## 2026-08-23 / PLAN-1 -- "Your Plan" board header (answer up top, GAP demoted)
+
+**Class:** shared + output UI (Architecture + QA + Design lenses). $0 (no API calls). Requested by Joe: stop leading the board with GAP (a bargain-detector he kept misreading as a talent score); instead put the sim's actual answer -- who to target, in what order, at what price -- at the top of the board, and leave GAP as the small footnote it always should have been.
+
+**What it is.** A restrained header panel that sits ON the existing `/prep/board` page (NOT a new screen/route) and answers the draft in one glance:
+- **1 - The Anchor** (the one brick-red moment): the stud that appears in the most top sim combos, its top pairing record, and a walk-away price.
+- **2 - Second big buy - pick one**: the other stud in each top pairing, best-graded first, `best` chip on the top grade, each with its pairing record + walk-up price.
+- **3 - Pockets**: players the room underprices (`pocket`/`sleeper` tags), worth vs room + walk price, `INJ` tag on durability/injury; the anchor and second-buys are de-duped out so it's a one-glance set of NEW names.
+- **Let them overpay**: dim strip of `tax`-tagged players (room/worth).
+The board table stays below as the lookup tool; its GAP value is already the small `+X pocket` / `X hot` footnote chip.
+
+**Derivation (no hand-entered picks).** New pure `src/lib/prep/draft-plan.ts` `buildDraftPlan(dataset)` reads the SAME published research dataset the board already loads (via `useResearchDataset`), using the identical rules `scripts/research-run.ts` uses for its report: combos ranked by `sim.grade.meanWins`; pockets = `pocket`/`sleeper` tags by `valueGap` desc; overpays = `tax` by `valueGap` asc; room read = `leagueIntel.positionalInflation`; walk-away = solver-fit `target_pricing.walkUp`, falling back to `ceilingValue`. When the dataset has no combos the panel still renders the lists it can, and renders nothing at all when there's no dataset.
+
+**Design.** Approved direction: `.claude/mockups/board-plan-panel-direction.html`. Real SHIELD tokens (Saira Condensed / JetBrains Mono, `--ffi-volt` brick-red anchor, position-chip palette). Mobile-first. No em-dashes (repo lint rule).
+
+**Files.** `src/lib/prep/draft-plan.ts` (new, +view-model), `src/lib/prep/draft-plan.test.ts` (new, 6 tests), `src/components/prep/draft-plan-panel.tsx` (new), `src/app/(app)/prep/board/client.tsx` (import + `useMemo(buildDraftPlan)` + render above the board), `.claude/launch.json` (verify port entry).
+
+**Proof (pasted).** `npm run type-check` clean; `npm run test:run` -> **58 files, 711 passed, 0 failed** (705 prior + 6 new); `npm run lint` -> new files 0 errors/0 warnings (34 pre-existing errors in untouched files unchanged). Rendered live on my own dev server (port 3141) against the published Supabase dataset: panel shows Gibbs anchor ($84, "in 7 of 8 top combos"), Puka/CMC/Bijan/JSN/ARSB second-buys with records+prices, Zay Flowers/G.Wilson/Burden/Daniels/DEFs/Hurts pockets with INJ tags, overpay strip, and the board below with GAP as the `+$6 POCKET` footnote. (Numbers reflect the live published dataset snapshot, which differs from the fresh `report.md` run -- the panel is data-driven, not pinned to prose.)
+
+---
+
 ## 2026-08-22 / VAL-2.3 -- injury-risk-adjusted display worth (kills the false injury POCKET star)
 
 **Class:** shared (Architecture + QA lenses). `convert.ts` is the single shared read path. $0 (no API calls). Requested by Joe after he caught that nearly every `(INJ)` player was getting a target star.

@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Board Plan Panel - Design Direction</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Saira:wght@400;500;600;700&family=Saira+Condensed:wght@500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  /* Real Nasties SHIELD tokens, pulled from src/app/globals.css */
+  :root{
+    --ffi-bg-1:#08101c; --ffi-surface-2:#1a2637; --ffi-surface-3:#26364e;
+    --ffi-hairline:rgba(180,200,224,0.10);
+    --ffi-volt:#a63c41; --ffi-title-red:#c25a5e;
+    --ffi-blue:#5fa8e0; --ffi-blue-bright:#7fc0ea;
+    --ffi-ink:#eaf1f8; --ffi-ink-2:#9fb2c6; --ffi-ink-3:#5e708a;
+    --ffi-pos-qb:#ff6e8a; --ffi-pos-rb:#56e0a0; --ffi-pos-wr:#6ca8ff; --ffi-pos-te:#ffb05c; --ffi-pos-def:#637396;
+    --ffi-danger:#ff6e8a;
+    --cond:'Saira Condensed',system-ui,sans-serif;
+    --body:'Saira',system-ui,sans-serif;
+    --mono:'JetBrains Mono',monospace;
+    --display:'Anton',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--body);background:var(--ffi-bg-1);color:var(--ffi-ink);
+    min-height:100vh;padding:16px 12px 60px;-webkit-font-smoothing:antialiased}
+  .phone{max-width:430px;margin:0 auto}
+
+  /* ---- page header (as the board already looks) ---- */
+  .screen-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:14px;padding:0 2px}
+  .screen-head .t{font-family:var(--display);font-size:26px;letter-spacing:.01em;color:var(--ffi-ink)}
+  .screen-head .t em{font-style:normal;color:var(--ffi-title-red)}
+  .screen-head .meta{font-family:var(--mono);font-size:10px;color:var(--ffi-ink-3)}
+
+  /* ================= THE PANEL ================= */
+  .panel{border:1px solid var(--ffi-hairline);border-radius:16px;overflow:hidden;
+    background:linear-gradient(180deg,#101a2b,#0b1422);margin-bottom:10px}
+  .panel-head{display:flex;align-items:center;gap:9px;padding:13px 15px 11px;border-bottom:1px solid var(--ffi-hairline)}
+  .panel-head .kick{font-family:var(--cond);font-weight:800;letter-spacing:.14em;text-transform:uppercase;
+    font-size:15px;color:var(--ffi-ink)}
+  .panel-head .kick b{color:var(--ffi-title-red);font-weight:800}
+  .panel-head .src{margin-left:auto;font-family:var(--mono);font-size:9px;color:var(--ffi-ink-3);text-align:right;line-height:1.35}
+
+  .sect{padding:12px 15px;border-bottom:1px solid var(--ffi-hairline)}
+  .sect:last-child{border-bottom:none}
+  .sect-label{font-family:var(--cond);font-weight:700;letter-spacing:.22em;text-transform:uppercase;
+    font-size:9.5px;color:var(--ffi-ink-3);margin-bottom:9px}
+
+  /* anchor line - the ONE brick-red moment */
+  .anchor{display:flex;align-items:center;gap:10px;border-left:2.5px solid var(--ffi-volt);
+    background:rgba(166,60,65,0.06);border-radius:11px;padding:10px 12px;margin:-2px 0}
+  .pos{font-family:var(--cond);font-weight:700;font-size:11px;padding:4px 7px;border-radius:7px;line-height:1;flex-shrink:0}
+  .pos.rb{background:rgba(86,224,160,0.18);color:var(--ffi-pos-rb)}
+  .pos.wr{background:rgba(108,168,255,0.18);color:var(--ffi-pos-wr)}
+  .pos.qb{background:rgba(255,110,138,0.18);color:var(--ffi-pos-qb)}
+  .pos.def{background:rgba(99,115,150,0.20);color:#93a6c2}
+  .nm{font-family:var(--cond);font-weight:800;font-size:17px;color:#fff;line-height:1;flex:1;min-width:0}
+  .nm .sub{display:block;font-family:var(--mono);font-size:9px;color:var(--ffi-ink-3);font-weight:500;margin-top:3px;letter-spacing:.02em}
+  .walk{text-align:right;flex-shrink:0}
+  .walk .big{font-family:var(--mono);font-weight:700;font-size:19px;color:var(--ffi-blue);line-height:1}
+  .walk .cap{font-family:var(--cond);font-weight:700;font-size:8px;letter-spacing:.10em;text-transform:uppercase;color:var(--ffi-ink-3);margin-top:3px}
+  .tagline{font-family:var(--cond);font-weight:700;font-size:9px;letter-spacing:.10em;text-transform:uppercase;
+    color:var(--ffi-title-red);background:rgba(166,60,65,0.14);border:1px solid rgba(166,60,65,0.34);
+    border-radius:6px;padding:2px 6px;flex-shrink:0}
+
+  /* pick-one rows */
+  .opt{display:flex;align-items:center;gap:10px;padding:8px 2px;border-bottom:1px solid rgba(180,200,224,0.055)}
+  .opt:last-child{border-bottom:none}
+  .opt .nm2{font-family:var(--cond);font-weight:700;font-size:14.5px;color:var(--ffi-ink);flex:1}
+  .opt .rec{font-family:var(--cond);font-weight:700;font-size:8px;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--ffi-blue-bright);border:1px solid rgba(95,168,224,0.30);background:rgba(95,168,224,0.10);border-radius:5px;padding:1px 5px}
+  .opt .price{font-family:var(--mono);font-weight:700;font-size:14px;color:var(--ffi-blue)}
+  .opt .grade{font-family:var(--mono);font-size:10px;color:var(--ffi-ink-3);width:52px;text-align:right}
+  .note{font-family:var(--body);font-size:11px;color:var(--ffi-ink-2);margin-top:9px;line-height:1.45}
+  .note b{color:var(--ffi-ink)}
+
+  /* pocket list - compact rows, mono walk price on the right */
+  .pk{display:flex;align-items:center;gap:9px;padding:6px 2px}
+  .pk .nm3{font-family:var(--cond);font-weight:600;font-size:13.5px;color:var(--ffi-ink);flex:1}
+  .pk .wr2{font-family:var(--mono);font-size:10px;color:var(--ffi-ink-3);white-space:nowrap}
+  .pk .win{font-family:var(--mono);font-weight:700;font-size:13px;color:var(--ffi-pos-rb);white-space:nowrap;width:38px;text-align:right}
+  .pk .inj{font-family:var(--cond);font-weight:700;font-size:7.5px;letter-spacing:.06em;color:var(--ffi-pos-te);
+    border:1px solid rgba(255,176,92,0.28);border-radius:4px;padding:0 3px;line-height:1.5}
+
+  /* overpay strip - dim */
+  .over{font-family:var(--body);font-size:11.5px;color:var(--ffi-ink-3);line-height:1.6}
+  .over b{color:var(--ffi-ink-2);font-weight:600}
+  .over .p{font-family:var(--mono);color:var(--ffi-danger);font-size:10.5px}
+
+  /* ================= BOARD BELOW (unchanged, GAP demoted) ================= */
+  .board-label{font-family:var(--cond);font-weight:700;letter-spacing:.2em;text-transform:uppercase;
+    font-size:10px;color:var(--ffi-ink-3);margin:16px 2px 8px}
+  .row{display:flex;align-items:center;gap:10px;background:var(--ffi-surface-2);border:1px solid var(--ffi-hairline);
+    border-radius:14px;padding:12px 14px;margin-bottom:6px}
+  .row.tgt{border-left:2.5px solid var(--ffi-blue)}
+  .row .rk{font-family:var(--mono);font-weight:700;font-size:22px;color:var(--ffi-blue);width:28px;text-align:center;flex-shrink:0;letter-spacing:-.02em}
+  .row .rk.el{color:var(--ffi-blue-bright)}
+  .row .mid{flex:1;min-width:0}
+  .row .mid .rn{font-family:var(--cond);font-weight:800;font-size:16px;color:#fff;line-height:1}
+  .row .mid .rm{font-family:var(--mono);font-size:10px;color:var(--ffi-ink-3);margin-top:3px}
+  .row .val{text-align:right;flex-shrink:0}
+  .row .val .v{font-family:var(--mono);font-weight:700;font-size:20px;color:var(--ffi-blue);line-height:1}
+  .row .val .r{font-family:var(--mono);font-size:10px;color:var(--ffi-ink-3);margin-top:3px}
+  .row .val .foot{display:inline-block;margin-top:4px;font-family:var(--cond);font-weight:700;font-size:8.5px;
+    letter-spacing:.06em;text-transform:uppercase;border-radius:5px;padding:2px 5px}
+  .foot.pocket{color:var(--ffi-blue);background:rgba(95,168,224,0.12);border:1px solid rgba(95,168,224,0.28)}
+  .foot.tax{color:var(--ffi-danger);background:rgba(255,110,138,0.10);border:1px solid rgba(255,110,138,0.22)}
+
+  .caption{font-family:var(--body);font-size:11px;color:var(--ffi-ink-3);line-height:1.55;margin-top:16px;
+    border-top:1px solid var(--ffi-hairline);padding-top:12px}
+  .caption b{color:var(--ffi-ink-2)}
+</style>
+</head>
+<body>
+<div class="phone">
+
+  <div class="screen-head">
+    <div class="t">Draft <em>Board</em></div>
+    <div class="meta">$200 &middot; PPR &middot; no-K</div>
+  </div>
+
+  <!-- ================= THE NEW PANEL ================= -->
+  <div class="panel">
+    <div class="panel-head">
+      <div class="kick">Your <b>Plan</b></div>
+      <div class="src">10,400 sims of your room<br>graded on wins</div>
+    </div>
+
+    <!-- ANCHOR -->
+    <div class="sect">
+      <div class="sect-label">1 &middot; The Anchor &mdash; win him</div>
+      <div class="anchor">
+        <span class="pos rb">RB</span>
+        <span class="nm">Jahmyr Gibbs<span class="sub">DET &middot; BYE 6 &middot; in 10 of 10 top builds</span></span>
+        <span class="tagline">Anchor</span>
+        <span class="walk"><span class="big">$86</span><span class="cap">walk-away</span></span>
+      </div>
+    </div>
+
+    <!-- SECOND BUY -->
+    <div class="sect">
+      <div class="sect-label">2 &middot; Second big buy &mdash; pick one</div>
+      <div class="opt"><span class="pos wr">WR</span><span class="nm2">Jaxon Smith-Njigba</span><span class="rec">best</span><span class="grade">8.9-5.1</span><span class="price">$75</span></div>
+      <div class="opt"><span class="pos wr">WR</span><span class="nm2">Amon-Ra St. Brown</span><span class="rec">best</span><span class="grade">8.9-5.1</span><span class="price">$69</span></div>
+      <div class="opt"><span class="pos rb">RB</span><span class="nm2">Bijan Robinson</span><span class="grade">8.8-5.2</span><span class="price">$75</span></div>
+      <div class="note"><b>A WR beats a 2nd elite RB here.</b> Skip Barkley + Gibbs &mdash; it never completes a winning $200 roster.</div>
+    </div>
+
+    <!-- POCKETS -->
+    <div class="sect">
+      <div class="sect-label">3 &middot; Pockets &mdash; your room sleeps on these</div>
+      <div class="pk"><span class="nm3">Bo Nix</span><span class="pos qb">QB</span><span class="wr2">worth $33 &middot; room $1</span><span class="win">$17</span></div>
+      <div class="pk"><span class="nm3">Jalen Hurts</span><span class="pos qb">QB</span><span class="wr2">worth $33 &middot; room $13</span><span class="win">$23</span></div>
+      <div class="pk"><span class="nm3">Quinshon Judkins</span><span class="pos rb">RB</span><span class="wr2">worth $33 &middot; room $12</span><span class="inj">INJ</span><span class="win">$22</span></div>
+      <div class="pk"><span class="nm3">Zay Flowers</span><span class="pos wr">WR</span><span class="wr2">worth $41 &middot; room $24</span><span class="inj">INJ</span><span class="win">$32</span></div>
+      <div class="pk"><span class="nm3">Garrett Wilson</span><span class="pos wr">WR</span><span class="wr2">worth $40 &middot; room $23</span><span class="win">$30</span></div>
+      <div class="pk"><span class="nm3">Courtland Sutton</span><span class="pos wr">WR</span><span class="wr2">worth $18 &middot; room $1</span><span class="win">$10</span></div>
+      <div class="pk"><span class="nm3">Pittsburgh</span><span class="pos def">DEF</span><span class="wr2">worth $13 &middot; room $1</span><span class="win">$7</span></div>
+    </div>
+
+    <!-- LET THEM OVERPAY -->
+    <div class="sect">
+      <div class="sect-label">Let them overpay &mdash; walk away</div>
+      <div class="over">
+        <b>CeeDee Lamb</b> <span class="p">$60/$49</span> &middot; <b>Drake London</b> <span class="p">$54/$41</span> &middot;
+        <b>Nico Collins</b> <span class="p">$42/$25</span> &middot; <b>George Pickens</b> <span class="p">$39/$23</span> &middot;
+        <b>Joe Burrow</b> <span class="p">$23/$5</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= EXISTING BOARD (GAP demoted to footnote) ================= -->
+  <div class="board-label">The Board &mdash; look anyone up</div>
+
+  <div class="row tgt">
+    <span class="rk el">01</span>
+    <span class="pos rb">RB</span>
+    <span class="mid"><span class="rn">Jahmyr Gibbs</span><span class="rm">DET &middot; BYE 6</span></span>
+    <span class="val"><span class="v">$96</span><span class="r">room ~$76</span><br><span class="foot pocket">+$6 pocket</span></span>
+  </div>
+  <div class="row">
+    <span class="rk el">02</span>
+    <span class="pos wr">WR</span>
+    <span class="mid"><span class="rn">Amon-Ra St. Brown</span><span class="rm">DET &middot; BYE 6</span></span>
+    <span class="val"><span class="v">$74</span><span class="r">room ~$64</span></span>
+  </div>
+  <div class="row">
+    <span class="rk">14</span>
+    <span class="pos wr">WR</span>
+    <span class="mid"><span class="rn">Drake London</span><span class="rm">ATL &middot; BYE 11</span></span>
+    <span class="val"><span class="v">$41</span><span class="r">room ~$54</span><br><span class="foot tax">-$5 tax</span></span>
+  </div>
+
+  <div class="caption"><b>The idea:</b> the panel is a new header on the board you already have &mdash; it reads the same sim data and tells you the answer up top (anchor / second buy / pockets / avoids with walk-away prices). The board table stays underneath as your lookup tool, and GAP shrinks to the small "pocket / tax" footnote it always should have been. <b>Design direction only &mdash; nothing wired.</b></div>
+
+</div>
+</body>
+</html>

@@ -6,6 +6,7 @@ import { Loader2, AlertCircle, RefreshCw, CheckCircle2, Star, ArrowDown, ArrowUp
 import { DraftBoardTable } from '@/components/prep/draft-board-table'
 import { PositionBreakdown } from '@/components/prep/position-breakdown'
 import { LeagueIntelPanel } from '@/components/prep/league-intel-panel'
+import { DraftPlanPanel } from '@/components/prep/draft-plan-panel'
 import { Nameplate } from '@/components/ui/shield'
 import {
   scorePlayersWithStrategy,
@@ -16,6 +17,7 @@ import { cacheToPlayers } from '@/lib/players/convert'
 import { useUserTags, useToggleTag } from '@/hooks/use-user-tags'
 import { useResearchDataset } from '@/hooks/use-research-dataset'
 import { buildEnrichmentMap } from '@/lib/research/dataset-enrichment'
+import { buildDraftPlan } from '@/lib/prep/draft-plan'
 import type { Strategy } from '@/lib/supabase/database.types'
 import type { DraftFormat, Player, Position } from '@/lib/players/types'
 
@@ -114,6 +116,9 @@ export function DraftBoardClient() {
     () => (dataset ? buildEnrichmentMap(dataset.players) : undefined),
     [dataset],
   )
+  // "Your Plan" header view-model - anchor / second-buy / pockets / overpays,
+  // all derived from the same dataset (no hand-entered picks).
+  const draftPlan = useMemo(() => buildDraftPlan(dataset), [dataset])
 
   // Fetch leagues — single-league app: The Nasties (is_active) sorts to leagues[0].
   const fetchLeagues = useCallback(async () => {
@@ -338,6 +343,9 @@ export function DraftBoardClient() {
 
       {/* ── SCREEN HEADER ── */}
       <BoardHeader leagueName={selectedLeague?.name} />
+
+      {/* ── YOUR PLAN (answer up top, derived from the same dataset) ── */}
+      {dataset && !datasetEmpty && <DraftPlanPanel plan={draftPlan} />}
 
       {dataset && !datasetEmpty && <LeagueIntelPanel intel={dataset.leagueIntel} />}
 
