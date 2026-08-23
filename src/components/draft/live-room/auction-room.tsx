@@ -42,6 +42,8 @@ import { BlockPickerSheet, type BlockPickerFilter } from './block-picker-sheet'
 import { FixPickSheet } from './fix-pick-sheet'
 import { ResearchView } from './research-view'
 import { InlinePlayersPanel } from './inline-players-panel'
+import { DollarBinPanel } from './dollar-bin'
+import { selectDollarBin } from '@/lib/draft/dollar-bin'
 
 const TIER_POSITIONS: Position[] = ['QB', 'RB', 'WR', 'TE']
 const FLEX_ELIGIBLE = new Set<Position>(['RB', 'WR', 'TE'])
@@ -227,6 +229,13 @@ export function AuctionDraftRoom({
     }
     return out
   }, [available, inflation, openSlotsByPosition, myMaxBid, myBudget, leagueBudget])
+
+  // LB-3: the Dollar Bin - Joe's starred watchlist (pinned) + the model's $1-$3
+  // darts (unstarred, priced in the $1 bin, with a real reason to beat the tag).
+  const dollarBin = useMemo(
+    () => selectDollarBin(available, repriced, isTarget),
+    [available, repriced, isTarget],
+  )
 
   // --- What To Do + rule-based confidence for the player on the block -------
   const { advice, confidence } = useMemo(() => {
@@ -516,6 +525,16 @@ export function AuctionDraftRoom({
               isTarget={isTarget}
               onToggleTarget={onToggleTarget}
               onSelectPlayer={setOnBlockPlayer}
+            />
+
+            {/* LB-3: Dollar Bin - starred watchlist + model $1-$3 darts */}
+            <DollarBinPanel
+              bin={dollarBin}
+              onToggleTarget={onToggleTarget}
+              onSelectPlayer={id => {
+                const sp = available.find(s => s.player.id === id)
+                if (sp) setOnBlockPlayer(sp.player)
+              }}
             />
           </>
         )}

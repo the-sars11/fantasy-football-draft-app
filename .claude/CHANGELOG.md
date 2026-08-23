@@ -2,6 +2,30 @@
 
 ---
 
+## 2026-08-23 / LB-3 -- Dollar Bin Watch (starred watchlist + model $1-$3 darts, one shared star)
+
+**Class:** output (UI) + shared. $0, no Claude API. Built directly on Opus, single-threaded. Look already Joe-approved (`research-output/LIVE_BOARD_MOCKUP.html` Dollar Bin section, "looks good").
+
+**Why.** LB Phase 3 -- give Joe a real end-game plan for the $1 tier. Two groups, ONE shared piece of state (the existing star / target -- no new "watch" concept, per Joe's rule): (1) STARRED = his watchlist, pinned at the top regardless of price so it surfaces the instant prices collapse; (2) DARTS = unstarred players sitting in the $1-to-$3 room band that carry a real reason to beat that tag (our model's upside, positive VORP, or a flagged sleeper) -- not "whoever is highest left."
+
+**What shipped:**
+- **`src/lib/draft/dollar-bin.ts`** (NEW) -- pure, deterministic selection. `selectDollarBin(available, repriced, isTarget)` returns `{ starred, darts }`. STARRED = every available player Joe has starred, best-first by combinedScore, pinned no matter the price. DARTS = unstarred, room price (live repriced room preferred over pre-draft `expectedRoomPrice`) <= `DOLLAR_BAND` ($3), AND a real beat signal (`analysis.isSleeper` || `upsideValue > 0` || `vorp > 0`), ranked best-first by model upside (VORP breaks ties), capped at `DART_MAX` (6). `priceLabel()` -> "$1" / "$1 to $2" / "$1 to $3". Descriptors trace ONLY to real fields (`ecrPositionRank`/`positionRankByPoints`, `upsideValue`, `vorp`, `isSleeper`) -- the mockup's hand-written scouting notes ("if Swift misses") were illustrative filler and were deliberately NOT reproduced.
+- **`src/components/draft/live-room/dollar-bin.tsx`** (NEW) -- presentational `DollarBinPanel`. Starred rows (blue ★) pinned on top; a "model darts" divider; darts (hollow ☆) below. Each row: star toggle + name + `POS## · signal · +$X upside` + price band (the "to $N" tail set smaller, per the mockup). Clicking any star calls the SAME `onToggleTarget` the Value Board uses, so Joe can pin a dart or drop a stale watch from right here. Empty state prompts him to star someone. Split-explainer note at the bottom.
+- **`src/components/draft/live-room/auction-room.tsx`** (WIRED) -- new `dollarBin` memo (`selectDollarBin(available, repriced, isTarget)`); renders `<DollarBinPanel>` directly under the Value Board, threading `onToggleTarget` (shared star) and an `onSelectPlayer` that maps id -> Player -> `setOnBlockPlayer`.
+- **New tests:** `src/lib/draft/__tests__/dollar-bin.test.ts` (10: priceLabel bands, starred-pinned-regardless-of-price, dart requires a beat signal, above-band excluded, live-repriced room overrides pre-draft, best-first rank + DART_MAX cap, sleeper/upside/VORP labels from real fields). `src/components/draft/live-room/__tests__/dollar-bin.test.tsx` (7: empty prompt, starred filled star, divider only with both groups, price-band tail, star click fires shared toggle, explainer note).
+
+**Proof (VERIFY, pasted):**
+- `npm run type-check` -> **0 errors**.
+- Targeted `eslint` on all 5 touched files -> **clean** (no output). Repo's 30 pre-existing errors are all in untouched files (research sources, `require()` scripts) -- none introduced by LB-3.
+- `npm run test:run` -> **779 passed / 65 files** (+17 from the two new dollar-bin test files; 0 failures).
+- **Live render (shared-tree dev server on :3003 via `/draft/live?sim=1`, mid-sim R5/pick 56):** Dollar Bin Watch mounts clean under the Value Board. With nothing starred it shows 6 model darts, each with a real posRank + `VORP+` + concrete upside number + price band (Zach Charbonnet RB47 +$15 upside $1; Dallas Goedert TE14 +$12 $1; Denver DEF2 +$11 $1 to $3; Kyler Murray QB17 +$8 $1), the empty-watchlist path correctly hides the divider, and the split-explainer note renders. Star toggle is wired to the shared `onToggleTarget`: proven by unit + render tests. (Live star-flip is NOT demonstrable in sim mode -- the whole app's target persistence writes to Supabase against the mock `demo-league` non-UUID and 404s identically for the Value Board star; a real Supabase-backed draft session flips it.)
+
+**NOT done / next:** `on-the-block-card.tsx` still shows the existing advisor number, not the repriced You/Room -- deferred (out of LB scope so far). Mine/gone row interleaving in the Value Board deferred (panel iterates `available` only). **Not committed/pushed at time of writing -- master push = live Vercel deploy, HARD-HALT for Joe's go.**
+
+**Files.** NEW: `src/lib/draft/dollar-bin.ts`, `src/components/draft/live-room/dollar-bin.tsx`, `src/lib/draft/__tests__/dollar-bin.test.ts`, `src/components/draft/live-room/__tests__/dollar-bin.test.tsx`. EDITED: `src/components/draft/live-room/auction-room.tsx`.
+
+---
+
 ## 2026-08-23 / LB-2 -- Live board wired into the cockpit (Value Board + Market Pulse, strategy strip retired)
 
 **Class:** output (UI) + shared. $0, no Claude API. Built directly on Opus, single-threaded. Look already Joe-approved (`research-output/LIVE_BOARD_MOCKUP.html`, "looks good"); this is the real SHIELD-component build of that mockup.
