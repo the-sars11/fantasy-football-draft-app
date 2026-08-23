@@ -1,5 +1,95 @@
 # Bug Hunt Log
 
+## Hunt: 2026-08-22 -- FULL mode (static + build + tests + lint) -- Scope: full project
+
+**Project:** fantasy_football_draft_app
+**Type:** TypeScript / Next.js 16 (App Router) + React 19 + Supabase
+**Auditor:** Claude Code
+**Mode:** FULL -- static discovery + `npm run build` + `npm run test:run` + `npm run lint`. $0 (no live AI calls). This is the `/bug-hunt full` portion left open on R13.
+
+### Summary
+
+| Severity | Count |
+|----------|-------|
+| CRITICAL | 0 |
+| HIGH | 0 |
+| MEDIUM | 1 |
+| LOW | 4 |
+
+| Category | Count |
+|----------|-------|
+| Logic | 1 (theoretical, config-impossible) |
+| Data Quality | 1 |
+| Config | 2 |
+| UX | 1 |
+
+**Headline:** the draft-core advisory engine -- the app's North Star ship-critical path (`what-to-do.ts`, `auction-advisor.ts`, `flow-monitor.ts`, `pivot-detector.ts`, `explain.ts`, `state.ts`, `room-target-pricing.ts`, `roster-solver.ts`) -- is **clean**: no CRITICAL/HIGH findings, zero TODO/stub/mock markers, all `JSON.parse` wrapped in try/catch with shape validation, no loose equality (every `==`/`!=` is an idiomatic `== null` guard), and money/pace math is null-guarded. All 5 findings are in **non-core** surfaces (in-season Phase 8 features, dev/mockup/backtest scripts, pre-existing lint debt). Build clean, 690/690 tests pass.
+
+### Dynamic gate results (FULL mode)
+
+- **`npm run build`** -> clean, all 30 routes prerendered, exit 0.
+- **`npm run test:run`** -> 56 files, **690 passed / 0 failed**.
+- **`npm run lint`** -> 148 problems (36 errors, 112 warnings). Near the R13 baseline (39 err / 108 warn); "0 new" in draft-core. See BUG-BH0822-02.
+- **`npm run type-check`** -> 0 errors.
+
+### Findings
+
+#### MEDIUM
+
+##### BUG-BH0822-01: In-season Waivers page renders fabricated "mock" analysis + 2 unimplemented action stubs
+- **File:** `src/app/(app)/season/waivers/page.tsx:62-65, 75, 114, 119`
+- **Category:** Data Quality
+- **Effort:** L (needs the real waiver-analysis endpoint built)
+- **Description:** The Waivers page builds a `WaiverWireAnalysis` object via `buildMockAnalysis(data.targets)` and renders it as if it were real analysis. Comments say "Build a mock analysis object for the UI / In production, this would come from the full analysis endpoint." Two action handlers are `// TODO: Implement watchlist functionality` and `// TODO: Implement bid functionality` (buttons that do nothing).
+- **Evidence:** `page.tsx:62` "// Build a mock analysis object for the UI"; `page.tsx:75` `const buildMockAnalysis = ...`; `page.tsx:114/119` TODO stubs.
+- **Impact:** Violates the project's no-fabricated-data standard for a user-facing surface. **Out of the draft app's North Star scope** (in-season / Phase 8 is not the auction-draft advisor), so it does not block the draft ship, but the page should not present mock numbers as analysis. Recommend gating the page behind a "coming soon" state or wiring the real endpoint before any in-season use.
+
+#### LOW
+
+##### BUG-BH0822-02: 36 lint errors, concentrated in non-runtime dev/mockup/backtest files (pre-existing debt)
+- **Files:** `.claude/mockups/d0-themes*/build-themes*.js`, root `_dev_s5.js` / `_dev_s6.js`, `scripts/*.{ts,mjs}` (backtest/populate/verify tooling), plus a few runtime items: `src/components/draft/team-reports.tsx:233,307` (`any`), `src/app/(app)/season/waivers/page.tsx:175` (unescaped entity), `src/app/api/user-tags/route.ts:244` + `src/lib/draft/export.ts:315` (`prefer-const`), `src/lib/players/__tests__/recommendation.test.ts:71` (en-dash).
+- **Category:** Config
+- **Effort:** M (whole cleanup) / S (just the runtime handful)
+- **Description:** Error breakdown: ~11 en/em-dash (`no-restricted-syntax`), ~15 `no-explicit-any`, 7 `no-require-imports`, 2 `prefer-const`, 1 `react/no-unescaped-entities`. 30 of the 36 are in dev-only scripts and mockup build files that never ship in the app bundle. Only ~6 touch runtime code and all are cosmetic/type-quality, not behavior.
+- **Impact:** None on runtime behavior. This is accepted pre-existing debt (R13 shipped at "39 errors, 0 new"). One notable rule-of-house violation: the en-dash in `recommendation.test.ts:71` breaks the global no-em/en-dash rule. Recommend a dedicated lint-cleanup card rather than folding 36 fixes into this hunt (would balloon scope).
+
+##### BUG-BH0822-03: Budget-pace math produces NaN if `totalSlots===0` or `budget_total===0`
+- **File:** `src/lib/draft/auction-advisor.ts:223-224`
+- **Category:** Logic (theoretical)
+- **Effort:** S
+- **Description:** `pctSpent = (spent / mgr.budget_total) * 100` and `pctPicks = (mgr.picks.length / totalSlots) * 100`. `budget_total` is guarded non-null but not non-zero; `totalSlots` (sum of `roster_slots`) is not guarded against 0. Either being 0 yields NaN, which makes both pace comparisons false and silently pins `status` to `'on_track'`.
+- **Evidence:** `auction-advisor.ts:219` guards `== null` only; line 221 sums roster_slots with no floor.
+- **Impact:** Config-impossible for a real auction (Nasties is $200 / 14 slots, and league config validation enforces both). No reachable path today. Recommend a one-line guard (`if (totalSlots <= 0 || mgr.budget_total <= 0) return null`) for defensiveness.
+
+##### BUG-BH0822-04: Root `_dev_s5.js` / `_dev_s6.js` scratch scripts tracked and linted
+- **File:** `_dev_s5.js`, `_dev_s6.js` (repo root)
+- **Category:** Config
+- **Effort:** XS
+- **Description:** Two dev scratch scripts sit in the repo root, are tracked by git, and get picked up by ESLint (4 of the 36 errors). They are not part of the app.
+- **Impact:** Noise only. Recommend deleting them or moving to `scripts/` + gitignoring.
+
+##### BUG-BH0822-05: Bye-week distribution placeholder in post-draft export
+- **File:** `src/lib/draft/export.ts:226`
+- **Category:** Data Quality
+- **Effort:** S
+- **Description:** `// Bye week distribution (placeholder - would need bye week data)` -- the export's bye-week section is a stub.
+- **Impact:** Cosmetic gap in the post-draft export (not the live advisor). Bye data exists on `Player.byeWeek`, so this is wireable if the export section is wanted.
+
+### Recommended Fix Order
+
+1. **BUG-BH0822-03** (S) -- one-line defensive guard in the pace math; cheap, in the ship-critical engine, worth doing even though unreachable today.
+2. **BUG-BH0822-04** (XS) -- delete/relocate the two root `_dev_s*.js` scratch files.
+3. **BUG-BH0822-02** runtime subset (S) -- fix the ~6 runtime lint errors (2 `any` in team-reports, the unescaped entity, 2 prefer-const, the test-file en-dash) in a dedicated cleanup card; leave the 30 dev-script errors as accepted debt.
+4. **BUG-BH0822-01** (L) and **BUG-BH0822-05** (S) -- in-season / export polish; out of the draft North Star, defer until in-season work is scheduled.
+
+### Notes
+
+- **Draft-core is the clean part.** The advisory engine that decides the draft has no CRITICAL/HIGH findings. R13 + R14 hardening plus this session's F1 fix (live room now maps players through `cacheToPlayers`) leave the ship-critical path solid.
+- **Silent-failure scan clean in core.** All 3 `.catch(() => {})` sites are documented best-effort player fetches (players are non-critical / offline path); every `JSON.parse` is wrapped with try/catch + shape validation (`offline-cache.ts`, `prep/configure/actions.ts`, `auctioneer-feed/route.ts`).
+- **Gate at time of hunt:** build clean, 690/690 tests, type-check 0, lint 36 err (0 new in core) / 112 warn.
+
+---
+
 ## Hunt: 2026-08-18 -- FREE mode (static) -- Scope: D6b-2 change set
 
 **Project:** fantasy_football_draft_app

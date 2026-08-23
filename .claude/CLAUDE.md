@@ -219,7 +219,7 @@ See `.claude/REVIEW_LENSES.md` for full pre-check and verify checklists.
 | Cadence | Mode | Scope | Last Run | Next Run |
 |---------|------|-------|----------|----------|
 | Per-sprint | `free` ($0, static) | Changed modules | 2026-08-13 | next sprint |
-| Monthly | `full` (tests + build) | Full project | 2026-08-18 (R13: 1 HIGH, 3 MED, 3 LOW) | 2026-09-18 |
+| Monthly | `full` (tests + build) | Full project | 2026-08-22 (R13 closeout: 0 CRIT, 0 HIGH, 1 MED, 4 LOW -- all non-core) | 2026-09-22 |
 
 Run: `/bug-hunt free` or `/bug-hunt full`
 
