@@ -673,6 +673,21 @@ body.ffi-on-the-clock .stadium-atmos {
   border: 1px solid var(--ffi-hairline-bright);
   box-shadow: 0 16px 44px rgba(0, 0, 0, 0.5), 0 0 22px rgba(95, 168, 224, 0.1);
 }
+/* Opt-in static iridescent edge-sheen -- the .ffi-card-interactive rest state shown
+   at rest, for anchor panels like the (auth) card. Additive: only elements that add
+   .ffi-sheen get it. */
+.ffi-sheen { position: relative; overflow: hidden; }
+.ffi-sheen::before {
+  content: "";
+  position: absolute; inset: 0; border-radius: inherit; padding: 1px;
+  background: linear-gradient(115deg, transparent 22%, rgba(95, 168, 224, 0.5) 45%, rgba(166, 60, 65, 0.3) 55%, transparent 80%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  opacity: 0.55;
+  pointer-events: none;
+}
 .ffi-card-interactive {
   @apply rounded-2xl p-4 cursor-pointer;
   position: relative;

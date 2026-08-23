@@ -2,6 +2,55 @@
 
 ---
 
+## 2026-08-23 / SP-7 -- (auth) sign-in + sign-up rebuilt to SHIELD (approved SP-2 mockup screen 05)
+
+**Class:** output (UI). $0, no Claude API. Built directly on Opus, single-threaded. Look already Joe-approved (SP-2 mockups, 2026-08-18) so no new sign-off needed -- this is the from-scratch re-theme against that mockup.
+
+**Why.** SP-track (SHIELD Screen-Parity Sprint) -- the last unstyled surfaces were the two `(auth)` screens, still on stock shadcn (bg-background + a blur-3xl primary glow). SP-7 re-themes them to the navy broadcast cockpit while preserving every line of Supabase auth wiring.
+
+**What shipped (3 files rebuilt + 1 additive CSS class):**
+- **`src/app/(auth)/layout.tsx`** -- replaced the shadcn background + blur-3xl glow with the full-screen navy `.stadium-atmos` field + `.atmos-grain` overlay (same field the rest of the app uses), centered `max-w-md` content slot.
+- **`src/app/(auth)/sign-in/page.tsx`** -- rebuilt: Oswald "FANTASY" wordmark over the `.ffi-title-red` "DRAFT ADVISOR" Kanit gradient title, condensed-uppercase subtitle, panel = `.ffi-card-elevated .ffi-sheen`, danger-pink error alert, `.ffi-input .ffi-form-input` (red-volt focus) Email/Password fields, `FFIButton variant="hero"` brick CTA, steel-blue Forgot-password + Sign-up links. Preserves `useActionState(signIn)`, hidden `redirect` input, `useSearchParams` error handling, `Suspense` wrapper.
+- **`src/app/(auth)/sign-up/page.tsx`** -- same header/panel/field system; 4 fields (Full Name/Email/Password/Confirm, minLength preserved), `useActionState(signUp)`, the `state.success` "Check Your Email" branch re-themed with `.ffi-title-chrome`. All field names + validation preserved.
+- **`src/app/globals.css`** -- NEW additive opt-in class `.ffi-sheen` (static iridescent edge, the `.ffi-card-interactive` rest state made reusable) reproducing the mockup's `.sheen`. Additive only: nothing changes unless an element adds `.ffi-sheen`.
+
+**Proof (VERIFY, pasted):**
+- `npm run type-check` -> **0 errors**. `npm run lint` on the 3 auth files -> clean (exit 0). Retired-literal grep (green `139,255,69`/`8bff45`, off-token blues `77,130,255`/`8bacff`/`121,166,255`/`4d82ff`/`79A6FF`) across all 3 files -> **0** (grep exit 1 = none found). Dash check 0/0/0 on the 3 files; my `.ffi-sheen` CSS block dash-clean (0).
+- `npm run test:run` -> **749 passed / 61 files** (SP-7 added no tests, broke none).
+- `npm run build` -> Compiled successfully; `○ /sign-in` and `○ /sign-up` both prerendered static.
+- **Live render (DEV_MODE temporarily off, server restarted, both screens loaded, then DEV_MODE restored):** `/sign-in` and `/sign-up` render with FANTASY/DRAFT ADVISOR header + correct fields + wiring intact (read_page). Computed styles confirmed: `.stadium-atmos` fixed z0 steel-blue radial field; `.ffi-card-elevated.ffi-sheen` gradient (surface-3->surface-2) with sheen `::before` opacity 0.55; `.ffi-title-red` = Kanit + background-clip:text gradient; hero button brick `linear-gradient(#a63c41->#6e2225)` rounded-full; inputs carry `ffi-input ffi-form-input` (red-volt focus rule, globals.css:776, applies on real focus -- unpainted in headless read only because `document.hasFocus()` was false). Sign-up: elevated+sheen card, 4 volt inputs, brick CTA, red title all confirmed.
+
+**Decisions flagged:** (1) Added an additive shared-CSS class `.ffi-sheen` rather than misuse `.ffi-hero` (wrong colored bg) or `.ffi-card-interactive` (wrong click semantics). (2) The small `AuthHeader`/`Field` helpers are duplicated inline in both page files to keep the change scoped to the 3 plan-named files (no new shared module). (3) Live verification required temporarily flipping DEV_MODE off + a server restart because DEV_MODE redirects authed users off auth routes (`src/lib/supabase/middleware.ts:19`); DEV_MODE was restored to true and confirmed (/sign-in -> /prep again).
+
+**Files.** EDITED: `src/app/globals.css`, `src/app/(auth)/layout.tsx`, `src/app/(auth)/sign-in/page.tsx`, `src/app/(auth)/sign-up/page.tsx`. Docs: `.claude/BUILD_PLAN.md` (SP-7 [x]), `.claude/WORKING_STATE.md` (pointer -> SP-7V), this CHANGELOG. **Next: SP-7V (fresh-context OTHER_FAMILY validator).**
+
+---
+
+## 2026-08-23 / LB-1 -- Live-board dynamic repricing engine (Phase 1 of the "core action base")
+
+**Class:** shared (pure lib) + bugfix (tag taxonomy). $0, 100% rule-based, no Claude API. Built directly on Opus, single-threaded.
+
+**Why.** Joe's new direction for the live cockpit: kill the strategy lock-in and make the value board the app's *dynamic action base*. The board must reprice targets/prices live off (1) what the draft has actually done (auctioneer feed) and (2) Joe's current roster -- "if the league overpays for RB this year the app must adjust." Plus split the blanket INJ tag into injury RISK (fragile-but-healthy) vs injured-NOW. Joe approved the mockup (`research-output/LIVE_BOARD_MOCKUP.html`) and said build it into real SHIELD components. Phase 1 = the engine + tests only (no UI wired yet).
+
+**What shipped (3 new pure modules + tests, all deterministic):**
+- **`src/lib/draft/market-inflation.ts`** -- per-position live inflation = dollar-weighted `sum(actualPrice)/sum(baselineRoom)` over sold players, shrunk toward 1.0 by sample size (`1 + (raw-1)*n/(n+K)`, K=4) so one early sale is not treated as a trend. Zero-baseline scrubs skipped (no divide-by-zero). Moves the ROOM price only.
+- **`src/lib/draft/live-reprice.ts`** -- `repricePlayer`/`repriceBoard`: Room = baselineRoom x posInflation; You = baselineTarget x needMultiplier(openSlots) capped by solvency maxBid; pocket = You - Room (>=+$4 POCKET, <=-$4 TAX). Market inflation moves ROOM only; roster need moves YOUR target only -- the two drivers Joe named, cleanly separated.
+- **`src/lib/players/injury-flags.ts`** -- `classifyInjury`: FRAGILE = chronic durability factor <=0.90 (measured 15-season `durabilityPriceFactor`, healthy now); OUT = real current absence (Doubtful/Out/PUP/IR/Suspended). "Questionable" flags NEITHER (camp catch-all, already in the range). The two are independent.
+
+**Tag taxonomy change (`src/lib/players/tags.ts`):** `injury` tag id removed; replaced by `fragile` (warn/amber) + `out` (bad/danger). Consumers updated: `ffi-player-intel-card.tsx` TAG_STYLE + NEGATIVE_TAGS; `recommendation.ts` now cautions on OUT only ("he's injured now"), not the chronic risk (already priced in).
+
+**Proof (VERIFY, pasted):**
+- New tests: `injury-flags.test.ts`, `market-inflation.test.ts`, `live-reprice.test.ts` + updated `tags.test.ts`/`recommendation.test.ts`. Core scenario asserted: RB running +30% turns a slim RB pocket into a -$10 TAX; a soft WR Joe still needs (-20% room, 2 open slots) becomes a +$10 POCKET.
+- `npm run test:run` -> **749 passed / 61 files** (was 711; +38 new).
+- `npm run type-check` -> **0 errors** (nothing references the removed `injury` id).
+- `npm run lint` -> 0 NEW errors/warnings in the 6 touched files (repo's 30 pre-existing `no-explicit-any` errors in scripts/research untouched).
+
+**NOT done / next:** no UI wired yet (that's Phase 2: `market-pulse-strip.tsx`, evolve `inline-players-panel.tsx` into the Value Board, feed repriced target into `on-the-block-card.tsx`, delete `strategy-strip.tsx`). Not committed/pushed -- awaiting Joe's go (master push = live Vercel deploy).
+
+**Files.** NEW: `src/lib/draft/market-inflation.ts`, `src/lib/draft/live-reprice.ts`, `src/lib/players/injury-flags.ts`, `src/lib/draft/__tests__/market-inflation.test.ts`, `src/lib/draft/__tests__/live-reprice.test.ts`, `src/lib/players/__tests__/injury-flags.test.ts`. EDITED: `src/lib/players/tags.ts`, `src/lib/players/recommendation.ts`, `src/components/prep/ffi-player-intel-card.tsx`, `src/lib/players/__tests__/tags.test.ts`, `src/lib/players/__tests__/recommendation.test.ts`.
+
+---
+
 ## 2026-08-23 / SP-6V -- /settings rebuild validated (OTHER_FAMILY) -- PASS, 0 defects
 
 **Class:** output (validation). $0. Fresh-context Sonnet (OTHER_FAMILY, did NOT write SP-6), adversarial.
