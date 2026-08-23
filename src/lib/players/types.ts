@@ -60,12 +60,17 @@ export interface Player {
   // League-calibrated valuation (VAL-2.2, expert-anchored). Sourced from Joe's real
   // Nasties auction ledger (src/data/league-history/), NOT national curves.
   // ceilingValue        = our OPTIMISTIC naive-persistence worth (VORP $). Context
-  //                       + upside only; runs high on breakouts. NOT the price.
+  //                       + upside only; runs high on breakouts. NOT the price. The
+  //                       decision engine (sim/solver/advisor) reads THIS raw.
+  // riskAdjustedCeiling = ceilingValue after the VAL-2.3 injury haircut (chronic
+  //                       durability * acute designation). DISPLAY worth only -- it
+  //                       feeds expertAdjustedValue / valueGap / My Range so a hurt
+  //                       player stops lighting a false POCKET star. See injury-risk.ts.
   // expectedRoomPrice   = what Joe's room pays for this player's EXPERT (ECR) rank.
   //                       This is the number to bid against.
-  // expertAdjustedValue = expert-anchored worth = LAMBDA*ceiling + (1-LAMBDA)*room
-  //                       (VAL-2.2; low LAMBDA = a disciplined shrink toward the
-  //                       expert room price). PER-PLAYER, not a positional constant.
+  // expertAdjustedValue = expert-anchored worth = LAMBDA*riskAdjustedCeiling +
+  //                       (1-LAMBDA)*room (VAL-2.2/2.3; low LAMBDA = a disciplined
+  //                       shrink toward the room price). PER-PLAYER, injury-aware.
   // valueGap            = expertAdjustedValue - expectedRoomPrice, per player.
   //                       Positive = model + room agree he's underpriced; negative
   //                       = the room overpays. Drives the POCKET/TAX tags.
@@ -73,6 +78,7 @@ export interface Player {
   //                       our model sees more than the market. A breakout-at-a-
   //                       discount / late-round dart signal. Do NOT pay up for it.
   ceilingValue?: number
+  riskAdjustedCeiling?: number
   expectedRoomPrice?: number
   expertAdjustedValue?: number
   valueGap?: number

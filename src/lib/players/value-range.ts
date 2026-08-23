@@ -8,8 +8,11 @@
  * engine - nothing here is an invented ±% spread.
  *
  * THE MODEL (source: 'league'):
- *   ceiling = ceilingValue      - genuine worth in Nasties full-PPR/no-K scoring
- *                                 (roster-aware VORP $, budget-balanced to $2,400)
+ *   ceiling = riskAdjustedCeiling ?? ceilingValue - genuine worth in Nasties
+ *                                 full-PPR/no-K scoring (roster-aware VORP $,
+ *                                 budget-balanced to $2,400), after the VAL-2.3
+ *                                 injury haircut so the band and the POCKET star
+ *                                 agree; raw ceilingValue for rows without one (DEF).
  *   room    = expectedRoomPrice - what Joe's 12-team room has historically PAID
  *                                 for this positional rank (16-yr Nasties ledger)
  *   low  = min(ceiling, room)   - the cheaper of "his worth" and "what it costs"
@@ -49,7 +52,10 @@ export interface CalibratedValueRange {
  * it. See the file header for the model. Deterministic; safe on partial rows.
  */
 export function computeValueRange(p: Player): CalibratedValueRange {
-  const ceiling = p.ceilingValue
+  // Use the injury-risk-adjusted worth (VAL-2.3) when present so the band's high
+  // end and the POCKET star are driven by the SAME worth; fall back to raw ceiling
+  // for rows that have none (DEF / unpriced).
+  const ceiling = p.riskAdjustedCeiling ?? p.ceilingValue
   const room = p.expectedRoomPrice
 
   // LEAGUE band - both real Nasties-calibrated dollars present and the worth is

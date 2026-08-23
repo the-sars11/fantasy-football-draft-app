@@ -25,9 +25,13 @@ The prior plan (S1–S8 / P2 DR / P3 VAL) marked the app "done" while it (a) pri
 
 ## Next open item
 
-### ▶ ACTIVE FOCUS 2026-08-22 -- VAL-2.2 expert-anchored valuation blend DONE (code); board regen PENDING
+### ▶ ACTIVE FOCUS 2026-08-22 -- VAL-2.3 injury haircut DONE (code); board REPOINT to sim in progress
 
-Fixed the "all RB value / all WR prem" board bug. It was self-inflicted in VAL-2.1: `valueGap` was defined off a per-POSITION inflation constant, so its sign was pure position, no per-player signal. VAL-2.2 replaces it with `expertAdjustedValue = 0.3*ceiling + 0.7*room` (expert-anchored, Joe's pick), restoring per-player signal; POCKET is now expert-corroborated (suppressed when `rankSpread.std >= 20`). The live advisor/solver/sim never read `valueGap`, so they were never affected -- bug was display-only. Gate: type-check 0, **688/688 tests** (+4 regression), eslint 0 on 6 touched files. See CHANGELOG VAL-2.2. **PENDING: `npm run research:run` to regenerate `research-output/dataset.json` (stale pre-VAL-2.1 snapshot) -- needs Supabase service key + ESPN feed; until then the published board still shows stale numbers.** Full detail: `C:\Users\jrasa\.claude\plans\bright-percolating-pudding.md`.
+**VAL-2.3 (done, green).** Joe caught that nearly every `(INJ)` player was getting a target star (measured: injured starred ~4x healthy). Root cause: room price fades injury via ECR but `ceilingValue` (points-based) does not, so `valueGap` blew up for hurt players. Fix = new `src/lib/players/injury-risk.ts` risk-adjusts the DISPLAY worth only (chronic durability x acute designation, floored 0.3) before it drives `expertAdjustedValue`/`valueGap`/My Range. Raw `ceilingValue` untouched -> sim/solver/advisor unaffected (they carry their own measured risk model). Gate: **705/705 tests** (+ new `injury-risk.test.ts` + convert.test.ts acute regression). See CHANGELOG VAL-2.3.
+
+**Board data regen -- UNBLOCKED.** `.env.local` HAS `SUPABASE_SERVICE_ROLE_KEY` + `NEXT_PUBLIC_SUPABASE_URL`, so `npm run research:run` runs locally for **$0** (Supabase read + public ESPN feed, "No LLM"). Re-reads the 08-20 player cache and re-runs the engine over current code -> fresh `dataset.json` + `report.md`. Pushing it triggers a Vercel redeploy of the live board (the only visible step -- flag before push).
+
+**BOARD REPOINT (Joe-approved 2026-08-22).** Joe: GAP is not decision-useful ("who do I target and why?"). Approved repointing the board headline AWAY from GAP/stars and onto what the **sim** buys -- a tiered target list, GAP demoted to a footnote. Sim signal from today's dataset.json (26 strategies x 400 runs): **studs-and-duds/stars-and-scrubs win (8.1 wins, #2.2) over balanced (#4.4); Elite-QB/Elite-TE anchors finish WORST (#4.6-4.8). Gibbs is in 10/10 top strategies -- THE anchor. Second big buy is a WR (Burden/Smith/Flowers/Olave/ARSB), not a second elite RB. Get QB cheap, never anchor on it.** Next: design direction for the repoint -> Joe signoff -> build. Full detail: `C:\Users\jrasa\.claude\plans\bright-percolating-pudding.md`.
 
 ### ▶ PRIOR FOCUS 2026-08-22 -- R13 test hardening: LIVE-DRAFT ADAPTIVE ENGINE suite DONE
 

@@ -2,6 +2,26 @@
 
 ---
 
+## 2026-08-22 / VAL-2.3 -- injury-risk-adjusted display worth (kills the false injury POCKET star)
+
+**Class:** shared (Architecture + QA lenses). `convert.ts` is the single shared read path. $0 (no API calls). Requested by Joe after he caught that nearly every `(INJ)` player was getting a target star.
+
+**Root cause (surfaced by Joe).** The room prices a player off his EXPERT (ECR) rank, and the experts fade a hurt player's rank -> his `expectedRoomPrice` drops. But `ceilingValue` is built from projected fantasy points and does NOT fade injury nearly as hard, so `valueGap` (which rides ceiling) blew UP for injured players and lit a false POCKET star on them. Measured on the live pool: injured players got starred at ~4x the healthy rate (29% vs 7%), avg gap +1.8 vs +0.5; 41% of all stars were injured. The star was real arithmetic on a worth number that ignored risk the market had already priced in -- effectively telling Joe to "draft the all-injury team."
+
+**The fix (VAL-2.3, two separated defensible haircuts on the DISPLAY worth only).** New `src/lib/players/injury-risk.ts`:
+- **CHRONIC durability** -- reuses the engine's measured 15-season `durabilityPriceFactor` (games-played rate / position baseline, floored 0.75). Catches the fragile-vet case (McCaffrey) whether or not he carries a current designation.
+- **ACUTE designation** -- a severity-graded factor off the CURRENT `injury_status`: Questionable 0.95 (ESPN's broad camp catch-all, barely fades), Doubtful 0.70, Out 0.55, PUP 0.60, IR 0.40; any other non-healthy label 0.90. Healthy/active/probable/empty = 1.
+- The two MULTIPLY, floored at `RISK_WORTH_FLOOR = 0.3` so an IR stud keeps a real (small) worth, not $0.
+- `convert.ts`: computes `worthCeiling = riskAdjustedCeiling(...)` and blends THAT (not raw ceiling) into `expertAdjustedValue`; exposes new `riskAdjustedCeiling` field. `upsideValue` still rides RAW ceiling (healthy-upside lane).
+- `value-range.ts`: My Range high now uses `riskAdjustedCeiling ?? ceilingValue` so the band and the POCKET star agree.
+- `types.ts` / `tags.ts`: doc + hint/source copy updated to describe the injury-adjusted worth.
+
+**SCOPE (unchanged, verified).** Raw `ceilingValue` is UNTOUCHED. The decision engine (sim-engine, roster-solver, auction-advisor) reads `ceilingValue` directly and carries its OWN measured 15-season risk model -- so the sim's advice was never polluted by this display bug, and re-running the sim yields the identical result. Only the board display fields (`expertAdjustedValue`, `valueGap`, `riskAdjustedCeiling`, My Range) get the haircut. All `valueGap`/`expertAdjustedValue` readers use the same +/-4 threshold and keep working.
+
+**Proof (pasted).** `npm run test:run` -> **57 files, 705 passed, 0 failed** (working tree; includes the new VAL-2.3 blocks). New unit test `src/lib/players/__tests__/injury-risk.test.ts` (mock RiskModel: chronic x acute multiplication, floor clamp, zero-ceiling passthrough, $1 floor, severity ladder order). Extended `convert.test.ts` with acute-layer regression (PUP player gets lower `valueGap` than the same player healthy; Questionable barely moves it). Files: `src/lib/players/injury-risk.ts` (new), `convert.ts`, `types.ts`, `value-range.ts`, `tags.ts`, plus the two test files.
+
+---
+
 ## 2026-08-22 / L3 pace guard -- analyzeBudgetStrategy bails instead of emitting NaN on zero divisor
 
 **Class:** bugfix (QA lens). $0 (no API calls). Found by the R13 `/bug-hunt full` closeout (BUG-BH0822-03, LOW).

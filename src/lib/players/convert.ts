@@ -6,6 +6,7 @@
 import type { Player, Position } from './types'
 import type { CachedPlayer } from '@/lib/research/cache'
 import { expectedRoomPrice } from '@/lib/draft/league-calibration'
+import { riskAdjustedCeiling } from './injury-risk'
 import { dedupePlayerIdentities } from './dedupe-identities'
 import { imputeMissingProjections } from './impute-projections'
 
@@ -86,11 +87,24 @@ export function cacheToPlayer(cached: CachedPlayer): Player {
   const roomRank = ecrPositionRank ?? posRankPoints
   const expectedRoom =
     roomRank !== undefined ? expectedRoomPrice(appPos, roomRank) : undefined
+  // RISK-ADJUSTED WORTH (VAL-2.3): before blending, haircut our optimistic ceiling
+  // for injury risk the market has already priced into the ECR room price but our
+  // points-based ceiling ignores. Two measured/severity layers (chronic durability
+  // + current designation) live in injury-risk.ts. Without this the value gap blew
+  // up for hurt players and lit a false POCKET star on them (injured players were
+  // starred ~4x the healthy rate). Raw ceilingValue is untouched -- the sim/solver/
+  // advisor read that directly and carry their own risk model. See DR: VAL-2.3.
+  const worthCeiling = riskAdjustedCeiling(
+    ceilingValue,
+    cached.external_id,
+    appPos,
+    cached.injury_status,
+  )
   // EXPERT-ANCHORED WORTH (VAL-2.2): worth = a disciplined shrink of our
-  // optimistic model ceiling toward the expert (ECR) room price. Low LAMBDA =
-  // expert-anchored (Joe's choice); our optimism lives on ONLY in the separate
-  // upsideValue lane below. This restores PER-PLAYER signal (worth rides each
-  // player's own ceilingValue) while keeping the number close to what the room
+  // (now risk-adjusted) model ceiling toward the expert (ECR) room price. Low
+  // LAMBDA = expert-anchored (Joe's choice); our optimism lives on ONLY in the
+  // separate upsideValue lane below. This restores PER-PLAYER signal (worth rides
+  // each player's own ceiling) while keeping the number close to what the room
   // actually pays. The old VAL-2.1 "divide by positional inflation" collapsed
   // valueGap to expectedRoom * (1/mult - 1) -- a per-POSITION constant, so every
   // priced RB read as a pocket and every priced WR/TE as a tax, with zero
@@ -98,7 +112,7 @@ export function cacheToPlayer(cached: CachedPlayer): Player {
   const LAMBDA = 0.3
   const expertAdjustedValue =
     expectedRoom !== undefined && ceilingValue > 0
-      ? Math.max(1, Math.round(LAMBDA * ceilingValue + (1 - LAMBDA) * expectedRoom))
+      ? Math.max(1, Math.round(LAMBDA * worthCeiling + (1 - LAMBDA) * expectedRoom))
       : expectedRoom
   // valueGap = expert-anchored worth vs room price, PER PLAYER. Positive = model
   // and room agree he is underpriced here; negative = the room overpays. Clamped
@@ -143,6 +157,7 @@ export function cacheToPlayer(cached: CachedPlayer): Player {
     ecrPositionRank,
     // League-calibrated valuation (VAL-1.2) — Nasties ledger, not national.
     ceilingValue,
+    riskAdjustedCeiling: ceilingValue > 0 ? worthCeiling : undefined,
     expectedRoomPrice: expectedRoom,
     expertAdjustedValue,
     valueGap,

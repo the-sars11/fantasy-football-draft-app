@@ -9,11 +9,13 @@
  * question is "is he cheap or dear in THIS room," not "do experts rank him":
  *
  *   ELITE   - real FantasyPros tier 1. Anchor targets.            [FP tier]
- *   POCKET  - expert-anchored worth (VAL-2.2 blend) beats what     [blend worth
- *             the room pays for his EXPERT rank by >= $4, AND        vs ledger room,
- *             the experts aren't wildly split (rank std < 20).       expert-gated]
- *             Model + room agree he's underpriced. When the gap
- *             is there but experts ARE split, VOLATILE fires
+ *   POCKET  - injury-risk-adjusted, expert-anchored worth (VAL-2.2/  [blend worth
+ *             2.3 blend) beats what the room pays for his EXPERT       vs ledger room,
+ *             rank by >= $4, AND the experts aren't wildly split       expert-gated,
+ *             (rank std < 20). Model + room agree he's underpriced.    injury-adj]
+ *             The worth is haircut for injury first (injury-risk.ts)
+ *             so a hurt player no longer lights a false star. When
+ *             the gap is there but experts ARE split, VOLATILE fires
  *             instead (boom/bust) and the upsideValue lane carries
  *             the dollar upside -- it is NOT a corroborated pocket.
  *   TAX     - the room historically pays >= $4 OVER his worth.     [same as POCKET]
@@ -96,8 +98,8 @@ export function computePlayerTags(p: Player): PlayerTag[] {
         id: 'pocket',
         label: `+$${gap} POCKET`,
         tone: 'good',
-        hint: `Model + experts both beat your room's price here (~$${p.expertAdjustedValue} worth vs ~$${p.expectedRoomPrice} paid) - a corroborated value`,
-        source: 'VAL-2.2 expert-anchored worth vs Nasties room price',
+        hint: `Model + experts both beat your room's price here (~$${p.expertAdjustedValue} injury-adjusted worth vs ~$${p.expectedRoomPrice} paid) - a corroborated value`,
+        source: 'VAL-2.3 injury-risk-adjusted worth vs Nasties room price',
       })
     } else if (gap <= -DOLLAR_GAP) {
       tags.push({
@@ -105,7 +107,7 @@ export function computePlayerTags(p: Player): PlayerTag[] {
         label: `-$${Math.abs(gap)} TAX`,
         tone: 'bad',
         hint: `Room historically pays ~$${p.expectedRoomPrice} but he's only worth ~$${p.expertAdjustedValue} here - reputation premium, let him go`,
-        source: 'VAL-2.2 expert-anchored worth vs Nasties room price',
+        source: 'VAL-2.3 injury-risk-adjusted worth vs Nasties room price',
       })
     }
   }

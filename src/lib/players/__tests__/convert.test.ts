@@ -122,3 +122,39 @@ describe('cacheToPlayer - VAL-2.2 expert-anchored valuation', () => {
     expect(hi.valueGap as number).toBeGreaterThan(lo.valueGap as number)
   })
 })
+
+describe('cacheToPlayer - VAL-2.3 injury-risk-adjusted worth', () => {
+  // The acute (designation) layer needs no risk model, so it is deterministic
+  // here. The chronic durability layer is unit-tested in injury-risk.test.ts.
+  const base = {
+    position: 'RB' as const,
+    source_data: { pos_rank: 'RB5' },
+    auction_values: { vorp_12_200_ppr: 60 },
+  }
+
+  it('a healthy player is NOT haircut: riskAdjustedCeiling === ceilingValue', () => {
+    const p = cacheToPlayer(cachedPlayer({ ...base, injury_status: null }))
+    expect(p.ceilingValue).toBe(60)
+    expect(p.riskAdjustedCeiling).toBe(60)
+  })
+
+  it('a PUP player is haircut hard: riskAdjustedCeiling below ceiling, gap shrinks', () => {
+    const healthy = cacheToPlayer(cachedPlayer({ ...base, injury_status: null }))
+    const pup = cacheToPlayer(cachedPlayer({ ...base, injury_status: 'PUP' }))
+    // Same ceiling + same ECR rank -> same room price to bid against...
+    expect(pup.ceilingValue).toBe(healthy.ceilingValue)
+    expect(pup.expectedRoomPrice).toBe(healthy.expectedRoomPrice)
+    // ...but PUP worth is faded (0.6x), so both the worth and the gap drop.
+    expect(pup.riskAdjustedCeiling).toBe(Math.round(60 * 0.6))
+    expect(pup.expertAdjustedValue as number).toBeLessThan(healthy.expertAdjustedValue as number)
+    expect(pup.valueGap as number).toBeLessThan(healthy.valueGap as number)
+  })
+
+  it('"Questionable" (camp catch-all) barely moves the worth vs a PUP fade', () => {
+    const q = cacheToPlayer(cachedPlayer({ ...base, injury_status: 'Questionable' }))
+    const pup = cacheToPlayer(cachedPlayer({ ...base, injury_status: 'PUP' }))
+    // 0.95 vs 0.60: Questionable stays near ceiling, PUP is much lower.
+    expect(q.riskAdjustedCeiling).toBe(Math.round(60 * 0.95))
+    expect(q.riskAdjustedCeiling as number).toBeGreaterThan(pup.riskAdjustedCeiling as number)
+  })
+})
