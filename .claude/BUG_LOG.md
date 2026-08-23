@@ -46,7 +46,8 @@
 
 #### LOW
 
-##### BUG-BH0822-02: 36 lint errors, concentrated in non-runtime dev/mockup/backtest files (pre-existing debt)
+##### BUG-BH0822-02: 36 lint errors, concentrated in non-runtime dev/mockup/backtest files (pre-existing debt) -- **[runtime subset FIXED]**
+- **Status update 2026-08-22:** the ~6 **runtime** lint errors are FIXED (errors 36 -> 30). Fixed: `team-reports.tsx:233,307` (`as any` -> `as PositionType`, exported the type from `ffi-primitives.tsx`), `user-tags/route.ts:244` + `export.ts:315` (`let` -> `const`), `waivers/page.tsx:175` (`team's` -> `team&apos;s`), `recommendation.test.ts:71` (em-dash -> colon, honors the no-em-dash rule). Verified: type-check 0, full suite green, lint 30 err/112 warn. The remaining 30 errors are all in dev-only `.claude/mockups/*`, root `_dev_s*.js`, and `scripts/*` tooling that never ships -- left as accepted debt (see L4 for the scratch files).
 - **Files:** `.claude/mockups/d0-themes*/build-themes*.js`, root `_dev_s5.js` / `_dev_s6.js`, `scripts/*.{ts,mjs}` (backtest/populate/verify tooling), plus a few runtime items: `src/components/draft/team-reports.tsx:233,307` (`any`), `src/app/(app)/season/waivers/page.tsx:175` (unescaped entity), `src/app/api/user-tags/route.ts:244` + `src/lib/draft/export.ts:315` (`prefer-const`), `src/lib/players/__tests__/recommendation.test.ts:71` (en-dash).
 - **Category:** Config
 - **Effort:** M (whole cleanup) / S (just the runtime handful)

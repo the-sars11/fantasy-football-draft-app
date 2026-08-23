@@ -312,7 +312,7 @@ function generateContextualCallouts(
     if (teamPosCount < 2 && pos !== 'QB' && pos !== 'K' && pos !== 'DEF') {
       // Count how many were taken in a "run" before their pick
       let runCount = 0
-      let runManagers: string[] = []
+      const runManagers: string[] = []
       for (let i = 0; i < drafted.length; i++) {
         if (drafted[i].manager === managerName) break
         if (i > 0 && drafted[i].pick - drafted[i - 1].pick <= 3) {

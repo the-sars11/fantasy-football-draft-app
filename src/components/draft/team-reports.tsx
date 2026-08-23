@@ -30,6 +30,7 @@ import {
   FFIPositionBadge,
   FFIGrade,
   FFISectionHeader,
+  type PositionType,
 } from '@/components/ui/ffi-primitives'
 import {
   generateLeagueReport,
@@ -230,7 +231,7 @@ function TeamReportCard({
               {report.positionBreakdown.slice(0, 4).map(pos => (
                 <FFIPositionBadge
                   key={pos.position}
-                  position={pos.position as any}
+                  position={pos.position as PositionType}
                   className="text-[9px] px-1"
                 />
               ))}
@@ -304,7 +305,7 @@ function TeamReportCard({
                         key={pos.position}
                         className="flex items-start gap-2 p-2 rounded-lg bg-[var(--ffi-surface)]/30"
                       >
-                        <FFIPositionBadge position={pos.position as any} className="mt-0.5" />
+                        <FFIPositionBadge position={pos.position as PositionType} className="mt-0.5" />
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between mb-1">
                             <span className="ffi-body-md text-white">

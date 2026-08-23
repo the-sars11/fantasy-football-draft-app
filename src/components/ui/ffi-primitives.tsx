@@ -118,7 +118,7 @@ export function FFICardDescription({
    FFI Badge Components
    ======================================== */
 
-type PositionType = "QB" | "RB" | "WR" | "TE" | "K" | "DEF"
+export type PositionType = "QB" | "RB" | "WR" | "TE" | "K" | "DEF"
 type StatusType = "success" | "warning" | "danger" | "info"
 
 interface FFIBadgeProps extends React.HTMLAttributes<HTMLSpanElement> {

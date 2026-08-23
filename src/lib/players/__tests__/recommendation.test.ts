@@ -68,7 +68,7 @@ describe('computeRecommendation', () => {
     expect(r.line).not.toMatch(/Watch the injury/)
   })
 
-  it('is deterministic — same input, same line', () => {
+  it('is deterministic: same input, same line', () => {
     const p = player({ valueGap: 21, ceilingValue: 97, expectedRoomPrice: 76 })
     expect(computeRecommendation(p)).toEqual(computeRecommendation(p))
   })

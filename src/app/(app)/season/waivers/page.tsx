@@ -172,7 +172,7 @@ export default function WaiversPage() {
                   Connect Your League for Personalized Picks
                 </h3>
                 <p className="text-xs text-[#9eadb8] mt-1">
-                  Get roster-aware recommendations and see which players fit your team's needs.
+                  Get roster-aware recommendations and see which players fit your team&apos;s needs.
                 </p>
               </div>
               <FFIButton

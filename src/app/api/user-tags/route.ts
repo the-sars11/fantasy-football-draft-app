@@ -241,7 +241,7 @@ export async function PUT(req: NextRequest) {
         return NextResponse.json({ error: 'User tag record not found' }, { status: 404 })
       }
 
-      let newTags = new Set(current.tags as string[])
+      const newTags = new Set(current.tags as string[])
 
       // Add new tags
       if (addTags) {
