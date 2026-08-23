@@ -54,18 +54,27 @@ describe('computeRecommendation', () => {
     expect(r.line).toMatch(/Fair value/)
   })
 
-  it('injury appends a caution when not already a pass', () => {
+  it('injured-now (OUT) appends a caution when not already a pass', () => {
+    // Uses a real current absence - "Questionable" is no longer a flag (it's the
+    // camp catch-all, already priced into the range).
+    const r = computeRecommendation(
+      player({ expertTier: 1, ceilingValue: 90, expectedRoomPrice: 80, injuryStatus: 'Out' }),
+    )
+    expect(r.line).toMatch(/injured now/i)
+  })
+
+  it('Questionable does NOT append an injury caution', () => {
     const r = computeRecommendation(
       player({ expertTier: 1, ceilingValue: 90, expectedRoomPrice: 80, injuryStatus: 'Questionable' }),
     )
-    expect(r.line).toMatch(/injury/i)
+    expect(r.line).not.toMatch(/injured now/i)
   })
 
   it('injury does NOT double up when the line already says pass', () => {
     const r = computeRecommendation(
       player({ valueGap: -10, ceilingValue: 20, expectedRoomPrice: 30, injuryStatus: 'Out' }),
     )
-    expect(r.line).not.toMatch(/Watch the injury/)
+    expect(r.line).not.toMatch(/injured now/i)
   })
 
   it('is deterministic: same input, same line', () => {

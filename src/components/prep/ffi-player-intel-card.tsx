@@ -61,12 +61,13 @@ const TAG_STYLE: Record<PlayerTagId, TagStyle> = {
   pocket: { bgClass: 'bg-[var(--ffi-blue)]/14', textClass: 'text-[var(--ffi-blue)]', icon: TrendingUp },
   tax: { bgClass: 'bg-[var(--ffi-danger)]/16', textClass: 'text-[var(--ffi-danger)]', icon: TrendingDown },
   volatile: { bgClass: 'bg-[var(--ffi-warning)]/15', textClass: 'text-[var(--ffi-warning)]', icon: AlertTriangle },
-  injury: { bgClass: 'bg-[var(--ffi-warning)]/13', textClass: 'text-[var(--ffi-warning)]', icon: Activity },
+  fragile: { bgClass: 'bg-[var(--ffi-warning)]/13', textClass: 'text-[var(--ffi-warning)]', icon: Activity },
+  out: { bgClass: 'bg-[var(--ffi-danger)]/16', textClass: 'text-[var(--ffi-danger)]', icon: Activity },
   sleeper: { bgClass: 'bg-[var(--ffi-blue-bright)]/16', textClass: 'text-[var(--ffi-blue-bright)]', icon: Star },
 }
 
 const POSITIVE_TAGS: PlayerTagId[] = ['elite', 'pocket', 'sleeper']
-const NEGATIVE_TAGS: PlayerTagId[] = ['tax']
+const NEGATIVE_TAGS: PlayerTagId[] = ['tax', 'out']
 
 // Position chip color-encoding (SHIELD v4 --ffi-pos-*). QB/RB/WR/TE/DEF/K each
 // carry their token hue; `wash` is the faint left-to-right rail tint (rgba of

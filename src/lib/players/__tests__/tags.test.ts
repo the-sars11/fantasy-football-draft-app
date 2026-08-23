@@ -80,16 +80,26 @@ describe('computePlayerTags -VOLATILE', () => {
   })
 })
 
-describe('computePlayerTags -INJURY', () => {
-  it('fires on a real non-healthy designation', () => {
-    expect(ids(player({ injuryStatus: 'Questionable' }))).toContain('injury')
-    expect(ids(player({ injuryStatus: 'Out' }))).toContain('injury')
+describe('computePlayerTags -OUT (injured now)', () => {
+  it('fires on a real current absence designation', () => {
+    expect(ids(player({ injuryStatus: 'Out' }))).toContain('out')
+    expect(ids(player({ injuryStatus: 'Doubtful' }))).toContain('out')
+    expect(ids(player({ injuryStatus: 'IR' }))).toContain('out')
+    expect(ids(player({ injuryStatus: 'PUP' }))).toContain('out')
+    expect(ids(player({ injuryStatus: 'Suspended' }))).toContain('out')
   })
-  it('does not fire on healthy/active/empty', () => {
-    expect(ids(player({ injuryStatus: 'Healthy' }))).not.toContain('injury')
-    expect(ids(player({ injuryStatus: '' }))).not.toContain('injury')
-    expect(ids(player({ injuryStatus: undefined }))).not.toContain('injury')
-    expect(ids(player({ injuryStatus: 'Probable' }))).not.toContain('injury')
+  it('does NOT fire on Questionable (camp catch-all, already in the range)', () => {
+    expect(ids(player({ injuryStatus: 'Questionable' }))).not.toContain('out')
+  })
+  it('does not fire on healthy/active/empty/probable', () => {
+    expect(ids(player({ injuryStatus: 'Healthy' }))).not.toContain('out')
+    expect(ids(player({ injuryStatus: '' }))).not.toContain('out')
+    expect(ids(player({ injuryStatus: undefined }))).not.toContain('out')
+    expect(ids(player({ injuryStatus: 'Probable' }))).not.toContain('out')
+  })
+  it('a player with no durability data is not FRAGILE by default', () => {
+    // No sleeperId -> real durability model returns the neutral 1.0 factor.
+    expect(ids(player({ injuryStatus: 'Healthy' }))).not.toContain('fragile')
   })
 })
 
@@ -158,10 +168,10 @@ describe('computePlayerTags - multiple tags on one player', () => {
     expect(t).toContain('pocket')
   })
 
-  it('emits INJURY + SLEEPER together for a late hurt skill player', () => {
-    const t = ids(player({ position: 'WR', consensusRank: 100, vorp: 3, injuryStatus: 'Questionable' }))
+  it('emits OUT + SLEEPER together for a late injured skill player', () => {
+    const t = ids(player({ position: 'WR', consensusRank: 100, vorp: 3, injuryStatus: 'Out' }))
     expect(t).toContain('sleeper')
-    expect(t).toContain('injury')
+    expect(t).toContain('out')
   })
 
   it('emits no tags for a plain average player with no signals', () => {

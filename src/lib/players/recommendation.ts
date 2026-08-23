@@ -33,7 +33,9 @@ export function computeRecommendation(p: Player): PlayerRecommendation {
   const range = computeValueRange(p)
   const tags = computePlayerTags(p)
   const has = (id: string) => tags.some((t) => t.id === id)
-  const injured = has('injury')
+  // "injured NOW" (OUT) is the acute absence worth a bid-trim caution. Chronic
+  // FRAGILE risk is already priced into the range, so it doesn't add a line here.
+  const injured = has('out')
 
   let intent: PlayerRecommendation['intent']
   let line: string
@@ -60,7 +62,7 @@ export function computeRecommendation(p: Player): PlayerRecommendation {
 
   // Injury caution - skip if we're already saying pass (redundant).
   if (injured && intent !== 'pass') {
-    line += ` Watch the injury tag - trim the bid.`
+    line += ` He's injured now - trim the bid or stash only.`
   }
 
   return { line, intent }

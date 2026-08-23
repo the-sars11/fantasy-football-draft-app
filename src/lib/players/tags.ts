@@ -22,8 +22,13 @@
  *             Reputation premium; let someone else have him.
  *   VOLATILE- experts wildly disagree (ECR rank std >= 20) and     [FP rank std]
  *             he's in the bidding pool. Boom/bust.
- *   INJURY  - a real, non-healthy injury designation. Dents his    [injury_status]
- *             floor; discount the bid.
+ *   FRAGILE - injury RISK: healthy NOW but the measured durability  [durability
+ *             model breaks him down more than his position baseline.   factor]
+ *             A standing worth dent, already priced into the range.
+ *   OUT     - injured NOW: a real current absence (Doubtful / Out / [injury_status]
+ *             PUP / IR / Suspended). He is not on the field.
+ *             "Questionable" is NOT flagged - it is ESPN's broad camp
+ *             catch-all and its tiny haircut is already in the range.
  *   SLEEPER - skill player who goes late (outside ~top 84) but     [VORP]
  *             still clears replacement level. Bench value most miss.
  *
@@ -35,6 +40,7 @@
  */
 
 import type { Player } from './types'
+import { classifyInjury } from './injury-flags'
 
 export type PlayerTagTone = 'elite' | 'good' | 'bad' | 'warn'
 
@@ -43,7 +49,8 @@ export type PlayerTagId =
   | 'pocket'
   | 'tax'
   | 'volatile'
-  | 'injury'
+  | 'fragile'
+  | 'out'
   | 'sleeper'
 
 export interface PlayerTag {
@@ -67,9 +74,6 @@ const VOLATILE_MAX_RANK = 120
 const SLEEPER_RANK = 84
 const SKILL_POS = new Set(['RB', 'WR', 'TE'])
 
-// Injury designations that are NOT a healthy/active player. The DB stores a raw
-// string; anything outside this healthy set that is non-empty flags the tag.
-const HEALTHY_INJURY = new Set(['', 'healthy', 'active', 'none', 'probable'])
 
 export function computePlayerTags(p: Player): PlayerTag[] {
   const tags: PlayerTag[] = []
@@ -124,14 +128,25 @@ export function computePlayerTags(p: Player): PlayerTag[] {
     })
   }
 
-  // INJURY - real, non-healthy designation.
-  const injury = (p.injuryStatus ?? '').trim()
-  if (injury && !HEALTHY_INJURY.has(injury.toLowerCase())) {
+  // FRAGILE / OUT - the two split injury signals (injury-flags.ts). FRAGILE is a
+  // chronic durability dent on a player who is healthy NOW; OUT is a real current
+  // absence. "Questionable" fires neither - already priced into the range.
+  const injuryFlags = classifyInjury(p.sleeperId, p.position, p.injuryStatus)
+  if (injuryFlags.fragile) {
     tags.push({
-      id: 'injury',
-      label: `INJ ${injury.toUpperCase()}`,
+      id: 'fragile',
+      label: 'FRAGILE',
       tone: 'warn',
-      hint: `Carrying an injury designation (${injury}) - dents his floor, discount the bid`,
+      hint: `Injury RISK - healthy now, but the durability model breaks him down more than his position (durability ${injuryFlags.fragileFactor.toFixed(2)}). Already priced into the range; don't pay the ceiling`,
+      source: 'measured 15-season durability factor',
+    })
+  }
+  if (injuryFlags.out) {
+    tags.push({
+      id: 'out',
+      label: `OUT ${injuryFlags.outStatus.toUpperCase()}`,
+      tone: 'bad',
+      hint: `Injured NOW - carries a ${injuryFlags.outStatus} designation, not on the field. Draft only as a stash`,
       source: 'FantasyPros injury status',
     })
   }
