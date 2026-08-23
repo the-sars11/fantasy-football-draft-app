@@ -2,6 +2,29 @@
 
 ---
 
+## 2026-08-23 / SP-6 -- Rebuild /settings to approved SHIELD mockup
+
+**Class:** output (Design + QA lenses). $0. Built directly on Opus for mockup-match fidelity; fresh-context OTHER_FAMILY validator (SP-6V) runs next.
+
+**What it is.** `/settings` had an on-token header but an iOS-style grouped list body (SectionLabel + rounded SettingsGroup + plain NavRow) with no SHIELD hero/section objects, plus an off-token blue Dev badge `bg-[#8bacff]/15 text-[#8bacff]` at `page.tsx:45`. Rebuilt to the Joe-approved SP-2 mockup (screen 04), turning the screen into the prep-hub twin.
+
+**What changed (`src/app/(app)/settings/page.tsx`, rebuild):**
+- **NEW ACTIVE LEAGUE `.ffi-hero` anchor** at the top: "Active League" label in condensed blue-bright, league name in `.ffi-title-red` (22px), format subline (Auction / N teams / $budget) muted -- with null-safe fallbacks ("No league yet" / "Configure a league to get started").
+- `SectionLabel` -> local `QuietLabel` (Kanit condensed, 0.28em, `--ffi-ink-3`), matching the SP-5 runs screen.
+- `NavRow` -> `DestRow`: `.ffi-nameplate-interactive` rows with a 34px icon chip (red `--ffi-volt`, blue `--ffi-blue` for Demo Draft) + label/sub body + chevron. Icons: List / Flag / Play / Clock. 44px min touch target kept.
+- Dev badge `#8bacff` -> `FFIBadge status="info"` (steel-blue), the off-token literal deleted.
+- Account block -> `.ffi-nameplate` card with InfoRows split by `--ffi-hairline`. Legacy `--ffi-text-*`/`--ffi-surface` aliases swapped for canonical SHIELD tokens (`--ffi-ink`/`--ffi-ink-3`/`--ffi-surface-2`).
+
+**`client.tsx`:** SignOutRow restyled to `--ffi-danger` at rest (mockup shows the pink logout row), hover dims; the `signOut` server action is unchanged.
+
+**1 decision flagged.** Omitted the mockup's decorative left "rail" on the DestRows so this screen stays visually consistent with the already-shipped SP-5 runs rows (same DestRow object, no rail). The two sibling list screens now match.
+
+**Proof.** grep `8bacff`/`139,255,69`/`77,130,255` in both files = 0; em/en-dash count = 0; `type-check` 0 errors; `eslint` both files exit 0; `test:run` **711 passed / 58 files**; `build` Compiled successfully, `/settings` prerendered static. Rendered at http://localhost:3003/settings -- **fully populated** (hero + all DestRows + Dev badge + Account Name/Email + preserved Sign-out form), console clean apart from the unrelated app-shell `useUserTags` 500.
+
+**Files.** `src/app/(app)/settings/page.tsx` (rebuild), `src/app/(app)/settings/client.tsx` (SignOutRow restyle), `.claude/BUILD_PLAN.md` (SP-6 marked DONE + decision), `.claude/WORKING_STATE.md` (pointer), this CHANGELOG.
+
+---
+
 ## 2026-08-23 / SP-5V -- /prep/runs rebuild validated (OTHER_FAMILY) + 3 findings fixed
 
 **Class:** output (Design + QA lenses, validation). $0. Fresh-context Sonnet sub-agent (did NOT write SP-5) ran the adversarial check the SP-track puts behind every build.

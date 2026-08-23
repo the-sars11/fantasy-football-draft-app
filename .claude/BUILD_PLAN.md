@@ -797,15 +797,17 @@ Screen → target: S1 research-hub `/research`; S2 player-browser (D4, already b
 > **Done-when:** 0 unresolved HIGH; screenshot parity attached; grep clean; gate green.
 > **DONE (proof):** fresh-context Sonnet validator = **VERDICT PASS** (0 HIGH+). Independent grep = 0 for every retired literal (`139,255,69`/`77,130,255`/`8bacff`/`121,166,255`/`79A6FF`) + 0 raw hex/off-token rgba (full token compliance). Mockup parity confirmed (section order, 4-stat cluster colors, hairline separators); DestRow checkbox/contextual-Compare divergence judged correct (interactive functionality the static mockup omits). Auto-load effect verified correctly guarded + `runs[0]` genuinely newest (API `.order('created_at', ascending:false)`); failed-run + 0-target + compare-cap-2 paths safe; no `any`, no missing keys, a11y labels present. 3 findings, all resolved: F1 (LOW, 6 em-dashes in comments) fixed; F2 (MED, missing `cancelled` guard on league-runs fetch) fixed; F3 (LOW, dangling Top Targets label at 0 targets) fixed. Gate re-run after fixes: dashes 0, type-check 0, lint 0, test:run 711/711, build clean. See CHANGELOG SP-5V.
 
-### SP-6 -- Rebuild /settings to approved mockup `[Sonnet]` · class: output
+### SP-6 -- Rebuild /settings to approved mockup `[x]` `[Opus]` · class: output
 > - Class: WORKHORSE
 >   Reason: bounded restyle of an iOS-style grouped list to SHIELD rows against the SP-2 mockup.
 >   Verifier: OTHER_FAMILY (SP-6V)
-> **Size:** S-M. **Depends on:** SP-2.
+> **Size:** S-M. **Depends on:** SP-2. **DONE 2026-08-23.**
 > **Why:** header is on-token but the body is an iOS-style grouped list with no SHIELD hero/card/section objects, plus an off-token blue badge `bg-[#8bacff]/15 text-[#8bacff]` at `page.tsx:45`.
 > **Reads first:** approved SP-2 settings mockup; `src/app/(app)/settings/page.tsx` + `client.tsx` (local `SectionLabel`/`SettingsGroup`/`NavRow`/`InfoRow`/`SignOutRow`).
 > **Work:** restyle the list rows to SHIELD section/card treatment per the mockup; replace the `#8bacff` badge with `var(--ffi-blue)`; token-only; keep 44px touch targets.
 > **Done-when:** screenshot matches mockup; grep for `8bacff` in the 2 files returns 0; gate green; A1-A10 pass.
+> **DONE (proof):** rebuilt `page.tsx` to mockup screen 04 -- new ACTIVE LEAGUE `.ffi-hero` anchor (label blue-bright + league name `.ffi-title-red` 22px + muted format subline), `SectionLabel`->`QuietLabel`, `NavRow`->`DestRow` (`.ffi-nameplate-interactive` rows w/ icon chip [red `--ffi-volt`, blue `--ffi-blue` for Demo] + body + chevron), Dev badge `#8bacff`->`FFIBadge status="info"` steel-blue, Account = `.ffi-nameplate` card w/ InfoRows split by hairline. `client.tsx` SignOutRow restyled to `--ffi-danger` at rest (signOut action preserved). All 4 destinations + 44px targets kept. grep `8bacff`=0 both files; dashes 0; type-check 0; eslint 0; test:run 711/711; build clean (/settings static). Rendered at :3003/settings -- FULLY populated (hero + all DestRows + Dev badge + Account + Sign-out form), console clean (only unrelated `useUserTags`).
+> **1 decision (flagged):** omitted the mockup's decorative left "rail" on DestRows to stay visually consistent with the shipped SP-5 runs rows (same DestRow object, no rail) -- the two sibling list screens now match.
 
 ### SP-6V -- Validate /settings rebuild `[Sonnet]` · class: output
 > - Class: WORKHORSE (validation)

@@ -1,68 +1,81 @@
 import Link from 'next/link'
-import { ChevronRight, Beaker } from 'lucide-react'
+import { ChevronRight, Beaker, List, Flag, Play, Clock } from 'lucide-react'
 import { getUser } from '@/lib/supabase/server'
 import { createClient } from '@/lib/supabase/server'
+import { FFIBadge } from '@/components/ui/ffi-primitives'
 import { SignOutRow } from './client'
 
-function SectionLabel({ children }: { children: React.ReactNode }) {
+// SHIELD section label (condensed, wide-tracked) - the prep-hub twin's QuietLabel
+function QuietLabel({ children }: { children: React.ReactNode }) {
   return (
-    <div className="px-4 pb-1 pt-5 first:pt-0">
-      <span className="text-[10px] font-bold tracking-widest uppercase text-[var(--ffi-text-muted)]">
-        {children}
-      </span>
-    </div>
-  )
-}
-
-function SettingsGroup({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="rounded-2xl border border-[var(--ffi-border)]/20 bg-[var(--ffi-surface)] divide-y divide-[var(--ffi-border)]/10 overflow-hidden">
+    <p
+      className="font-bold text-[10px] uppercase mt-6 mb-2.5"
+      style={{ fontFamily: 'var(--font-cond)', letterSpacing: '0.28em', color: 'var(--ffi-ink-3)' }}
+    >
       {children}
-    </div>
+    </p>
   )
 }
 
-function NavRow({
+// DestRow: nameplate navigation row with an icon chip, body, and chevron
+function DestRow({
+  icon,
   label,
   value,
   href,
+  accent = 'red',
   badge,
 }: {
+  icon: React.ReactNode
   label: string
   value?: string
   href: string
+  accent?: 'red' | 'blue'
   badge?: string
 }) {
+  const chipColor = accent === 'blue' ? 'var(--ffi-blue)' : 'var(--ffi-volt)'
   return (
     <Link
       href={href}
-      className="flex items-center gap-3 py-3 px-4 hover:bg-[var(--ffi-surface-elevated)] transition-colors group min-h-[44px]"
+      className="ffi-nameplate ffi-nameplate-interactive flex items-center gap-3 px-3 py-3 group min-h-[44px]"
     >
+      <div
+        className="shrink-0 flex items-center justify-center rounded-full"
+        style={{ width: 34, height: 34, background: 'var(--ffi-surface-2)', border: '1px solid var(--ffi-hairline)' }}
+        aria-hidden
+      >
+        <span style={{ color: chipColor, display: 'flex' }}>{icon}</span>
+      </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <span className="ffi-body-md text-white font-medium">{label}</span>
-          {badge && (
-            <span className="text-[9px] font-bold tracking-wider uppercase px-1.5 py-0.5 rounded bg-[#8bacff]/15 text-[#8bacff]">
-              {badge}
-            </span>
-          )}
+          <span className="text-[14px] font-medium truncate" style={{ color: 'var(--ffi-ink)' }}>{label}</span>
+          {badge && <FFIBadge status="info" className="text-[9px]">{badge}</FFIBadge>}
         </div>
         {value && (
-          <span className="ffi-caption text-[var(--ffi-text-secondary)] truncate block mt-0.5">
+          <span className="ffi-caption truncate block mt-0.5" style={{ color: 'var(--ffi-ink-3)' }}>
             {value}
           </span>
         )}
       </div>
-      <ChevronRight className="h-4 w-4 text-[var(--ffi-text-muted)] group-hover:text-[var(--ffi-text-secondary)] transition-colors shrink-0" aria-hidden="true" />
+      <ChevronRight
+        className="h-4 w-4 shrink-0 transition-colors"
+        style={{ color: 'var(--ffi-ink-3)' }}
+        aria-hidden="true"
+      />
     </Link>
   )
 }
 
-function InfoRow({ label, value }: { label: string; value: string }) {
+function InfoRow({ label, value, danger }: { label: string; value: string; danger?: boolean }) {
   return (
-    <div className="flex items-center justify-between py-3 px-4 min-h-[44px]">
-      <span className="ffi-caption text-[var(--ffi-text-secondary)]">{label}</span>
-      <span className="ffi-body-md text-white font-medium truncate max-w-[60%] text-right">{value}</span>
+    <div className="flex items-center justify-between py-3 min-h-[44px]">
+      <span className="ffi-caption" style={{ color: 'var(--ffi-ink-3)' }}>{label}</span>
+      <span
+        className="ffi-body-md font-medium truncate max-w-[60%] text-right"
+        style={{ color: danger ? 'var(--ffi-danger)' : 'var(--ffi-ink)' }}
+      >
+        {value}
+      </span>
     </div>
   )
 }
@@ -71,6 +84,7 @@ export default async function SettingsPage() {
   const user = await getUser()
   const supabase = await createClient()
 
+  let leagueName: string | undefined
   let leagueSummary: string | undefined
   if (supabase) {
     const { data } = await supabase
@@ -81,7 +95,8 @@ export default async function SettingsPage() {
       .limit(1)
     const league = data?.[0]
     if (league) {
-      const parts = [league.name, 'Auction', `${league.team_count} teams`]
+      leagueName = league.name
+      const parts = ['Auction', `${league.team_count} teams`]
       if (league.budget) parts.push(`$${league.budget}`)
       leagueSummary = parts.join(' · ')
     }
@@ -89,58 +104,80 @@ export default async function SettingsPage() {
 
   const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Not set'
   const userEmail = user?.email || 'Not set'
+  const configSummary = leagueName ? `${leagueName} · ${leagueSummary}` : 'Not configured yet'
 
   return (
-    <div className="space-y-0 max-w-lg">
-      <div className="pb-4">
+    <div className="max-w-lg">
+      <div className="pb-2">
         <h1 className="ffi-title-red ffi-display-md">Setup</h1>
       </div>
 
-      <SectionLabel>League</SectionLabel>
-      <SettingsGroup>
-        <NavRow
-          label="League Config"
-          value={leagueSummary ?? 'Not configured yet'}
-          href="/prep/configure"
-        />
-      </SettingsGroup>
+      {/* ACTIVE LEAGUE - hero anchor (prep-hub twin) */}
+      <div className="ffi-hero p-4 mt-3">
+        <div className="relative z-10">
+          <div
+            className="font-bold text-[10px] uppercase"
+            style={{ fontFamily: 'var(--font-cond)', letterSpacing: '0.22em', color: 'var(--ffi-blue-bright)' }}
+          >
+            Active League
+          </div>
+          <div className="ffi-title-red mt-1" style={{ fontSize: 22, lineHeight: 1.1 }}>
+            {leagueName ?? 'No league yet'}
+          </div>
+          <div className="ffi-caption mt-1" style={{ color: 'var(--ffi-ink-3)' }}>
+            {leagueSummary ?? 'Configure a league to get started'}
+          </div>
+        </div>
+      </div>
 
-      <SectionLabel>Draft</SectionLabel>
-      <SettingsGroup>
-        <NavRow
+      <QuietLabel>League</QuietLabel>
+      <DestRow
+        icon={<List className="w-[18px] h-[18px]" strokeWidth={2} />}
+        label="League Config"
+        value={configSummary}
+        href="/prep/configure"
+      />
+
+      <QuietLabel>Draft</QuietLabel>
+      <div className="space-y-2">
+        <DestRow
+          icon={<Flag className="w-[18px] h-[18px]" strokeWidth={2} />}
           label="Draft Setup"
           value="Confirm managers before going live"
           href="/draft/setup"
         />
-        <NavRow
+        <DestRow
+          icon={<Play className="w-[18px] h-[18px]" strokeWidth={2} />}
           label="Demo Draft"
           value="Practice run · no real draft"
           href="/draft/live?sim=1"
+          accent="blue"
           badge="Dev"
         />
-      </SettingsGroup>
+      </div>
 
-      <SectionLabel>History</SectionLabel>
-      <SettingsGroup>
-        <NavRow
-          label="Run History"
-          value="Past research runs"
-          href="/prep/runs"
-        />
-      </SettingsGroup>
+      <QuietLabel>History</QuietLabel>
+      <DestRow
+        icon={<Clock className="w-[18px] h-[18px]" strokeWidth={2} />}
+        label="Run History"
+        value="Past research runs"
+        href="/prep/runs"
+      />
 
-      <SectionLabel>Account</SectionLabel>
-      <SettingsGroup>
+      <QuietLabel>Account</QuietLabel>
+      <div className="ffi-nameplate px-4">
         <InfoRow label="Name" value={userName} />
+        <div style={{ borderTop: '1px solid var(--ffi-hairline)' }} />
         <InfoRow label="Email" value={userEmail} />
+        <div style={{ borderTop: '1px solid var(--ffi-hairline)' }} />
         <SignOutRow />
-      </SettingsGroup>
+      </div>
 
-      <div className="pt-6 pb-2">
-        <p className="ffi-caption text-[var(--ffi-text-muted)] text-center flex items-center justify-center gap-1">
-          <Beaker className="h-3 w-3" aria-hidden="true" />
+      <div className="flex items-center gap-2 mt-4 pb-2">
+        <Beaker className="h-3.5 w-3.5 shrink-0" style={{ color: 'var(--ffi-ink-3)' }} aria-hidden="true" />
+        <span className="ffi-caption" style={{ color: 'var(--ffi-ink-3)' }}>
           Demo Draft launches a sim against real player data. No AI calls fired.
-        </p>
+        </span>
       </div>
     </div>
   )

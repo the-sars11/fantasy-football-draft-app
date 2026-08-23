@@ -8,12 +8,11 @@ export function SignOutRow() {
     <form action={signOut}>
       <button
         type="submit"
-        className="w-full flex items-center gap-3 py-3 px-4 text-left hover:bg-[var(--ffi-surface-elevated)] transition-colors rounded-b-2xl group min-h-[44px]"
+        className="w-full flex items-center gap-2 py-3 text-left min-h-[44px] transition-opacity hover:opacity-80"
+        style={{ color: 'var(--ffi-danger)' }}
       >
-        <LogOut className="h-4 w-4 text-[var(--ffi-text-secondary)] group-hover:text-[var(--ffi-danger)] transition-colors" aria-hidden="true" />
-        <span className="ffi-body-md text-[var(--ffi-text-secondary)] group-hover:text-[var(--ffi-danger)] transition-colors font-medium">
-          Sign out
-        </span>
+        <LogOut className="h-4 w-4 shrink-0" aria-hidden="true" />
+        <span className="ffi-body-md font-medium">Sign out</span>
       </button>
     </form>
   )
