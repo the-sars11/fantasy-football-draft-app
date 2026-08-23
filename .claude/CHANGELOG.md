@@ -2,6 +2,28 @@
 
 ---
 
+## 2026-08-23 / SP-7V -- (auth) rebuild validated (OTHER_FAMILY) -- PASS, 0 defects
+
+**Class:** output (validation). $0. Fresh-context Sonnet (OTHER_FAMILY, did NOT write SP-7), adversarial.
+
+**Verdict: PASS. Zero defects (0 CRITICAL / 0 HIGH / 0 MED / 0 LOW). No code changed.**
+
+**Independent grep (all 3 auth files + the `.ffi-sheen` globals block, not trusting prior claims):** every retired literal = 0 -- green `139,255,69`/`139, 255, 69`/`8bff45`; off-token blues `77,130,255`/`77, 130, 255`/`8bacff`/`121,166,255`/`121, 166, 255`/`79A6FF`/`4d82ff`. Dash count 0/0/0 on the 3 files; `.ffi-sheen` block dash-clean. Full hex/rgba sweep of the 3 files: zero raw off-token hex, only sanctioned danger-pink `rgba(255,110,138,...)` for the error alert; everything else a `var(--ffi-*)` token.
+
+**No shadcn leftovers:** no `Card`/`CardHeader`/`CardContent` import or usage; `blur-3xl`/`bg-background` appear only inside the one explanatory comment on `layout.tsx:8` (documentation of what was removed), never as live classes.
+
+**Design Lens (vs mockup screen 05, checks a-g):** all PASS. Oswald "FANTASY" wordmark over `.ffi-title-red` Kanit title (live `webkitBackgroundClip:"text"`); `.ffi-card-elevated .ffi-sheen` panel on both pages incl. the success screen; every input carries both `ffi-input ffi-form-input`; hero CTA live gradient `linear-gradient(rgb(166,60,65)->rgb(110,34,37))` (brick) on both routes; links `--ffi-blue-bright` (#7fc0ea sanctioned); navy `.stadium-atmos`(position:fixed) + `.atmos-grain` mounted in the layout, content `z-10 max-w-md`. (Validator noted the mockup prose uses `--font-display`/Anton but the build uses `--font-oswald` per the SP-7 spec's own item 4a -- a deliberate registered-font choice, not a bug.)
+
+**QA Lens (wiring preserved, traced in source):** all PASS. sign-in `useActionState(signIn)` + hidden `redirect` input + `useSearchParams` (redirect+error) + `<Suspense>` wrapper + guarded error alert (non-null assertion only reached when truthy); sign-up `useActionState(signUp)` + fields `fullName`/`email`/`password`/`confirmPassword` + `minLength=8` both password fields + `type=email` + `state.success` "Check Your Email" branch linking `/sign-in`. Both import `signIn`/`signUp`/`AuthState` from `../actions` (confirmed exported at actions.ts:32/37/72) and `FFIButton` from ffi-primitives. No `any`/`as any`; no unused imports; submit `disabled={pending}` both.
+
+**Gate re-run (validator, raw):** type-check 0 errors; eslint the 3 auth files clean (no output); test:run **753 passed / 61 files** (grew from 749 via other landed work; SP-7 added no tests, broke none); build Compiled successfully in 5.5s, `/sign-in` + `/sign-up` both `○` prerendered static.
+
+**Live render (validator flipped DEV_MODE false, verified, restored true):** `/sign-in` + `/sign-up` both render without redirect; computed styles confirm navy field, elevated+sheen card, red Kanit gradient title, brick hero button, dual-class volt inputs (4 on sign-up, `minLength:8` live). Screenshots not attempted (pane-not-displayed env limit). Restored `.env.local` to `DEV_MODE=true` and confirmed `/sign-in` -> `/prep` redirect is back.
+
+**Files.** No source changes. `.claude/BUILD_PLAN.md` (SP-7V marked DONE + verdict), `.claude/WORKING_STATE.md` (pointer), this CHANGELOG. **(auth) fully SHIELD-clean and validated. SP-track screen work complete through auth.**
+
+---
+
 ## 2026-08-23 / SP-7 -- (auth) sign-in + sign-up rebuilt to SHIELD (approved SP-2 mockup screen 05)
 
 **Class:** output (UI). $0, no Claude API. Built directly on Opus, single-threaded. Look already Joe-approved (SP-2 mockups, 2026-08-18) so no new sign-off needed -- this is the from-scratch re-theme against that mockup.
