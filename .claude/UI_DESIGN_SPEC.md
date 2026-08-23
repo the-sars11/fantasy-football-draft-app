@@ -27,6 +27,26 @@
 
 ---
 
+> ## 🎬 Visual plan (opt-in) before substantial UI work
+> For a **substantial** UI change (a new screen, component, layout, or a
+> multi-screen flow) the AI offers a visual plan BEFORE writing code:
+>
+> > "This is a substantial UI change. Author a visual plan first (storyboard +
+> > plan doc) so you can approve the look before I build? (y/n)"
+>
+> - **Yes** -> invoke the `visual-plan` skill in **local / private mode** (no
+>   upload; the plan stays on this machine). Storyboard the real screen states
+>   (idle / on-the-block / recording / recorded, etc.) plus a short plan doc,
+>   hand over the local URL and the file paths, and wait for approval before
+>   composing code. This satisfies the Quality Gate's "design sign-off before
+>   building" for substantial UI.
+> - **No**, or a trivial tweak (copy, a single color, a one-line change) -> skip
+>   the plan and compose directly. Do not force a storyboard onto small changes.
+>
+> Never upload a plan to a hosted service without explicit per-task approval.
+
+---
+
 ## 1. Design Vision & Aesthetic Direction
 
 ### Visual Aesthetic
