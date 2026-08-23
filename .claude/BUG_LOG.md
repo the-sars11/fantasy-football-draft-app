@@ -53,10 +53,11 @@
 - **Description:** Error breakdown: ~11 en/em-dash (`no-restricted-syntax`), ~15 `no-explicit-any`, 7 `no-require-imports`, 2 `prefer-const`, 1 `react/no-unescaped-entities`. 30 of the 36 are in dev-only scripts and mockup build files that never ship in the app bundle. Only ~6 touch runtime code and all are cosmetic/type-quality, not behavior.
 - **Impact:** None on runtime behavior. This is accepted pre-existing debt (R13 shipped at "39 errors, 0 new"). One notable rule-of-house violation: the en-dash in `recommendation.test.ts:71` breaks the global no-em/en-dash rule. Recommend a dedicated lint-cleanup card rather than folding 36 fixes into this hunt (would balloon scope).
 
-##### BUG-BH0822-03: Budget-pace math produces NaN if `totalSlots===0` or `budget_total===0`
+##### BUG-BH0822-03: Budget-pace math produces NaN if `totalSlots===0` or `budget_total===0` -- **[FIXED]**
 - **File:** `src/lib/draft/auction-advisor.ts:223-224`
 - **Category:** Logic (theoretical)
 - **Effort:** S
+- **Status:** FIXED 2026-08-22. Added `if (totalSlots <= 0 || mgr.budget_total <= 0) return null` guard before the pace math in `analyzeBudgetStrategy`. Verified: type-check clean, 690/690 tests pass (auction-advisor 23/23).
 - **Description:** `pctSpent = (spent / mgr.budget_total) * 100` and `pctPicks = (mgr.picks.length / totalSlots) * 100`. `budget_total` is guarded non-null but not non-zero; `totalSlots` (sum of `roster_slots`) is not guarded against 0. Either being 0 yields NaN, which makes both pace comparisons false and silently pins `status` to `'on_track'`.
 - **Evidence:** `auction-advisor.ts:219` guards `== null` only; line 221 sums roster_slots with no floor.
 - **Impact:** Config-impossible for a real auction (Nasties is $200 / 14 slots, and league config validation enforces both). No reachable path today. Recommend a one-line guard (`if (totalSlots <= 0 || mgr.budget_total <= 0) return null`) for defensiveness.
@@ -77,7 +78,7 @@
 
 ### Recommended Fix Order
 
-1. **BUG-BH0822-03** (S) -- one-line defensive guard in the pace math; cheap, in the ship-critical engine, worth doing even though unreachable today.
+1. ~~**BUG-BH0822-03** (S) -- one-line defensive guard in the pace math~~ **[FIXED 2026-08-22]** -- guard added; 690/690 tests green.
 2. **BUG-BH0822-04** (XS) -- delete/relocate the two root `_dev_s*.js` scratch files.
 3. **BUG-BH0822-02** runtime subset (S) -- fix the ~6 runtime lint errors (2 `any` in team-reports, the unescaped entity, 2 prefer-const, the test-file en-dash) in a dedicated cleanup card; leave the 30 dev-script errors as accepted debt.
 4. **BUG-BH0822-01** (L) and **BUG-BH0822-05** (S) -- in-season / export polish; out of the draft North Star, defer until in-season work is scheduled.

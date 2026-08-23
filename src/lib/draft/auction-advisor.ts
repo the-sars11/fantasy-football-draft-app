@@ -219,6 +219,10 @@ export function analyzeBudgetStrategy(
   if (!mgr || mgr.budget_remaining == null || mgr.budget_total == null) return null
 
   const totalSlots = Object.values(state.roster_slots).reduce((s, v) => s + v, 0)
+  // Guard against divide-by-zero (config-impossible for a real auction, but a
+  // zero budget_total or zero roster-slot sum would make pctSpent/pctPicks NaN
+  // and silently pin status to 'on_track'). Bail rather than emit NaN.
+  if (totalSlots <= 0 || mgr.budget_total <= 0) return null
   const spent = mgr.budget_total - mgr.budget_remaining
   const pctSpent = (spent / mgr.budget_total) * 100
   const pctPicks = (mgr.picks.length / totalSlots) * 100

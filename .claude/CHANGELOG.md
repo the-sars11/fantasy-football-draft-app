@@ -2,6 +2,18 @@
 
 ---
 
+## 2026-08-22 / L3 pace guard -- analyzeBudgetStrategy bails instead of emitting NaN on zero divisor
+
+**Class:** bugfix (QA lens). $0 (no API calls). Found by the R13 `/bug-hunt full` closeout (BUG-BH0822-03, LOW).
+
+**Root cause.** `src/lib/draft/auction-advisor.ts` `analyzeBudgetStrategy` guarded `mgr.budget_total` for null but not for zero, and never guarded `totalSlots` (the roster-slot sum). If either were 0, `pctSpent = (spent / budget_total) * 100` or `pctPicks = (picks.length / totalSlots) * 100` would be NaN, both pace comparisons would be false, and `status` would silently pin to `'on_track'`. Config-impossible for the Nasties ($200 / 14 slots, validated), so unreachable today -- but defensive.
+
+**The fix.** Added `if (totalSlots <= 0 || mgr.budget_total <= 0) return null` immediately after `totalSlots` is computed, with a comment explaining the NaN/`on_track` failure mode. Returns null (the function's existing "cannot analyze" signal) rather than emitting a NaN-derived analysis.
+
+**Proof (pasted).** `npm run type-check` -> 0 errors. `npx vitest run src/lib/draft/__tests__/auction-advisor.test.ts` -> 23/23 passed. `npm run test:run` -> **56 files, 690 passed, 0 failed**. Files: `src/lib/draft/auction-advisor.ts`, `.claude/BUG_LOG.md`.
+
+---
+
 ## 2026-08-22 / R13 F1 fix -- live draft room now maps players through cacheToPlayers (tier scarcity + urgency)
 
 **Class:** bugfix (QA lens). $0 (no API calls). Found by the R13 Claude-driven browser layer (TEST_FINDINGS F1).
