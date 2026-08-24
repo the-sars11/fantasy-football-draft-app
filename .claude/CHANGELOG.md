@@ -2,6 +2,27 @@
 
 ---
 
+## 2026-08-23 / LB-6a -- Value Board defaults to the full ranked board
+
+**Class:** output (UI default). $0, no Claude API. Built directly on Opus, single-threaded. No new look -- same rows, different default view.
+
+**Why.** LB-6 shipped with the compact 15-live-row window as the default and hid gone studs ranked *above* every live target behind "Show full board." Joe reviewed it and asked for the reverse: "show me the full board by default." He wants the board to open on the true top of the room -- gone studs at their real rank, his own picks in place, live targets interleaved -- not a target-only slice.
+
+**What shipped:**
+- **`src/components/draft/live-room/inline-players-panel.tsx`** -- flipped the initial view: `showAll` now starts `true`, so the board renders the complete merged ladder (`merged`) on first paint. The old capped window is now a named `compact` memo (top `DEFAULT_ROWS` live rows starting at Joe's best available player) used only when Joe opts into the collapsed view. The footer toggle now gates on `merged.length > compact.length` (so the collapse affordance still renders when the full board is the default -- the old `merged.length > rows.length` gate hid it) and reads "Show top targets" (collapse) / "Show full board" (expand). Same paint cost as tapping the old "Show full board" -- no new render regime.
+- **Test updated:** the LB-6 case that asserted a gone stud above every live target was hidden-until-opened now asserts the inverse -- visible by default, and removed after a real `fireEvent.click` on "Show top targets." The other 9 board cases are unchanged.
+
+**Proof (VERIFY, pasted):**
+- `npm run type-check` -> **0 errors**.
+- `npx vitest run src/components/draft/live-room/__tests__/value-board.test.tsx` -> **10 passed / 10**.
+- Targeted `eslint` on `inline-players-panel.tsx` + `value-board.test.tsx` -> **clean, exit 0**.
+- `npm run test:run` -> **789 passed / 65 files, 0 failures**.
+- **Live in-sim screenshot NOT captured** (same environment limits as LB-6: Browser pane not displayed, another chat holds the :3003 server, and the drafted/gone rows only populate once real picks land). The default-view behavior is proven by the component test flipping on the real `InlinePlayersPanel` via `fireEvent`.
+
+**Files.** EDITED: `src/components/draft/live-room/inline-players-panel.tsx`, `src/components/draft/live-room/__tests__/value-board.test.tsx`.
+
+---
+
 ## 2026-08-23 / LB-6 -- Mine/gone row interleaving in the Value Board
 
 **Class:** shared (live-room component) + output (UI). $0, no Claude API. Built directly on Opus, single-threaded. No new look to approve -- reuses the Value Board's existing you-vs-room chip language (blue = yours, muted = not-for-you) for the drafted-context rows; extends the already-shipped board.

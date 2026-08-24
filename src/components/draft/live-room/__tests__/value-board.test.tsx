@@ -160,16 +160,17 @@ describe('Value Board mine/gone interleaving (LB deferred)', () => {
     expect(screen.queryByTestId('vb-gone-row')).not.toBeInTheDocument()
   })
 
-  it('hides gone studs ranked above every live target until the full board opens', () => {
+  it('shows gone studs ranked above every live target by default, and collapses them away on demand', () => {
     const live = player({ id: 'a', name: 'Best Available', position: 'WR' })
-    // Ranked far above the only live row -> excluded from the default window.
+    // Ranked far above the only live row -> visible by default (full board).
     const goneAbove = drafted({ id: 'g', name: 'Gone Above', combinedScore: 90 })
     renderWithDrafted([scored(live, 10)], [goneAbove])
 
-    expect(screen.queryByText('Gone Above')).not.toBeInTheDocument()
-    const toggle = screen.getByText('Show full board')
-    fireEvent.click(toggle)
+    // Full board is the default: the gone stud above the target shows up front.
     expect(screen.getByText('Gone Above')).toBeInTheDocument()
+    // Collapsing to the focused view drops players ranked above the first live target.
+    fireEvent.click(screen.getByText('Show top targets'))
+    expect(screen.queryByText('Gone Above')).not.toBeInTheDocument()
   })
 
   it('keeps target ranks on live rows only, so a woven gone row does not bump the count', () => {

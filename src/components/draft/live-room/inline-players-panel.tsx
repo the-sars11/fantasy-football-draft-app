@@ -199,7 +199,7 @@ export function InlinePlayersPanel({
   const [open, setOpen] = useState(true)
   const [posFilter, setPosFilter] = useState<PosFilter>('ALL')
   const [query, setQuery] = useState('')
-  const [showAll, setShowAll] = useState(false)
+  const [showAll, setShowAll] = useState(true)
 
   // Merge live + drafted into one ranked ladder so gone/mine players hold their
   // board slot instead of vanishing. Same search + position filter hits both.
@@ -221,11 +221,11 @@ export function InlinePlayersPanel({
       .sort((a, b) => b.score - a.score)
   }, [available, drafted, posFilter, query])
 
-  // Default view = the top DEFAULT_ROWS LIVE targets, starting at Joe's best
-  // available player, with gone/mine rows woven in between them. No leading wall
-  // of already-gone studs (those live only under "show full board").
-  const rows = useMemo(() => {
-    if (showAll) return merged
+  // Default = the FULL ranked ladder, gone studs at the top included, so the
+  // board opens on the true top of the room, not just Joe's live targets.
+  // The compact view is an opt-in collapse: the top DEFAULT_ROWS LIVE targets
+  // starting at Joe's best available player, gone/mine woven in between them.
+  const compact = useMemo(() => {
     const firstLive = merged.findIndex(it => it.kind === 'live')
     if (firstLive === -1) return merged
     const out: BoardItem[] = []
@@ -239,7 +239,9 @@ export function InlinePlayersPanel({
       out.push(it)
     }
     return out
-  }, [merged, showAll])
+  }, [merged])
+
+  const rows = showAll ? merged : compact
 
   // Only LIVE rows carry a target rank (1, 2, 3...); drafted rows are context
   // and hold no actionable number.
@@ -411,8 +413,8 @@ export function InlinePlayersPanel({
             )
           })}
 
-          {/* Show more / less */}
-          {merged.length > rows.length && (
+          {/* Full board is the default; the toggle collapses to Joe's live targets */}
+          {merged.length > compact.length && (
             <button
               onClick={() => setShowAll(v => !v)}
               className="mt-2 w-full rounded-lg py-2 text-[11px] font-bold uppercase tracking-wide"
@@ -422,7 +424,7 @@ export function InlinePlayersPanel({
                 color: ROOM.t2,
               }}
             >
-              {showAll ? 'Show less' : 'Show full board'}
+              {showAll ? 'Show top targets' : 'Show full board'}
             </button>
           )}
 
