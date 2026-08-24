@@ -39,7 +39,7 @@
 
 ## 2026-08-24 / IA-0.2 -- Delete Strategies + Leaderboard + Sims-page (keep engines)
 
-**Class:** shared (route/component deletion). $0, no Claude API. Sonnet worker session, built strictly to a frozen thinker card (Sprint IA plan of record in `BUILD_PLAN.md`). Verifier: OTHER_FAMILY V-0.2 (separate fresh-context agent), not yet run by the orchestrator.
+**Class:** shared (route/component deletion). $0, no Claude API. Sonnet worker session, built strictly to a frozen thinker card (Sprint IA plan of record in `BUILD_PLAN.md`). Verifier: OTHER_FAMILY V-0.2 (separate fresh-context Sonnet agent) -- **ran and returned OVERALL: PASS** (evidence appended below).
 
 **What shipped (via `git rm`, 16 files):**
 - Route folders: `src/app/(app)/prep/strategies/{client,loading,page}.tsx`, `src/app/(app)/prep/leaderboard/{client,page}.tsx`, `src/app/(app)/prep/simulate/{client,page}.tsx` (7 files).
@@ -81,7 +81,13 @@
 
 **Files.** EDITED: `src/app/(app)/prep/page.tsx`, `src/app/(app)/prep/board/client.tsx`, `src/lib/nav-context.tsx`. DELETED (16, via `git rm`): the 7 route files, 6 exclusive components/lib, and 3 orphaned tests listed above.
 
-**V-0.2 VALIDATION:** not yet run -- orchestrator's job, not this worker session's.
+**V-0.2 VALIDATION (OTHER_FAMILY, separate fresh-context Sonnet agent, defaults to FAIL, reproduced everything itself on the real routes at 390px, never `?sim=1`) -- OVERALL: PASS:**
+- Clause (a): `/prep/strategies`, `/prep/leaderboard`, `/prep/simulate` each `404 Not Found` (read via `read_network_requests`, real HTTP status, on a fresh dev server). PASS.
+- Clause (b): grep for the 5 deleted component basenames = 0 hits; route-path/`leaderboard` grep = 8 hits, all inert prose comments (zero imports/usages). PASS.
+- Clause (c): 4/5 KEEP engines have live real-code importers (`sim-engine.ts` 8 files, `sim-grade.ts` 9 files, `strategy/generate.ts` 3 files incl `adaptive-guidance.ts`+`propose/route.ts`, `strategy-picker.tsx` 1 file `draft/live/client.tsx`). `strategy-swap.tsx` = 0 real importers; validator ran `git grep "strategy-swap" c077be4^ -- src/` and found the same single prose-comment-only hit on the PARENT commit, independently confirming the orphan is PRE-EXISTING, not caused by IA-0.2 -> does not fail the card. PASS (with the flagged pre-existing orphan).
+- Clause (d): `/prep`, `/prep/board`, `/draft/live`, `/draft/review`, `/settings` all `200 OK`; only error is the pre-existing environmental `useUserTags` -> `/api/user-tags/batch` 500 (Supabase unreachable in sandbox), confirmed NOT in the diff via `git show --stat c077be4`. PASS.
+- Re-run A-items: A2 `tsc --noEmit` 0 errors (after `.next` clear); A3 `test:run` 761/761 (62 files); A4 lint 140 problems (30 err/110 warn), 0 in the 3 edited files; A5 build `Compiled successfully in 3.8s`, 55/55 static pages, 3 deleted routes absent from the manifest; A10 `c077be4` present as HEAD, `master` in sync with `origin/master`, tree clean, `git show --stat` confirms the 16 `git rm` deletions are in the commit. PASS.
+- Overall verdict: PASS.
 
 ---
 
