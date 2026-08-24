@@ -41,7 +41,7 @@ import { BottomNav } from './bottom-nav'
 import { BlockPickerSheet, type BlockPickerFilter } from './block-picker-sheet'
 import { FixPickSheet } from './fix-pick-sheet'
 import { ResearchView } from './research-view'
-import { InlinePlayersPanel } from './inline-players-panel'
+import { InlinePlayersPanel, type DraftedRow } from './inline-players-panel'
 import { DollarBinPanel } from './dollar-bin'
 import { selectDollarBin } from '@/lib/draft/dollar-bin'
 
@@ -168,6 +168,36 @@ export function AuctionDraftRoom({
     () => scoredPlayers.filter(sp => !draftedNames.has(sp.player.name.toLowerCase())),
     [scoredPlayers, draftedNames],
   )
+
+  // Drafted players, ranked-in-place context for the Value Board: mine (Joe won)
+  // vs gone (another owner), each with its sale price. Off the same scored pool
+  // so board rank matches the live rows; classified by the winning manager.
+  const draftedRows = useMemo<DraftedRow[]>(() => {
+    if (state.picks.length === 0) return []
+    const me = myManager.trim().toLowerCase()
+    const info = new Map<string, { price: number | null; mine: boolean }>()
+    for (const pk of state.picks) {
+      info.set(pk.player_name.toLowerCase(), {
+        price: pk.price ?? null,
+        mine: pk.manager.trim().toLowerCase() === me,
+      })
+    }
+    const rows: DraftedRow[] = []
+    for (const sp of scoredPlayers) {
+      const d = info.get(sp.player.name.toLowerCase())
+      if (!d) continue
+      rows.push({
+        id: sp.player.id,
+        name: sp.player.name,
+        position: sp.player.position,
+        team: sp.player.team,
+        combinedScore: sp.combinedScore,
+        price: d.price,
+        mine: d.mine,
+      })
+    }
+    return rows
+  }, [state.picks, scoredPlayers, myManager])
 
   const scarcityByPos = useMemo(() => {
     const m = new Map<string, PositionScarcityExtended>()
@@ -523,6 +553,7 @@ export function AuctionDraftRoom({
               available={available}
               maxBidMap={maxBidMap}
               repriced={repriced}
+              drafted={draftedRows}
               isTarget={isTarget}
               onToggleTarget={onToggleTarget}
               onSelectPlayer={setOnBlockPlayer}

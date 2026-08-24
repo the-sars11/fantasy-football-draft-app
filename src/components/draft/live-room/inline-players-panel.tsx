@@ -26,17 +26,43 @@ import { ROOM, posColors } from './theme'
 type PosFilter = 'ALL' | 'QB' | 'RB' | 'WR' | 'TE' | 'DEF'
 const POS_FILTERS: PosFilter[] = ['ALL', 'QB', 'RB', 'WR', 'TE', 'DEF']
 
+/**
+ * A player already off the board, shown as dimmed context inside the ranked
+ * ladder instead of silently vanishing. `mine` = Joe won him; otherwise gone to
+ * another owner. `combinedScore` places him at his true board rank; `price` is
+ * the sale price (null if unpriced/unknown).
+ */
+export interface DraftedRow {
+  id: string
+  name: string
+  position: string
+  team?: string
+  combinedScore: number
+  price: number | null
+  mine: boolean
+}
+
 export interface InlinePlayersPanelProps {
   available: ScoredPlayer[]
   maxBidMap: Map<string, number>
   /** LB-2: live-repriced You/Room/pocket per player id. Empty before any sale. */
   repriced: Map<string, RepricedPlayer>
+  /**
+   * Drafted players interleaved into the ladder as dimmed context (mine/gone).
+   * Defaults to none, which reproduces the original available-only board.
+   */
+  drafted?: DraftedRow[]
   isTarget: (id: string) => boolean
   onToggleTarget: (id: string) => void
   onSelectPlayer: (p: Player) => void
 }
 
-/** Rows shown before "show more" — keeps paint fast in a live auction. */
+/** One merged ladder entry: a live (undrafted) player or a gone/mine context row. */
+type BoardItem =
+  | { kind: 'live'; sp: ScoredPlayer; score: number; name: string; position: string }
+  | { kind: 'drafted'; row: DraftedRow; score: number; name: string; position: string }
+
+/** Rows shown before "show more" -- keeps paint fast in a live auction. */
 const DEFAULT_ROWS = 15
 
 const GRID = '20px 1fr auto 26px'
@@ -121,10 +147,51 @@ function ValueCluster({
   )
 }
 
+/** A drafted player, dimmed and struck, holding his ranked slot as context. */
+function DraftedRowLine({ row }: { row: DraftedRow }) {
+  const pc = posColors(row.position)
+  return (
+    <div
+      data-testid={row.mine ? 'vb-mine-row' : 'vb-gone-row'}
+      className="grid items-center gap-2 border-t px-2 py-1.5"
+      style={{ gridTemplateColumns: GRID, borderColor: ROOM.border, opacity: 0.55 }}
+    >
+      <span aria-hidden="true" />
+      <span className="min-w-0">
+        <div
+          className="truncate font-headline text-[12px] font-semibold leading-tight"
+          style={{ color: ROOM.t3, textDecoration: 'line-through' }}
+        >
+          {row.name}
+        </div>
+        <div className="font-mono text-[9px]" style={{ color: pc.color }}>
+          {row.position}
+          {row.team ? ` · ${row.team}` : ''}
+        </div>
+      </span>
+      <span className="flex items-center justify-end gap-1.5 text-right">
+        <span
+          className="shrink-0 rounded-[4px] px-1.5 py-0.5 font-headline text-[8px] font-bold uppercase tracking-[0.5px]"
+          style={row.mine ? { background: ROOM.blue10, color: ROOM.blue } : { background: ROOM.muted10, color: ROOM.muted }}
+        >
+          {row.mine ? 'mine' : 'gone'}
+        </span>
+        {row.price != null && (
+          <span className="font-mono text-[11px] font-bold" style={{ color: ROOM.t3 }}>
+            ${row.price}
+          </span>
+        )}
+      </span>
+      <span aria-hidden="true" />
+    </div>
+  )
+}
+
 export function InlinePlayersPanel({
   available,
   maxBidMap,
   repriced,
+  drafted = [],
   isTarget,
   onToggleTarget,
   onSelectPlayer,
@@ -134,18 +201,61 @@ export function InlinePlayersPanel({
   const [query, setQuery] = useState('')
   const [showAll, setShowAll] = useState(false)
 
-  const filtered = useMemo(() => {
+  // Merge live + drafted into one ranked ladder so gone/mine players hold their
+  // board slot instead of vanishing. Same search + position filter hits both.
+  const merged = useMemo(() => {
+    const items: BoardItem[] = []
+    for (const sp of available) {
+      items.push({ kind: 'live', sp, score: sp.combinedScore, name: sp.player.name, position: sp.player.position })
+    }
+    for (const row of drafted) {
+      items.push({ kind: 'drafted', row, score: row.combinedScore, name: row.name, position: row.position })
+    }
     const q = query.trim().toLowerCase()
-    return available
-      .filter(sp => {
-        if (posFilter !== 'ALL' && sp.player.position !== posFilter) return false
-        if (q && !sp.player.name.toLowerCase().includes(q)) return false
+    return items
+      .filter(it => {
+        if (posFilter !== 'ALL' && it.position !== posFilter) return false
+        if (q && !it.name.toLowerCase().includes(q)) return false
         return true
       })
-      .sort((a, b) => b.combinedScore - a.combinedScore)
-  }, [available, posFilter, query])
+      .sort((a, b) => b.score - a.score)
+  }, [available, drafted, posFilter, query])
 
-  const rows = showAll ? filtered : filtered.slice(0, DEFAULT_ROWS)
+  // Default view = the top DEFAULT_ROWS LIVE targets, starting at Joe's best
+  // available player, with gone/mine rows woven in between them. No leading wall
+  // of already-gone studs (those live only under "show full board").
+  const rows = useMemo(() => {
+    if (showAll) return merged
+    const firstLive = merged.findIndex(it => it.kind === 'live')
+    if (firstLive === -1) return merged
+    const out: BoardItem[] = []
+    let live = 0
+    for (let i = firstLive; i < merged.length; i++) {
+      const it = merged[i]
+      if (it.kind === 'live') {
+        if (live >= DEFAULT_ROWS) break
+        live++
+      }
+      out.push(it)
+    }
+    return out
+  }, [merged, showAll])
+
+  // Only LIVE rows carry a target rank (1, 2, 3...); drafted rows are context
+  // and hold no actionable number.
+  const withRank = useMemo(() => {
+    const out: Array<{ it: BoardItem; rank: number | null }> = []
+    let live = 0
+    for (const it of rows) {
+      if (it.kind === 'live') {
+        live += 1
+        out.push({ it, rank: live })
+      } else {
+        out.push({ it, rank: null })
+      }
+    }
+    return out
+  }, [rows])
 
   return (
     <div
@@ -245,8 +355,12 @@ export function InlinePlayersPanel({
             <span className="text-center">Fav</span>
           </div>
 
-          {/* Player rows */}
-          {rows.map((sp, i) => {
+          {/* Ranked ladder: live targets numbered, drafted players dimmed in place */}
+          {withRank.map(({ it, rank }) => {
+            if (it.kind === 'drafted') {
+              return <DraftedRowLine key={it.row.id} row={it.row} />
+            }
+            const sp = it.sp
             const pc = posColors(sp.player.position)
             const rp = repriced.get(sp.player.id)
             const fallbackValue =
@@ -266,7 +380,7 @@ export function InlinePlayersPanel({
                 onClick={() => onSelectPlayer(sp.player)}
               >
                 <span className="font-mono text-[12px] font-semibold" style={{ color: rp?.isPocket ? ROOM.blue : ROOM.t3 }}>
-                  {i + 1}
+                  {rank}
                 </span>
                 <span className="min-w-0">
                   <div
@@ -298,7 +412,7 @@ export function InlinePlayersPanel({
           })}
 
           {/* Show more / less */}
-          {filtered.length > DEFAULT_ROWS && (
+          {merged.length > rows.length && (
             <button
               onClick={() => setShowAll(v => !v)}
               className="mt-2 w-full rounded-lg py-2 text-[11px] font-bold uppercase tracking-wide"
@@ -308,11 +422,11 @@ export function InlinePlayersPanel({
                 color: ROOM.t2,
               }}
             >
-              {showAll ? 'Show less' : `Show all ${filtered.length} players`}
+              {showAll ? 'Show less' : 'Show full board'}
             </button>
           )}
 
-          {filtered.length === 0 && (
+          {merged.length === 0 && (
             <div className="py-4 text-center font-mono text-[11px]" style={{ color: ROOM.t3 }}>
               No players match
             </div>

@@ -2,6 +2,31 @@
 
 ---
 
+## 2026-08-23 / LB-6 -- Mine/gone row interleaving in the Value Board
+
+**Class:** shared (live-room component) + output (UI). $0, no Claude API. Built directly on Opus, single-threaded. No new look to approve -- reuses the Value Board's existing you-vs-room chip language (blue = yours, muted = not-for-you) for the drafted-context rows; extends the already-shipped board.
+
+**Why.** Closes the last deferred LB item. The Value Board (`InlinePlayersPanel`) iterated `available` only, so the instant a player was drafted he vanished from the ladder -- Joe lost the scarcity context ("the two RBs ranked above my target are already gone") and had no in-board record of his own picks' rank. Drafted players should hold their board slot as dimmed context, not disappear.
+
+**Design decision (flagged).** The default 15-row window stays a LIVE board, not a gray wall: the window is capped on 15 *live* rows and starts at Joe's best available player, so gone/mine rows are woven in only where they fall *between* his live targets. Studs already gone *above* every live target are hidden until "Show full board" opens the complete ranked ladder. This preserves the board's job (openings surface themselves) while restoring the context; the alternative (a true full ladder by default) buries live targets under 50+ gray rows late-draft and was rejected.
+
+**What shipped:**
+- **`src/components/draft/live-room/inline-players-panel.tsx`** -- new exported `DraftedRow` interface + optional `drafted?: DraftedRow[]` prop (defaults to `[]`, reproducing the original available-only board). Live + drafted are merged into one ranked ladder (`BoardItem` union) sorted by `combinedScore`; the same search + position filter hits both. New `DraftedRowLine` renders a drafted player dimmed (`opacity 0.55`) with a struck-through name, position/team subline, and a right-side tag: blue `mine` (Joe won him) or muted `gone` (another owner) plus the sale price. Drafted rows are inert -- no star, no arrow, not clickable. The 15-row cap now counts LIVE rows only and starts at the first live row; ranks (1, 2, 3...) are assigned to live rows only (a woven gone row takes no number). Footer button relabeled "Show full board" / "Show less"; empty-state and toggle gated on the merged list.
+- **`src/components/draft/live-room/auction-room.tsx`** -- new `draftedRows` memo builds `DraftedRow[]` off the same `scoredPlayers` pool (so board rank matches the live rows), classifying each drafted player mine-vs-gone by comparing the pick's winning `manager` to `myManager` (case-insensitive) and attaching the sale `price` from `state.picks`. Threaded into `<InlinePlayersPanel drafted={draftedRows} />`. `available` and every other consumer untouched.
+- **New tests:** 4 added to `src/components/draft/live-room/__tests__/value-board.test.tsx` -- (1) a gone player woven between two live rows renders `vb-gone-row` with the `gone` tag + `$55` and both live targets still show; (2) a player Joe won renders `vb-mine-row` with `mine`, no gone row; (3) a stud ranked above every live target is hidden by default and appears after clicking "Show full board"; (4) live ranks stay 1 and 2 across a woven gone row (rank "3" never appears).
+
+**Proof (VERIFY, pasted):**
+- `npm run type-check` -> **0 errors**.
+- Targeted `eslint` on the 3 touched files (`inline-players-panel.tsx`, `auction-room.tsx`, `value-board.test.tsx`) -> **clean, exit 0** (rewrote the live-rank counter from a captured `.map` closure to a local for-loop to satisfy `react-hooks/immutability`).
+- `npm run test:run` -> **789 passed / 65 files** (+4 new interleave cases; 0 failures).
+- **Component render proof:** the 4 new cases render the real `InlinePlayersPanel` with actual drafted rows and assert exact DOM -- `vb-gone-row`/`vb-mine-row` testids, the `mine`/`gone` tags, sale prices, the default-hidden-until-full-board behavior (via a real `fireEvent.click`), and the live-only rank numbering.
+- **Live in-sim screenshot NOT captured** (same environment limits as LB-4/LB-5: Browser pane not displayed so screenshots time out; sharing the other chat's running :3003 server; mock `demo-league` 404s so picks do not persist into the sim board). The drafted rows only populate once real picks land; the component tests cover the exact DOM those picks produce.
+- Swept a pre-existing em-dash out of the touched panel file (comment line 65) to hold the zero-dash rule.
+
+**Files.** EDITED: `src/components/draft/live-room/inline-players-panel.tsx`, `src/components/draft/live-room/auction-room.tsx`, `src/components/draft/live-room/__tests__/value-board.test.tsx`.
+
+---
+
 ## 2026-08-23 / LB-5 -- Repriced You/Room wired into the On-the-Block market-band track
 
 **Class:** output (UI) + shared. $0, no Claude API. Built directly on Opus, single-threaded. No new look to approve -- extends the existing v5 market-band track with the same you-vs-room language already shipped on the glance (LB-4) and Value Board (LB-2).
