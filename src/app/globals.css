@@ -230,6 +230,16 @@
   --ffi-glow-gold: 0 0 22px rgba(166, 60, 65, 0.3);
   --ffi-glow-gold-strong: 0 0 38px rgba(166, 60, 65, 0.45);
 
+  /* Money-green: the Board's +/- value-gap band + live STEAL signal only.
+     Deliberate, Joe-approved override (2026-08-24) of the "positive = steel-blue"
+     lock. A cooler/brighter cash-green, kept distinct from RB position green
+     (--pos-rb #56e0a0) so a value badge never reads as a position tag. */
+  --ffi-money-green: #3ddc84;
+  --ffi-money-green-bright: #5cff9d;
+  --ffi-money-green-dim: rgba(61, 220, 132, 0.12);
+  --ffi-money-green-line: rgba(61, 220, 132, 0.3);
+  --ffi-glow-money: 0 0 13px rgba(61, 220, 132, 0.55);
+
   /* live-data signal = electric blue (kept name) */
   --ffi-live: #7fc0ea;
   --ffi-live-dim: rgba(95, 168, 224, 0.14);

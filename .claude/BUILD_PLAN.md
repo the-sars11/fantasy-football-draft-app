@@ -661,13 +661,13 @@ Screen → target: S1 research-hub `/research`; S2 player-browser (D4, already b
 - **Tabs:** two tabs share one list -- **Board** (prep) + **Live** (draft day). Bottom nav becomes **Board / Live / Post Draft / Settings** (renames Research->Board, Live Draft->Live).
 - **Default sort (ALL view):** priciest first (Target $ desc). Position chips (incl FLEX) filter; RB view shows RBs in RB order.
 - **Offline mode:** full manual tracking -- tap a player, mark Sold with price + who won; player leaves the board, values re-adjust; works with zero connection.
-- **Row does NOT show Market or base** (they cause the "$64 vs $76" confusion). Row = the cheat sheet: `Rk | Name team.BYE (injury) | Range | Room | Target | +/- vs room`. Market (ESPN) + base appear only inside the expand's "How this is calculated."
+- **Row does NOT show Market or base** (they cause the "$64 vs $76" confusion). Row = the cheat sheet: `Rk | Name team.BYE (injury) | Range | Room | Target | +/- vs room`. **(R1/DEC-IA1b supersede:** Market (ESPN) = Room, so nothing is hidden; the "How this is calculated" disclosure and the base-blend number are removed from the UI entirely.**)**
 
 **Product spec (thinkers freeze the detail; workers build to it):**
-- **Row model (shared, prep + live identical):** `Rk | Name  team.BYE (injury pill) | Range | Room | Target | +/- vs room`. `Rk` = position rank, colored by position, no "ECR" label surfaced. `Range` = worth..room bracket. `Room` = expected room price (prep) / repriced room (live). `Target` = your pay-up-to (prep target price / live repriced `you`), the blue number. `+/- vs room` = Target minus Room; green (+ = chase) / red (- = hold) / grey. Collapsed-row flags: tappable **star** (my target, no expand needed), auto **value** badge (POCKET), auto **dollar dart** (dollar-bin / likely-under-value-late); injury pill inline. No separate Dollar Bin panel. ~44px rows, zebra, `tabular-nums`, single line, ellipsis.
+- **Row model (shared, prep + live identical):** `Rk | Name  team.BYE (injury pill) | Range | Room | Target | +/- vs room`. `Rk` = position rank, colored by position, no "ECR" label surfaced. `Range` = worth..room bracket. `Room` = expected room price (prep) / repriced room (live). `Target` = your pay-up-to (prep target price / live repriced `you`), the blue number. `+/- vs room` = Target minus Room; **(R1/DEC-IA1b:** money-green at `>= +$4` (chase) / danger-red at `<= -$4` (hold) / neutral grey within `+/-$3`; the number always prints.**)** Collapsed-row flags: tappable **star** (my target, no expand needed), auto **value** badge (POCKET), auto **dollar dart** (dollar-bin / likely-under-value-late); injury pill inline. No separate Dollar Bin panel. ~44px rows, zebra, `tabular-nums`, single line, ellipsis.
 - **Shared architecture (DRY):** one `<Board>` list + `<BoardRow>` + `<BoardRowDetail>`, taking normalized `BoardRow[]` + `mode: 'prep' | 'live'`. Prep adapter: `src/lib/players/convert.ts` fields, tags via `tags.ts`, dollar flag via `src/lib/draft/dollar-bin.ts`. Live adapter: same pool through `repriceBoard(...)` (`src/lib/draft/live-reprice.ts`); drafted filtered OUT (mine -> roster, gone -> gone); `+/-` live.
 - **Filters:** one chip row `ALL / QB / RB / WR / TE / FLEX / DEF` + a `Targets` chip. Remove the redundant All/FLEX/By-Position toggle (`prep/board/client.tsx` ~456-536).
-- **Expand (compact), action-first order (per `BOARD_SPEC_IA-1.0.md` §3):** **Your Call** (verdict pill target?/priority + big star) -> **Valuation** (the restored Room/Target/Ceiling **value meter** = the `.valbar` 3-tick bar + a "How this is calculated" disclosure) -> **Outlook** (one plain read + breakout/bust tag) -> **Draft Intel** (tag chips). Height budget <=300px so it does NOT fill the screen. Market + base + provenance only under How-calculated. No ALL-CAPS names, no jargon surfaced, red reserved for T1.
+- **Expand (compact), action-first order (per `BOARD_SPEC_IA-1.0.md` §3):** **Your Call** (verdict pill target?/priority + big star) -> **Valuation** **(R1/DEC-IA1b:** a recessed light-catch **value gauge** — raised glowing Target marker in a Room->Ceiling worth band + a shaded green STEAL zone; edge-clamped captions; NO "How this is calculated" disclosure**)** -> **Outlook** (one plain read + breakout/bust tag) -> **Draft Intel** (tag chips). Height budget <=300px so it does NOT fill the screen. Market/base no longer surfaced anywhere. No ALL-CAPS names, no jargon surfaced, red reserved for T1.
 - **Live chrome (all pieces exist -- reuse/reorder), top->bottom:** draft details (`status-bar.tsx` + `budget-strip.tsx`) -> Market Pulse (`market-pulse-strip.tsx`) -> collapsible On the Block (`on-the-block-card.tsx`) -> shared Board (live adapter) -> collapsible My Team + needs (`my-team-roster.tsx`) -> manual entry bar (`manual-pick-entry.tsx` variant `bar`). Targets = the `Targets` chip + a lightweight slide-out sheet of remaining starred targets.
 
 **Session model:** **Thinker = Opus (FRONTIER)** designs the contract/spec/architecture + a mockup; gate = **Joe's explicit sign-off**. **Worker = Sonnet (WORKHORSE)** builds strictly to a frozen thinker spec, improvises nothing; gate = **A1-A10 + a separate Validation Agent PASS**. A Worker that hits a decision its spec did not cover STOPS and kicks it back to an Opus thinker.
@@ -686,7 +686,7 @@ Screen → target: S1 research-hub `/research`; S2 player-browser (D4, already b
 | Model | Sessions |
 |-------|----------|
 | **Opus** (FRONTIER) | IA-1.0, IA-2.0, IA-4.0 |
-| **Sonnet** (WORKHORSE) | IA-0.1, IA-0.2, IA-1.1, IA-1.2, IA-1.3, IA-2.1, IA-2.2, IA-3.1 + every V-* validator |
+| **Sonnet** (WORKHORSE) | IA-0.1, IA-0.2, IA-1.1, IA-1.2, IA-1.3, IA-2.1, IA-2.1b, IA-2.1c, IA-2.2, IA-3.1 + every V-* validator |
 
 ### IA-0.1 -- Kill swipe carousel, restore scroll `[Sonnet]` · class: shared -- **[x] DONE 2026-08-24 (code green, gate PASS, awaiting V-0.1)**
 > - Class: WORKHORSE
@@ -725,6 +725,13 @@ Screen → target: S1 research-hub `/research`; S2 player-browser (D4, already b
 > mockup HTMLs deleted. LOOK sign-off is on `board-mockup-IA-1.0.html`. Spec fix folded in before freeze:
 > the Range column renders **min-max ordered** so a TAX (ceiling < room) never reads backwards (e.g. "50-58", not "58-50").
 > **Awaiting Joe's typed LOOK approval — no IA-1.x worker starts until then.**
+>
+> **⚑ DEC-IA1b (2026-08-24) — Board LOOK revision R1 (Joe's first-look feedback), folded into `UI/board-mockup-IA-1.0.html` + `UI/BOARD_SPEC_IA-1.0.md`. Verified live at 375px (computed styles pasted in-session). Still `[~]` — re-served for Joe's LOOK:**
+> 1. **+/- money-green banding** (Joe's exact rule): `vsRoom >= +$4` -> money-green `--ffi-money-green-bright #5cff9d`; `<= -$4` -> danger red; within `+/-$3` -> neutral `--ffi-ink-3`. The number always prints. Deliberate, Joe-approved override of the "positive = steel-blue" lock (cash-green kept distinct from RB green `#56e0a0`). Boundaries match the existing `isPocket`/`isTax` `+/-$4` rule. Token `--ffi-money-green*` added to `src/app/globals.css`.
+> 2. **Valuation bar redesigned** into a recessed light-catch gauge: raised glowing Target marker inside a Room->Ceiling worth band + a shaded green STEAL zone on the low end (previews the live grab-under-$X call). Edge-aware, clamped captions — **the "labels fall off the edge" bug is fixed**.
+> 3. **"How this is calculated" removed** — Room already IS the ESPN market number; internal base-blend dropped from the UI.
+> 4. **De-flattened** with the app's own locked light-catch material (layered surface + inset bevel + box-shadow + hairline; NO blur) across rows, masthead, chips, expand, legend. POCKET blue rail preserved as a separate inset layer.
+> BOARD_SPEC amended (Revision R1 note at top + §2 col 7 + §3 Valuation + §6 tokens + §7 checklist). This card stays `[~]` until Joe types LOOK approval.
 
 ### IA-1.1 -- BoardRow type + prep adapter (sort/filter/flags) + tests `[Sonnet]` · class: shared -- **[ ] NOT STARTED**
 > - Class: WORKHORSE
@@ -749,15 +756,15 @@ Screen → target: S1 research-hub `/research`; S2 player-browser (D4, already b
 >   Reason: bounded UI build against the IA-1.0 expand spec.
 >   Verifier: OTHER_FAMILY (V-1.3) -- see VAP.
 > **Size:** M. **Depends on:** IA-1.0, IA-1.2.
-> **Scope in:** `<BoardRowDetail>` per `BOARD_SPEC_IA-1.0.md` §3 -- Your Call (target?/priority), the **value meter** (restore the `.valbar` 3-tick from `UI/board-mockup-IA-1.0.html` lines 125-135 & 305-309: Room grey / Target blue-bright larger / Ceiling grey dots, positioned by `left:%` on ONE consistent max, clamped so no tick runs past the rail), consensus read, breakout-bust tag; Market + base only under the "How this is calculated" disclosure.
-> **Done-when:** on the real route, expanded height is bounded (paste measured px, <=300px); all required fields present incl the 3 meter ticks (DOM: assert Room/Target/Ceiling ticks exist with sane `left:%`, none > 100%); constraints hold (no ALL-CAPS name, no "ECR" string surfaced -- assert both; red only on a T1 marker); tests for field presence + meter tick positions + constraints; A1-A10 pass.
+> **Scope in:** `<BoardRowDetail>` per `BOARD_SPEC_IA-1.0.md` §3 (as amended by R1/DEC-IA1b) -- Your Call (target?/priority), the **recessed value gauge** (build from `UI/board-mockup-IA-1.0.html`: `.gauge`/`.track`/`.steal`/`.band`/`.mk.room`/`.mk.tgt`/`.scale` — a recessed track, a Room->Ceiling worth band, a raised glowing Target marker `--ffi-glow-primary`, a shaded green STEAL zone below Room, and **edge-aware clamped captions** so Room/Target/Ceiling never clip the card at 390px), consensus read, breakout-bust tag. **NO "How this is calculated" disclosure; Market/base are not surfaced** (Room already = market).
+> **Done-when:** on the real route, expanded height is bounded (paste measured px, <=300px); the gauge renders with the room notch + glowing target marker + green steal zone (DOM: assert `.mk.tgt` and `.steal` exist; target marker `left:%` within the band; every `.scale .cap` right edge `<=` the gauge right edge, i.e. no caption clipped); **no `.howcalc`/"How this is calculated" element exists and no market/base number is rendered (assert both = 0)**; constraints hold (no ALL-CAPS name, no "ECR" string surfaced -- assert both; red only on a T1 marker); tests for field presence + gauge marker positions + caption-in-bounds + constraints; A1-A10 pass.
 > **V-1.3 done-when:** open an expand on the real route, measure height, assert each required field + each constraint from the DOM. PASS/FAIL table.
 
 ### IA-2.0 -- Live assembly spec + layout sign-off `[Opus]` · class: output -- **[ ] NOT STARTED**
 > - Class: FRONTIER
 >   Reason: open judgment on the live adapter contract + chrome composition + the dynamic-target logic; no existing mockup for the unified live layout.
 >   Verifier: Joe (explicit sign-off before IA-2.x build).
-> **Size:** L. **Depends on:** IA-1.0 (shares the row/expand). **Gates IA-2.1, IA-2.1b, IA-2.2.**
+> **Size:** L. **Depends on:** IA-1.0 (shares the row/expand). **Gates IA-2.1, IA-2.1b, IA-2.1c, IA-2.2.**
 > **Work:** freeze the Live adapter contract (`repriceBoard` -> BoardRow, drafted-removal rule, mine->roster), the chrome order + which panels are collapsible, the Targets filter + slide-out behavior. ALSO design the two dynamic behaviors below (the substance of Joe's live-draft questions). Mockup of the Live layout for Joe (showing dim + re-sort), saved under `UI/`.
 > **Done-when:** Joe types explicit approval; spec names the adapter mapping, the chrome order, the collapsible set, the Targets mechanism, AND the exact priority formula + sort rule (below). NO IA-2.x build starts until checked.
 >
@@ -775,6 +782,65 @@ Screen → target: S1 research-hub `/research`; S2 player-browser (D4, already b
 > - **Behavior B (value alerts) — DESIGN HERE, build in IA-2.1b.** Keep the blue POCKET rail on the row, and add
 >   a **pockets-first live sort** that pulls fallen pockets to the top, weighted toward still-needed positions.
 >   One board, no second surface (Joe's choice). Freeze the comparator rule.
+> - **Behavior C (on-the-block STEAL + DON'T-DRAFT-NOW) — DESIGN HERE, build in IA-2.1c + IA-2.2.** This is the
+>   answer to Joe's live-draft question: "is there a STEAL number — anything under $X is a f***ing steal — that is
+>   DYNAMIC to my roster + money + market, WITHOUT making me buy 4 straight RBs and have nothing for WR/QB?" and
+>   "flag DON'T-DRAFT-NOW when I'm RB-heavy and another RB deal comes up." Both are verdicts on the ONE player on
+>   the block, and BOTH live in the single existing composer `computeWhatToDo` (`src/lib/draft/what-to-do.ts:210`)
+>   — no new surface, no logic beside the call.
+>
+>   **New precedence chain (was PASS -> PUSH -> HOLD -> BID):**
+>   **`PASS -> DON'T-DRAFT-NOW -> PUSH -> STEAL -> HOLD -> BID`.**
+>   DON'T-DRAFT sits ABOVE PUSH and STEAL so a saturated position is never celebrated. PUSH (last of a scarce tier
+>   you still need) sits ABOVE STEAL so "pay up for the last elite body you need" beats "wait for a discount."
+>
+>   **Two new `WhatToDoMove` states** added to the union `'HOLD'|'BID'|'PUSH'|'PASS'`: **`'STEAL'`** and **`'DONT_DRAFT'`**.
+>   - **STEAL** — money-green (`--ffi-money-green`), loud. Copy: `STEAL · grab him — worth up to $${you}` with a
+>     sub-line `$${you - price} under your number`. Binds to the gauge's green steal zone (§3).
+>   - **DONT_DRAFT** — amber (`--ffi-warning`), loud but distinct from red PASS. Copy:
+>     `Hold off — you're set at ${pos}. Keep it for ${unfilledCoreNeeds.join('/')}.` Advisory, NOT a hard block
+>     (the app advises; Joe still places the bid).
+>
+>   **STEAL fires when ALL hold** (`price` = current live ask/high bid on the block):
+>   1. position still needed: `openSlotsByPosition[pos] > 0` (hard gate — no steal at a full position);
+>   2. affordable: `price <= maxBid`;
+>   3. genuine discount vs YOUR disciplined pay-up-to: `(you - price) >= stealGap(ctx)`;
+>   4. not suppressed by DON'T-DRAFT-NOW (precedence handles this).
+>
+>   **`stealGap(ctx)` — the DYNAMIC threshold (pure; IA-2.0 proposes these constants, IA-2.1c tunes vs fixtures):**
+>   ```
+>   base      = max(STEAL_MIN_ABS, round(STEAL_FRAC * you))      // STEAL_FRAC=0.20, STEAL_MIN_ABS=3
+>                                                                // scales to player size: $2 off a $60 guy isn't a
+>                                                                // steal; $4 off a $21 guy is. (DeVonta: base≈4.)
+>   needEase  = openSlotsByPosition[pos] >= 2 ? 0.75 : 1.0        // deep need -> accept a smaller discount (grab value)
+>   tight     = price / max(1, maxBid)                            // how much of your ceiling this eats
+>   budgetPad = tight >= 0.85 ? 1.5 : tight >= 0.60 ? 1.15 : 1.0  // near-broke -> demand a BIGGER discount (be pickier)
+>   stealGap  = max(STEAL_MIN_ABS, round(base * needEase * budgetPad))
+>   stealCeiling = you - stealGap                                 // the loudest price; gauge steal-zone right edge
+>   ```
+>   Why this satisfies "don't make me buy 4 straight RBs": (a) `you` itself already folds in need — `needMultiplier`
+>   in `live-reprice.ts` fades a FILLED position's `you` to ×0.55, so `you - price` rarely clears the gap once a
+>   position is stocked; (b) the hard `openSlots > 0` gate blocks any steal at a saturated position; (c) `budgetPad`
+>   raises the bar as you spend down, so late steals must be truly cheap; (d) DON'T-DRAFT-NOW is the hard stop on top.
+>
+>   **DON'T-DRAFT-NOW fires when** (roster-construction driven — Joe said "at any price"):
+>   1. position saturated: `isPositionSaturated(pos) = openSlotsByPosition[pos] <= 0` (starters + FLEX filled, FLEX
+>      already folded into RB/WR/TE by `openSlotsFromRoster`); AND
+>   2. a CORE starting need is still open elsewhere: `anyCoreNeedUnfilled` = any of {QB1, RBmin, WRmin, TE1, FLEX, DEF1}
+>      with `openSlotsByPosition[thatPos] > 0`; AND
+>   3. it is not a harmless late stash: `price > 1` OR no open bench slot. (A `$1` dart with bench room is NOT loud —
+>      it falls through to a quiet BID with a "bench depth only" caption, so we never nag on $1 handcuffs.)
+>   Rationale: adding a 4th RB while you have no WR2/QB is wrong almost regardless of price, so this is saturation-driven,
+>   not budget-driven — but the $1-bench carve-out keeps it from crying wolf on legitimate end-of-draft darts.
+>
+>   **Gauge binding (§3, live mode):** the green STEAL zone's right edge = `stealCeiling`; the worth band = `room..ceiling`;
+>   the glowing marker = `you`. In prep it is a static preview (zone sits just below room); in live it is the real
+>   "grab him under $${stealCeiling}" line, so the meter and the verdict copy always agree.
+>
+>   **IA-2.0 freezes** (this block): the precedence, the two states + their colors/copy, the `stealGap` formula + its
+>   four constants, the saturation + core-need + $1-bench rule, and the gauge binding. **IA-2.1c builds** the pure fns
+>   + branches; **IA-2.2 wires** the live inputs (below). A short live-layout note + the two verdicts appear in the
+>   IA-2.0 Live mockup for Joe's sign-off.
 
 ### IA-2.1 -- Live adapter (reprice -> BoardRow, drafted removed) + tests `[Sonnet]` · class: shared -- **[ ] NOT STARTED**
 > - Class: WORKHORSE
@@ -800,12 +866,26 @@ Screen → target: S1 research-hub `/research`; S2 player-browser (D4, already b
 > **Done-when:** unit tests prove: filling a position lowers its redundant targets' priority WITHOUT unstarring; a price fall that opens a pocket re-elevates that player; the comparator surfaces a needed-position pocket above a filled-position pocket and above a non-pocket. Paste the test output; A1-A10 pass.
 > **V-2.1b done-when:** fresh context; run the suite; drive both fns with a fixture (a filled RB slot + a redundant RB target + a fallen-pocket WR at a needed slot), assert never-unstar + re-elevate + comparator order from raw output. PASS/FAIL table.
 
+### IA-2.1c -- On-the-block STEAL + DON'T-DRAFT-NOW verdicts (Behavior C) `[Sonnet]` · class: shared -- **[ ] NOT STARTED**
+> - Class: WORKHORSE
+>   Reason: two pure gate fns + two new branches in the ONE existing verdict composer, to the IA-2.0 freeze; fully unit-testable, no UI, no new pricing math.
+>   Verifier: OTHER_FAMILY (V-2.1c) -- see VAP.
+> **Size:** M. **Depends on:** IA-1.1 (BoardRow type), IA-2.0 (freezes Behavior C: precedence, `stealGap` formula + 4 constants, saturation/core-need/$1-bench rule, the two states + colors/copy). **Gates IA-2.2.**
+> **Scope in:** to the Behavior C freeze, all in `src/lib/draft/`, PURE + unit-tested:
+>   - **(A) `stealThreshold(ctx)`** beside `live-reprice.ts` -> `{ stealGap, stealCeiling }` from `you`, `openSlotsByPosition[pos]`, `maxBid`, `price` (the `STEAL_FRAC=0.20` / `STEAL_MIN_ABS=3` / needEase / budgetPad formula). Pure; no unstar, no side effects.
+>   - **(B) `isPositionSaturated(pos, openSlotsByPosition)`** + **`wouldStarveCoreNeed(ctx)`** beside `live-reprice.ts` -> the DON'T-DRAFT gate (saturated AND a core starter {QB1,RBmin,WRmin,TE1,FLEX,DEF1} still open AND not a harmless `$1`-with-bench-room stash). Pure.
+>   - **(C)** extend `WhatToDoMove` union with `'STEAL' | 'DONT_DRAFT'`; extend `WhatToDoInput` with `currentPrice`, `pocket`/`isPocket`, `openSlotsByPosition`, `maxBid`, `budgetRemaining`, `benchOpen`, `unfilledCoreNeeds`; add the two branches to `computeWhatToDo` (what-to-do.ts:210) in the frozen precedence **PASS -> DONT_DRAFT -> PUSH -> STEAL -> HOLD -> BID**. Copy/colors per the freeze (STEAL money-green, DONT_DRAFT amber).
+>   - **(D)** wire the seam at `auction-room.tsx:281`: pass `repriced.get(id)` (room/you/pocket/isPocket) + `openSlotsByPosition[pos]` + budget/bench/core-needs into the existing `computeWhatToDo` call. No new surface.
+> **Scope out:** no meter/gauge UI build (that is IA-1.3 static + IA-2.2 live binding), no re-sort/dim wiring (IA-2.1b/IA-2.2), no new pricing/solver math (reuse `live-reprice.ts`, `getMaxBid`, `openSlotsFromRoster`, `needMultiplier`).
+> **Done-when:** unit tests prove -- a saturated position (`openSlots<=0`) with a core need still open SUPPRESSES STEAL and yields DON'T-DRAFT-NOW (even at a great price); an under-target price at a still-needed position (`you - price >= stealGap`, affordable) fires STEAL; the `stealGap` widens as `maxBid` tightens (budgetPad) and eases with deep need (needEase); a `$1` stash with bench room does NOT fire the loud DON'T-DRAFT. Paste the test output; A1-A10 pass.
+> **V-2.1c done-when:** fresh context; run the suite; drive `computeWhatToDo` with two fixtures -- (1) RB saturated + WR2 unfilled + cheap RB on the block -> assert DON'T-DRAFT-NOW and NO steal; (2) WR needed + DeVonta-style `you=21`/`price=12` -> assert STEAL with the right `stealCeiling`, budget-safe. Assert precedence order from raw output. PASS/FAIL table.
+
 ### IA-2.2 -- Assemble Live screen + Targets filter/slide-out `[Sonnet]` · class: output -- **[ ] NOT STARTED**
 > - Class: WORKHORSE
 >   Reason: bounded composition of existing panels around the shared Board per the IA-2.0 spec; reuse-only.
 >   Verifier: OTHER_FAMILY (V-2.2) -- see VAP.
-> **Size:** L. **Depends on:** IA-1.2, IA-2.0, IA-2.1, IA-2.1b.
-> **Scope in:** compose the Live screen from existing pieces (status/budget, market pulse, collapsible on-the-block, the shared Board via live adapter, collapsible roster+needs, manual bar) + the Targets chip + slide-out sheet. Wire the IA-2.1b `targetPriority` to DIM redundant targets and `pocketsFirstComparator` to RE-SORT the live board (Behaviors A + B). No re-implemented solver/pricing.
+> **Size:** L. **Depends on:** IA-1.2, IA-2.0, IA-2.1, IA-2.1b, IA-2.1c.
+> **Scope in:** compose the Live screen from existing pieces (status/budget, market pulse, collapsible on-the-block, the shared Board via live adapter, collapsible roster+needs, manual bar) + the Targets chip + slide-out sheet. Wire the IA-2.1b `targetPriority` to DIM redundant targets and `pocketsFirstComparator` to RE-SORT the live board (Behaviors A + B). Surface the IA-2.1c STEAL / DON'T-DRAFT-NOW verdict on the on-the-block card (money-green / amber per the freeze) and bind the value gauge's green STEAL zone to the live `stealCeiling` (Behavior C). No re-implemented solver/pricing.
 > **Done-when:** on a **real** manual/offline draft (NOT `?sim=1`): the Board renders and scrolls; a recorded Sold removes that player and moves room/target/+- (before/after measured); on-the-block + roster collapse/expand (DOM); Targets chip + slide-out show only starred-remaining; A1-A10 pass.
 > **V-2.2 done-when:** start a real manual session, record a Sold, measure the board delta + removal on the real route; toggle collapses; check the Targets set. PASS/FAIL table.
 
