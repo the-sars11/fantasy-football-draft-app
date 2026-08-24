@@ -15,6 +15,7 @@
     { "name": "Auctioneer remote sync proxy - built; live-verify against a running auctioneer pending R15", "done": false }
   ],
   "nextItems": [
+    "Sprint IA [Joe-approved 2026-08-24]: COLLAPSE TO ONE BOARD. Radical simplification -- kill the screen sprawl, collapse the app around ONE dense players list called Board (prep) that, with draft chrome layered on, becomes Live (draft day). 11 model-gated one-sitting sessions (Thinker=Opus designs+Joe-signoff / Worker=Sonnet builds to a frozen spec) + a Validation Agent Protocol: a separate fresh-context adversarial agent reruns each Worker's proof itself on the REAL dev route, defaults to FAIL, and rejects any ?sim=1-only proof -- closing the hole that let a feature be called 'done' while it only ran under a fake sim URL. Full detail = the 'Sprint IA -- Collapse to One Board' section below. SUPERSEDES as SCREENS: W1 Leaderboard, the Strategies screens (D3), the Sim page (D5), and the SP-track reskins of /prep/players + /prep/board (those screens are retired/merged into Board). KEPT + feeding the Board: the W0 dataset contract, W2 LeagueIntelPanel enrichment, R6 target-pricing, the R10 sim engine (background), R11 adaptive-guidance, and the LB-track live cockpit (inline-players-panel Value Board + live-reprice + dollar-bin + market-pulse + on-the-block reprice) which Sprint IA-2.x REUSES on the Live tab -- do not rebuild it. NEXT = IA-0.1 [Worker/Sonnet]: kill the swipe carousel to restore mobile scroll (root cause: swipe-carousel.tsx:110 wraps mobile non-live pages in h-full overflow-hidden, clipping tall content so nothing scrolls). HARD MODEL GATE: IA-0.1 is a Sonnet worker -- launch on Sonnet; the three Thinker sessions (IA-1.0, IA-2.0, IA-4.0) run on Opus.",
     "W-track [Joe-approved 2026-08-21]: wire the headless research engine + a draft-day decide->lock->phone workflow INTO the app UI (see 'W-track' section). W0 [Opus] DONE 2026-08-21 = dataset contract (dataset-types.ts) + storage seam (research:publish -> research_runs kind:'dataset' + GET /api/research-dataset + use-research-dataset hook); proven end-to-end, McCaffrey $60 (room $67, 0.894x) round-trips through the DB. W1 [Sonnet] DONE 2026-08-21 = Strategy Leaderboard screen (prep/leaderboard, ranks 26 strategies by 400-run meanWins, reuses sim-cards, +fixed a W0-introduced /prep hub crash + a stud-combo dup-key bug). W2 [Sonnet] DONE 2026-08-21 = LeagueIntelPanel (HOT/COOL inflation + owner leans) on leaderboard + /prep/board, per-player dataset enrichment merged over /prep/players + /prep/board (land odds, durability price, value bands), durabilityPriceFactor added to EnrichedPlayer contract + writer; commit 1cfea82. NEXT = W3 [Opus]: Decisions + Lock contract (research_runs kind:'plan') + Claude write seam (draft-plan.json + plan:set/plan:lock + GET/POST/DELETE /api/draft-plan).",
     "DEC-1 [Opus/Joe]: RESOLVED 2026-08-17 = BIAS. The sim 'me' seat (R10b) + in-room advice (R11b) bias toward Joe's graded targets/avoids at a bounded weight (respect user_tags weight 1-10 + soft/hard severity); opponents stay generic-ceiling. Encoded as a fixed instruction in R10b + R11b; both unblocked.",
     "R10b [Opus, L]: DONE 2026-08-17. Sim grading + output - season-points-vs-league grade, projected record, top-5 modal rosters, players-you-land-most frequency, saved runs (persist/reload/compare). Me-seat biases to targets/avoids per DEC-1 = BIAS. 45 new tests, 417/417 green; live-verified on port 3003 (screenshot blocked by non-compositing pane, DOM/network proof in-chat). Unblocks D5.",
@@ -644,6 +645,146 @@ Screen → target: S1 research-hub `/research`; S2 player-browser (D4, already b
 > **Gate:** type-check 0 errors · **497/497** tests green (+12) · lint 0 new errors in changed files (warnings all pre-existing) · build ✓ Compiled successfully in 4.6s · **latency 173.6ms** worst-case (16 runs, empty early-draft board -- well under the multi-second nomination clock, and memoized to run once per pick). **Bug-hunt (static, D6b-2 change set):** 1 HIGH (memoization defect -- FIXED this session, see above), 2 findings logged + deferred as pre-existing/disclosed engine behavior (BUG-D6b2-01 tie-break bias, BUG-D6b2-02 symmetric-state approximation). Visual proof: same headless-env limitation as D6/D6b-1/R11a (no active `/draft/live` session reachable) -- the LAND chip render path is proven by the 4 RTL DOM tests against the real `OnTheBlockCard`, plus a faithful static HTML render (exact `theme.ts` tokens + exact chip markup) delivered in-chat.
 >
 > **Not in D6b-2 scope:** extending `sim-engine.ts` with true per-manager initial state (each opponent's own budget/filled slots) -- documented as a separate future step.
+
+---
+
+## 🎯 Sprint IA -- Collapse to One Board (added 2026-08-24, Joe-approved)
+
+**Why this track exists:** the app sprawled into too many screens (Research hub -> Players, Cheat Sheet, Strategies, Sims, Leaderboard; plus Live, Post Draft, Setup). On Joe's phone it is unusable: nothing scrolls (a swipe carousel clips every prep page), a spring-loaded swipe fights every tap, the player cards are bloated (one expand eats the whole screen for ~8 facts), the position controls are duplicated, "Market $64 vs Room $76" reads as nonsense, there is no way to star a player from the row, and Live is stonewalled unless a session already exists. Joe's direction: collapse the whole app around ONE dense players list (modeled on `research-output/CHEAT_SHEETS.html`) used for prep AND, with draft chrome layered on top, as the live cockpit. No Strategies screen, no separate Sims screen, no Leaderboard, no separate Dollar Bin section. Just a great **Board**, and a **Live** version of that same Board.
+
+**Plan of record:** this section. The plan-mode scratch file `C:\Users\jrasa\.claude\plans\bright-percolating-pudding.md` is SUPERSEDED and carries a banner pointing here (one-plan rule).
+
+**⚠️ Supersession / sequencing (READ before running SP-track or W3/W4):** Sprint IA collapses Prep to one Board. It RETIRES `/prep/players` + `/prep/board` (merged into Board) and DELETES `/prep/strategies` + `/prep/leaderboard` + `/prep/simulate` (SCREENS only; engines kept). This supersedes, as SCREENS: **W1** (Leaderboard), the Strategies screens (D3), the Sim screen (D5), and the **SP-track work on `/prep/players`** (SP screen 1) **+ `/prep/board`** (SP-1 Tier A) -- those screens go away, so their reskins are mooted. **UNAFFECTED SP-track screens stay valid:** /draft hub, /draft/review, /draft/setup, /prep/configure, /prep/runs, /settings, auth. **Data + engines KEPT and feeding the Board:** W0 dataset contract, W2 LeagueIntelPanel enrichment, R6 target-pricing, R10 sim engine (background), R11 adaptive-guidance, `live-reprice.ts`. If both tracks run, Sprint IA owns the retired screens; SP-track keeps the rest.
+
+**Locked decisions (Joe answered):**
+- **Name:** the unified list is **Board**.
+- **Tabs:** two tabs share one list -- **Board** (prep) + **Live** (draft day). Bottom nav becomes **Board / Live / Post Draft / Settings** (renames Research->Board, Live Draft->Live).
+- **Default sort (ALL view):** priciest first (Target $ desc). Position chips (incl FLEX) filter; RB view shows RBs in RB order.
+- **Offline mode:** full manual tracking -- tap a player, mark Sold with price + who won; player leaves the board, values re-adjust; works with zero connection.
+- **Row does NOT show Market or base** (they cause the "$64 vs $76" confusion). Row = the cheat sheet: `Rk | Name team.BYE (injury) | Range | Room | Target | +/- vs room`. Market (ESPN) + base appear only inside the expand's "How this is calculated."
+
+**Product spec (thinkers freeze the detail; workers build to it):**
+- **Row model (shared, prep + live identical):** `Rk | Name  team.BYE (injury pill) | Range | Room | Target | +/- vs room`. `Rk` = position rank, colored by position, no "ECR" label surfaced. `Range` = worth..room bracket. `Room` = expected room price (prep) / repriced room (live). `Target` = your pay-up-to (prep target price / live repriced `you`), the blue number. `+/- vs room` = Target minus Room; green (+ = chase) / red (- = hold) / grey. Collapsed-row flags: tappable **star** (my target, no expand needed), auto **value** badge (POCKET), auto **dollar dart** (dollar-bin / likely-under-value-late); injury pill inline. No separate Dollar Bin panel. ~44px rows, zebra, `tabular-nums`, single line, ellipsis.
+- **Shared architecture (DRY):** one `<Board>` list + `<BoardRow>` + `<BoardRowDetail>`, taking normalized `BoardRow[]` + `mode: 'prep' | 'live'`. Prep adapter: `src/lib/players/convert.ts` fields, tags via `tags.ts`, dollar flag via `src/lib/draft/dollar-bin.ts`. Live adapter: same pool through `repriceBoard(...)` (`src/lib/draft/live-reprice.ts`); drafted filtered OUT (mine -> roster, gone -> gone); `+/-` live.
+- **Filters:** one chip row `ALL / QB / RB / WR / TE / FLEX / DEF` + a `Targets` chip. Remove the redundant All/FLEX/By-Position toggle (`prep/board/client.tsx` ~456-536).
+- **Expand (compact):** keep the D4 group bones (this file ~579-648: HERO / Valuation / Outlook / Draft Intel / Your Call / How-calculated) shrunk so it does NOT fill the screen. Answers: target him or not (+ priority), consensus analyst read, breakout/bust tag, context. Market + base + provenance only under How-calculated. No ALL-CAPS names, no jargon surfaced, red reserved for T1.
+- **Live chrome (all pieces exist -- reuse/reorder), top->bottom:** draft details (`status-bar.tsx` + `budget-strip.tsx`) -> Market Pulse (`market-pulse-strip.tsx`) -> collapsible On the Block (`on-the-block-card.tsx`) -> shared Board (live adapter) -> collapsible My Team + needs (`my-team-roster.tsx`) -> manual entry bar (`manual-pick-entry.tsx` variant `bar`). Targets = the `Targets` chip + a lightweight slide-out sheet of remaining starred targets.
+
+**Session model:** **Thinker = Opus (FRONTIER)** designs the contract/spec/architecture + a mockup; gate = **Joe's explicit sign-off**. **Worker = Sonnet (WORKHORSE)** builds strictly to a frozen thinker spec, improvises nothing; gate = **A1-A10 + a separate Validation Agent PASS**. A Worker that hits a decision its spec did not cover STOPS and kicks it back to an Opus thinker.
+
+**Validation Agent Protocol (VAP) -- required to close every Worker session** (the SP-track OTHER_FAMILY pattern, teeth hardened so a fake `?sim=1` proof cannot survive):
+1. Separate agent, fresh context. Dispatched at the end of the Worker session; did NOT write the code; NOT shown the worker's rationale or pasted "proof."
+2. Given only: the session's Done-when clauses + the A1-A10 list + the file scope.
+3. Model: Sonnet (Opus only if flagged logic-heavy).
+4. Mandate -- reproduce, do not trust: re-runs `type-check`, `lint`, `test:run` itself; loads the **real dev route** (the exact URL a human uses -- **never `?sim=1`, never a fabricated session/picks**) at **390px**; **measures** each claimed behavior (scrollHeight vs innerHeight, element counts, computed styles, DOM assertions, grep counts) and pastes raw numbers.
+5. **Default to FAIL.** Any clause it cannot independently prove PASS with pasted evidence is FAIL. "Looks right" = FAIL. A screenshot with no measured assertion = FAIL. A proof only reachable via `?sim=1` = FAIL.
+6. Output: a per-clause PASS/FAIL table + overall verdict + the raw evidence captured.
+7. Gate: the Worker session is not done until the Validator returns overall PASS. On FAIL, the Worker fixes and re-dispatches. The Validator's evidence goes into `.claude/CHANGELOG.md`.
+
+**Model gate (IA) -- hard STOP, announce model first:**
+
+| Model | Sessions |
+|-------|----------|
+| **Opus** (FRONTIER) | IA-1.0, IA-2.0, IA-4.0 |
+| **Sonnet** (WORKHORSE) | IA-0.1, IA-0.2, IA-1.1, IA-1.2, IA-1.3, IA-2.1, IA-2.2, IA-3.1 + every V-* validator |
+
+### IA-0.1 -- Kill swipe carousel, restore scroll `[Sonnet]` · class: shared -- **[ ] NOT STARTED**
+> - Class: WORKHORSE
+>   Reason: bounded layout surgery against a found root cause; no open judgment.
+>   Verifier: OTHER_FAMILY (V-0.1) -- see VAP.
+> **Size:** S. **Depends on:** nothing (run first).
+> **Root cause (found):** `src/components/layout/swipe-carousel.tsx:110` wraps mobile non-live pages in `h-full overflow-hidden`, clipping tall content so `main` (which already has `overflow-y-auto`) never gets scroll height. Desktop + live room bypass the carousel, which is why only phone prep pages freeze. Killing the carousel fixes scroll AND removes the spring-slide Joe hates.
+> **Scope in:** `src/components/layout/app-shell.tsx` (~226-245: render mobile content directly in `main`), delete `src/components/layout/swipe-carousel.tsx`, `src/components/layout/page-transition.tsx` (drop horizontal slide variants ~15-41). **Not touched:** `main`'s `overflow-y-auto`, bottom tab bar (~250-315), any route.
+> **Done-when:** (a) `SwipeCarousel`/`EdgeSwipeBack` deleted, grep across `src/` = 0 references; (b) on the real `/prep` at 390px, `scrollingElement.scrollHeight > innerHeight` AND a programmatic scroll to bottom reveals the last player row (paste both numbers); (c) horizontal swipe on `/prep` no longer changes route; A1-A10 pass.
+> **V-0.1 done-when:** reload real `/prep` (no sim) at 390px, measure scrollHeight vs innerHeight, scroll to bottom, confirm last row reachable; grep the two symbols = 0; confirm swipe does not navigate. PASS/FAIL table.
+
+### IA-0.2 -- Delete Strategies + Leaderboard + Sims-page (keep engines) `[Sonnet]` · class: shared -- **[ ] NOT STARTED**
+> - Class: WORKHORSE
+>   Reason: mechanical deletion + link cleanup against a known blast radius; engines explicitly preserved.
+>   Verifier: OTHER_FAMILY (V-0.2) -- see VAP.
+> **Size:** M. **Depends on:** nothing.
+> **Scope in:** delete pages `prep/strategies`, `prep/leaderboard`, `prep/simulate`; their exclusive components (`strategy-*.tsx`, `sim-results-cards.tsx`) + `src/lib/research/leaderboard.ts`; remove the three hub DestRows (`prep/page.tsx` ~258-278); remove the "Set a strategy" link (`prep/board/client.tsx` ~389); prune stale entries in `src/lib/nav-context.tsx`.
+> **KEEP (must stay imported -- paste grep proof):** `src/lib/draft/sim-engine.ts`, `sim-grade.ts`, `src/lib/research/strategy/generate.ts`, `components/draft/strategy-picker.tsx`, `strategy-swap.tsx`.
+> **Done-when:** (a) the three routes are gone (404); (b) grep for deleted symbols across `src/` = 0; (c) grep proves each KEEP engine still imported by its real consumer (paste counts); (d) `/prep` + Board + Live + Post Draft + Settings load on real routes with 0 console errors; A1-A10 pass.
+> **V-0.2 done-when:** rerun both greps (deleted = 0, engines > 0); load every remaining nav dest on real routes, read console for errors. PASS/FAIL table.
+
+### IA-1.0 -- Board spec + mockup + LOOK SIGN-OFF `[Opus]` · class: output -- **[ ] NOT STARTED**
+> - Class: FRONTIER
+>   Reason: open layout + contract judgment (row, expand, flags, shared architecture) with no existing mockup; the only Phase-1 planning item; Opus per the model rule.
+>   Verifier: Joe (explicit look sign-off before any Phase-1 worker starts).
+> **Size:** L. **Depends on:** nothing. **Gates IA-1.1..IA-1.3.**
+> **Work:** freeze for the workers -- the `BoardRow` normalized contract (fields + provenance), exact row columns/widths/colors/flag rules, the compact-expand spec (which fields, what copy, height budget), the chip/filter/sort spec, and the `<Board>`/`<BoardRow>`/`<BoardRowDetail>` + adapter architecture. Produce a **static mockup** (row + expand + chip row) against `research-output/CHEAT_SHEETS.html`, saved under `UI/`.
+> **Done-when:** Joe types explicit approval on the mockup; spec self-checklist names every row field, every flag, every expand field; saved under `UI/` + referenced by ID. NO IA-1.x build starts until checked.
+
+### IA-1.1 -- BoardRow type + prep adapter (sort/filter/flags) + tests `[Sonnet]` · class: shared -- **[ ] NOT STARTED**
+> - Class: WORKHORSE
+>   Reason: bounded data-layer build against the IA-1.0 contract; no UI, fully unit-testable.
+>   Verifier: OTHER_FAMILY (V-1.1) -- see VAP.
+> **Size:** M. **Depends on:** IA-1.0.
+> **Scope in:** new `BoardRow` type + prep adapter (`convert.ts` fields -> BoardRow, priciest-first sort, position filter incl FLEX = RB|WR|TE, tags + dollar flag). No UI.
+> **Done-when:** new unit tests prove -- ALL-view sort is Target desc; FLEX filter returns exactly RB/WR/TE; dollar flag set for a known dollar-bin fixture; value flag = POCKET rule; star/target flag plumbed. Paste count + new test names; A1-A10 pass.
+> **V-1.1 done-when:** run the suite itself; feed a fixture through the adapter, assert sort order + FLEX membership + flags from the raw output. PASS/FAIL table.
+
+### IA-1.2 -- Board list + collapsed row; wire as Board tab; retire old routes; rename nav `[Sonnet]` · class: output -- **[ ] NOT STARTED**
+> - Class: WORKHORSE
+>   Reason: bounded UI build against the approved IA-1.0 mockup; zero open judgment once signed off.
+>   Verifier: OTHER_FAMILY (V-1.2) -- see VAP.
+> **Size:** L. **Depends on:** IA-1.0 (mockup), IA-1.1 (adapter).
+> **Scope in:** `<Board>` + `<BoardRow>` per IA-1.0 (dense grid, chip row, search, scroll, star-on-row); point the Board tab at it; retire `/prep/players` + `/prep/board` (redirect); rename bottom nav to Board/Live/Post Draft/Settings.
+> **Done-when:** on the real Board route at 390px -- list scrolls to the last row (measured); tapping a position chip incl FLEX filters (element count before/after); tapping the star toggles target state WITHOUT expanding (DOM proof); matches the IA-1.0 mockup; old routes redirect; no dead nav links; A1-A10 pass.
+> **V-1.2 done-when:** real route, no sim -- measure scroll, chip filter counts, star toggle DOM, redirect of old routes, nav labels; screenshot backed by the measured assertions. PASS/FAIL table.
+
+### IA-1.3 -- Compact expand (BoardRowDetail) `[Sonnet]` · class: output -- **[ ] NOT STARTED**
+> - Class: WORKHORSE
+>   Reason: bounded UI build against the IA-1.0 expand spec.
+>   Verifier: OTHER_FAMILY (V-1.3) -- see VAP.
+> **Size:** M. **Depends on:** IA-1.0, IA-1.2.
+> **Scope in:** `<BoardRowDetail>` per IA-1.0 -- target?/priority, consensus read, breakout-bust tag, context; Market + base only under How-calculated.
+> **Done-when:** on the real route, expanded height is bounded (paste measured px, well under full screen); all required fields present (DOM); constraints hold (no ALL-CAPS name, no "ECR" string surfaced -- assert both); tests for field presence + constraints; A1-A10 pass.
+> **V-1.3 done-when:** open an expand on the real route, measure height, assert each required field + each constraint from the DOM. PASS/FAIL table.
+
+### IA-2.0 -- Live assembly spec + layout sign-off `[Opus]` · class: output -- **[ ] NOT STARTED**
+> - Class: FRONTIER
+>   Reason: open judgment on the live adapter contract + chrome composition; no existing mockup for the unified live layout.
+>   Verifier: Joe (explicit sign-off before IA-2.x build).
+> **Size:** M. **Depends on:** IA-1.0 (shares the row/expand). **Gates IA-2.1..IA-2.2.**
+> **Work:** freeze the Live adapter contract (`repriceBoard` -> BoardRow, drafted-removal rule, mine->roster), the chrome order + which panels are collapsible, the Targets filter + slide-out behavior. Mockup of the Live layout for Joe, saved under `UI/`.
+> **Done-when:** Joe types explicit approval; spec names the adapter mapping, the chrome order, the collapsible set, the Targets mechanism. NO IA-2.x build starts until checked.
+
+### IA-2.1 -- Live adapter (reprice -> BoardRow, drafted removed) + tests `[Sonnet]` · class: shared -- **[ ] NOT STARTED**
+> - Class: WORKHORSE
+>   Reason: bounded adapter build reusing existing pricing; unit-testable.
+>   Verifier: OTHER_FAMILY (V-2.1) -- see VAP.
+> **Size:** M. **Depends on:** IA-1.1 (BoardRow type), IA-2.0.
+> **Scope in:** live adapter (`repriceBoard` output -> BoardRow: room/target/+- live), drafted players filtered out, mine routed to roster. No new pricing math -- reuse `live-reprice.ts`.
+> **Done-when:** tests prove a repriced player maps room/target/+- correctly; a drafted player is removed from the list; a `mine` pick is excluded from the list and surfaced to roster. Paste count + names; A1-A10 pass.
+> **V-2.1 done-when:** run the suite; drive the adapter with a fixture incl a drafted + a mine pick, assert removal + roster routing from raw output. PASS/FAIL table.
+
+### IA-2.2 -- Assemble Live screen + Targets filter/slide-out `[Sonnet]` · class: output -- **[ ] NOT STARTED**
+> - Class: WORKHORSE
+>   Reason: bounded composition of existing panels around the shared Board per the IA-2.0 spec; reuse-only.
+>   Verifier: OTHER_FAMILY (V-2.2) -- see VAP.
+> **Size:** L. **Depends on:** IA-1.2, IA-2.0, IA-2.1.
+> **Scope in:** compose the Live screen from existing pieces (status/budget, market pulse, collapsible on-the-block, the shared Board via live adapter, collapsible roster+needs, manual bar) + the Targets chip + slide-out sheet. No re-implemented solver/pricing.
+> **Done-when:** on a **real** manual/offline draft (NOT `?sim=1`): the Board renders and scrolls; a recorded Sold removes that player and moves room/target/+- (before/after measured); on-the-block + roster collapse/expand (DOM); Targets chip + slide-out show only starred-remaining; A1-A10 pass.
+> **V-2.2 done-when:** start a real manual session, record a Sold, measure the board delta + removal on the real route; toggle collapses; check the Targets set. PASS/FAIL table.
+
+### IA-3.1 -- Board without session + one-tap manual + Sold->board (offline) `[Sonnet]` · class: shared -- **[ ] NOT STARTED**
+> - Class: WORKHORSE
+>   Reason: bounded gate-removal + wiring of the existing manual-pick path; offline-verifiable.
+>   Verifier: OTHER_FAMILY (V-3.1) -- see VAP.
+> **Size:** M. **Depends on:** IA-2.2.
+> **Scope in:** replace the hard "No Draft Session Yet" wall (`src/app/(app)/draft/live/client.tsx` ~549-569) so the Board still shows with no session; a one-tap "Start manual draft" that creates a manual session (`draft/page.tsx` manual path + `draft/setup`); wire `manual-pick-entry.tsx` Sold -> board update.
+> **Done-when:** with NO session and the network offline, the real Live route renders the Board (not the wall); "Start manual draft" creates a session in one tap; a Sold entry with the network offline removes the player and reprices (measured); A1-A10 pass.
+> **V-3.1 done-when:** real route, network disabled -- confirm Board renders with no session, one-tap start works, Sold updates the board offline (measured before/after). PASS/FAIL table.
+
+### IA-4.0 -- Full-vision integration review + regression sweep `[Opus]` · class: output -- **[ ] NOT STARTED**
+> - Class: FRONTIER
+>   Reason: cross-cutting completeness critic against Joe's original complaint + the North Star; open judgment on whether the vision is met.
+>   Verifier: Joe (sign-off that nothing was silently dropped).
+> **Size:** L. **Depends on:** IA-0.1..IA-3.1.
+> **Work:** map every line of Joe's original complaint AND the North Star / `VISION.md` pillars to the delivered code, evidence per item. Full `test:run` + `/bug-hunt full` on the sprint's modules + an end-to-end pass on the REAL routes (Board -> Live -> manual -> Post Draft) at 390px. Any gap becomes an `IA-fix` card in this section.
+> **Done-when:** per-item complaint->code evidence table complete; full suite green; `/bug-hunt full` 0 unresolved CRIT/HIGH; end-to-end real-route pass captured; Joe signs off the vision is met.
 
 ---
 

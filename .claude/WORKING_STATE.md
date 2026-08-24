@@ -25,7 +25,17 @@ The prior plan (S1–S8 / P2 DR / P3 VAL) marked the app "done" while it (a) pri
 
 ## Next open item
 
-### ▶ ACTIVE FOCUS 2026-08-23 -- SP-track RESUMED (finish the SHIELD UI)
+### ▶ ACTIVE FOCUS 2026-08-24 -- Sprint IA: Collapse to One Board (Joe-approved)
+
+Joe-approved radical simplification: kill the screen sprawl, collapse the app around ONE dense list -- **Board** (prep) that, with draft chrome layered on, becomes **Live** (draft day). **Plan of record = the `Sprint IA -- Collapse to One Board` section in `.claude/BUILD_PLAN.md`** (11 model-gated sessions: Thinker=Opus designs + Joe sign-off / Worker=Sonnet builds to a frozen spec; each Worker closed by the **Validation Agent Protocol** -- a separate fresh-context adversarial agent that reruns the proof on the REAL route, defaults to FAIL, rejects `?sim=1`). The plan-mode scratch file `C:\Users\jrasa\.claude\plans\bright-percolating-pudding.md` is SUPERSEDED and points here.
+
+This supersedes the two focuses below as the active thread. Both are complete: **SP-track** is done + validated through auth (Tier A + /prep/runs + /settings + /sign-in + /sign-up). **LB-track** is code-green but **uncommitted in the tree** -- its live Value Board (`inline-players-panel.tsx`, `live-reprice.ts`, `dollar-bin.tsx`, `market-pulse-strip.tsx`, on-the-block reprice) is exactly what Sprint IA-2.x REUSES on the Live tab, so **do not rebuild it**.
+
+**Sequencing:** Sprint IA retires `/prep/players` + `/prep/board` (merged into Board) and deletes the Strategies/Leaderboard/Sim SCREENS (engines kept). Other SP-track screens (draft hub/review/setup, prep/configure, prep/runs, settings, auth) stay valid.
+
+**Next open item -> IA-0.1 [Worker/Sonnet]:** kill the swipe carousel to restore mobile scroll (root cause `swipe-carousel.tsx:110` `h-full overflow-hidden`). **HARD MODEL GATE:** IA-0.1 is a Sonnet worker session -- launch it on Sonnet, not Opus. Thinker sessions (IA-1.0, IA-2.0, IA-4.0) run on Opus. First: another session may share this tree and LB/SP work is uncommitted -- Joe should decide whether to commit/push that first so Sprint IA starts from a clean base.
+
+### ▶ PRIOR FOCUS 2026-08-23 -- SP-track RESUMED (finish the SHIELD UI)
 
 Joe re-sequenced 2026-08-23: run the **SP-track now**, ahead of W3/W4 and the R15 rehearsal, to finish the SHIELD screen reskin. W3/W4 (draft-plan lock + screen) are held; R15 (phone-vs-live-auctioneer) still runs whenever Joe is ready and does not block SP. BUILD_PLAN SP-track PAUSED banner superseded (history kept).
 
