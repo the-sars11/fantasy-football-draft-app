@@ -37,6 +37,54 @@
 
 ---
 
+## 2026-08-24 / IA-0.2 -- Delete Strategies + Leaderboard + Sims-page (keep engines)
+
+**Class:** shared (route/component deletion). $0, no Claude API. Sonnet worker session, built strictly to a frozen thinker card (Sprint IA plan of record in `BUILD_PLAN.md`). Verifier: OTHER_FAMILY V-0.2 (separate fresh-context agent), not yet run by the orchestrator.
+
+**What shipped (via `git rm`, 16 files):**
+- Route folders: `src/app/(app)/prep/strategies/{client,loading,page}.tsx`, `src/app/(app)/prep/leaderboard/{client,page}.tsx`, `src/app/(app)/prep/simulate/{client,page}.tsx` (7 files).
+- Exclusive components + lib: `src/components/prep/strategy-proposals.tsx`, `strategy-editor.tsx`, `strategy-list.tsx`, `strategy-value-preview.tsx`, `sim-results-cards.tsx`, `src/lib/research/leaderboard.ts` (6 files).
+- Orphaned tests for the above: `src/components/prep/__tests__/strategy-proposals-reflow.test.tsx`, `sim-results-cards.test.tsx`, `src/lib/research/__tests__/leaderboard.test.ts` (3 files).
+- **EDITED `src/app/(app)/prep/page.tsx`** -- removed the Strategies/Sims/Leaderboard `<DestRow>`s and their icons (`Layers`, `Activity`, `Trophy`), the parallel `strategyCount` fetch/state, and the derived `strategiesMetric`/`simsMetric`/`leaderboardMetric`. Hub doc comment trimmed to the two remaining destinations.
+- **EDITED `src/app/(app)/prep/board/client.tsx`** -- removed the "Set a strategy" link that pointed at the deleted `/prep/strategies`.
+- **EDITED `src/lib/nav-context.tsx`** -- removed the stale `'/prep/strategies': 1` entry from `routeDepth` (leaderboard/simulate never appeared there).
+
+**KEEP engines -- grep-proven live importers, none touched:**
+- `src/lib/draft/sim-engine.ts` / `sim-grade.ts`: imported by `sim-results.ts`, `room-sim-probability.ts`, `league-opponents.ts`, `injury-flags.ts`, `injury-risk.ts`, `room-target-pricing.ts`, `research/strategy/{research,generate}.ts` + multiple test files.
+- `src/lib/research/strategy/generate.ts`: imported by `src/lib/draft/adaptive-guidance.ts:35` and `src/app/api/strategies/propose/route.ts:20`.
+- `src/components/draft/strategy-picker.tsx`: imported by `src/app/(app)/draft/live/client.tsx:51`.
+
+**Flagged exception (not fixed, per the card's own escalation instruction):** `src/components/draft/strategy-swap.tsx` is KEEP-listed by this card, but `grep -rn "strategy-swap" src` shows ZERO real importers anywhere -- only the file's own internals and an unrelated comment. This is pre-existing and not caused by this deletion. Left in place (KEEP instruction), but Done-when clause (c) cannot be proven for it with a live-importer count. Needs a Joe decision: wire it into a real screen, or formally retire it in a future card.
+
+**Two more pre-existing orphans discovered, correctly left untouched as out-of-scope (neither was exclusive to a deleted screen, so neither qualified for deletion under this card):**
+- `src/components/prep/strategy-compare.tsx` -- 0 importers anywhere in `src`.
+- `src/components/prep/strategy-proposal-card.tsx` -- only its own test (`__tests__/strategy-proposal-card.test.tsx`) imports it; no real consumer.
+- `src/lib/prep/pull-signal.ts`'s `readPullStamp` export is now orphaned (its only consumer was the deleted `strategy-proposals.tsx`), but `markPullComplete` in the same file is still used by `prep/page.tsx`. File not named in scope-in; left completely untouched, including the now-stale comment above the `markPullComplete` call referencing `/prep/strategies`.
+
+**Proof (VERIFY, pasted):**
+- Done-when (a): `npm run build` route manifest -- `/prep/strategies`, `/prep/leaderboard`, `/prep/simulate` absent; live 404 (Next.js not-found page) confirmed for all three at 390px in a fresh browser tab, cross-checked via `read_network_requests` (not the `navigate` return text, which only ever reports the bare origin).
+- Done-when (b): `grep -rn "prep/strategies\|prep/leaderboard\|prep/simulate\|StrategyProposals\|StrategyEditor\|StrategyList\|StrategyValuePreview\|SimResultsCards\|from '.../leaderboard'" src` = 0 functional/import hits. 6 stray hits are all stale prose comments in files outside this card's scope-in (`prep/page.tsx:168`, `api/user-tags/batch/route.ts:88` + its test, `strategy-proposal-card.test.tsx`, `lib/prep/pull-signal.ts`) -- deliberately not touched to avoid scope creep.
+- Done-when (c): see KEEP engines above, all with real importer file:line citations.
+- Done-when (d)/A7: console-checked on real routes (never `?sim=1`), fresh browser tab per route:
+  - `/prep`: 0 console errors. DOM confirms only "Players" and "Cheat Sheet" remain under WHERE YOU WORK (the 3 DestRows gone).
+  - `/prep/board`: full 483-player list renders, "Set a strategy" link absent. Console shows a pre-existing `[useUserTags] Error: TypeError: fetch failed` + `POST /api/user-tags/batch -> 500`.
+  - `/draft`: same pre-existing `useUserTags`/500 error.
+  - `/draft/review`: 0 console errors, 200 OK.
+  - `/settings`: 0 console errors, 200 OK.
+  - **The `useUserTags` error is environmental, not a regression:** `git status --short` shows this diff touches only the 3 edited files + 16 deletions listed above -- `src/hooks/use-user-tags.ts` and `src/app/api/user-tags/batch/route.ts` are untouched. The route's own code comment already documents it's shared by `/prep/board` AND `/prep/simulate`. The error reproduces identically on an untouched in-scope-adjacent route (`/prep/board`) and an unrelated route (`/draft`), and the failure mode (`TypeError: fetch failed` at the Supabase client, surfaced server-side as a caught 500) is a network-reachability issue in this dev sandbox, not application logic. Recommend Joe re-check on his own machine where Supabase is reachable.
+- `npm run type-check` -> **0 errors** (`.next` cache cleared first to drop the stale route-manifest type file).
+- `npm run test:run` -> **761 passed / 62 files, 0 failures.** The 3 deleted tests (`strategy-proposals-reflow`, `sim-results-cards`, `leaderboard`) were removed with their subjects; no other suite references the deleted symbols.
+- `npm run lint` -> **140 problems (30 errors, 110 warnings)** -- identical to the pre-card baseline captured via `git stash`/`git stash pop`. 0 new errors, 0 new warnings. All 30 pre-existing errors live in files never touched by this card (mockup/build scripts, `_dev_s5.js`/`_dev_s6.js`, various `scripts/*`).
+- `npm run build` -> `✓ Compiled successfully in 3.6s`, full route manifest confirms the 3 deleted routes absent and every other route present, including `/prep/board`, `/draft/live`, `/draft/review`, `/settings`, and all `/api/strategies*` endpoints (API routes are engine-backed, correctly untouched).
+- **Static review (A6, blast radius only):** 0 unresolved CRITICAL/HIGH. Cascading removals in `prep/page.tsx` (icons, state, parallel fetch, derived metrics, JSX) left no dangling imports or unused vars (confirmed by the 0-delta lint + 0 type-check errors); `dataLoading` state in `board/client.tsx` remains used by other call sites after the link removal.
+- **Cost gate (A9):** $0. No paid Claude or third-party API calls made this session.
+
+**Files.** EDITED: `src/app/(app)/prep/page.tsx`, `src/app/(app)/prep/board/client.tsx`, `src/lib/nav-context.tsx`. DELETED (16, via `git rm`): the 7 route files, 6 exclusive components/lib, and 3 orphaned tests listed above.
+
+**V-0.2 VALIDATION:** not yet run -- orchestrator's job, not this worker session's.
+
+---
+
 ## 2026-08-23 / LB-6a -- Value Board defaults to the full ranked board
 
 **Class:** output (UI default). $0, no Claude API. Built directly on Opus, single-threaded. No new look -- same rows, different default view.

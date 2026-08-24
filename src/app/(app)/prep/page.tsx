@@ -3,8 +3,8 @@
 /**
  * Research landing (`/prep`) — D2 redesign (2026-08-15).
  *
- * Hierarchy FLIP: the four destinations Joe lives in for weeks are the heroes —
- * Players · Cheat Sheet · Strategies · Sims — each a rich row with a glanceable
+ * Hierarchy FLIP: the destinations Joe lives in for weeks are the heroes —
+ * Players · Cheat Sheet — each a rich row with a glanceable
  * real stat. The AI "Player Pull" (run 2-4x/year) is DEMOTED to a subordinate
  * "Data" strip at the bottom: freshness at a glance, one plain line of what a
  * pull produces, and a quiet action.
@@ -21,9 +21,6 @@ import Link from 'next/link'
 import {
   Search,
   BarChart3,
-  Layers,
-  Activity,
-  Trophy,
   ChevronRight,
   Play,
   Target,
@@ -107,7 +104,6 @@ export default function PrepPage() {
   const [league, setLeague] = useState<League | null>(null)
   const [cache, setCache] = useState<CacheStatus | null>(null)
   const [detail, setDetail] = useState<RunDetail | null>(null)
-  const [strategyCount, setStrategyCount] = useState<number | null>(null)
 
   // Player Pull cost guard: idle → confirm → running.
   const [runState, setRunState] = useState<'idle' | 'confirm' | 'running'>('idle')
@@ -131,21 +127,10 @@ export default function PrepPage() {
         return
       }
 
-      // Runs + saved-strategy count in parallel (both need the league id).
-      const [runsRes, stratRes] = await Promise.all([
-        fetch(`/api/research?leagueId=${lg.id}`),
-        fetch(`/api/strategies?leagueId=${lg.id}`),
-      ])
+      const runsRes = await fetch(`/api/research?leagueId=${lg.id}`)
       if (!runsRes.ok) throw new Error('runs')
       const runsData = await runsRes.json()
       const runs: RunListItem[] = runsData.runs ?? []
-
-      if (stratRes.ok) {
-        const stratData = await stratRes.json()
-        setStrategyCount(Array.isArray(stratData.strategies) ? stratData.strategies.length : null)
-      } else {
-        setStrategyCount(null)
-      }
 
       const latest = runs.find((r) => r.status === 'completed') ?? null
 
@@ -204,10 +189,6 @@ export default function PrepPage() {
   const cheatMetric: Metric = targets[0]
     ? { value: '#1', label: lastName(targets[0].name) }
     : null
-  const strategiesMetric: Metric =
-    strategyCount && strategyCount > 0 ? { value: String(strategyCount), label: 'saved' } : null
-  const simsMetric: Metric = { badge: 'New' }
-  const leaderboardMetric: Metric = { badge: 'New' }
 
   return (
     <div className="pb-2">
@@ -254,27 +235,6 @@ export default function PrepPage() {
           label="Cheat Sheet"
           sub="Ranked, position-colored board"
           metric={cheatMetric}
-        />
-        <DestRow
-          href="/prep/strategies"
-          icon={Layers}
-          label="Strategies"
-          sub="Budget-by-position plans"
-          metric={strategiesMetric}
-        />
-        <DestRow
-          href="/prep/simulate"
-          icon={Activity}
-          label="Sims"
-          sub="Mock the auction, see your rosters"
-          metric={simsMetric}
-        />
-        <DestRow
-          href="/prep/leaderboard"
-          icon={Trophy}
-          label="Leaderboard"
-          sub="Every strategy, ranked by projected wins"
-          metric={leaderboardMetric}
         />
       </div>
 

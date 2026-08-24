@@ -23,7 +23,6 @@ export function useNavDirection() {
 const routeDepth: Record<string, number> = {
   '/prep': 0,
   '/prep/board': 1,
-  '/prep/strategies': 1,
   '/prep/runs': 1,
   '/prep/configure': 1,
   '/draft': 0,

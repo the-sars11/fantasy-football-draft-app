@@ -384,12 +384,6 @@ export function DraftBoardClient() {
           </span>
         )}
 
-        {!activeStrategy && !dataLoading && players.length > 0 && (
-          <span className="text-[11px]" style={{ color: 'var(--ffi-ink-3)' }}>
-            <a href="/prep/strategies" style={{ color: 'var(--ffi-blue-bright)' }}>Set a strategy</a>
-          </span>
-        )}
-
         {/* Player count + refresh */}
         <div className="flex items-center gap-2 ml-auto">
           {players.length > 0 && (
