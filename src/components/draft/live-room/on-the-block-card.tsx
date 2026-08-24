@@ -8,6 +8,7 @@
 import { useState } from 'react'
 import type { Player } from '@/lib/players/types'
 import type { WhatToDoAdvice } from '@/lib/draft/what-to-do'
+import type { RepricedPlayer } from '@/lib/draft/live-reprice'
 import { ROOM, posColors, moveTheme } from './theme'
 
 const ACTION_GLOW = 'rgba(166,60,65,0.32)'
@@ -204,11 +205,68 @@ function MarketBand({
   )
 }
 
+/**
+ * LB-4: always-visible repriced glance - the roster-need-adjusted You over the
+ * inflation-moved room price, plus a POCKET / tax chip. Same you-vs-room language
+ * as the Value Board (arrows: amber up = room got hot, blue down = room went soft;
+ * pocket chip blue, tax chip muted). The You number keeps this card's action red -
+ * it is still "your target," just repriced live off the draft instead of static.
+ */
+function RepricedGlance({ rp }: { rp: RepricedPlayer }) {
+  const roomArrow =
+    rp.roomDelta > 0 ? (
+      <span style={{ color: ROOM.amber }}> ▲</span>
+    ) : rp.roomDelta < 0 ? (
+      <span style={{ color: ROOM.blue }}> ▼</span>
+    ) : null
+
+  return (
+    <div className="flex shrink-0 items-center gap-1.5" data-testid="otb-repriced">
+      {rp.isPocket && (
+        <span
+          className="shrink-0 rounded-[5px] px-1.5 py-0.5 font-mono text-[10px] font-bold"
+          style={{ background: ROOM.blue10, color: ROOM.blue }}
+          data-testid="otb-pocket"
+        >
+          +${rp.pocket}
+        </span>
+      )}
+      {rp.isTax && (
+        <span
+          className="shrink-0 rounded-[5px] px-1.5 py-0.5 font-mono text-[10px] font-bold"
+          style={{ background: ROOM.muted10, color: ROOM.muted }}
+          data-testid="otb-tax"
+        >
+          tax
+        </span>
+      )}
+      <span className="text-right" style={{ minWidth: 38 }}>
+        <span
+          className="block font-mono text-[15px] font-bold leading-none"
+          style={{ color: ROOM.action }}
+          data-testid="otb-you"
+        >
+          ${rp.you}
+        </span>
+        <span
+          className="mt-0.5 block whitespace-nowrap font-mono text-[9px]"
+          style={{ color: ROOM.t3 }}
+          data-testid="otb-room"
+        >
+          room {rp.room}
+          {roomArrow}
+        </span>
+      </span>
+    </div>
+  )
+}
+
 export function OnTheBlockCard({
   player,
   advice,
   confidence,
   landProbability,
+  repriced,
   onChangePlayer,
   onToggleTarget,
   onToggleAvoid,
@@ -223,6 +281,13 @@ export function OnTheBlockCard({
    * real runMonteCarlo fraction (DEC-2b), never a fabricated number.
    */
   landProbability?: number | null
+  /**
+   * LB-4: this player's live-repriced You/Room (roster-need-adjusted target over
+   * the inflation-moved room price). Null/undefined => no live reprice for this
+   * player (e.g. DEF / unpriced rows the repricer skips) => fall back to the
+   * static advisor cap. Never fabricated; the caller passes repriced.get(id).
+   */
+  repriced?: RepricedPlayer | null
   onChangePlayer: () => void
   /** R11b: target and avoid settable right from the hero card. */
   onToggleTarget: (playerId: string) => void
@@ -298,18 +363,23 @@ export function OnTheBlockCard({
           </span>
         )}
 
-        {/* Target price — always visible when a numeric cap exists */}
-        {advice.capValue != null && (
-          <span
-            className="shrink-0 font-mono text-[14px] font-bold"
-            style={{ color: ROOM.action }}
-            data-testid="otb-max-bid"
-          >
-            ${advice.capValue}
-            <small className="ml-0.5 text-[9px] font-semibold" style={{ color: ROOM.t3 }}>
-              tgt
-            </small>
-          </span>
+        {/* LB-4: always-visible glance. Live repriced You/Room when the repricer
+            has a value for this player; otherwise the static advisor cap. */}
+        {repriced ? (
+          <RepricedGlance rp={repriced} />
+        ) : (
+          advice.capValue != null && (
+            <span
+              className="shrink-0 font-mono text-[14px] font-bold"
+              style={{ color: ROOM.action }}
+              data-testid="otb-max-bid"
+            >
+              ${advice.capValue}
+              <small className="ml-0.5 text-[9px] font-semibold" style={{ color: ROOM.t3 }}>
+                tgt
+              </small>
+            </span>
+          )
         )}
 
         {/* Change player — only visible in expanded header */}

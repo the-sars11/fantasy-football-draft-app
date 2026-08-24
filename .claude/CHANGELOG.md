@@ -2,6 +2,30 @@
 
 ---
 
+## 2026-08-23 / LB-4 -- Repriced You/Room wired into the On-the-Block hero card
+
+**Class:** output (UI) + shared. $0, no Claude API. Built directly on Opus, single-threaded. No new look to approve -- reuses the already-Joe-approved Value Board you-vs-room language on the existing hero card.
+
+**Why.** Closes the deferred LB gap flagged in LB-2 and LB-3: the On-the-Block hero card's always-visible glance number was still the STATIC advisor cap (`advice.capValue`, "tgt"), not the live-repriced You/Room the rest of the cockpit runs on. Joe reads the hero first when a player is nominated -- that number should be the same live figure the Value Board shows: his roster-need-adjusted target over the inflation-moved room price, with the value-pocket read.
+
+**What shipped:**
+- **`src/components/draft/live-room/on-the-block-card.tsx`** (WIRED) -- new optional `repriced?: RepricedPlayer | null` prop + a `RepricedGlance` sub-component in the always-visible summary row (renders in both collapsed and expanded states). Shows **You** (the roster-need-adjusted target) in the card's action red over **room {N}** with a hot/soft arrow (amber ▲ when the room moved up, blue ▼ when it went soft), plus a blue `+$X` POCKET chip or a muted `tax` chip -- identical you-vs-room language to the Value Board's `ValueCluster`. The You number keeps this card's established action-red identity (it is still "your target," just repriced live instead of static). When there is no live reprice for the player (DEF / unpriced rows the repricer skips), it falls back to the old static `capValue` "tgt" span -- no blank. MarketBand, The Read, roster note, star/avoid, land probability and confidence all untouched.
+- **`src/components/draft/live-room/auction-room.tsx`** (WIRED) -- passes `repriced={onBlockPlayer ? repriced.get(onBlockPlayer.id) ?? null : null}` into `<OnTheBlockCard>`. The `repriced` Map was already computed (LB-2) and keyed by player id, so this is a pure lookup -- no new math, no new source.
+- **New tests:** 3 added to `src/components/draft/live-room/__tests__/on-the-block-card.test.tsx` -- (1) live repriced You ($26) over room 20 with the hot ▲ arrow and a `+$6` pocket chip, and the static `otb-max-bid` span replaced; (2) the `tax` chip and soft ▼ arrow when the room has gone over Joe; (3) fallback to the static `otb-max-bid` cap ($24) with the repriced cluster absent when `repriced` is null.
+
+**Proof (VERIFY, pasted):**
+- `npm run type-check` -> **0 errors**.
+- Targeted `eslint` on all 3 touched files (`on-the-block-card.tsx`, `auction-room.tsx`, `on-the-block-card.test.tsx`) -> **clean, exit 0** (no output).
+- `npm run test:run` -> **782 passed / 65 files** (+3 from the new on-block cases; 0 failures).
+- **Component render proof:** the 3 new cases render the real `OnTheBlockCard` through React Testing Library and assert the exact repriced DOM -- `otb-you` = "$26", `otb-room` = "room 20" + "▲", `otb-pocket` = "+$6", the tax variant "▼" + `otb-tax`, and the null-reprice fallback `otb-max-bid` = "$24" with `otb-repriced` absent. All 5 card tests green.
+- **Live app confirmed mounting** with the change present (shared-tree dev server on :3003 via `/draft/live?sim=1`: Value Board "repriced live" and Market Pulse render clean). **NOT captured:** a live in-sim screenshot of the glance with a nominated player -- blocked by (a) the Browser pane not being displayed so screenshots time out, (b) sharing the other chat's running server + sim state so manual "Set player" inputs race and the picker will not open, and (c) the documented sim limitation (mock `demo-league` is not a UUID, so persistence/nomination flows 404 and no nominee parks in the card). This is an environment limit, not a defect in the change; the component-level render tests cover the exact DOM a nomination would produce.
+
+**NOT done / next:** Mine/gone row interleaving in the Value Board still deferred (panel iterates `available` only). The prep-board `dataset.json` regen (VAL-2.2 board visibility caveat) remains a separate data-refresh item.
+
+**Files.** EDITED: `src/components/draft/live-room/on-the-block-card.tsx`, `src/components/draft/live-room/auction-room.tsx`, `src/components/draft/live-room/__tests__/on-the-block-card.test.tsx`.
+
+---
+
 ## 2026-08-23 / LB-3 -- Dollar Bin Watch (starred watchlist + model $1-$3 darts, one shared star)
 
 **Class:** output (UI) + shared. $0, no Claude API. Built directly on Opus, single-threaded. Look already Joe-approved (`research-output/LIVE_BOARD_MOCKUP.html` Dollar Bin section, "looks good").

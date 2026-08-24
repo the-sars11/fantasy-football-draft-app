@@ -452,6 +452,7 @@ export function AuctionDraftRoom({
                 advice={advice}
                 confidence={confidence}
                 landProbability={landProbability}
+                repriced={onBlockPlayer ? repriced.get(onBlockPlayer.id) ?? null : null}
                 onChangePlayer={() => openPicker()}
                 onToggleTarget={onToggleTarget}
                 onToggleAvoid={onToggleAvoid}
