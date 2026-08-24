@@ -667,7 +667,7 @@ Screen → target: S1 research-hub `/research`; S2 player-browser (D4, already b
 - **Row model (shared, prep + live identical):** `Rk | Name  team.BYE (injury pill) | Range | Room | Target | +/- vs room`. `Rk` = position rank, colored by position, no "ECR" label surfaced. `Range` = worth..room bracket. `Room` = expected room price (prep) / repriced room (live). `Target` = your pay-up-to (prep target price / live repriced `you`), the blue number. `+/- vs room` = Target minus Room; green (+ = chase) / red (- = hold) / grey. Collapsed-row flags: tappable **star** (my target, no expand needed), auto **value** badge (POCKET), auto **dollar dart** (dollar-bin / likely-under-value-late); injury pill inline. No separate Dollar Bin panel. ~44px rows, zebra, `tabular-nums`, single line, ellipsis.
 - **Shared architecture (DRY):** one `<Board>` list + `<BoardRow>` + `<BoardRowDetail>`, taking normalized `BoardRow[]` + `mode: 'prep' | 'live'`. Prep adapter: `src/lib/players/convert.ts` fields, tags via `tags.ts`, dollar flag via `src/lib/draft/dollar-bin.ts`. Live adapter: same pool through `repriceBoard(...)` (`src/lib/draft/live-reprice.ts`); drafted filtered OUT (mine -> roster, gone -> gone); `+/-` live.
 - **Filters:** one chip row `ALL / QB / RB / WR / TE / FLEX / DEF` + a `Targets` chip. Remove the redundant All/FLEX/By-Position toggle (`prep/board/client.tsx` ~456-536).
-- **Expand (compact):** keep the D4 group bones (this file ~579-648: HERO / Valuation / Outlook / Draft Intel / Your Call / How-calculated) shrunk so it does NOT fill the screen. Answers: target him or not (+ priority), consensus analyst read, breakout/bust tag, context. Market + base + provenance only under How-calculated. No ALL-CAPS names, no jargon surfaced, red reserved for T1.
+- **Expand (compact), action-first order (per `BOARD_SPEC_IA-1.0.md` §3):** **Your Call** (verdict pill target?/priority + big star) -> **Valuation** (the restored Room/Target/Ceiling **value meter** = the `.valbar` 3-tick bar + a "How this is calculated" disclosure) -> **Outlook** (one plain read + breakout/bust tag) -> **Draft Intel** (tag chips). Height budget <=300px so it does NOT fill the screen. Market + base + provenance only under How-calculated. No ALL-CAPS names, no jargon surfaced, red reserved for T1.
 - **Live chrome (all pieces exist -- reuse/reorder), top->bottom:** draft details (`status-bar.tsx` + `budget-strip.tsx`) -> Market Pulse (`market-pulse-strip.tsx`) -> collapsible On the Block (`on-the-block-card.tsx`) -> shared Board (live adapter) -> collapsible My Team + needs (`my-team-roster.tsx`) -> manual entry bar (`manual-pick-entry.tsx` variant `bar`). Targets = the `Targets` chip + a lightweight slide-out sheet of remaining starred targets.
 
 **Session model:** **Thinker = Opus (FRONTIER)** designs the contract/spec/architecture + a mockup; gate = **Joe's explicit sign-off**. **Worker = Sonnet (WORKHORSE)** builds strictly to a frozen thinker spec, improvises nothing; gate = **A1-A10 + a separate Validation Agent PASS**. A Worker that hits a decision its spec did not cover STOPS and kicks it back to an Opus thinker.
@@ -710,13 +710,21 @@ Screen → target: S1 research-hub `/research`; S2 player-browser (D4, already b
 > **V-0.2 done-when:** rerun both greps (deleted = 0, engines > 0); load every remaining nav dest on real routes, read console for errors. PASS/FAIL table.
 > **Shipped:** Deleted (via `git rm`) 7 route files (`prep/strategies/{client,loading,page}.tsx`, `prep/leaderboard/{client,page}.tsx`, `prep/simulate/{client,page}.tsx`), 6 exclusive components + 1 lib (`components/prep/{strategy-proposals,strategy-editor,strategy-list,strategy-value-preview,sim-results-cards}.tsx`, `lib/research/leaderboard.ts`), 3 now-orphaned tests for those files -- 16 files total. Edited `prep/page.tsx` (removed 3 DestRows + their icons/state/fetch/metrics), `prep/board/client.tsx` (removed "Set a strategy" link), `lib/nav-context.tsx` (removed `'/prep/strategies': 1` from `routeDepth`). (a) Build route manifest confirms `/prep/strategies`, `/prep/leaderboard`, `/prep/simulate` absent from the compiled route table; live 404s confirmed for all three at 390px. (b) `grep -rn "prep/strategies\|prep/leaderboard\|prep/simulate\|StrategyProposals\|StrategyEditor\|StrategyList\|StrategyValuePreview\|SimResultsCards\|from '.../leaderboard'" src` = 0 functional/import hits (6 stray hits are all stale prose comments in files outside scope-in -- `prep/page.tsx:168`, `api/user-tags/batch/route.ts:88`, its test, `strategy-proposal-card.test.tsx`, `lib/prep/pull-signal.ts` -- left untouched per no-scope-creep). (c) KEEP engines all grep-confirmed live: `sim-engine.ts`/`sim-grade.ts` imported by `sim-results.ts`, `room-sim-probability.ts`, `league-opponents.ts`, `injury-flags.ts`, `injury-risk.ts`, `room-target-pricing.ts`, `research/strategy/{research,generate}.ts` + tests; `research/strategy/generate.ts` imported by `lib/draft/adaptive-guidance.ts:35` and `api/strategies/propose/route.ts:20`; `components/draft/strategy-picker.tsx` imported by `app/(app)/draft/live/client.tsx:51`. **Flagged exception:** `components/draft/strategy-swap.tsx` is KEEP-listed by this card but has ZERO real importers anywhere in `src` (pre-existing, not caused by this deletion) -- left in place per KEEP instruction, but clause (c) cannot be proven for it with a live-importer grep; needs a follow-up decision (wire it up or formally retire it). Two more pre-existing orphans discovered and correctly left untouched as out-of-scope: `components/prep/strategy-compare.tsx` (0 importers anywhere) and `components/prep/strategy-proposal-card.tsx` (only its own test imports it). (d) Console-checked on real routes, fresh tabs each: `/prep` 0 errors; `/prep/board` and `/draft` both show a pre-existing `[useUserTags] Error: TypeError: fetch failed` + `POST /api/user-tags/batch -> 500` -- confirmed environmental (Supabase unreachable from this dev sandbox), NOT a regression: `use-user-tags.ts` and `api/user-tags/batch/route.ts` are untouched by this diff (`git status --short` shows only the 3 edited + 16 deleted files listed above), and the error reproduces identically on both an in-scope-untouched route (`/prep/board`) and an unrelated route (`/draft`); `/draft/review` 0 errors; `/settings` 0 errors. Gate: `type-check` 0 errors; `test:run` 761/761 passed (62 files, the 3 orphaned tests correctly removed with their subjects, no leftover failures); `lint` 140 problems (30 errors, 110 warnings) -- identical to the pre-card baseline captured via `git stash` (0 new); `build` "Compiled successfully in 3.6s", route manifest confirms all 3 deleted routes absent and all other routes (incl. `/prep/board`, `/draft/live`, `/draft/review`, `/settings`, `/api/strategies*`) still present. Cost: $0, no paid API calls this session. Commit `<pending, see CHANGELOG>`.
 
-### IA-1.0 -- Board spec + mockup + LOOK SIGN-OFF `[Opus]` · class: output -- **[ ] NOT STARTED**
+### IA-1.0 -- Board spec + mockup + LOOK SIGN-OFF `[Opus]` · class: output -- **[~] IN PROGRESS (converged; awaiting Joe's LOOK sign-off)**
 > - Class: FRONTIER
 >   Reason: open layout + contract judgment (row, expand, flags, shared architecture) with no existing mockup; the only Phase-1 planning item; Opus per the model rule.
 >   Verifier: Joe (explicit look sign-off before any Phase-1 worker starts).
 > **Size:** L. **Depends on:** nothing. **Gates IA-1.1..IA-1.3.**
 > **Work:** freeze for the workers -- the `BoardRow` normalized contract (fields + provenance), exact row columns/widths/colors/flag rules, the compact-expand spec (which fields, what copy, height budget), the chip/filter/sort spec, and the `<Board>`/`<BoardRow>`/`<BoardRowDetail>` + adapter architecture. Produce a **static mockup** (row + expand + chip row) against `research-output/CHEAT_SHEETS.html`, saved under `UI/`.
 > **Done-when:** Joe types explicit approval on the mockup; spec self-checklist names every row field, every flag, every expand field; saved under `UI/` + referenced by ID. NO IA-1.x build starts until checked.
+>
+> **⚑ DEC-IA1 (2026-08-24) — spec convergence.** Two parallel sessions each drafted an IA-1.0 board.
+> Joe reviewed both and prefers the other session's layout. **FROZEN CONTRACT = `UI/BOARD_SPEC_IA-1.0.md`**
+> (mockup `UI/board-mockup-IA-1.0.html`). This session's `UI/IA1_BOARD_CONTRACT.md` + `UI/ia1_board_mockup_v1.html`
+> (+ served `public/ia1_board_mockup_v1.html`) are RETIRED — the contract doc carries a SUPERSEDED banner; both
+> mockup HTMLs deleted. LOOK sign-off is on `board-mockup-IA-1.0.html`. Spec fix folded in before freeze:
+> the Range column renders **min-max ordered** so a TAX (ceiling < room) never reads backwards (e.g. "50-58", not "58-50").
+> **Awaiting Joe's typed LOOK approval — no IA-1.x worker starts until then.**
 
 ### IA-1.1 -- BoardRow type + prep adapter (sort/filter/flags) + tests `[Sonnet]` · class: shared -- **[ ] NOT STARTED**
 > - Class: WORKHORSE
@@ -741,17 +749,32 @@ Screen → target: S1 research-hub `/research`; S2 player-browser (D4, already b
 >   Reason: bounded UI build against the IA-1.0 expand spec.
 >   Verifier: OTHER_FAMILY (V-1.3) -- see VAP.
 > **Size:** M. **Depends on:** IA-1.0, IA-1.2.
-> **Scope in:** `<BoardRowDetail>` per IA-1.0 -- target?/priority, consensus read, breakout-bust tag, context; Market + base only under How-calculated.
-> **Done-when:** on the real route, expanded height is bounded (paste measured px, well under full screen); all required fields present (DOM); constraints hold (no ALL-CAPS name, no "ECR" string surfaced -- assert both); tests for field presence + constraints; A1-A10 pass.
+> **Scope in:** `<BoardRowDetail>` per `BOARD_SPEC_IA-1.0.md` §3 -- Your Call (target?/priority), the **value meter** (restore the `.valbar` 3-tick from `UI/board-mockup-IA-1.0.html` lines 125-135 & 305-309: Room grey / Target blue-bright larger / Ceiling grey dots, positioned by `left:%` on ONE consistent max, clamped so no tick runs past the rail), consensus read, breakout-bust tag; Market + base only under the "How this is calculated" disclosure.
+> **Done-when:** on the real route, expanded height is bounded (paste measured px, <=300px); all required fields present incl the 3 meter ticks (DOM: assert Room/Target/Ceiling ticks exist with sane `left:%`, none > 100%); constraints hold (no ALL-CAPS name, no "ECR" string surfaced -- assert both; red only on a T1 marker); tests for field presence + meter tick positions + constraints; A1-A10 pass.
 > **V-1.3 done-when:** open an expand on the real route, measure height, assert each required field + each constraint from the DOM. PASS/FAIL table.
 
 ### IA-2.0 -- Live assembly spec + layout sign-off `[Opus]` · class: output -- **[ ] NOT STARTED**
 > - Class: FRONTIER
->   Reason: open judgment on the live adapter contract + chrome composition; no existing mockup for the unified live layout.
+>   Reason: open judgment on the live adapter contract + chrome composition + the dynamic-target logic; no existing mockup for the unified live layout.
 >   Verifier: Joe (explicit sign-off before IA-2.x build).
-> **Size:** M. **Depends on:** IA-1.0 (shares the row/expand). **Gates IA-2.1..IA-2.2.**
-> **Work:** freeze the Live adapter contract (`repriceBoard` -> BoardRow, drafted-removal rule, mine->roster), the chrome order + which panels are collapsible, the Targets filter + slide-out behavior. Mockup of the Live layout for Joe, saved under `UI/`.
-> **Done-when:** Joe types explicit approval; spec names the adapter mapping, the chrome order, the collapsible set, the Targets mechanism. NO IA-2.x build starts until checked.
+> **Size:** L. **Depends on:** IA-1.0 (shares the row/expand). **Gates IA-2.1, IA-2.1b, IA-2.2.**
+> **Work:** freeze the Live adapter contract (`repriceBoard` -> BoardRow, drafted-removal rule, mine->roster), the chrome order + which panels are collapsible, the Targets filter + slide-out behavior. ALSO design the two dynamic behaviors below (the substance of Joe's live-draft questions). Mockup of the Live layout for Joe (showing dim + re-sort), saved under `UI/`.
+> **Done-when:** Joe types explicit approval; spec names the adapter mapping, the chrome order, the collapsible set, the Targets mechanism, AND the exact priority formula + sort rule (below). NO IA-2.x build starts until checked.
+>
+> **⚑ DEC-IA2 (2026-08-24) — Joe's live-draft answers (Q1-Q7), the design basis for IA-2.x:**
+> - **Q1 Range/Room:** `room = rangeLow = expectedRoomPrice`; `rangeHigh = riskAdjustedCeiling`; `Target`(blue) = pay-up-to, between them for a value, BELOW room for a tax. Range renders min-max ordered (DEC-IA1).
+> - **Q2 snag floor / Q5 value-fall:** the **POCKET** (`isPocket`, `you-room >= POCKET_MIN=4`, board-wide incl non-targets) IS the snag + value-fall signal; plus the `$1-$3` dollar dart. Already in `live-reprice.ts`/`dollar-bin.ts`.
+> - **Q3 non-targets:** never ignored — pockets/darts surface them automatically.
+> - **Q6 priced-out/scarcity:** ALREADY EXISTS in `auction-advisor.ts` (position urgency 25/15/10/5, budget pace, PUSH-last-of-tier, max-bid scarcity boost). Surfaced as live chrome; NOT rebuilt.
+> - **Q7 meter:** restored in the expand (IA-1.3).
+> - **Behavior A (filled needs) — DESIGN HERE, build in IA-2.1b.** NEVER blanket-unstar; targets persist
+>   (a player Joe would only take way-low stays starred because he might fall there). What changes is a live
+>   **priority/urgency score** per starred target = f(open need at position via `openSlotsFromRoster`, the
+>   recommended spend threshold `you` vs current price headroom, solvency `maxBid`). Drives DIM + RE-SORT of
+>   targets; a price fall that opens a pocket RE-ELEVATES immediately. Freeze the exact formula + dim/sort thresholds.
+> - **Behavior B (value alerts) — DESIGN HERE, build in IA-2.1b.** Keep the blue POCKET rail on the row, and add
+>   a **pockets-first live sort** that pulls fallen pockets to the top, weighted toward still-needed positions.
+>   One board, no second surface (Joe's choice). Freeze the comparator rule.
 
 ### IA-2.1 -- Live adapter (reprice -> BoardRow, drafted removed) + tests `[Sonnet]` · class: shared -- **[ ] NOT STARTED**
 > - Class: WORKHORSE
@@ -762,12 +785,27 @@ Screen → target: S1 research-hub `/research`; S2 player-browser (D4, already b
 > **Done-when:** tests prove a repriced player maps room/target/+- correctly; a drafted player is removed from the list; a `mine` pick is excluded from the list and surfaced to roster. Paste count + names; A1-A10 pass.
 > **V-2.1 done-when:** run the suite; drive the adapter with a fixture incl a drafted + a mine pick, assert removal + roster routing from raw output. PASS/FAIL table.
 
+### IA-2.1b -- Live target-priority score + pockets-first comparator (pure) + tests `[Sonnet]` · class: shared -- **[ ] NOT STARTED**
+> - Class: WORKHORSE
+>   Reason: two bounded pure functions built to the IA-2.0 formula; fully unit-testable, no UI.
+>   Verifier: OTHER_FAMILY (V-2.1b) -- see VAP.
+> **Size:** M. **Depends on:** IA-1.1 (BoardRow type), IA-2.0 (freezes the formula + thresholds). **Gates IA-2.2.**
+> **Scope in:** to the DEC-IA2 spec, in `src/lib/draft/` beside `live-reprice.ts`, both PURE + unit-tested:
+>   - **(A) `targetPriority(row, ctx)`** -> a priority/urgency score per starred target from open need
+>     (`openSlotsFromRoster`), recommended spend threshold (`you` vs current-price headroom), solvency (`maxBid`).
+>     NEVER unstars; a price fall that opens a pocket must raise the score (re-elevate). Return the score the UI dims/sorts by.
+>   - **(B) `pocketsFirstComparator(a, b, ctx)`** -> a stable comparator that pulls fallen POCKETs to the top,
+>     weighted toward still-needed positions, then falls back to the default best-first order.
+> **Scope out:** no UI, no dim/re-sort wiring (that is IA-2.2), no new pricing math (reuse `live-reprice.ts`).
+> **Done-when:** unit tests prove: filling a position lowers its redundant targets' priority WITHOUT unstarring; a price fall that opens a pocket re-elevates that player; the comparator surfaces a needed-position pocket above a filled-position pocket and above a non-pocket. Paste the test output; A1-A10 pass.
+> **V-2.1b done-when:** fresh context; run the suite; drive both fns with a fixture (a filled RB slot + a redundant RB target + a fallen-pocket WR at a needed slot), assert never-unstar + re-elevate + comparator order from raw output. PASS/FAIL table.
+
 ### IA-2.2 -- Assemble Live screen + Targets filter/slide-out `[Sonnet]` · class: output -- **[ ] NOT STARTED**
 > - Class: WORKHORSE
 >   Reason: bounded composition of existing panels around the shared Board per the IA-2.0 spec; reuse-only.
 >   Verifier: OTHER_FAMILY (V-2.2) -- see VAP.
-> **Size:** L. **Depends on:** IA-1.2, IA-2.0, IA-2.1.
-> **Scope in:** compose the Live screen from existing pieces (status/budget, market pulse, collapsible on-the-block, the shared Board via live adapter, collapsible roster+needs, manual bar) + the Targets chip + slide-out sheet. No re-implemented solver/pricing.
+> **Size:** L. **Depends on:** IA-1.2, IA-2.0, IA-2.1, IA-2.1b.
+> **Scope in:** compose the Live screen from existing pieces (status/budget, market pulse, collapsible on-the-block, the shared Board via live adapter, collapsible roster+needs, manual bar) + the Targets chip + slide-out sheet. Wire the IA-2.1b `targetPriority` to DIM redundant targets and `pocketsFirstComparator` to RE-SORT the live board (Behaviors A + B). No re-implemented solver/pricing.
 > **Done-when:** on a **real** manual/offline draft (NOT `?sim=1`): the Board renders and scrolls; a recorded Sold removes that player and moves room/target/+- (before/after measured); on-the-block + roster collapse/expand (DOM); Targets chip + slide-out show only starred-remaining; A1-A10 pass.
 > **V-2.2 done-when:** start a real manual session, record a Sold, measure the board delta + removal on the real route; toggle collapses; check the Targets set. PASS/FAIL table.
 
