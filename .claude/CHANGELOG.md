@@ -2,6 +2,31 @@
 
 ---
 
+## 2026-08-23 / LB-5 -- Repriced You/Room wired into the On-the-Block market-band track
+
+**Class:** output (UI) + shared. $0, no Claude API. Built directly on Opus, single-threaded. No new look to approve -- extends the existing v5 market-band track with the same you-vs-room language already shipped on the glance (LB-4) and Value Board (LB-2).
+
+**Why.** The On-the-Block hero's market-band track (`MarketBand`) still plotted a STATIC red target marker at `advice.capValue` inside a market-range band derived from `advice.marketEst`. Its "Your target price" headline and the whole track ignored the live repriced numbers the rest of the cockpit runs on. Joe reads this track to judge where his target sits versus the price to beat -- it should be driven by the live You (roster-need-adjusted target) and Room (inflation-moved price), and it should show the pocket between them, not an abstract ESPN-style range.
+
+**What shipped (`src/components/draft/live-room/on-the-block-card.tsx`, `MarketBand` only):**
+- **Red YOU marker + headline** now follow `repriced.you` (falls back to `capValue` when the repricer skips the player). Marker label reads `YOU $N` when repriced, else the classic `YOUR TARGET`.
+- **New blue ROOM marker** at `repriced.room` -- the concrete price Joe must beat -- placed on the same track with its own `ROOM $N` label below. The band-edge `$low/$high` numeric labels are hidden when the ROOM marker owns that space (no collision); the shaded market-range region stays as context.
+- **Pocket/tax gap shaded** between the YOU and ROOM markers: blue tint when the room sits below Joe's number (a pocket in his favor), muted tint when it has run past him (a tax). The gap between the two markers IS the pocket, made visual.
+- **Prose note rewritten** in you-vs-room terms when repriced: POCKET -> "You $26 clear the room's $20 by $6 - a pocket to pounce on"; TAX -> "The room's $30 has run past your $24 - let him go"; even -> "You $24 vs the room's $20 - about even; bid to your number, not past it." The old market-range note still renders when there is no reprice.
+- **Legend** gains a "Room price" (blue) entry when the ROOM marker is present.
+- `trackMax` now spans `max(bandHigh, you, room) * 1.3` so neither marker clips. `<MarketBand>` call site threads the existing `repriced` prop; no other card section touched.
+
+**Proof (VERIFY, pasted):**
+- `npm run type-check` -> **0 errors**.
+- Targeted `eslint` on the 2 touched files (`on-the-block-card.tsx`, `on-the-block-card.test.tsx`) -> **clean, exit 0**.
+- `npm run test:run` -> **785 passed / 65 files** (+3 new market-band cases; 0 failures).
+- **Component render proof:** 3 new cases render the real card through React Testing Library and assert the exact DOM -- `mb-target`="$26" (driven by live You, not the static $24 cap), `mb-you-marker`="YOU $26", `mb-room-marker`="ROOM $20", `mb-gap` present, `mb-note`="pocket to pounce on", and a "Room price" legend entry; the tax case reads "run past your" with `ROOM $30`; the null-reprice case keeps the static "$24" headline, "YOUR TARGET" label, and NO ROOM marker / Room legend.
+- **Live in-sim screenshot NOT captured** (same environment limits as LB-4: Browser pane not displayed so screenshots time out; sharing the other chat's running :3003 server + sim churn so the manual picker will not open; mock `demo-league` 404s so no nominee parks in the card). The market band only renders inside the expanded card with a player on the block; the component-level tests cover the exact DOM a nomination would produce.
+
+**Files.** EDITED: `src/components/draft/live-room/on-the-block-card.tsx`, `src/components/draft/live-room/__tests__/on-the-block-card.test.tsx`.
+
+---
+
 ## 2026-08-23 / LB-4 -- Repriced You/Room wired into the On-the-Block hero card
 
 **Class:** output (UI) + shared. $0, no Claude API. Built directly on Opus, single-threaded. No new look to approve -- reuses the already-Joe-approved Value Board you-vs-room language on the existing hero card.

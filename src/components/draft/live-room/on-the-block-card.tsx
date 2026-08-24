@@ -47,29 +47,49 @@ function WaitingCard({ onChangePlayer }: { onChangePlayer: () => void }) {
   )
 }
 
-/** Positioned track: blue market band + red target marker (v5 spec). */
+/**
+ * Positioned track: market-range band + red YOU marker. LB-5: when a live
+ * reprice exists it also drops a blue ROOM marker (the price to beat) and shades
+ * the gap between YOU and ROOM - blue when the room sits below Joe's number (a
+ * pocket in his favor), muted when it has run past him (a tax). The red marker /
+ * headline follow the repriced You; with no reprice (DEF / unpriced) it renders
+ * exactly as before off the static advisor cap.
+ */
 function MarketBand({
   marketEst,
   capValue,
+  repriced,
 }: {
   marketEst: number | null
   capValue: number | null
+  repriced?: RepricedPlayer | null
 }) {
-  if (marketEst == null && capValue == null) return null
+  const room = repriced?.room ?? null
+  if (marketEst == null && capValue == null && room == null) return null
 
-  const mktCenter = marketEst ?? capValue ?? 0
+  const mktCenter = marketEst ?? room ?? capValue ?? 0
   const bandLow = Math.max(1, Math.round(mktCenter * 0.85))
   const bandHigh = Math.round(mktCenter * 1.15)
-  const target = capValue ?? Math.round(mktCenter)
+  // Live repriced You is Joe's real, roster-need-adjusted target; the static
+  // advisor cap is the fallback only when the repricer skips this player.
+  const target = repriced?.you ?? capValue ?? Math.round(mktCenter)
 
-  // Track spans 0 to a comfortable max so labels do not clip
-  const trackMax = Math.max(bandHigh, target) * 1.3
+  // Track spans 0 to a comfortable max so nothing (band, You, Room) clips.
+  const trackMax = Math.max(bandHigh, target, room ?? 0) * 1.3
+  const pct = (v: number) => Math.min(98, Math.max(2, (v / trackMax) * 100))
   const regionLeft = Math.max(0, (bandLow / trackMax) * 100)
   const regionWidth = Math.min(100 - regionLeft, ((bandHigh - bandLow) / trackMax) * 100)
-  const targetPct = Math.min(98, Math.max(2, (target / trackMax) * 100))
+  const targetPct = pct(target)
+  const roomPct = room != null ? pct(room) : null
 
+  // The pocket/tax gap between YOU and ROOM, made visual.
+  const gapLeft = roomPct != null ? Math.min(targetPct, roomPct) : null
+  const gapWidth = roomPct != null ? Math.abs(targetPct - roomPct) : null
+  const favorable = repriced != null && repriced.pocket > 0
+
+  // Prose: you-vs-room when repriced; the old market-range read otherwise.
   const inBand = target >= bandLow && target <= bandHigh
-  const note = marketEst != null
+  const marketNote = marketEst != null
     ? target <= bandLow
       ? `disciplined value at the bottom of the band.`
       : inBand
@@ -98,6 +118,7 @@ function MarketBand({
         <span
           className="font-mono text-[22px] font-bold leading-none"
           style={{ color: ROOM.action }}
+          data-testid="mb-target"
         >
           ${target}
           <small className="ml-0.5 text-[11px] font-semibold" style={{ color: ROOM.t3 }}>
@@ -129,23 +150,69 @@ function MarketBand({
             border: '1px solid rgba(95,168,224,0.5)',
           }}
         >
-          <span
-            className="absolute font-mono text-[9px]"
-            style={{ top: 15, left: 0, transform: 'translateX(-50%)', color: ROOM.blue }}
-          >
-            ${bandLow}
-          </span>
-          <span
-            className="absolute font-mono text-[9px]"
-            style={{ top: 15, right: 0, transform: 'translateX(50%)', color: ROOM.blue }}
-          >
-            ${bandHigh}
-          </span>
+          {/* Band-edge prices - hidden when a ROOM marker owns the space below. */}
+          {roomPct == null && (
+            <>
+              <span
+                className="absolute font-mono text-[9px]"
+                style={{ top: 15, left: 0, transform: 'translateX(-50%)', color: ROOM.blue }}
+              >
+                ${bandLow}
+              </span>
+              <span
+                className="absolute font-mono text-[9px]"
+                style={{ top: 15, right: 0, transform: 'translateX(50%)', color: ROOM.blue }}
+              >
+                ${bandHigh}
+              </span>
+            </>
+          )}
         </div>
 
-        {/* Red target marker */}
+        {/* Pocket / tax gap between YOU and ROOM */}
+        {gapLeft != null && gapWidth != null && gapWidth > 0.5 && (
+          <div
+            className="absolute"
+            data-testid="mb-gap"
+            style={{
+              left: `${gapLeft}%`,
+              width: `${gapWidth}%`,
+              top: 3,
+              bottom: 3,
+              borderRadius: 3,
+              background: favorable ? 'rgba(95,168,224,0.30)' : 'rgba(94,112,138,0.30)',
+            }}
+          />
+        )}
+
+        {/* Blue ROOM marker - the price Joe must beat (repriced live) */}
+        {roomPct != null && room != null && (
+          <div
+            className="absolute"
+            data-testid="mb-room-marker"
+            style={{
+              left: `${roomPct}%`,
+              top: -4,
+              bottom: -4,
+              width: 3,
+              borderRadius: 2,
+              background: ROOM.blue,
+              transform: 'translateX(-50%)',
+            }}
+          >
+            <span
+              className="absolute whitespace-nowrap font-mono text-[8px] font-bold tracking-[0.06em]"
+              style={{ top: 15, left: '50%', transform: 'translateX(-50%)', color: ROOM.blue }}
+            >
+              ROOM ${room}
+            </span>
+          </div>
+        )}
+
+        {/* Red YOU marker - Joe's repriced target */}
         <div
           className="absolute"
+          data-testid="mb-you-marker"
           style={{
             left: `${targetPct}%`,
             top: -4,
@@ -166,22 +233,44 @@ function MarketBand({
               color: ROOM.action,
             }}
           >
-            YOUR TARGET
+            {roomPct != null ? `YOU $${target}` : 'YOUR TARGET'}
           </span>
         </div>
       </div>
 
       {/* Prose note */}
-      {note != null && marketEst != null && (
-        <p className="mt-4 text-[11px] leading-snug" style={{ color: ROOM.t2 }}>
-          Market projects{' '}
-          <span style={{ color: ROOM.t1 }}>
-            ${bandLow}-${bandHigh}
-          </span>
-          {'. '}
-          Your target <span style={{ color: ROOM.t1 }}>${target}</span>{' '}
-          {note}
+      {repriced != null && room != null ? (
+        <p className="mt-6 text-[11px] leading-snug" style={{ color: ROOM.t2 }} data-testid="mb-note">
+          {repriced.isPocket ? (
+            <>
+              You <span style={{ color: ROOM.t1 }}>${target}</span> clear the room{"'"}s{' '}
+              <span style={{ color: ROOM.t1 }}>${room}</span> by{' '}
+              <span style={{ color: ROOM.blue }}>${repriced.pocket}</span> - a pocket to pounce on.
+            </>
+          ) : repriced.isTax ? (
+            <>
+              The room{"'"}s <span style={{ color: ROOM.t1 }}>${room}</span> has run past your{' '}
+              <span style={{ color: ROOM.t1 }}>${target}</span> - let him go, hunt value elsewhere.
+            </>
+          ) : (
+            <>
+              You <span style={{ color: ROOM.t1 }}>${target}</span> vs the room{"'"}s{' '}
+              <span style={{ color: ROOM.t1 }}>${room}</span> - about even; bid to your number, not past it.
+            </>
+          )}
         </p>
+      ) : (
+        marketNote != null && marketEst != null && (
+          <p className="mt-4 text-[11px] leading-snug" style={{ color: ROOM.t2 }} data-testid="mb-note">
+            Market projects{' '}
+            <span style={{ color: ROOM.t1 }}>
+              ${bandLow}-${bandHigh}
+            </span>
+            {'. '}
+            Your target <span style={{ color: ROOM.t1 }}>${target}</span>{' '}
+            {marketNote}
+          </p>
+        )
       )}
 
       {/* Legend */}
@@ -200,6 +289,15 @@ function MarketBand({
           />
           Your target
         </span>
+        {roomPct != null && (
+          <span className="flex items-center gap-1.5">
+            <span
+              className="inline-block h-[7px] w-3 rounded-sm"
+              style={{ background: ROOM.blue }}
+            />
+            Room price
+          </span>
+        )}
       </div>
     </div>
   )
@@ -528,8 +626,9 @@ export function OnTheBlockCard({
             )}
           </div>
 
-          {/* Market band — replaces plain "Your range" row (D6b-1 gap #1) */}
-          <MarketBand marketEst={advice.marketEst} capValue={advice.capValue} />
+          {/* Market band — replaces plain "Your range" row (D6b-1 gap #1).
+              LB-5: repriced You/Room drive the markers when a live reprice exists. */}
+          <MarketBand marketEst={advice.marketEst} capValue={advice.capValue} repriced={repriced} />
 
           {/* The Read section — CONF chip + move directive + rationale */}
           <div

@@ -137,3 +137,62 @@ describe('OnTheBlockCard repriced You/Room glance (LB-4)', () => {
     expect(screen.queryByTestId('otb-repriced')).not.toBeInTheDocument()
   })
 })
+
+describe('OnTheBlockCard market-band track repriced You/Room (LB-5)', () => {
+  it('drives the target headline + YOU marker off the repriced You and drops a ROOM marker', () => {
+    render(
+      <OnTheBlockCard
+        player={player}
+        advice={makeAdvice(null)}
+        repriced={repriced({ room: 20, you: 26, pocket: 6, isPocket: true })}
+        onChangePlayer={() => {}}
+        onToggleTarget={() => {}}
+        onToggleAvoid={() => {}}
+      />
+    )
+    // Headline follows the live You, not the static capValue ($24).
+    expect(screen.getByTestId('mb-target')).toHaveTextContent('$26')
+    expect(screen.getByTestId('mb-you-marker')).toHaveTextContent('YOU $26')
+    // The room price to beat gets its own marker on the same track.
+    expect(screen.getByTestId('mb-room-marker')).toHaveTextContent('ROOM $20')
+    // The pocket gap between them is shaded.
+    expect(screen.getByTestId('mb-gap')).toBeInTheDocument()
+    // Note reads in you-vs-room terms.
+    expect(screen.getByTestId('mb-note')).toHaveTextContent('pocket to pounce on')
+    // Room legend entry appears.
+    expect(screen.getByText('Room price')).toBeInTheDocument()
+  })
+
+  it('reads the tax case when the room has run past Joe', () => {
+    render(
+      <OnTheBlockCard
+        player={player}
+        advice={makeAdvice(null)}
+        repriced={repriced({ room: 30, you: 24, pocket: -6, isTax: true })}
+        onChangePlayer={() => {}}
+        onToggleTarget={() => {}}
+        onToggleAvoid={() => {}}
+      />
+    )
+    expect(screen.getByTestId('mb-room-marker')).toHaveTextContent('ROOM $30')
+    expect(screen.getByTestId('mb-note')).toHaveTextContent('run past your')
+  })
+
+  it('renders the classic static band (no ROOM marker) when there is no reprice', () => {
+    render(
+      <OnTheBlockCard
+        player={player}
+        advice={makeAdvice(null)}
+        repriced={null}
+        onChangePlayer={() => {}}
+        onToggleTarget={() => {}}
+        onToggleAvoid={() => {}}
+      />
+    )
+    // Static advisor cap drives the headline; no ROOM marker, no Room legend.
+    expect(screen.getByTestId('mb-target')).toHaveTextContent('$24')
+    expect(screen.getByTestId('mb-you-marker')).toHaveTextContent('YOUR TARGET')
+    expect(screen.queryByTestId('mb-room-marker')).not.toBeInTheDocument()
+    expect(screen.queryByText('Room price')).not.toBeInTheDocument()
+  })
+})
