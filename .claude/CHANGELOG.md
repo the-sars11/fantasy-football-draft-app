@@ -4,7 +4,7 @@
 
 ## 2026-08-24 / IA-0.1 -- Kill swipe carousel, restore mobile scroll
 
-**Class:** shared (layout). $0, no Claude API. Sonnet worker session, built strictly to a frozen thinker card (Sprint IA plan of record in `BUILD_PLAN.md`). Verifier: OTHER_FAMILY V-0.1 (separate fresh-context agent, still to run).
+**Class:** shared (layout). $0, no Claude API. Sonnet worker session, built strictly to a frozen thinker card (Sprint IA plan of record in `BUILD_PLAN.md`). Verifier: OTHER_FAMILY V-0.1 (separate fresh-context Sonnet agent) -- **ran and returned OVERALL: PASS** (evidence appended below).
 
 **Root cause (found by the thinker, confirmed here):** `src/components/layout/swipe-carousel.tsx:110` wrapped mobile non-live pages in `h-full overflow-hidden`, clipping tall content so `<main>` (which already had `overflow-y-auto`) never got scroll height. Desktop and the live room bypassed the carousel, which is why only phone prep pages froze. Killing the carousel restores scroll and removes the spring-slide gesture Joe hates.
 
@@ -27,6 +27,13 @@
 - **Static review (A6, changed files only):** 0 CRITICAL/HIGH. `isMobile`/`isLiveRoom` still correctly gate the two `app-shell.tsx` branches; no dangling imports; `page-transition.tsx`'s `Record<NavDirection, Variants>` type stays fully satisfied.
 
 **Files.** EDITED: `src/components/layout/app-shell.tsx`, `src/components/layout/page-transition.tsx`. DELETED: `src/components/layout/swipe-carousel.tsx`.
+
+**V-0.1 VALIDATION (OTHER_FAMILY, separate fresh-context Sonnet agent, defaults to FAIL, reproduced everything itself on the real `/prep` route at 390px, never `?sim=1`) -- OVERALL: PASS:**
+- Clause (a): `grep -rn "SwipeCarousel" src/` = 0, `grep -rn "EdgeSwipeBack" src/` = 0, `swipe-carousel.tsx` file confirmed gone. PASS.
+- Clause (b): real `/prep` at 390px (`pathname` = `/prep`, no query). `document.scrollingElement` scrollHeight 844 == clientHeight 844 (doc frame fixed by design); the actual scroll container `main.flex-1.overflow-y-auto` scrollHeight 899 vs clientHeight 732 (167px overflow); set `main.scrollTop = scrollHeight` -> landed at 167 (fully bottomed); last element "PULL FRESH DATA" rect `{top:595.8, bottom:639.8}` inside the 844px viewport; ancestor chain has no rogue `overflow:hidden` clipping `main` (the old bug). PASS.
+- Clause (c): no drag/touch/pointer route handler left in the layout tree (grep); synthetic `pointerdown/move x8/up` + `touchstart/move x8/end` from x=80%->10% -> `{before:"/prep", after:"/prep", changed:false}`. (Noted an unrelated generic `FFISwipeDismissCard` in `ffi-motion.tsx` that calls `onDismiss`, not a route navigator, outside the in-scope layout tree.) PASS.
+- Re-run A-items: A2 `tsc --noEmit` 0 errors; A3 `test:run` 789/789 (65 files); A4 lint 30 errors/110 warnings with 0 in the 3 in-scope files; A5 build `Compiled successfully in 4.0s`; A10 `458aba6` + `256da01` present on `master` in sync with `origin/master`, `git show --stat 458aba6` confirms the 245-line `swipe-carousel.tsx` deletion is in the commit, tracked tree clean. PASS.
+- Console during validation: only dev HMR WebSocket noise (environmental). Overall verdict: PASS.
 
 ---
 
