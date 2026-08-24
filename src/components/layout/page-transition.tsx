@@ -12,16 +12,21 @@ const transitionConfig = {
   mass: 0.8,
 }
 
+// IA-0.1: horizontal (left/right) slide variants removed -- they powered the
+// swipe-carousel's spring-slide feel, which we killed for clipping scroll on
+// mobile prep pages. `left`/`right` directions (still emitted by
+// nav-context.tsx's drill-in/out logic) now render as a fade, same as
+// `fade`, instead of an x-axis slide.
 const slideVariants: Record<NavDirection, Variants> = {
   left: {
-    initial: { x: '100%', opacity: 0 },
-    animate: { x: 0, opacity: 1 },
-    exit: { x: '-30%', opacity: 0 },
+    initial: { opacity: 0, scale: 0.98 },
+    animate: { opacity: 1, scale: 1 },
+    exit: { opacity: 0, scale: 0.98 },
   },
   right: {
-    initial: { x: '-100%', opacity: 0 },
-    animate: { x: 0, opacity: 1 },
-    exit: { x: '30%', opacity: 0 },
+    initial: { opacity: 0, scale: 0.98 },
+    animate: { opacity: 1, scale: 1 },
+    exit: { opacity: 0, scale: 0.98 },
   },
   up: {
     initial: { y: '100%', opacity: 0 },

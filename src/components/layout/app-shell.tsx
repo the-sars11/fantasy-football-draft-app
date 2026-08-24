@@ -20,7 +20,6 @@ import { Button } from '@/components/ui/button'
 import { signOut } from '@/app/(auth)/actions'
 import { NavProvider } from '@/lib/nav-context'
 import { PageTransition } from '@/components/layout/page-transition'
-import { SwipeCarousel } from '@/components/layout/swipe-carousel'
 import { ShieldBackground } from '@/components/ui/shield'
 import { motion, AnimatePresence } from 'framer-motion'
 
@@ -221,21 +220,17 @@ export function AppShell({
       )}
 
       {/* Main content — single render; wrapper chosen at runtime to prevent double-mount (FF-313) */}
+      {/* IA-0.1: swipe-carousel removed. It wrapped mobile non-live pages in
+          `h-full overflow-hidden`, clipping tall content so this `main`'s
+          `overflow-y-auto` never got scroll height -- the root cause of
+          "prep pages don't scroll on phone." Mobile content now renders
+          directly, same as the live room already did. */}
       <main className="flex-1 overflow-y-auto relative z-10">
         {isMobile ? (
           <div className="h-full">
-            {isLiveRoom ? (
-              // Live room: no swipe-carousel (a stray swipe must not leave the auction).
-              <PageTransition>
-                <div className="mx-auto max-w-6xl p-4 pb-24">{children}</div>
-              </PageTransition>
-            ) : (
-              <SwipeCarousel>
-                <PageTransition>
-                  <div className="mx-auto max-w-6xl p-4 pb-24">{children}</div>
-                </PageTransition>
-              </SwipeCarousel>
-            )}
+            <PageTransition>
+              <div className="mx-auto max-w-6xl p-4 pb-24">{children}</div>
+            </PageTransition>
           </div>
         ) : (
           <div className="h-full">

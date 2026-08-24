@@ -2,6 +2,34 @@
 
 ---
 
+## 2026-08-24 / IA-0.1 -- Kill swipe carousel, restore mobile scroll
+
+**Class:** shared (layout). $0, no Claude API. Sonnet worker session, built strictly to a frozen thinker card (Sprint IA plan of record in `BUILD_PLAN.md`). Verifier: OTHER_FAMILY V-0.1 (separate fresh-context agent, still to run).
+
+**Root cause (found by the thinker, confirmed here):** `src/components/layout/swipe-carousel.tsx:110` wrapped mobile non-live pages in `h-full overflow-hidden`, clipping tall content so `<main>` (which already had `overflow-y-auto`) never got scroll height. Desktop and the live room bypassed the carousel, which is why only phone prep pages froze. Killing the carousel restores scroll and removes the spring-slide gesture Joe hates.
+
+**What shipped:**
+- **DELETED `src/components/layout/swipe-carousel.tsx`** -- both exports (`SwipeCarousel`, the `useDrag`-bound section-swipe wrapper, and `EdgeSwipeBack`, an unused iOS-style back-gesture component) removed with the file.
+- **`src/components/layout/app-shell.tsx`** -- dropped the `SwipeCarousel` import and its conditional wrapper (~226-245 pre-edit). Mobile non-live content now renders `<PageTransition>` directly inside `<main>`, exactly like the live room branch already did (the two branches were now identical, so they collapsed to one).
+- **`src/components/layout/page-transition.tsx`** -- the `left`/`right` entries in `slideVariants` changed from an x-axis `100%`/`-100%` slide to the same opacity/scale fade as the `fade` variant. Kept as real `Record<NavDirection, Variants>` keys (not deleted) because `src/lib/nav-context.tsx` (out of scope, untouched) still computes `left`/`right` for drill-in/drill-out navigation; only the horizontal motion was killed, not the direction logic.
+
+**Proof (VERIFY, pasted):**
+- Grep `src/` for `SwipeCarousel` = 0 matches. Grep `src/` for `EdgeSwipeBack` = 0 matches.
+- `npm run type-check` -> **0 errors**.
+- `npm run lint` -> **30 errors / 110 warnings** (baseline via `git stash`: 30 errors / 112 warnings) -- **0 new errors**, 2 fewer warnings (the deleted file's own unused-var warnings). None of the 30 errors are in a file this session touched.
+- `npm run test:run` -> **789 passed / 65 files, 0 failures** (unchanged from before -- pure layout surgery, no new draft-deciding logic, so no new tests required).
+- `npm run build` -> `✓ Compiled successfully in 4.0s`, all routes (including `/prep`, `/prep/board`, `/draft/live`) still statically prerendered.
+- **Live DOM proof**, real dev server (`fantasy-football-draft-app`, port 3003), Browser pane at 390x844, real routes (never `?sim=1`):
+  - `/prep`: `document.scrollingElement.scrollHeight` 844 == `window.innerHeight` 844 (the app shell scrolls inside `<main class="overflow-y-auto">`, not the document -- pre-existing architecture, out of scope). Real proof: `main.scrollHeight` 899 > `main.clientHeight` 732.
+  - `/prep/board` (the screen with an actual player list -- 483 rows): `main.scrollHeight` 43027 vs `clientHeight` 732. Scrolled `main.scrollTop` to 42295 (== `scrollHeight - clientHeight`, confirmed max). Row #483 "Thomas Fidone II" `getBoundingClientRect()` = `{top: 536.7, bottom: 552.7}`, fully inside the 844px viewport -- last row reachable.
+  - Horizontal swipe: synthetic `pointerdown`/`pointermove`x3/`pointerup` dragged ~300px right-to-left across `/prep`'s `main`. `window.location.pathname` stayed `/prep` (no swipe handler remains after deletion).
+  - Console: one pre-existing, unrelated error (`[useUserTags] TypeError: fetch failed`, a data hook used by board/players/simulate/live, nothing to do with layout) -- confirmed present before this session's changes, out of scope.
+- **Static review (A6, changed files only):** 0 CRITICAL/HIGH. `isMobile`/`isLiveRoom` still correctly gate the two `app-shell.tsx` branches; no dangling imports; `page-transition.tsx`'s `Record<NavDirection, Variants>` type stays fully satisfied.
+
+**Files.** EDITED: `src/components/layout/app-shell.tsx`, `src/components/layout/page-transition.tsx`. DELETED: `src/components/layout/swipe-carousel.tsx`.
+
+---
+
 ## 2026-08-23 / LB-6a -- Value Board defaults to the full ranked board
 
 **Class:** output (UI default). $0, no Claude API. Built directly on Opus, single-threaded. No new look -- same rows, different default view.
