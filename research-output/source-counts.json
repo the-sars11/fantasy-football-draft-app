@@ -1,0 +1,28 @@
+{
+  "_README": "Hand-tallied breakout/sleeper and bust mentions from real 2026 preseason articles. This is the ONE manual research input to the draft board. Each outlet maps to the list of players it named. One outlet counts once per player even if it says both breakout and sleeper. Update these lists each year from fresh articles before running build-draft-board.py. Every name here must be a real mention from a real article. Never invent a name to pad a count.",
+  "season": 2026,
+  "notes": "The Yahoo bust article only partially loaded this year, so a few Yahoo bust mentions may be undercounted. No count was invented to fill the gap.",
+  "breakoutSleeper": {
+    "PFF": ["Luther Burden III", "Emeka Egbuka", "Quinshon Judkins"],
+    "ESPN": ["Tyler Shough", "C.J. Stroud", "Kenyon Sadiq", "Jonathon Brooks", "Kenny Gainwell", "Carnell Tate", "Jadarian Price", "Matthew Golden", "Isaiah Likely", "Wan'Dale Robinson", "Michael Pittman Jr.", "Terrance Ferguson", "Kyle Monangai", "Jalen McMillan", "Adonai Mitchell", "Mike Evans", "George Kittle", "Chig Okonkwo", "Greg Dulcich", "Jaxson Dart", "Cam Skattebo", "Travis Etienne Jr.", "Justin Herbert", "Keaton Mitchell", "Deebo Samuel Sr.", "Omarion Hampton", "Jeremiyah Love", "Ladd McConkey", "Bhayshul Tuten", "Ashton Jeanty"],
+    "SI": ["Malik Willis", "Omarion Hampton", "Alec Pierce", "Isaiah Likely"],
+    "NFL.com": ["Jaxson Dart", "Cam Ward", "Cam Skattebo", "Jordan Mason", "Jonathon Brooks", "Quinshon Judkins", "Parker Washington", "Zay Flowers", "Tetairoa McMillan", "Josh Downs", "Michael Wilson", "Jordyn Tyson", "Isaiah Likely", "Chigoziem Okonkwo", "Stefon Diggs", "Chris Rodriguez Jr.", "Dalton Kincaid", "Denzel Boston", "Ja'Kobi Lane", "Tank Dell"],
+    "FantasyPros": ["Justin Herbert", "Jared Goff", "Cam Skattebo", "Jadarian Price", "Emeka Egbuka", "DJ Moore", "Isaiah Likely", "Dallas Goedert"],
+    "DraftSharks": ["Tyler Shough", "Cam Ward", "Jordan Mason", "De'Zhaun Stribling", "Rashid Shaheed", "Jalen McMillan", "Dalton Kincaid", "Isaiah Likely", "Jaydon Blue", "MarShawn Lloyd", "Adonai Mitchell", "Ryan Flournoy", "Terrance Ferguson"],
+    "CBS": ["Omarion Hampton", "Malik Willis", "Isaiah Likely", "Tony Pollard"],
+    "Yahoo": ["Matthew Golden", "Josh Downs", "Luther Burden III", "Rome Odunze", "Christian Watson", "Parker Washington", "Jalen McMillan"]
+  },
+  "bust": {
+    "ESPN": ["Jaxson Dart", "Josh Jacobs", "Malik Nabers", "Sam LaPorta", "Bo Nix", "Derrick Henry", "Rashee Rice", "Trey McBride", "Patrick Mahomes", "Chuba Hubbard", "Mike Evans", "Tucker Kraft", "Drake Maye", "Travis Etienne Jr.", "Harold Fannin Jr.", "Christian McCaffrey", "Kenneth Walker III", "Matthew Stafford", "Jadarian Price", "Davante Adams", "De'Von Achane", "Jaylen Waddle", "TreVeyon Henderson", "Chris Olave", "Kyle Pitts Sr."],
+    "FFToday": ["Caleb Williams", "Kyler Murray", "Ashton Jeanty", "Jeremiyah Love", "Justin Jefferson", "Jameson Williams", "Harold Fannin Jr.", "Dallas Goedert"],
+    "Yahoo": ["Saquon Barkley", "Jayden Daniels", "Jaxson Dart", "Cam Skattebo"],
+    "RotoWire": ["Travis Etienne", "Bucky Irving", "DJ Moore", "Rashee Rice", "Breece Hall", "Garrett Wilson"],
+    "CBS": ["Patrick Mahomes", "Christian McCaffrey", "De'Von Achane", "Ashton Jeanty", "Jeremiyah Love", "Cam Skattebo", "TreVeyon Henderson", "Mike Evans", "Courtland Sutton", "Alec Pierce", "DK Metcalf", "Harold Fannin Jr"],
+    "WalterFootball": ["Christian McCaffrey", "Rashee Rice", "Travis Etienne", "Josh Jacobs", "Malik Nabers", "Chris Olave", "Kyren Williams", "Trey McBride", "Josh Allen", "Jeremiyah Love"]
+  },
+  "aliases": {
+    "chig okonkwo": "chigoziem okonkwo",
+    "jonathon brooks": "jonathan brooks",
+    "kenny gainwell": "kenneth gainwell"
+  }
+}
