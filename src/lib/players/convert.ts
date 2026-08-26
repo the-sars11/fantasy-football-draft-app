@@ -16,6 +16,23 @@ function dbPosToAppPos(pos: string): Position {
   return pos as Position
 }
 
+/**
+ * DEF/DST hard price ceiling (Joe-locked 2026-08-26). A defense is a stream
+ * position: the VORP point-spread invents $8-14 of phantom "worth" for the top
+ * few DSTs, and the ledger occasionally shows a one-off $6 room splurge, but the
+ * real actionable ceiling on a defense in this room is a few bucks. Cap a DEF's
+ * worth AND its room price at this number so NO downstream surface (value band,
+ * target price, sim, live max-bid, report) ever tells Joe to pay up for a DST.
+ * Applied at the single read funnel so raw model/ledger data in the DB is left
+ * intact -- this is a policy cap on advice, not a rewrite of the source numbers.
+ */
+const DEF_MAX_PRICE = 3
+
+/** Clamp a DEF/DST dollar figure to the stream-position ceiling; pass others through. */
+function capDef(pos: Position, value: number): number {
+  return pos === 'DEF' ? Math.min(value, DEF_MAX_PRICE) : value
+}
+
 /** Narrow a source_data number field. */
 function sdNum(sd: Record<string, unknown>, key: string): number | undefined {
   const v = sd[key]
@@ -77,7 +94,10 @@ export function cacheToPlayer(cached: CachedPlayer): Player {
   // runs wildly high on year-2 breakouts. Kept for context + the UPSIDE lane
   // below; it is NOT the price.
   const appPos = dbPosToAppPos(cached.position)
-  const ceilingValue = vorpValue !== undefined ? vorpValue : Math.round(avgAuction)
+  const rawCeiling = vorpValue !== undefined ? vorpValue : Math.round(avgAuction)
+  // DEF/DST worth is capped (see DEF_MAX_PRICE): a defense is a stream slot, its
+  // VORP dollars are noise, and Joe never pays up for one.
+  const ceilingValue = capDef(appPos, rawCeiling)
   // PRICE FIX (VAL-2.1): the room drafts off the EXPERT sheet (ESPN/magazines),
   // not our model. Price the player by his expert (ECR) positional rank; fall
   // back to our points rank only when no ECR is present. Previously this trusted
@@ -85,8 +105,11 @@ export function cacheToPlayer(cached: CachedPlayer): Player {
   // top-3 QB -> $28 against a ~$1-5 market. The room perceives ECR, so we price
   // off ECR. See DR: VAL-2.1 expert hedge.
   const roomRank = ecrPositionRank ?? posRankPoints
-  const expectedRoom =
+  const rawRoom =
     roomRank !== undefined ? expectedRoomPrice(appPos, roomRank) : undefined
+  // Cap the DEF room price too, so a one-off historical $6 splurge on a top
+  // defense never becomes a "plan to pay" number the target/walk-up math builds on.
+  const expectedRoom = rawRoom !== undefined ? capDef(appPos, rawRoom) : undefined
   // RISK-ADJUSTED WORTH (VAL-2.3): before blending, haircut our optimistic ceiling
   // for injury risk the market has already priced into the ECR room price but our
   // points-based ceiling ignores. Two measured/severity layers (chronic durability
@@ -140,7 +163,7 @@ export function cacheToPlayer(cached: CachedPlayer): Player {
     byeWeek: cached.bye_week ?? 0,
     injuryStatus: cached.injury_status ?? undefined,
     consensusRank: Math.round(avgAdp), // approximate from ADP
-    consensusAuctionValue: Math.round(avgAuction),
+    consensusAuctionValue: capDef(appPos, Math.round(avgAuction)),
     // Real FantasyPros tier when present; legacy rank/12 estimate otherwise.
     consensusTier: realTier ?? Math.ceil(avgAdp / 12),
     adp: avgAdp,
@@ -155,7 +178,7 @@ export function cacheToPlayer(cached: CachedPlayer): Player {
     replacementPoints,
     marketAuctionValue: marketValue,
     ecrPositionRank,
-    // League-calibrated valuation (VAL-1.2) — Nasties ledger, not national.
+    // League-calibrated valuation (VAL-1.2) - Nasties ledger, not national.
     ceilingValue,
     riskAdjustedCeiling: ceilingValue > 0 ? worthCeiling : undefined,
     expectedRoomPrice: expectedRoom,

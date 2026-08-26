@@ -158,3 +158,46 @@ describe('cacheToPlayer - VAL-2.3 injury-risk-adjusted worth', () => {
     expect(q.riskAdjustedCeiling as number).toBeGreaterThan(pup.riskAdjustedCeiling as number)
   })
 })
+
+describe('cacheToPlayer - DEF/DST price cap (Joe-locked 2026-08-26, $3)', () => {
+  // A defense is a stream slot. The VORP model invents $8-14 of phantom "worth"
+  // for the top DSTs; the read funnel must clamp worth AND room price to $3 so no
+  // downstream surface ever advises paying up for a defense. Regression for the
+  // "pay up to $13 for a defense" bug.
+  function topDst(): CachedPlayer {
+    return cachedPlayer({
+      name: 'Houston Texans',
+      team: 'HOU',
+      position: 'DST',
+      // VORP model would price this defense at $14 of worth...
+      auction_values: { vorp_12_200_ppr: 14 },
+      // ...and the ledger's DEF1 room curve at $6.
+      source_data: { pos_rank: 'DST1', vorp: 26.5, proj_points: 117.8 },
+    })
+  }
+
+  it('caps DEF worth (ceilingValue) at $3, never the raw $14', () => {
+    const d = cacheToPlayer(topDst())
+    expect(d.position).toBe('DEF')
+    expect(d.ceilingValue).toBeLessThanOrEqual(3)
+  })
+
+  it('caps DEF room price at $3, never the raw ledger splurge', () => {
+    const d = cacheToPlayer(topDst())
+    expect(d.expectedRoomPrice as number).toBeLessThanOrEqual(3)
+  })
+
+  it('caps DEF consensusAuctionValue at $3', () => {
+    const d = cacheToPlayer(topDst())
+    expect(d.consensusAuctionValue).toBeLessThanOrEqual(3)
+  })
+
+  it('does NOT cap a non-DEF player at $3 (RB worth passes through)', () => {
+    const rb = cacheToPlayer(cachedPlayer({
+      position: 'RB',
+      auction_values: { vorp_12_200_ppr: 87 },
+      source_data: { pos_rank: 'RB1' },
+    }))
+    expect(rb.ceilingValue).toBe(87)
+  })
+})

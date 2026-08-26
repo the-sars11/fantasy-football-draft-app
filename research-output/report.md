@@ -915,18 +915,20 @@ Positional inflation (where the room over- or under-pays vs national):
 
 ### DEF
 
-- **Houston Texans** (HOU, bye 8) - $6-$14 (base $10) league band.
-  Fair value ~$10 (band $6-$14).
-- **Denver Broncos** (DEN, bye 10) - $3-$14 (base $9) league band.
-  Fair value ~$9 (band $3-$14).
-- **Philadelphia Eagles** (PHI, bye 10) - $2-$13 (base $8) league band.
-  Fair value ~$8 (band $2-$13).
-- **Pittsburgh Steelers** (PIT, bye 9) - $1-$13 (base $7) league band.
-  Target - worth ~$13, room pays ~$1. Win him at or under $7.  [+$4 POCKET]
-- **Baltimore Ravens** (BAL, bye 13) - $1-$10 (base $6) league band.
-  Fair value ~$6 (band $1-$10).
-- **Los Angeles Rams** (LAR, bye 11) - $3-$8 (base $6) league band.
-  Fair value ~$6 (band $3-$8).
+_DST capped at a $3 walk-away (Joe-locked 2026-08-26): a defense is a stream slot; its VORP dollars are noise._
+
+- **Houston Texans** (HOU, bye 8) - $3-$3 (base $3) league band.
+  Fair value ~$3.
+- **Denver Broncos** (DEN, bye 10) - $3-$3 (base $3) league band.
+  Fair value ~$3.
+- **Philadelphia Eagles** (PHI, bye 10) - $2-$3 (base $3) league band.
+  Fair value ~$3 (band $2-$3).
+- **Pittsburgh Steelers** (PIT, bye 9) - $1-$3 (base $2) league band.
+  Fair value ~$2 (band $1-$3).
+- **Baltimore Ravens** (BAL, bye 13) - $1-$3 (base $2) league band.
+  Fair value ~$2 (band $1-$3).
+- **Los Angeles Rams** (LAR, bye 11) - $3-$3 (base $3) league band.
+  Fair value ~$3.
 
 ## Value pockets and sleepers (win them below the room)
 
@@ -943,7 +945,6 @@ Positional inflation (where the room over- or under-pays vs national):
 - **Garrett Wilson** (WR, NYJ) - Target - worth ~$41, room pays ~$24. Win him at or under $31.  [+$4 POCKET]
 - **Rome Odunze** (WR, CHI) - Target - worth ~$20, room pays ~$8. Win him at or under $14.  [+$4 POCKET]
 - **Carnell Tate** (WR, TEN) - Target - worth ~$19, room pays ~$6. Win him at or under $13.  [+$4 POCKET]
-- **Pittsburgh Steelers** (DEF, PIT) - Target - worth ~$13, room pays ~$1. Win him at or under $7.  [+$4 POCKET]
 - **J.K. Dobbins** (RB, DEN) - Late flier - a $2-$12 bench dollar with real upside.  [FRAGILE, SLEEPER]
 - **Dallas Goedert** (TE, PHI) - Late flier - a $2-$11 bench dollar with real upside.  [FRAGILE, SLEEPER]
 - **Zach Charbonnet** (RB, SEA) - Late flier - a $1-$10 bench dollar with real upside. He's injured now - trim the bid or stash only.  [OUT PUP, SLEEPER]

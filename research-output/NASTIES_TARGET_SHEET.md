@@ -62,7 +62,6 @@ Best-graded pairings **with Gibbs**, best first. Walk-away = top of that player'
 | **Courtland Sutton** | WR | $18 | $1 | **$10** | +$5 |
 | **Rome Odunze** | WR | $20 | $8 | **$14** | +$4 |
 | **Carnell Tate** | WR | $19 | $6 | **$13** | +$4, deep sleeper |
-| **Pittsburgh** | DEF | $13 | $1 | **$7** | +$4, best DST value |
 
 ---
 
@@ -94,6 +93,11 @@ Courtland Sutton (WR, $1) · J.K. Dobbins (RB, $2, fragile) · Dallas Goedert (T
 | Harold Fannin Jr. | TE | $24 | $18 | $21 | cheap upside |
 
 The Zero-RB and Elite-TE shapes only grade 8.6 to 8.8, below the RB-WR line, so paying up for Bowers or McBride is optional, not required. Kittle at $4 to $12 is the value play.
+
+---
+
+## DEFENSE (stream it, $1 to $3, never more)
+A defense is a stream slot. Its year-to-year scoring is close to a coin flip, so the tool now caps every DST at a $3 walk-away, full stop. Win ONE, dead last, for $1 to $3, whichever good defense is cheapest when your roster is otherwise done. Do not nominate one early and do not bid a fourth dollar. The old sheet showing "$7 to $13 for Pittsburgh" was the model treating a defense like a running back; that math is fixed.
 
 ---
 
