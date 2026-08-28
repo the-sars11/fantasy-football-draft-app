@@ -56,12 +56,14 @@ Best-graded pairings **with Gibbs**, best first. Walk-away = top of that player'
 | **Jaxson Dart** | QB | $20 | $3 | **$12** | cheap upside QB (+$5) |
 | **Quinshon Judkins** | RB | $33 | $11 | **$22** | +$7 |
 | **Jeremiyah Love** | RB | $44 | $26 | **$34** | +$5, Questionable tag |
-| **Josh Jacobs** | RB | $38 | $21 | **$29** | +$5, Questionable tag |
+| **Josh Jacobs** | RB | $38 | $21 | **$29** | +$5, Questionable tag. SUSPENSION RISK, see note below |
 | **Zay Flowers** | WR | $40 | $23 | **$31** | +$5, Questionable tag |
 | **Garrett Wilson** | WR | $41 | $24 | **$31** | +$4 |
 | **Courtland Sutton** | WR | $18 | $1 | **$10** | +$5 |
 | **Rome Odunze** | WR | $20 | $8 | **$14** | +$4 |
 | **Carnell Tate** | WR | $19 | $6 | **$13** | +$4, deep sleeper |
+
+> **WATCH, Josh Jacobs (RB, GB), added 2026-08-28:** Jacobs was charged with 2 misdemeanor counts (off-field). This is NOT priced into his band above; his numbers assume a full season. A legal charge is not a suspension, so the model has not moved him, but if the league announces any suspension his real value drops hard and fast. Bid him as the $29 pocket ONLY if nothing new has come out by draft day. If a suspension lands first, treat him as a late-round dart, not a pocket. Source: NFL news, Aug 27, 2026. No model reprice applied.
 
 ---
 
