@@ -71,3 +71,6 @@ Keys*Accounts*
 # Superseded live-room mockup iterations (v4 is the approved, committed reference)
 /.claude/mockups/draft-room-v2-phone.html
 /.claude/mockups/draft-room-v3-two-screen.html
+
+# Figma handoff deliverable (41MB binaries; kept on disk, out of git)
+/figma-handoff/
