@@ -48,6 +48,7 @@ import { AuctionAdvisor } from '@/components/draft/auction-advisor'
 import { PositionRunTicker } from '@/components/draft/position-run-ticker'
 import { LiveScoreBug } from '@/components/draft/live-scorebug'
 import { AuctionDraftRoom } from '@/components/draft/live-room/auction-room'
+import { ArmorLiveRoom } from '@/components/draft/live-room/armor-live-room'
 import { StrategyPicker } from '@/components/draft/strategy-picker'
 import { PickFeed } from '@/components/draft/pick-feed'
 import { MySquadPanel } from '@/components/draft/my-squad-panel'
@@ -221,7 +222,13 @@ export function LiveDraftClient() {
     reconnectNonce,
     remoteLastSnapshot,
   } = useDraftFeeds({
-    format: session?.format,
+    // UX-7.3: the ?sim=1 demo is fully self-contained -- the sim engine drives
+    // every pick. Passing format:undefined here disables BOTH the same-device
+    // and the automatic remote auctioneer poll (use-draft-feed gates on
+    // format === 'auction'), so real live-auctioneer picks (other Nasties
+    // managers) can never reconcile into the demo and balloon it to a
+    // completed draft. Without this the demo inherits the real draft.
+    format: simEnabled ? undefined : session?.format,
     aifParam,
     draftedNames,
     addManualPick,
@@ -685,7 +692,7 @@ export function LiveDraftClient() {
       {/* R11a: offline-cache banner — shown when the room is running off a locally
           cached session (network unreachable) or a pick write hasn't confirmed on
           the server yet. Clears itself the moment usingCachedData/syncStatus recover. */}
-      {(usingCachedData || syncStatus !== 'synced') && (
+      {!simEnabled && (usingCachedData || syncStatus !== 'synced') && (
         <div
           className="mx-auto max-w-md rounded-[14px] px-3.5 py-3"
           style={{ background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.3)' }}
@@ -742,6 +749,30 @@ export function LiveDraftClient() {
         </div>
       )}
 
+      {/* ARMOR LIVE ROOM -- sim-only swap (dev). The look-first rebuild of the
+          live screen renders here so it can be proven at 375px in ?sim=1
+          side-by-side with the mockup. Real (non-sim) drafts keep the shipping
+          AuctionDraftRoom below, untouched, until the armor room is signed off. */}
+      {simEnabled ? (
+        <ArmorLiveRoom
+          leagueName={league?.name ?? 'The Nasties'}
+          myBudget={myBudget}
+          leagueBudget={league?.budget ?? 200}
+          myMaxBid={myMaxBid}
+          myPicks={myPicks}
+          rosterSlots={rosterSlots}
+          scoredPlayers={scoredPlayers}
+          draftedNames={draftedNames}
+          scarcity={scarcity}
+          maxBidMap={maxBidAdviceMap}
+          rosterAdviceMap={rosterAdviceMap}
+          onBlockPlayer={onBlockPlayer}
+          isTarget={isTarget}
+          isAvoid={isAvoid}
+          avoidSeverity={avoidSeverity}
+          onLeave={goBack}
+        />
+      ) : (
       <AuctionDraftRoom
         leagueName={league?.name ?? 'The Nasties'}
         online={online}
@@ -776,6 +807,7 @@ export function LiveDraftClient() {
         strategies={allStrategies}
         onSwitchStrategy={(s) => handleStrategySwap(s, false)}
       />
+      )}
 
       {/* More tools -- every secondary panel preserved, mounted only when
           opened so nothing is silently dropped and no paid AI call fires

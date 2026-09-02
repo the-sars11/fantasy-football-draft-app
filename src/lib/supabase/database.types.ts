@@ -146,6 +146,10 @@ export interface DraftSession {
     price?: number
     round?: number
     pick_number: number
+    // Optional pick position. Real auctioneer feeds usually omit it (resolved
+    // downstream by name), but self-contained fixtures (the sim demo) carry it
+    // so roster pips never depend on fuzzy player-pool name matching.
+    position?: string
   }>
   keepers: Array<{
     player_name: string

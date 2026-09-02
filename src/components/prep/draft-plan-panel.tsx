@@ -216,10 +216,7 @@ export function DraftPlanPanel({ plan }: { plan: DraftPlan | null }) {
   const sims = source.simRuns * source.strategies
 
   return (
-    <div
-      className="mb-[10px] overflow-hidden"
-      style={{ border: '1px solid var(--ffi-hairline)', borderRadius: '16px', background: 'linear-gradient(180deg,#101a2b,#0b1422)' }}
-    >
+    <div className="ffi-nameplate mb-[10px] overflow-hidden">
       {/* head */}
       <div className="flex items-center gap-[9px]" style={{ padding: '13px 15px 11px', borderBottom: '1px solid var(--ffi-hairline)' }}>
         <div className="uppercase" style={{ fontFamily: 'var(--font-cond)', fontWeight: 800, letterSpacing: '0.14em', fontSize: '15px', color: 'var(--ffi-ink)' }}>

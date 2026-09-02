@@ -18,6 +18,60 @@ import type { Player } from '@/lib/players/types'
 import { cacheToPlayers } from '@/lib/players/convert'
 import { saveSessionCache, loadSessionCache } from '@/lib/draft/offline-cache'
 
+// UX-7.3: Seeded MID-draft board for sim demo mode. Boots the room into a
+// realistic Nasties auction ~28 picks deep (2026 values from /api/players) so
+// the live screen shows real budgets, open needs, and studs-with-pockets on the
+// board instead of an empty (or, worse, a stale completed-draft) shell. The
+// elite tier is absorbed by the 11 other managers; the user (Rasar, manager 0)
+// is left value-heavy at RB with WR/FLEX/DEF still open and ~$127 to spend, so
+// a marquee WR/TE floats to the top of the board on the block. player_id holds
+// the player NAME (our schema); names/prices must match the real player pool or
+// they will not register as drafted. See use-draft-state.ts replay path.
+function DEMO_PICKS(): DraftSession['picks'] {
+  // [player name, manager, price, position] -- nomination order (studs first).
+  // Position is carried on every pick so the user's roster pips resolve from the
+  // fixture itself; a live auctioneer feed omits it and the room resolves it by
+  // name instead. See use-draft-state.ts replay + armor-live-room.tsx posByName.
+  const rows: Array<[string, string, number, string]> = [
+    ['Jahmyr Gibbs', 'Reggie', 82, 'RB'],
+    ['Christian McCaffrey', 'Robbie', 76, 'RB'],
+    ['Bijan Robinson', 'Hendrickson', 70, 'RB'],
+    ['Puka Nacua', 'Moonshine', 80, 'WR'],
+    ['Jaxon Smith-Njigba', 'Cross', 70, 'WR'],
+    ['Amon-Ra St. Brown', 'Robbie', 66, 'WR'],
+    ["Ja'Marr Chase", 'Simmons', 64, 'WR'],
+    ['Justin Jefferson', 'Murphy', 52, 'WR'],
+    ['Josh Allen', 'Bruce', 34, 'QB'],
+    ['Saquon Barkley', 'Bruce', 48, 'RB'],
+    ['Jonathan Taylor', 'Simmons', 52, 'RB'],
+    ['Ashton Jeanty', 'Murphy', 50, 'RB'],
+    ['Brock Bowers', 'Hendrickson', 48, 'TE'],
+    ['CeeDee Lamb', 'Reggie', 46, 'WR'],
+    ['Lamar Jackson', 'Garrett', 33, 'QB'],
+    ['Jeremiyah Love', 'Garrett', 40, 'RB'],
+    ['Drake Maye', 'Kevin', 30, 'QB'],
+    ['Derrick Henry', 'Kevin', 30, 'RB'],
+    ['Jalen Hurts', 'Cross', 28, 'QB'],
+    ["De'Von Achane", 'Moonshine', 36, 'RB'],
+    ['Jayden Daniels', 'Moe', 22, 'QB'],
+    ['George Kittle', 'Moe', 20, 'TE'],
+    ['Drake London', 'Bruce', 38, 'WR'],
+    // --- Rasar (manager 0, the user): value-heavy start, ~$127 left, 5/13 ---
+    ['James Cook III', 'Rasar', 26, 'RB'],
+    ['Chase Brown', 'Rasar', 22, 'RB'],
+    ['Bo Nix', 'Rasar', 6, 'QB'],
+    ['Tyler Warren', 'Rasar', 7, 'TE'],
+    ['Rashee Rice', 'Rasar', 12, 'WR'],
+  ]
+  return rows.map(([name, manager, price, position], i) => ({
+    player_id: name,
+    manager,
+    price,
+    position,
+    pick_number: i + 1,
+  }))
+}
+
 // UX-7.3: Mock session + league for sim demo mode (?sim=1 with no ?session=)
 // Persistence calls to /api/draft/sessions/demo will 404 and fail silently.
 const DEMO_SESSION: DraftSession = {
@@ -41,7 +95,7 @@ const DEMO_SESSION: DraftSession = {
     { name: 'Simmons', budget: 200 },
     { name: 'Murphy', budget: 200 },
   ],
-  picks: [],
+  picks: DEMO_PICKS(),
   keepers: [],
   recommendations: [],
   created_at: '2026-08-01T00:00:00.000Z',
@@ -58,7 +112,11 @@ const DEMO_LEAGUE: League = {
   budget: 200,
   scoring_format: 'ppr',
   scoring_settings: null,
-  roster_slots: { qb: 1, rb: 2, wr: 2, te: 1, flex: 1, k: 0, dst: 1, bench: 6, ir: 0 },
+  // Nasties locked shape: QB1/RB1/WR1/TE1/FLEX3/DEF1/K0/Bench5/IR1 (14 total,
+  // 13 draftable). Must match the real league so the sim's Roster count reads
+  // /13, not the generic ESPN 2RB/2WR/1FLEX/bench6 default. See
+  // FANTASY_FOOTBALL_MASTER.md + client.tsx DEFAULT_ROSTER.
+  roster_slots: { qb: 1, rb: 1, wr: 1, te: 1, flex: 3, k: 0, dst: 1, bench: 5, ir: 1 },
   keeper_enabled: false,
   keeper_settings: null,
   is_active: true,

@@ -39,7 +39,7 @@ export function StrategyCompare({ proposals, format, onClose, onSelect }: Strate
     <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h3 className="ffi-title-lg" style={{ color: 'var(--ffi-ink)' }}>Compare Strategies</h3>
+        <h3 className="ffi-title-chrome text-xl">Compare Strategies</h3>
         <button onClick={onClose} className="ffi-btn-ghost text-[13px]">
           <X className="h-4 w-4" />
           Close
@@ -72,8 +72,8 @@ export function StrategyCompare({ proposals, format, onClose, onSelect }: Strate
           <div className="grid gap-3" style={{ gridTemplateColumns: `160px repeat(${compared.length}, 1fr)` }}>
             <div />
             {compared.map((p, i) => (
-              <div key={i} className="ffi-card text-center" style={{ padding: '0.5rem 0.75rem' }}>
-                <div className="font-semibold text-sm" style={{ color: 'var(--ffi-ink)' }}>{p.name}</div>
+              <div key={i} className="ffi-nameplate text-center" style={{ padding: '0.5rem 0.75rem' }}>
+                <div className="ffi-title-chrome text-sm">{p.name}</div>
                 <div className="text-xs" style={{ color: 'var(--ffi-ink-2)' }}>{p.archetype}</div>
               </div>
             ))}

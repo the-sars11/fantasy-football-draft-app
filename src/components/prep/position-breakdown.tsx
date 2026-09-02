@@ -31,7 +31,10 @@ const posBorder: Record<string, string> = {
 }
 
 function cardBorderStyle(pos: string): React.CSSProperties {
-  return { border: `1px solid ${posBorder[pos]}`, background: 'var(--ffi-surface-2)' }
+  // Border-only: the flat surface-2 fill is replaced by the ffi-nameplate
+  // plate material on the container; this keeps only the semantic
+  // per-position accent border reading on top of it.
+  return { border: `1px solid ${posBorder[pos]}` }
 }
 
 function tierStyle(tier: number): React.CSSProperties {
@@ -83,7 +86,7 @@ export function PositionBreakdown({ players, format }: PositionBreakdownProps) {
         }
 
         return (
-          <div key={pos} className="rounded-2xl pt-4 pb-3 px-3 space-y-3" style={cardBorderStyle(pos)}>
+          <div key={pos} className="ffi-nameplate pt-4 pb-3 px-3 space-y-3" style={cardBorderStyle(pos)}>
             {/* Position header */}
             <div className="flex items-center justify-between">
               <h3 className="font-bold text-base" style={{ color: posAccent[pos] }}>{pos}</h3>

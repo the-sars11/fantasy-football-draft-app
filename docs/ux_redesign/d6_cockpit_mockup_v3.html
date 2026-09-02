@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>D6 Live Cockpit - SHIELD mockup v3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Kanit:wght@500;600;700&family=Hanken+Grotesk:wght@400;500;600&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-0:#05070C; --bg-1:#08101C;
+    --s1:#121A28; --s2:#1A2637; --s3:#26364E;
+    --hair:rgba(180,200,224,0.10); --hair-br:rgba(200,215,235,0.18);
+    --red:#A63C41; --red-deep:#6E2225; --red-hdr:#C25A5E; --red-glow:rgba(166,60,65,0.32);
+    --blue:#5FA8E0; --blue-br:#7FC0EA; --blue-glow:rgba(95,168,224,0.28);
+    --ink:#EAF1F8; --ink-2:#9FB2C6; --ink-3:#5E708A;
+    --qb:#FF6E8A; --rb:#56E0A0; --wr:#6CA8FF; --te:#FFB05C;
+    --disp:"Kanit",system-ui,sans-serif;
+    --hdr:"Oswald",system-ui,sans-serif;
+    --ui:"Hanken Grotesk",system-ui,sans-serif;
+    --mono:"JetBrains Mono",ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#02040a;color:var(--ink);font-family:var(--ui);-webkit-font-smoothing:antialiased;
+    display:flex;justify-content:center;padding:24px 12px;min-height:100vh}
+  .phone{width:402px;max-width:100%;border-radius:30px;overflow:hidden;border:1px solid var(--hair-br);position:relative;
+    background:
+      radial-gradient(60% 26% at 22% -3%, rgba(95,168,224,0.15), transparent 58%),
+      radial-gradient(46% 26% at 92% 3%, rgba(166,60,65,0.06), transparent 55%),
+      radial-gradient(70% 40% at 50% 112%, rgba(95,168,224,0.08), transparent 60%),
+      linear-gradient(180deg,#0C1524 0%,#08101C 52%,#05070C 100%);
+    box-shadow:0 40px 90px -30px rgba(0,0,0,0.9);display:flex;flex-direction:column}
+  .scroll{padding:0 0 20px}
+
+  /* status */
+  .status{position:sticky;top:0;z-index:6;padding:13px 16px 11px;display:flex;align-items:center;justify-content:space-between;
+    border-bottom:1px solid var(--hair);background:linear-gradient(180deg,rgba(12,21,36,0.97),rgba(8,16,28,0.85))}
+  .live{display:flex;align-items:center;gap:8px}
+  .live .dot{width:8px;height:8px;border-radius:50%;background:var(--blue);box-shadow:0 0 0 4px rgba(95,168,224,0.18);
+    animation:pulse 2.4s ease-in-out infinite}
+  @keyframes pulse{50%{box-shadow:0 0 0 7px rgba(95,168,224,0.05)}}
+  .live .lbl{font-family:var(--disp);font-weight:600;font-size:12px;letter-spacing:.12em;color:var(--ink)}
+  .live .sub{font-family:var(--mono);font-size:11px;color:var(--ink-3);letter-spacing:.04em}
+  .budget{text-align:right;line-height:1}
+  .budget .n{font-family:var(--mono);font-weight:700;font-size:22px;color:var(--red-hdr);letter-spacing:-.01em}
+  .budget .c{font-family:var(--mono);font-size:10px;color:var(--ink-3);letter-spacing:.02em;margin-top:3px}
+
+  /* strategy switcher */
+  .stratwrap{padding:11px 16px 0}
+  .stratlab{font-family:var(--hdr);font-weight:600;font-size:10px;letter-spacing:.16em;color:var(--ink-3);
+    text-transform:uppercase;margin-bottom:6px}
+  .stratsel{position:relative}
+  .stratsel select{-webkit-appearance:none;appearance:none;width:100%;cursor:pointer;
+    font-family:var(--disp);font-weight:600;font-size:15px;letter-spacing:.02em;color:var(--ink);
+    background:linear-gradient(180deg,#1A2637,#141d2c);border:1px solid var(--hair-br);border-radius:11px;
+    padding:12px 40px 12px 14px;box-shadow:inset 3px 0 0 var(--blue)}
+  .stratsel .cav{position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--blue);pointer-events:none;font-size:12px}
+
+  /* ON THE BLOCK (compact, collapsible) */
+  .ob{margin:11px 16px 0;border-radius:14px;overflow:hidden;border:1px solid var(--hair-br);
+    background:linear-gradient(160deg,#22314733,#141d2c 70%);box-shadow:0 8px 24px rgba(0,0,0,0.36),inset 3px 0 0 var(--red)}
+  .ob summary{list-style:none;cursor:pointer;padding:10px 12px;display:flex;align-items:center;gap:10px}
+  .ob summary::-webkit-details-marker{display:none}
+  .poschip{font-family:var(--disp);font-weight:700;font-size:10px;letter-spacing:.05em;padding:3px 7px;border-radius:5px;color:#04110b;background:var(--rb);flex-shrink:0}
+  .ob .sum-name{font-family:var(--disp);font-weight:700;font-size:16px;color:var(--ink);line-height:1;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ob .sum-tgt{font-family:var(--mono);font-weight:700;font-size:14px;color:var(--red-hdr);flex-shrink:0}
+  .ob .sum-tgt small{color:var(--ink-3);font-size:9px;font-weight:600}
+  .ob .chev{color:var(--ink-3);font-size:11px;transition:transform .2s;flex-shrink:0}
+  .ob[open] .chev{transform:rotate(180deg)}
+  .ob[open] .sum-tgt,.ob[open] .sum-name{display:none}
+  .ob .eyebrow{display:none;font-family:var(--hdr);font-weight:600;font-size:10px;letter-spacing:.16em;color:var(--red-hdr);text-transform:uppercase;flex:1}
+  .ob[open] .eyebrow{display:block}
+  .ob-body{padding:0 12px 12px}
+
+  .ob-main{display:flex;gap:11px;align-items:center;padding-top:2px}
+  .headshot{width:52px;height:52px;border-radius:11px;flex-shrink:0;position:relative;overflow:hidden;
+    background:radial-gradient(120% 100% at 50% 10%, #2b3d57, #131b28);border:1px solid var(--hair-br)}
+  .headshot .sil{position:absolute;left:50%;bottom:-2px;transform:translateX(-50%);width:38px;height:40px;
+    background:rgba(95,168,224,0.22);border-radius:50% 50% 42% 42%/60% 60% 40% 40%;
+    box-shadow:0 -9px 0 -3px rgba(95,168,224,0.22)}
+  .headshot .num{position:absolute;top:3px;right:5px;font-family:var(--disp);font-weight:700;font-size:11px;color:rgba(255,255,255,0.5)}
+  .ob-id{min-width:0;flex:1}
+  .ob-name{font-family:var(--disp);font-weight:700;font-size:20px;line-height:1.05;color:var(--ink)}
+  .ob-meta{font-family:var(--mono);font-size:10px;color:var(--ink-2);margin-top:3px;letter-spacing:.02em}
+  .starbtn{width:28px;height:28px;border-radius:7px;border:1px solid rgba(166,60,65,0.5);background:rgba(166,60,65,0.14);
+    color:var(--red-hdr);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+
+  /* market band + target */
+  .bandbox{margin-top:13px;background:var(--bg-1);border:1px solid var(--hair);border-radius:11px;padding:11px 13px 12px}
+  .band-top{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:4px}
+  .band-top .l{font-family:var(--hdr);font-weight:600;font-size:9.5px;letter-spacing:.14em;color:var(--ink-3);text-transform:uppercase}
+  .band-top .tgtnum{font-family:var(--mono);font-weight:700;font-size:22px;color:var(--red-hdr);text-shadow:0 0 18px var(--red-glow);line-height:1}
+  .band-top .tgtnum small{font-size:11px;color:var(--ink-3);font-weight:600}
+  .btrack{position:relative;height:12px;margin:20px 2px 8px;border-radius:6px;
+    background:repeating-linear-gradient(90deg,transparent,transparent 6px,rgba(255,255,255,0.03) 6px,rgba(255,255,255,0.03) 7px),linear-gradient(90deg,#0e1622,#182338)}
+  .region{position:absolute;top:0;bottom:0;border-radius:5px;background:linear-gradient(180deg,rgba(95,168,224,0.34),rgba(95,168,224,0.16));
+    border:1px solid rgba(95,168,224,0.5)}
+  .region .rl,.region .rh{position:absolute;top:15px;font-family:var(--mono);font-size:9px;color:var(--blue-br)}
+  .region .rl{left:0;transform:translateX(-50%)} .region .rh{right:0;transform:translateX(50%)}
+  .tgtmark{position:absolute;top:-4px;bottom:-4px;width:3px;border-radius:2px;background:var(--red-hdr);
+    box-shadow:0 0 10px var(--red-glow);transform:translateX(-50%)}
+  .tgtmark::before{content:"YOUR TARGET";position:absolute;top:-16px;left:50%;transform:translateX(-50%);
+    font-family:var(--mono);font-size:8px;letter-spacing:.06em;color:var(--red-hdr);white-space:nowrap}
+  .band-note{font-family:var(--ui);font-size:11px;color:var(--ink-2);margin-top:16px;line-height:1.4}
+  .band-note b{color:var(--ink);font-weight:600}
+  .band-legend{display:flex;gap:14px;margin-top:9px;font-family:var(--mono);font-size:9.5px;color:var(--ink-3)}
+  .band-legend .k{display:inline-flex;align-items:center;gap:5px}
+  .band-legend .sw{width:12px;height:7px;border-radius:2px;display:inline-block}
+  .band-legend .sw.m{background:rgba(95,168,224,0.5)} .band-legend .sw.t{background:var(--red-hdr)}
+
+  /* collapsible sections */
+  details.sec{margin:11px 16px 0;border:1px solid var(--hair);border-radius:12px;background:var(--s1);overflow:hidden}
+  details.sec summary{list-style:none;cursor:pointer;padding:12px 13px;display:flex;align-items:center;justify-content:space-between}
+  details.sec summary::-webkit-details-marker{display:none}
+  .sum-l{display:flex;align-items:center;gap:9px}
+  .sum-t{font-family:var(--hdr);font-weight:600;font-size:12px;letter-spacing:.14em;color:var(--red-hdr);text-transform:uppercase}
+  .sum-t.blue{color:var(--blue-br)}
+  .sum-meta{font-family:var(--mono);font-size:11px;color:var(--ink-2)}
+  details.sec .chev{color:var(--ink-3);font-size:12px;transition:transform .2s}
+  details.sec[open] .chev{transform:rotate(180deg)}
+  .body{padding:0 13px 13px}
+
+  .read-p{font-size:12.5px;line-height:1.55;color:var(--ink-2)}
+  .read-p b{color:var(--ink);font-weight:600}
+  .read-conf{font-family:var(--mono);font-size:11px;color:var(--blue-br);font-weight:600}
+
+  .tgrid{border:1px solid var(--hair);border-radius:10px;overflow:hidden;background:var(--bg-1)}
+  .trow{display:grid;grid-template-columns:52px repeat(5,1fr);align-items:center}
+  .trow+.trow{border-top:1px solid var(--hair)}
+  .trow.head{background:rgba(255,255,255,0.02)}
+  .trow.head .tc{font-family:var(--disp);font-weight:600;font-size:10px;letter-spacing:.06em;color:var(--ink-3);padding:6px 0;text-align:center;text-transform:uppercase}
+  .trow .pos{font-family:var(--disp);font-weight:700;font-size:12px;padding-left:11px;letter-spacing:.04em}
+  .trow .pos.qbc{color:var(--qb)} .trow .pos.rbc{color:var(--rb)} .trow .pos.wrc{color:var(--wr)} .trow .pos.tec{color:var(--te)} .trow .pos.flx{color:var(--te)}
+  .trow.flexrow{background:rgba(255,176,92,0.05)}
+  .tc{font-family:var(--mono);font-size:12.5px;font-weight:600;text-align:center;padding:8px 0;color:var(--ink)}
+  .tc.z{color:var(--ink-3);font-weight:500} .tc.hot{color:var(--red-hdr)}
+
+  .rrow{display:flex;align-items:center;gap:11px;padding:11px 12px;border:1px solid var(--hair);border-radius:10px;background:var(--bg-1);margin-top:7px}
+  .rrow:first-child{margin-top:0}
+  .rrow.open{border-color:rgba(95,168,224,0.32);background:linear-gradient(180deg,rgba(95,168,224,0.05),rgba(95,168,224,0.01))}
+  .rslot{font-family:var(--mono);font-weight:700;font-size:10px;letter-spacing:.04em;color:var(--ink-2);width:44px;text-align:center;padding:4px 0;border:1px solid var(--hair);border-radius:6px;flex-shrink:0}
+  .rname{flex:1;font-family:var(--disp);font-weight:600;font-size:14px;color:var(--ink)}
+  .rname.o{color:var(--ink-3);font-weight:500;font-size:12.5px}
+  .rname.o em{color:var(--blue-br);font-style:normal}
+  .rprice{font-family:var(--mono);font-weight:700;font-size:14px;color:var(--ink)}
+  .rprice.o{color:var(--blue);font-size:12px;font-weight:600}
+
+  .search{display:flex;align-items:center;gap:8px;padding:10px 12px;border:1px solid var(--hair);border-radius:10px;background:var(--bg-1);margin-bottom:9px}
+  .search .mag{color:var(--ink-3);font-size:13px}
+  .search input{flex:1;background:none;border:none;outline:none;color:var(--ink);font-family:var(--ui);font-size:13px}
+  .search input::placeholder{color:var(--ink-3)}
+  .filters{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+  .fchip{font-family:var(--disp);font-weight:600;font-size:11px;letter-spacing:.04em;padding:5px 11px;border-radius:999px;border:1px solid var(--hair);color:var(--ink-2);background:var(--bg-1)}
+  .fchip.on{color:#04121f;background:var(--blue);border-color:var(--blue)}
+  .plist-head{display:grid;grid-template-columns:26px 1fr 52px 48px 34px;gap:8px;padding:0 8px 6px;font-family:var(--disp);font-weight:600;font-size:9.5px;letter-spacing:.06em;color:var(--ink-3);text-transform:uppercase}
+  .plist-head .r{text-align:right}
+  .prow{display:grid;grid-template-columns:26px 1fr 52px 48px 34px;gap:8px;align-items:center;padding:9px 8px;border-top:1px solid var(--hair)}
+  .prow .rk{font-family:var(--mono);font-size:12px;color:var(--ink-3);font-weight:600}
+  .prow .pl{min-width:0}
+  .prow .pl .nm{font-family:var(--disp);font-weight:600;font-size:13.5px;color:var(--ink);line-height:1.1}
+  .prow .pl .tm{font-family:var(--mono);font-size:9.5px;color:var(--ink-3);margin-top:1px}
+  .prow .pj{font-family:var(--mono);font-size:12.5px;font-weight:700;color:var(--ink);text-align:right}
+  .prow .vl{font-family:var(--mono);font-size:12.5px;font-weight:700;color:var(--blue-br);text-align:right}
+  .prow .fv{text-align:center;color:var(--ink-3);font-size:14px}
+  .prow .fv.on{color:var(--red-hdr)}
+
+  .manual{margin:12px 16px 4px;border:1px dashed var(--hair-br);border-radius:11px;background:rgba(255,255,255,0.015);padding:11px 13px;display:flex;align-items:center;gap:10px;opacity:.75}
+  .manual .ic{width:30px;height:30px;border-radius:8px;border:1px solid var(--hair);display:flex;align-items:center;justify-content:center;color:var(--ink-3);font-size:15px}
+  .manual .mt{font-family:var(--disp);font-weight:600;font-size:12.5px;color:var(--ink-2)}
+  .manual .ms{font-family:var(--mono);font-size:9.5px;color:var(--ink-3);letter-spacing:.04em;margin-top:2px}
+  .foot{padding:12px 16px 2px;font-size:9.5px;color:var(--ink-3);line-height:1.5;font-family:var(--mono);text-align:center}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="scroll">
+
+    <!-- STATUS -->
+    <div class="status">
+      <div class="live"><span class="dot"></span>
+        <div><div class="lbl">LIVE</div><div class="sub">R3 · PICK 27</div></div>
+      </div>
+      <div class="budget"><div class="n">$69</div><div class="c">LEFT · 10 OPEN · CAP $12</div></div>
+    </div>
+
+    <!-- STRATEGY SWITCHER -->
+    <div class="stratwrap">
+      <div class="stratlab">Strategy · ranked from your research</div>
+      <div class="stratsel">
+        <select>
+          <option>Hero RB &nbsp;— #1</option>
+          <option>Robust RB &nbsp;— #2</option>
+          <option>Balanced / Best Value &nbsp;— #3</option>
+          <option>Anchor WR &nbsp;— #4</option>
+          <option>Zero RB &nbsp;— #5</option>
+        </select>
+        <span class="cav">▼</span>
+      </div>
+    </div>
+
+    <!-- ON THE BLOCK (compact + collapsible) -->
+    <details class="ob" open>
+      <summary>
+        <span class="poschip">RB</span>
+        <span class="eyebrow">On The Block</span>
+        <span class="sum-name">Kyren Williams</span>
+        <span class="sum-tgt">$34<small> tgt</small></span>
+        <span class="chev">▲</span>
+      </summary>
+      <div class="ob-body">
+        <div class="ob-main">
+          <div class="headshot"><span class="num">23</span><span class="sil"></span></div>
+          <div class="ob-id">
+            <div class="ob-name">Kyren Williams</div>
+            <div class="ob-meta">LAR · RB6 · TIER 2 · BYE 6</div>
+          </div>
+          <span class="starbtn" title="Targeted">★</span>
+        </div>
+
+        <div class="bandbox">
+          <div class="band-top">
+            <span class="l">Your target price</span>
+            <span class="tgtnum">$34<small> max</small></span>
+          </div>
+          <div class="btrack">
+            <!-- market range band: $32-$44 on a $24-$52 window -->
+            <div class="region" style="left:29%;width:42%"><span class="rl">$32</span><span class="rh">$44</span></div>
+            <!-- your target $34 -->
+            <div class="tgtmark" style="left:36%"></div>
+          </div>
+          <div class="band-note">Market projects <b>$32–$44</b>. Your Hero-RB target holds at <b>$34</b> — bottom of the band, disciplined value. Bump the strategy and this marker moves.</div>
+          <div class="band-legend">
+            <span class="k"><span class="sw m"></span> Market range</span>
+            <span class="k"><span class="sw t"></span> Your target</span>
+          </div>
+        </div>
+      </div>
+    </details>
+
+    <!-- READ -->
+    <details class="sec" open>
+      <summary><span class="sum-l"><span class="sum-t blue">Read</span><span class="read-conf">78%</span></span><span class="chev">▲</span></summary>
+      <div class="body">
+        <p class="read-p">You hold <b>$69</b> with <b>3 FLEX + a WR</b> to fill. Winning Kyren at <b>$34</b> locks a second every-down back into FLEX and still leaves <b>$35</b> for a WR1 swing. Past <b>$38</b> you starve the receiver room — hold the line.</p>
+      </div>
+    </details>
+
+    <!-- TIERS -->
+    <details class="sec" open>
+      <summary><span class="sum-l"><span class="sum-t">Tiers Remaining</span><span class="sum-meta">tap a cell</span></span><span class="chev">▲</span></summary>
+      <div class="body">
+        <div class="tgrid">
+          <div class="trow head"><span class="tc" style="text-align:left;padding-left:11px"></span><span class="tc">T1</span><span class="tc">T2</span><span class="tc">T3</span><span class="tc">T4</span><span class="tc">T5</span></div>
+          <div class="trow"><span class="pos qbc">QB</span><span class="tc z">0</span><span class="tc">2</span><span class="tc">4</span><span class="tc">7</span><span class="tc">9</span></div>
+          <div class="trow"><span class="pos rbc">RB</span><span class="tc z">0</span><span class="tc hot">1</span><span class="tc">3</span><span class="tc">6</span><span class="tc">10</span></div>
+          <div class="trow"><span class="pos wrc">WR</span><span class="tc">2</span><span class="tc">5</span><span class="tc">8</span><span class="tc">11</span><span class="tc">14</span></div>
+          <div class="trow"><span class="pos tec">TE</span><span class="tc z">0</span><span class="tc">1</span><span class="tc">3</span><span class="tc">5</span><span class="tc">8</span></div>
+          <div class="trow flexrow"><span class="pos flx">FLEX</span><span class="tc">4</span><span class="tc">11</span><span class="tc">19</span><span class="tc">22</span><span class="tc">32</span></div>
+        </div>
+      </div>
+    </details>
+
+    <!-- MY TEAM -->
+    <details class="sec" open>
+      <summary><span class="sum-l"><span class="sum-t">My Team</span><span class="sum-meta">3 / 13 filled</span></span><span class="chev">▲</span></summary>
+      <div class="body">
+        <div class="rrow"><span class="rslot">QB1</span><span class="rname">Josh Allen</span><span class="rprice">$40</span></div>
+        <div class="rrow"><span class="rslot">RB1</span><span class="rname">Bijan Robinson</span><span class="rprice">$58</span></div>
+        <div class="rrow"><span class="rslot">WR1</span><span class="rname o">(Open) — <em>target elite WR</em></span><span class="rprice o">~$44</span></div>
+        <div class="rrow"><span class="rslot">TE1</span><span class="rname">Brock Bowers</span><span class="rprice">$33</span></div>
+        <div class="rrow open"><span class="rslot">FLEX1</span><span class="rname o">(Open) — <em>RB on the block</em></span><span class="rprice o">~$34</span></div>
+        <div class="rrow"><span class="rslot">FLEX2</span><span class="rname o">(Open)</span><span class="rprice o">—</span></div>
+        <div class="rrow"><span class="rslot">FLEX3</span><span class="rname o">(Open)</span><span class="rprice o">—</span></div>
+        <div class="rrow"><span class="rslot">DEF1</span><span class="rname o">(Open)</span><span class="rprice o">$1</span></div>
+        <div class="rrow"><span class="rslot">BN×5</span><span class="rname o">(Open) — <em>5 bench</em></span><span class="rprice o">—</span></div>
+      </div>
+    </details>
+
+    <!-- PLAYERS -->
+    <details class="sec" open>
+      <summary><span class="sum-l"><span class="sum-t">Players</span><span class="sum-meta">sort · filter · star</span></span><span class="chev">▲</span></summary>
+      <div class="body">
+        <div class="search"><span class="mag">⌕</span><input placeholder="Search players..." disabled></div>
+        <div class="filters"><span class="fchip on">ALL</span><span class="fchip">QB</span><span class="fchip">RB</span><span class="fchip">WR</span><span class="fchip">TE</span><span class="fchip">DEF</span></div>
+        <div class="plist-head"><span>Rk</span><span>Player</span><span class="r">Proj</span><span class="r">Value</span><span>Fav</span></div>
+        <div class="prow"><span class="rk">1</span><span class="pl"><div class="nm">Christian McCaffrey</div><div class="tm">RB · CAR</div></span><span class="pj">248</span><span class="vl">$61</span><span class="fv on">★</span></div>
+        <div class="prow"><span class="rk">2</span><span class="pl"><div class="nm">Saquon Barkley</div><div class="tm">RB · PHI</div></span><span class="pj">236</span><span class="vl">$58</span><span class="fv">☆</span></div>
+        <div class="prow"><span class="rk">3</span><span class="pl"><div class="nm">CeeDee Lamb</div><div class="tm">WR · DAL</div></span><span class="pj">214</span><span class="vl">$54</span><span class="fv on">★</span></div>
+        <div class="prow"><span class="rk">4</span><span class="pl"><div class="nm">Ja'Marr Chase</div><div class="tm">WR · CIN</div></span><span class="pj">208</span><span class="vl">$52</span><span class="fv">☆</span></div>
+        <div class="prow"><span class="rk">5</span><span class="pl"><div class="nm">Jahmyr Gibbs</div><div class="tm">RB · DET</div></span><span class="pj">198</span><span class="vl">$46</span><span class="fv">☆</span></div>
+      </div>
+    </details>
+
+    <!-- MANUAL ENTRY (planned) -->
+    <div class="manual">
+      <span class="ic">⤢</span>
+      <div><div class="mt">Manual entry</div><div class="ms">PLANNED · SLIDE-OUT FALLBACK IF FEED DROPS</div></div>
+    </div>
+
+    <div class="foot">SHIELD tokens · steel-blue = market range · red = your target / your action · sample data · D6 direction v3</div>
+  </div>
+</div>
+</body>
+</html>

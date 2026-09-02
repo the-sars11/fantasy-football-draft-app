@@ -82,7 +82,7 @@ export function LeagueConfigForm({ userId }: { userId: string }) {
 
   if (state.success) {
     return (
-      <div className="ffi-card-elevated py-8 text-center space-y-4">
+      <div className="ffi-nameplate px-5 py-8 text-center space-y-4">
         <div className="ffi-display-md" style={{ color: 'var(--ffi-volt)' }}>League Saved</div>
         <p style={{ color: 'var(--ffi-ink-2)' }}>
           Your league config has been saved.
@@ -126,7 +126,7 @@ export function LeagueConfigForm({ userId }: { userId: string }) {
 
         {/* Basic Info */}
         <QuietLabel>League Details</QuietLabel>
-        <div className="ffi-card">
+        <div className="ffi-nameplate p-4">
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <label htmlFor="name" className="text-sm font-medium" style={{ color: 'var(--ffi-ink-2)' }}>League Name</label>
@@ -212,7 +212,7 @@ export function LeagueConfigForm({ userId }: { userId: string }) {
 
         {/* Roster Slots, pre-filled with locked Nasties values (QB1/RB1/WR1/TE1/FLEX3/DEF1/K0/Bench5/IR1) */}
         <QuietLabel>Roster Slots</QuietLabel>
-        <div className="ffi-card">
+        <div className="ffi-nameplate p-4">
           <div className="grid grid-cols-3 gap-4 sm:grid-cols-5">
             {[
               { key: 'qb',    label: 'QB',    default: 1 },
@@ -245,7 +245,7 @@ export function LeagueConfigForm({ userId }: { userId: string }) {
 
         {/* Custom Scoring Editor */}
         <QuietLabel>Scoring Settings</QuietLabel>
-        <div className="ffi-card">
+        <div className="ffi-nameplate p-4">
           <div className="flex items-center gap-2 mb-3">
             {scoringFormat === 'custom' ? (
               <FFIBadge className="text-xs" style={{ background: 'var(--ffi-surface-1)', color: 'var(--ffi-ink-2)' }}>

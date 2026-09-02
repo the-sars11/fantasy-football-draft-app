@@ -200,7 +200,7 @@ export function AppShell({
 
       {/* Mobile top header — hidden on desktop, and entirely on the live room */}
       {!isLiveRoom && (
-      <header className="shield-glass shield-glass--bottom flex md:hidden items-center justify-between px-4 h-12 shrink-0 relative z-10">
+      <header className="shield-glass flex md:hidden items-center justify-between px-4 h-12 shrink-0 relative z-10">
         <div className="flex items-center gap-2">
           <Image
             src="/icons/FFI - 32x32 - Favicon.png"
@@ -208,14 +208,29 @@ export function AppShell({
             width={20}
             height={20}
           />
-          <span className="text-sm font-semibold">
-            <span className="text-white">FF</span>
-            <span className="text-[var(--ffi-primary)]">Intelligence</span>
+          <span
+            className="leading-none"
+            style={{ fontFamily: 'var(--font-anton)', fontSize: '20px', letterSpacing: '0.045em' }}
+          >
+            <span className="ffi-title-chrome">FF</span>
+            <span className="ffi-title-red">Intelligence</span>
           </span>
         </div>
         <div className="flex items-center gap-2">
           <ProfileAvatar initials={initials} size="sm" />
         </div>
+        {/* Centered red masthead hairline — ported from the ARMOR board mockup
+            (.mast::after): a glowing red line that fades to transparent at both
+            edges, not a flat full-width inset. */}
+        <span
+          aria-hidden
+          className="pointer-events-none absolute left-4 right-4 -bottom-px h-px"
+          style={{
+            background:
+              'linear-gradient(90deg,transparent,#a63c41,rgba(204,96,91,0.9),#a63c41,transparent)',
+            boxShadow: '0 0 10px rgba(166,60,65,0.55)',
+          }}
+        />
       </header>
       )}
 

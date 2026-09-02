@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>D6 Live Cockpit - SHIELD mockup v2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Kanit:wght@500;600;700&family=Hanken+Grotesk:wght@400;500;600&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-0:#05070C; --bg-1:#08101C;
+    --s1:#121A28; --s2:#1A2637; --s3:#26364E;
+    --hair:rgba(180,200,224,0.10); --hair-br:rgba(200,215,235,0.18);
+    --red:#A63C41; --red-deep:#6E2225; --red-hdr:#C25A5E; --red-glow:rgba(166,60,65,0.32);
+    --blue:#5FA8E0; --blue-br:#7FC0EA; --blue-glow:rgba(95,168,224,0.28);
+    --ink:#EAF1F8; --ink-2:#9FB2C6; --ink-3:#5E708A;
+    --qb:#FF6E8A; --rb:#56E0A0; --wr:#6CA8FF; --te:#FFB05C;
+    --disp:"Kanit",system-ui,sans-serif;
+    --hdr:"Oswald",system-ui,sans-serif;
+    --ui:"Hanken Grotesk",system-ui,sans-serif;
+    --mono:"JetBrains Mono",ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#02040a;color:var(--ink);font-family:var(--ui);-webkit-font-smoothing:antialiased;
+    display:flex;justify-content:center;padding:24px 12px;min-height:100vh}
+  .phone{width:402px;max-width:100%;border-radius:30px;overflow:hidden;border:1px solid var(--hair-br);position:relative;
+    background:
+      radial-gradient(60% 26% at 22% -3%, rgba(95,168,224,0.15), transparent 58%),
+      radial-gradient(46% 26% at 92% 3%, rgba(166,60,65,0.06), transparent 55%),
+      radial-gradient(70% 40% at 50% 112%, rgba(95,168,224,0.08), transparent 60%),
+      linear-gradient(180deg,#0C1524 0%,#08101C 52%,#05070C 100%);
+    box-shadow:0 40px 90px -30px rgba(0,0,0,0.9);display:flex;flex-direction:column}
+  .scroll{padding:0 0 20px}
+
+  /* status */
+  .status{position:sticky;top:0;z-index:6;padding:13px 16px 11px;display:flex;align-items:center;justify-content:space-between;
+    border-bottom:1px solid var(--hair);background:linear-gradient(180deg,rgba(12,21,36,0.97),rgba(8,16,28,0.85))}
+  .live{display:flex;align-items:center;gap:8px}
+  .live .dot{width:8px;height:8px;border-radius:50%;background:var(--blue);box-shadow:0 0 0 4px rgba(95,168,224,0.18);
+    animation:pulse 2.4s ease-in-out infinite}
+  @keyframes pulse{50%{box-shadow:0 0 0 7px rgba(95,168,224,0.05)}}
+  .live .lbl{font-family:var(--disp);font-weight:600;font-size:12px;letter-spacing:.12em;color:var(--ink)}
+  .live .sub{font-family:var(--mono);font-size:11px;color:var(--ink-3);letter-spacing:.04em}
+  .budget{text-align:right;line-height:1}
+  .budget .n{font-family:var(--mono);font-weight:700;font-size:22px;color:var(--red-hdr);letter-spacing:-.01em}
+  .budget .c{font-family:var(--mono);font-size:10px;color:var(--ink-3);letter-spacing:.02em;margin-top:3px}
+
+  /* strategy switcher */
+  .stratwrap{padding:11px 16px 0}
+  .stratlab{font-family:var(--hdr);font-weight:600;font-size:10px;letter-spacing:.16em;color:var(--ink-3);
+    text-transform:uppercase;margin-bottom:6px}
+  .stratsel{position:relative}
+  .stratsel select{-webkit-appearance:none;appearance:none;width:100%;cursor:pointer;
+    font-family:var(--disp);font-weight:600;font-size:15px;letter-spacing:.02em;color:var(--ink);
+    background:linear-gradient(180deg,#1A2637,#141d2c);border:1px solid var(--hair-br);border-radius:11px;
+    padding:12px 40px 12px 14px;box-shadow:inset 3px 0 0 var(--blue)}
+  .stratsel .cav{position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--blue);pointer-events:none;font-size:12px}
+  .stratsel .rankbadge{position:absolute;right:38px;top:50%;transform:translateY(-50%);font-family:var(--mono);font-size:10px;
+    color:var(--ink-3);pointer-events:none}
+
+  /* on the block (compact) */
+  .block{margin:11px 16px 0;border-radius:14px;overflow:hidden;position:relative;
+    background:linear-gradient(160deg,#22314733,#141d2c 70%);border:1px solid var(--hair-br);
+    box-shadow:0 8px 24px rgba(0,0,0,0.38),inset 3px 0 0 var(--red)}
+  .block-top{display:flex;align-items:center;gap:9px;padding:11px 13px 0}
+  .poschip{font-family:var(--disp);font-weight:700;font-size:10.5px;letter-spacing:.06em;padding:3px 7px;border-radius:5px;color:#04110b;background:var(--rb)}
+  .eyebrow{font-family:var(--hdr);font-weight:600;font-size:10.5px;letter-spacing:.16em;color:var(--red-hdr);text-transform:uppercase}
+  .block-top .spacer{flex:1}
+  .star{width:28px;height:28px;border-radius:7px;border:1px solid rgba(166,60,65,0.5);background:rgba(166,60,65,0.14);
+    color:var(--red-hdr);display:flex;align-items:center;justify-content:center;font-size:14px}
+  .block-name{font-family:var(--disp);font-weight:700;font-size:23px;line-height:1.05;color:var(--ink);padding:5px 13px 0}
+  .block-meta{font-family:var(--mono);font-size:10.5px;color:var(--ink-2);padding:2px 13px 0;letter-spacing:.02em}
+
+  /* range bar */
+  .range{padding:12px 13px 13px}
+  .range-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:9px}
+  .range-head .bidk{font-family:var(--hdr);font-weight:600;font-size:10px;letter-spacing:.14em;color:var(--ink-2);text-transform:uppercase}
+  .range-head .bidv{font-family:var(--mono);font-weight:700;font-size:26px;color:var(--red-hdr);text-shadow:0 0 20px var(--red-glow);line-height:1}
+  .range-head .bidv small{font-size:13px;color:var(--ink-3);font-weight:600}
+  .track{position:relative;height:8px;border-radius:5px;background:linear-gradient(90deg,#0f1622,#1b2740);border:1px solid var(--hair);margin:16px 0 6px}
+  .fill{position:absolute;top:0;bottom:0;left:0;border-radius:5px 0 0 5px;background:linear-gradient(90deg,var(--red-deep),var(--red))}
+  .mkt{position:absolute;top:-5px;bottom:-5px;width:2px;background:var(--blue-br);box-shadow:0 0 8px var(--blue-glow)}
+  .mkt-lab{position:absolute;top:-22px;transform:translateX(-50%);font-family:var(--mono);font-size:9.5px;color:var(--blue-br);white-space:nowrap}
+  .bidmark{position:absolute;top:50%;width:13px;height:13px;border-radius:50%;background:var(--red-hdr);
+    border:2px solid #1a1113;transform:translate(-50%,-50%);box-shadow:0 0 12px var(--red-glow)}
+  .range-ends{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;color:var(--ink-3)}
+  .range-ends .lo b,.range-ends .hi b{color:var(--ink-2);font-weight:600}
+  .steal{display:inline-block;margin-top:9px;font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.02em;
+    padding:4px 8px;border-radius:6px;color:var(--blue-br);background:rgba(95,168,224,0.12);border:1px solid rgba(95,168,224,0.26)}
+
+  /* collapsible sections */
+  details{margin:11px 16px 0;border:1px solid var(--hair);border-radius:12px;background:var(--s1);overflow:hidden}
+  summary{list-style:none;cursor:pointer;padding:12px 13px;display:flex;align-items:center;justify-content:space-between}
+  summary::-webkit-details-marker{display:none}
+  .sum-l{display:flex;align-items:center;gap:9px}
+  .sum-t{font-family:var(--hdr);font-weight:600;font-size:12px;letter-spacing:.14em;color:var(--red-hdr);text-transform:uppercase}
+  .sum-t.blue{color:var(--blue-br)}
+  .sum-meta{font-family:var(--mono);font-size:11px;color:var(--ink-2)}
+  .chev{color:var(--ink-3);font-size:12px;transition:transform .2s}
+  details[open] .chev{transform:rotate(180deg)}
+  .body{padding:0 13px 13px}
+
+  /* READ */
+  .read-p{font-size:12.5px;line-height:1.55;color:var(--ink-2)}
+  .read-p b{color:var(--ink);font-weight:600}
+  .read-conf{font-family:var(--mono);font-size:11px;color:var(--blue-br);font-weight:600}
+
+  /* tiers */
+  .tgrid{border:1px solid var(--hair);border-radius:10px;overflow:hidden;background:var(--bg-1)}
+  .trow{display:grid;grid-template-columns:52px repeat(5,1fr);align-items:center}
+  .trow+.trow{border-top:1px solid var(--hair)}
+  .trow.head{background:rgba(255,255,255,0.02)}
+  .trow.head .tc{font-family:var(--disp);font-weight:600;font-size:10px;letter-spacing:.06em;color:var(--ink-3);padding:6px 0;text-align:center;text-transform:uppercase}
+  .trow .pos{font-family:var(--disp);font-weight:700;font-size:12px;padding-left:11px;letter-spacing:.04em}
+  .trow .pos.qbc{color:var(--qb)} .trow .pos.rbc{color:var(--rb)} .trow .pos.wrc{color:var(--wr)} .trow .pos.tec{color:var(--te)} .trow .pos.flx{color:var(--te)}
+  .trow.flexrow{background:rgba(255,176,92,0.05)}
+  .tc{font-family:var(--mono);font-size:12.5px;font-weight:600;text-align:center;padding:8px 0;color:var(--ink)}
+  .tc.z{color:var(--ink-3);font-weight:500} .tc.hot{color:var(--red-hdr)}
+  .tc.tap{cursor:pointer}
+
+  /* my team roster rows */
+  .rrow{display:flex;align-items:center;gap:11px;padding:11px 12px;border:1px solid var(--hair);border-radius:10px;background:var(--bg-1);margin-top:7px}
+  .rrow:first-child{margin-top:0}
+  .rrow.open{border-color:rgba(95,168,224,0.32);background:linear-gradient(180deg,rgba(95,168,224,0.05),rgba(95,168,224,0.01))}
+  .rslot{font-family:var(--mono);font-weight:700;font-size:10px;letter-spacing:.04em;color:var(--ink-2);
+    width:44px;text-align:center;padding:4px 0;border:1px solid var(--hair);border-radius:6px;flex-shrink:0}
+  .rname{flex:1;font-family:var(--disp);font-weight:600;font-size:14px;color:var(--ink)}
+  .rname.o{color:var(--ink-3);font-weight:500;font-size:12.5px}
+  .rname.o em{color:var(--blue-br);font-style:normal}
+  .rprice{font-family:var(--mono);font-weight:700;font-size:14px;color:var(--ink)}
+  .rprice.o{color:var(--blue);font-size:12px;font-weight:600}
+
+  /* players list */
+  .search{display:flex;align-items:center;gap:8px;padding:10px 12px;border:1px solid var(--hair);border-radius:10px;background:var(--bg-1);margin-bottom:9px}
+  .search .mag{color:var(--ink-3);font-size:13px}
+  .search input{flex:1;background:none;border:none;outline:none;color:var(--ink);font-family:var(--ui);font-size:13px}
+  .search input::placeholder{color:var(--ink-3)}
+  .filters{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+  .fchip{font-family:var(--disp);font-weight:600;font-size:11px;letter-spacing:.04em;padding:5px 11px;border-radius:999px;
+    border:1px solid var(--hair);color:var(--ink-2);background:var(--bg-1)}
+  .fchip.on{color:#04121f;background:var(--blue);border-color:var(--blue)}
+  .plist-head{display:grid;grid-template-columns:26px 1fr 52px 48px 34px;gap:8px;padding:0 8px 6px;
+    font-family:var(--disp);font-weight:600;font-size:9.5px;letter-spacing:.06em;color:var(--ink-3);text-transform:uppercase}
+  .plist-head .r{text-align:right}
+  .prow{display:grid;grid-template-columns:26px 1fr 52px 48px 34px;gap:8px;align-items:center;
+    padding:9px 8px;border-top:1px solid var(--hair)}
+  .prow .rk{font-family:var(--mono);font-size:12px;color:var(--ink-3);font-weight:600}
+  .prow .pl{min-width:0}
+  .prow .pl .nm{font-family:var(--disp);font-weight:600;font-size:13.5px;color:var(--ink);line-height:1.1}
+  .prow .pl .tm{font-family:var(--mono);font-size:9.5px;color:var(--ink-3);margin-top:1px}
+  .prow .pl .tm .pc{font-weight:700}
+  .prow .pj{font-family:var(--mono);font-size:12.5px;font-weight:700;color:var(--ink);text-align:right}
+  .prow .vl{font-family:var(--mono);font-size:12.5px;font-weight:700;color:var(--blue-br);text-align:right}
+  .prow .fv{text-align:center;color:var(--ink-3);font-size:14px}
+  .prow .fv.on{color:var(--red-hdr)}
+
+  /* manual entry (planned, inert) */
+  .manual{margin:12px 16px 4px;border:1px dashed var(--hair-br);border-radius:11px;background:rgba(255,255,255,0.015);
+    padding:11px 13px;display:flex;align-items:center;gap:10px;opacity:.75}
+  .manual .ic{width:30px;height:30px;border-radius:8px;border:1px solid var(--hair);display:flex;align-items:center;justify-content:center;color:var(--ink-3);font-size:15px}
+  .manual .mt{font-family:var(--disp);font-weight:600;font-size:12.5px;color:var(--ink-2)}
+  .manual .ms{font-family:var(--mono);font-size:9.5px;color:var(--ink-3);letter-spacing:.04em;margin-top:2px}
+  .foot{padding:12px 16px 2px;font-size:9.5px;color:var(--ink-3);line-height:1.5;font-family:var(--mono);text-align:center}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="scroll">
+
+    <!-- STATUS -->
+    <div class="status">
+      <div class="live"><span class="dot"></span>
+        <div><div class="lbl">LIVE</div><div class="sub">R3 · PICK 27</div></div>
+      </div>
+      <div class="budget"><div class="n">$69</div><div class="c">LEFT · 10 OPEN · CAP $12</div></div>
+    </div>
+
+    <!-- STRATEGY SWITCHER -->
+    <div class="stratwrap">
+      <div class="stratlab">Strategy · ranked from your research</div>
+      <div class="stratsel">
+        <select>
+          <option>Hero RB &nbsp;— #1</option>
+          <option>Robust RB &nbsp;— #2</option>
+          <option>Balanced / Best Value &nbsp;— #3</option>
+          <option>Anchor WR &nbsp;— #4</option>
+          <option>Zero RB &nbsp;— #5</option>
+        </select>
+        <span class="cav">▼</span>
+      </div>
+    </div>
+
+    <!-- ON THE BLOCK (compact) -->
+    <div class="block">
+      <div class="block-top">
+        <span class="poschip">RB</span>
+        <span class="eyebrow">On The Block</span>
+        <span class="spacer"></span>
+        <span class="star" title="Targeted">★</span>
+      </div>
+      <div class="block-name">Kyren Williams</div>
+      <div class="block-meta">LAR · BYE 6 · RB6 · PROJ 262 · VONA +41</div>
+
+      <div class="range">
+        <div class="range-head">
+          <span class="bidk">Bid Up To</span>
+          <span class="bidv">$34<small> max</small></span>
+        </div>
+        <div class="track">
+          <div class="fill" style="width:33%"></div>
+          <div class="mkt" style="left:83%"><span class="mkt-lab">MKT $40</span></div>
+          <div class="bidmark" style="left:33%"></div>
+        </div>
+        <div class="range-ends">
+          <span class="lo">LOW <b>$30</b></span>
+          <span class="hi"><b>$42</b> HIGH</span>
+        </div>
+        <span class="steal">$6 UNDER MARKET · VALUE</span>
+      </div>
+    </div>
+
+    <!-- READ (collapsible) -->
+    <details open>
+      <summary>
+        <span class="sum-l"><span class="sum-t blue">Read</span><span class="read-conf">78%</span></span>
+        <span class="chev">▲</span>
+      </summary>
+      <div class="body">
+        <p class="read-p">You hold <b>$69</b> with <b>3 FLEX + a WR</b> to fill. Winning Kyren at <b>$34</b> locks a second every-down back into FLEX and still leaves <b>$35</b> for a WR1 swing. Past <b>$38</b> you starve the receiver room — hold the line.</p>
+      </div>
+    </details>
+
+    <!-- TIERS (collapsible) -->
+    <details open>
+      <summary>
+        <span class="sum-l"><span class="sum-t">Tiers Remaining</span><span class="sum-meta">tap a cell</span></span>
+        <span class="chev">▲</span>
+      </summary>
+      <div class="body">
+        <div class="tgrid">
+          <div class="trow head"><span class="tc" style="text-align:left;padding-left:11px"></span><span class="tc">T1</span><span class="tc">T2</span><span class="tc">T3</span><span class="tc">T4</span><span class="tc">T5</span></div>
+          <div class="trow"><span class="pos qbc">QB</span><span class="tc z">0</span><span class="tc tap">2</span><span class="tc tap">4</span><span class="tc tap">7</span><span class="tc tap">9</span></div>
+          <div class="trow"><span class="pos rbc">RB</span><span class="tc z">0</span><span class="tc hot tap">1</span><span class="tc tap">3</span><span class="tc tap">6</span><span class="tc tap">10</span></div>
+          <div class="trow"><span class="pos wrc">WR</span><span class="tc tap">2</span><span class="tc tap">5</span><span class="tc tap">8</span><span class="tc tap">11</span><span class="tc tap">14</span></div>
+          <div class="trow"><span class="pos tec">TE</span><span class="tc z">0</span><span class="tc tap">1</span><span class="tc tap">3</span><span class="tc tap">5</span><span class="tc tap">8</span></div>
+          <div class="trow flexrow"><span class="pos flx">FLEX</span><span class="tc tap">4</span><span class="tc tap">11</span><span class="tc tap">19</span><span class="tc tap">22</span><span class="tc tap">32</span></div>
+        </div>
+      </div>
+    </details>
+
+    <!-- MY TEAM (collapsible, roster-progress style) -->
+    <details open>
+      <summary>
+        <span class="sum-l"><span class="sum-t">My Team</span><span class="sum-meta">3 / 13 filled</span></span>
+        <span class="chev">▲</span>
+      </summary>
+      <div class="body">
+        <div class="rrow"><span class="rslot">QB1</span><span class="rname">Josh Allen</span><span class="rprice">$40</span></div>
+        <div class="rrow"><span class="rslot">RB1</span><span class="rname">Bijan Robinson</span><span class="rprice">$58</span></div>
+        <div class="rrow"><span class="rslot">WR1</span><span class="rname o">(Open) — <em>target elite WR</em></span><span class="rprice o">~$44</span></div>
+        <div class="rrow"><span class="rslot">TE1</span><span class="rname">Brock Bowers</span><span class="rprice">$33</span></div>
+        <div class="rrow open"><span class="rslot">FLEX1</span><span class="rname o">(Open) — <em>RB on the block</em></span><span class="rprice o">~$34</span></div>
+        <div class="rrow"><span class="rslot">FLEX2</span><span class="rname o">(Open)</span><span class="rprice o">—</span></div>
+        <div class="rrow"><span class="rslot">FLEX3</span><span class="rname o">(Open)</span><span class="rprice o">—</span></div>
+        <div class="rrow"><span class="rslot">DEF1</span><span class="rname o">(Open)</span><span class="rprice o">$1</span></div>
+        <div class="rrow"><span class="rslot">BN×5</span><span class="rname o">(Open) — <em>5 bench</em></span><span class="rprice o">—</span></div>
+      </div>
+    </details>
+
+    <!-- PLAYERS LIST (collapsible) -->
+    <details open>
+      <summary>
+        <span class="sum-l"><span class="sum-t">Players</span><span class="sum-meta">sort · filter · star</span></span>
+        <span class="chev">▲</span>
+      </summary>
+      <div class="body">
+        <div class="search"><span class="mag">⌕</span><input placeholder="Search players..." disabled></div>
+        <div class="filters">
+          <span class="fchip on">ALL</span><span class="fchip">QB</span><span class="fchip">RB</span><span class="fchip">WR</span><span class="fchip">TE</span><span class="fchip">DEF</span>
+        </div>
+        <div class="plist-head"><span>Rk</span><span>Player</span><span class="r">Proj</span><span class="r">Value</span><span>Fav</span></div>
+        <div class="prow"><span class="rk">1</span><span class="pl"><div class="nm">Christian McCaffrey</div><div class="tm"><span class="pc" style="color:var(--rb)">RB</span> · CAR</div></span><span class="pj">248</span><span class="vl">$61</span><span class="fv on">★</span></div>
+        <div class="prow"><span class="rk">2</span><span class="pl"><div class="nm">Saquon Barkley</div><div class="tm"><span class="pc" style="color:var(--rb)">RB</span> · PHI</div></span><span class="pj">236</span><span class="vl">$58</span><span class="fv">☆</span></div>
+        <div class="prow"><span class="rk">3</span><span class="pl"><div class="nm">CeeDee Lamb</div><div class="tm"><span class="pc" style="color:var(--wr)">WR</span> · DAL</div></span><span class="pj">214</span><span class="vl">$54</span><span class="fv on">★</span></div>
+        <div class="prow"><span class="rk">4</span><span class="pl"><div class="nm">Ja'Marr Chase</div><div class="tm"><span class="pc" style="color:var(--wr)">WR</span> · CIN</div></span><span class="pj">208</span><span class="vl">$52</span><span class="fv">☆</span></div>
+        <div class="prow"><span class="rk">5</span><span class="pl"><div class="nm">Jahmyr Gibbs</div><div class="tm"><span class="pc" style="color:var(--rb)">RB</span> · DET</div></span><span class="pj">198</span><span class="vl">$46</span><span class="fv">☆</span></div>
+      </div>
+    </details>
+
+    <!-- MANUAL ENTRY (planned, not built) -->
+    <div class="manual">
+      <span class="ic">⤢</span>
+      <div><div class="mt">Manual entry</div><div class="ms">PLANNED · SLIDE-OUT FALLBACK IF FEED DROPS</div></div>
+    </div>
+
+    <div class="foot">SHIELD tokens · red = your action / the moment only · sample data · D6 direction v2</div>
+  </div>
+</div>
+</body>
+</html>

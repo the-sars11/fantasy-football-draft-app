@@ -30,6 +30,7 @@ import type {
 import {
   loadDraftStateCache,
   saveDraftStateCache,
+  clearDraftCache,
   resolveInitialDraftState,
 } from '@/lib/draft/offline-cache'
 import type { DraftFormat, RosterSlots, DraftSession } from '@/lib/supabase/database.types'
@@ -109,9 +110,22 @@ export function useDraftState({
           manager: p.manager,
           price: p.price,
           round: p.round,
-          position: undefined,
+          position: p.position, // honored when the feed/fixture supplies it
         })
       }
+    }
+
+    // UX-7.3: the sim demo ('demo' session) must boot deterministically from the
+    // seeded mid-draft fixture every time. A prior sim run persists its (often
+    // completed) draft to the local state cache under 'demo'; without this guard
+    // resolveInitialDraftState would replay that stale completed draft over the
+    // seed and leave only $1 scrubs on the board. Clear the demo cache and use
+    // the freshly-replayed seed.
+    if (session.id === 'demo') {
+      clearDraftCache(session.id)
+      setState(initial)
+      setSyncStatus('synced')
+      return
     }
 
     // R11a: decide whether the server-replayed state or the local offline

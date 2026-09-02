@@ -34,13 +34,13 @@ export function StrategyProposalCard({ proposal, format, onSelect, isSelected }:
 
   return (
     <div
-      className="ffi-card"
+      className="ffi-nameplate p-4"
       style={isSelected ? { borderColor: 'var(--ffi-volt)', boxShadow: '0 0 0 1px var(--ffi-volt), 0 0 22px rgba(139,255,69,0.18)' } : undefined}
     >
       <div className="flex items-start justify-between gap-2 mb-3">
         <div className="space-y-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap ffi-title-md" style={{ color: 'var(--ffi-ink)' }}>
-            {proposal.name}
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="ffi-title-chrome text-base">{proposal.name}</span>
             <span className="ffi-badge" style={RISK_STYLES[proposal.risk_tolerance]}>
               {proposal.risk_tolerance}
             </span>

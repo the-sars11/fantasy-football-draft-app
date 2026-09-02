@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Kanit, Hanken_Grotesk, JetBrains_Mono, Oswald } from 'next/font/google'
+import { Kanit, Hanken_Grotesk, JetBrains_Mono, Oswald, Anton, Saira, Saira_Condensed } from 'next/font/google'
 import { ThemeProvider } from '@/components/theme-provider'
 import './globals.css'
 
@@ -45,6 +45,31 @@ const oswald = Oswald({
   display: 'swap',
 })
 
+// ARMOR LIVE type system -- the exact families the board-live mockup was
+// designed in. Loaded under their own vars and consumed only inside `.ffi-live`
+// (the armor live room) via --disp/--cond/--body, so the rest of the app keeps
+// its current Kanit/Hanken type until the armor identity is scaled out.
+const antonReal = Anton({
+  variable: '--font-anton-real',
+  subsets: ['latin'],
+  weight: ['400'],
+  display: 'swap',
+})
+
+const sairaReal = Saira({
+  variable: '--font-saira-real',
+  subsets: ['latin'],
+  weight: ['400', '500', '600'],
+  display: 'swap',
+})
+
+const sairaCondReal = Saira_Condensed({
+  variable: '--font-saira-cond-real',
+  subsets: ['latin'],
+  weight: ['500', '600', '700'],
+  display: 'swap',
+})
+
 export const metadata: Metadata = {
   title: 'FFI Gridiron',
   description: 'AI-powered fantasy football draft intelligence',
@@ -79,7 +104,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`dark ${anton.variable} ${saira.variable} ${sairaCondensed.variable} ${jetbrainsMono.variable} ${oswald.variable} h-full antialiased`}
+      className={`dark ${anton.variable} ${saira.variable} ${sairaCondensed.variable} ${jetbrainsMono.variable} ${oswald.variable} ${antonReal.variable} ${sairaReal.variable} ${sairaCondReal.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col">

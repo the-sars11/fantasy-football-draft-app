@@ -1,0 +1,408 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Live Value Board</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@500;600;700&family=JetBrains+Mono:wght@500;600;700&family=Inter:wght@400;500;600&display=swap">
+<style>
+  :root{
+    /* Exact live-room ROOM tokens (src/components/draft/live-room/theme.ts) */
+    --bg:#060c14; --surface:#09121d; --card:#0d1a27; --cardEl:#132234;
+    --border:rgba(255,255,255,0.07); --border2:rgba(255,255,255,0.04);
+    --t1:#edf4fb; --t2:#7a98b4; --t3:#3d5a73;
+    --blue:#5FA8E0; --blue10:rgba(95,168,224,0.10); --blue20:rgba(95,168,224,0.20); --blue45:rgba(95,168,224,0.45);
+    --action:#A63C41; --action10:rgba(166,60,65,0.10); --action20:rgba(166,60,65,0.20);
+    --amber:#FFB05C; --amber10:rgba(255,176,92,0.10); --amber25:rgba(255,176,92,0.25);
+    --muted:#5E708A; --muted10:rgba(94,112,138,0.10); --muted25:rgba(94,112,138,0.25);
+    --danger:#FF6E8A; --danger10:rgba(255,110,138,0.10); --danger25:rgba(255,110,138,0.25);
+    --qb:#16a34a; --rb:#dc2626; --wr:#2563eb; --te:#9333ea; --def:#6b7280;
+    --head:'Saira Condensed',system-ui,sans-serif;
+    --mono:'JetBrains Mono',ui-monospace,monospace;
+    --body:'Inter',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#02060b;color:var(--t1);font-family:var(--body);
+    -webkit-font-smoothing:antialiased;padding:28px 14px 60px;}
+  .wrap{max-width:940px;margin:0 auto;}
+
+  /* ---- explainer header ---- */
+  .lede{max-width:620px;margin:0 auto 26px;text-align:center;}
+  .lede .kick{font-family:var(--head);font-weight:600;font-size:11px;letter-spacing:3px;
+    text-transform:uppercase;color:var(--blue);margin-bottom:8px;}
+  .lede h1{font-family:var(--head);font-weight:700;font-size:30px;letter-spacing:.3px;
+    line-height:1.05;color:var(--t1);text-wrap:balance;}
+  .lede p{font-size:13.5px;line-height:1.6;color:var(--t2);margin-top:11px;}
+  .lede .ref{font-size:11.5px;color:var(--t3);margin-top:10px;font-family:var(--mono);}
+
+  .stage{display:grid;grid-template-columns:minmax(0,392px) minmax(0,1fr);gap:34px;
+    align-items:start;justify-content:center;}
+  @media(max-width:780px){.stage{grid-template-columns:1fr;max-width:392px;margin:0 auto;gap:26px}}
+
+  /* ---- phone ---- */
+  .phone{background:var(--bg);border:1px solid var(--border);border-radius:26px;
+    overflow:hidden;box-shadow:0 24px 70px rgba(0,0,0,.6);}
+  .screen{padding:12px 12px 20px;}
+
+  .mono{font-family:var(--mono)} .head{font-family:var(--head)}
+
+  /* status bar */
+  .status{display:flex;align-items:center;gap:9px;padding:9px 11px 10px;}
+  .live{display:inline-flex;align-items:center;gap:6px;font-family:var(--head);font-weight:700;
+    font-size:11px;letter-spacing:1.5px;color:var(--blue);
+    background:var(--blue10);border:1px solid var(--blue20);border-radius:999px;padding:3px 9px;}
+  .live .dot{width:6px;height:6px;border-radius:50%;background:var(--blue);
+    box-shadow:0 0 8px var(--blue);animation:pulse 1.8s infinite;}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+  .pick{font-family:var(--mono);font-size:11px;color:var(--t3);letter-spacing:.5px}
+  .budget{margin-left:auto;text-align:right;line-height:1}
+  .budget .n{font-family:var(--mono);font-weight:700;font-size:22px;color:var(--blue)}
+  .budget .l{font-family:var(--head);font-size:8.5px;letter-spacing:1.5px;color:var(--t3);
+    text-transform:uppercase;display:block;margin-top:2px}
+  .maxbid{text-align:right;line-height:1;padding-left:11px;margin-left:2px;border-left:1px solid var(--border)}
+  .maxbid .n{font-family:var(--mono);font-weight:700;font-size:15px;color:var(--t2)}
+  .subline{display:flex;gap:8px;padding:0 11px 4px;font-family:var(--mono);font-size:9.5px;color:var(--t3)}
+
+  /* section label */
+  .slab{font-family:var(--head);font-weight:600;font-size:10px;letter-spacing:2.4px;
+    text-transform:uppercase;color:var(--t3);padding:14px 6px 7px;display:flex;align-items:center;gap:8px}
+  .slab .newtag{font-family:var(--head);font-weight:700;font-size:8px;letter-spacing:1px;
+    color:var(--bg);background:var(--blue);border-radius:3px;padding:1px 5px;}
+
+  /* MARKET PULSE strip (new) */
+  .pulse{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:11px 12px 12px}
+  .pulse .row{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:9px}
+  .pchip{display:flex;align-items:center;gap:5px;border-radius:8px;padding:5px 8px 4px;
+    font-family:var(--mono);font-weight:700;font-size:12px;border:1px solid var(--border)}
+  .pchip b{font-family:var(--head);font-size:11px;letter-spacing:.5px;font-weight:700}
+  .pchip.hot{background:var(--amber10);border-color:var(--amber25);color:var(--amber)}
+  .pchip.soft{background:var(--blue10);border-color:var(--blue20);color:var(--blue)}
+  .pchip.flat{background:var(--muted10);border-color:var(--muted25);color:var(--muted)}
+  .pulse .read{font-size:12px;line-height:1.5;color:var(--t2)}
+  .pulse .read b{color:var(--t1);font-weight:600}
+  .pulse .read .up{color:var(--blue);font-weight:600}
+
+  /* ON THE BLOCK card (evolves on-the-block-card.tsx) */
+  .otb{position:relative;overflow:hidden;border-radius:16px;
+    background:linear-gradient(160deg,rgba(34,49,71,.2),#141d2c 70%);
+    border:1px solid var(--border);box-shadow:0 8px 24px rgba(0,0,0,.36),inset 3px 0 0 var(--action)}
+  .otb .top{display:flex;align-items:center;gap:9px;padding:10px 12px 7px}
+  .poschip{flex:none;border-radius:5px;padding:3px 6px;font-family:var(--head);font-weight:700;
+    font-size:10px;letter-spacing:.5px}
+  .eyebrow{flex:1;font-family:var(--head);font-weight:600;font-size:10.5px;letter-spacing:1.6px;
+    text-transform:uppercase;color:var(--action)}
+  .otb .body{padding:0 12px 12px}
+  .otb .name{font-family:var(--head);font-weight:700;font-size:22px;line-height:1.05;color:var(--t1)}
+  .otb .meta{font-family:var(--mono);font-size:10px;letter-spacing:.3px;color:var(--t2);margin-top:3px}
+
+  /* market band */
+  .band{margin-top:11px;background:rgba(5,7,12,.6);border:1px solid var(--border);
+    border-radius:11px;padding:11px 13px 12px}
+  .band .brow{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:2px}
+  .band .blab{font-family:var(--head);font-weight:700;font-size:9px;letter-spacing:1.5px;
+    text-transform:uppercase;color:var(--t3)}
+  .band .price{font-family:var(--mono);font-weight:700;font-size:22px;color:var(--action);line-height:1}
+  .band .price small{font-size:11px;color:var(--t3);font-weight:600}
+  .track{position:relative;height:12px;border-radius:6px;margin:26px 2px 20px;
+    background:repeating-linear-gradient(90deg,transparent,transparent 6px,rgba(255,255,255,.03) 6px,rgba(255,255,255,.03) 7px),linear-gradient(90deg,#0e1622,#182338)}
+  .region{position:absolute;top:0;bottom:0;border-radius:5px;
+    background:linear-gradient(180deg,rgba(95,168,224,.34),rgba(95,168,224,.16));border:1px solid rgba(95,168,224,.5)}
+  .region .lo,.region .hi{position:absolute;top:15px;font-family:var(--mono);font-size:9px;color:var(--blue)}
+  .region .lo{left:0;transform:translateX(-50%)} .region .hi{right:0;transform:translateX(50%)}
+  .marker{position:absolute;top:-4px;bottom:-4px;width:3px;border-radius:2px;background:var(--action);
+    box-shadow:0 0 10px rgba(166,60,65,.32);transform:translateX(-50%)}
+  .marker .lb{position:absolute;top:-15px;left:50%;transform:translateX(-50%);white-space:nowrap;
+    font-family:var(--mono);font-weight:700;font-size:8px;letter-spacing:.6px;color:var(--action)}
+  .shift{margin-top:14px;font-size:11px;line-height:1.5;color:var(--t2)}
+  .shift b{color:var(--t1)} .shift .up{color:var(--blue);font-weight:600}
+
+  /* the read */
+  .read{margin-top:10px;border-radius:10px;padding:10px 12px;background:var(--action10);border:1px solid var(--action20)}
+  .read .rtop{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+  .read .rl{font-family:var(--head);font-weight:700;font-size:8.5px;letter-spacing:2.5px;
+    text-transform:uppercase;color:var(--blue)}
+  .conf{border-radius:999px;padding:2px 8px;font-family:var(--mono);font-weight:700;font-size:10px;
+    background:var(--blue10);border:1px solid var(--blue20);color:var(--blue)}
+  .verdict{margin-left:auto;font-family:var(--head);font-weight:700;font-size:15px;letter-spacing:.5px;color:var(--action)}
+  .read p{font-size:12.5px;line-height:1.5;color:var(--t1)}
+
+  /* VALUE BOARD list - one scannable line per row */
+  .vhead{display:flex;align-items:center;justify-content:space-between;padding:2px 12px 7px;
+    font-family:var(--head);font-weight:600;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--t3)}
+  .vrow{display:grid;grid-template-columns:16px 1fr auto;gap:11px;align-items:center;
+    padding:11px 12px;border-radius:12px;margin-bottom:6px;background:var(--surface);border:1px solid transparent}
+  .vrow.pocket{box-shadow:inset 2.5px 0 0 var(--blue)}
+  .vrow.mine{background:var(--blue10)}
+  .vrow.gone{opacity:.38}
+  .vrk{font-family:var(--mono);font-size:12px;color:var(--t3);text-align:center}
+  .vname{min-width:0}
+  .vname .nm{font-family:var(--head);font-weight:700;font-size:16px;line-height:1.05;color:var(--t1);
+    display:flex;align-items:center;gap:7px}
+  .vrow.gone .nm{color:var(--t2);text-decoration:line-through;text-decoration-color:var(--muted)}
+  .vmeta{font-family:var(--mono);font-size:10px;margin-top:3px;color:var(--t3)}
+  .flag{flex:none;font-family:var(--head);font-weight:700;font-size:8px;letter-spacing:.5px;
+    border-radius:3px;padding:1px 4px;text-transform:uppercase}
+  .flag.fragile{background:var(--amber10);color:var(--amber)}
+  .flag.out{background:var(--danger10);color:var(--danger)}
+  /* right value cluster */
+  .vval{display:flex;align-items:center;gap:9px}
+  .vchip{flex:none;font-family:var(--mono);font-weight:700;font-size:11px;border-radius:5px;padding:2px 6px;white-space:nowrap}
+  .vchip.up{background:var(--blue10);color:var(--blue)}
+  .vchip.tax{background:var(--muted10);color:var(--muted)}
+  .vprice{text-align:right;min-width:40px}
+  .vprice .you{font-family:var(--mono);font-weight:700;font-size:17px;color:var(--blue);line-height:1;display:block}
+  .vprice .room{font-family:var(--mono);font-size:9.5px;color:var(--t3);margin-top:3px;display:block;white-space:nowrap}
+  .vprice .room .dn{color:var(--blue)} .vprice .room .up{color:var(--amber)}
+  .vtag{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--blue)}
+  .vtag.gone{color:var(--muted);font-weight:600}
+
+  /* dollar bin */
+  .bin{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:6px 4px 8px}
+  .binrow{display:grid;grid-template-columns:22px 1fr auto;gap:9px;align-items:center;padding:8px 9px;border-top:1px solid var(--border2)}
+  .binrow:first-of-type{border-top:none}
+  .binrow .st{font-size:14px;color:var(--blue);text-align:center}
+  .binrow .st.off{color:var(--t3)}
+  .binrow .nm{font-family:var(--head);font-weight:700;font-size:14px;color:var(--t1);line-height:1.1}
+  .binrow .wy{font-family:var(--mono);font-size:9.5px;color:var(--t3);margin-top:2px}
+  .binrow .pr{font-family:var(--mono);font-weight:700;font-size:13px;color:var(--blue);white-space:nowrap}
+  .binrow .pr small{font-size:9px;color:var(--t3);font-weight:600}
+  .binnote{font-size:11px;line-height:1.5;color:var(--t2);padding:9px 10px 4px}
+  .binnote b{color:var(--t1)}
+
+  /* legend */
+  .legend{margin-top:12px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 13px}
+  .legend h4{font-family:var(--head);font-weight:600;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--t3);margin-bottom:9px}
+  .lg{display:flex;gap:9px;align-items:flex-start;margin-bottom:9px;font-size:11.5px;line-height:1.45;color:var(--t2)}
+  .lg:last-child{margin-bottom:0}
+  .lg .tag{flex:none;margin-top:1px}
+  .lg b{color:var(--t1);font-weight:600}
+
+  /* right rail spec */
+  .spec{font-size:13px;line-height:1.62;color:var(--t2)}
+  .spec h3{font-family:var(--head);font-weight:700;font-size:15px;letter-spacing:.3px;color:var(--t1);
+    margin:20px 0 9px;padding-bottom:7px;border-bottom:1px solid var(--border)}
+  .spec h3:first-child{margin-top:0}
+  .spec .item{display:flex;gap:10px;margin-bottom:11px}
+  .spec .num{flex:none;font-family:var(--mono);font-weight:700;font-size:11px;color:var(--blue);
+    width:20px;height:20px;border-radius:5px;background:var(--blue10);border:1px solid var(--blue20);
+    display:grid;place-items:center;margin-top:1px}
+  .spec .item b{color:var(--t1);font-weight:600}
+  .spec .note{font-size:11.5px;color:var(--t3);font-style:italic;margin-top:14px;padding-top:12px;border-top:1px solid var(--border)}
+</style>
+
+<div class="wrap">
+  <div class="lede">
+    <div class="kick">Nasties Live Draft &nbsp;/&nbsp; Design Direction</div>
+    <h1>The Live Value Board</h1>
+    <p>One screen that reprices every player in real time off two things: what the room is actually paying (the auctioneer feed) and what your roster still needs. No strategy banner. The board is the strategy, in the moment.</p>
+    <div class="ref">reference screen: draft / live cockpit &nbsp;·&nbsp; same SHIELD tokens, evolved</div>
+  </div>
+
+  <div class="stage">
+
+    <!-- ============ PHONE ============ -->
+    <div class="phone">
+      <div class="screen">
+
+        <!-- status bar -->
+        <div class="status">
+          <span class="live"><span class="dot"></span>LIVE</span>
+          <span class="pick">PICK 47 &middot; 22 rostered</span>
+          <div class="budget"><span class="n">$132</span><span class="l">budget</span></div>
+          <div class="maxbid"><span class="n">$54</span><span class="l" style="display:block;font-family:var(--head);font-size:8.5px;letter-spacing:1.5px;color:var(--t3);text-transform:uppercase;margin-top:2px">max bid</span></div>
+        </div>
+        <div class="subline"><span>9 open</span><span>&middot;</span><span>needs WR WR RB FLEX</span></div>
+
+        <!-- MARKET PULSE -->
+        <div class="slab">Market Pulse <span class="newtag">NEW</span></div>
+        <div class="pulse">
+          <div class="row">
+            <span class="pchip hot"><b>RB</b> +14% &#9650;</span>
+            <span class="pchip soft"><b>WR</b> -9% &#9660;</span>
+            <span class="pchip flat"><b>TE</b> +2%</span>
+            <span class="pchip flat"><b>QB</b> flat</span>
+          </div>
+          <div class="read">The room is <b>overpaying RB</b> and letting <b>WR go cheap</b>. <span class="up">Push your dollars to WR value now</span> - every RB target below has been repriced up, every WR down.</div>
+        </div>
+
+        <!-- ON THE BLOCK -->
+        <div class="slab">On The Block</div>
+        <div class="otb">
+          <div class="top">
+            <span class="poschip" style="background:rgba(37,99,235,.16);color:var(--wr)">WR</span>
+            <span class="eyebrow">On The Block</span>
+            <span class="mono" style="font-weight:700;font-size:14px;color:var(--action)">$21<small style="font-size:9px;color:var(--t3)"> tgt</small></span>
+          </div>
+          <div class="body">
+            <div class="name">Jaylen Waddle</div>
+            <div class="meta">MIA &middot; WR14 &middot; TIER 3 &middot; BYE 6</div>
+
+            <!-- market band -->
+            <div class="band">
+              <div class="brow">
+                <span class="blab">Your target price</span>
+                <span class="price">$21<small>&nbsp;max</small></span>
+              </div>
+              <div class="track">
+                <div class="region" style="left:34%;width:30%"><span class="lo">$16</span><span class="hi">$24</span></div>
+                <div class="marker" style="left:52%"><span class="lb">YOUR TARGET</span></div>
+              </div>
+              <div class="shift">Baseline target was <b>$17</b>. <span class="up">Bumped to $21 for you</span> - WR is running cheap and you still need two.</div>
+            </div>
+
+            <!-- the read -->
+            <div class="read">
+              <div class="rtop">
+                <span class="rl">The Read</span>
+                <span class="conf">CONF &middot; HIGH</span>
+                <span class="verdict">BID</span>
+              </div>
+              <p>Worth ~$25 to you, room is at $18 and soft. This is $4 under his live value and fills a need. Take him up to $21.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- VALUE BOARD -->
+        <div class="slab">Value Board</div>
+        <div class="vhead"><span>Player</span><span>You &middot; Room</span></div>
+
+        <!-- pocket WR -->
+        <div class="vrow pocket">
+          <span class="vrk" style="color:var(--blue)">18</span>
+          <div class="vname">
+            <div class="nm">DeVonta Smith</div>
+            <div class="vmeta">WR19 &middot; PHI</div>
+          </div>
+          <div class="vval">
+            <span class="vchip up">+$5</span>
+            <span class="vprice"><span class="you">$21</span><span class="room">room 16 <span class="dn">&#9660;</span></span></span>
+          </div>
+        </div>
+
+        <!-- WR need shift -->
+        <div class="vrow pocket">
+          <span class="vrk" style="color:var(--blue)">24</span>
+          <div class="vname">
+            <div class="nm">Jameson Williams</div>
+            <div class="vmeta">WR23 &middot; DET &middot; your need</div>
+          </div>
+          <div class="vval">
+            <span class="vchip up">+$4</span>
+            <span class="vprice"><span class="you">$17</span><span class="room">room 13 <span class="dn">&#9660;</span></span></span>
+          </div>
+        </div>
+
+        <!-- hot RB tax -->
+        <div class="vrow">
+          <span class="vrk">12</span>
+          <div class="vname">
+            <div class="nm">Kenneth Walker</div>
+            <div class="vmeta">RB11 &middot; SEA</div>
+          </div>
+          <div class="vval">
+            <span class="vchip tax">tax</span>
+            <span class="vprice"><span class="you">$26</span><span class="room">room 34 <span class="up">&#9650;</span></span></span>
+          </div>
+        </div>
+
+        <!-- FRAGILE RB, still a target -->
+        <div class="vrow">
+          <span class="vrk">9</span>
+          <div class="vname">
+            <div class="nm">De'Von Achane <span class="flag fragile">fragile</span></div>
+            <div class="vmeta">RB8 &middot; MIA</div>
+          </div>
+          <div class="vval">
+            <span class="vprice"><span class="you">$38</span><span class="room">room 41 <span class="up">&#9650;</span></span></span>
+          </div>
+        </div>
+
+        <!-- OUT NOW -->
+        <div class="vrow">
+          <span class="vrk">31</span>
+          <div class="vname">
+            <div class="nm">Brandon Aiyuk <span class="flag out">out</span></div>
+            <div class="vmeta">WR34 &middot; SF &middot; PUP</div>
+          </div>
+          <div class="vval">
+            <span class="vprice"><span class="you">$3</span><span class="room">late stash</span></span>
+          </div>
+        </div>
+
+        <!-- MINE -->
+        <div class="vrow mine">
+          <span class="vrk" style="color:var(--blue)">&#10003;</span>
+          <div class="vname">
+            <div class="nm">Bijan Robinson</div>
+            <div class="vmeta" style="color:var(--blue)">RB &middot; ATL &middot; yours</div>
+          </div>
+          <span class="vtag">$58</span>
+        </div>
+
+        <!-- GONE -->
+        <div class="vrow gone">
+          <span class="vrk">6</span>
+          <div class="vname">
+            <div class="nm">Malik Nabers</div>
+            <div class="vmeta">WR4 &middot; NYG</div>
+          </div>
+          <span class="vtag gone">Grigg $47</span>
+        </div>
+
+        <!-- DOLLAR BIN -->
+        <div class="slab">Dollar Bin Watch <span class="newtag">NEW</span></div>
+        <div class="bin">
+          <div class="binrow">
+            <span class="st">&#9733;</span>
+            <div><div class="nm">Kyle Monangai</div><div class="wy">RB38 &middot; sleeper &middot; VORP+ if Swift misses</div></div>
+            <span class="pr">$1<small> to $3</small></span>
+          </div>
+          <div class="binrow">
+            <span class="st">&#9733;</span>
+            <div><div class="nm">Wan'Dale Robinson</div><div class="wy">WR39 &middot; PPR floor &middot; slot volume</div></div>
+            <span class="pr">$1<small> to $2</small></span>
+          </div>
+          <div class="binrow">
+            <span class="st off">&#9734;</span>
+            <div><div class="nm">Isaiah Likely</div><div class="wy">TE13 &middot; dart &middot; upside if Andrews fades</div></div>
+            <span class="pr">$1</span>
+          </div>
+          <div class="binrow">
+            <span class="st off">&#9734;</span>
+            <div><div class="nm">Blake Corum</div><div class="wy">RB37 &middot; handcuff &middot; standalone flex</div></div>
+            <span class="pr">$1</span>
+          </div>
+          <div class="binnote">Starred = <b>your watchlist</b>, pinned here so they surface the moment the draft hits the $1 bin. Below the line = the model's <b>darts more likely to beat a $1 to $3 tag</b> (sleeper or positive VORP), not random filler.</div>
+        </div>
+
+        <!-- LEGEND -->
+        <div class="legend">
+          <h4>Reading the flags</h4>
+          <div class="lg"><span class="tag flag fragile">FRAGILE</span><span><b>Injury-prone, but the price already reflects it.</b> Durability is baked into the range - not a reason to back off, just know the floor.</span></div>
+          <div class="lg"><span class="tag flag out">OUT</span><span><b>Unavailable right now</b> (IR, PUP, or ruled out). A real hit to this season - only a late stash, never a starter target.</span></div>
+          <div class="lg"><span class="tag" style="font-family:var(--mono);font-size:9.5px;color:var(--t3);border:1px dashed var(--muted25);border-radius:3px;padding:1px 5px">hidden</span><span><b>&ldquo;Questionable&rdquo; is not shown.</b> 97 players wear it in camp - it is noise, so the board stays quiet unless the hit is real.</span></div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ============ SPEC RAIL ============ -->
+    <div class="spec">
+      <h3>What changed, and why</h3>
+
+      <div class="item"><span class="num">1</span><span><b>Strategy banner is gone.</b> You said the pre-locked strategies all sit on top of each other. They do. This screen replaces the banner with a board that already reflects the winning move at this exact second.</span></div>
+
+      <div class="item"><span class="num">2</span><span><b>Live repricing off the room.</b> As the auctioneer feed reports sales, the model re-reads dollars-still-in-the-room against dollars-still-needed. If RB is going for a tax, every RB target ticks up (the &#9650;) and every WR ticks down (the &#9660;). That is the &ldquo;if the league overpays for RB, adjust&rdquo; ask, built in.</span></div>
+
+      <div class="item"><span class="num">3</span><span><b>Repricing off your roster too.</b> The <span style="color:var(--blue)">You</span> column is your target, not a generic one. A WR you still need gets a <span style="color:var(--blue)">+$ your need</span> bump the market does not see. Room is the field's price; You is yours.</span></div>
+
+      <div class="item"><span class="num">4</span><span><b>Value pockets surface themselves.</b> Blue-railed rows are live pockets - worth more to you than the room is paying. The &ldquo;+$5 pocket&rdquo; chip is the gap, recomputed every pick, so you see the opening the instant it opens.</span></div>
+
+      <div class="item"><span class="num">5</span><span><b>A real dollar-bin plan.</b> Star anyone during the draft and they hold at the top of the bin for when prices collapse. Under them, the model lists $1 to $3 darts that actually project to beat that price - not &ldquo;whoever is highest left.&rdquo;</span></div>
+
+      <div class="item"><span class="num">6</span><span><b>Two different injury truths, finally split.</b> <span style="color:var(--amber)">FRAGILE</span> = injury-prone but priced in (Achane, McCaffrey) - keep targeting. <span style="color:var(--danger)">OUT</span> = hurt right now, real availability hit. &ldquo;Questionable&rdquo; is silenced entirely.</span></div>
+
+      <div class="note">Mockup only - no live data wired yet. Numbers are illustrative to show the layout and the color language. Colors, tokens, and the on-the-block card are lifted straight from the current live cockpit so this reads as the same app, evolved. Say the word and I build the repricing engine behind it.</div>
+    </div>
+
+  </div>
+</div>
