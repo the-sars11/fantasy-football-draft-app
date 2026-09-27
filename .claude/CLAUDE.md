@@ -1,3 +1,5 @@
+@../AGENTS.md
+
 # CLAUDE.md — Fantasy Football Draft Advisor
 
 ## Project Overview

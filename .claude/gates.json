@@ -1,0 +1,11 @@
+{
+  "ban_scan": "C:\\Users\\jrasa\\AI Projects\\dev-workflow-builder\\skills\\ui-ux-review\\graders\\ban_scan.py",
+  "fast_tests": "npm run test:run",
+  "dash_exclude": [
+    "*.lock",
+    "package-lock.json",
+    "*.min.js",
+    "*.min.css"
+  ],
+  "secret_exclude": []
+}
