@@ -685,8 +685,8 @@ Screen → target: S1 research-hub `/research`; S2 player-browser (D4, already b
 
 | Model | Sessions |
 |-------|----------|
-| **Opus** (FRONTIER) | IA-1.0, IA-2.0, IA-4.0 |
-| **Sonnet** (WORKHORSE) | IA-0.1, IA-0.2, IA-1.1, IA-1.2, IA-1.3, IA-2.1, IA-2.1b, IA-2.1c, IA-2.2, IA-3.1 + every V-* validator |
+| **claude-deep** (Opus, FRONTIER) | IA-1.0, IA-2.0, IA-4.0 |
+| **claude-build** (Sonnet, WORKHORSE) | IA-0.1, IA-0.2, IA-1.1, IA-1.2, IA-1.3, IA-2.1, IA-2.1b, IA-2.1c, IA-2.2, IA-3.1 + every V-* validator |
 
 ### IA-0.1 -- Kill swipe carousel, restore scroll `[Sonnet]` · class: shared -- **[x] DONE 2026-08-24 (code green, gate PASS, awaiting V-0.1)**
 > - Class: WORKHORSE
@@ -733,7 +733,7 @@ Screen → target: S1 research-hub `/research`; S2 player-browser (D4, already b
 > 4. **De-flattened** with the app's own locked light-catch material (layered surface + inset bevel + box-shadow + hairline; NO blur) across rows, masthead, chips, expand, legend. POCKET blue rail preserved as a separate inset layer.
 > BOARD_SPEC amended (Revision R1 note at top + §2 col 7 + §3 Valuation + §6 tokens + §7 checklist). This card stays `[~]` until Joe types LOOK approval.
 
-### IA-1.1 -- BoardRow type + prep adapter (sort/filter/flags) + tests `[Sonnet]` · class: shared -- **[ ] NOT STARTED**
+### IA-1.1 -- BoardRow type + prep adapter (sort/filter/flags) + tests `[claude-build]` · class: shared -- **[ ] NOT STARTED**
 > - Class: WORKHORSE
 >   Reason: bounded data-layer build against the IA-1.0 contract; no UI, fully unit-testable.
 >   Verifier: OTHER_FAMILY (V-1.1) -- see VAP.
@@ -742,7 +742,7 @@ Screen → target: S1 research-hub `/research`; S2 player-browser (D4, already b
 > **Done-when:** new unit tests prove -- ALL-view sort is Target desc; FLEX filter returns exactly RB/WR/TE; dollar flag set for a known dollar-bin fixture; value flag = POCKET rule; star/target flag plumbed. Paste count + new test names; A1-A10 pass.
 > **V-1.1 done-when:** run the suite itself; feed a fixture through the adapter, assert sort order + FLEX membership + flags from the raw output. PASS/FAIL table.
 
-### IA-1.2 -- Board list + collapsed row; wire as Board tab; retire old routes; rename nav `[Sonnet]` · class: output -- **[ ] NOT STARTED**
+### IA-1.2 -- Board list + collapsed row; wire as Board tab; retire old routes; rename nav `[claude-build]` · class: output -- **[ ] NOT STARTED**
 > - Class: WORKHORSE
 >   Reason: bounded UI build against the approved IA-1.0 mockup; zero open judgment once signed off.
 >   Verifier: OTHER_FAMILY (V-1.2) -- see VAP.
@@ -751,7 +751,7 @@ Screen → target: S1 research-hub `/research`; S2 player-browser (D4, already b
 > **Done-when:** on the real Board route at 390px -- list scrolls to the last row (measured); tapping a position chip incl FLEX filters (element count before/after); tapping the star toggles target state WITHOUT expanding (DOM proof); matches the IA-1.0 mockup; old routes redirect; no dead nav links; A1-A10 pass.
 > **V-1.2 done-when:** real route, no sim -- measure scroll, chip filter counts, star toggle DOM, redirect of old routes, nav labels; screenshot backed by the measured assertions. PASS/FAIL table.
 
-### IA-1.3 -- Compact expand (BoardRowDetail) `[Sonnet]` · class: output -- **[ ] NOT STARTED**
+### IA-1.3 -- Compact expand (BoardRowDetail) `[claude-build]` · class: output -- **[ ] NOT STARTED**
 > - Class: WORKHORSE
 >   Reason: bounded UI build against the IA-1.0 expand spec.
 >   Verifier: OTHER_FAMILY (V-1.3) -- see VAP.
@@ -760,7 +760,7 @@ Screen → target: S1 research-hub `/research`; S2 player-browser (D4, already b
 > **Done-when:** on the real route, expanded height is bounded (paste measured px, <=300px); the gauge renders with the room notch + glowing target marker + green steal zone (DOM: assert `.mk.tgt` and `.steal` exist; target marker `left:%` within the band; every `.scale .cap` right edge `<=` the gauge right edge, i.e. no caption clipped); **no `.howcalc`/"How this is calculated" element exists and no market/base number is rendered (assert both = 0)**; constraints hold (no ALL-CAPS name, no "ECR" string surfaced -- assert both; red only on a T1 marker); tests for field presence + gauge marker positions + caption-in-bounds + constraints; A1-A10 pass.
 > **V-1.3 done-when:** open an expand on the real route, measure height, assert each required field + each constraint from the DOM. PASS/FAIL table.
 
-### IA-2.0 -- Live assembly spec + layout sign-off `[Opus]` · class: output -- **[ ] NOT STARTED**
+### IA-2.0 -- Live assembly spec + layout sign-off `[claude-deep]` · class: output -- **[ ] NOT STARTED**
 > - Class: FRONTIER
 >   Reason: open judgment on the live adapter contract + chrome composition + the dynamic-target logic; no existing mockup for the unified live layout.
 >   Verifier: Joe (explicit sign-off before IA-2.x build).
@@ -842,7 +842,7 @@ Screen → target: S1 research-hub `/research`; S2 player-browser (D4, already b
 >   + branches; **IA-2.2 wires** the live inputs (below). A short live-layout note + the two verdicts appear in the
 >   IA-2.0 Live mockup for Joe's sign-off.
 
-### IA-2.1 -- Live adapter (reprice -> BoardRow, drafted removed) + tests `[Sonnet]` · class: shared -- **[ ] NOT STARTED**
+### IA-2.1 -- Live adapter (reprice -> BoardRow, drafted removed) + tests `[claude-build]` · class: shared -- **[ ] NOT STARTED**
 > - Class: WORKHORSE
 >   Reason: bounded adapter build reusing existing pricing; unit-testable.
 >   Verifier: OTHER_FAMILY (V-2.1) -- see VAP.
@@ -851,7 +851,7 @@ Screen → target: S1 research-hub `/research`; S2 player-browser (D4, already b
 > **Done-when:** tests prove a repriced player maps room/target/+- correctly; a drafted player is removed from the list; a `mine` pick is excluded from the list and surfaced to roster. Paste count + names; A1-A10 pass.
 > **V-2.1 done-when:** run the suite; drive the adapter with a fixture incl a drafted + a mine pick, assert removal + roster routing from raw output. PASS/FAIL table.
 
-### IA-2.1b -- Live target-priority score + pockets-first comparator (pure) + tests `[Sonnet]` · class: shared -- **[ ] NOT STARTED**
+### IA-2.1b -- Live target-priority score + pockets-first comparator (pure) + tests `[claude-build]` · class: shared -- **[ ] NOT STARTED**
 > - Class: WORKHORSE
 >   Reason: two bounded pure functions built to the IA-2.0 formula; fully unit-testable, no UI.
 >   Verifier: OTHER_FAMILY (V-2.1b) -- see VAP.
@@ -866,7 +866,7 @@ Screen → target: S1 research-hub `/research`; S2 player-browser (D4, already b
 > **Done-when:** unit tests prove: filling a position lowers its redundant targets' priority WITHOUT unstarring; a price fall that opens a pocket re-elevates that player; the comparator surfaces a needed-position pocket above a filled-position pocket and above a non-pocket. Paste the test output; A1-A10 pass.
 > **V-2.1b done-when:** fresh context; run the suite; drive both fns with a fixture (a filled RB slot + a redundant RB target + a fallen-pocket WR at a needed slot), assert never-unstar + re-elevate + comparator order from raw output. PASS/FAIL table.
 
-### IA-2.1c -- On-the-block STEAL + DON'T-DRAFT-NOW verdicts (Behavior C) `[Sonnet]` · class: shared -- **[ ] NOT STARTED**
+### IA-2.1c -- On-the-block STEAL + DON'T-DRAFT-NOW verdicts (Behavior C) `[claude-build]` · class: shared -- **[ ] NOT STARTED**
 > - Class: WORKHORSE
 >   Reason: two pure gate fns + two new branches in the ONE existing verdict composer, to the IA-2.0 freeze; fully unit-testable, no UI, no new pricing math.
 >   Verifier: OTHER_FAMILY (V-2.1c) -- see VAP.
@@ -880,7 +880,7 @@ Screen → target: S1 research-hub `/research`; S2 player-browser (D4, already b
 > **Done-when:** unit tests prove -- a saturated position (`openSlots<=0`) with a core need still open SUPPRESSES STEAL and yields DON'T-DRAFT-NOW (even at a great price); an under-target price at a still-needed position (`you - price >= stealGap`, affordable) fires STEAL; the `stealGap` widens as `maxBid` tightens (budgetPad) and eases with deep need (needEase); a `$1` stash with bench room does NOT fire the loud DON'T-DRAFT. Paste the test output; A1-A10 pass.
 > **V-2.1c done-when:** fresh context; run the suite; drive `computeWhatToDo` with two fixtures -- (1) RB saturated + WR2 unfilled + cheap RB on the block -> assert DON'T-DRAFT-NOW and NO steal; (2) WR needed + DeVonta-style `you=21`/`price=12` -> assert STEAL with the right `stealCeiling`, budget-safe. Assert precedence order from raw output. PASS/FAIL table.
 
-### IA-2.2 -- Assemble Live screen + Targets filter/slide-out `[Sonnet]` · class: output -- **[ ] NOT STARTED**
+### IA-2.2 -- Assemble Live screen + Targets filter/slide-out `[claude-build]` · class: output -- **[ ] NOT STARTED**
 > - Class: WORKHORSE
 >   Reason: bounded composition of existing panels around the shared Board per the IA-2.0 spec; reuse-only.
 >   Verifier: OTHER_FAMILY (V-2.2) -- see VAP.
@@ -889,7 +889,7 @@ Screen → target: S1 research-hub `/research`; S2 player-browser (D4, already b
 > **Done-when:** on a **real** manual/offline draft (NOT `?sim=1`): the Board renders and scrolls; a recorded Sold removes that player and moves room/target/+- (before/after measured); on-the-block + roster collapse/expand (DOM); Targets chip + slide-out show only starred-remaining; A1-A10 pass.
 > **V-2.2 done-when:** start a real manual session, record a Sold, measure the board delta + removal on the real route; toggle collapses; check the Targets set. PASS/FAIL table.
 
-### IA-3.1 -- Board without session + one-tap manual + Sold->board (offline) `[Sonnet]` · class: shared -- **[ ] NOT STARTED**
+### IA-3.1 -- Board without session + one-tap manual + Sold->board (offline) `[claude-build]` · class: shared -- **[ ] NOT STARTED**
 > - Class: WORKHORSE
 >   Reason: bounded gate-removal + wiring of the existing manual-pick path; offline-verifiable.
 >   Verifier: OTHER_FAMILY (V-3.1) -- see VAP.
@@ -898,7 +898,7 @@ Screen → target: S1 research-hub `/research`; S2 player-browser (D4, already b
 > **Done-when:** with NO session and the network offline, the real Live route renders the Board (not the wall); "Start manual draft" creates a session in one tap; a Sold entry with the network offline removes the player and reprices (measured); A1-A10 pass.
 > **V-3.1 done-when:** real route, network disabled -- confirm Board renders with no session, one-tap start works, Sold updates the board offline (measured before/after). PASS/FAIL table.
 
-### IA-4.0 -- Full-vision integration review + regression sweep `[Opus]` · class: output -- **[ ] NOT STARTED**
+### IA-4.0 -- Full-vision integration review + regression sweep `[claude-deep]` · class: output -- **[ ] NOT STARTED**
 > - Class: FRONTIER
 >   Reason: cross-cutting completeness critic against Joe's original complaint + the North Star; open judgment on whether the vision is met.
 >   Verifier: Joe (sign-off that nothing was silently dropped).
