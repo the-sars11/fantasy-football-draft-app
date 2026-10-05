@@ -6,8 +6,6 @@ The single source of repo rules for every AI agent: Claude Code (imports this th
 this repo. If the two conflict, stop and ask Joe.
 
 firewall: personal
-allowed_providers: anthropic, openai, google, runway, elevenlabs, xai, meta, alibaba, kling, minimax, seedance
-blocked_providers: moonshot
 
 ## Purpose
 
