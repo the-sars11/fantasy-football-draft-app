@@ -19,3 +19,188 @@ Moved here word for word by dev-workflow-builder `scripts/weekly_clean.py` (em a
   - [x] **P2 / Strategy Leaderboard [Opus] · DONE 2026-08-21 (commit `8e5e1ee`).** `prep/leaderboard/client.tsx` + new `sim-results-cards.tsx`: full 13-man MEDOID roster grouped by position with the dollar paid per slot (was only 3-4 core names). 16/16 component tests. Gate green.
   - [x] **P2 / Cheat Sheet + League Intel [Opus] · DONE 2026-08-22 (commit `b523f19`).** `draft-board-table.tsx` off its `var(--ffi-surface-2)` shell onto `ffi-plate-row` rows + `Nameplate` empty state; ALL volt-green + inline hex purged for `--ffi-*` tokens (live computed-style scan across 483 rendered rows = 0 green). SHIELD semantics: targets/pocket=steel-blue, elite/T1=brick-red, hot/avoid=coral. `globals.css` +`--ffi-pos-def`/`--ffi-pos-k`. `board/client.tsx` Nameplate error/empty + tokenized pills + brick-red strategy badge + blue/coral filters. `league-intel-panel.tsx` plain-English wrapping inflation actions (HOT/COOL/NEUTRAL). Gate: type-check 0, lint 0, test:run 632/632. See CHANGELOG 2026-08-22 / Part 2.
   - [x] **P2 / Players intel card · DONE 2026-08-22.** `ffi-player-intel-card.tsx`: all 77 inline hex purged to `--ffi-*` tokens; the Joe-approved D4 expandable-row IA untouched (structure/logic byte-identical, only color values changed). Confirmed the earlier "opacity modifiers don't translate" worry was wrong -- Tailwind CSS 4 here DOES support `bg-[var(--ffi-blue)]/18` opacity-on-variable (15+ existing uses across settings/simulate/draft-setup). Exact-match swaps (blue/blue-bright/ink/ink-2/ink-3/volt) = zero visual change. Reconciled off-palette drift: `#ff716c`->`--ffi-danger` (near-identical coral), `#f5b301`->`--ffi-warning` (**visible: yellow->orange on volatile/injury tags**), `#8bacff`->`--ffi-blue-bright` (**visible-ish: periwinkle->cyan on sleeper/accents**), plus DEF/K entries added to `POS_CHIP`. Both visible shifts flagged to Joe for eyeball/veto. **Proof:** Grep 0 hex + 0 volt-green + 0 off-palette drift; type-check 0, lint 0, test:run 632/632. Live visual render NOT captured this session (Browser pane not displayed -> non-compositing -> screenshot/JS time out; all 3 API endpoints verified healthy 200). Presentational-only token swap; type-check guards the style objects.
+
+## One-time plan split, 2026-11-05 (16 finished sections)
+
+### R2 - Data truth: labels stop lying `[Sonnet]` · class: bugfix/output `[x]` DONE 2026-08-12
+> **Why:** a board that labels ADP as "ECR" and paints a fake ±15% range is worse than no data - it looks authoritative and is wrong.
+> **Reads first:** `src/lib/players/convert.ts`, `src/components/prep/draft-board-table.tsx`, `src/lib/players/value-range.ts`, `src/lib/players/tags.ts`.
+> **Closes:** RV-7, RV-8, RV-14.
+> **Work:** ECR cell = real `ecrPositionRank`; PTS = real projection; RANGE = the real calibrated VORP↔room band (kill the ±15%); surface tier data beyond the single ELITE flag (tier badges / tier grouping).
+> **Done-when:** every board cell equals its real source field; tests assert cell = source (no derived-from-ADP stand-ins). Screenshot of the corrected board.
+
+
+### R3 - Valuation correctness: never recommend overpaying `[Opus]` · class: pipeline `[x]` DONE 2026-08-12
+> **Why:** before the team engine constrains bids further, the single-player math must at least never tell Joe to pay *more than a player is worth*.
+> **Reads first:** `src/lib/draft/auction-advisor.ts`, `src/lib/players/recommendation.ts`, `src/lib/players/tags.ts`, `src/lib/intel/tag-detector.ts`, `src/lib/players/value-range.ts`.
+> **Closes:** RV-4, RV-5, RV-18.
+> **Work:** cap max-bid at the ceiling (`absoluteMax` must never exceed worth); the recommendation line shows a real **pay-to price**, not the theoretical ceiling; make POCKET/TAX legible in plain language; **wire the breakout/bust/value detector into the board or delete it** (recommend: wire it - the signal is real and cheap; if wiring is more than an hour, delete it and log the decision).
+> **Done-when:** no code path returns a max-bid above ceiling across budget states (unit-tested); the "pay up to $X" line is the pay-to, not the ceiling; tag-detector is either surfaced or gone. Screenshot + tests.
+
+
+### R7b - Player filters + strategy-fit line `[Sonnet · Opus for the fit logic]` · class: output · **[x] DONE 2026-08-13**
+> **Depends on:** R4 (solver, for the fit line), R7a (graded tags, for tag filters).
+> **Reads first:** `prep/players/client.tsx`, `roster-solver.ts`, `players/tags.ts`.
+> **Work:** expanded filters (position incl. FLEX, tier, value-pocket, bye, tag/grade); a per-player **strategy-fit line** driven by the solver ("Fits your stars-and-scrubs plan; you can afford him at $X and still fill RB").
+> **Done-when:** every filter works and composes; every player shows a fit line that reflects the current strategy + budget + roster state. Screenshot + tests on the fit logic.
+> **Delivered:** FLEX position filter (RB+WR+TE virtual), tier filter (T1/T2/T3+), bye-week filter (populated from live player pool), grade filter (7+/9+ weight, target-mode only), severity filter (soft/hard, avoid-mode only), reset-on-tagFilter-change. New pure module `prep-fit-line.ts` with `buildSlotSummary` + `buildPrepFitLine`; `fitLineMap` useMemo runs solver once per player on a full $200/13-slot board; "Your target - can bid up to $X, still needs QB and 2 FLEX" / "Flagged to avoid - can afford at $X" / "Can bid up to $X on a full $200 board". `FFIPlayerIntelCard` gets `fitLine` prop + ◆ strip. 22 new tests (17 unit + 5 RTL). Gate: type-check 0, 344/344 tests, lint 161 (0 new), build clean. Bug-hunt: 0 CRITICAL, 0 HIGH, 1 MEDIUM (BUG-R7b-01: fitLineMap mixes solver + label in one memo - fix in R8), 2 LOW.
+
+
+### R8 - Cheat Sheet resolution + FLEX view `[Sonnet]` · class: output · **[x] DONE 2026-08-13**
+> **Reads first:** `prep/board/client.tsx`, `prep/players/client.tsx`, `roster-solver.ts`.
+> **Closes:** RV-9, RV-10.
+> **Done-when:** no two screens do the same job; a FLEX (RB/WR/TE) ranked list exists; the Cheat Sheet shows roster fit. Screenshot.
+> **Shipped:** Fixed BUG-R7b-01 in `players/client.tsx` - split the single `fitLineMap` useMemo (deps `[players, isTarget, isAvoid]`) into three: `boardPlayers` (deps `[players]`), `solverResultMap` (deps `[boardPlayers]`, runs the 500 solver calls), `fitLineMap` (deps `[boardPlayers, solverResultMap, isTarget, isAvoid]`, cheap label only). Tag toggles no longer re-fire the solver. Added FLEX tab (third tab) to the Cheat Sheet board - shows RB/WR/TE combined, sorted by `adjustedAuctionValue ?? consensusAuctionValue` DESC, ties broken by rank ASC. Cheat Sheet and Players are now differentiated by purpose: Cheat Sheet = strategy-ranked reference + position breakdown + FLEX view; Players = individual player deep-dive with fit lines and detail cards. RV-10 resolved by purpose differentiation (not screen deletion). Construction board idea dropped - not useful in prep mode where players are not yet being drafted into slots. Gate: type-check 0, 349/349 tests (+5 new flex-tab unit tests), lint 0 new, build clean, bug-hunt free (0 CRITICAL/HIGH/MED, 1 LOW pre-existing K pill). Browser pane not compositing (same env constraint as R5/R6) - render path proven by type-check + build + 5 DOM logic tests.
+
+
+### ✅ DEC-1 - Targets/avoids bias `[Opus/Joe]` · RESOLVED 2026-08-17: BIAS · unblocked R10b + R11b
+> - Class: FRONTIER
+>   Reason: ambiguous product decision
+>   Verifier: OTHER_FAMILY
+> **Type:** Thinking / DECISION. Extracted from inside R10b and R11 during the 2026-08-16 Re-Plan so no Doing card carries a buried judgment call (Scoping Gate).
+> **The question:** should the sim's "me" seat (R10b) and the in-room advice (R11b) bid toward **Joe's graded targets/avoids** (weighted) instead of the generic ceiling-based valuation they use today (`sim-engine.ts:294-311`)? Today targets/avoids do NOT bias sim bidding, and the same question applies to R9 strategy generation.
+> **Why it gates:** R10b grades a strategy Joe acts on and R11b advises him live. If the me-seat ignores his targets while grading/advising against opponents who also ignore them, the grade and the advice model a draft Joe would not actually run. This is a product-behavior call, not an implementation detail, so it cannot be resolved inside a Doing card.
+> **RULING (Joe, 2026-08-17): BIAS.** The sim "me" seat (R10b) and the in-room advice (R11b) DO bias toward Joe's graded targets/avoids, with a **bounded weight** that respects the graded weight (1-10) + severity (soft/hard) already in `user_tags`. Opponents stay on the generic ceiling model, so the grade answers "how does MY plan fare," not "how does a generic drafter fare." This is now a fixed instruction for R10b + R11b (and applies to R9 strategy generation where the same question arises).
+> **Done-when:** ✅ Joe ruled BIAS. Ruling written into R10b + R11b below as a fixed instruction; both cards unblocked.
+
+
+### ✅ R11b - Live draft: team-aware in-room guidance `[Sonnet]` · class: pipeline · DONE 2026-08-17 (DEC-1 = BIAS)
+> - Class: FRONTIER
+>   Reason: approved spec; DEC-1 ruled BIAS 2026-08-17
+>   Verifier: OTHER_FAMILY
+> **RESULT:** R9's `adaptive-guidance.ts` pivot line now renders always-on in a new `StrategyStrip` between AwarenessStrip and BudgetStrip (not buried in "More tools"); target AND avoid are independently settable in two places (Research tab player rows, on-the-block hero card), each with its own button/aria-pressed state calling the existing generic `toggle(id, 'target'|'avoid')`. DEC-1 verified: `roster-solver.ts` and `what-to-do.ts` did NOT honor the bounded-bias ruling before this card; fixed to mirror R10b's `sim-engine.ts` pattern (`TARGET_MAX_BOOST = 0.35`, `SOFT_AVOID_FACTOR = 0.5`, hard avoid skipped), unit-tested, and wired end-to-end live (`userTagsMap` -> `buildSolverInput`; `avoidSeverity` -> the on-block `advice` memo -> `computeWhatToDo`). 441/441 tests green, 0 type errors, 0 lint errors on touched files, clean build. Live-verified on port 3003: pivot line and StrategyStrip visible in the always-on room ("On plan. Balanced Auction still fits your budget: target Trey Lance, Gardner Minshew II, Quinn Ewers."); both target/avoid buttons present and independently wired on Research rows and the on-the-block card (confirmed via DOM read + a live PATCH `/api/user-tags` network call fired per click). Persistence of the write itself could not be captured on camera: the verification browser tab carries no Supabase auth session (`localStorage`/`document.cookie` checked, empty), so every PATCH -- old target-only code path and the new avoid path alike -- 500s identically on the DB's `user_id` not-null constraint. Confirmed this is a test-environment gap, not a regression: same endpoint, same failure, on both the pre-existing and new toggle. Real-session persistence proof -> R15.
+> **Size:** M - one Sonnet sitting for the in-room guidance BEHAVIOR only. The six UX-gap PIXELS listed below land once in D6 (build-once rule), not here; R11b owns the logic they surface.
+> **Depends on:** R5 (team-aware max-bid), R9 (adaptive-guidance engine). **DEC-1 = BIAS (2026-08-17):** in-room advice weights Joe's targets/avoids at a bounded weight (respect `user_tags` weight 1-10 + soft/hard severity). Verify the solver + what-to-do path honor this; if not, fix here.
+> **Reads first:** `draft/live/client.tsx`, `roster-solver.ts`, `adaptive-guidance.ts`, `what-to-do.ts`.
+> **Work:** wire `adaptive-guidance.ts` pivot line into the room; in-room target/avoid toggle writes (add / un-target / add-avoid live); surface an always-reachable strategy display + quick switcher (the logic behind D6's pixels).
+> **Done-when:** live room shows roster-aware advice + the adaptive pivot line; target AND avoid are settable during the draft; solo-verifiable. (Full live-auctioneer proof -> R15.) Screenshot.
+> **Added 2026-08-14 (Joe feedback - Live screens review). Grounded against the CURRENT room (`components/draft/live-room/auction-room.tsx`), which is in better shape than the old review implied.** It already has: money-remaining + single-player max-bid (`budget-strip.tsx:57-61`), slots filled/open, a per-position tier-count "Tier Context" panel with tap-to-list (`tier-context.tsx`), and a target-toggle on the Research tab. The gaps Joe flagged (these are the R11b UX scope - the PIXELS land with D6, "built once"):
+>   - **Tier Context is incomplete.** Shows QB/RB/WR/TE only (`auction-room.tsx:34` `TIER_POSITIONS`) with **no FLEX row**, and only T1/T2/T3 (`explain.ts:32-34`) with **no T4/T5**. Add a **FLEX row** (combined RB/WR/TE remaining) and extend to **T4 (evaluate T5)** - Joe reads tier depth per position + FLEX to make in-the-moment calls.
+>   - **My Team is always-on, not collapsible** (`auction-room.tsx:293-294`). Make it **expand/collapse** so the space can hold tiers/strategy when the roster isn't needed.
+>   - **On-the-block card is not collapsible** (`on-the-block-card.tsx`). Make the player-context card **expand/collapse** - full context for players Joe cares about, minimized for the many he doesn't.
+>   - **Strategy is buried.** The switcher + adaptive pivot alerts live in a "More tools" accordion **closed by default** (`client.tsx:124`). Surface an **always-reachable strategy display + quick switcher** so Joe can flip strategy views mid-draft, and surface the R9 **adaptive-guidance** pivot line in the room (this IS R11's core "wire `adaptive-guidance.ts`" job per VISION §31).
+>   - **Avoid has no control in the room; target only toggles on the Research tab** (writes `'target'` only). Add **target AND avoid** toggles reachable during the draft (add / un-target / add-avoid live as the board changes).
+>   - **Live-updating player values (Players-screen ask).** Joe wants the player card's base/market/your-value to **update live as players are bought**. The prep Players screen is static (no auctioneer subscription); the live version of that card belongs here. Keep base/mkt/your-value + the range bar; tier on the card face; projected points → expansion; add "expert consensus." (The static prep card's density/tier redesign is D4.)
+>   - **DEC-1 RULED BIAS (2026-08-17):** in-room advice biases toward Joe's targets/avoids at a bounded weight (respect `user_tags` weight 1-10 + soft/hard severity). R11b's Doing scope: VERIFY the current solver + what-to-do path honors this; if the code does not match the ruling, log it as a functional gap and fix it here. No longer a blocker.
+
+
+### D2 - Research landing + nav `[Sonnet]` · class: output ✅ DONE (2026-08-15)
+> **Folds in the Research feedback.** Current hub is a card-dump with a paragraph explainer. Rebuild per `UX_OVERHAUL_2026-08.md` §9.1 AND: **demote "Run Research"** (Joe uses it 2-4×/year, not a hero); **rename + define it** as a **Player Pull / full Research Pull** - state plainly what a pull produces (projections, injury status, starting roles, analysis, consensus, auction values, sleepers/breakouts/busts - confirm exact contents with Joe and document them); **no paragraph explainer**; make **Players · Cheat Sheet · Strategies · Sims** the real destinations (the things Joe lives in for weeks).
+> **Done-when:** Research landing matches the approved look, Run-Research demoted + clearly labeled with a defined action, destinations are the heroes. Screenshot.
+> **DONE:** `src/app/(app)/prep/page.tsx` fully rewritten. Reconnaissance found the hub was already one-hero + quiet-jump-rows but with the hierarchy BACKWARDS (AI run = hero) → reframed D2 as "flip the hierarchy". Now: header → "Where you work" 4 destination hero rows (Players → real pool count · Cheat Sheet → your #1 target · Strategies → saved count via new `GET /api/strategies?leagueId` fetch · Sims → New badge, → `/prep/simulate`) → "Latest run highlights" (existing target/avoid chips, kept) → "Data" demoted **Player Pull** strip (freshness Fresh/Stale, one plain what-it-produces line, cost-guard confirm preserved, "Free data pull · no AI credits"). All metrics real/graceful-absent - no fabricated numbers. Approved mockup `d2_research_landing_v1.html`. tsc clean · 392/392 tests · lint clean · build clean. Live render proof (375px mobile, real data 3,148 pool + THE NASTIES): `scratchpad/prep_frame.png`. Commit `c247070` (pushed to origin/master).
+
+
+### D4 - Players card redesign `[Sonnet]` · class: output ✅ DONE (2026-08-16)
+> **Folds in the Players feedback.** **Thinner** list cards; **tier on the card face** (absent today, `ffi-player-intel-card.tsx`); move projected points to the expansion; keep base/mkt/your-value + the range bar Joe likes; add **expert consensus**. (Live-updating values = R11/D6, not here.)
+> **Done-when:** thinner card with tier + consensus, points demoted to expansion, on the approved look. Screenshot.
+>
+> **Shipped (2026-08-16) - 4th attempt, approved v3 mockup, all failed-session constraints honored:**
+> - `src/components/prep/ffi-player-intel-card.tsx` - full rewrite. Compact row = one ~50px line: color rail + position chip (pos + rank) | mixed-case name + team/BYE | tier badge | value range + base underneath | chevron. Removed headshot, `.toUpperCase()`, rec strip, range bar, and the "Your value" label from the compact face. Tier now on the card face from `player.expertTier`: T1 = brick-red glow (elite), T2 = steel-blue outline, T3+ = muted outline. Projected points demoted into the expansion.
+> - Expansion reorganized into labeled groups: **Valuation** (range bar room/base/worth + Market / Proj Pts / Experts strip - expert positional rank shown plainly, e.g. "RB2", no "ECR" jargon), **Outlook** (plain-English rec + solver fitLine), **Draft Intel** (user + system tags), **Your Call** (target/avoid + priority/severity graders), and a "how this value is calculated" provenance toggle.
+> - `src/components/prep/__tests__/ffi-player-intel-card-fitline.test.tsx` - updated: fitLine now lives in the expansion, so the presence assertions render the card open (`isExpanded ?? true`). Guard preserved (fitLine-reaches-DOM), only location changed.
+> - **Zero em/en-dashes** (hyphens only), per Joe's global policy. Verified across the whole file.
+> - **Proof:** `npm run test:run` 392/392 green · changed-file lint clean (`npx eslint <2 files>` exit 0; the 61 project-wide lint errors are all pre-existing in untouched `src/lib/research/*` + `src/lib/supabase/*`) · `npm run build` ✓ Compiled successfully · two real 390px screenshots captured live in real Chrome via a temporary `/d4preview` auth-free harness (harness deleted after capture): (1) expanded McCaffrey card showing all five groups with real Kanit/Hanken/JetBrains fonts, range bar room $70/base $77/worth $83, Market ~$52 / Proj Pts 347 / Experts RB2; (2) all 8 collapsed rows proving tier variety (T1 red glow, T2 blue outline, T3/T4 muted) and position-color chips (RB green, WR blue, QB pink, TE orange, DEF grey).
+>
+> **FAILED SESSION (2026-08-16) - hard-won design constraints for the next attempt:**
+> Three mockups, all rejected. Do NOT repeat these mistakes:
+> - **NO ALL-CAPS names.** Current code does `.toUpperCase()` on player names -- this must be removed. Names read as yelling and scan poorly in a list.
+> - **NO unexplained jargon.** "WR2 ECR" means nothing at a glance. If you show expert position rank, label it plainly ("WR2 consensus" or just show it contextually) or drop it from the face entirely -- Joe does not want acronym clutter.
+> - **NO "Your value" label above the range.** The range is obviously the value. The label is noise.
+> - **No blue blob.** Every element in all three mockups collapsed into the same steel-blue tonal family -- tier badge, value, tags, strip. Use RED for the one most important signal (T1 tier = elite, act now). Everything else earns its own clear treatment or gets dropped.
+> - **Compact row = one line, ~44px tall.** Current cards are 130-160px. The entire compact row should be: position chip | name | tier | value | expand. Nothing else. No headshot, no recommendation strip, no range bar -- those open in the expansion.
+> - **SHOW JOE A REAL BROWSER SCREENSHOT of the actual current card first.** Joe's feedback was partly about not recognizing the design. Start the next session by screenshotting the live card at 375px so you and Joe have a shared baseline before any mockup work.
+
+
+### SP-0 -- Refresh stale Design review lens to SHIELD v4.0 `[Sonnet]` · class: docs -- **[x] DONE (2026-08-23)**
+> **Shipped:** rewrote the Design Lens in `.claude/REVIEW_LENSES.md` (pre-check + verify) to the SHIELD v4.0/4.1 bar: SHIELD component contract (`shield.tsx` -- `<Nameplate>`/`<PageTitle>`/`<CardTitle>`/`<IconChip>`/`<ShieldBackground>`, never raw `.ffi-card`/shadcn `Card`/inline `bg-[#...]`), SET palette meaning (brick-RED `#A63C41` body / `#C25A5E` Oswald headers, steel-blue `#5FA8E0` structure, chrome-silver readouts), inline `var(--ffi-*)` only with a hex/`Card`/`blur-3xl` grep gate, Oswald/Kanit/Hanken typography + `tabular-nums`, the No-Line Rule (tonal shift + cool-steel hairline <=18%, no gray borders, no backdrop-blur), navy FIELD (`.stadium-atmos`) inheritance, and the 44px touch-target rule. **Done-when met:** grep of `REVIEW_LENSES.md` for `Tactical Hologram|Space Grotesk|8bacff|2ff801|031018|Manrope` = 0; zero em/en-dashes in the rewrite; both reference files (`.claude/DESIGN_SYSTEM.md`, `UI/mockup-SHIELD-token-map.md`) already tracked/committed. Docs-only edit (no `src/` touched), so the Vitest/ESLint gate is unaffected.
+> - Class: WORKHORSE
+>   Reason: bounded doc rewrite against an already-LOCKED spec (DESIGN_SYSTEM SHIELD v4.0); zero open judgment.
+>   Verifier: self (docs class, QA lens only)
+> **Size:** S. **Depends on:** nothing -- run first, validators depend on it.
+> **Why:** `REVIEW_LENSES.md` Design lens still describes the retired Tactical Hologram system (`#8bacff`, `#2ff801`, `#031018`, Space Grotesk). Every SP validator uses that lens; if it is wrong, validation is wrong.
+> **Reads first:** `.claude/DESIGN_SYSTEM.md` (SHIELD v4.0 LOCKED), `.claude/REVIEW_LENSES.md:73-83`, `src/app/globals.css`.
+> **Work:** rewrite the Design lens pre-check + verify checklist to the SHIELD bar (Oswald-red 26px header + steel-blue chip; inline `var(--ffi-*)` only, no structure hex; dedicated components over generic shells; RED sparingly for action/moment/headers, steel-blue as everyday structure; 44px touch targets; navy field inherited from app-shell). Also commit the already-uncommitted `DESIGN_SYSTEM.md` + `UI/mockup-SHIELD-token-map.md` so the reference is version-pinned.
+> **Done-when:** Design lens has zero references to Tactical Hologram / Space Grotesk / `#8bacff` / `#2ff801`; grep of `REVIEW_LENSES.md` for those literals returns 0; the SHIELD reference files show committed in `git status`.
+
+
+### SP-4V -- Validate /prep/configure rebuild `[x] DONE (2026-08-18)` · class: output
+> - Class: WORKHORSE (validation)
+>   Reason: independent check behind SP-4.
+>   Verifier: OTHER_FAMILY -- did NOT write SP-4.
+> **Size:** S. **Depends on:** SP-4.
+> **Work:** adversarial `/code-review` + `/bug-hunt free`; Design + QA lenses; screenshot vs mockup; independent grep for off-token blue; re-run gate.
+> **Done-when:** 0 unresolved HIGH; screenshot parity attached; grep clean; gate green.
+> **VERDICT: PASS (Opus, fresh context, commit 771ecc1).** 0 HIGH. Independent re-run of the full gate reproduced green: type-check 0, test:run 497/497, scoped eslint 0 errors (1 pre-existing `userId` warning), build clean with `/prep/configure` static. Off-token `77,130,255` grep = 0 on both source files. Raw hex/rgba sweep = 1 match (`rgba(255,110,138)` error banner, `league-config-form.tsx:114`), git-blame confirms pre-existing (a591de36, 2026-08-10), untouched by SP-4, exempt. Structural parity vs mockup SCREEN 2 = full match (hero strip, 3 QuietLabel dividers, ffi-title-red header, FFIBadge status=info replacing the blue badge, red-volt-focus inputs); no missing or extra element. Supabase `createLeague` action not in diff; no form field name/id/value/hidden-input changed, form saves identically. Commit hygiene clean: exactly 5 files staged, none of the 24 unrelated dirty files swept in. One MED found and FIXED by orchestrator: 2 literal dashes (U+2014/U+2013) the build agent wrote into the SP-4 gate line above, swapped to ASCII codepoint names; SP-4 doc-block dash grep now 0. No live pixel render (Supabase-auth route in a headless no-composite sandbox); parity established via source-vs-mockup structural read, the documented fallback.
+
+
+### SP-5 -- Rebuild /prep/runs to approved mockup `[x]` `[Opus]` · class: output
+> - Class: WORKHORSE
+>   Reason: bounded promotion of a utility card-list to SHIELD card/section objects against the SP-2 mockup.
+>   Verifier: OTHER_FAMILY (SP-5V)
+> **Size:** M. **Depends on:** SP-2. **DONE 2026-08-23.**
+> **Why:** on-token header but a plain "list of cards" utility layout with no hero/section SHIELD objects, plus a stale volt-green leftover `rgba(139,255,69,0.16)` at `client.tsx:66` (completed-status style).
+> **Reads first:** approved SP-2 runs mockup; `src/app/(app)/prep/runs/page.tsx` + `client.tsx` (includes `RunDetailView`/`CompareView`).
+> **Work:** promote list rows + detail/compare views to SHIELD card/section treatment per the mockup; replace the green status literal; token-only.
+> **Done-when:** screenshot matches mockup; grep for `139,255,69` in the file returns 0; gate green; A1-A10 pass.
+> **DONE (proof):** rebuilt `client.tsx` -- local `QuietLabel`, LATEST RUN `.ffi-hero` (date `.ffi-title-red` + status/strategy `FFIBadge` + auto-loaded stat cluster tabular-nums), ALL RUNS DestRow-style `.ffi-nameplate` rows (checkbox + clock chip `--ffi-volt` + status badge + View/expand keeping `RunDetailView`), TOP TARGETS `.ffi-nameplate` card w/ `FFIPositionBadge` rows split by hairline. Preserved league selector, Refresh (FF-028), compare/`CompareView`. grep `139,255,69`=0; type-check clean; eslint clean; test:run 711/711; build compiled ✓ (/prep/runs static). Rendered at :3003/prep/runs -- shell OK, body populates only vs live DB (sandbox Supabase 500 is env-only).
+> **2 DECISIONS (flagged to Joe):** (1) Completed status -> steel-blue `FFIBadge status="success"` per approved mockup line 414 (`badge blue`), NOT plan-prose `var(--ffi-volt)` -- mockup is authoritative + red reserved for act-now/value. (2) Hero stat cluster (Players/Targets/Avoids/Value) auto-loads the newest completed run's detail via `/api/research/${latest.id}` on mount -- the list endpoint returns no counts, so faithfully rendering the approved hero requires it (per-row destrow counts stay omitted, not fabricated).
+
+
+### SP-5V -- Validate /prep/runs rebuild `[x]` `[Sonnet]` · class: output
+> - Class: WORKHORSE (validation)
+>   Reason: independent check behind SP-5.
+>   Verifier: OTHER_FAMILY -- did NOT write SP-5.
+> **Size:** S. **Depends on:** SP-5. **DONE 2026-08-23.**
+> **Work:** adversarial `/code-review` + `/bug-hunt free`; Design + QA lenses; screenshot vs mockup; independent grep for green literal; re-run gate.
+> **Done-when:** 0 unresolved HIGH; screenshot parity attached; grep clean; gate green.
+> **DONE (proof):** fresh-context Sonnet validator = **VERDICT PASS** (0 HIGH+). Independent grep = 0 for every retired literal (`139,255,69`/`77,130,255`/`8bacff`/`121,166,255`/`79A6FF`) + 0 raw hex/off-token rgba (full token compliance). Mockup parity confirmed (section order, 4-stat cluster colors, hairline separators); DestRow checkbox/contextual-Compare divergence judged correct (interactive functionality the static mockup omits). Auto-load effect verified correctly guarded + `runs[0]` genuinely newest (API `.order('created_at', ascending:false)`); failed-run + 0-target + compare-cap-2 paths safe; no `any`, no missing keys, a11y labels present. 3 findings, all resolved: F1 (LOW, 6 em-dashes in comments) fixed; F2 (MED, missing `cancelled` guard on league-runs fetch) fixed; F3 (LOW, dangling Top Targets label at 0 targets) fixed. Gate re-run after fixes: dashes 0, type-check 0, lint 0, test:run 711/711, build clean. See CHANGELOG SP-5V.
+
+
+### SP-6 -- Rebuild /settings to approved mockup `[x]` `[Opus]` · class: output
+> - Class: WORKHORSE
+>   Reason: bounded restyle of an iOS-style grouped list to SHIELD rows against the SP-2 mockup.
+>   Verifier: OTHER_FAMILY (SP-6V)
+> **Size:** S-M. **Depends on:** SP-2. **DONE 2026-08-23.**
+> **Why:** header is on-token but the body is an iOS-style grouped list with no SHIELD hero/card/section objects, plus an off-token blue badge `bg-[#8bacff]/15 text-[#8bacff]` at `page.tsx:45`.
+> **Reads first:** approved SP-2 settings mockup; `src/app/(app)/settings/page.tsx` + `client.tsx` (local `SectionLabel`/`SettingsGroup`/`NavRow`/`InfoRow`/`SignOutRow`).
+> **Work:** restyle the list rows to SHIELD section/card treatment per the mockup; replace the `#8bacff` badge with `var(--ffi-blue)`; token-only; keep 44px touch targets.
+> **Done-when:** screenshot matches mockup; grep for `8bacff` in the 2 files returns 0; gate green; A1-A10 pass.
+> **DONE (proof):** rebuilt `page.tsx` to mockup screen 04 -- new ACTIVE LEAGUE `.ffi-hero` anchor (label blue-bright + league name `.ffi-title-red` 22px + muted format subline), `SectionLabel`->`QuietLabel`, `NavRow`->`DestRow` (`.ffi-nameplate-interactive` rows w/ icon chip [red `--ffi-volt`, blue `--ffi-blue` for Demo] + body + chevron), Dev badge `#8bacff`->`FFIBadge status="info"` steel-blue, Account = `.ffi-nameplate` card w/ InfoRows split by hairline. `client.tsx` SignOutRow restyled to `--ffi-danger` at rest (signOut action preserved). All 4 destinations + 44px targets kept. grep `8bacff`=0 both files; dashes 0; type-check 0; eslint 0; test:run 711/711; build clean (/settings static). Rendered at :3003/settings -- FULLY populated (hero + all DestRows + Dev badge + Account + Sign-out form), console clean (only unrelated `useUserTags`).
+> **1 decision (flagged):** omitted the mockup's decorative left "rail" on DestRows to stay visually consistent with the shipped SP-5 runs rows (same DestRow object, no rail) -- the two sibling list screens now match.
+
+
+### SP-6V -- Validate /settings rebuild `[Sonnet]` · class: output -- [x] DONE 2026-08-23
+> - Class: WORKHORSE (validation)
+>   Reason: independent check behind SP-6.
+>   Verifier: OTHER_FAMILY -- did NOT write SP-6.
+> **Size:** S. **Depends on:** SP-6.
+> **Work:** adversarial `/code-review` + `/bug-hunt free`; Design + QA lenses; screenshot vs mockup; independent grep for `8bacff`; re-run gate.
+> **Done-when:** 0 unresolved HIGH; screenshot parity attached; grep clean; gate green.
+> **VERDICT: PASS -- 0 defects (0 CRIT/HIGH/MED/LOW).** OTHER_FAMILY fresh-context Sonnet, did not write SP-6. Independent grep of both files: `8bacff`/`139,255,69`/`77,130,255`/`121,166,255`/`4d82ff`/`8bff45`/`79A6FF` all = 0; dash count 0/0. Design Lens (checks a-g) all PASS vs mockup screen 04: hero (`.ffi-hero`+`.ffi-title-red`), QuietLabel sections, `.ffi-nameplate-interactive` DestRows w/ 34px chips + correct volt/blue accents, Dev badge = `FFIBadge status="info"` (confirmed `.ffi-badge-info` = rgba(95,168,224,.16)/#7fc0ea steel-blue), Account `.ffi-nameplate` InfoRow card, Sign out `--ffi-danger`; omitted rail acknowledged as accepted decision. QA Lens (a-e) all PASS: null-safety traced end-to-end (no-league/no-user fall back to "No league yet"/"Not configured yet"/"Not set", no crash path), `signOut` server action genuinely wired (`(auth)/actions.ts:95` -> `<form action={signOut}>`), all 4 hrefs real routes, aria-hidden + 44px targets present, `createClient()` null-guarded, no `any`. Gate re-run green: type-check 0 errors, eslint clean, test:run **711/711 (58 files)**, build Compiled successfully + `/settings` prerendered static. No fixes needed. See CHANGELOG SP-6V.
+
+
+### SP-7 -- Rebuild (auth) sign-in + sign-up to approved mockup `[Sonnet]` · class: output -- [x] DONE 2026-08-23
+> - Class: WORKHORSE
+>   Reason: bounded from-scratch build against the SP-2 mockup; judgment was resolved in SP-2, this is execution.
+>   Verifier: OTHER_FAMILY (SP-7V)
+> **Size:** M. **Depends on:** SP-2.
+> **Why:** the `(auth)` screens are pure shadcn New-York cards with zero `ffi-*` styling and no navy field (their own `(auth)/layout.tsx` uses `bg-background` + a `bg-primary/5 blur-3xl` glow). No SHIELD identity at all.
+> **Reads first:** approved SP-2 auth mockup; `src/app/(auth)/sign-in/page.tsx`, `sign-up/page.tsx`, `(auth)/layout.tsx`; `ffi-primitives.tsx`; `globals.css` (`.stadium-atmos`, `.ffi-btn-hero`, `.ffi-title-red`).
+> **Work:** re-theme both screens per the mockup -- add the navy field to `(auth)/layout.tsx` (mount `.stadium-atmos`/`.atmos-grain` or equivalent), Oswald-red header, brick `.ffi-btn-hero` primary CTA, Kanit display, `ffi-*` inputs; remove the shadcn `Card` shells and the `blur-3xl` glow; PRESERVE all Supabase auth wiring and form behavior.
+> **Done-when:** screenshot matches mockup (both sign-in and sign-up); screens use `ffi-*` and carry the navy field; no shadcn `Card` or `blur-3xl` remains; auth still functions (sign-in/sign-up submit works against Supabase in dev); gate green; A1-A10 pass.
+> **DONE (proof):** all 3 files rebuilt against mockup screen 05. `(auth)/layout.tsx` -> navy `.stadium-atmos` + `.atmos-grain` field, shadcn `bg-background`/`blur-3xl` glow removed. `sign-in/page.tsx` + `sign-up/page.tsx` -> Oswald "FANTASY" wordmark over `.ffi-title-red` Kanit title, `.ffi-card-elevated .ffi-sheen` panel, `.ffi-input .ffi-form-input` red-volt fields, `FFIButton variant="hero"` brick CTA, steel-blue links; no shadcn `Card` remains. All Supabase wiring preserved (`useActionState` signIn/signUp, field names email/password/confirmPassword/fullName, hidden `redirect`, `useSearchParams` errors, `Suspense`, `state.success` "Check Your Email" branch). NEW additive `.ffi-sheen` class in globals.css (opt-in iridescent edge; nothing else affected). Gate: type-check 0; eslint 3 files clean; retired-literal grep (green + all off-token blues) = 0 across all 3; dash 0/0/0; test:run **749/749 (61 files)**; build clean, `/sign-in` + `/sign-up` both `○` prerendered static. Live render verified (DEV_MODE temporarily off + restart, then restored + confirmed /sign-in->/prep): both screens render with header/fields/wiring; computed styles confirm navy field (fixed z0 steel radial), elevated+sheen card (surface-3->surface-2, sheen ::before opacity 0.55), red Kanit gradient title (background-clip:text), brick rounded-full hero button, dual-class volt inputs.
+> **Decisions (flagged):** (1) added additive shared-CSS `.ffi-sheen` rather than misuse `.ffi-hero`/`.ffi-card-interactive`; (2) `AuthHeader`/`Field` helpers duplicated inline in both pages to keep scope to the 3 plan-named files; (3) live verify needed a temporary DEV_MODE flip because middleware redirects authed users off auth routes (`src/lib/supabase/middleware.ts:19`). See CHANGELOG SP-7.
+
+
+### SP-7V -- Validate (auth) rebuild `[Sonnet · Opus for visual parity]` · class: output -- [x] DONE 2026-08-23
+> - Class: WORKHORSE (validation)
+>   Reason: independent check behind the from-scratch auth build, including a functional auth smoke test.
+>   Verifier: OTHER_FAMILY -- did NOT write SP-7.
+> **Size:** S-M. **Depends on:** SP-7.
+> **Work:** adversarial `/code-review` + `/bug-hunt free`; Design + QA lenses; screenshots of both screens vs mockup; confirm navy field present and no shadcn `Card`/`blur-3xl`; smoke-test that sign-in and sign-up forms submit and error-handle correctly; re-run gate.
+> **Done-when:** 0 unresolved HIGH; screenshot parity for both screens attached; auth smoke test passes; gate green.
+> **VERDICT: PASS -- 0 defects (0 CRIT/HIGH/MED/LOW).** OTHER_FAMILY fresh-context Sonnet, did not write SP-7. Independent grep of all 3 auth files + `.ffi-sheen` block: every retired literal (`139,255,69`/`8bff45`/`77,130,255`/`8bacff`/`121,166,255`/`79A6FF`/`4d82ff`) = 0; dashes 0/0/0. No shadcn `Card`/`blur-3xl` live (only in the layout.tsx:8 comment). Design Lens a-g all PASS vs mockup screen 05 (Oswald wordmark over `.ffi-title-red` Kanit gradient, `.ffi-card-elevated .ffi-sheen` panel both pages, dual-class `ffi-input ffi-form-input` on every field, live brick hero gradient `rgb(166,60,65)->rgb(110,34,37)`, steel-blue links, navy field mounted). QA Lens all PASS -- wiring preserved: `useActionState` signIn/signUp, hidden redirect, useSearchParams errors, Suspense, field names + minLength=8, `state.success` branch; imports resolve to real exports (actions.ts:32/37/72); no `any`. Gate re-run green: type-check 0, eslint 3 files clean, test:run **753/753 (61 files)**, build clean + `/sign-in`+`/sign-up` static. Live render confirmed both routes (DEV_MODE flipped + restored to true, `/sign-in`->`/prep` redirect verified back). No fixes needed. See CHANGELOG SP-7V.
+
+---
+
+
