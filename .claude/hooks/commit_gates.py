@@ -10,7 +10,10 @@ pre-commit checks, in order (cheapest first, all failures reported together):
   1. No em-dash or en-dash in any added line (Joe's global rule).
   2. No secrets: key-shaped strings in added lines, or key files like .env being staged.
   3. ban_scan.py on staged design files (.claude/ui-ux/, .claude/DESIGN.md).
-  4. The fast test command, when one is set.
+  4. The repo's own custom_rules (each: name, files, pattern, message), empty by default.
+  5. The fast test command, when one is set.
+  Warning only (never blocks): a staged BUILD_PLAN.md over plan_warn_chars (30,000) or with a
+  line over plan_warn_line (3,000) characters, since every session reads that file at boot.
 commit-msg checks: no em-dash or en-dash in the message.
 
 Exit 1 blocks the commit. Standard library only.
@@ -46,12 +49,22 @@ DEFAULTS = {
     "secret_exclude": [],
     "ban_scan": "",
     "fast_tests": "",
+    "custom_rules": [],
+    "plan_warn_chars": 30000,
+    "plan_warn_line": 3000,
 }
+GATES_FILE = ".claude/gates.json"
 
 
 def git(*args: str) -> str:
-    out = subprocess.run(["git", *args], capture_output=True, check=True)
+    # core.quotePath=false: git otherwise prints a non-ASCII name in quotes, which hides it from rules.
+    out = subprocess.run(["git", "-c", "core.quotePath=false", *args], capture_output=True, check=True)
     return out.stdout.decode("utf-8", errors="replace")
+
+
+def staged_names(*args: str):
+    """Staged paths, NUL-separated so no name is ever quoted or split."""
+    return [p for p in git("diff", "--cached", "--name-only", "-z", *args).split("\0") if p]
 
 
 def load_config(root: Path) -> dict:
@@ -136,6 +149,66 @@ def check_ban_scan(root: Path, staged, cfg):
     return errors, []
 
 
+def check_custom_rules(lines, changed, cfg):
+    """Each rule: a regex `pattern` searched in added lines of files matching `files` (a glob or
+    a list of globs). A rule with `"any_change": true` needs no pattern and blocks any staged
+    change to a matching file, deletions and renames included (a file that must not change).
+    Rules come from Joe-approved Lessons, so a hit shows the rule's own message.
+    gates.json itself is never checked, since it holds the patterns."""
+    errors, rules = [], []
+    for rule in cfg.get("custom_rules") or []:
+        name = rule.get("name", "unnamed") if isinstance(rule, dict) else "unnamed"
+        try:
+            files = rule["files"]
+            files = [files] if isinstance(files, str) else list(files)
+            if not files or not all(isinstance(f, str) for f in files):
+                raise TypeError("files must be a glob or a list of globs")
+            any_change = rule.get("any_change") is True
+            pattern = None if any_change else re.compile(rule["pattern"])
+            if not isinstance(rule["message"], str):
+                raise TypeError("message must be text")
+            rules.append((name, files, pattern, rule["message"]))
+        except (KeyError, TypeError, re.error) as exc:
+            # Fail closed: a rule that cannot run must not pass silently.
+            errors.append(f"custom rule {name} is not valid ({exc}); fix it in {GATES_FILE}")
+    for name, files, pattern, message in rules:
+        if pattern is None:
+            errors += [f"rule {name} on {path}: {message}"
+                       for path in changed if path != GATES_FILE and matches(path, files)]
+    for path, n, text in lines:
+        if path == GATES_FILE:
+            continue
+        for name, files, pattern, message in rules:
+            if pattern is not None and matches(path, files) and pattern.search(text):
+                errors.append(f"rule {name} in {path}:{n}: {message}")
+    return errors
+
+
+def plan_size_warnings(path: str, text: str, cfg):
+    """Warnings (never errors) for a build plan that has grown too big to read at boot."""
+    if path.rsplit("/", 1)[-1] != "BUILD_PLAN.md":
+        return []
+    warnings, limit, line_limit = [], int(cfg["plan_warn_chars"]), int(cfg["plan_warn_line"])
+    if limit and len(text) > limit:
+        warnings.append(f"{path} is {len(text):,} characters (limit {limit:,}). Move finished work to "
+                        f".claude/archive/ or split it into a plan folder (scripts/plan_tool.py).")
+    long = [(n, len(l)) for n, l in enumerate(text.splitlines(), 1) if line_limit and len(l) > line_limit]
+    if long:
+        where = ", ".join(f"line {n} ({size:,})" for n, size in long[:5]) + (" ..." if len(long) > 5 else "")
+        warnings.append(f"{path} has {len(long)} line(s) over {line_limit:,} characters: {where}. "
+                        f"Put long notes in their own file and link to it.")
+    return warnings
+
+
+def check_plan_size(staged, cfg):
+    warnings = []
+    for path in staged:
+        if path.rsplit("/", 1)[-1] == "BUILD_PLAN.md":
+            text = subprocess.run(["git", "show", f":{path}"], capture_output=True).stdout
+            warnings += plan_size_warnings(path, text.decode("utf-8", errors="replace"), cfg)
+    return warnings
+
+
 def check_tests(root: Path, cfg):
     cmd = (cfg.get("fast_tests") or "").strip()
     if not cmd:
@@ -164,9 +237,13 @@ def pre_commit() -> int:
     root = Path(git("rev-parse", "--show-toplevel").strip())
     cfg = load_config(root)
     lines = list(added_lines())
-    staged = [p for p in git("diff", "--cached", "--name-only", "--diff-filter=ACMR").splitlines() if p]
+    staged = staged_names("--diff-filter=ACMR")
+    # Every staged path, deletions included; --no-renames lists a rename's old and new path.
+    changed = staged_names("--no-renames")
     ban_errors, warnings = check_ban_scan(root, staged, cfg)
-    errors = check_dashes(lines, cfg) + check_secrets(lines, staged, cfg) + ban_errors
+    warnings = list(warnings) + check_plan_size(staged, cfg)
+    errors = (check_dashes(lines, cfg) + check_secrets(lines, staged, cfg) + ban_errors
+              + check_custom_rules(lines, changed, cfg))
     if not errors:
         errors = check_tests(root, cfg)  # slowest last, and only when the rest passed
     return report("commit", errors, warnings)
